@@ -15,10 +15,10 @@ Pod::Spec.new do |s|
                         "CleverTap is the world’s first prescriptive ‘smart’ app engagement platform."
                        DESC
 
-  s.homepage         = "https://github.com/pwilkniss/clevertap-ios-sdk"
-  s.license          = { :type => 'Commercial', :text => 'Please refer to https://github.com/pwilkniss/clevertap-ios-sdk/blob/master/LICENSE'}
+  s.homepage         = "https://github.com/CleverTap/clevertap-ios-sdk"
+  s.license          = { :type => 'Commercial', :text => 'Please refer to https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE'}
   s.author           = { "CleverTap" => "http://www.clevertap.com" }
-  s.source           = { :git => "https://github.com/pwilkniss/clevertap-ios-sdk.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
   s.documentation_url = 'http://support.wizrocket.com/'
 
   s.platform     = :ios, '6.0'
