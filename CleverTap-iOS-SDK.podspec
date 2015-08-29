@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
   s.version          = "1.83.34"
-  s.summary          = "The CleverTap-iOS-SDK for Mobile App Engagement."
+  s.summary          = "The CleverTap iOS SDK for Mobile App Engagement."
 
   s.description      = <<-DESC
                     CleverTap iOS SDK. CleverTap is the next generation mobile engagement platform. It enables marketers to identify, engage and retain users and provides developers with unprecedented code-level access to build dynamic app experiences for multiple user groups. CleverTap includes out-of-the-box prescriptive campaigns, omni-channel messaging, uninstall data and the industry’s largest FREE messaging tier.
