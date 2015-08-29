@@ -1,9 +1,9 @@
 
-![CleverTap Logo](https://raw.githubusercontent.com/clevertap/clevertap-ios-sdk/master/CleverTap_logo.png)
+[![CleverTap Logo](https://raw.githubusercontent.com/clevertap/clevertap-ios-sdk/master/CleverTap_logo.png)](http:www.clevertap.com)
 
 CleverTap app engagement platform.
 
-- [Support Documentation](http://support.wizrocket.com "CleverTap Technical Documentation")
+[Support Documentation](http://support.wizrocket.com "CleverTap Technical Documentation")
 
 # CleverTap iOS SDK  
 [![CI Status](http://img.shields.io/travis/CleverTap/clevertap-ios-sdk.svg?style=flat)](https://travis-ci.org/CleverTap/clevertap-ios-sdk)
