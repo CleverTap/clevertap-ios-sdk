@@ -2,4 +2,4 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '6.0'
 
-pod 'CleverTap-iOS-SDK', :git => 'https://github.com/CleverTap/CleverTap-iOS-SDK.git'
+pod 'CleverTap-iOS-SDK'
