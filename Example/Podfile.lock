@@ -2,18 +2,18 @@ PODS:
   - CleverTap-iOS-SDK (1.83.34)
 
 DEPENDENCIES:
-  - CleverTap-iOS-SDK (from `https://github.com/pwilkniss/CleverTap-iOS-SDK.git`)
+  - CleverTap-iOS-SDK (from `https://github.com/CleverTap/CleverTap-iOS-SDK.git`)
 
 EXTERNAL SOURCES:
   CleverTap-iOS-SDK:
-    :git: https://github.com/pwilkniss/CleverTap-iOS-SDK.git
+    :git: https://github.com/CleverTap/CleverTap-iOS-SDK.git
 
 CHECKOUT OPTIONS:
   CleverTap-iOS-SDK:
-    :commit: 6be7646b22ca6b3e668a668b64268f395ac90d30
-    :git: https://github.com/pwilkniss/CleverTap-iOS-SDK.git
+    :commit: a6d1fecc4c2772b6ef11578065064ceae05bad25
+    :git: https://github.com/CleverTap/CleverTap-iOS-SDK.git
 
 SPEC CHECKSUMS:
-  CleverTap-iOS-SDK: 9cead0540890a68b8f7a4f57fc05cef549633816
+  CleverTap-iOS-SDK: f80a96b9c051f9ee6d974079a78d331850fae517
 
 COCOAPODS: 0.38.2
