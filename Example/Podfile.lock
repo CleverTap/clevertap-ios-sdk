@@ -2,11 +2,16 @@ PODS:
   - CleverTap-iOS-SDK (2.0.1)
 
 DEPENDENCIES:
-  - CleverTap-iOS-SDK (from `../`)
+  - CleverTap-iOS-SDK (from `git@github.com:CleverTap/CleverTap-iOS-SDK.git`)
 
 EXTERNAL SOURCES:
   CleverTap-iOS-SDK:
-    :path: "../"
+    :git: git@github.com:CleverTap/CleverTap-iOS-SDK.git
+
+CHECKOUT OPTIONS:
+  CleverTap-iOS-SDK:
+    :commit: b39e27557063a2d6388ce9abcea68afbed403918
+    :git: git@github.com:CleverTap/CleverTap-iOS-SDK.git
 
 SPEC CHECKSUMS:
   CleverTap-iOS-SDK: bef53262391dc956bf88e8a1651c9a48300c13ea
