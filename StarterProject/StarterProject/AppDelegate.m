@@ -1,8 +1,8 @@
 //
 //  AppDelegate.m
-//  RobotStore
+//  StarterProject
 //
-//  Created by pwilkniss on 8/14/15.
+//  Created by pwilkniss on 9/4/15.
 //  Copyright (c) 2015 CleverTap. All rights reserved.
 //
 
@@ -15,10 +15,9 @@
 
 @implementation AppDelegate
 
-# pragma mark Lifecycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+
 #ifdef DEBUG
     [CleverTap setDebugLevel:1];
 #endif
@@ -27,7 +26,7 @@
     [CleverTap enablePersonalization];
     
     NSDate *lastTimeAppLaunched = [[NSDate alloc] initWithTimeIntervalSince1970:[[CleverTap session] getPreviousVisitTime]];
-    NSLog(@"last app launch %@", lastTimeAppLaunched);
+    NSLog(@"last App Launch %@", lastTimeAppLaunched);
     
     // enable push notifications
     
@@ -38,10 +37,6 @@
          UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
     }
     
-    // clear badges
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
-    
-
     return YES;
 }
 

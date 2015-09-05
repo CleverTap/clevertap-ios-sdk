@@ -23,6 +23,8 @@ DerivedData
 .bundle
 
 Carthage
-Example/build
-Example/RobotStore.xcodeproj/project.xcworkspace/xcuserdata/
-Example/Pods
+StarterProject/build
+StarterProject/StarterProject.xcodeproj/project.xcworkspace/xcuserdata/
+StarterProject/Pods
+StarterProject/StarterProject.xcworkspace/
+StarterProject/Podfile.lock
