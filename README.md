@@ -55,5 +55,5 @@ For more information check out our [website](http://www.clevertap.com "CleverTap
     ![plist account values](http://staging.support.wizrocket.com.s3-website-eu-west-1.amazonaws.com/images/integration/plist-account.png)
 
 ## Example Usage
-To run the Starter project, clone the repo, and run `pod install` from the StarterProject directory first.
+To run the example StarterProject, clone the repo, and run `pod install` from the StarterProject directory first.
 
