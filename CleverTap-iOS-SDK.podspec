@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
-  s.version          = "2.0.1"
+  s.version          = "2.0.2"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
 
   s.description      = <<-DESC
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'Commercial', :text => 'Please refer to https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE'}
   s.author           = { "CleverTap" => "http://www.clevertap.com" }
   s.source           = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
-  s.documentation_url = 'http://support.wizrocket.com/'
+  s.documentation_url = 'http://support.clevertap.com/'
 
   s.platform     = :ios, '6.0'
   s.requires_arc = true
