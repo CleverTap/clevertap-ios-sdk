@@ -17,7 +17,7 @@ For more information check out our [website](http://www.clevertap.com "CleverTap
 
 1. Sign Up
 
-    [Sign up](http://www.clevertap.com/sign-up.html) for a free account.  
+    [Sign up](https://www.clevertap.com/sign-up) for a free account.  
 
 2.  Install the Framework
 
