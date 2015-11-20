@@ -62,3 +62,4 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 ## Example Usage
 To run the example StarterProject, clone the repo, and run `pod install` from the StarterProject directory.  Then open the StarterProject.xcworkspace, add your CleverTap account credentials to the Info.plist and build and run.
 
+For non-Cocoapods folks, check out the example StarterProjectManualInstall.
