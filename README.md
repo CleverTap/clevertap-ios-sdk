@@ -38,7 +38,7 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
     - **Manually Install the Framework** 
 
-         - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). For Xcode 7, use v2.0.2, for Xcode 6, use v2.0.1.  Unzip the download.
+         - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). For Xcode 7, use v2.0.4, for Xcode 6, use v2.0.1.  Unzip the download.
 
          - Add the CleverTapSDK.framework to your Xcode Project, by dragging the CleverTapSDK.framework directory into your Project Navigator.
 
