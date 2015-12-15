@@ -45,6 +45,7 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
          - Add the following frameworks to your Xcode Project: 
             - SystemConfiguration
             - CoreTelephony
+            - Security
             - UIKit
             - CoreLocation (optional)
 
@@ -72,5 +73,5 @@ To run the example StarterProject, clone the repo, and run `pod install` from th
 
 For non-Cocoapods folks, check out the example StarterProjectManualInstall.  
 
-For Swfit, please refer to the example SwiftStarterProject.  
+For Swift, please refer to the example SwiftStarterProject.  
 
