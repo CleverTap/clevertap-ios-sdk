@@ -59,7 +59,16 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
     ![plist account values](http://staging.support.wizrocket.com.s3-website-eu-west-1.amazonaws.com/images/integration/plist-account.png)
 
+### Swift
+
+1. Follow the Manual Install and Add Your CleverTap Account Credentials steps above.  
+2. Add the [CleverTapSDK-Bridging-Header.h](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/SwiftStarterProject/CleverTapSDK-Bridging-Header.h) to your project.  
+3. Add the path to the CleverTapSDK-Bridging-Header.h to the Objective-C Bridging Header section in your project's Build Settings.  
+
 ## Example Usage
 To run the example StarterProject, clone the repo, and run `pod install` from the StarterProject directory.  Then open the StarterProject.xcworkspace, add your CleverTap account credentials to the Info.plist and build and run.
 
-For non-Cocoapods folks, check out the example StarterProjectManualInstall.
+For non-Cocoapods folks, check out the example StarterProjectManualInstall.  
+
+For Swfit, please refer to the example SwiftStarterProject.  
+
