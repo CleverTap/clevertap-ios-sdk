@@ -73,5 +73,5 @@ To run the example StarterProject, clone the repo, and run `pod install` from th
 For Swift, please refer to the SwiftStarterProject. 
 
 For non-Cocoapods folks, check out the example StarterProjectManualInstall.  
-For Swift, please refer to the SwiftStarterProjectManualInstall examples. 
+For Swift, please refer to the SwiftStarterProjectManualInstall example. 
 
