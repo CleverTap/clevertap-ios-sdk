@@ -14,11 +14,12 @@
 		5203C6621C1FB62F000B9BC7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5203C6611C1FB62F000B9BC7 /* Assets.xcassets */; };
 		5203C6671C1FB6CB000B9BC7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5203C6631C1FB6CB000B9BC7 /* Main.storyboard */; };
 		5203C6681C1FB6CB000B9BC7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5203C6651C1FB6CB000B9BC7 /* LaunchScreen.storyboard */; };
-		52E77A951C1FB9140034EAFB /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52E77A941C1FB9140034EAFB /* CleverTapSDK.framework */; };
 		52E77A971C1FBA6B0034EAFB /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52E77A961C1FBA6B0034EAFB /* SystemConfiguration.framework */; };
+		DFE07D5E72CB37D3C3DDA1FF /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5C3A2CBBB12F29F0BAE14FA /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		280E285E3F41B1AB5971B24E /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		5203C6331C1F26EA000B9BC7 /* swiftstarter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = swiftstarter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5203C64D1C1F2DDC000B9BC7 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		5203C64F1C1FAD49000B9BC7 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -29,8 +30,9 @@
 		5203C6641C1FB6CB000B9BC7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = swiftstarter/Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
 		5203C6661C1FB6CB000B9BC7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = swiftstarter/Base.lproj/LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
 		52E77A931C1FB9140034EAFB /* CleverTapSDK-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTapSDK-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
-		52E77A941C1FB9140034EAFB /* CleverTapSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CleverTapSDK.framework; sourceTree = SOURCE_ROOT; };
 		52E77A961C1FBA6B0034EAFB /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		BDD27E54AC10E51D1F743B6A /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		F5C3A2CBBB12F29F0BAE14FA /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,9 +41,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				52E77A971C1FBA6B0034EAFB /* SystemConfiguration.framework in Frameworks */,
-				52E77A951C1FB9140034EAFB /* CleverTapSDK.framework in Frameworks */,
 				5203C6501C1FAD49000B9BC7 /* Security.framework in Frameworks */,
 				5203C64E1C1F2DDC000B9BC7 /* CoreTelephony.framework in Frameworks */,
+				DFE07D5E72CB37D3C3DDA1FF /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,9 +57,10 @@
 				5203C64F1C1FAD49000B9BC7 /* Security.framework */,
 				5203C64D1C1F2DDC000B9BC7 /* CoreTelephony.framework */,
 				52E77A931C1FB9140034EAFB /* CleverTapSDK-Bridging-Header.h */,
-				52E77A941C1FB9140034EAFB /* CleverTapSDK.framework */,
 				5203C6351C1F26EA000B9BC7 /* swiftstarter */,
 				5203C6341C1F26EA000B9BC7 /* Products */,
+				6CCEB4CDA6C05991C1E4819C /* Pods */,
+				91AFD7B2C9F5DD849500AFAD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -83,6 +86,23 @@
 			path = swifttest;
 			sourceTree = "<group>";
 		};
+		6CCEB4CDA6C05991C1E4819C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				280E285E3F41B1AB5971B24E /* Pods.debug.xcconfig */,
+				BDD27E54AC10E51D1F743B6A /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		91AFD7B2C9F5DD849500AFAD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F5C3A2CBBB12F29F0BAE14FA /* libPods.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -90,9 +110,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5203C6451C1F26EA000B9BC7 /* Build configuration list for PBXNativeTarget "swiftstarter" */;
 			buildPhases = (
+				B1B3B4B420655616A8665C71 /* Check Pods Manifest.lock */,
 				5203C62F1C1F26EA000B9BC7 /* Sources */,
 				5203C6301C1F26EA000B9BC7 /* Frameworks */,
 				5203C6311C1F26EA000B9BC7 /* Resources */,
+				0BF472D40A5A6E7C80E13868 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -148,6 +170,39 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0BF472D40A5A6E7C80E13868 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B1B3B4B420655616A8665C71 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5203C62F1C1F26EA000B9BC7 /* Sources */ = {
@@ -266,6 +321,7 @@
 		};
 		5203C6461C1F26EA000B9BC7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 280E285E3F41B1AB5971B24E /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -273,7 +329,7 @@
 					"$(PROJECT_DIR)/swiftstarter",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/swiftstarter/CleverTapSDK.framework/Headers";
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = swiftstarter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -285,6 +341,7 @@
 		};
 		5203C6471C1F26EA000B9BC7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDD27E54AC10E51D1F743B6A /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -292,7 +349,7 @@
 					"$(PROJECT_DIR)/swiftstarter",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/swiftstarter/CleverTapSDK.framework/Headers";
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = swiftstarter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

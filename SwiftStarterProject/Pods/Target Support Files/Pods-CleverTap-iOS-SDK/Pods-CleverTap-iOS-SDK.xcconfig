@@ -1,0 +1,2 @@
+PODS_CLEVERTAP_IOS_SDK_FRAMEWORK_SEARCH_PATHS = $(inherited) "$(PODS_ROOT)/CleverTap-iOS-SDK"
+PODS_CLEVERTAP_IOS_SDK_OTHER_LDFLAGS = -framework "CleverTapSDK" -framework "CoreLocation" -framework "CoreTelephony" -framework "SystemConfiguration" -framework "UIKit"

@@ -1,0 +1,10 @@
+PODS:
+  - CleverTap-iOS-SDK (2.0.4)
+
+DEPENDENCIES:
+  - CleverTap-iOS-SDK
+
+SPEC CHECKSUMS:
+  CleverTap-iOS-SDK: 0f15bf606e8c747dcc3612370ce4cd928ade4525
+
+COCOAPODS: 0.35.0
