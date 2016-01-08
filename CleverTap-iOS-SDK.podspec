@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
-  s.version          = "2.0.4"
+  s.version          = "2.0.5"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
 
   s.description      = <<-DESC
@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
-  s.frameworks = 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'CoreLocation'
+  s.frameworks = 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'Security', 'CoreLocation'
 
   s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }  
   s.source_files = 'CleverTapSDK.framework/Versions/A/Headers/*.h'
