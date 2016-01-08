@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 #import "CleverTapEventDetail.h"
 #import "CleverTapUTMDetail.h"
 
@@ -46,6 +47,32 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
 + (CleverTap *)autoIntegrate;
 
 
+/*!
+ @method
+ 
+ @abstract
+ Change the CleverTap accountID and token
+ 
+ @discussion
+ Changes the CleverTap account associated with the app on the fly.  Should only used during testing.
+ Instead, considering relying on the separate -Test account created for your app in CleverTap.
+ 
+ @param accountId   the CleverTap account id
+ @param token       the CleverTap account token
+ 
+ */
++ (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token;
+
+/*!
+ @method
+ 
+ @abstract
+ notify the SDK of application launch
+ 
+ */
+- (void)notifyApplicationLaunchedWithOptions:launchOptions;
+
+
 /* ------------------------------------------------------------------------------------------------------
  * User Profile/Action Events/Session API
  */
@@ -70,6 +97,22 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  */
 + (void)disablePersonalization;
+
+
+/*!
+ @method
+ 
+ @abstract
+ Store the users location.
+ 
+ @discussion
+ Optional.  If you're application is collection the user location you can pass it to CleverTap
+ for, among other things, more fine-grained geo-targeting and segmentation purposes.
+ 
+ 
+ @param location       CLLocationCoordiate2D
+ */
++ (void)setLocation:(CLLocationCoordinate2D)location;
 
 
 #pragma mark Profile API
@@ -486,21 +529,6 @@ extern NSString *const CleverTapProfileDidChangeNotification;
  */
 + (void)setDebugLevel:(int)level;
 
-/*!
- @method
- 
- @abstract
- Change the CleverTap accountID and token
- 
- @discussion
- Changes the CleverTap account associated with the app on the fly.  Should only used during testing.
- Instead, considering relying on the separate -Test account created for your app in CleverTap.
- 
- @param accountId   the CleverTap account id
- @param token       the CleverTap account token
- 
- */
-- (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token;
 
 #pragma mark deprecations as of version 2.0.3
 
@@ -511,8 +539,6 @@ extern NSString *const CleverTapProfileDidChangeNotification;
 + (CleverTap *)profile __attribute__((deprecated("Deprecated as of version 2.0.3, use sharedInstance instead")));
 
 + (CleverTap *)session  __attribute__((deprecated("Deprecated as of version 2.0.3, use sharedInstance instead")));
-
-+ (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token  __attribute__((deprecated("Deprecated as of version 2.0.3, use [[CleverTap sharedInstance] changeCredentialsWithAccountID:andToken:] instead")));
 
 - (void)eventName:(NSString *)event __attribute__((deprecated("Deprecated as of version 2.0.3, use recordEvent: instead")));
 

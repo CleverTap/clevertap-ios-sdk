@@ -1,1 +1,0 @@
-../../../CleverTap-iOS-SDK/CleverTapSDK.framework/Versions/A/Headers/CleverTap.h

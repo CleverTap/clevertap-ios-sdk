@@ -14,6 +14,7 @@
 		5203C6621C1FB62F000B9BC7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5203C6611C1FB62F000B9BC7 /* Assets.xcassets */; };
 		5203C6671C1FB6CB000B9BC7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5203C6631C1FB6CB000B9BC7 /* Main.storyboard */; };
 		5203C6681C1FB6CB000B9BC7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5203C6651C1FB6CB000B9BC7 /* LaunchScreen.storyboard */; };
+		521469AA1C405D1B00B9EF40 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 521469A91C405D1B00B9EF40 /* CoreLocation.framework */; };
 		52E77A951C1FB9140034EAFB /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52E77A941C1FB9140034EAFB /* CleverTapSDK.framework */; };
 		52E77A971C1FBA6B0034EAFB /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52E77A961C1FBA6B0034EAFB /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
@@ -28,6 +29,7 @@
 		5203C6611C1FB62F000B9BC7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = swiftstarter/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		5203C6641C1FB6CB000B9BC7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = swiftstarter/Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
 		5203C6661C1FB6CB000B9BC7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = swiftstarter/Base.lproj/LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
+		521469A91C405D1B00B9EF40 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		52E77A931C1FB9140034EAFB /* CleverTapSDK-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTapSDK-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
 		52E77A941C1FB9140034EAFB /* CleverTapSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CleverTapSDK.framework; sourceTree = SOURCE_ROOT; };
 		52E77A961C1FBA6B0034EAFB /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -38,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				521469AA1C405D1B00B9EF40 /* CoreLocation.framework in Frameworks */,
 				52E77A971C1FBA6B0034EAFB /* SystemConfiguration.framework in Frameworks */,
 				52E77A951C1FB9140034EAFB /* CleverTapSDK.framework in Frameworks */,
 				5203C6501C1FAD49000B9BC7 /* Security.framework in Frameworks */,
@@ -51,6 +54,7 @@
 		5203C62A1C1F26EA000B9BC7 = {
 			isa = PBXGroup;
 			children = (
+				521469A91C405D1B00B9EF40 /* CoreLocation.framework */,
 				52E77A961C1FBA6B0034EAFB /* SystemConfiguration.framework */,
 				5203C64F1C1FAD49000B9BC7 /* Security.framework */,
 				5203C64D1C1F2DDC000B9BC7 /* CoreTelephony.framework */,

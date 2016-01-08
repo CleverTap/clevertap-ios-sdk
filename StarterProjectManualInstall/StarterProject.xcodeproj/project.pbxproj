@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		521469AC1C405DC600B9EF40 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 521469AB1C405DC600B9EF40 /* Security.framework */; };
+		521469AE1C405DD200B9EF40 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 521469AD1C405DD200B9EF40 /* CoreLocation.framework */; };
 		524BD5FD1BFFA91000BF8A7B /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 524BD5FC1BFFA91000BF8A7B /* CleverTapSDK.framework */; };
 		524BD5FF1BFFA92B00BF8A7B /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 524BD5FE1BFFA92B00BF8A7B /* CoreTelephony.framework */; };
 		524BD6011BFFA95C00BF8A7B /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 524BD6001BFFA95C00BF8A7B /* SystemConfiguration.framework */; };
@@ -30,6 +32,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		521469AB1C405DC600B9EF40 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		521469AD1C405DD200B9EF40 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		524BD5FC1BFFA91000BF8A7B /* CleverTapSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CleverTapSDK.framework; path = StarterProject/Frameworks/CleverTapSDK.framework; sourceTree = "<group>"; };
 		524BD5FE1BFFA92B00BF8A7B /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		524BD6001BFFA95C00BF8A7B /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -53,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				521469AE1C405DD200B9EF40 /* CoreLocation.framework in Frameworks */,
+				521469AC1C405DC600B9EF40 /* Security.framework in Frameworks */,
 				524BD6011BFFA95C00BF8A7B /* SystemConfiguration.framework in Frameworks */,
 				524BD5FF1BFFA92B00BF8A7B /* CoreTelephony.framework in Frameworks */,
 				524BD5FD1BFFA91000BF8A7B /* CleverTapSDK.framework in Frameworks */,
@@ -132,6 +138,8 @@
 		DF805DB89853104C6F638F44 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				521469AD1C405DD200B9EF40 /* CoreLocation.framework */,
+				521469AB1C405DC600B9EF40 /* Security.framework */,
 				524BD6001BFFA95C00BF8A7B /* SystemConfiguration.framework */,
 				524BD5FE1BFFA92B00BF8A7B /* CoreTelephony.framework */,
 				524BD5FC1BFFA91000BF8A7B /* CleverTapSDK.framework */,

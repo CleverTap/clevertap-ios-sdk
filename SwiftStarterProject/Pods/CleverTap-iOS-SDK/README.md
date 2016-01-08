@@ -38,13 +38,14 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
     - **Manually Install the Framework** 
 
-         - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). For Xcode 7, use v2.0.2, for Xcode 6, use v2.0.1.  Unzip the download.
+         - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). For Xcode 7, use v2.0.4, for Xcode 6, use v2.0.1.  Unzip the download.
 
          - Add the CleverTapSDK.framework to your Xcode Project, by dragging the CleverTapSDK.framework directory into your Project Navigator.
 
          - Add the following frameworks to your Xcode Project: 
             - SystemConfiguration
             - CoreTelephony
+            - Security
             - UIKit
             - CoreLocation (optional)
 
@@ -59,7 +60,18 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
     ![plist account values](http://staging.support.wizrocket.com.s3-website-eu-west-1.amazonaws.com/images/integration/plist-account.png)
 
+### Swift
+
+1. Follow the Install and Add Your CleverTap Account Credentials steps above.  
+2. Add the [CleverTapSDK-Bridging-Header.h](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/SwiftStarterProject/CleverTapSDK-Bridging-Header.h) (rename to YOUR-PROJECT-NAME-Bridging-Header.h, if you like) to your project.  
+3. Add the path to that Bridging-Header.h in the Objective-C Bridging Header section of your project's Build Settings.  
+
+Alternatively, add the contents of the CleverTapSDK-Bridging-Header.h to your existing Bridging Header file.    
+
 ## Example Usage
 To run the example StarterProject, clone the repo, and run `pod install` from the StarterProject directory.  Then open the StarterProject.xcworkspace, add your CleverTap account credentials to the Info.plist and build and run.
+For Swift, please refer to the SwiftStarterProject. 
 
-For non-Cocoapods folks, check out the example StarterProjectManualInstall.
+For non-Cocoapods folks, check out the example StarterProjectManualInstall.  
+For Swift, please refer to the SwiftStarterProjectManualInstall example. 
+

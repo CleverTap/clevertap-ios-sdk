@@ -1,7 +1,6 @@
-FRAMEWORK_SEARCH_PATHS = $(inherited) "$(PODS_ROOT)/CleverTap-iOS-SDK"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/CleverTap-iOS-SDK"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/CleverTap-iOS-SDK"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/CleverTap-iOS-SDK"
 OTHER_CFLAGS = $(inherited) -isystem "${PODS_ROOT}/Headers/Public" -isystem "${PODS_ROOT}/Headers/Public/CleverTap-iOS-SDK"
-OTHER_LDFLAGS = -ObjC -l"Pods-CleverTap-iOS-SDK" -framework "CleverTapSDK" -framework "CoreLocation" -framework "CoreTelephony" -framework "SystemConfiguration" -framework "UIKit"
-OTHER_LIBTOOLFLAGS = $(OTHER_LDFLAGS)
+OTHER_LDFLAGS = $(inherited) -ObjC -framework "CleverTapSDK" -framework "CoreLocation" -framework "CoreTelephony" -framework "Security" -framework "SystemConfiguration" -framework "UIKit"
 PODS_ROOT = ${SRCROOT}/Pods
