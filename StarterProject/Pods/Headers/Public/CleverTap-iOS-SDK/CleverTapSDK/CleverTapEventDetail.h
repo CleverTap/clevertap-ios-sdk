@@ -1,0 +1,1 @@
+../../../../CleverTap-iOS-SDK/CleverTapSDK.framework/Headers/CleverTapEventDetail.h
