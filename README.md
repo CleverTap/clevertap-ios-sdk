@@ -72,6 +72,6 @@ Alternatively, add the contents of the CleverTapSDK-Bridging-Header.h to your ex
 To run the example StarterProject, clone the repo, and run `pod install` from the StarterProject directory.  Then open the StarterProject.xcworkspace, add your CleverTap account credentials to the Info.plist and build and run.
 For Swift, please refer to the SwiftStarterProject. 
 
-For non-Cocoapods folks, check out the example StarterProjectManualInstall.  
+For non-CocoaPods folks, check out the example StarterProjectManualInstall.  
 For Swift, please refer to the SwiftStarterProjectManualInstall example. 
 
