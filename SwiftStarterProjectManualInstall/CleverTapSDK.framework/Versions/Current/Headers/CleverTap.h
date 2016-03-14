@@ -26,7 +26,7 @@ This method will set up a singleton instance of the CleverTap class, when you wa
 elsewhere in your code, you can use this singleton or call sharedInstance.
 
  */
-+ (CleverTap *)sharedInstance;
++ (instancetype)sharedInstance;
 
 
 /*!
@@ -44,7 +44,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  behind the AppDelegate. The proxy will first call the AppDelegate and then call the CleverTap AppDelegate.
  
  */
-+ (CleverTap *)autoIntegrate;
++ (instancetype)autoIntegrate;
 
 
 /*!
@@ -124,17 +124,122 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  Set properties on the current user profile.
  
  @discussion
- Property keys must be NSString and values must be one of NSString, NSNumber, BOOL
- or NSDate.
+ Property keys must be NSString and values must be one of NSString, NSNumber, BOOL, NSDate.
+ 
+ To add a multi-value (array) property value type please use profileAddValueToSet: forKey:
  
  Keys are limited to 32 characters.
  Values are limited to 120 bytes.  
+ 
  Longer will be truncated.
+ 
  Maximum number of custom profile attributes is 63
  
  @param properties       properties dictionary
  */
 - (void)profilePush:(NSDictionary *)properties;
+
+
+/*!
+ @method
+ 
+ @abstract
+ Remove the property specified by key from the user profile.
+ 
+ @param key       key string
+
+ */
+- (void)profileRemoveValueForKey:(NSString *)key;
+
+/*!
+ @method
+ 
+ @abstract
+ Method for setting a multi-value user profile property.
+ 
+ Any existing value(s) for the key will be overwritten.
+ 
+ @discussion
+ Key must be NSString.
+ Values must be NSStrings, max 40 bytes.  Longer will be truncated.
+ Max 100 values, on reaching 100 cap, oldest value(s) will be removed.
+
+ 
+ @param key       key string
+ @param values    values NSArray<NSString *>
+ 
+ */
+- (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString*)key;
+
+/*!
+ @method
+ 
+ @abstract
+ Method for adding a unique value to a multi-value profile property (or creating if not already existing).
+ 
+ If the key currently contains a scalar value, the key will be promoted to a multi-value property
+ with the current value cast to a string and the new value(s) added
+ 
+ @discussion
+ Key must be NSString.
+ Values must be NSStrings, max 40 bytes. Longer will be truncated.
+ Max 100 values, on reaching 100 cap, oldest value(s) will be removed.
+
+ 
+ @param key       key string
+ @param value     value string
+ */
+- (void)profileAddMultiValue:(NSString *)value forKey:(NSString *)key;
+
+/*!
+ @method
+ 
+ @abstract
+ Method for adding multiple unique values to a multi-value profile property (or creating if not already existing).
+ 
+ If the key currently contains a scalar value, the key will be promoted to a multi-value property
+ with the current value cast to a string and the new value(s) added.
+ 
+ @discussion
+ Key must be NSString.
+ Values must be NSStrings, max 40 bytes. Longer will be truncated.
+ Max 100 values, on reaching 100 cap, oldest value(s) will be removed.
+ 
+ 
+ @param key       key string
+ @param values    values NSArray<NSString *>
+ */
+- (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString*)key;
+
+/*!
+ @method
+ 
+ @abstract
+ Method for removing a unique value from a multi-value profile property.
+ 
+ If the key currently contains a scalar value, prior to performing the remove operation the key will be promoted to a multi-value property with the current value cast to a string.
+ 
+ If the multi-value property is empty after the remove operation, the key will be removed.
+ 
+ @param key       key string
+ @param value     value string
+ */
+- (void)profileRemoveMultiValue:(NSString *)value forKey:(NSString *)key;
+
+/*!
+ @method
+ 
+ @abstract
+ Method for removing multiple unique values from a multi-value profile property.
+ 
+ If the key currently contains a scalar value, prior to performing the remove operation the key will be promoted to a multi-value property with the current value cast to a string.
+ 
+ If the multi-value property is empty after the remove operation, the key will be removed.
+ 
+ @param key       key string
+ @param values    values NSArray<NSString *>
+ */
+- (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString*)key;
 
 /*!
  @method
@@ -179,8 +284,23 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  @param propertyName          property name
  
+ @return
+ returns NSArray in the case of a multi-value property
+ 
  */
 - (id)profileGet:(NSString *)propertyName;
+
+/*!
+ @method
+ 
+ @abstract
+ Get the CleverTap ID of the User Profile.
+ 
+ @discussion
+ The CleverTap ID is the unique identifier assigned to the User Profile by CleverTap.
+ 
+ */
+-(NSString*)profileGetCleverTapID;
 
 #pragma mark User Action Events API
 
@@ -408,13 +528,28 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  */
 extern NSString *const CleverTapProfileDidChangeNotification;
 
+/*!
+ 
+ @abstract
+ Posted when the CleverTap User Profile is initialized.
+ 
+ @discussion
+ Useful for accessing the CleverTap ID of the User Profile.
+ 
+ The CleverTap ID is the unique identifier assigned to the User Profile by CleverTap.
+ 
+ The CleverTap ID will be returned in the userInfo property of the NSNotifcation in the form: {@"CleverTapID":CleverTapID}.
+ 
+ */
+extern NSString *const CleverTapProfileDidInitializeNotification;
+
 
 /*!
  
  @method
  
  @abstract 
- The `CleverTapSyncDelegate` protocol provides an additional/alternative method for notifying
+ The `CleverTapSyncDelegate` protocol provides additional/alternative methods for notifying
  your application (the adopting delegate) about synchronization-related changes to the User Profile/Event History.
  
  @see CleverTapSyncDelegate.h
@@ -546,11 +681,11 @@ extern NSString *const CleverTapProfileDidChangeNotification;
 
 - (void)chargedEventWithDetails:(NSDictionary *)chargeDetails andItems:(NSArray *)items __attribute__((deprecated("Deprecated as of version 2.0.3, use recordChargedEventWithDetails:andItems: instead")));
 
-- (void)profile:(NSDictionary *)profileDictionary __attribute__((deprecated("Deprecated as of version 2.0.3, use profileSet: instead")));
+- (void)profile:(NSDictionary *)profileDictionary __attribute__((deprecated("Deprecated as of version 2.0.3, use profilePush: instead")));
 
-- (void)graphUser:(id)fbGraphUser __attribute__((deprecated("Deprecated as of version 2.0.3, use profileSetGraphUser: instead")));
+- (void)graphUser:(id)fbGraphUser __attribute__((deprecated("Deprecated as of version 2.0.3, use profilePushGraphUser: instead")));
 
-- (void)googlePlusUser:(id)googleUser __attribute__((deprecated("Deprecated as of version 2.0.3, use profileSetGooglePlusUser: instead")));
+- (void)googlePlusUser:(id)googleUser __attribute__((deprecated("Deprecated as of version 2.0.3, use profilePushGooglePlusUser: instead")));
 
 + (void)setPushToken:(NSData *)pushToken __attribute__((deprecated("Deprecated as of version 2.0.3, use [[CleverTap sharedInstance] setPushToken:] instead")));
 

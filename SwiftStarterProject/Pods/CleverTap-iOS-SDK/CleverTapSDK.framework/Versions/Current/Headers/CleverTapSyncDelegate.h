@@ -7,12 +7,26 @@
 
 @protocol CleverTapSyncDelegate <NSObject>
 
-@required
+/*!
+ 
+ @abstract
+ The `CleverTapSyncDelegate` protocol provides additional/alternative methods for
+ notifying your application (the adopting delegate) when the User Profile is initialized.
+ 
+ @discussion
+ This method will be called when the User Profile is initialized with the CleverTap ID of the User Profile.
+ The CleverTap ID is the unique identifier assigned to the User Profile by CleverTap.
+ 
+ */
+
+@optional
+- (void)profileDidInitialize:(NSString*)CleverTapID;
+
 
 /*!
  
  @abstract 
- The `CleverTapSyncDelegate` protocol provides an additional/alternative method for
+ The `CleverTapSyncDelegate` protocol provides additional/alternative methods for
  notifying your application (the adopting delegate) about synchronization-related changes to the User Profile/Event History.
  
  @discussion
@@ -32,6 +46,7 @@
  
  */
 
+@optional
 - (void)profileDataUpdated:(NSDictionary*)updates;
 
 @end
