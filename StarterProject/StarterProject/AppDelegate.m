@@ -22,7 +22,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #ifdef DEBUG
-    [CleverTap setDebugLevel:1];
+    [CleverTap setDebugLevel:1277182231];
 #endif
     
     [CleverTap enablePersonalization];
