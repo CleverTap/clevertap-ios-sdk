@@ -586,6 +586,19 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  @method
  
  @abstract
+ Convenience method to register the device push token as as string.
+ 
+ @discussion
+ This will associate the device token with the current user to allow push notifications to the user.
+ 
+ @param pushTokenString     device token as returned from application:didRegisterForRemoteNotificationsWithDeviceToken: converted to an NSString.
+ */
+- (void)setPushTokenAsString:(NSString *)pushTokenString;
+
+/*!
+ @method
+ 
+ @abstract
  Track and process a push notification based on its payload.
  
  @discussion

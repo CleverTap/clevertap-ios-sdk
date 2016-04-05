@@ -31,6 +31,8 @@
     
     [clevertap setSyncDelegate:self];
     
+    //[[CleverTap sharedInstance] profileGetCleverTapID];
+    
     /*
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didReceiveCleverTapProfileDidChangeNotification:)
