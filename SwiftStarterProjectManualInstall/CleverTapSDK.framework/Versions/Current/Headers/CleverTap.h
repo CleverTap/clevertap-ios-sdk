@@ -3,8 +3,10 @@
 #import <CoreLocation/CoreLocation.h>
 #import "CleverTapEventDetail.h"
 #import "CleverTapUTMDetail.h"
+#import "CleverTapInAppNotificationDelegate.h"
 
 @protocol CleverTapSyncDelegate;
+@protocol CleverTapInAppNotificationDelegate;
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMethodInspection"
@@ -169,7 +171,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  @param values    values NSArray<NSString *>
  
  */
-- (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString*)key;
+- (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
 
 /*!
  @method
@@ -209,7 +211,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  @param key       key string
  @param values    values NSArray<NSString *>
  */
-- (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString*)key;
+- (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
 
 /*!
  @method
@@ -239,7 +241,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  @param key       key string
  @param values    values NSArray<NSString *>
  */
-- (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString*)key;
+- (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
 
 /*!
  @method
@@ -300,7 +302,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  The CleverTap ID is the unique identifier assigned to the User Profile by CleverTap.
  
  */
--(NSString*)profileGetCleverTapID;
+- (NSString *)profileGetCleverTapID;
 
 #pragma mark User Action Events API
 
@@ -562,6 +564,24 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  @param delegate     an object conforming to the CleverTapSyncDelegate Protocol
  */
 - (void)setSyncDelegate:(id <CleverTapSyncDelegate>)delegate;
+
+/*!
+
+ @method
+
+ @abstract
+ The `CleverTapInAppNotificationDelegate` protocol provides methods for notifying
+ your application (the adopting delegate) about in-app notifications.
+
+ @see CleverTapInAppNotificationDelegate.h
+
+ @discussion
+ This sets the CleverTapInAppNotificationDelegate.
+
+ @param delegate     an object conforming to the CleverTapInAppNotificationDelegate Protocol
+ */
+- (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate>)delegate;
+
 
 
 

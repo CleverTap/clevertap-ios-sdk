@@ -25,20 +25,13 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
         Just add the following line to your Podfile:
 
-        Xcode 7:
-
         `pod "CleverTap-iOS-SDK"`
-
-        Xcode 6:
-
-        `pod "CleverTap-iOS-SDK", "2.0.1"`
-
 
         Then run `pod install`.
 
     - **Manually Install the Framework** 
 
-         - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). For Xcode 7, use the latest release, for Xcode 6, use v2.0.1.  Unzip the download.
+         - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). Unzip the download.
 
          - Add the CleverTapSDK.framework to your Xcode Project, by dragging the CleverTapSDK.framework directory into your Project Navigator.
 
