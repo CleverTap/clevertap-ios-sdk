@@ -10,6 +10,21 @@
 	<string>46</string>
 	<key>objects</key>
 	<dict>
+		<key>01A8857448F291C8FE17C98702F17170</key>
+		<dict>
+			<key>includeInIndex</key>
+			<string>1</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.h</string>
+			<key>name</key>
+			<string>CleverTapUTMDetail.h</string>
+			<key>path</key>
+			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapUTMDetail.h</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
 		<key>037C0CA694176A3C0915F62C9D20B3E6</key>
 		<dict>
 			<key>children</key>
@@ -90,6 +105,19 @@
 			<string>XCBuildConfiguration</string>
 			<key>name</key>
 			<string>Release</string>
+		</dict>
+		<key>09A88250ECC9DDE730E547690DA7D839</key>
+		<dict>
+			<key>children</key>
+			<array>
+				<string>B8B0E58B1387D5050CACECDDC57A13EF</string>
+			</array>
+			<key>isa</key>
+			<string>PBXGroup</string>
+			<key>name</key>
+			<string>Pods</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
 		</dict>
 		<key>10834806BD7B412BC24F347361FA2C8E</key>
 		<dict>
@@ -181,26 +209,6 @@
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<string>0</string>
 		</dict>
-		<key>2F855081A00C8B4F4C8634422F3CA28E</key>
-		<dict>
-			<key>children</key>
-			<array>
-				<string>F5007316734F39D26213060BA2CD3E35</string>
-				<string>55E4A3F8AF5E6D326EC171468BC412E0</string>
-				<string>E9E424BFB4930E5D5D0B040E50A9AA66</string>
-				<string>D82C734AE3B567D2723271922161D9F8</string>
-				<string>91AC5F19018CBEB23EB2ED4E1CEE93FA</string>
-				<string>A33ABC0A8EA564E02ECB465038EE697F</string>
-			</array>
-			<key>isa</key>
-			<string>PBXGroup</string>
-			<key>name</key>
-			<string>CleverTap-iOS-SDK</string>
-			<key>path</key>
-			<string>CleverTap-iOS-SDK</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
 		<key>37DB56D75062CC75FCB0966E1C6E8A8E</key>
 		<dict>
 			<key>includeInIndex</key>
@@ -240,7 +248,20 @@
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>55E4A3F8AF5E6D326EC171468BC412E0</key>
+		<key>5937FD4CF398A7DBB52AC975ECF759A9</key>
+		<dict>
+			<key>children</key>
+			<array>
+				<string>87D6BEB7295FB88E21EA48CC127FA0DC</string>
+			</array>
+			<key>isa</key>
+			<string>PBXGroup</string>
+			<key>name</key>
+			<string>Frameworks</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>5BB8DA3B3881B4DF2B00456435A43F95</key>
 		<dict>
 			<key>includeInIndex</key>
 			<string>1</string>
@@ -249,9 +270,9 @@
 			<key>lastKnownFileType</key>
 			<string>sourcecode.c.h</string>
 			<key>name</key>
-			<string>CleverTapBuildInfo.h</string>
+			<string>CleverTapEventDetail.h</string>
 			<key>path</key>
-			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapBuildInfo.h</string>
+			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapEventDetail.h</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -282,6 +303,21 @@
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<string>0</string>
 		</dict>
+		<key>61C6D958A2946B086A28E82050C84A94</key>
+		<dict>
+			<key>includeInIndex</key>
+			<string>1</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.h</string>
+			<key>name</key>
+			<string>CleverTapBuildInfo.h</string>
+			<key>path</key>
+			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapBuildInfo.h</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
 		<key>6911BECA35E7518D864239B7E898EEF3</key>
 		<dict>
 			<key>includeInIndex</key>
@@ -308,12 +344,38 @@
 			<array>
 				<string>BA6428E9F66FD5A23C0A2E06ED26CD2F</string>
 				<string>BC3CA7F9E30CC8F7E2DD044DD34432FC</string>
-				<string>B263D30EA2B5FAB8DA493FE39E22FF45</string>
+				<string>09A88250ECC9DDE730E547690DA7D839</string>
 				<string>1F0B9F713A13B4F29BE0C0E7483B187B</string>
 				<string>037C0CA694176A3C0915F62C9D20B3E6</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>82FB2FF5DB1107666776A083A387B612</key>
+		<dict>
+			<key>includeInIndex</key>
+			<string>1</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.h</string>
+			<key>name</key>
+			<string>CleverTapInAppNotificationDelegate.h</string>
+			<key>path</key>
+			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapInAppNotificationDelegate.h</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>87D6BEB7295FB88E21EA48CC127FA0DC</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>wrapper.framework</string>
+			<key>path</key>
+			<string>CleverTapSDK.framework</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -348,21 +410,6 @@
 			<string>XCBuildConfiguration</string>
 			<key>name</key>
 			<string>Debug</string>
-		</dict>
-		<key>91AC5F19018CBEB23EB2ED4E1CEE93FA</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>sourcecode.c.h</string>
-			<key>name</key>
-			<string>CleverTapUTMDetail.h</string>
-			<key>path</key>
-			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapUTMDetail.h</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
 		</dict>
 		<key>98C98CDFB3F20F2925F6CD1F141BB14F</key>
 		<dict>
@@ -422,29 +469,33 @@
 			<key>name</key>
 			<string>Release</string>
 		</dict>
-		<key>A33ABC0A8EA564E02ECB465038EE697F</key>
+		<key>AB4381501B2F64BE7D521AB76D8E06EE</key>
 		<dict>
-			<key>children</key>
-			<array>
-				<string>DAC859A545B29AC3C1993E889F8F5A8F</string>
-			</array>
+			<key>includeInIndex</key>
+			<string>1</string>
 			<key>isa</key>
-			<string>PBXGroup</string>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.h</string>
 			<key>name</key>
-			<string>Frameworks</string>
+			<string>CleverTapSyncDelegate.h</string>
+			<key>path</key>
+			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapSyncDelegate.h</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>B263D30EA2B5FAB8DA493FE39E22FF45</key>
+		<key>B03CDA98A57E0666CDB93B5A81F9E713</key>
 		<dict>
-			<key>children</key>
-			<array>
-				<string>2F855081A00C8B4F4C8634422F3CA28E</string>
-			</array>
+			<key>includeInIndex</key>
+			<string>1</string>
 			<key>isa</key>
-			<string>PBXGroup</string>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.h</string>
 			<key>name</key>
-			<string>Pods</string>
+			<string>CleverTap.h</string>
+			<key>path</key>
+			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTap.h</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -539,6 +590,27 @@
 			<string>Pods</string>
 			<key>path</key>
 			<string>Target Support Files/Pods</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>B8B0E58B1387D5050CACECDDC57A13EF</key>
+		<dict>
+			<key>children</key>
+			<array>
+				<string>B03CDA98A57E0666CDB93B5A81F9E713</string>
+				<string>61C6D958A2946B086A28E82050C84A94</string>
+				<string>5BB8DA3B3881B4DF2B00456435A43F95</string>
+				<string>82FB2FF5DB1107666776A083A387B612</string>
+				<string>AB4381501B2F64BE7D521AB76D8E06EE</string>
+				<string>01A8857448F291C8FE17C98702F17170</string>
+				<string>5937FD4CF398A7DBB52AC975ECF759A9</string>
+			</array>
+			<key>isa</key>
+			<string>PBXGroup</string>
+			<key>name</key>
+			<string>CleverTap-iOS-SDK</string>
+			<key>path</key>
+			<string>CleverTap-iOS-SDK</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -644,62 +716,6 @@
 			<array>
 				<string>1469924FC52F60B0068FA24EEFCB3EFC</string>
 			</array>
-		</dict>
-		<key>D82C734AE3B567D2723271922161D9F8</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>sourcecode.c.h</string>
-			<key>name</key>
-			<string>CleverTapSyncDelegate.h</string>
-			<key>path</key>
-			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapSyncDelegate.h</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>DAC859A545B29AC3C1993E889F8F5A8F</key>
-		<dict>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>wrapper.framework</string>
-			<key>path</key>
-			<string>CleverTapSDK.framework</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>E9E424BFB4930E5D5D0B040E50A9AA66</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>sourcecode.c.h</string>
-			<key>name</key>
-			<string>CleverTapEventDetail.h</string>
-			<key>path</key>
-			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTapEventDetail.h</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
-		</dict>
-		<key>F5007316734F39D26213060BA2CD3E35</key>
-		<dict>
-			<key>includeInIndex</key>
-			<string>1</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>lastKnownFileType</key>
-			<string>sourcecode.c.h</string>
-			<key>name</key>
-			<string>CleverTap.h</string>
-			<key>path</key>
-			<string>CleverTapSDK.framework/Versions/A/Headers/CleverTap.h</string>
-			<key>sourceTree</key>
-			<string>&lt;group&gt;</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

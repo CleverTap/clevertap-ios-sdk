@@ -9,8 +9,9 @@
 #import "AppDelegate.h"
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapSyncDelegate.h>
+#import <CleverTapSDK/CleverTapInAppNotificationDelegate.h>
 
-@interface AppDelegate () <CleverTapSyncDelegate> {
+@interface AppDelegate () <CleverTapSyncDelegate, CleverTapInAppNotificationDelegate> {
     CleverTap *clevertap;
 }
 
@@ -22,15 +23,16 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #ifdef DEBUG
-    [CleverTap setDebugLevel:1277182231];
+    [CleverTap setDebugLevel:1];
 #endif
     
     [CleverTap enablePersonalization];
     
-    
     clevertap = [CleverTap autoIntegrate];
     
     [clevertap setSyncDelegate:self];
+    [clevertap setInAppNotificationDelegate:self];
+    
     
     /*
      [[NSNotificationCenter defaultCenter] addObserver:self
