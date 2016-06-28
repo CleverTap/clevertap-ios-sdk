@@ -1,6 +1,4 @@
-source 'https://github.com/CocoaPods/Specs.git'
-
 platform :ios, '7.0'
 target 'StarterProject' do
-    pod 'CleverTap-iOS-SDK', '2.1.2'
+    pod 'CleverTap-iOS-SDK'
 end
