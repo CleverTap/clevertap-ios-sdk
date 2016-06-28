@@ -195,6 +195,8 @@
 				TargetAttributes = {
 					525BFA2C1B9A74AA00C41034 = {
 						CreatedOnToolsVersion = 6.4;
+						DevelopmentTeam = A5J34NR598;
+						DevelopmentTeamName = "WizRocket Inc.";
 					};
 					525BFA451B9A74AA00C41034 = {
 						CreatedOnToolsVersion = 6.4;
