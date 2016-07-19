@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
-#import "CleverTapEventDetail.h"
-#import "CleverTapUTMDetail.h"
-#import "CleverTapInAppNotificationDelegate.h"
 
 @protocol CleverTapSyncDelegate;
 @protocol CleverTapInAppNotificationDelegate;
+
+@class CleverTapEventDetail;
+@class CleverTapUTMDetail;
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMethodInspection"
@@ -59,7 +59,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  Changes the CleverTap account associated with the app on the fly.  Should only used during testing.
  Instead, considering relying on the separate -Test account created for your app in CleverTap.
  
- @param accountId   the CleverTap account id
+ @param accountID  the CleverTap account id
  @param token       the CleverTap account token
  
  */
@@ -105,17 +105,67 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  @method
  
  @abstract
- Store the users location.
+ Store the users location in CleverTap.
  
  @discussion
  Optional.  If you're application is collection the user location you can pass it to CleverTap
  for, among other things, more fine-grained geo-targeting and segmentation purposes.
  
- 
  @param location       CLLocationCoordiate2D
  */
 + (void)setLocation:(CLLocationCoordinate2D)location;
 
+
+/*!
+ @method
+ 
+ @abstract
+ Get the device location if available.  Calling this will prompt the user location permissions dialog.
+ 
+ Please be sure to include the NSLocationWhenInUseUsageDescription key in your Info.plist.  See https://developer.apple.com/library/ios/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW26
+
+ Uses desired accuracy of kCLLocationAccuracyHundredMeters.
+
+ If you need background location updates or finer accuracy please implement your own location handling.  Please see https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/index.html for more info.
+ 
+ @discussion
+ Optional.  You can use location to pass it to CleverTap via the setLocation API
+ for, among other things, more fine-grained geo-targeting and segmentation purposes.
+*/
++ (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error;
+
+/*!
+ @method
+ 
+ @abstract
+ Creates a separate and distinct user profile identified by one or more of Identity, Email, FBID or GPID values,
+ and populated with the key-values included in the properties dictionary.
+ 
+ @discussion
+ If your app is used by multiple users, you can use this method to assign them each a unique profile to track them separately.
+ 
+ If instead you wish to assign multiple Identity, Email, FBID and/or GPID values to the same user profile,
+ use profilePush rather than this method.
+ 
+ If none of Identity, Email, FBID or GPID is included in the properties dictionary,
+ all properties values will be associated with the current user profile.
+ 
+ When initially installed on this device, your app is assigned an "anonymous" profile.
+ The first time you identify a user on this device (whether via onUserLogin or profilePush),
+ the "anonymous" history on the device will be associated with the newly identified user.
+ 
+ Then, use this method to switch between subsequent separate identified users.
+ 
+ Please note that switching from one identified user to another is a costly operation
+ in that the current session for the previous user is automatically closed
+ and data relating to the old user removed, and a new session is started
+ for the new user and data for that user refreshed via a network call to CleverTap.
+ In addition, any global frequency caps are reset as part of the switch.
+
+ @param properties       properties dictionary
+ 
+ */
+- (void)onUserLogin:(NSDictionary *)properties;
 
 #pragma mark Profile API
 
@@ -303,6 +353,15 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  */
 - (NSString *)profileGetCleverTapID;
+
+/*!
+ @method
+ 
+ @abstract
+ Returns a unique CleverTap identifier suitable for use with install attribution providers.
+ 
+ */
+- (NSString *)profileGetCleverTapAttributionIdentifier;
 
 #pragma mark User Action Events API
 

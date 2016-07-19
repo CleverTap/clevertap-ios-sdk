@@ -23,29 +23,15 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #ifdef DEBUG
-    [CleverTap setDebugLevel:1277182231];
+    [CleverTap setDebugLevel:1];
 #endif
     
-    //[CleverTap enablePersonalization];
+    [CleverTap enablePersonalization];
     
-    //clevertap = [CleverTap autoIntegrate];
+    clevertap = [CleverTap autoIntegrate];
     
-    //[clevertap setSyncDelegate:self];
-    //[clevertap setInAppNotificationDelegate:self];
-    
-    
-    [CleverTap autoIntegrate];
-    //NSString *cleverTapId = [[CleverTap sharedInstance]profileGetCleverTapID];
-    //NSLog(@"CleverTapID %@",cleverTapId);
-    
-    NSDictionary *profile = @{
-                              @"Name": @"Jack Montana",       // String
-                              @"Identity": @61026032,         // String or number
-                              @"Email": @"jack@gmail.com",    // Email address of the user
-                              };
-    [[CleverTap sharedInstance] profilePush:profile];
-    
-    [[CleverTap sharedInstance] recordEvent:@"Product Clicked" withProps:@{@"foo":@"bar"}];
+    [clevertap setSyncDelegate:self];
+    [clevertap setInAppNotificationDelegate:self];
     
     /*
      [[NSNotificationCenter defaultCenter] addObserver:self
