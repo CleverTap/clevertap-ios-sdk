@@ -43,7 +43,7 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
         ```
         target 'YOUR_APP_EXTENSION_TARGET_NAME' do  
-            pod 'CleverTap-iOS-SDK',  :subspecs => ['AppExtension']  
+            pod 'CleverTap-iOS-SDK', :subspecs => ['AppExtension']  
         end
         ```
 
