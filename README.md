@@ -59,6 +59,9 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
         Then run `pod install`.
 
+        [See example Podfile here](https://github.com/CleverTap/ios-10-demo/blob/master/Podfile)
+
+
     - **Manually Install the Framework** 
 
         For just the basic SDK functionality in your main app:
