@@ -31,7 +31,7 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
          end     
          ```
 
-        If your main app is a host for a WatchOS app, instead add this:
+        If your main app is a host for a watchOS app, instead add this:
 
         ```
         target 'YOUR_TARGET_NAME' do  
@@ -47,7 +47,7 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
         end
         ```
 
-        To install in a WatchOS app extension target, add the following to your Podfile:
+        To install in a watchOS app extension target, add the following to your Podfile:
 
         ```
         target 'YOUR_WATCH_EXTENSION_TARGET_NAME' do  
