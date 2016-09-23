@@ -25,21 +25,35 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
         To install in your main app target, add the following to your Podfile:
 
-        `target 'YOUR_TARGET_NAME' do`
-            `pod "CleverTap-iOS-SDK"`
-         `end`   
+        ```
+        target 'YOUR_TARGET_NAME' do  
+            pod 'CleverTap-iOS-SDK'  
+         end     
+         ```
 
         If your main app is a host for a WatchOS app, instead add this:
 
-        `target 'YOUR_TARGET_NAME' do`
-            `pod "CleverTap-iOS-SDK", :subspecs => ['HostWatchOS']`
-        `end`   
+        ```
+        target 'YOUR_TARGET_NAME' do  
+            pod 'CleverTap-iOS-SDK', :subspecs => ['HostWatchOS']  
+        end  
+        ```
         
-        To install in an app extension target (including a WatchOS extension), add the following to your Podfile:
+        To install in a main app extension target, add the following to your Podfile:
 
-        `target 'YOUR_APP_EXTENSION_TARGET_NAME' do`
-            `pod "CleverTap-iOS-SDK",  :subspecs => ['AppExtension']`
-         `end`   
+        ```
+        target 'YOUR_APP_EXTENSION_TARGET_NAME' do  
+            pod 'CleverTap-iOS-SDK',  :subspecs => ['AppExtension']  
+        end
+        ```
+
+        To install in a WatchOS app extension target, add the following to your Podfile:
+
+        ```
+        target 'YOUR_WATCH_EXTENSION_TARGET_NAME' do  
+             pod 'CleverTapWatchOS'  
+        end
+        ```
 
         Then run `pod install`.
 
