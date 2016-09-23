@@ -23,9 +23,23 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
     - **Install Using [CocoaPods](http://cocoapods.org)**
 
-        Just add the following line to your Podfile:
+        To install in your main app target, add the following to your Podfile:
 
-        `pod "CleverTap-iOS-SDK"`
+        `target 'YOUR_TARGET_NAME' do`
+            `pod "CleverTap-iOS-SDK"`
+         `end`   
+
+        If your main app is a host for a WatchOS app, instead add this:
+
+        `target 'YOUR_TARGET_NAME' do`
+            `pod "CleverTap-iOS-SDK", :subspecs => ['HostWatchOS']`
+        `end`   
+        
+        To install in an app extension target (including a WatchOS extension), add the following to your Podfile:
+
+        `target 'YOUR_APP_EXTENSION_TARGET_NAME' do`
+            `pod "CleverTap-iOS-SDK",  :subspecs => ['AppExtension']`
+         `end`   
 
         Then run `pod install`.
 
