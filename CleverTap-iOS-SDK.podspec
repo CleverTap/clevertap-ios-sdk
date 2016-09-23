@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
-  s.version          = "2.2.2"
+  s.version          = "3.0.0"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
 
   s.description      = <<-DESC
@@ -13,14 +13,32 @@ Pod::Spec.new do |s|
   s.source           = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
   s.documentation_url = 'http://support.clevertap.com/'
 
-  s.platform     = :ios, '7.0'
   s.requires_arc = true
 
-  s.frameworks = 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'Security', 'CoreLocation'
+  s.platform = :ios, '8.0'
 
-  s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }  
-  s.source_files = 'CleverTapSDK.framework/Versions/A/Headers/*.h'
-  s.ios.vendored_frameworks = 'CleverTapSDK.framework'
-  s.preserve_paths = 'CleverTapSDK.framework'  
+  s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }
+
+  s.default_subspec = 'Main'  
+
+  s.subspec 'Main' do |ss|
+      ss.source_files = 'CleverTapSDK.framework/Versions/A/Headers/*.h'
+      ss.frameworks = 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'CoreLocation'
+      ss.ios.vendored_frameworks = 'CleverTapSDK.framework'
+  end
+
+  s.subspec 'AppExtension' do |ss|
+      ss.source_files = 'CleverTapSDK.appex.framework/Versions/A/Headers/*.h'
+      ss.frameworks = 'SystemConfiguration', 'UIKit', 'CoreLocation'
+      ss.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' =>  '$(inherited) CLEVERTAP_APP_EXTENSION' }
+      ss.ios.vendored_frameworks = 'CleverTapSDK.appex.framework'
+  end
+
+  s.subspec 'HostWatchOS' do |ss|
+      ss.source_files = 'CleverTapSDK.hostwatchos.framework/Versions/A/Headers/*.h'
+      ss.frameworks = 'WatchConnectivity', 'WatchKit', 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'CoreLocation'
+      ss.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' =>  '$(inherited) CLEVERTAP_HOST_WATCHOS' }
+      ss.ios.vendored_frameworks = 'CleverTapSDK.hostwatchos.framework'
+  end
 
 end
