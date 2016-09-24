@@ -111,3 +111,4 @@ For Swift, please refer to the SwiftStarterProject.
 For non-CocoaPods folks, check out the example StarterProjectManualInstall.  
 For Swift, please refer to the SwiftStarterProjectManualInstall example. 
 
+For App Extension and watchOS usage, [please refer to this demo project](https://github.com/CleverTap/ios-10-demo).
