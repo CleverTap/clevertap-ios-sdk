@@ -119,6 +119,8 @@
 				TargetAttributes = {
 					5203C6321C1F26EA000B9BC7 = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = A5J34NR598;
+						LastSwiftMigration = 0820;
 					};
 				};
 			};
@@ -272,6 +274,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = A5J34NR598;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/swiftstarter",
@@ -284,6 +287,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.swiftstarter;
 				PRODUCT_NAME = swiftstarter;
 				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/CleverTapSDK-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -291,6 +295,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = A5J34NR598;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/swiftstarter",
@@ -303,6 +308,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.swiftstarter;
 				PRODUCT_NAME = swiftstarter;
 				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/CleverTapSDK-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

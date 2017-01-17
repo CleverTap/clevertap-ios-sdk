@@ -21,15 +21,50 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
 2.  Install the Framework
 
+    Starting with v3.0.0, the SDK adds support for App Extensions and watchOS apps via separate SDK target builds.
+
     - **Install Using [CocoaPods](http://cocoapods.org)**
 
-        Just add the following line to your Podfile:
+        For just the basic SDK functionality in your main app, add the following to your Podfile:
 
-        `pod "CleverTap-iOS-SDK"`
+        ```
+        target 'YOUR_TARGET_NAME' do  
+            pod 'CleverTap-iOS-SDK'  
+         end     
+         ```
+
+        If your main app is also a watchOS Host, and you wish to capture custom events from your watchOS app, add this (instead of the basic SDK):
+
+        ```
+        target 'YOUR_TARGET_NAME' do  
+            pod 'CleverTap-iOS-SDK', :subspecs => ['HostWatchOS']  
+        end  
+        ```
+
+        and this:
+
+        ```
+        target 'YOUR_WATCH_EXTENSION_TARGET_NAME' do  
+             pod 'CleverTapWatchOS'  
+        end
+        ```
+        
+        If you wish to capture custom events from your main App Extension target(s), also add the following to your Podfile:
+
+        ```
+        target 'YOUR_APP_EXTENSION_TARGET_NAME' do  
+            pod 'CleverTap-iOS-SDK', :subspecs => ['AppExtension']  
+        end
+        ```
 
         Then run `pod install`.
 
+        [See example Podfile here](https://github.com/CleverTap/ios-10-demo/blob/master/Podfile)
+
+
     - **Manually Install the Framework** 
+
+        For just the basic SDK functionality in your main app:
 
          - Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). Unzip the download.
 
@@ -38,9 +73,17 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
          - Add the following frameworks to your Xcode Project: 
             - SystemConfiguration
             - CoreTelephony
-            - Security
             - UIKit
             - CoreLocation
+
+        If your main app is also a watchOS Host, and you wish to capture custom events from your watchOS app:
+        
+        - follow the steps above, but add CleverTapSDK.hostwatchos.framework instead of CleverTapSDK.framework.
+        - add [the CleverTapWatchOS Swift framework](https://github.com/CleverTap/clevertap-ios-sdk/tree/master/CleverTapWatchOS) to your watchOS Extension target(s). 
+
+        If you also wish to capture custom events from your main App Extension target(s):
+
+        - add the CleverTapSDK.appex.framework to those target(s)
 
 3. Add Your CleverTap Account Credentials
 
@@ -68,3 +111,4 @@ For Swift, please refer to the SwiftStarterProject.
 For non-CocoaPods folks, check out the example StarterProjectManualInstall.  
 For Swift, please refer to the SwiftStarterProjectManualInstall example. 
 
+For App Extension and watchOS usage, [please refer to this demo project](https://github.com/CleverTap/ios-10-demo).

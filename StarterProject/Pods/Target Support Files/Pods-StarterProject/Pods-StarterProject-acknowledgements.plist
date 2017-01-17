@@ -15,6 +15,8 @@
 		<dict>
 			<key>FooterText</key>
 			<string>Please refer to https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE</string>
+			<key>License</key>
+			<string>Commercial</string>
 			<key>Title</key>
 			<string>CleverTap-iOS-SDK</string>
 			<key>Type</key>
