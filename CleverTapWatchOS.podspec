@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTapWatchOS"
-  s.version          = "3.1.1"
+  s.version          = "3.1.2"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement, watchOS Framework."
 
   s.description      = <<-DESC
