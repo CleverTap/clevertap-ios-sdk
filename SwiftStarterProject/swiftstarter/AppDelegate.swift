@@ -8,6 +8,7 @@
 
 import UIKit
 import UserNotifications
+import CleverTapSDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, CleverTapSyncDelegate, UNUserNotificationCenterDelegate {

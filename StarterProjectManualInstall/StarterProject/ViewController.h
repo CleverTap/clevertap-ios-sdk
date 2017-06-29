@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CleverTapSDK/CleverTapTrackedViewController.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : CleverTapTrackedViewController
 
 
 @end

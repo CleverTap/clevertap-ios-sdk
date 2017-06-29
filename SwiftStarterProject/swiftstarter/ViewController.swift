@@ -7,11 +7,13 @@
 //
 
 import UIKit
+import CleverTapSDK
 
-class ViewController: UIViewController {
+class ViewController: CleverTapTrackedViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.screenName = "ViewController"
         // Do any additional setup after loading the view, typically from a nib.
     }
 
