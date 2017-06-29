@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
-  s.version          = "3.1.2"
+  s.version          = "3.1.3"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
 
   s.description      = <<-DESC
@@ -15,30 +15,32 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
 
-  s.platform = :ios, '8.0'
-
   s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }
 
   s.default_subspec = 'Main'  
 
   s.subspec 'Main' do |ss|
-      ss.source_files = 'CleverTapSDK.framework/Versions/A/Headers/*.h'
+      ss.platform = :ios, '8.0'
       ss.frameworks = 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'CoreLocation'
       ss.ios.vendored_frameworks = 'CleverTapSDK.framework'
   end
 
-  s.subspec 'AppExtension' do |ss|
-      ss.source_files = 'CleverTapSDK.appex.framework/Versions/A/Headers/*.h'
-      ss.frameworks = 'SystemConfiguration', 'UIKit', 'CoreLocation'
-      ss.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' =>  '$(inherited) CLEVERTAP_APP_EXTENSION' }
-      ss.ios.vendored_frameworks = 'CleverTapSDK.appex.framework'
+  s.subspec 'HostWatchOS' do |ss|
+      ss.platform = :ios, '8.0'
+      ss.frameworks = 'WatchConnectivity', 'WatchKit'
+      ss.dependency "CleverTap-iOS-SDK/Main"
   end
 
-  s.subspec 'HostWatchOS' do |ss|
-      ss.source_files = 'CleverTapSDK.hostwatchos.framework/Versions/A/Headers/*.h'
-      ss.frameworks = 'WatchConnectivity', 'WatchKit', 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'CoreLocation'
-      ss.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' =>  '$(inherited) CLEVERTAP_HOST_WATCHOS' }
-      ss.ios.vendored_frameworks = 'CleverTapSDK.hostwatchos.framework'
+  s.subspec 'AppEx' do |ss|
+      ss.platform = :ios, '10.0'
+      ss.frameworks = 'SystemConfiguration', 'UIKit', 'CoreLocation'
+      ss.ios.vendored_frameworks = 'CleverTapAppEx.framework'
+  end
+
+  s.subspec 'tvOS' do |ss|
+      ss.platform = :tvos, '9.0'
+      ss.frameworks = 'SystemConfiguration', 'UIKit', 'Foundation'
+      ss.vendored_frameworks = 'CleverTapTVOS.framework'
   end
 
 end

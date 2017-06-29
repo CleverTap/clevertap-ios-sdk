@@ -2,8 +2,19 @@
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
 
+#if defined(CLEVERTAP_HOST_WATCHOS)
+#import <WatchConnectivity/WatchConnectivity.h>
+#endif
+
+#if TARGET_OS_TV
+#define CLEVERTAP_TVOS_EXTENSION 1
+#endif
+
+#define CLEVERTAP_NO_INAPP_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
+#define CLEVERTAP_NO_LOCATION_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
+
 @protocol CleverTapSyncDelegate;
-#if !defined(CLEVERTAP_APP_EXTENSION)
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
 #endif
 
@@ -106,6 +117,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
 + (void)disablePersonalization;
 
 
+#if !CLEVERTAP_NO_LOCATION_SUPPORT
 /*!
  @method
  
@@ -120,7 +132,6 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  */
 + (void)setLocation:(CLLocationCoordinate2D)location;
 
-#if !defined(CLEVERTAP_APP_EXTENSION)
 /*!
  @method
  
@@ -138,7 +149,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  for, among other things, more fine-grained geo-targeting and segmentation purposes.
 */
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error;
-#endif
+#endif // !CLEVERTAP_NO_LOCATION_SUPPORT
 
 /*!
  @method
@@ -440,6 +451,19 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
 
 - (void)recordErrorWithMessage:(NSString *)message andErrorCode:(int)code;
 
+#if !defined(CLEVERTAP_APP_EXTENSION)
+/*!
+ @method
+ 
+ @abstract
+ Record a screen view.
+ 
+ @param screenName           the screen name
+ */
+- (void)recordScreenView:(NSString *)screenName;
+
+#endif
+
 /*!
  @method
  
@@ -630,7 +654,7 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  */
 - (void)setSyncDelegate:(id <CleverTapSyncDelegate>)delegate;
 
-#if !defined(CLEVERTAP_APP_EXTENSION)
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 /*!
 
  @method
@@ -696,7 +720,7 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
 
 #endif
 
-#if !defined(CLEVERTAP_APP_EXTENSION)
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 /*!
  @method
  
@@ -765,6 +789,14 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  
  */
 + (void)setDebugLevel:(int)level;
+
+
+#if defined(CLEVERTAP_HOST_WATCHOS)
+/** HostWatchOS
+ */
+
+- (BOOL)handleMessage:(NSDictionary<NSString *, id> *)message forWatchSession:(WCSession *)session;
+#endif
 
 
 #pragma mark deprecations as of version 2.0.3

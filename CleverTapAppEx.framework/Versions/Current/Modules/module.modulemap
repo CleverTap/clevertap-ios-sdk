@@ -1,0 +1,10 @@
+framework module CleverTapAppEx {
+    umbrella header "CleverTap.h"
+    header "CleverTapBuildInfo.h"
+    header "CleverTapEventDetail.h"
+    header "CleverTapSyncDelegate.h"
+    header "CleverTapUTMDetail.h"
+    
+    export *
+    module * { export * }
+}
