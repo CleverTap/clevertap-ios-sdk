@@ -17,6 +17,8 @@ Pod::Spec.new do |s|
 
   s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }
 
+  s.tvos.deployment_target = '9.0'
+
   s.default_subspec = 'Main'  
 
   s.subspec 'Main' do |ss|
