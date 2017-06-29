@@ -21,7 +21,7 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
 2.  Install the Framework
 
-    Starting with v3.0.0, the SDK adds support for App Extensions and watchOS apps.  Starting with v3.1.3 the SDK adds support for tvOS.
+    Starting with v3.0.0, the SDK adds support for App Extensions and watchOS apps.  Starting with v3.1.3, the SDK adds support for tvOS.
 
     - **Install Using [CocoaPods](http://cocoapods.org)**
 
@@ -86,7 +86,8 @@ For more information check out our [website](https://clevertap.com "CleverTap") 
 
         - add the CleverTapAppEx.framework to those target(s)
 
-        For tvOS, add the CleverTapTVOS.framework to your tvOS target.
+        For tvOS:
+        - add the CleverTapTVOS.framework to your tvOS target.
 
 3. Add Your CleverTap Account Credentials
 
