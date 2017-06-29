@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
-  s.version          = "3.1.3"
+  s.version          = "3.1.4"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
 
   s.description      = <<-DESC
@@ -18,6 +18,8 @@ Pod::Spec.new do |s|
   s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }
 
   s.tvos.deployment_target = '9.0'
+  s.ios.deployment_target = '8.0'
+  s.watchos.deployment_target = '2.0'
 
   s.default_subspec = 'Main'  
 
