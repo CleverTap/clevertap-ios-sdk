@@ -12,6 +12,8 @@
 
 #define CLEVERTAP_NO_INAPP_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
 #define CLEVERTAP_NO_LOCATION_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
+#define CLEVERTAP_NO_REACHABILITY_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
+
 
 @protocol CleverTapSyncDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -23,6 +25,12 @@
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMethodInspection"
+
+typedef NS_ENUM(int, CleverTapLogLevel) {
+    CleverTapLogOff = -1,
+    CleverTapLogInfo = 0,
+    CleverTapLogDebug = 1
+};
 
 @interface CleverTap : NSObject
 
@@ -68,17 +76,32 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  @method
  
  @abstract
- Change the CleverTap accountID and token
+ Set the CleverTap accountID and token
  
  @discussion
- Changes the CleverTap account associated with the app on the fly.  Should only used during testing.
- Instead, considering relying on the separate -Test account created for your app in CleverTap.
+ Sets the CleverTap account credentials.  Once the SDK is intialized subsequent calls will be ignored
  
  @param accountID  the CleverTap account id
- @param token       the CleverTap account token
+ @param token      the CleverTap account token
  
  */
 + (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token;
+
+/*!
+ @method
+ 
+ @abstract
+ Set the CleverTap accountID, token and region
+ 
+ @discussion
+ Sets the CleverTap account credentials.  Once the SDK is intialized subsequent calls will be ignored
+ 
+ @param accountID  the CleverTap account id
+ @param token      the CleverTap account token
+ @param region     the dedicated CleverTap region
+ 
+ */
++ (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region;
 
 #if !defined(CLEVERTAP_APP_EXTENSION)
 /*!
@@ -197,13 +220,6 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  To add a multi-value (array) property value type please use profileAddValueToSet: forKey:
  
- Keys are limited to 32 characters.
- Values are limited to 120 bytes.  
- 
- Longer will be truncated.
- 
- Maximum number of custom profile attributes is 63
- 
  @param properties       properties dictionary
  */
 - (void)profilePush:(NSDictionary *)properties;
@@ -230,7 +246,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  @discussion
  Key must be NSString.
- Values must be NSStrings, max 40 bytes.  Longer will be truncated.
+ Values must be NSStrings.
  Max 100 values, on reaching 100 cap, oldest value(s) will be removed.
 
  
@@ -251,7 +267,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  @discussion
  Key must be NSString.
- Values must be NSStrings, max 40 bytes. Longer will be truncated.
+ Values must be NSStrings.
  Max 100 values, on reaching 100 cap, oldest value(s) will be removed.
 
  
@@ -271,7 +287,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  @discussion
  Key must be NSString.
- Values must be NSStrings, max 40 bytes. Longer will be truncated.
+ Values must be NSStrings.
  Max 100 values, on reaching 100 cap, oldest value(s) will be removed.
  
  
@@ -712,11 +728,36 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  
  @discussion
  By calling this method, CleverTap will automatically track user notification interaction for you.
- If the push notification contains a deep link, CleverTap will handle the call to application:openUrl: with the deep link.
+ If the push notification contains a deep link, CleverTap will handle the call to application:openUrl: with the deep link, as long as the application is not in the foreground.
  
  @param data         notification payload
  */
 - (void)handleNotificationWithData:(id)data;
+
+/*!
+ @method
+ 
+ @abstract
+ Track and process a push notification based on its payload.
+ 
+ @discussion
+ By calling this method, CleverTap will automatically track user notification interaction for you.
+ If the push notification contains a deep link, CleverTap will handle the call to application:openUrl: with the deep link, as long as the application is not in the foreground or you pass TRUE in the openInForeground param.
+ 
+ @param data                     notification payload
+ @param openInForeground         Boolean as to whether the SDK should open any deep link attached to the notification while the application is in the foreground.
+ */
+- (void)handleNotificationWithData:(id)data openDeepLinksInForeground:(BOOL)openInForeground;
+
+/*!
+ @method
+ 
+ @abstract
+ Determine whether a notification originated from CleverTap
+ 
+ @param payload  notification payload
+ */
+- (BOOL)isCleverTapNotification:(NSDictionary *)payload;
 
 #endif
 
@@ -783,10 +824,16 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  Set the debug logging level
  
  @discussion
- 0 = off, 1 = on
+ Set using CleverTapLogLevel enum values (or the corresponding int values).
+ SDK logging defaults to CleverTapLogInfo, which prints minimal SDK integration-related messages
  
- @param level  the level to set (0 or 1)
+ CleverTapLogOff - turns off all SDK logging.
+ CleverTapLogInfo - default, prints minimal SDK integration related messages.
+ CleverTapLogDebug - enables verbose debug logging.
+ In Swift, use the respective rawValues:  CleverTapLogLevel.off.rawValue, CleverTapLogLevel.info.rawValue,
+ CleverTapLogLevel.debug.rawValue.
  
+ @param level  the level to set
  */
 + (void)setDebugLevel:(int)level;
 
