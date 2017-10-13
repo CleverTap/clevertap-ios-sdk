@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CleverTap-iOS-SDK"
-  s.version          = "3.1.5"
+  s.version          = "3.1.6"
   s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
 
   s.description      = <<-DESC
@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'AppEx' do |ss|
-      ss.platform = :ios, '10.0'
+      ss.platform = :ios, '8.0'
       ss.frameworks = 'SystemConfiguration', 'UIKit', 'CoreLocation'
       ss.ios.vendored_frameworks = 'CleverTapAppEx.framework'
   end
