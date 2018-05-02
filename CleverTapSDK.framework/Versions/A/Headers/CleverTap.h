@@ -10,15 +10,17 @@
 #define CLEVERTAP_TVOS_EXTENSION 1
 #endif
 
-#define CLEVERTAP_NO_INAPP_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
-#define CLEVERTAP_NO_LOCATION_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
-#define CLEVERTAP_NO_REACHABILITY_SUPPORT (defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION))
-
+#if defined(CLEVERTAP_APP_EXTENSION) || defined(CLEVERTAP_TVOS_EXTENSION)
+#define CLEVERTAP_NO_INAPP_SUPPORT 1
+#define CLEVERTAP_NO_LOCATION_SUPPORT 1
+#define CLEVERTAP_NO_REACHABILITY_SUPPORT 1
+#endif
 
 @protocol CleverTapSyncDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
 #endif
+
 
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
@@ -139,7 +141,6 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  */
 + (void)disablePersonalization;
 
-
 #if !CLEVERTAP_NO_LOCATION_SUPPORT
 /*!
  @method
@@ -172,7 +173,7 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  for, among other things, more fine-grained geo-targeting and segmentation purposes.
 */
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error;
-#endif // !CLEVERTAP_NO_LOCATION_SUPPORT
+#endif // CLEVERTAP_NO_LOCATION_SUPPORT
 
 /*!
  @method
@@ -206,6 +207,35 @@ elsewhere in your code, you can use this singleton or call sharedInstance.
  
  */
 - (void)onUserLogin:(NSDictionary *)properties;
+
+/*!
+ @method
+ 
+ @abstract
+ Enables tracking opt out for the currently active user.
+ 
+ @discussion
+ Use this method to opt the current user out of all event/profile tracking.
+ You must call this method separately for each active user profile (e.g. when switching user profiles using onUserLogin).
+ Once enabled, no events will be saved remotely or locally for the current user. To re-enable tracking call this method with enabled set to NO.
+ 
+ @param enabled         BOOL Whether tracking opt out should be enabled/disabled.
+ */
+- (void)setOptOut:(BOOL)enabled;
+
+/*!
+ @method
+ 
+ @abstract
+ Enables the reporting of device network-related information, including IP address.  This reporting is disabled by default.
+ 
+ @discussion
+ Use this method to enable device network-related information tracking, including IP address.
+ This reporting is disabled by default.  To re-disable tracking call this method with enabled set to NO.
+ 
+ @param enabled         BOOL Whether device network info reporting should be enabled/disabled.
+ */
+- (void)enableDeviceNetworkInfoReporting:(BOOL)enabled;
 
 #pragma mark Profile API
 
@@ -836,7 +866,6 @@ extern NSString *const CleverTapProfileDidInitializeNotification;
  @param level  the level to set
  */
 + (void)setDebugLevel:(int)level;
-
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
