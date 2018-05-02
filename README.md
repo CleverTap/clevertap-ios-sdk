@@ -1,5 +1,5 @@
 
-[![CleverTap Logo](http://staging.support.wizrocket.com.s3-website-eu-west-1.amazonaws.com/images/CleverTap_logo.png)](http:www.clevertap.com)
+[![CleverTap Logo]](http:www.clevertap.com)
 
 # CleverTap iOS SDK  
 [![CI Status](http://img.shields.io/travis/CleverTap/clevertap-ios-sdk.svg?style=flat)](https://travis-ci.org/CleverTap/clevertap-ios-sdk)
