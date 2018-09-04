@@ -1,6 +1,6 @@
 # CHANGE LOG
 
-## Version 3.2.0 (September 3, 2018)
+## Version 3.2.0 (September 5, 2018)
 * Adds support to create multiple instances
 * Adds support for SSL-pinning
 * Adds ability to go offline (disable sending logged events to server)
