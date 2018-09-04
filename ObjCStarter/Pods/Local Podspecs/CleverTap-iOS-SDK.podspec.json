@@ -10,7 +10,8 @@
     "CleverTap": "http://www.clevertap.com"
   },
   "source": {
-    "git": "https://github.com/CleverTap/sdk-ios-source.git"
+    "git": "https://github.com/CleverTap/clevertap-ios-sdk.git",
+    "tag": "3.2.0"
   },
   "requires_arc": true,
   "module_name": "CleverTapSDK",

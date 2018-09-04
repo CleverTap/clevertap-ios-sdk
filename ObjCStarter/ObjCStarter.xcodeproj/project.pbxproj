@@ -16,8 +16,6 @@
 		07E16EA2212FF6EA00429BDF /* ObjCStarterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EA1212FF6EA00429BDF /* ObjCStarterTests.m */; };
 		07E16EAD212FF6EA00429BDF /* ObjCStarterUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EAC212FF6EA00429BDF /* ObjCStarterUITests.m */; };
 		07E16EBF2130088A00429BDF /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07E16EBD2130086500429BDF /* AdSupport.framework */; };
-		07E16EC821300A5500429BDF /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EC721300A5500429BDF /* NotificationService.m */; };
-		07E16ECC21300A5500429BDF /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 07E16EC421300A5500429BDF /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		07E16ED921300EE200429BDF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16ED821300EE200429BDF /* AppDelegate.m */; };
 		07E16EDC21300EE200429BDF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EDB21300EE200429BDF /* ViewController.m */; };
 		07E16EDF21300EE200429BDF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07E16EDD21300EE200429BDF /* Main.storyboard */; };
@@ -26,7 +24,6 @@
 		07E16EEE21300EE500429BDF /* ObjCTvOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EED21300EE500429BDF /* ObjCTvOSTests.m */; };
 		07E16EF921300EE500429BDF /* ObjCTvOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EF821300EE500429BDF /* ObjCTvOSUITests.m */; };
 		107D751FABE6D5ACC611DA29 /* Pods_ObjCStarterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8305EF4E81974FAEB2DC25D /* Pods_ObjCStarterUITests.framework */; };
-		65F860A945627718E72728DE /* Pods_ObjCStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E7B8692A699B89A0EDC8D8A /* Pods_ObjCStarter_NotificationService.framework */; };
 		A06033F9C8B1F8DC7D19FAD4 /* Pods_ObjCStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCFF12C6B7DD9F4C0EE459ED /* Pods_ObjCStarterTests.framework */; };
 		CBD52D22FB0AE37C1E4A5194 /* Pods_ObjCTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F23762765F6B76841D12A96D /* Pods_ObjCTvOS.framework */; };
 		D3D2E04DE5DA0DAEBDCF01B9 /* Pods_ObjCStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 997C676BD55E3DF0A0EC04CB /* Pods_ObjCStarter.framework */; };
@@ -46,13 +43,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 07E16E84212FF6E700429BDF;
 			remoteInfo = ObjCStarter;
-		};
-		07E16ECA21300A5500429BDF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 07E16E7D212FF6E700429BDF /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 07E16EC321300A5500429BDF;
-			remoteInfo = NotificationService;
 		};
 		07E16EEA21300EE500429BDF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -77,7 +67,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				07E16ECC21300A5500429BDF /* NotificationService.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,10 +92,6 @@
 		07E16EAE212FF6EA00429BDF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		07E16EBC2130019600429BDF /* ObjCStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ObjCStarter.entitlements; sourceTree = "<group>"; };
 		07E16EBD2130086500429BDF /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
-		07E16EC421300A5500429BDF /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		07E16EC621300A5500429BDF /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
-		07E16EC721300A5500429BDF /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
-		07E16EC921300A5500429BDF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		07E16ED521300EE200429BDF /* ObjCTvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjCTvOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		07E16ED721300EE200429BDF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		07E16ED821300EE200429BDF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -128,8 +113,6 @@
 		12E4FB508CE7AEA5EF886710 /* Pods-ObjCTvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCTvOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		1BADAD65D0453B217B0542A0 /* Pods-ObjCTvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCTvOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS.release.xcconfig"; sourceTree = "<group>"; };
 		2A279F01BA1862DE0AF1A38C /* Pods-ObjCStarterUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarterUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCStarterUITests/Pods-ObjCStarterUITests.release.xcconfig"; sourceTree = "<group>"; };
-		31AF68A112BE2DA819B5E77C /* Pods-ObjCStarter-NotificationService.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarter-NotificationService.release.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCStarter-NotificationService/Pods-ObjCStarter-NotificationService.release.xcconfig"; sourceTree = "<group>"; };
-		59C74D47FBB28A4E6CABB285 /* Pods-ObjCStarter-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarter-NotificationService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCStarter-NotificationService/Pods-ObjCStarter-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		7046415EE115CF8DED880897 /* Pods-ObjCStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarterTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCStarterTests/Pods-ObjCStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
 		922F9EE17716C9F3ABFC06AA /* Pods-ObjCStarter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarter.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter.debug.xcconfig"; sourceTree = "<group>"; };
 		997C676BD55E3DF0A0EC04CB /* Pods_ObjCStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjCStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -165,14 +148,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		07E16EC121300A5500429BDF /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				65F860A945627718E72728DE /* Pods_ObjCStarter_NotificationService.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		07E16ED221300EE200429BDF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -204,7 +179,6 @@
 				07E16E87212FF6E700429BDF /* ObjCStarter */,
 				07E16EA0212FF6EA00429BDF /* ObjCStarterTests */,
 				07E16EAB212FF6EA00429BDF /* ObjCStarterUITests */,
-				07E16EC521300A5500429BDF /* NotificationService */,
 				07E16ED621300EE200429BDF /* ObjCTvOS */,
 				07E16EEC21300EE500429BDF /* ObjCTvOSTests */,
 				07E16EF721300EE500429BDF /* ObjCTvOSUITests */,
@@ -220,7 +194,6 @@
 				07E16E85212FF6E700429BDF /* ObjCStarter.app */,
 				07E16E9D212FF6EA00429BDF /* ObjCStarterTests.xctest */,
 				07E16EA8212FF6EA00429BDF /* ObjCStarterUITests.xctest */,
-				07E16EC421300A5500429BDF /* NotificationService.appex */,
 				07E16ED521300EE200429BDF /* ObjCTvOS.app */,
 				07E16EE921300EE500429BDF /* ObjCTvOSTests.xctest */,
 				07E16EF421300EE500429BDF /* ObjCTvOSUITests.xctest */,
@@ -261,16 +234,6 @@
 				07E16EAE212FF6EA00429BDF /* Info.plist */,
 			);
 			path = ObjCStarterUITests;
-			sourceTree = "<group>";
-		};
-		07E16EC521300A5500429BDF /* NotificationService */ = {
-			isa = PBXGroup;
-			children = (
-				07E16EC621300A5500429BDF /* NotificationService.h */,
-				07E16EC721300A5500429BDF /* NotificationService.m */,
-				07E16EC921300A5500429BDF /* Info.plist */,
-			);
-			path = NotificationService;
 			sourceTree = "<group>";
 		};
 		07E16ED621300EE200429BDF /* ObjCTvOS */ = {
@@ -328,8 +291,6 @@
 				EEABA42B049362D4686D36FD /* Pods-ObjCStarterTests.release.xcconfig */,
 				0BE8D422E41AA4815D1FF2CB /* Pods-ObjCStarterUITests.debug.xcconfig */,
 				2A279F01BA1862DE0AF1A38C /* Pods-ObjCStarterUITests.release.xcconfig */,
-				59C74D47FBB28A4E6CABB285 /* Pods-ObjCStarter-NotificationService.debug.xcconfig */,
-				31AF68A112BE2DA819B5E77C /* Pods-ObjCStarter-NotificationService.release.xcconfig */,
 				12E4FB508CE7AEA5EF886710 /* Pods-ObjCTvOS.debug.xcconfig */,
 				1BADAD65D0453B217B0542A0 /* Pods-ObjCTvOS.release.xcconfig */,
 			);
@@ -347,14 +308,12 @@
 				07E16E81212FF6E700429BDF /* Sources */,
 				07E16E82212FF6E700429BDF /* Frameworks */,
 				07E16E83212FF6E700429BDF /* Resources */,
-				EB76A8B940FF5CB455F75489 /* [CP] Copy Pods Resources */,
 				07E16ED021300A5500429BDF /* Embed App Extensions */,
 				88FF26A12D4FDE2480D7B220 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				07E16ECB21300A5500429BDF /* PBXTargetDependency */,
 			);
 			name = ObjCStarter;
 			productName = ObjCStarter;
@@ -369,8 +328,6 @@
 				07E16E99212FF6EA00429BDF /* Sources */,
 				07E16E9A212FF6EA00429BDF /* Frameworks */,
 				07E16E9B212FF6EA00429BDF /* Resources */,
-				EEF829901F1C7A37ACB8211E /* [CP] Embed Pods Frameworks */,
-				9000DF6788B60170D2893A13 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -390,8 +347,6 @@
 				07E16EA4212FF6EA00429BDF /* Sources */,
 				07E16EA5212FF6EA00429BDF /* Frameworks */,
 				07E16EA6212FF6EA00429BDF /* Resources */,
-				237A8B4C1E896626D0F55A16 /* [CP] Embed Pods Frameworks */,
-				38E486EC5A47DF51FF4FA863 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -403,25 +358,6 @@
 			productReference = 07E16EA8212FF6EA00429BDF /* ObjCStarterUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		07E16EC321300A5500429BDF /* NotificationService */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 07E16ECD21300A5500429BDF /* Build configuration list for PBXNativeTarget "NotificationService" */;
-			buildPhases = (
-				2B0B7FABD6EA640655307641 /* [CP] Check Pods Manifest.lock */,
-				07E16EC021300A5500429BDF /* Sources */,
-				07E16EC121300A5500429BDF /* Frameworks */,
-				07E16EC221300A5500429BDF /* Resources */,
-				72E57846FA53DF56E7D6CD28 /* [CP] Copy Pods Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = NotificationService;
-			productName = NotificationService;
-			productReference = 07E16EC421300A5500429BDF /* NotificationService.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		07E16ED421300EE200429BDF /* ObjCTvOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 07E16F0121300EE500429BDF /* Build configuration list for PBXNativeTarget "ObjCTvOS" */;
@@ -430,7 +366,6 @@
 				07E16ED121300EE200429BDF /* Sources */,
 				07E16ED221300EE200429BDF /* Frameworks */,
 				07E16ED321300EE200429BDF /* Resources */,
-				102CCF1E302311CA7C7BD299 /* [CP] Copy Pods Resources */,
 				C4E696347544397D8CBD6B24 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
@@ -503,9 +438,6 @@
 						CreatedOnToolsVersion = 9.4.1;
 						TestTargetID = 07E16E84212FF6E700429BDF;
 					};
-					07E16EC321300A5500429BDF = {
-						CreatedOnToolsVersion = 9.4.1;
-					};
 					07E16ED421300EE200429BDF = {
 						CreatedOnToolsVersion = 9.4.1;
 					};
@@ -535,7 +467,6 @@
 				07E16E84212FF6E700429BDF /* ObjCStarter */,
 				07E16E9C212FF6EA00429BDF /* ObjCStarterTests */,
 				07E16EA7212FF6EA00429BDF /* ObjCStarterUITests */,
-				07E16EC321300A5500429BDF /* NotificationService */,
 				07E16ED421300EE200429BDF /* ObjCTvOS */,
 				07E16EE821300EE500429BDF /* ObjCTvOSTests */,
 				07E16EF321300EE500429BDF /* ObjCTvOSUITests */,
@@ -568,13 +499,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		07E16EC221300A5500429BDF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		07E16ED321300EE200429BDF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -601,94 +525,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		102CCF1E302311CA7C7BD299 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS-resources.sh",
-				"${PODS_ROOT}/../../CleverTapSDK/DigiCertGlobalRootCA.crt",
-				"${PODS_ROOT}/../../CleverTapSDK/DigiCertSHA2SecureServerCA.crt",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DigiCertGlobalRootCA.crt",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DigiCertSHA2SecureServerCA.crt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		237A8B4C1E896626D0F55A16 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarterUITests/Pods-ObjCStarterUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		2B0B7FABD6EA640655307641 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ObjCStarter-NotificationService-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		38E486EC5A47DF51FF4FA863 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarterUITests/Pods-ObjCStarterUITests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		72E57846FA53DF56E7D6CD28 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter-NotificationService/Pods-ObjCStarter-NotificationService-resources.sh",
-				"${PODS_ROOT}/../../CleverTapSDK/DigiCertGlobalRootCA.crt",
-				"${PODS_ROOT}/../../CleverTapSDK/DigiCertSHA2SecureServerCA.crt",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DigiCertGlobalRootCA.crt",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DigiCertSHA2SecureServerCA.crt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter-NotificationService/Pods-ObjCStarter-NotificationService-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		75907684EA1FB3A91E298071 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -715,31 +551,14 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CleverTap-iOS-SDK-iOS/CleverTapSDK.framework",
-				"${BUILT_PRODUCTS_DIR}/CTNotificationService/CTNotificationService.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CleverTapSDK.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CTNotificationService.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9000DF6788B60170D2893A13 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarterTests/Pods-ObjCStarterTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		BC0631ECDE413CA037DA7257 /* [CP] Check Pods Manifest.lock */ = {
@@ -814,41 +633,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		EB76A8B940FF5CB455F75489 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-resources.sh",
-				"${PODS_ROOT}/../../CleverTapSDK/DigiCertGlobalRootCA.crt",
-				"${PODS_ROOT}/../../CleverTapSDK/DigiCertSHA2SecureServerCA.crt",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DigiCertGlobalRootCA.crt",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DigiCertSHA2SecureServerCA.crt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		EEF829901F1C7A37ACB8211E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarterTests/Pods-ObjCStarterTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -875,14 +659,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				07E16EAD212FF6EA00429BDF /* ObjCStarterUITests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		07E16EC021300A5500429BDF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				07E16EC821300A5500429BDF /* NotificationService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -924,11 +700,6 @@
 			isa = PBXTargetDependency;
 			target = 07E16E84212FF6E700429BDF /* ObjCStarter */;
 			targetProxy = 07E16EA9212FF6EA00429BDF /* PBXContainerItemProxy */;
-		};
-		07E16ECB21300A5500429BDF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 07E16EC321300A5500429BDF /* NotificationService */;
-			targetProxy = 07E16ECA21300A5500429BDF /* PBXContainerItemProxy */;
 		};
 		07E16EEB21300EE500429BDF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1090,7 +861,10 @@
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCStarter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1107,7 +881,10 @@
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCStarter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1122,7 +899,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCStarterTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarterTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1138,7 +919,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCStarterTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarterTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1153,7 +938,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCStarterUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarterUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1168,43 +957,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCStarterUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarterUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = ObjCStarter;
-			};
-			name = Release;
-		};
-		07E16ECE21300A5500429BDF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 59C74D47FBB28A4E6CABB285 /* Pods-ObjCStarter-NotificationService.debug.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = A5J34NR598;
-				INFOPLIST_FILE = NotificationService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarter.NotificationService;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		07E16ECF21300A5500429BDF /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 31AF68A112BE2DA819B5E77C /* Pods-ObjCStarter-NotificationService.release.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = A5J34NR598;
-				INFOPLIST_FILE = NotificationService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCStarter.NotificationService;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -1217,7 +978,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCTvOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCTvOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -1235,7 +999,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCTvOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCTvOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -1251,7 +1018,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCTvOSTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCTvOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -1268,7 +1039,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCTvOSTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCTvOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -1284,7 +1059,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCTvOSUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCTvOSUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -1300,7 +1079,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = ObjCTvOSUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.ObjCTvOSUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -1345,15 +1128,6 @@
 			buildConfigurations = (
 				07E16EB8212FF6EA00429BDF /* Debug */,
 				07E16EB9212FF6EA00429BDF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		07E16ECD21300A5500429BDF /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				07E16ECE21300A5500429BDF /* Debug */,
-				07E16ECF21300A5500429BDF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
