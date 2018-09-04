@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		522771CD1D79092B00E90B2C /* CleverTapWatchOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 52375BCC1D7907C200E6D860 /* CleverTapWatchOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		52375BCE1D7907C200E6D860 /* CleverTapWatchOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52375BCB1D7907C200E6D860 /* CleverTapWatchOS.swift */; };
+		07BAA432210702F100FB7C9A /* CleverTapWatchOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 07BAA430210702F100FB7C9A /* CleverTapWatchOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		07BAA433210702F100FB7C9A /* CleverTapWatchOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 07BAA431210702F100FB7C9A /* CleverTapWatchOS.m */; };
 		52439B361D78E7F0000967C7 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52439B351D78E7F0000967C7 /* WatchConnectivity.framework */; };
 		52439B381D78E7F8000967C7 /* WatchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52439B371D78E7F8000967C7 /* WatchKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		52375BCB1D7907C200E6D860 /* CleverTapWatchOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CleverTapWatchOS.swift; sourceTree = SOURCE_ROOT; };
-		52375BCC1D7907C200E6D860 /* CleverTapWatchOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapWatchOS.h; sourceTree = SOURCE_ROOT; };
+		07BAA430210702F100FB7C9A /* CleverTapWatchOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapWatchOS.h; sourceTree = "<group>"; };
+		07BAA431210702F100FB7C9A /* CleverTapWatchOS.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTapWatchOS.m; sourceTree = "<group>"; };
 		52375BCD1D7907C200E6D860 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		52439B271D78BB0C000967C7 /* CleverTapWatchOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CleverTapWatchOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52439B351D78E7F0000967C7 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
@@ -38,8 +38,8 @@
 		52439B1D1D78BB0C000967C7 = {
 			isa = PBXGroup;
 			children = (
-				52375BCB1D7907C200E6D860 /* CleverTapWatchOS.swift */,
-				52375BCC1D7907C200E6D860 /* CleverTapWatchOS.h */,
+				07BAA430210702F100FB7C9A /* CleverTapWatchOS.h */,
+				07BAA431210702F100FB7C9A /* CleverTapWatchOS.m */,
 				52375BCD1D7907C200E6D860 /* Info.plist */,
 				52439B281D78BB0C000967C7 /* Products */,
 				52439B341D78E7F0000967C7 /* Frameworks */,
@@ -70,7 +70,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				522771CD1D79092B00E90B2C /* CleverTapWatchOS.h in Headers */,
+				07BAA432210702F100FB7C9A /* CleverTapWatchOS.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,7 +101,7 @@
 		52439B1E1D78BB0C000967C7 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = CleverTap;
 				TargetAttributes = {
 					52439B261D78BB0C000967C7 = {
@@ -144,7 +144,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52375BCE1D7907C200E6D860 /* CleverTapWatchOS.swift in Sources */,
+				07BAA433210702F100FB7C9A /* CleverTapWatchOS.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +164,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -171,6 +172,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -223,6 +225,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -230,6 +233,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -276,6 +280,8 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = watchos.modulemap;
+				MODULEMAP_PRIVATE_FILE = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapWatchOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -299,6 +305,8 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = watchos.modulemap;
+				MODULEMAP_PRIVATE_FILE = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapWatchOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

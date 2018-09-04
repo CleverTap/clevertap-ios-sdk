@@ -1,50 +1,19 @@
 Pod::Spec.new do |s|
-  s.name             = "CleverTap-iOS-SDK"
-  s.version          = "3.1.7"
-  s.summary          = "The CleverTap iOS SDK for App Personalization and Engagement."
-
-  s.description      = <<-DESC
-                    CleverTap is the next generation app engagement platform. It enables marketers to identify, engage and retain users and provides developers with unprecedented code-level access to build dynamic app experiences for multiple user groups. CleverTap includes out-of-the-box prescriptive campaigns, omni-channel messaging, uninstall data and the industry’s largest FREE messaging tier.
-                       DESC
-
-  s.homepage         = "https://github.com/CleverTap/clevertap-ios-sdk"
-  s.license          = { :type => 'Commercial', :text => 'Please refer to https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE'}
-  s.author           = { "CleverTap" => "http://www.clevertap.com" }
-  s.source           = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
-  s.documentation_url = 'http://support.clevertap.com/'
-
-  s.requires_arc = true
-
-  s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited)' }
-
-  s.tvos.deployment_target = '9.0'
-  s.ios.deployment_target = '8.0'
-  s.watchos.deployment_target = '2.0'
-
-  s.default_subspec = 'Main'  
-
-  s.subspec 'Main' do |ss|
-      ss.platform = :ios, '8.0'
-      ss.frameworks = 'SystemConfiguration', 'CoreTelephony', 'UIKit', 'CoreLocation'
-      ss.ios.vendored_frameworks = 'CleverTapSDK.framework'
-  end
-
-  s.subspec 'HostWatchOS' do |ss|
-      ss.platform = :ios, '8.0'
-      ss.frameworks = 'WatchConnectivity', 'WatchKit'
-      ss.dependency "CleverTap-iOS-SDK/Main"
-  end
-
-  s.subspec 'AppEx' do |ss|
-      ss.platform = :ios, '8.0'
-      ss.frameworks = 'SystemConfiguration', 'UIKit', 'CoreLocation'
-      ss.ios.vendored_frameworks = 'CleverTapAppEx.framework'
-  end
-
-  s.subspec 'tvOS' do |ss|
-      ss.platform = :tvos, '9.0'
-      ss.frameworks = 'SystemConfiguration', 'UIKit', 'Foundation'
-      ss.vendored_frameworks = 'CleverTapTVOS.framework'
-  end
-
+s.name                      = "CleverTap-iOS-SDK"
+s.version                   = "3.2.0"
+s.summary                   = "The CleverTap iOS SDK for App Analytics and Engagement."
+s.homepage                  = "https://github.com/CleverTap/clevertap-ios-sdk"
+s.license                   = { :type => "MIT" }
+s.author                    = { "CleverTap" => "http://www.clevertap.com" }
+s.source                    = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
+s.requires_arc              = true
+s.module_name               = 'CleverTapSDK' 
+s.resources                 = 'CleverTapSDK/*.crt'
+s.ios.deployment_target     = '8.0'
+s.ios.source_files          = 'CleverTapSDK/*.{h,m}'
+s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTap+SSLPinning.h', 'CleverTapSDK/CleverTapInstanceConfig.h', 'CleverTapSDK/CleverTapBuildInfo.h', 'CleverTapSDK/CleverTapEventDetail.h', 'CleverTapSDK/CleverTapInAppNotificationDelegate.h', 'CleverTapSDK/CleverTapSyncDelegate.h', 'CleverTapSDK/CleverTapTrackedViewController.h', 'CleverTapSDK/CleverTapUTMDetail.h'
+s.tvos.deployment_target    = '9.0'
+s.tvos.source_files         = 'CleverTapSDK/*.{h,m}'
+s.tvos.exclude_files        = 'CleverTapSDK/CTInAppHTMLViewController.{h,m}'
+s.tvos.public_header_files  = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTap+SSLPinning.h', 'CleverTapSDK/CleverTapInstanceConfig.h', 'CleverTapSDK/CleverTapBuildInfo.h', 'CleverTapSDK/CleverTapEventDetail.h', 'CleverTapSDK/CleverTapSyncDelegate.h', 'CleverTapSDK/CleverTapTrackedViewController.h', 'CleverTapSDK/CleverTapUTMDetail.h'
 end

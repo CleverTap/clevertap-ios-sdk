@@ -1,0 +1,5 @@
+framework module CleverTapWatchOS {
+    header "CleverTapWatchOS.h"
+    export *
+}
+

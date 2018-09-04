@@ -1,8 +1,12 @@
 
+#import <Foundation/Foundation.h>
 #import <WatchKit/WatchKit.h>
+#import <WatchConnectivity/WatchConnectivity.h>
 
-//! Project version number for CleverTapWatchOS.
-FOUNDATION_EXPORT double CleverTapWatchOSVersionNumber;
+@interface CleverTapWatchOS : NSObject
 
-//! Project version string for CleverTapWatchOS.
-FOUNDATION_EXPORT const unsigned char CleverTapWatchOSVersionString[];
+- (instancetype)initWithSession:(WCSession* _Nonnull)session;
+
+- (void)recordEvent:(NSString *)event withProps:(NSDictionary *)props;
+
+@end

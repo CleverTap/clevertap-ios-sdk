@@ -1,0 +1,24 @@
+PODS:
+  - CleverTap-iOS-SDK (3.2.0)
+  - CleverTapWatchOS (3.2.0)
+  - CTNotificationService (0.1.1)
+
+DEPENDENCIES:
+  - CleverTap-iOS-SDK (from `../`)
+  - CleverTapWatchOS (from `../`)
+  - CTNotificationService
+
+EXTERNAL SOURCES:
+  CleverTap-iOS-SDK:
+    :path: ../
+  CleverTapWatchOS:
+    :path: ../
+
+SPEC CHECKSUMS:
+  CleverTap-iOS-SDK: f6f9d6196490016817a54e36f3237261e182a2ba
+  CleverTapWatchOS: d00df683f603b940d0dfdbe8d9a67d608bb1b52e
+  CTNotificationService: 3b1ddf06ee77b1226ab4dda4cc04e33d8305a9ff
+
+PODFILE CHECKSUM: 8fc4208bec80bc3cb0a7d4813d3aac15e25cd245
+
+COCOAPODS: 1.4.0

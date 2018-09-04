@@ -1,0 +1,32 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '10.0'
+
+target 'ObjCStarter' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for ObjCStarter
+  
+  pod 'CleverTap-iOS-SDK', :path =>'../'
+
+  target 'ObjCStarterTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'ObjCStarterUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+  
+  target 'NotificationService' do
+      platform :ios, '10.0'
+      pod 'CTNotificationService'
+  end
+  
+  target 'ObjCTvOS' do
+      platform :tvos, '9.0'
+      pod 'CleverTap-iOS-SDK', :path =>'../'
+  end
+  
+end

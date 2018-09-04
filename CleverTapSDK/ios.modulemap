@@ -1,0 +1,12 @@
+framework module CleverTapSDK {    
+    header "CleverTap.h"
+    header "CleverTap+SSLPinning.h"
+    header "CleverTapBuildInfo.h"
+    header "CleverTapEventDetail.h"
+    header "CleverTapInAppNotificationDelegate.h"
+    header "CleverTapSyncDelegate.h"
+    header "CleverTapUTMDetail.h"
+    header "CleverTapTrackedViewController.h"
+    header "CleverTapInstanceConfig.h"
+    export *
+}

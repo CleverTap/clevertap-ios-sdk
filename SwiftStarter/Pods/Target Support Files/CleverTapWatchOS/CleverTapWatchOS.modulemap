@@ -1,0 +1,6 @@
+framework module CleverTapWatchOS {
+  umbrella header "CleverTapWatchOS-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,6 @@
+framework module Pods_SwiftTvOS {
+  umbrella header "Pods-SwiftTvOS-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,19 @@
+PODS:
+  - CleverTap-iOS-SDK (3.2.0)
+  - CTNotificationService (0.1.1)
+
+DEPENDENCIES:
+  - CleverTap-iOS-SDK (from `../`)
+  - CTNotificationService
+
+EXTERNAL SOURCES:
+  CleverTap-iOS-SDK:
+    :path: ../
+
+SPEC CHECKSUMS:
+  CleverTap-iOS-SDK: f6f9d6196490016817a54e36f3237261e182a2ba
+  CTNotificationService: 3b1ddf06ee77b1226ab4dda4cc04e33d8305a9ff
+
+PODFILE CHECKSUM: 75b38d304db936c7dc93967597502db73dbc040c
+
+COCOAPODS: 1.4.0
