@@ -4,13 +4,13 @@
 
 language: objective-c
 cache: cocoapods
-podfile: StarterProject/Podfile
+podfile: ObjCStarter/Podfile
 osx_image: xcode8
 before_install:
  - gem install cocoapods  -v '1.0.1' # Since Travis is not always on latest version
- - pod update --project-directory=StarterProject
+ - pod update --project-directory=ObjCStarter
 install:
 - gem install xcpretty --no-rdoc --no-ri --no-document --quiet
 script:
-- set -o pipefail && xcodebuild -workspace "StarterProject/StarterProject.xcworkspace" -scheme "StarterProject" -sdk iphonesimulator -destination 'name=iPad Retina' build 
+- set -o pipefail && xcodebuild -workspace "ObjCStarter/ObjCStarter.xcworkspace" -scheme "ObjCStarter" -sdk iphonesimulator -destination 'name=iPad Retina' build 
 - pod lib lint --quick
