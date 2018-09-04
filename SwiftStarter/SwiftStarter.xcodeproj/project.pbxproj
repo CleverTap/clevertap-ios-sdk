@@ -440,7 +440,6 @@
 				5BC01570000A94163576DEA0 /* [CP] Embed Pods Frameworks */,
 				49EA455020E36104005E0E54 /* Embed App Extensions */,
 				0772939020F602020032DC42 /* Embed Watch Content */,
-				974F36D4108016301A398683 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -461,8 +460,6 @@
 				0740613520C150A000D8F4C9 /* Sources */,
 				0740613620C150A000D8F4C9 /* Frameworks */,
 				0740613720C150A000D8F4C9 /* Resources */,
-				02C0984F8FEE2B4C81D28B98 /* [CP] Embed Pods Frameworks */,
-				950961E951CAA1EEDDAD7F54 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -482,8 +479,6 @@
 				0740614020C150A000D8F4C9 /* Sources */,
 				0740614120C150A000D8F4C9 /* Frameworks */,
 				0740614220C150A000D8F4C9 /* Resources */,
-				05FF1B94DC989D344C5BB5E2 /* [CP] Embed Pods Frameworks */,
-				0D7EFD1D673FACBB4C32CD16 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -522,7 +517,6 @@
 				0772937C20F602020032DC42 /* Frameworks */,
 				0772937D20F602020032DC42 /* Resources */,
 				788C3B2CE43A58F046E8AAD3 /* [CP] Embed Pods Frameworks */,
-				96E1FB7DFC75DF449A4F4725 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -542,7 +536,6 @@
 				079F54F620F34BB500343925 /* Frameworks */,
 				079F54F720F34BB500343925 /* Resources */,
 				58FCBB345CACF3985D1DAB68 /* [CP] Embed Pods Frameworks */,
-				983C4F61396FEBD21124855C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -597,7 +590,6 @@
 				49EA454120E36103005E0E54 /* Sources */,
 				49EA454220E36103005E0E54 /* Frameworks */,
 				49EA454320E36103005E0E54 /* Resources */,
-				7EF99BE43234ED6781B2FCC1 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -757,51 +749,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		02C0984F8FEE2B4C81D28B98 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarterTests/Pods-SwiftStarterTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		05FF1B94DC989D344C5BB5E2 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		0D7EFD1D673FACBB4C32CD16 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		2A96F8A7D22D4B0D2B1D78C6 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -892,81 +839,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		7EF99BE43234ED6781B2FCC1 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarter-NotificationService/Pods-SwiftStarter-NotificationService-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		950961E951CAA1EEDDAD7F54 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarterTests/Pods-SwiftStarterTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		96E1FB7DFC75DF449A4F4725 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		974F36D4108016301A398683 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		983C4F61396FEBD21124855C /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		AE2AF5F5F22BAB85527A024E /* [CP] Check Pods Manifest.lock */ = {

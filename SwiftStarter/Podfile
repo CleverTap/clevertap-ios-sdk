@@ -5,7 +5,7 @@ target 'SwiftStarter' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
   
-  pod 'CleverTap-iOS-SDK', :path =>'../'
+  pod 'CleverTap-iOS-SDK'
 
   # Pods for SwiftStarter
   
@@ -26,12 +26,12 @@ target 'SwiftStarter' do
   
   target 'SwiftTvOS' do
       platform :tvos, '9.0'
-      pod 'CleverTap-iOS-SDK', :path =>'../'
+      pod 'CleverTap-iOS-SDK'
   end
   
   target 'SwiftWatchOS Extension' do
       platform :watchos, '3.0'
-      pod 'CleverTapWatchOS', :path =>'../'
+      pod 'CleverTapWatchOS'
   end
   
   post_install do |installer_representation|
