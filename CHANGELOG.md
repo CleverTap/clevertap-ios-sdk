@@ -1,5 +1,8 @@
 # CHANGE LOG
 
+## Version 3.2.1 (September 26, 2018)
+* Fix method swizzling issue
+
 ## Version 3.2.0 (September 5, 2018)
 * Adds support to create multiple instances
 * Adds support for SSL-pinning

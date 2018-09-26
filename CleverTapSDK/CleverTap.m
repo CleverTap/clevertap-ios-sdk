@@ -386,7 +386,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
      sourceApplication:(NSString *)sourceApplication
             annotation:(id)annotation {
     CleverTapLogStaticDebug(@"Handling openURL:sourceApplication: %@", url);
-    [self handleOpenURL:url];
+    [CleverTap handleOpenURL:url];
     return NO;
 }
 #endif
@@ -395,14 +395,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                openURL:(NSURL *)url
                options:(NSDictionary<NSString*, id> *)options {
     CleverTapLogStaticDebug(@"Handling openURL:options: %@", url);
-    [self handleOpenURL:url];
+    [CleverTap handleOpenURL:url];
     return NO;
 }
 
 + (void)ct_application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     NSString *deviceTokenString = [CTUtils deviceTokenStringFromData:deviceToken];
     if (!_instances || [_instances count] <= 0) {
-        [[self sharedInstance] setPushTokenAsString:deviceTokenString];
+        [[CleverTap sharedInstance] setPushTokenAsString:deviceTokenString];
         return;
     }
     for (CleverTap *instance in [_instances allValues]) {
@@ -413,7 +413,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogStaticDebug(@"Application failed to register for remote notification: %@", error);
 }
 + (void)ct_application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    [self handlePushNotification:userInfo openDeepLinksInForeground:NO];
+    [CleverTap handlePushNotification:userInfo openDeepLinksInForeground:NO];
 }
 
 #pragma clang diagnostic pop
