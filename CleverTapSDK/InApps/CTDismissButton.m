@@ -5,9 +5,29 @@
 static UIImage *dismissButtonImage;
 
 - (instancetype)init {
-    if (!(self = [super initWithFrame:(CGRect) {0, 0, 32, 32}])) {
+    if (!(self = [self initWithFrame:(CGRect) {0, 0, 32, 32}])) {
         return nil;
     }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self commonInit];
+    }
+    return self;
+}
+
+- (void)commonInit {
     if (dismissButtonImage != nil) {
         [self setImage:dismissButtonImage forState:UIControlStateNormal];
     } else {
@@ -16,7 +36,6 @@ static UIImage *dismissButtonImage;
             dismissButtonImage = [self dismissButtonImage];
         });
     }
-    return self;
 }
 
 - (UIImage *)dismissButtonImage {
@@ -128,6 +147,5 @@ static UIImage *dismissButtonImage;
     UIGraphicsEndImageContext();
     return img;
 }
-
 
 @end

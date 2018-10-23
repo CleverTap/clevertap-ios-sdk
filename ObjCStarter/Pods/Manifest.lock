@@ -1,5 +1,5 @@
 PODS:
-  - CleverTap-iOS-SDK (3.2.0)
+  - CleverTap-iOS-SDK (3.3.0)
 
 DEPENDENCIES:
   - CleverTap-iOS-SDK (from `../`)
@@ -9,8 +9,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CleverTap-iOS-SDK: c97919fe74eb445d67678c6b228711588ebf6f29
+  CleverTap-iOS-SDK: d9147eb21a2728c25b3249d11c5b2b780f8a95c6
 
-PODFILE CHECKSUM: bb22d4cf4cb18e79258f10dd77a6cf7a5fafa099
+PODFILE CHECKSUM: b4f3542daf2ced0c2c6faa368b426728b78fa179
 
 COCOAPODS: 1.5.3

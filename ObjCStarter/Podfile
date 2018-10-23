@@ -6,7 +6,6 @@ target 'ObjCStarter' do
   use_frameworks!
 
   # Pods for ObjCStarter
-  
   pod 'CleverTap-iOS-SDK', :path =>'../'
 
   target 'ObjCStarterTests' do
