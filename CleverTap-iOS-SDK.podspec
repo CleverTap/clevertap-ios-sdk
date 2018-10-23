@@ -8,12 +8,14 @@ s.author                    = { "CleverTap" => "http://www.clevertap.com" }
 s.source                    = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
 s.requires_arc              = true
 s.module_name               = 'CleverTapSDK' 
-s.resources                 = 'CleverTapSDK/*.crt', 'CleverTapSDK/**/*.{png,xib}'
+s.resources                 = 'CleverTapSDK/*.crt'
+s.ios.resources             = 'CleverTapSDK/**/*.{png,xib}'
 s.ios.deployment_target     = '8.0'
 s.ios.source_files          = 'CleverTapSDK/**/*.{h,m}'
 s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTap+SSLPinning.h', 'CleverTapSDK/CleverTapInstanceConfig.h', 'CleverTapSDK/CleverTapBuildInfo.h', 'CleverTapSDK/CleverTapEventDetail.h', 'CleverTapSDK/CleverTapInAppNotificationDelegate.h', 'CleverTapSDK/CleverTapSyncDelegate.h', 'CleverTapSDK/CleverTapTrackedViewController.h', 'CleverTapSDK/CleverTapUTMDetail.h'
 s.tvos.deployment_target    = '9.0'
-s.tvos.source_files         = 'CleverTapSDK/*.{h,m}'
-s.tvos.exclude_files        = 'CleverTapSDK/CTInAppHTMLViewController.{h,m}'
+s.tvos.source_files         = 'CleverTapSDK/**/*.{h,m}'
+s.tvos.exclude_files        = 'CleverTapSDK/**/CTInAppHTMLViewController.{h,m}','CleverTapSDK/**/CTCoverViewController.{h,m}','CleverTapSDK/**/CTInterstitialViewController.{h,m}','CleverTapSDK/**/CTHeaderViewController.{h,m}','CleverTapSDK/**/CTFooterViewController.{h,m}','CleverTapSDK/**/CTAlertViewController.{h,m}','CleverTapSDK/**/CTHalfInterstitialViewController.{h,m}','CleverTapSDK/**/CTInterstitialImageViewController.{h,m}','CleverTapSDK/**/CTCoverImageViewController.{h,m}','CleverTapSDK/**/CTHalfInterstitialImageViewController.{h,m}','CleverTapSDK/**/CTAVPlayerViewController.{h,m}','CleverTapSDK/**/CTSlider.{h,m}','CleverTapSDK/**/CTAVPlayerControlsViewController.{h,m}','CleverTapSDK/**/CTBaseHeaderFooterViewController.{h,m}'
+
 s.tvos.public_header_files  = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTap+SSLPinning.h', 'CleverTapSDK/CleverTapInstanceConfig.h', 'CleverTapSDK/CleverTapBuildInfo.h', 'CleverTapSDK/CleverTapEventDetail.h', 'CleverTapSDK/CleverTapSyncDelegate.h', 'CleverTapSDK/CleverTapTrackedViewController.h', 'CleverTapSDK/CleverTapUTMDetail.h'
 end

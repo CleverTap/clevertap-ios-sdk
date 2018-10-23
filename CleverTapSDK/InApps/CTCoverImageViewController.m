@@ -53,7 +53,7 @@
     }
     
     // set image
-    if (self.notification.image && !self.notification.hideMedia) {
+    if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];

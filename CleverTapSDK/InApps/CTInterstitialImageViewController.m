@@ -40,6 +40,17 @@
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
     
+    if ([UIScreen mainScreen].bounds.size.height == 480) {
+        [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
+        [[NSLayoutConstraint constraintWithItem:self.containerView
+                                      attribute:NSLayoutAttributeWidth
+                                      relatedBy:NSLayoutRelationEqual
+                                         toItem:self.containerView
+                                      attribute:NSLayoutAttributeHeight
+                                     multiplier:0.6 constant:0] setActive:YES];
+        
+    }
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         if (self.notification.tablet) {
@@ -54,9 +65,9 @@
                                              toItem:self.view attribute:NSLayoutAttributeTrailing
                                          multiplier:1 constant:-40] setActive:YES];
             [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeWidth
+                                          attribute:NSLayoutAttributeHeight
                                           relatedBy:NSLayoutRelationEqual
-                                             toItem:self.containerView
+                                             toItem:self.view
                                           attribute:NSLayoutAttributeHeight
                                          multiplier:0.85 constant:0] setActive:YES];
             
@@ -76,7 +87,7 @@
     }
 
     // set image
-    if (self.notification.image && !self.notification.hideMedia) {
+    if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];

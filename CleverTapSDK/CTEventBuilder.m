@@ -141,11 +141,11 @@ NSString *const kCHARGED_EVENT = @"Charged";
         return;
     }
     
-    if (((int) [items count]) > 15) {
+    if (((int) [items count]) > 50) {
         CTValidationResult *error = [[CTValidationResult alloc] init];
         [error setErrorCode:522];
-        [error setErrorDesc:@"Charged event contained more than 15 items."];
-        CleverTapLogStaticDebug(@"Charged event contained more than 15 items.");
+        [error setErrorDesc:@"Charged event contained more than 50 items."];
+        CleverTapLogStaticDebug(@"Charged event contained more than 50 items.");
         [errors addObject:error];
     }
     NSMutableDictionary *evtData = [[NSMutableDictionary alloc] init];

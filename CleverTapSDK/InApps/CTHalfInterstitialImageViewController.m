@@ -58,8 +58,8 @@
                                           attribute:NSLayoutAttributeHeight
                                           relatedBy:NSLayoutRelationEqual
                                              toItem:self.view
-                                          attribute:NSLayoutAttributeWidth
-                                         multiplier:0.58 constant:0] setActive:YES];            
+                                          attribute:NSLayoutAttributeHeight
+                                         multiplier:0.5 constant:0] setActive:YES];            
             
         }else{
             [[NSLayoutConstraint constraintWithItem:self.containerView
@@ -76,7 +76,7 @@
     }
         
     // set image
-    if (self.notification.image && !self.notification.hideMedia) {
+    if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];

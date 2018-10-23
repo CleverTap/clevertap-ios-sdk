@@ -77,7 +77,7 @@ typedef enum {
     }
     
     // set image
-    if (self.notification.image && !self.notification.hideMedia) {
+    if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
         self.imageView.hidden = NO;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;

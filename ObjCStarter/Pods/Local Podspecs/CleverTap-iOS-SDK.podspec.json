@@ -15,15 +15,9 @@
   },
   "requires_arc": true,
   "module_name": "CleverTapSDK",
-  "resources": [
-    "CleverTapSDK/*.crt",
-    "CleverTapSDK/**/*.{png,xib}"
-  ],
-  "platforms": {
-    "ios": "8.0",
-    "tvos": "9.0"
-  },
+  "resources": "CleverTapSDK/*.crt",
   "ios": {
+    "resources": "CleverTapSDK/**/*.{png,xib}",
     "source_files": "CleverTapSDK/**/*.{h,m}",
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",
@@ -37,9 +31,28 @@
       "CleverTapSDK/CleverTapUTMDetail.h"
     ]
   },
+  "platforms": {
+    "ios": "8.0",
+    "tvos": "9.0"
+  },
   "tvos": {
-    "source_files": "CleverTapSDK/*.{h,m}",
-    "exclude_files": "CleverTapSDK/CTInAppHTMLViewController.{h,m}",
+    "source_files": "CleverTapSDK/**/*.{h,m}",
+    "exclude_files": [
+      "CleverTapSDK/**/CTInAppHTMLViewController.{h,m}",
+      "CleverTapSDK/**/CTCoverViewController.{h,m}",
+      "CleverTapSDK/**/CTInterstitialViewController.{h,m}",
+      "CleverTapSDK/**/CTHeaderViewController.{h,m}",
+      "CleverTapSDK/**/CTFooterViewController.{h,m}",
+      "CleverTapSDK/**/CTAlertViewController.{h,m}",
+      "CleverTapSDK/**/CTHalfInterstitialViewController.{h,m}",
+      "CleverTapSDK/**/CTInterstitialImageViewController.{h,m}",
+      "CleverTapSDK/**/CTCoverImageViewController.{h,m}",
+      "CleverTapSDK/**/CTHalfInterstitialImageViewController.{h,m}",
+      "CleverTapSDK/**/CTAVPlayerViewController.{h,m}",
+      "CleverTapSDK/**/CTSlider.{h,m}",
+      "CleverTapSDK/**/CTAVPlayerControlsViewController.{h,m}",
+      "CleverTapSDK/**/CTBaseHeaderFooterViewController.{h,m}"
+    ],
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",
       "CleverTapSDK/CleverTap+SSLPinning.h",

@@ -9,13 +9,7 @@
 + (NSString *)XibNameForControllerName:(NSString *)controllerName {
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        UIApplication *sharedApplication = [self getSharedApplication];
-        BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
-        if (landscape) {
-            [xib appendString:@"~iphoneland"];
-        } else {
-            [xib appendString:@"~iphoneport"];
-        }
+        [xib appendString:@"~iphoneport"];
     } else {
         [xib appendString:@"~ipad"];
     }

@@ -75,6 +75,17 @@ struct FrameRotation {
     self.view.backgroundColor = [UIColor clearColor];
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
     
+    if ([UIScreen mainScreen].bounds.size.height == 480) {
+        [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
+        [[NSLayoutConstraint constraintWithItem:self.containerView
+                                      attribute:NSLayoutAttributeWidth
+                                      relatedBy:NSLayoutRelationEqual
+                                         toItem:self.containerView
+                                      attribute:NSLayoutAttributeHeight
+                                     multiplier:0.6 constant:0] setActive:YES];
+        
+    }
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         if (self.notification.tablet) {
@@ -89,9 +100,9 @@ struct FrameRotation {
                                              toItem:self.view attribute:NSLayoutAttributeTrailing
                                          multiplier:1 constant:-40] setActive:YES];
             [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeWidth
+                                          attribute:NSLayoutAttributeHeight
                                           relatedBy:NSLayoutRelationEqual
-                                             toItem:self.containerView
+                                             toItem:self.view
                                           attribute:NSLayoutAttributeHeight
                                          multiplier:0.85 constant:0] setActive:YES];
         } else {
@@ -116,7 +127,7 @@ struct FrameRotation {
     self.closeButton.hidden = !self.notification.showCloseButton;
 
     // use FLAnimatedImageView to support gif
-    if (self.notification.image && !self.notification.hideMedia) {
+    if (self.notification.image) {
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         if ([self.notification.contentType isEqualToString:@"image/gif"] ) {
             FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:self.notification.image];
@@ -127,7 +138,7 @@ struct FrameRotation {
     }
     
     // handle video or audio
-    if (self.notification.mediaUrl && !self.notification.hideMedia) {
+    if (self.notification.mediaUrl) {
         self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification];
         self.playerController.playerDelegate = self;
         self.imageView.hidden = YES;
