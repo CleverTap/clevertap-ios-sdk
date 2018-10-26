@@ -31,13 +31,17 @@
     return self;
 }
 
+#if !(TARGET_OS_TV)
 - (BOOL)shouldAutorotate {
     return NO;
 }
+#endif
 
+#if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
 }
+#endif
 
 -(void)show:(BOOL)animated {
     NSAssert(false, @"Override in sub-class");
