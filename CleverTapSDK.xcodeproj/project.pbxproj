@@ -7,20 +7,108 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		071EB4C7217F6427008F0FAB /* CTFooterViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB477217F6427008F0FAB /* CTFooterViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB478217F6427008F0FAB /* CTDismissButton.m */; };
+		071EB4C9217F6427008F0FAB /* CTHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB479217F6427008F0FAB /* CTHeaderViewController.m */; };
+		071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */; };
+		071EB4CB217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */; };
+		071EB4CC217F6427008F0FAB /* CTHalfInterstitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47C217F6427008F0FAB /* CTHalfInterstitialViewController.m */; };
+		071EB4CD217F6427008F0FAB /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47D217F6427008F0FAB /* CTInAppUtils.m */; };
+		071EB4CE217F6427008F0FAB /* CTInAppDisplayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47E217F6427008F0FAB /* CTInAppDisplayViewController.m */; };
+		071EB4CF217F6427008F0FAB /* CTBaseHeaderFooterViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB47F217F6427008F0FAB /* CTBaseHeaderFooterViewControllerPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4D0217F6427008F0FAB /* CTInterstitialViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */; };
+		071EB4D1217F6427008F0FAB /* CTNotificationButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB481217F6427008F0FAB /* CTNotificationButton.m */; };
+		071EB4D2217F6427008F0FAB /* CTInterstitialImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB482217F6427008F0FAB /* CTInterstitialImageViewController.m */; };
+		071EB4D3217F6427008F0FAB /* CTAVPlayerViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB483217F6427008F0FAB /* CTAVPlayerViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4D4217F6427008F0FAB /* CTBaseHeaderFooterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB484217F6427008F0FAB /* CTBaseHeaderFooterViewController.m */; };
+		071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */; };
+		071EB4D6217F6427008F0FAB /* CTInAppFCManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB486217F6427008F0FAB /* CTInAppFCManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4D7217F6427008F0FAB /* CTCoverViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB487217F6427008F0FAB /* CTCoverViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4D8217F6427008F0FAB /* CTHalfInterstitialImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB488217F6427008F0FAB /* CTHalfInterstitialImageViewController.m */; };
+		071EB4D9217F6427008F0FAB /* FLAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB489217F6427008F0FAB /* FLAnimatedImage.m */; };
+		071EB4DA217F6427008F0FAB /* ic_shrink@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48B217F6427008F0FAB /* ic_shrink@2x.png */; };
+		071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48C217F6427008F0FAB /* ic_play@1x.png */; };
+		071EB4DC217F6427008F0FAB /* ic_shrink@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48D217F6427008F0FAB /* ic_shrink@3x.png */; };
+		071EB4DD217F6427008F0FAB /* ic_thumb.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48E217F6427008F0FAB /* ic_thumb.png */; };
+		071EB4DF217F6427008F0FAB /* ic_expand@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB490217F6427008F0FAB /* ic_expand@3x.png */; };
+		071EB4E0217F6427008F0FAB /* ic_expand@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB491217F6427008F0FAB /* ic_expand@2x.png */; };
+		071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB492217F6427008F0FAB /* ic_pause@1x.png */; };
+		071EB4E2217F6427008F0FAB /* ic_pause@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB493217F6427008F0FAB /* ic_pause@2x.png */; };
+		071EB4E3217F6427008F0FAB /* ic_expand@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB494217F6427008F0FAB /* ic_expand@1x.png */; };
+		071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB495217F6427008F0FAB /* ic_pause@3x.png */; };
+		071EB4E5217F6427008F0FAB /* ic_play@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB496217F6427008F0FAB /* ic_play@3x.png */; };
+		071EB4E6217F6427008F0FAB /* ic_play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB497217F6427008F0FAB /* ic_play@2x.png */; };
+		071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB498217F6427008F0FAB /* ic_shrink@1x.png */; };
+		071EB4E8217F6427008F0FAB /* CTFooterViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */; };
+		071EB4E9217F6427008F0FAB /* CTSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB49A217F6427008F0FAB /* CTSlider.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4EA217F6427008F0FAB /* FLAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */; };
+		071EB4EB217F6427008F0FAB /* CTCoverImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */; };
+		071EB4EC217F6427008F0FAB /* CTAVPlayerControlsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */; };
+		071EB4EE217F6427008F0FAB /* CTAlertViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB49F217F6427008F0FAB /* CTAlertViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A0217F6427008F0FAB /* CTInterstitialViewController.m */; };
+		071EB4F0217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4F1217F6427008F0FAB /* CTAVPlayerControlsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */; };
+		071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */; };
+		071EB4F3217F6427008F0FAB /* CTInAppNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A4217F6427008F0FAB /* CTInAppNotification.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4F4217F6427008F0FAB /* CTCoverViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */; };
+		071EB4F5217F6427008F0FAB /* CTInAppHTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A6217F6427008F0FAB /* CTInAppHTMLViewController.m */; };
+		071EB4F6217F6427008F0FAB /* CTInAppResources.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A7217F6427008F0FAB /* CTInAppResources.m */; };
+		071EB4F7217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */; };
+		071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A9217F6427008F0FAB /* CTInterstitialImageViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4F9217F6427008F0FAB /* CTNotificationButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AA217F6427008F0FAB /* CTNotificationButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4FA217F6427008F0FAB /* CTAVPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4AB217F6427008F0FAB /* CTAVPlayerViewController.m */; };
+		071EB4FB217F6427008F0FAB /* CTInAppDisplayViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AC217F6427008F0FAB /* CTInAppDisplayViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4FC217F6427008F0FAB /* CTHalfInterstitialViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AD217F6427008F0FAB /* CTHalfInterstitialViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4FD217F6427008F0FAB /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AE217F6427008F0FAB /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4FE217F6427008F0FAB /* CTDismissButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AF217F6427008F0FAB /* CTDismissButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB4FF217F6427008F0FAB /* CTHeaderViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB500217F6427008F0FAB /* CTHeaderViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */; };
+		071EB501217F6427008F0FAB /* CTFooterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B2217F6427008F0FAB /* CTFooterViewController.m */; };
+		071EB502217F6427008F0FAB /* FLAnimatedImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4B3217F6427008F0FAB /* FLAnimatedImage.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB503217F6427008F0FAB /* CTHalfInterstitialImageViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4B4217F6427008F0FAB /* CTHalfInterstitialImageViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB504217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */; };
+		071EB505217F6427008F0FAB /* CTCoverViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B6217F6427008F0FAB /* CTCoverViewController.m */; };
+		071EB506217F6427008F0FAB /* CTInAppFCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B7217F6427008F0FAB /* CTInAppFCManager.m */; };
+		071EB507217F6427008F0FAB /* CTFooterViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */; };
+		071EB508217F6427008F0FAB /* CTBaseHeaderFooterViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4B9217F6427008F0FAB /* CTBaseHeaderFooterViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB509217F6427008F0FAB /* CTAlertViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4BA217F6427008F0FAB /* CTAlertViewController.m */; };
+		071EB50A217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */; };
+		071EB50B217F6427008F0FAB /* CTAVPlayerControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */; };
+		071EB50C217F6427008F0FAB /* CTCoverImageViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4BD217F6427008F0FAB /* CTCoverImageViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB50D217F6427008F0FAB /* FLAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB50E217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */; };
+		071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */; };
+		071EB510217F6427008F0FAB /* CTSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4C1217F6427008F0FAB /* CTSlider.m */; };
+		071EB511217F6427008F0FAB /* CTInAppResources.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4C2217F6427008F0FAB /* CTInAppResources.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB512217F6427008F0FAB /* CTInAppHTMLViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4C3217F6427008F0FAB /* CTInAppHTMLViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB513217F6427008F0FAB /* CTInAppNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4C4217F6427008F0FAB /* CTInAppNotification.m */; };
+		071EB514217F6427008F0FAB /* CTCoverImageViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */; };
+		071EB515217F6427008F0FAB /* CTInterstitialViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4C6217F6427008F0FAB /* CTInterstitialViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB518217F6510008F0FAB /* CTInAppFCManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB486217F6427008F0FAB /* CTInAppFCManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB519217F6513008F0FAB /* CTInAppFCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B7217F6427008F0FAB /* CTInAppFCManager.m */; };
+		071EB51A217F6565008F0FAB /* CTInAppNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A4217F6427008F0FAB /* CTInAppNotification.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB51B217F6568008F0FAB /* CTInAppNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4C4217F6427008F0FAB /* CTInAppNotification.m */; };
+		071EB51C217F6721008F0FAB /* FLAnimatedImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4B3217F6427008F0FAB /* FLAnimatedImage.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB51F217F6730008F0FAB /* FLAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB489217F6427008F0FAB /* FLAnimatedImage.m */; };
+		071EB521217F6764008F0FAB /* CTNotificationButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AA217F6427008F0FAB /* CTNotificationButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB525217F6C8F008F0FAB /* CTInAppResources.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4C2217F6427008F0FAB /* CTInAppResources.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		071EB527217F6CD1008F0FAB /* CTNotificationButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB481217F6427008F0FAB /* CTNotificationButton.m */; };
+		0766014A21833277009A244E /* FLAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		0766014B2183327D009A244E /* FLAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */; };
+		079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */ = {isa = PBXBuildFile; fileRef = 079701E42180A055008BF668 /* sound-wave-headphones.png */; };
+		07BF465B217F7C41002E166D /* CTInAppDisplayViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AC217F6427008F0FAB /* CTInAppDisplayViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		07BF465C217F7C4B002E166D /* CTInAppDisplayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47E217F6427008F0FAB /* CTInAppDisplayViewController.m */; };
+		07BF465D217F7C88002E166D /* CTInAppDisplayViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		07BF4661217F80C1002E166D /* CTInAppResources.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A7217F6427008F0FAB /* CTInAppResources.m */; };
+		07BF4662217F8359002E166D /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AE217F6427008F0FAB /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		07BF4663217F838D002E166D /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47D217F6427008F0FAB /* CTInAppUtils.m */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0F2098E2F00019C6FD /* CTProfileBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */; };
 		D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B102098EDA90019C6FD /* CTLocationManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B132098EDA90019C6FD /* CTLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B112098EDA90019C6FD /* CTLocationManager.m */; };
-		D0047B1E209904DD0019C6FD /* CTInAppFCManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B1C209904DD0019C6FD /* CTInAppFCManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0047B1F209904DD0019C6FD /* CTInAppFCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B1D209904DD0019C6FD /* CTInAppFCManager.m */; };
-		D0047B22209935200019C6FD /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B20209935200019C6FD /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0047B23209935200019C6FD /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B21209935200019C6FD /* CTInAppUtils.m */; };
-		D0047B26209935EA0019C6FD /* CTInAppDisplayViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B24209935EA0019C6FD /* CTInAppDisplayViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0047B27209935EA0019C6FD /* CTInAppDisplayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B25209935EA0019C6FD /* CTInAppDisplayViewController.m */; };
-		D0047B2A209936510019C6FD /* CTInAppNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B28209936510019C6FD /* CTInAppNotification.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0047B2B209936510019C6FD /* CTInAppNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B29209936510019C6FD /* CTInAppNotification.m */; };
 		D014B8DF20E2F9DE001E0780 /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D014B8E020E2F9E6001E0780 /* CleverTap.m in Sources */ = {isa = PBXBuildFile; fileRef = D0C7BBC9207D8837001345EF /* CleverTap.m */; };
 		D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF8A20B890EA00A02327 /* CleverTap+SSLPinning.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -66,17 +154,6 @@
 		D014B90920E2FB71001E0780 /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D014B90A20E2FB74001E0780 /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */; };
-		D014B90E20E2FB89001E0780 /* CTInAppFCManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B1C209904DD0019C6FD /* CTInAppFCManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B90F20E2FB8F001E0780 /* CTInAppFCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B1D209904DD0019C6FD /* CTInAppFCManager.m */; };
-		D014B91020E2FB93001E0780 /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B20209935200019C6FD /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B91120E2FB99001E0780 /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B21209935200019C6FD /* CTInAppUtils.m */; };
-		D014B91220E2FB9C001E0780 /* CTInAppNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B28209936510019C6FD /* CTInAppNotification.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B91320E2FBA3001E0780 /* CTInAppNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B29209936510019C6FD /* CTInAppNotification.m */; };
-		D014B91420E2FBA8001E0780 /* CTInAppDisplayViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B24209935EA0019C6FD /* CTInAppDisplayViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B91620E2FBB8001E0780 /* CTInAppDisplayViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B2C209936E00019C6FD /* CTInAppDisplayViewControllerPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B91720E2FBB9001E0780 /* CTInAppDisplayViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B2C209936E00019C6FD /* CTInAppDisplayViewControllerPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B91A20E2FBC8001E0780 /* CTDismissButton.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A9802E209B892100499991 /* CTDismissButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B91B20E2FBCD001E0780 /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A9802F209B892100499991 /* CTDismissButton.m */; };
 		D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF8C20B8A44B00A02327 /* CTCertificatePinning.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D014B91D20E2FBD6001E0780 /* CTCertificatePinning.m in Sources */ = {isa = PBXBuildFile; fileRef = D0CACF8D20B8A44C00A02327 /* CTCertificatePinning.m */; };
 		D014B91E20E2FBDA001E0780 /* CTPinnedNSURLSessionDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF9420B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -91,7 +168,6 @@
 		D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = D01A0893207EC2D400423D6F /* CleverTapInstanceConfig.m */; };
 		D01A0898207ED98300423D6F /* CTPlistInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = D01A0896207ED98300423D6F /* CTPlistInfo.m */; };
 		D01A0899207ED98300423D6F /* CTPlistInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D01A0897207ED98300423D6F /* CTPlistInfo.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D01F688B210295A7004DEC85 /* CTInAppDisplayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B25209935EA0019C6FD /* CTInAppDisplayViewController.m */; };
 		D020C928209006AD0073F61E /* CTUriHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = D020C926209006AD0073F61E /* CTUriHelper.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D020C929209006AD0073F61E /* CTUriHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = D020C927209006AD0073F61E /* CTUriHelper.m */; };
 		D0213D4B207D905800FE5740 /* CleverTapInAppNotificationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0213D43207D905700FE5740 /* CleverTapInAppNotificationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -116,11 +192,6 @@
 		D0A84AD9209135D400191B1F /* CTPreferences.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A84AD7209135D400191B1F /* CTPreferences.m */; };
 		D0A84ADC209136D500191B1F /* CTLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A84ADA209136D500191B1F /* CTLogger.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0A84ADD209136D500191B1F /* CTLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A84ADB209136D500191B1F /* CTLogger.m */; };
-		D0A9802C209B83B100499991 /* CTInAppHTMLViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A9802A209B83B100499991 /* CTInAppHTMLViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0A9802D209B83B100499991 /* CTInAppHTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A9802B209B83B100499991 /* CTInAppHTMLViewController.m */; };
-		D0A98030209B892100499991 /* CTDismissButton.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A9802E209B892100499991 /* CTDismissButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0A98031209B892100499991 /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A9802F209B892100499991 /* CTDismissButton.m */; };
-		D0A9E9CC20EEA8500004BC6F /* CTInAppHTMLViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A9802A209B83B100499991 /* CTInAppHTMLViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0A9E9CD20EEA8630004BC6F /* CTLocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B102098EDA90019C6FD /* CTLocationManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0A9E9CE20EEA8770004BC6F /* CTLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B112098EDA90019C6FD /* CTLocationManager.m */; };
 		D0C7BBCA207D8837001345EF /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -136,21 +207,91 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		071EB477217F6427008F0FAB /* CTFooterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFooterViewController.h; sourceTree = "<group>"; };
+		071EB478217F6427008F0FAB /* CTDismissButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDismissButton.m; sourceTree = "<group>"; };
+		071EB479217F6427008F0FAB /* CTHeaderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHeaderViewController.m; sourceTree = "<group>"; };
+		071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB47C217F6427008F0FAB /* CTHalfInterstitialViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHalfInterstitialViewController.m; sourceTree = "<group>"; };
+		071EB47D217F6427008F0FAB /* CTInAppUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInAppUtils.m; sourceTree = "<group>"; };
+		071EB47E217F6427008F0FAB /* CTInAppDisplayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInAppDisplayViewController.m; sourceTree = "<group>"; };
+		071EB47F217F6427008F0FAB /* CTBaseHeaderFooterViewControllerPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTBaseHeaderFooterViewControllerPrivate.h; sourceTree = "<group>"; };
+		071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB481217F6427008F0FAB /* CTNotificationButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTNotificationButton.m; sourceTree = "<group>"; };
+		071EB482217F6427008F0FAB /* CTInterstitialImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInterstitialImageViewController.m; sourceTree = "<group>"; };
+		071EB483217F6427008F0FAB /* CTAVPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAVPlayerViewController.h; sourceTree = "<group>"; };
+		071EB484217F6427008F0FAB /* CTBaseHeaderFooterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTBaseHeaderFooterViewController.m; sourceTree = "<group>"; };
+		071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTCoverImageViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB486217F6427008F0FAB /* CTInAppFCManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppFCManager.h; sourceTree = "<group>"; };
+		071EB487217F6427008F0FAB /* CTCoverViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCoverViewController.h; sourceTree = "<group>"; };
+		071EB488217F6427008F0FAB /* CTHalfInterstitialImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHalfInterstitialImageViewController.m; sourceTree = "<group>"; };
+		071EB489217F6427008F0FAB /* FLAnimatedImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLAnimatedImage.m; sourceTree = "<group>"; };
+		071EB48B217F6427008F0FAB /* ic_shrink@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_shrink@2x.png"; sourceTree = "<group>"; };
+		071EB48C217F6427008F0FAB /* ic_play@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_play@1x.png"; sourceTree = "<group>"; };
+		071EB48D217F6427008F0FAB /* ic_shrink@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_shrink@3x.png"; sourceTree = "<group>"; };
+		071EB48E217F6427008F0FAB /* ic_thumb.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_thumb.png; sourceTree = "<group>"; };
+		071EB490217F6427008F0FAB /* ic_expand@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_expand@3x.png"; sourceTree = "<group>"; };
+		071EB491217F6427008F0FAB /* ic_expand@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_expand@2x.png"; sourceTree = "<group>"; };
+		071EB492217F6427008F0FAB /* ic_pause@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_pause@1x.png"; sourceTree = "<group>"; };
+		071EB493217F6427008F0FAB /* ic_pause@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_pause@2x.png"; sourceTree = "<group>"; };
+		071EB494217F6427008F0FAB /* ic_expand@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_expand@1x.png"; sourceTree = "<group>"; };
+		071EB495217F6427008F0FAB /* ic_pause@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_pause@3x.png"; sourceTree = "<group>"; };
+		071EB496217F6427008F0FAB /* ic_play@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_play@3x.png"; sourceTree = "<group>"; };
+		071EB497217F6427008F0FAB /* ic_play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_play@2x.png"; sourceTree = "<group>"; };
+		071EB498217F6427008F0FAB /* ic_shrink@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_shrink@1x.png"; sourceTree = "<group>"; };
+		071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTFooterViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB49A217F6427008F0FAB /* CTSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTSlider.h; sourceTree = "<group>"; };
+		071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLAnimatedImageView.m; sourceTree = "<group>"; };
+		071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCoverImageViewController.m; sourceTree = "<group>"; };
+		071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAVPlayerControlsViewController.h; sourceTree = "<group>"; };
+		071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB49F217F6427008F0FAB /* CTAlertViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAlertViewController.h; sourceTree = "<group>"; };
+		071EB4A0217F6427008F0FAB /* CTInterstitialViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInterstitialViewController.m; sourceTree = "<group>"; };
+		071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayViewControllerPrivate.h; sourceTree = "<group>"; };
+		071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CTAVPlayerControlsViewController.xib; sourceTree = "<group>"; };
+		071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTCoverViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB4A4217F6427008F0FAB /* CTInAppNotification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppNotification.h; sourceTree = "<group>"; };
+		071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTCoverViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB4A6217F6427008F0FAB /* CTInAppHTMLViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInAppHTMLViewController.m; sourceTree = "<group>"; };
+		071EB4A7217F6427008F0FAB /* CTInAppResources.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInAppResources.m; sourceTree = "<group>"; };
+		071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHeaderViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB4A9217F6427008F0FAB /* CTInterstitialImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInterstitialImageViewController.h; sourceTree = "<group>"; };
+		071EB4AA217F6427008F0FAB /* CTNotificationButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTNotificationButton.h; sourceTree = "<group>"; };
+		071EB4AB217F6427008F0FAB /* CTAVPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAVPlayerViewController.m; sourceTree = "<group>"; };
+		071EB4AC217F6427008F0FAB /* CTInAppDisplayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayViewController.h; sourceTree = "<group>"; };
+		071EB4AD217F6427008F0FAB /* CTHalfInterstitialViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTHalfInterstitialViewController.h; sourceTree = "<group>"; };
+		071EB4AE217F6427008F0FAB /* CTInAppUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppUtils.h; sourceTree = "<group>"; };
+		071EB4AF217F6427008F0FAB /* CTDismissButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTDismissButton.h; sourceTree = "<group>"; };
+		071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTHeaderViewController.h; sourceTree = "<group>"; };
+		071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHeaderViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB4B2217F6427008F0FAB /* CTFooterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFooterViewController.m; sourceTree = "<group>"; };
+		071EB4B3217F6427008F0FAB /* FLAnimatedImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLAnimatedImage.h; sourceTree = "<group>"; };
+		071EB4B4217F6427008F0FAB /* CTHalfInterstitialImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTHalfInterstitialImageViewController.h; sourceTree = "<group>"; };
+		071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB4B6217F6427008F0FAB /* CTCoverViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCoverViewController.m; sourceTree = "<group>"; };
+		071EB4B7217F6427008F0FAB /* CTInAppFCManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManager.m; sourceTree = "<group>"; };
+		071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTFooterViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB4B9217F6427008F0FAB /* CTBaseHeaderFooterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTBaseHeaderFooterViewController.h; sourceTree = "<group>"; };
+		071EB4BA217F6427008F0FAB /* CTAlertViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAlertViewController.m; sourceTree = "<group>"; };
+		071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAVPlayerControlsViewController.m; sourceTree = "<group>"; };
+		071EB4BD217F6427008F0FAB /* CTCoverImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCoverImageViewController.h; sourceTree = "<group>"; };
+		071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLAnimatedImageView.h; sourceTree = "<group>"; };
+		071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~iphoneport.xib"; sourceTree = "<group>"; };
+		071EB4C1217F6427008F0FAB /* CTSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTSlider.m; sourceTree = "<group>"; };
+		071EB4C2217F6427008F0FAB /* CTInAppResources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppResources.h; sourceTree = "<group>"; };
+		071EB4C3217F6427008F0FAB /* CTInAppHTMLViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppHTMLViewController.h; sourceTree = "<group>"; };
+		071EB4C4217F6427008F0FAB /* CTInAppNotification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInAppNotification.m; sourceTree = "<group>"; };
+		071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTCoverImageViewController~ipad.xib"; sourceTree = "<group>"; };
+		071EB4C6217F6427008F0FAB /* CTInterstitialViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInterstitialViewController.h; sourceTree = "<group>"; };
+		079701E42180A055008BF668 /* sound-wave-headphones.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sound-wave-headphones.png"; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
 		D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProfileBuilder.m; sourceTree = "<group>"; };
 		D0047B102098EDA90019C6FD /* CTLocationManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocationManager.h; sourceTree = "<group>"; };
 		D0047B112098EDA90019C6FD /* CTLocationManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocationManager.m; sourceTree = "<group>"; };
-		D0047B1C209904DD0019C6FD /* CTInAppFCManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppFCManager.h; sourceTree = "<group>"; };
-		D0047B1D209904DD0019C6FD /* CTInAppFCManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManager.m; sourceTree = "<group>"; };
-		D0047B20209935200019C6FD /* CTInAppUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppUtils.h; sourceTree = "<group>"; };
-		D0047B21209935200019C6FD /* CTInAppUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppUtils.m; sourceTree = "<group>"; };
-		D0047B24209935EA0019C6FD /* CTInAppDisplayViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayViewController.h; sourceTree = "<group>"; };
-		D0047B25209935EA0019C6FD /* CTInAppDisplayViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppDisplayViewController.m; sourceTree = "<group>"; };
-		D0047B28209936510019C6FD /* CTInAppNotification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppNotification.h; sourceTree = "<group>"; };
-		D0047B29209936510019C6FD /* CTInAppNotification.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppNotification.m; sourceTree = "<group>"; };
-		D0047B2C209936E00019C6FD /* CTInAppDisplayViewControllerPrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayViewControllerPrivate.h; sourceTree = "<group>"; };
 		D014B8D720E2F963001E0780 /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D01651AC2097B38400660178 /* CTEventBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTEventBuilder.h; sourceTree = "<group>"; };
 		D01651AD2097B38400660178 /* CTEventBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEventBuilder.m; sourceTree = "<group>"; };
@@ -186,10 +327,6 @@
 		D0A84AD7209135D400191B1F /* CTPreferences.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPreferences.m; sourceTree = "<group>"; };
 		D0A84ADA209136D500191B1F /* CTLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLogger.h; sourceTree = "<group>"; };
 		D0A84ADB209136D500191B1F /* CTLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLogger.m; sourceTree = "<group>"; };
-		D0A9802A209B83B100499991 /* CTInAppHTMLViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppHTMLViewController.h; sourceTree = "<group>"; };
-		D0A9802B209B83B100499991 /* CTInAppHTMLViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppHTMLViewController.m; sourceTree = "<group>"; };
-		D0A9802E209B892100499991 /* CTDismissButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTDismissButton.h; sourceTree = "<group>"; };
-		D0A9802F209B892100499991 /* CTDismissButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDismissButton.m; sourceTree = "<group>"; };
 		D0C7BBBD207D82C0001345EF /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7BBC8207D8837001345EF /* CleverTap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTap.h; sourceTree = "<group>"; };
 		D0C7BBC9207D8837001345EF /* CleverTap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTap.m; sourceTree = "<group>"; };
@@ -222,6 +359,83 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		071EB476217F6427008F0FAB /* InApps */ = {
+			isa = PBXGroup;
+			children = (
+				071EB48A217F6427008F0FAB /* images */,
+				071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */,
+				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
+				071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */,
+				071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */,
+				071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */,
+				071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */,
+				071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */,
+				071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */,
+				071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */,
+				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
+				071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */,
+				071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */,
+				071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */,
+				071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */,
+				071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */,
+				071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */,
+				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
+				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
+				071EB478217F6427008F0FAB /* CTDismissButton.m */,
+				071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */,
+				071EB479217F6427008F0FAB /* CTHeaderViewController.m */,
+				071EB4AD217F6427008F0FAB /* CTHalfInterstitialViewController.h */,
+				071EB47C217F6427008F0FAB /* CTHalfInterstitialViewController.m */,
+				071EB4B9217F6427008F0FAB /* CTBaseHeaderFooterViewController.h */,
+				071EB47F217F6427008F0FAB /* CTBaseHeaderFooterViewControllerPrivate.h */,
+				071EB484217F6427008F0FAB /* CTBaseHeaderFooterViewController.m */,
+				071EB4A9217F6427008F0FAB /* CTInterstitialImageViewController.h */,
+				071EB482217F6427008F0FAB /* CTInterstitialImageViewController.m */,
+				071EB483217F6427008F0FAB /* CTAVPlayerViewController.h */,
+				071EB4AB217F6427008F0FAB /* CTAVPlayerViewController.m */,
+				071EB487217F6427008F0FAB /* CTCoverViewController.h */,
+				071EB4B6217F6427008F0FAB /* CTCoverViewController.m */,
+				071EB4BD217F6427008F0FAB /* CTCoverImageViewController.h */,
+				071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */,
+				071EB4B4217F6427008F0FAB /* CTHalfInterstitialImageViewController.h */,
+				071EB488217F6427008F0FAB /* CTHalfInterstitialImageViewController.m */,
+				071EB49A217F6427008F0FAB /* CTSlider.h */,
+				071EB4C1217F6427008F0FAB /* CTSlider.m */,
+				071EB49F217F6427008F0FAB /* CTAlertViewController.h */,
+				071EB4BA217F6427008F0FAB /* CTAlertViewController.m */,
+				071EB4C6217F6427008F0FAB /* CTInterstitialViewController.h */,
+				071EB4A0217F6427008F0FAB /* CTInterstitialViewController.m */,
+				071EB4C3217F6427008F0FAB /* CTInAppHTMLViewController.h */,
+				071EB4A6217F6427008F0FAB /* CTInAppHTMLViewController.m */,
+				071EB477217F6427008F0FAB /* CTFooterViewController.h */,
+				071EB4B2217F6427008F0FAB /* CTFooterViewController.m */,
+				071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */,
+				071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */,
+			);
+			path = InApps;
+			sourceTree = "<group>";
+		};
+		071EB48A217F6427008F0FAB /* images */ = {
+			isa = PBXGroup;
+			children = (
+				071EB48B217F6427008F0FAB /* ic_shrink@2x.png */,
+				071EB48C217F6427008F0FAB /* ic_play@1x.png */,
+				071EB48D217F6427008F0FAB /* ic_shrink@3x.png */,
+				071EB48E217F6427008F0FAB /* ic_thumb.png */,
+				071EB490217F6427008F0FAB /* ic_expand@3x.png */,
+				071EB491217F6427008F0FAB /* ic_expand@2x.png */,
+				079701E42180A055008BF668 /* sound-wave-headphones.png */,
+				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
+				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
+				071EB494217F6427008F0FAB /* ic_expand@1x.png */,
+				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
+				071EB496217F6427008F0FAB /* ic_play@3x.png */,
+				071EB497217F6427008F0FAB /* ic_play@2x.png */,
+				071EB498217F6427008F0FAB /* ic_shrink@1x.png */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
 		D0C7BBB3207D82C0001345EF = {
 			isa = PBXGroup;
 			children = (
@@ -242,6 +456,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				071EB476217F6427008F0FAB /* InApps */,
 				D0C7BBC8207D8837001345EF /* CleverTap.h */,
 				D0C7BBC9207D8837001345EF /* CleverTap.m */,
 				D0CACF8A20B890EA00A02327 /* CleverTap+SSLPinning.h */,
@@ -287,23 +502,27 @@
 				D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */,
 				D0047B102098EDA90019C6FD /* CTLocationManager.h */,
 				D0047B112098EDA90019C6FD /* CTLocationManager.m */,
-				D0047B1C209904DD0019C6FD /* CTInAppFCManager.h */,
-				D0047B1D209904DD0019C6FD /* CTInAppFCManager.m */,
-				D0047B20209935200019C6FD /* CTInAppUtils.h */,
-				D0047B21209935200019C6FD /* CTInAppUtils.m */,
-				D0047B28209936510019C6FD /* CTInAppNotification.h */,
-				D0047B29209936510019C6FD /* CTInAppNotification.m */,
-				D0047B24209935EA0019C6FD /* CTInAppDisplayViewController.h */,
-				D0047B25209935EA0019C6FD /* CTInAppDisplayViewController.m */,
-				D0047B2C209936E00019C6FD /* CTInAppDisplayViewControllerPrivate.h */,
-				D0A9802A209B83B100499991 /* CTInAppHTMLViewController.h */,
-				D0A9802B209B83B100499991 /* CTInAppHTMLViewController.m */,
-				D0A9802E209B892100499991 /* CTDismissButton.h */,
-				D0A9802F209B892100499991 /* CTDismissButton.m */,
 				D0CACF8C20B8A44B00A02327 /* CTCertificatePinning.h */,
 				D0CACF8D20B8A44C00A02327 /* CTCertificatePinning.m */,
 				D0CACF9420B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h */,
 				D0CACF9520B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.m */,
+				071EB4AE217F6427008F0FAB /* CTInAppUtils.h */,
+				071EB47D217F6427008F0FAB /* CTInAppUtils.m */,
+				071EB486217F6427008F0FAB /* CTInAppFCManager.h */,
+				071EB4B7217F6427008F0FAB /* CTInAppFCManager.m */,
+				071EB4A4217F6427008F0FAB /* CTInAppNotification.h */,
+				071EB4C4217F6427008F0FAB /* CTInAppNotification.m */,
+				071EB4AC217F6427008F0FAB /* CTInAppDisplayViewController.h */,
+				071EB47E217F6427008F0FAB /* CTInAppDisplayViewController.m */,
+				071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */,
+				071EB4A7217F6427008F0FAB /* CTInAppResources.m */,
+				071EB4C2217F6427008F0FAB /* CTInAppResources.h */,
+				071EB4AA217F6427008F0FAB /* CTNotificationButton.h */,
+				071EB481217F6427008F0FAB /* CTNotificationButton.m */,
+				071EB4B3217F6427008F0FAB /* FLAnimatedImage.h */,
+				071EB489217F6427008F0FAB /* FLAnimatedImage.m */,
+				071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */,
+				071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */,
 				D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */,
 				D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */,
 			);
@@ -323,23 +542,24 @@
 				D014B8E320E2F9FA001E0780 /* CleverTapInstanceConfigPrivate.h in Headers */,
 				D014B91E20E2FBDA001E0780 /* CTPinnedNSURLSessionDelegate.h in Headers */,
 				D014B8E920E2FA88001E0780 /* CleverTapEventDetail.h in Headers */,
+				071EB521217F6764008F0FAB /* CTNotificationButton.h in Headers */,
 				D014B8FC20E2FB12001E0780 /* CTPreferences.h in Headers */,
+				071EB518217F6510008F0FAB /* CTInAppFCManager.h in Headers */,
 				D014B8EE20E2FAA8001E0780 /* CleverTapUTMDetail.h in Headers */,
-				D014B91720E2FBB9001E0780 /* CTInAppDisplayViewControllerPrivate.h in Headers */,
-				D014B91420E2FBA8001E0780 /* CTInAppDisplayViewController.h in Headers */,
 				D014B90820E2FB6B001E0780 /* CTLocalDataStore.h in Headers */,
-				D014B91220E2FB9C001E0780 /* CTInAppNotification.h in Headers */,
 				D014B90220E2FB4F001E0780 /* CTEventBuilder.h in Headers */,
+				07BF465B217F7C41002E166D /* CTInAppDisplayViewController.h in Headers */,
+				071EB51A217F6565008F0FAB /* CTInAppNotification.h in Headers */,
 				D014B8F020E2FAB1001E0780 /* CTPlistInfo.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
 				D014B8EB20E2FA94001E0780 /* CleverTapSyncDelegate.h in Headers */,
-				D014B91020E2FB93001E0780 /* CTInAppUtils.h in Headers */,
+				07BF465D217F7C88002E166D /* CTInAppDisplayViewControllerPrivate.h in Headers */,
 				D014B8F820E2FADD001E0780 /* CTUtils.h in Headers */,
+				071EB51C217F6721008F0FAB /* FLAnimatedImage.h in Headers */,
 				D014B8DF20E2F9DE001E0780 /* CleverTap.h in Headers */,
 				D014B8FA20E2FB09001E0780 /* CTUriHelper.h in Headers */,
-				D0A9E9CC20EEA8500004BC6F /* CTInAppHTMLViewController.h in Headers */,
 				D014B8F620E2FAD5001E0780 /* CTConstants.h in Headers */,
-				D014B91A20E2FBC8001E0780 /* CTDismissButton.h in Headers */,
+				071EB525217F6C8F008F0FAB /* CTInAppResources.h in Headers */,
 				D014B8FE20E2FB3B001E0780 /* CTLogger.h in Headers */,
 				D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */,
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
@@ -348,8 +568,9 @@
 				D014B8F420E2FACA001E0780 /* CTSwizzle.h in Headers */,
 				D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */,
 				D014B8F220E2FABC001E0780 /* CTDeviceInfo.h in Headers */,
+				0766014A21833277009A244E /* FLAnimatedImageView.h in Headers */,
 				D014B90A20E2FB74001E0780 /* CTProfileBuilder.h in Headers */,
-				D014B90E20E2FB89001E0780 /* CTInAppFCManager.h in Headers */,
+				07BF4662217F8359002E166D /* CTInAppUtils.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -358,39 +579,57 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0CACF8B20B8923700A02327 /* CleverTap+SSLPinning.h in Headers */,
+				071EB4F3217F6427008F0FAB /* CTInAppNotification.h in Headers */,
 				D0C7BBCA207D8837001345EF /* CleverTap.h in Headers */,
 				D014B8E220E2F9F9001E0780 /* CleverTapInstanceConfigPrivate.h in Headers */,
+				071EB4CF217F6427008F0FAB /* CTBaseHeaderFooterViewControllerPrivate.h in Headers */,
 				D0213D4F207D905800FE5740 /* CleverTapUTMDetail.h in Headers */,
+				071EB4D3217F6427008F0FAB /* CTAVPlayerViewController.h in Headers */,
 				D0213D4C207D905800FE5740 /* CleverTapSyncDelegate.h in Headers */,
 				D01651B22097B42C00660178 /* CTValidator.h in Headers */,
 				D0A84ADC209136D500191B1F /* CTLogger.h in Headers */,
+				071EB4EE217F6427008F0FAB /* CTAlertViewController.h in Headers */,
 				D0CACF9620B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h in Headers */,
+				071EB4FE217F6427008F0FAB /* CTDismissButton.h in Headers */,
+				071EB511217F6427008F0FAB /* CTInAppResources.h in Headers */,
 				D01651AE2097B38400660178 /* CTEventBuilder.h in Headers */,
 				D01651B62097B81400660178 /* CTKnownProfileFields.h in Headers */,
-				D0047B26209935EA0019C6FD /* CTInAppDisplayViewController.h in Headers */,
+				071EB4D7217F6427008F0FAB /* CTCoverViewController.h in Headers */,
 				D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */,
-				D0A9802C209B83B100499991 /* CTInAppHTMLViewController.h in Headers */,
 				D033FB83208FE51200B4390F /* CTUtils.h in Headers */,
 				D0CACF9020B8A44C00A02327 /* CTCertificatePinning.h in Headers */,
-				D0A98030209B892100499991 /* CTDismissButton.h in Headers */,
+				071EB503217F6427008F0FAB /* CTHalfInterstitialImageViewController.h in Headers */,
+				071EB515217F6427008F0FAB /* CTInterstitialViewController.h in Headers */,
+				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
 				D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */,
-				D0047B2A209936510019C6FD /* CTInAppNotification.h in Headers */,
-				D014B91620E2FBB8001E0780 /* CTInAppDisplayViewControllerPrivate.h in Headers */,
+				071EB4FC217F6427008F0FAB /* CTHalfInterstitialViewController.h in Headers */,
+				071EB4C7217F6427008F0FAB /* CTFooterViewController.h in Headers */,
+				071EB4FD217F6427008F0FAB /* CTInAppUtils.h in Headers */,
 				D0213D54207D93C300FE5740 /* CTConstants.h in Headers */,
 				D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */,
-				D0047B1E209904DD0019C6FD /* CTInAppFCManager.h in Headers */,
+				071EB4F0217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h in Headers */,
+				071EB4E9217F6427008F0FAB /* CTSlider.h in Headers */,
 				D01A0899207ED98300423D6F /* CTPlistInfo.h in Headers */,
 				D032F3A82093EC9700F98D74 /* CTValidationResult.h in Headers */,
-				D0047B22209935200019C6FD /* CTInAppUtils.h in Headers */,
 				D020C928209006AD0073F61E /* CTUriHelper.h in Headers */,
 				D0596EFA208A6A9000A80753 /* CTSwizzle.h in Headers */,
+				071EB502217F6427008F0FAB /* FLAnimatedImage.h in Headers */,
+				071EB508217F6427008F0FAB /* CTBaseHeaderFooterViewController.h in Headers */,
 				D0A84AD8209135D400191B1F /* CTPreferences.h in Headers */,
+				071EB4FB217F6427008F0FAB /* CTInAppDisplayViewController.h in Headers */,
 				D0A6626D20801E7F00B403F3 /* CTDeviceInfo.h in Headers */,
 				D0A6626A207EE6F500B403F3 /* CleverTapBuildInfo.h in Headers */,
+				071EB50D217F6427008F0FAB /* FLAnimatedImageView.h in Headers */,
 				D0213D50207D905800FE5740 /* CleverTapEventDetail.h in Headers */,
+				071EB4F9217F6427008F0FAB /* CTNotificationButton.h in Headers */,
 				D0213D4D207D905800FE5740 /* CleverTapTrackedViewController.h in Headers */,
+				071EB4EC217F6427008F0FAB /* CTAVPlayerControlsViewController.h in Headers */,
+				071EB512217F6427008F0FAB /* CTInAppHTMLViewController.h in Headers */,
 				D01A0894207EC2D400423D6F /* CleverTapInstanceConfig.h in Headers */,
+				071EB50C217F6427008F0FAB /* CTCoverImageViewController.h in Headers */,
 				D0213D4B207D905800FE5740 /* CleverTapInAppNotificationDelegate.h in Headers */,
+				071EB4FF217F6427008F0FAB /* CTHeaderViewController.h in Headers */,
+				071EB4D6217F6427008F0FAB /* CTInAppFCManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,8 +721,39 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				071EB4E0217F6427008F0FAB /* ic_expand@2x.png in Resources */,
+				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
 				D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */,
+				071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */,
+				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
+				071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */,
+				071EB507217F6427008F0FAB /* CTFooterViewController~iphoneport.xib in Resources */,
+				071EB4E5217F6427008F0FAB /* ic_play@3x.png in Resources */,
+				071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */,
+				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
+				071EB500217F6427008F0FAB /* CTHeaderViewController~ipad.xib in Resources */,
+				071EB4F7217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib in Resources */,
+				071EB4DF217F6427008F0FAB /* ic_expand@3x.png in Resources */,
+				071EB4E6217F6427008F0FAB /* ic_play@2x.png in Resources */,
+				071EB4F4217F6427008F0FAB /* CTCoverViewController~ipad.xib in Resources */,
+				071EB50E217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib in Resources */,
+				071EB4E3217F6427008F0FAB /* ic_expand@1x.png in Resources */,
+				071EB504217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib in Resources */,
+				071EB4E2217F6427008F0FAB /* ic_pause@2x.png in Resources */,
+				071EB4E8217F6427008F0FAB /* CTFooterViewController~ipad.xib in Resources */,
+				071EB4DD217F6427008F0FAB /* ic_thumb.png in Resources */,
+				079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */,
+				071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */,
+				071EB4DC217F6427008F0FAB /* ic_shrink@3x.png in Resources */,
+				071EB4F1217F6427008F0FAB /* CTAVPlayerControlsViewController.xib in Resources */,
+				071EB4DA217F6427008F0FAB /* ic_shrink@2x.png in Resources */,
+				071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */,
+				071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */,
 				D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */,
+				071EB4D0217F6427008F0FAB /* CTInterstitialViewController~ipad.xib in Resources */,
+				071EB4CB217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib in Resources */,
+				071EB50A217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib in Resources */,
+				071EB514217F6427008F0FAB /* CTCoverImageViewController~ipad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -494,23 +764,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				071EB519217F6513008F0FAB /* CTInAppFCManager.m in Sources */,
 				D014B8ED20E2FAA2001E0780 /* CleverTapTrackedViewController.m in Sources */,
-				D014B91B20E2FBCD001E0780 /* CTDismissButton.m in Sources */,
-				D01F688B210295A7004DEC85 /* CTInAppDisplayViewController.m in Sources */,
 				D014B8F120E2FAB9001E0780 /* CTPlistInfo.m in Sources */,
-				D014B91320E2FBA3001E0780 /* CTInAppNotification.m in Sources */,
 				D014B8F320E2FAC2001E0780 /* CTDeviceInfo.m in Sources */,
-				D014B90F20E2FB8F001E0780 /* CTInAppFCManager.m in Sources */,
 				D014B8F920E2FAE4001E0780 /* CTUtils.m in Sources */,
-				D014B91120E2FB99001E0780 /* CTInAppUtils.m in Sources */,
+				07BF4661217F80C1002E166D /* CTInAppResources.m in Sources */,
+				07BF465C217F7C4B002E166D /* CTInAppDisplayViewController.m in Sources */,
+				071EB51B217F6568008F0FAB /* CTInAppNotification.m in Sources */,
 				D0A9E9CE20EEA8770004BC6F /* CTLocationManager.m in Sources */,
 				D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */,
+				071EB51F217F6730008F0FAB /* FLAnimatedImage.m in Sources */,
 				D014B90120E2FB4C001E0780 /* CTValidationResult.m in Sources */,
 				D014B91F20E2FBDF001E0780 /* CTPinnedNSURLSessionDelegate.m in Sources */,
 				D014B90520E2FB5F001E0780 /* CTValidator.m in Sources */,
 				D014B8F720E2FADA001E0780 /* CTConstants.m in Sources */,
 				D014B90720E2FB67001E0780 /* CTKnownProfileFields.m in Sources */,
 				D014B8E020E2F9E6001E0780 /* CleverTap.m in Sources */,
+				0766014B2183327D009A244E /* FLAnimatedImageView.m in Sources */,
 				D014B8E720E2FA6A001E0780 /* CleverTapInstanceConfig.m in Sources */,
 				D014B8F520E2FAD0001E0780 /* CTSwizzle.m in Sources */,
 				D014B8EF20E2FAAD001E0780 /* CleverTapUTMDetail.m in Sources */,
@@ -521,6 +792,8 @@
 				D014B8FB20E2FB0E001E0780 /* CTUriHelper.m in Sources */,
 				D014B8FF20E2FB40001E0780 /* CTLogger.m in Sources */,
 				D014B8FD20E2FB18001E0780 /* CTPreferences.m in Sources */,
+				071EB527217F6CD1008F0FAB /* CTNotificationButton.m in Sources */,
+				07BF4663217F838D002E166D /* CTInAppUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -528,33 +801,50 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0A98031209B892100499991 /* CTDismissButton.m in Sources */,
+				071EB509217F6427008F0FAB /* CTAlertViewController.m in Sources */,
+				071EB510217F6427008F0FAB /* CTSlider.m in Sources */,
 				D0213D52207D905800FE5740 /* CleverTapEventDetail.m in Sources */,
-				D0A9802D209B83B100499991 /* CTInAppHTMLViewController.m in Sources */,
+				071EB4F5217F6427008F0FAB /* CTInAppHTMLViewController.m in Sources */,
 				D01651AF2097B38400660178 /* CTEventBuilder.m in Sources */,
 				D020C929209006AD0073F61E /* CTUriHelper.m in Sources */,
 				D01A0898207ED98300423D6F /* CTPlistInfo.m in Sources */,
-				D0047B2B209936510019C6FD /* CTInAppNotification.m in Sources */,
-				D0047B27209935EA0019C6FD /* CTInAppDisplayViewController.m in Sources */,
+				071EB4D2217F6427008F0FAB /* CTInterstitialImageViewController.m in Sources */,
+				071EB4C9217F6427008F0FAB /* CTHeaderViewController.m in Sources */,
+				071EB505217F6427008F0FAB /* CTCoverViewController.m in Sources */,
+				071EB4CD217F6427008F0FAB /* CTInAppUtils.m in Sources */,
+				071EB4EA217F6427008F0FAB /* FLAnimatedImageView.m in Sources */,
 				D0CACF9120B8A44C00A02327 /* CTCertificatePinning.m in Sources */,
 				D033FB84208FE51200B4390F /* CTUtils.m in Sources */,
-				D0047B1F209904DD0019C6FD /* CTInAppFCManager.m in Sources */,
+				071EB50B217F6427008F0FAB /* CTAVPlayerControlsViewController.m in Sources */,
 				D01651B32097B42C00660178 /* CTValidator.m in Sources */,
+				071EB513217F6427008F0FAB /* CTInAppNotification.m in Sources */,
 				D0CACF9720B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.m in Sources */,
 				D0047B0F2098E2F00019C6FD /* CTProfileBuilder.m in Sources */,
 				D0A6626E20801E7F00B403F3 /* CTDeviceInfo.m in Sources */,
+				071EB4D1217F6427008F0FAB /* CTNotificationButton.m in Sources */,
 				D0213D4E207D905800FE5740 /* CleverTapTrackedViewController.m in Sources */,
 				D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */,
-				D0047B23209935200019C6FD /* CTInAppUtils.m in Sources */,
+				071EB4CC217F6427008F0FAB /* CTHalfInterstitialViewController.m in Sources */,
+				071EB4CE217F6427008F0FAB /* CTInAppDisplayViewController.m in Sources */,
 				D0213D51207D905800FE5740 /* CleverTapUTMDetail.m in Sources */,
 				D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */,
 				D032F3A92093EC9700F98D74 /* CTValidationResult.m in Sources */,
+				071EB501217F6427008F0FAB /* CTFooterViewController.m in Sources */,
 				D0A84ADD209136D500191B1F /* CTLogger.m in Sources */,
 				D0A84AD9209135D400191B1F /* CTPreferences.m in Sources */,
 				D0047B132098EDA90019C6FD /* CTLocationManager.m in Sources */,
+				071EB4EB217F6427008F0FAB /* CTCoverImageViewController.m in Sources */,
+				071EB4D4217F6427008F0FAB /* CTBaseHeaderFooterViewController.m in Sources */,
+				071EB4F6217F6427008F0FAB /* CTInAppResources.m in Sources */,
+				071EB4FA217F6427008F0FAB /* CTAVPlayerViewController.m in Sources */,
+				071EB506217F6427008F0FAB /* CTInAppFCManager.m in Sources */,
 				D01651B72097B81400660178 /* CTKnownProfileFields.m in Sources */,
 				D0C7BBCB207D8837001345EF /* CleverTap.m in Sources */,
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
+				071EB4D9217F6427008F0FAB /* FLAnimatedImage.m in Sources */,
+				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
+				071EB4D8217F6427008F0FAB /* CTHalfInterstitialImageViewController.m in Sources */,
+				071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */,
 				D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

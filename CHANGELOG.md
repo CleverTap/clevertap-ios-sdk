@@ -1,5 +1,11 @@
 # CHANGE LOG
 
+## Version 3.3.0 (October 26, 2018)
+* Adds support for Native InApp Notifications
+
+## Version 3.2.2 (September 26, 2018)
+* Update Build Info
+
 ## Version 3.2.1 (September 26, 2018)
 * Fix method swizzling issue
 

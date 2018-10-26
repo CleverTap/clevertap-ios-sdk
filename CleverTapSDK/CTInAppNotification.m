@@ -1,14 +1,32 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
+#import "FLAnimatedImage.h"
 
 @interface CTInAppNotification() {
 }
 
-@property (nonatomic, readwrite) NSString* Id;
-@property (nonatomic, readwrite) NSString* campaignId;
+@property (nonatomic, readwrite) NSString *Id;
+@property (nonatomic, readwrite) NSString *campaignId;
+@property (nonatomic, readwrite) NSString *type;
 @property (nonatomic, readwrite) CTInAppType inAppType;
+
+@property (nonatomic, strong) NSURL *imageURL;
+@property (nonatomic, readwrite, strong) NSData *image;
+@property (nonatomic, copy, readwrite) NSString *contentType;
+@property (nonatomic, copy, readwrite) NSString *mediaUrl;
+
+@property (nonatomic, readwrite) NSString *title;
+@property (nonatomic, readwrite) NSString *titleColor;
+@property (nonatomic, readwrite) NSString *message;
+@property (nonatomic, readwrite) NSString *messageColor;
+
+@property (nonatomic, readwrite) NSString *backgroundColor;
+
+@property (nonatomic, readwrite, assign) BOOL hideMedia;
+@property (nonatomic, readwrite, assign) BOOL showCloseButton;
+@property (nonatomic, readwrite, assign) BOOL tablet;
+
 @property (nonatomic, copy, readwrite) NSString *html;
-@property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
 @property (nonatomic, readwrite) BOOL showClose;
 @property (nonatomic, readwrite) BOOL darkenScreen;
 @property (nonatomic, readwrite) BOOL excludeFromCaps;
@@ -21,6 +39,9 @@
 @property (nonatomic, assign, readwrite) float width;
 @property (nonatomic, assign, readwrite) float widthPercent;
 
+@property (nonatomic, readwrite) NSArray<CTNotificationButton *> *buttons;
+
+@property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
 @property (nonatomic, copy, readwrite) NSDictionary *customExtras;
 
 @property (nonatomic, readwrite) NSString *error;
@@ -29,42 +50,31 @@
 
 @implementation CTInAppNotification: NSObject
 
+@synthesize mediaIsImage=_mediaIsImage;
+@synthesize mediaIsGif=_mediaIsGif;
+@synthesize mediaIsAudio=_mediaIsAudio;
+@synthesize mediaIsVideo=_mediaIsVideo;
+
 - (instancetype)initWithJSON:(NSDictionary *)jsonObject {
     if (self = [super init]) {
         @try {
+            self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
-            if (![self validateJSON:jsonObject]) {
-                self.error = @"Invalid JSON";
-                return self;
-            }
-            if (jsonObject[@"ti"]) {
-                self.Id = [NSString stringWithFormat:@"%@", jsonObject[@"ti"]];
-            }
             self.campaignId = (NSString*) jsonObject[@"wzrk_id"];
             self.excludeFromCaps = [jsonObject[@"efc"] boolValue];
             self.totalLifetimeCount = jsonObject[@"tlc"] ? [jsonObject[@"tlc"] intValue] : -1;
             self.totalDailyCount = jsonObject[@"tdc"] ? [jsonObject[@"tdc"] intValue] : -1;
-            NSDictionary *data = (NSDictionary*) jsonObject[@"d"];
-            if (data) {
-                NSString *html = (NSString*) data[CLTAP_INAPP_DATA_TAG];
-                if (html) {
-                    self.html = html;
-                    self.inAppType = [CTInAppUtils inAppTypeFromString:@"html"];
-                }
-                NSDictionary* customExtras = (NSDictionary *) data[@"kv"];
-                if (!customExtras) customExtras = [NSDictionary new];
-                self.customExtras = customExtras;
+            if (jsonObject[@"ti"]) {
+                self.Id = [NSString stringWithFormat:@"%@", jsonObject[@"ti"]];
             }
-            NSDictionary *displayParams = jsonObject[@"w"];
-            if (displayParams) {
-                self.darkenScreen = [displayParams[CLTAP_INAPP_NOTIF_DARKEN_SCREEN] boolValue];
-                self.showClose = [displayParams[CLTAP_INAPP_NOTIF_SHOW_CLOSE] boolValue];
-                self.position = (char) [displayParams[CLTAP_INAPP_POSITION] characterAtIndex:0];
-                self.width = displayParams[CLTAP_INAPP_X_DP] ? [displayParams[CLTAP_INAPP_X_DP] floatValue] : 0.0;
-                self.widthPercent = displayParams[CLTAP_INAPP_X_PERCENT] ? [displayParams[CLTAP_INAPP_X_PERCENT] floatValue] : 0.0;
-                self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
-                self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
-                self.maxPerSession = displayParams[@"mdc"] ? [displayParams[@"mdc"] intValue] : -1;
+            NSString *type = (NSString*) jsonObject[@"type"];
+            if (!type || [type isEqualToString:@"custom-html"]) {
+                [self legacyConfigureFromJSON:jsonObject];
+            } else {
+                [self configureFromJSON:jsonObject];
+            }
+            if (self.inAppType == CTInAppTypeUnknown) {
+                self.error = @"Unknown InApp Type";
             }
         } @catch (NSException *e) {
             self.error = e.debugDescription;
@@ -73,16 +83,165 @@
     return self;
 }
 
+- (void)configureFromJSON: (NSDictionary *)jsonObject {
+    self.type = (NSString*) jsonObject[@"type"];
+    if (self.type) {
+        self.inAppType = [CTInAppUtils inAppTypeFromString:self.type];
+    }
+    self.backgroundColor = jsonObject[@"bg"];
+    self.title = (NSString*) jsonObject[@"title"][@"text"];
+    self.titleColor = (NSString*) jsonObject[@"title"][@"color"];
+    self.message = (NSString*) jsonObject[@"message"][@"text"];
+    self.messageColor = (NSString*) jsonObject[@"message"][@"color"];
+    self.showCloseButton = [jsonObject[@"close"] boolValue];
+    self.tablet = [jsonObject[@"tablet"] boolValue];
+    
+    NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
+    if (_media) {
+        self.contentType = _media[@"content_type"];
+        NSString *_mediaUrl = _media[@"url"];
+        if (_mediaUrl) {
+            if ([self.contentType hasPrefix:@"image"]) {
+                self.imageURL = [NSURL URLWithString:_mediaUrl];
+                if ([self.contentType isEqualToString:@"image/gif"] ) {
+                    _mediaIsGif = YES;
+                }else {
+                    _mediaIsImage = YES;
+                }
+            } else {
+                self.mediaUrl = _mediaUrl;
+                if ([self.contentType hasPrefix:@"video"]) {
+                    _mediaIsVideo = YES;
+                }
+                if ([self.contentType hasPrefix:@"audio"]) {
+                    _mediaIsAudio = YES;
+                }
+            }
+        }
+    }
+    
+    id buttons = jsonObject[@"buttons"];
+    
+    NSMutableArray *_buttons = [NSMutableArray new];
+    
+    if ([buttons isKindOfClass:[NSArray class]]) {
+        buttons = (NSArray *) buttons;
+        for (NSDictionary *button in buttons) {
+            CTNotificationButton *ct_button = [[CTNotificationButton alloc] initWithJSON:button];
+            if (ct_button && !ct_button.error) {
+                [_buttons addObject:ct_button];
+            }
+        }
+    }
+    else if ([buttons isKindOfClass:[NSDictionary class]]) {
+        buttons = (NSDictionary*) buttons;
+        for (NSString *key in [buttons allKeys]) {
+            CTNotificationButton *ct_button = [[CTNotificationButton alloc] initWithJSON:buttons[key]];
+            if (ct_button && !ct_button.error) {
+                [_buttons addObject:ct_button];
+            }
+        }
+    }
+    self.buttons = _buttons;
+    
+    switch (self.inAppType) {
+        case CTInAppTypeHeader:
+        case CTInAppTypeFooter:
+            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
+                self.imageURL = nil;
+                CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
+            }
+            break;
+        case CTInAppTypeCoverImage:
+        case CTInAppTypeInterstitialImage:
+        case CTInAppTypeHalfInterstitialImage:
+              if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
+                  self.error = [NSString stringWithFormat:@"wrong media type for template"];
+              }
+           break;
+        case CTInAppTypeCover:
+        case CTInAppTypeHalfInterstitial:
+            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
+                self.imageURL = nil;
+                CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)legacyConfigureFromJSON:(NSDictionary *)jsonObject {
+    if (![self validateLegacyJSON:jsonObject]) {
+        self.error = @"Invalid JSON";
+        return;
+    }
+    NSDictionary *data = (NSDictionary*) jsonObject[@"d"];
+    if (data) {
+        NSString *html = (NSString*) data[@"html"];
+        if (html) {
+            self.html = html;
+            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+        }
+        NSDictionary* customExtras = (NSDictionary *) data[@"kv"];
+        if (!customExtras) customExtras = [NSDictionary new];
+        self.customExtras = customExtras;
+    }
+    NSDictionary *displayParams = jsonObject[@"w"];
+    if (displayParams) {
+        self.darkenScreen = [displayParams[CLTAP_INAPP_NOTIF_DARKEN_SCREEN] boolValue];
+        self.showClose = [displayParams[CLTAP_INAPP_NOTIF_SHOW_CLOSE] boolValue];
+        self.position = (char) [displayParams[CLTAP_INAPP_POSITION] characterAtIndex:0];
+        self.width = displayParams[CLTAP_INAPP_X_DP] ? [displayParams[CLTAP_INAPP_X_DP] floatValue] : 0.0;
+        self.widthPercent = displayParams[CLTAP_INAPP_X_PERCENT] ? [displayParams[CLTAP_INAPP_X_PERCENT] floatValue] : 0.0;
+        self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
+        self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
+        self.maxPerSession = displayParams[@"mdc"] ? [displayParams[@"mdc"] intValue] : -1;
+    }
+}
+
+- (BOOL)mediaIsAudio {
+    return _mediaIsAudio;
+}
+
+- (BOOL)mediaIsImage {
+    return _mediaIsImage;
+}
+- (BOOL)mediaIsGif {
+    return _mediaIsGif;
+}
+
+- (BOOL)mediaIsVideo {
+    return _mediaIsVideo;
+}
+
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler {
     if ([NSThread isMainThread]) {
         self.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
         completionHandler();
         return;
     }
+    
+    if (self.imageURL) {
+        NSError *error = nil;
+        NSData *imageData = [NSData dataWithContentsOfURL:self.imageURL options:NSDataReadingMappedIfSafe error:&error];
+        if (error || !imageData) {
+            self.error = [NSString stringWithFormat:@"unable to load image from URL: %@", self.imageURL];
+        } else {
+            if ([self.contentType isEqualToString:@"image/gif"] ) {
+                FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:imageData];
+                if (gif == nil) {
+                    self.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", self.imageURL];
+                }
+            }
+            self.image = self.error ? nil : imageData;
+        }
+    }
+    
     completionHandler();
 }
 
-- (BOOL)validateJSON:(NSDictionary *)jsonObject {
+- (BOOL)validateLegacyJSON:(NSDictionary *)jsonObject {
     // Check that either xdp or xp is set
     NSDictionary *w = jsonObject[@"w"];
     if (![self isKeyValidInDictionary:w forKey:CLTAP_INAPP_X_DP ofClass:[NSNumber class]]) if (![self isKeyValidInDictionary:w forKey:CLTAP_INAPP_X_PERCENT ofClass:[NSNumber class]])
@@ -118,7 +277,7 @@
     
     NSDictionary *d = jsonObject[@"d"];
     // Check that html is set
-    if (![self isKeyValidInDictionary:d forKey:CLTAP_INAPP_DATA_TAG ofClass:[NSString class]])
+    if (![self isKeyValidInDictionary:d forKey:@"html" ofClass:[NSString class]])
         return FALSE;
     
     // Check that pos contains the right value

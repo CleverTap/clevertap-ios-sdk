@@ -31,6 +31,18 @@
     return self;
 }
 
+#if !(TARGET_OS_TV)
+- (BOOL)shouldAutorotate {
+    return NO;
+}
+#endif
+
+#if !(TARGET_OS_TV)
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
+}
+#endif
+
 -(void)show:(BOOL)animated {
     NSAssert(false, @"Override in sub-class");
 }
@@ -100,10 +112,64 @@
     [self hide:NO];
 }
 
+#pragma mark - Setup Buttons
+
+- (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index {
+    [buttonView setTag: index];
+    buttonView.titleLabel.adjustsFontSizeToFitWidth = YES;
+    buttonView.hidden = NO;
+    if (_notification.inAppType != CTInAppTypeHeader && _notification.inAppType != CTInAppTypeFooter) {
+        buttonView.layer.borderWidth = 1.0f;
+        buttonView.layer.cornerRadius = [button.borderRadius floatValue];
+        buttonView.layer.borderColor = [[CTInAppUtils ct_colorWithHexString:button.borderColor] CGColor];
+    }
+    
+    [buttonView setBackgroundColor:[CTInAppUtils ct_colorWithHexString:button.backgroundColor]];
+    [buttonView setTitleColor:[CTInAppUtils ct_colorWithHexString:button.textColor] forState:UIControlStateNormal];
+    [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [buttonView setTitle:button.text forState:UIControlStateNormal];
+    return buttonView;
+}
+
 #pragma mark - Actions
 
 - (void)tappedDismiss {
     [self hide:YES];
+}
+
+- (void)buttonTapped:(UIButton*)button {
+    [self handleButtonClickFromIndex:(int)button.tag];
+    [self hide:YES];
+}
+
+- (void)handleButtonClickFromIndex:(int)index {
+    CTNotificationButton *button = self.notification.buttons[index];
+    NSURL *buttonCTA = button.actionURL;
+    NSString *buttonText = button.text;
+    NSString *campaignId = self.notification.campaignId;
+    
+    if (campaignId == nil) {
+        campaignId = @"";
+    }
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:forNotification:fromViewController:withExtras:)]) {
+        [self.delegate handleNotificationCTA:buttonCTA forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
+    }
+}
+
+- (void)handleImageTapGesture{
+    CTNotificationButton *button = self.notification.buttons[0];
+    NSURL *buttonCTA = button.actionURL;
+    NSString *buttonText = @"image";
+    NSString *campaignId = self.notification.campaignId;
+    
+    if (campaignId == nil) {
+        campaignId = @"";
+    }
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:forNotification:fromViewController:withExtras:)]) {
+        [self.delegate handleNotificationCTA:buttonCTA forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
+    }
 }
 
 @end

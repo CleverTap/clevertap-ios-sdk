@@ -23,6 +23,15 @@
 #import "CTInAppDisplayViewController.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppHTMLViewController.h"
+#import "CTInterstitialViewController.h"
+#import "CTHalfInterstitialViewController.h"
+#import "CTCoverViewController.h"
+#import "CTHeaderViewController.h"
+#import "CTFooterViewController.h"
+#import "CTAlertViewController.h"
+#import "CTCoverImageViewController.h"
+#import "CTInterstitialImageViewController.h"
+#import "CTHalfInterstitialImageViewController.h"
 #endif
 #import "CTLocationManager.h"
 
@@ -1543,6 +1552,33 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     switch (notification.inAppType) {
         case CTInAppTypeHTML:
             controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeInterstitial:
+            controller = [[CTInterstitialViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeHalfInterstitial:
+            controller = [[CTHalfInterstitialViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeCover:
+            controller = [[CTCoverViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeHeader:
+            controller = [[CTHeaderViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeFooter:
+            controller = [[CTFooterViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeAlert:
+            controller = [[CTAlertViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeInterstitialImage:
+            controller = [[CTInterstitialImageViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeHalfInterstitialImage:
+            controller = [[CTHalfInterstitialImageViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypeCoverImage:
+            controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
         default:
             errorString = [NSString stringWithFormat:@"Unhandled notification type: %lu", (unsigned long)notification.inAppType];
