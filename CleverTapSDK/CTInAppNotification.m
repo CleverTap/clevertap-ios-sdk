@@ -68,7 +68,7 @@
                 self.Id = [NSString stringWithFormat:@"%@", jsonObject[@"ti"]];
             }
             NSString *type = (NSString*) jsonObject[@"type"];
-            if (!type) {
+            if (!type || [type isEqualToString:@"custom-html"]) {
                 [self legacyConfigureFromJSON:jsonObject];
             } else {
                 [self configureFromJSON:jsonObject];
@@ -93,7 +93,6 @@
     self.titleColor = (NSString*) jsonObject[@"title"][@"color"];
     self.message = (NSString*) jsonObject[@"message"][@"text"];
     self.messageColor = (NSString*) jsonObject[@"message"][@"color"];
-    self.hideMedia = [jsonObject[@"hideMedia"] boolValue];
     self.showCloseButton = [jsonObject[@"close"] boolValue];
     self.tablet = [jsonObject[@"tablet"] boolValue];
     
@@ -104,13 +103,11 @@
         if (_mediaUrl) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
-                
                 if ([self.contentType isEqualToString:@"image/gif"] ) {
                     _mediaIsGif = YES;
                 }else {
                     _mediaIsImage = YES;
                 }
-                
             } else {
                 self.mediaUrl = _mediaUrl;
                 if ([self.contentType hasPrefix:@"video"]) {
@@ -151,12 +148,8 @@
         case CTInAppTypeHeader:
         case CTInAppTypeFooter:
             if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
-               self.error = [NSString stringWithFormat:@"wrong media type for template"];
-            }
-            break;
-        case CTInAppTypeInterstitial:
-            if  (!_mediaIsGif && !_mediaIsAudio && !_mediaIsVideo && !_mediaIsImage){
-                self.error = [NSString stringWithFormat:@"no media type found for template"];
+                self.imageURL = nil;
+                CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
             }
             break;
         case CTInAppTypeCoverImage:
@@ -169,7 +162,8 @@
         case CTInAppTypeCover:
         case CTInAppTypeHalfInterstitial:
             if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
-                self.error = [NSString stringWithFormat:@"wrong media type for template"];
+                self.imageURL = nil;
+                CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
             }
             break;
         default:

@@ -66,7 +66,7 @@
         NSBundle *bundle = [NSBundle bundleForClass:[self class]];
         UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
         self.imageView = [[UIImageView alloc] initWithFrame: self.controlsViewVC.view.frame];
-        self.imageView.backgroundColor = [UIColor whiteColor];
+        self.imageView.backgroundColor = [UIColor blackColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         self.imageView.image = image;
         [self.contentOverlayView addSubview:self.imageView];

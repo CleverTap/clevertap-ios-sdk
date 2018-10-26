@@ -36,23 +36,7 @@
     "tvos": "9.0"
   },
   "tvos": {
-    "source_files": "CleverTapSDK/**/*.{h,m}",
-    "exclude_files": [
-      "CleverTapSDK/**/CTInAppHTMLViewController.{h,m}",
-      "CleverTapSDK/**/CTCoverViewController.{h,m}",
-      "CleverTapSDK/**/CTInterstitialViewController.{h,m}",
-      "CleverTapSDK/**/CTHeaderViewController.{h,m}",
-      "CleverTapSDK/**/CTFooterViewController.{h,m}",
-      "CleverTapSDK/**/CTAlertViewController.{h,m}",
-      "CleverTapSDK/**/CTHalfInterstitialViewController.{h,m}",
-      "CleverTapSDK/**/CTInterstitialImageViewController.{h,m}",
-      "CleverTapSDK/**/CTCoverImageViewController.{h,m}",
-      "CleverTapSDK/**/CTHalfInterstitialImageViewController.{h,m}",
-      "CleverTapSDK/**/CTAVPlayerViewController.{h,m}",
-      "CleverTapSDK/**/CTSlider.{h,m}",
-      "CleverTapSDK/**/CTAVPlayerControlsViewController.{h,m}",
-      "CleverTapSDK/**/CTBaseHeaderFooterViewController.{h,m}"
-    ],
+    "source_files": "CleverTapSDK/*.{h,m}",
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",
       "CleverTapSDK/CleverTap+SSLPinning.h",

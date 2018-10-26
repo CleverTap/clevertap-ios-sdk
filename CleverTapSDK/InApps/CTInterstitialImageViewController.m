@@ -40,6 +40,8 @@
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
     
+    self.closeButton.hidden = !self.notification.showCloseButton;
+    
     if ([UIScreen mainScreen].bounds.size.height == 480) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [[NSLayoutConstraint constraintWithItem:self.containerView

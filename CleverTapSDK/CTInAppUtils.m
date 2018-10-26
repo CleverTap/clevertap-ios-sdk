@@ -49,7 +49,7 @@ static NSDictionary *_inAppTypeMap;
 }
 
 + (UIImage *)imageForName:(NSString *)name type:(NSString *)type {
-#if !CLEVERTAP_NO_INAPP_SUPPORT
+#if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
 #else
     return [CTInAppResources imageForName:name type:type];

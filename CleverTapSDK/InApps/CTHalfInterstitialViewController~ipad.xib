@@ -13,6 +13,7 @@
             <connections>
                 <outlet property="bodyLabel" destination="KPp-g5-Gzh" id="RQh-hB-EQM"/>
                 <outlet property="buttonsContainer" destination="nxR-MO-FNN" id="CQu-9Z-Dje"/>
+                <outlet property="closeButton" destination="4ZY-rW-T8q" id="7Sm-o0-qMS"/>
                 <outlet property="containerView" destination="RoT-Kh-Pe3" id="Olw-i2-Rh7"/>
                 <outlet property="firstButton" destination="2cc-ON-Hbb" id="VeG-9X-hFa"/>
                 <outlet property="imageView" destination="wIA-hH-4yN" id="8rU-8B-msD"/>

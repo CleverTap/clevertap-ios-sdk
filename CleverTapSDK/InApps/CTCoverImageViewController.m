@@ -40,6 +40,8 @@
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
     
+    self.closeButton.hidden = !self.notification.showCloseButton;
+    
     if (@available(iOS 11.0, *)) {
         CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
         [[NSLayoutConstraint constraintWithItem: self.closeButton

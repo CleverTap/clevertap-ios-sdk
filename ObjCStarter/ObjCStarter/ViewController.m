@@ -18,30 +18,12 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     [self loadData];
-    [self inApps];
     self.tblEvent.tableFooterView = [UIView new];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
-- (void)inApps {
-    
-    [[CleverTap sharedInstance] recordEvent:@"Header"];
-    [[CleverTap sharedInstance] recordEvent:@"Footer"];
-    [[CleverTap sharedInstance] recordEvent:@"Alert"];
-    [[CleverTap sharedInstance] recordEvent:@"Cover"];
-    [[CleverTap sharedInstance] recordEvent:@"Cover Image"];
-    [[CleverTap sharedInstance] recordEvent:@"Interstitial Image"];
-    [[CleverTap sharedInstance] recordEvent:@"Interstitial"];
-    [[CleverTap sharedInstance] recordEvent:@"Half Interstitial Image"];
-    [[CleverTap sharedInstance] recordEvent:@"Half Interstitial"];
-    [[CleverTap sharedInstance] recordEvent:@"Interstitial Video"];
-    [[CleverTap sharedInstance] recordEvent:@"Interstitial Audio"];
-    [[CleverTap sharedInstance] recordEvent:@"Custom-HTML"];
-    [[CleverTap sharedInstance] recordEvent:@"Interstitial Gif"];
 }
 
 - (void)loadData {

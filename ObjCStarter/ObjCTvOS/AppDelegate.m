@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import <CleverTap-iOS-SDK/CleverTap.h>
+#import <CleverTapSDK/CleverTap.h>
 
 @interface AppDelegate ()
 

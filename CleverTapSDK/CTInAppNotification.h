@@ -38,7 +38,6 @@
 @property (nonatomic, copy, readonly) NSString *messageColor;
 @property (nonatomic, copy, readonly) NSString *backgroundColor;
 
-@property (nonatomic, readonly, assign) BOOL hideMedia;
 @property (nonatomic, readonly, assign) BOOL showCloseButton;
 @property (nonatomic, readonly, assign) BOOL tablet;
 
