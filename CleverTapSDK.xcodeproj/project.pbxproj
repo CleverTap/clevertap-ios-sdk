@@ -94,6 +94,8 @@
 		071EB521217F6764008F0FAB /* CTNotificationButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AA217F6427008F0FAB /* CTNotificationButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB525217F6C8F008F0FAB /* CTInAppResources.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4C2217F6427008F0FAB /* CTInAppResources.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB527217F6CD1008F0FAB /* CTNotificationButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB481217F6427008F0FAB /* CTNotificationButton.m */; };
+		0766014A21833277009A244E /* FLAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		0766014B2183327D009A244E /* FLAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */; };
 		079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */ = {isa = PBXBuildFile; fileRef = 079701E42180A055008BF668 /* sound-wave-headphones.png */; };
 		07BF465B217F7C41002E166D /* CTInAppDisplayViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AC217F6427008F0FAB /* CTInAppDisplayViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07BF465C217F7C4B002E166D /* CTInAppDisplayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47E217F6427008F0FAB /* CTInAppDisplayViewController.m */; };
@@ -409,8 +411,6 @@
 				071EB4B2217F6427008F0FAB /* CTFooterViewController.m */,
 				071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */,
 				071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */,
-				071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */,
-				071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -521,6 +521,8 @@
 				071EB481217F6427008F0FAB /* CTNotificationButton.m */,
 				071EB4B3217F6427008F0FAB /* FLAnimatedImage.h */,
 				071EB489217F6427008F0FAB /* FLAnimatedImage.m */,
+				071EB4BE217F6427008F0FAB /* FLAnimatedImageView.h */,
+				071EB49B217F6427008F0FAB /* FLAnimatedImageView.m */,
 				D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */,
 				D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */,
 			);
@@ -566,6 +568,7 @@
 				D014B8F420E2FACA001E0780 /* CTSwizzle.h in Headers */,
 				D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */,
 				D014B8F220E2FABC001E0780 /* CTDeviceInfo.h in Headers */,
+				0766014A21833277009A244E /* FLAnimatedImageView.h in Headers */,
 				D014B90A20E2FB74001E0780 /* CTProfileBuilder.h in Headers */,
 				07BF4662217F8359002E166D /* CTInAppUtils.h in Headers */,
 			);
@@ -778,6 +781,7 @@
 				D014B8F720E2FADA001E0780 /* CTConstants.m in Sources */,
 				D014B90720E2FB67001E0780 /* CTKnownProfileFields.m in Sources */,
 				D014B8E020E2F9E6001E0780 /* CleverTap.m in Sources */,
+				0766014B2183327D009A244E /* FLAnimatedImageView.m in Sources */,
 				D014B8E720E2FA6A001E0780 /* CleverTapInstanceConfig.m in Sources */,
 				D014B8F520E2FAD0001E0780 /* CTSwizzle.m in Sources */,
 				D014B8EF20E2FAAD001E0780 /* CleverTapUTMDetail.m in Sources */,
