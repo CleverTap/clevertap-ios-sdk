@@ -34,7 +34,11 @@
 #import "CTHalfInterstitialImageViewController.h"
 #endif
 #import "CTLocationManager.h"
-
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+#import "CTInboxController.h"
+#import "CleverTap+Inbox.h"
+#import "CleverTapInboxViewControllerPrivate.h"
+#endif
 #if CLEVERTAP_SSL_PINNING
 #import "CTPinnedNSURLSessionDelegate.h"
 static NSArray* sslCertNames;
@@ -97,6 +101,20 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenRegister,
     CleverTapPushTokenUnregister,
 };
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+@interface CleverTapInboxMessage ()
+- (instancetype) init __unavailable;
+- (instancetype)initWithJSON:(NSDictionary *)json;
+@end
+#endif
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+@interface CleverTap () <CTInboxDelegate, CleverTapInboxViewControllerAnalyticsDelegate> {}
+@property(atomic, strong) CTInboxController *inboxController;
+@property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
+@end
+#endif
 
 @interface CleverTap () <CTInAppNotificationDisplayDelegate> {}
 #if CLEVERTAP_SSL_PINNING
@@ -506,6 +524,24 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self notifyUserProfileInitialized];
+    
+    // TODO REMOVE FOR TEST ONLY - move to parseResponse
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+    [self initializeInboxWithCallback:^(BOOL success) {
+        if (success) {
+            [self runSerialAsync:^{
+                NSArray <NSDictionary*> *messages = @[@{@"id":@"1", @"title": @"oneTitle", @"body": @"Time your apps' push notifications. What you say doesn't matter, it's all about ",@"type": @"single-media",@"media": @{@"content_type": @"gif", @"url": @"https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/d0e0943576e14a5baa3615260fb9523c.gif?v=1541057886"}}, @{@"id":@"3", @"title": @"threeTitle", @"body": @"Time your apps' push notifications. What you say doesn't matter, it's all about ",@"type": @"single-media",@"media": @{@"content_type": @"video", @"url": @"https://www.w3schools.com/html/mov_bbb.mp4"}},
+  @{@"id":@"12", @"title": @"Video Play", @"body": @"Time your apps' push notifications. What you say doesn't matter, it's all about ",@"type": @"single-media",@"media": @{@"content_type": @"video", @"url": @"https://s3-us-west-2.amazonaws.com/cevertapdktesting/Sonyvideo.mp4"}}, @{@"id":@"5", @"title": @"Apple", @"type": @"single-message", @"body": @"Enhance your history, design, engineering or geography lessons with the famous Indian Railways in #GoogleExpeditions. Download the free app now and see breathtaking scenery in #VR: http://g.co/IndianRailways  @GoogleArts #RailYatra",  @"media": @{@"content_type": @"gif", @"url": @"https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/d0e0943576e14a5baa3615260fb9523c.gif?v=1541057886"}}, @{@"id":@"6", @"title": @"sixTitle", @"body": @"If you want to stay relevant as a software developer for the next ten years?These are the 3 major things you should focus on", @"type": @"single-media", @"media": @{@"content_type": @"image", @"url": @"https://media.giphy.com/media/DBfgKX9yjSKSQ/200w_d.gif"}}, @{@"id":@"9", @"title": @"sixTitle", @"body": @"If you want to stay relevant as a software developer for the next ten years?These are the 3 major things you should focus on", @"type": @"multi-media", @"media": @{@"content_type": @"gif", @"url": @"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg", @"items":@[@{@"caption":@"caption one",@"subcaption":@"subcaption one",@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg",@"actionUrl":@"com.clevertap.ctcontent.example://item/one"},@{@"caption":@"caption two", @"subcaption":@"subcaption two",@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg",                                                                                                                                                               @"actionUrl":@"com.clevertap.ctcontent.example://item/two"}]}}, @{@"id":@"19", @"title": @"sixTitle", @"body": @"If you want to stay relevant as a software developer for the next ten years?These are the 3 major things you should focus on", @"type": @"multi-media", @"media": @{@"content_type": @"gif", @"url": @"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg", @"orientation": @"portrait", @"items":@[@{@"caption":@"caption one",@"subcaption":@"subcaption one",@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg",@"actionUrl":@"com.clevertap.ctcontent.example://item/one"},@{@"caption":@"caption two", @"subcaption":@"subcaption two",@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg",                                                                                                                                                               @"actionUrl":@"com.clevertap.ctcontent.example://item/two"}]}}];
+                
+                
+                
+                
+                [self.inboxController updateMessages:messages];
+            }];
+        }
+    }];
+    
+#endif
     return self;
 }
 
@@ -2670,6 +2706,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
         
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+        [self _resetInbox];
+        // TODO REMOVE test only
+        [self runSerialAsync:^{
+            NSArray <NSDictionary*> *messages = @[@{@"id":@"1", @"title": @"oneTitle", @"body": @"oneBody"}, @{@"id":@"5", @"title": @"FiveTitle", @"body": @"ThreeBody"}, @{@"id":@"6", @"title": @"sixTitle", @"body": @"SixBody"}];
+            [self.inboxController updateMessages:messages];
+        }];
+#endif
+        
         // push data on reset profile
         [self recordAppLaunched:@"onUserLogin"];
         [self profilePush:properties];
@@ -3392,5 +3437,170 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return handled;
 }
 #endif
+
+#pragma mark - Inbox
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+
+#pragma mark public
+
+- (void)initializeInboxWithCallback:(CleverTapInboxSuccessBlock)callback {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Inbox unavailable in app extensions", self);
+        self.inboxController = nil;
+        return;
+    }
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Inbox unavailable", self);
+        self.inboxController = nil;
+        return;
+    }
+    [self runSerialAsync:^{
+        if (self.inboxController) {
+            [[self class] runSyncMainQueue: ^{
+                callback(self.inboxController.isInitialized);
+            }];
+            return;
+        }
+        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.inboxController.delegate = self;
+        [[self class] runSyncMainQueue: ^{
+            callback(self.inboxController.isInitialized);
+        }];
+    }];
+}
+
+- (NSUInteger)getInboxMessageCount {
+    if (![self _isInboxInitialized]) {
+        return -1;
+    }
+    return self.inboxController.count;
+}
+
+- (NSUInteger)getInboxMessageUnreadCount {
+    if (![self _isInboxInitialized]) {
+        return -1;
+    }
+    return self.inboxController.unreadCount;
+}
+
+- (NSArray<CleverTapInboxMessage *> * _Nonnull )getAllInboxMessages {
+    NSMutableArray *all = [NSMutableArray new];
+    if (![self _isInboxInitialized]) {
+        return all;
+    }
+    for (NSDictionary *m in self.inboxController.messages) {
+        @try {
+            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+        } @catch (NSException *e) {
+            CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
+        }
+    };
+    
+    return all;
+}
+
+- (NSArray<CleverTapInboxMessage *> * _Nonnull )getUnreadInboxMessages {
+    NSMutableArray *all = [NSMutableArray new];
+    if (![self _isInboxInitialized]) {
+        return all;
+    }
+    for (NSDictionary *m in self.inboxController.unreadMessages) {
+        @try {
+            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+        } @catch (NSException *e) {
+            CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
+        }
+    };
+    return all;
+}
+
+- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString *)messageId {
+    if (![self _isInboxInitialized]) {
+        return nil;
+    }
+    NSDictionary *m = [self.inboxController messageForId:messageId];
+    return (m != nil) ? [[CleverTapInboxMessage alloc] initWithJSON:m] : nil;
+}
+
+- (void)deleteInboxMessage:(CleverTapInboxMessage * _Nonnull )message {
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    [self.inboxController deleteMessageWithId:message.messageId];
+}
+
+- (void)markReadInboxMessage:(CleverTapInboxMessage * _Nonnull) message {
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    [self.inboxController markReadMessageWithId:message.messageId];
+}
+
+- (void)registerInboxUpdatedBlock:(CleverTapInboxUpdatedBlock)block {
+    if (!_inboxUpdateBlocks) {
+        _inboxUpdateBlocks = [NSMutableArray new];
+    }
+    [_inboxUpdateBlocks addObject:block];
+}
+
+- (CleverTapInboxViewController * _Nullable)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
+    if (![self _isInboxInitialized]) {
+        return nil;
+    }
+    NSArray *messages = [self getAllInboxMessages];
+    if (! messages || [messages count] <= 0) {
+        return nil;
+    }
+    return [[CleverTapInboxViewController alloc] initWithMessages:messages config:config delegate:delegate analyticsDelegate:self];
+}
+
+#pragma mark private
+
+// call async always
+- (void)_resetInbox {
+    self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+    self.inboxController.delegate = self;
+}
+
+- (BOOL)_isInboxInitialized {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Inbox unavailable in app extensions", self);
+        return NO;
+    }
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Inbox unavailable", self);
+        return NO;
+    }
+    
+    if (!self.inboxController || !self.inboxController.isInitialized) {
+        CleverTapLogDebug(_config.logLevel, @"%@: Inbox not initialized.  Did you call initializeInboxWithCallback: ?", self);
+        return NO;
+    }
+    return YES;
+}
+
+#pragma mark CTInboxDelegate
+
+- (void)inboxMessagesDidUpdate {
+    CleverTapLogInternal(self.config.logLevel, @"%@: Inbox messages did update: %@", self, [self getAllInboxMessages]);
+    for (CleverTapInboxUpdatedBlock block in self.inboxUpdateBlocks) {
+        if (block) {
+            block();
+        }
+    }
+}
+
+#pragma mark CleverTapInboxViewControllerAnalyticsDelegate
+
+- (void)messageDidShow:(CleverTapInboxMessage *)message {
+    CleverTapLogDebug(_config.logLevel, @"%@: inbox message viewed: %@", self, message);
+    // TODO
+}
+- (void)messageDidSelect:(CleverTapInboxMessage *)message {
+    CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
+    // TODO
+}
+#endif  //!CLEVERTAP_NO_INBOX_SUPPORT
 
 @end

@@ -22,6 +22,7 @@
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",
       "CleverTapSDK/CleverTap+SSLPinning.h",
+      "CleverTapSDK/CleverTap+Inbox.h",
       "CleverTapSDK/CleverTapInstanceConfig.h",
       "CleverTapSDK/CleverTapBuildInfo.h",
       "CleverTapSDK/CleverTapEventDetail.h",

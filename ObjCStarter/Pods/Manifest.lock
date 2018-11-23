@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CleverTap-iOS-SDK: fe97ad987d57990c105db9d2ec7197336c88d0dc
+  CleverTap-iOS-SDK: 2b89ca82fadaad12573bac7db36a1f5b881cd976
 
 PODFILE CHECKSUM: b4f3542daf2ced0c2c6faa368b426728b78fa179
 
