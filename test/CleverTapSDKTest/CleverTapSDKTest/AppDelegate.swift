@@ -15,13 +15,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     var window: UIWindow?
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue+1)
         CleverTap.enablePersonalization()
         
         //CleverTap.sharedInstance()?.setOffline(true)
-        UNUserNotificationCenter.current().delegate = self;
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().delegate = self
+        } else {
+            // Fallback on earlier versions
+        };
         
 //        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         CleverTap.autoIntegrate()
@@ -32,13 +36,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     private func registerPush() {
         // request permissions
-        UNUserNotificationCenter.current().requestAuthorization(options: [.sound, .alert, .badge]) {
-            (granted, error) in
-            if (granted) {
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.sound, .alert, .badge]) {
+                (granted, error) in
+                if (granted) {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
                 }
             }
+        } else {
+            // Fallback on earlier versions
         }
     }
     
@@ -64,11 +72,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         NSLog("%@: registered for remote notifications: %@", self.description, deviceToken.description)
     }
     
+    @available(iOS 10.0, *)
+    @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
         completionHandler()
     }
     
+    @available(iOS 10.0, *)
+    @available(iOS 10.0, *)
+    @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         NSLog("%@: will present notification: %@", self.description, notification.request.content.userInfo)
         completionHandler([.badge, .sound, .alert])
@@ -79,7 +92,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler(UIBackgroundFetchResult.noData)
     }
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
         return true
     }
