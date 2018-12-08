@@ -13,4 +13,8 @@
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl;
 
+- (instancetype _Nonnull)initWithFrame:(CGRect)frame
+                              imageUrl:(NSString * _Nonnull)imageUrl
+                             actionUrl:(NSString * _Nullable)actionUrl;
+
 @end

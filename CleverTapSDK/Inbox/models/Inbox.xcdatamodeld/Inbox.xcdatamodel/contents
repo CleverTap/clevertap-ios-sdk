@@ -6,6 +6,7 @@
         <attribute name="id" attributeType="String" defaultValueString="&quot;&quot;" syncable="YES"/>
         <attribute name="isRead" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="json" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="tags" optional="YES" attributeType="Transformable" syncable="YES"/>
         <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="CTUser" inverseName="messages" inverseEntity="CTUser" syncable="YES"/>
     </entity>
     <entity name="CTUser" representedClassName="CTUserMO" syncable="YES">
@@ -15,7 +16,7 @@
         <relationship name="messages" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="CTMessage" inverseName="user" inverseEntity="CTMessage" syncable="YES"/>
     </entity>
     <elements>
-        <element name="CTMessage" positionX="-18" positionY="54" width="128" height="135"/>
+        <element name="CTMessage" positionX="-18" positionY="54" width="128" height="150"/>
         <element name="CTUser" positionX="-208.91796875" positionY="-234.44140625" width="128" height="105"/>
     </elements>
 </model>

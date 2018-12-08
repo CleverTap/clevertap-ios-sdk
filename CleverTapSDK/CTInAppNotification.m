@@ -1,6 +1,7 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
-#import "FLAnimatedImage.h"
+#import <SDWebImage/FLAnimatedImageView+WebCache.h>
+#import <SDWebImage/UIImageView+WebCache.h>
 
 @interface CTInAppNotification() {
 }

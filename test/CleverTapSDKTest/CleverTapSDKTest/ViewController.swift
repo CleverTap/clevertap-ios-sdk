@@ -59,9 +59,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             style.messageTitleColor = UIColor.cyan
             style.messageBodyColor = UIColor.gray
             if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
-                inboxController.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
+//                inboxController.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
                 let navigationController = UINavigationController.init(rootViewController: inboxController)
-                navigationController.navigationBar.isTranslucent = false
+//                navigationController.navigationBar.isTranslucent = false
                 self.present(navigationController, animated: true, completion: nil)
             }
     }
@@ -130,7 +130,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         NSLog("test button tapped")
         CleverTap.sharedInstance()?.recordEvent("test ios")
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-         CleverTap.sharedInstance()?.recordEvent("Cover")
+        CleverTap.sharedInstance()?.recordEvent("Cover")
     }
     
     @objc func doneButtonTapped() {

@@ -1,20 +1,44 @@
 @import Foundation;
 #import "CleverTap.h"
+@class CTInboxNotificationContentItem;
 
 @interface CleverTapInboxMessage : NSObject
 
 @property (nullable, nonatomic, copy, readonly) NSString *title;
 @property (nullable, nonatomic, copy, readonly) NSString *body;
 @property (nullable, nonatomic, copy, readonly) NSString *imageUrl;
+@property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
-@property (nullable, nonatomic, copy, readonly) NSDate *date;
-@property (nullable, nonatomic, copy, readonly) NSDate *expires;
-@property (nullable, nonatomic, copy, readonly) NSString *messageId;
-@property (nullable, nonatomic, copy, readonly) NSString *type;
 @property (nullable, nonatomic, copy, readonly) NSDictionary *media;
+@property (nullable, nonatomic, copy, readonly) NSDictionary *action;
 @property (nullable, nonatomic, copy, readonly) NSDictionary *json;
 @property (nullable, nonatomic, copy, readonly) NSDictionary *customData;
+
 @property (nonatomic, assign, readonly) BOOL isRead;
+@property (nullable, nonatomic, copy, readonly) NSDate *date;
+@property (nullable, nonatomic, copy, readonly) NSDate *expires;
+@property (nullable, nonatomic, copy, readonly) NSString *type;
+@property (nullable, nonatomic, copy, readonly) NSString *messageId;
+@property (nullable, nonatomic, copy, readonly) NSString *tagString;
+@property (nullable, nonatomic, copy, readonly) NSArray *tags;
+@property (nullable, nonatomic, copy, readonly) NSString *orientation;
+@property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
+@property (nullable, nonatomic, copy, readonly) NSArray<CTInboxNotificationContentItem *> *content;
+
+@end
+
+@interface CTInboxNotificationContentItem : NSObject
+
+@property (nullable, nonatomic, copy, readonly) NSString *title;
+@property (nullable, nonatomic, copy, readonly) NSString *titleColor;
+@property (nullable, nonatomic, copy, readonly) NSString *message;
+@property (nullable, nonatomic, copy, readonly) NSString *messageColor;
+@property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
+@property (nullable, nonatomic, copy, readonly) NSString *mediaUrl;
+@property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
+@property (nullable, nonatomic, copy, readonly) NSString *actionType;
+@property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
+@property (nullable, nonatomic, copy, readonly) NSArray *links;
 
 @end
 

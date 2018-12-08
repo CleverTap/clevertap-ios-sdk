@@ -1,5 +1,11 @@
-
 #import "CleverTap+Inbox.h"
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+@interface CTInboxNotificationContentItem ()
+- (instancetype) init __unavailable;
+- (instancetype)initWithJSON:(NSDictionary *)json;
+@end
+#endif
 
 @implementation CleverTapInboxMessage
 
@@ -39,6 +45,30 @@
         if (customData) {
             _customData = customData;
         }
+        NSArray *tags = json[@"tags"];
+        if (tags) {
+            _tags = tags;
+        }
+        NSString *tagString = [tags componentsJoinedByString:@","];
+        if (tagString) {
+            _tagString = tagString;
+        }
+        
+        NSMutableArray *_contents = [NSMutableArray new];
+        NSMutableArray *contents = json[@"content"];
+        
+        for (NSDictionary *content in contents) {
+            CTInboxNotificationContentItem *ct_content = [[CTInboxNotificationContentItem alloc] initWithJSON:content];
+            [_contents addObject:ct_content];
+            
+            NSString *iconUrl = content[@"icon"][@"url"];
+            if (iconUrl) {
+                _iconUrl = iconUrl;
+            }
+        }
+        
+        _content = _contents;
+        
         NSDate *date = json[@"date"];
         _date = date ? date : [NSDate new];
         

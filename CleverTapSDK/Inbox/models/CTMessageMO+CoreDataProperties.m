@@ -15,6 +15,8 @@
     if (self != nil) {
         self.json = [json copy];
         
+        self.tags = json[@"tags"];
+        
         NSString *id = json[@"id"];
         if (id) {
             self.id = id;
@@ -33,7 +35,6 @@
     
     CTMessageMO *obj =  [self init];
     obj = msg;
-    [obj setValue:@"44" forKey:@"expires"];
     return obj;
 }
 
@@ -49,5 +50,6 @@
 @dynamic user;
 @dynamic json;
 @dynamic isRead;
+@dynamic tags;
 
 @end

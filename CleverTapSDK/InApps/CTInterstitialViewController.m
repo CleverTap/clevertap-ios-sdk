@@ -4,9 +4,8 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTAVPlayerViewController.h"
-
-#import "FLAnimatedImageView.h"
-#import "FLAnimatedImage.h"
+#import <SDWebImage/FLAnimatedImageView+WebCache.h>
+#import <SDWebImage/UIImageView+WebCache.h>
 #import "CTSlider.h"
 
 @import AVFoundation;

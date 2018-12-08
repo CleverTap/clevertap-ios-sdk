@@ -15,18 +15,31 @@ static const CGFloat kFontResizeFactor = 0.42f;
     UIColor *_color = color ? color : [self _randomColor];
     CGSize size = CGSizeMake(1,1);
     
-    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc]
-                                         initWithSize:size
-                                         format:[UIGraphicsImageRendererFormat defaultFormat]];
-    
-    UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
-        CGContextRef context = ctx.CGContext;
+    if (@available(iOS 10.0, *)) {
+        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc]
+                                             initWithSize:size
+                                             format:[UIGraphicsImageRendererFormat defaultFormat]];
+        
+        UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+            CGContextRef context = ctx.CGContext;
+            CGRect rect = CGRectMake(0, 0, size.width, size.height);
+            CGContextSetFillColorWithColor(context, _color.CGColor);
+            CGContextFillRect(context, rect);
+        }];
+        
+        return image;
+
+    } else {
+        // Fallback on earlier versions
         CGRect rect = CGRectMake(0, 0, size.width, size.height);
-        CGContextSetFillColorWithColor(context, _color.CGColor);
+        UIGraphicsBeginImageContext(rect.size);
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextSetFillColorWithColor(context, [color CGColor]);
         CGContextFillRect(context, rect);
-    }];
-    
-    return image;
+        UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        return image;
+    }
 }
 
 + (instancetype)_imageWithString:(NSString *)str color:(UIColor * _Nullable)color size:(CGSize)size {
@@ -41,28 +54,46 @@ static const CGFloat kFontResizeFactor = 0.42f;
     
     NSString *displayText = [self _generateDisplayText:str];
     
-    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc]
-                                         initWithSize:size
-                                         format:[UIGraphicsImageRendererFormat defaultFormat]];
-    
-    UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
-        CGContextRef context = ctx.CGContext;
+    if (@available(iOS 10.0, *)) {
+        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc]
+                                             initWithSize:size
+                                             format:[UIGraphicsImageRendererFormat defaultFormat]];
+        
+        UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+            CGContextRef context = ctx.CGContext;
+            CGRect rect = CGRectMake(0, 0, size.width, size.height);
+            CGContextSetFillColorWithColor(context, _color.CGColor);
+            CGContextFillRect(context, rect);
+            
+            CGSize textSize = [displayText sizeWithAttributes:textAttributes];
+            
+            [displayText drawInRect:CGRectMake(size.width/2 - textSize.width/2,
+                                               size.height/2 - textSize.height/2,
+                                               textSize.width,
+                                               textSize.height)
+                     withAttributes:textAttributes];
+            
+        }];
+        
+        return image;
+        
+    } else {
+        // Fallback on earlier versions
         CGRect rect = CGRectMake(0, 0, size.width, size.height);
-        CGContextSetFillColorWithColor(context, _color.CGColor);
+        UIGraphicsBeginImageContext(rect.size);
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextSetFillColorWithColor(context, [color CGColor]);
         CGContextFillRect(context, rect);
-        
+        UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
         CGSize textSize = [displayText sizeWithAttributes:textAttributes];
-        
         [displayText drawInRect:CGRectMake(size.width/2 - textSize.width/2,
                                            size.height/2 - textSize.height/2,
                                            textSize.width,
                                            textSize.height)
                  withAttributes:textAttributes];
-        
-    }];
-    
-    return image;
-    
+        UIGraphicsEndImageContext();
+        return image;
+    }
 }
 
 + (UIColor *)_randomColor {

@@ -1,15 +1,31 @@
 PODS:
-  - CleverTap-iOS-SDK (3.3.0)
+  - CleverTap-iOS-SDK (3.4.0):
+    - SDWebImage (= 4.4.2)
+    - SDWebImage/GIF
+  - FLAnimatedImage (1.0.12)
+  - SDWebImage (4.4.2):
+    - SDWebImage/Core (= 4.4.2)
+  - SDWebImage/Core (4.4.2)
+  - SDWebImage/GIF (4.4.2):
+    - FLAnimatedImage (~> 1.0)
+    - SDWebImage/Core
 
 DEPENDENCIES:
   - CleverTap-iOS-SDK (from `../`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - FLAnimatedImage
+    - SDWebImage
 
 EXTERNAL SOURCES:
   CleverTap-iOS-SDK:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CleverTap-iOS-SDK: 2b89ca82fadaad12573bac7db36a1f5b881cd976
+  CleverTap-iOS-SDK: c3301650e3590fb0c773213a536eeb85a1878c74
+  FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
 
 PODFILE CHECKSUM: b4f3542daf2ced0c2c6faa368b426728b78fa179
 

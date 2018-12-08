@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, copy) NSDate *date;
 @property (nullable, nonatomic, copy) NSDate *expires;
 @property (nullable, nonatomic, copy) NSString *id;
+@property (nullable, nonatomic, copy) id tags;
 @property (nullable, nonatomic, retain) CTUserMO *user;
 @property (nullable, nonatomic, copy) id json;
 @property (nonatomic, assign) BOOL isRead;
