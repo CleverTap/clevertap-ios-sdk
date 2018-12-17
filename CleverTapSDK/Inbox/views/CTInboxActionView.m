@@ -38,32 +38,22 @@
     self.thirdButton.hidden = YES;
 }
 
-- (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTInboxNotificationContentItem *)message withIndex:(NSInteger)index {
-    [buttonView setTag: index];
+- (CTButton*)setupViewForButton:(CTButton *)buttonView forText:(NSString *)text withIndexPath:(NSIndexPath *)indexPath andIndex:(int)index; {
+    [buttonView setTag:index];
+    buttonView.indexPath = indexPath;
+    buttonView.index = index;
     buttonView.titleLabel.adjustsFontSizeToFitWidth = YES;
     buttonView.hidden = NO;
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    self.notification = message;
-    NSDictionary *button = message.links[index];
-    [buttonView setTitle:button[@"text"] forState:UIControlStateNormal];
+    [buttonView setTitle:text forState:UIControlStateNormal];
     return buttonView;
 }
 
-- (void)buttonTapped:(UIButton*)button {
+- (void)buttonTapped:(CTButton*)button {
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(inboxButtonDidTapped)]) {
-        [self.delegate inboxButtonDidTapped];
-    }
-    
-    NSDictionary *data = self.notification.links[button.tag];
-    
-//    NSURL *buttonCTA = data[@"url"];
-//    NSString *buttonText = data[@""]
-//    NSString *campaignId = self.notification.campaignId;
-    
-    if ([data[@"type"]  isEqual: @"copy"]) {
-        UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-        pasteboard.string = data[@"copyText"];
+        [self.delegate handleInboxNotificationFromIndex:button];
+        [self.delegate handleInboxNotificationFromIndexPath:button.indexPath withIndex:button.index];
     }
 }
 

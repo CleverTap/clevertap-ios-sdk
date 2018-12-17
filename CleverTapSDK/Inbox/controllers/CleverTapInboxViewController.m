@@ -16,14 +16,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
 
-#if __has_include(<SDWebImage/FLAnimatedImage.h>)
-#import <SDWebImage/FLAnimatedImage.h>
-#endif
-
-#if __has_include(<SDWebImage/FLAnimatedImageView.h>)
-#import <SDWebImage/FLAnimatedImageView.h>
-#endif
-
 NSString* const kCellSimpleMessageIdentifier = @"CTInboxSimpleMessageCell";
 NSString* const kCellCarouselMessageIdentifier = @"CTCarouselMessageCell";
 NSString* const kCellCarouselImgMessageIdentifier = @"CTCarouselImageMessageCell";
@@ -34,10 +26,16 @@ NSString* const kIconMessage = @"icon-message";
 NSString* const kCarouselMessage = @"carousel";
 NSString* const kCarouselImageMessage = @"carousel-image";
 
-NSString* const kMultiMedia = @"multi-media";
-
 static CGFloat kSegmentHeight = 32.0;
 static CGFloat kToolbarHeight = 48.0;
+
+NSString* const kACTION_TYPE_COPY = @"copy";
+NSString* const kACTION_TYPE_URL = @"url";
+
+NSString* const kACTION_TYPE = @"type";
+NSString* const kACTION_COPY_TEXT = @"copyText";
+NSString* const kACTION_DL = @"url";
+
 
 @interface CleverTapInboxViewController () <UITableViewDelegate, UITableViewDataSource, CTInboxActionViewDelegate>
 
@@ -87,9 +85,6 @@ static CGFloat kToolbarHeight = 48.0;
     
     CGFloat topOffset = self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
     _toolbar.frame  = CGRectMake(0, topOffset, self.navigationController.navigationBar.frame.size.width, kToolbarHeight);
-//
-//    NSLog(@"titleview %f:", self.navigationItem.titleView.frame.size.height);
-//    _navigation.frame = CGRectMake(0, 0, self.navigationController.navigationBar.frame.size.width, topOffset - 39);
 }
 
 - (void)registerNibs {
@@ -122,22 +117,28 @@ static CGFloat kToolbarHeight = 48.0;
 }
 
 - (void)setupSegmentController {
-    
+   
     self.navigationController.navigationBar.translucent = NO;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
-    self.navigationItem.prompt = @"";
     
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc]initWithItems: self.tags];
     [segmentedControl addTarget:self action:@selector(segmentSelected:) forControlEvents:UIControlEventValueChanged];
     segmentedControl.frame = CGRectMake(0, 0, 300.0f, 0.0f);
     segmentedControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    segmentedControl.selectedSegmentIndex = 0;
     
-    self.navigationItem.titleView = segmentedControl;
+    if (self.tags.count > 1) {
+        self.navigationItem.prompt = @"";
+        self.navigationItem.titleView = segmentedControl;
+    }
     
     CGFloat topOffset = self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
+    
+    CGFloat statusOffset = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
+    
     _navigation = [[UIView alloc] init];
     [self.navigationController.view addSubview:_navigation];
-    
+//    _navigation.backgroundColor = [UIColor redColor];
     _navigation.translatesAutoresizingMaskIntoConstraints = NO;
     
     [[NSLayoutConstraint constraintWithItem:_navigation
@@ -156,10 +157,11 @@ static CGFloat kToolbarHeight = 48.0;
     [[NSLayoutConstraint constraintWithItem:_navigation
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:topOffset] setActive:YES];
+                                 multiplier:1 constant:topOffset-3] setActive:YES];
     
     UILabel *lblTitle = [[UILabel alloc] init];
     lblTitle.text = @"Notifications";
+//    lblTitle.backgroundColor = [UIColor blueColor];
     [lblTitle setFont: [UIFont boldSystemFontOfSize:18.0]];
 
     [_navigation addSubview:lblTitle];
@@ -168,7 +170,7 @@ static CGFloat kToolbarHeight = 48.0;
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
                                      toItem:_navigation attribute:NSLayoutAttributeTop
-                                 multiplier:1 constant:20] setActive:YES];
+                                 multiplier:1 constant:statusOffset] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
                                      toItem:_navigation attribute:NSLayoutAttributeLeading
@@ -193,7 +195,7 @@ static CGFloat kToolbarHeight = 48.0;
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
                                      toItem:_navigation attribute:NSLayoutAttributeTop
-                                 multiplier:1 constant:20] setActive:YES];
+                                 multiplier:1 constant:statusOffset] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:_navigation attribute:NSLayoutAttributeTrailing
@@ -212,7 +214,6 @@ static CGFloat kToolbarHeight = 48.0;
     
     self.navigationController.navigationBar.translucent = NO;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
-//    self.navigationItem.prompt = @"";
     self.navigationItem.title = @"Notifications";
     
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc]initWithItems: self.tags];
@@ -283,12 +284,15 @@ static CGFloat kToolbarHeight = 48.0;
         if (message.content && message.content.count > 0) {
             [cell setupSimpleMessage:message.content[0]];
         }
+
         cell.actionView.hidden = YES;
+        cell.volume.hidden = YES;
         cell.titleLabel.text = message.title;
         cell.bodyLabel.text = message.body;
         cell.cellImageView.image = nil;
         cell.cellImageView.animatedImage = nil;
         cell.avPlayerContainerView.hidden = YES;
+        cell.playButton.hidden = YES;
         
         [[NSLayoutConstraint constraintWithItem:cell.actionView
                                       attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
@@ -309,11 +313,33 @@ static CGFloat kToolbarHeight = 48.0;
         } else {
             cell.imageViewRatioContraint.priority = 999;
             cell.imageViewHeightContraint.priority = 750;
+            
+//            if ([message.orientation isEqualToString:@""]) {
+//                
+//                [[NSLayoutConstraint constraintWithItem:cell.containerView
+//                                              attribute:NSLayoutAttributeWidth
+//                                              relatedBy:NSLayoutRelationEqual
+//                                                 toItem:cell.containerView
+//                                              attribute:NSLayoutAttributeHeight
+//                                             multiplier:1 constant:0] setActive:YES];
+//                
+//            } else {
+//                
+//                [[NSLayoutConstraint constraintWithItem:cell.mediaContainerView
+//                                              attribute:NSLayoutAttributeWidth
+//                                              relatedBy:NSLayoutRelationEqual
+//                                                 toItem:cell.mediaContainerView
+//                                              attribute:NSLayoutAttributeHeight
+//                                             multiplier:1.7 constant:0] setActive:YES];
+//            }
         }
 
         if ([message.media[@"content_type"]  isEqual: @"video"]) {
             
+            cell.avPlayerContainerView.hidden = NO;
+            cell.cellImageView.hidden = YES;
             [cell setupVideoPlayer:message];
+            
         }
 
         if (_config && _config.messageTitleColor) {
@@ -330,7 +356,7 @@ static CGFloat kToolbarHeight = 48.0;
         [cell.contentView layoutIfNeeded];
         return cell;
 
-    } else if ([message.type isEqualToString:kMultiMedia]) {
+    } else if ([message.type isEqualToString:kCarouselMessage]) {
         
         CTCarouselMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselMessageIdentifier forIndexPath:indexPath];
         [cell setupCarouselMessage:message];
@@ -350,7 +376,8 @@ static CGFloat kToolbarHeight = 48.0;
         
         CTInboxIconMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellIconMessageIdentifier forIndexPath:indexPath];
         if (message.content && message.content.count > 0) {
-            [cell setupIconMessage:message.content[0]];
+//            [cell setupIconMessage:message.content[0]];
+            [cell setupIconMessage:message.content[0] forIndexpath:indexPath];
         }
         cell.actionView.delegate = self;
         [cell.contentView setNeedsLayout];
@@ -375,7 +402,7 @@ static CGFloat kToolbarHeight = 48.0;
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    CleverTapInboxMessage *message = [self.messages objectAtIndex:indexPath.section];
+    CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
     CleverTapLogStaticDebug(@"%@: message selected: %@", self, message);
     [self _notifyMessageSelected:message];    
 }
@@ -420,10 +447,61 @@ static CGFloat kToolbarHeight = 48.0;
     }
 }
 
-- (void)inboxButtonDidTapped {
+- (void)handleInboxNotificationFromIndex:(UIButton *)sender {
     
-    CleverTapLogStaticDebug(@"%@: message link clicked:", self);
-    // TODO handle button data
+    // Cast Sender to UIButton
+    UIButton *button = (UIButton *)sender;
+    CGPoint pointInSuperview = [button.superview convertPoint:button.center toView:self.tableView];
+    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:pointInSuperview];
+    CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+}
+
+
+- (void)handleInboxNotificationFromIndexPath:(NSIndexPath *)indexPath withIndex:(int)index {
+    
+    CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+    CTInboxNotificationContentItem *messageContent = message.content[0];
+    NSDictionary *link = messageContent.links[index];
+    NSString *actionType = link[kACTION_TYPE];
+    
+    if ([actionType isEqualToString:kACTION_TYPE_COPY]) {
+        NSString *copyText = link[kACTION_COPY_TEXT];
+        UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+        pasteboard.string = copyText;
+    } else if ([actionType isEqualToString:kACTION_TYPE_URL]) {
+        UIApplication *application = [CTInAppResources getSharedApplication];
+        NSString *dl = @"https://www.google.com/";
+
+        if (dl) {
+            __block NSURL *dlURL = [NSURL URLWithString:dl];
+            if (dlURL) {
+                    if (@available(iOS 10.0, *)) {
+                        if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                            NSMethodSignature *signature = [UIApplication
+                                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                            NSInvocation *invocation = [NSInvocation
+                                                        invocationWithMethodSignature:signature];
+                            [invocation setTarget:application];
+                            [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                            NSDictionary *options = @{};
+                            id completionHandler = nil;
+                            [invocation setArgument:&dlURL atIndex:2];
+                            [invocation setArgument:&options atIndex:3];
+                            [invocation setArgument:&completionHandler atIndex:4];
+                            [invocation invoke];
+                        } else {
+                            if ([application respondsToSelector:@selector(openURL:)]) {
+                                [application performSelector:@selector(openURL:) withObject:dlURL];
+                            }
+                        }
+                    } else {
+                        if ([application respondsToSelector:@selector(openURL:)]) {
+                            [application performSelector:@selector(openURL:) withObject:dlURL];
+                        }
+                }
+            }
+        }
+    }
 }
 
 #pragma mark - Actions

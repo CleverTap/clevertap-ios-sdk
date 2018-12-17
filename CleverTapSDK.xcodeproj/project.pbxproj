@@ -136,6 +136,8 @@
 		07BF4661217F80C1002E166D /* CTInAppResources.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A7217F6427008F0FAB /* CTInAppResources.m */; };
 		07BF4662217F8359002E166D /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AE217F6427008F0FAB /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07BF4663217F838D002E166D /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47D217F6427008F0FAB /* CTInAppUtils.m */; };
+		07C7B75C21C131FB009C1177 /* CTButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 07C7B75A21C131FB009C1177 /* CTButton.h */; };
+		07C7B75D21C131FB009C1177 /* CTButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 07C7B75B21C131FB009C1177 /* CTButton.m */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -356,6 +358,8 @@
 		07B9453A219EA34300D4C542 /* CTUserMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTUserMO.m; sourceTree = "<group>"; };
 		07B9454F219EA38F00D4C542 /* CleverTap+Inbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+Inbox.h"; sourceTree = "<group>"; };
 		07B94552219EA44100D4C542 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		07C7B75A21C131FB009C1177 /* CTButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTButton.h; sourceTree = "<group>"; };
+		07C7B75B21C131FB009C1177 /* CTButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTButton.m; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
@@ -517,6 +521,8 @@
 				0797133821A309720011C9A3 /* CTCaptionedImageView.m */,
 				0797133B21A309910011C9A3 /* UIImage+CTImage.h */,
 				0797133C21A309910011C9A3 /* UIImage+CTImage.m */,
+				07C7B75A21C131FB009C1177 /* CTButton.h */,
+				07C7B75B21C131FB009C1177 /* CTButton.m */,
 				072F9E4021B14ECC00BC6313 /* CTInboxActionView.h */,
 				072F9E4121B14ECC00BC6313 /* CTInboxActionView.m */,
 			);
@@ -750,6 +756,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0CACF8B20B8923700A02327 /* CleverTap+SSLPinning.h in Headers */,
+				07C7B75C21C131FB009C1177 /* CTButton.h in Headers */,
 				071EB4F3217F6427008F0FAB /* CTInAppNotification.h in Headers */,
 				07B9453B219EA34300D4C542 /* CTInboxSimpleMessageCell.h in Headers */,
 				D0C7BBCA207D8837001345EF /* CleverTap.h in Headers */,
@@ -1023,6 +1030,7 @@
 				071EB4CE217F6427008F0FAB /* CTInAppDisplayViewController.m in Sources */,
 				07B9454D219EA34300D4C542 /* Inbox.xcdatamodeld in Sources */,
 				D0213D51207D905800FE5740 /* CleverTapUTMDetail.m in Sources */,
+				07C7B75D21C131FB009C1177 /* CTButton.m in Sources */,
 				D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */,
 				D032F3A92093EC9700F98D74 /* CTValidationResult.m in Sources */,
 				071EB501217F6427008F0FAB /* CTFooterViewController.m in Sources */,

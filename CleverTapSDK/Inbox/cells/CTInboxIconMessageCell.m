@@ -26,7 +26,7 @@
     [super layoutSubviews];
 }
 
-- (void)setupIconMessage:(CTInboxNotificationContentItem *)message {
+- (void)setupIconMessage:(CTInboxNotificationContentItem *)message forIndexpath:(NSIndexPath *)indexPath {
     
     if (message.mediaUrl == nil || [message.mediaUrl isEqual: @""]) {
         self.imageViewHeightContraint.priority = 999;
@@ -49,18 +49,23 @@
         _actionView.secondButton.hidden = YES;
         _actionView.thirdButton.hidden = YES;
         
-        _actionView.thirdButton = [_actionView setupViewForButton:_actionView.thirdButton withData:message withIndex:0];
+        _actionView.thirdButton = [_actionView setupViewForButton:_actionView.thirdButton forText:message.links[0][@"text"] withIndexPath:indexPath andIndex:0];
+        
         
         if (message.links.count > 1) {
-            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton withData:message withIndex:1];
+//            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forNotification:message withIndex:1];
+        _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:message.links[1][@"text"] withIndexPath:indexPath andIndex:1];
+
             [[NSLayoutConstraint constraintWithItem:self.actionView.secondButton
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                              toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                          multiplier:1 constant:0] setActive:YES];
         } else if (message.links.count > 2) {
-            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton withData:message withIndex:1];
-            _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton withData:message withIndex:2];
+            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:message.links[1][@"text"] withIndexPath:indexPath andIndex:1];
+            _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forText:message.links[2][@"text"] withIndexPath:indexPath andIndex:2];
 
+//            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forNotification:message withIndex:1];
+//            _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forNotification:message withIndex:2];
         }
     }
 }

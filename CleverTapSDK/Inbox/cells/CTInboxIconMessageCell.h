@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewRatioContraint;
 @property (strong, nonatomic) IBOutlet CTInboxActionView *actionView;
 
-- (void)setupIconMessage:(CTInboxNotificationContentItem *)message;
+- (void)setupIconMessage:(CTInboxNotificationContentItem *)message forIndexpath:(NSIndexPath *)indexPath;
 
 @end
 

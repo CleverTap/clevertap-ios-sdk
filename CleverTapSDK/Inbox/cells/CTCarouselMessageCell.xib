@@ -51,56 +51,18 @@
                                     <constraint firstAttribute="height" constant="2" id="Wto-ge-3JJ"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XPS-63-n6R">
-                                <rect key="frame" x="0.0" y="246" width="460" height="44"/>
-                                <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h6I-lK-bAM">
-                                        <rect key="frame" x="0.0" y="0.0" width="153.5" height="44"/>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
-                                        <state key="normal" title="Read More"/>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="szB-23-tQy">
-                                        <rect key="frame" x="153.5" y="0.0" width="153" height="44"/>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
-                                        <state key="normal" title="Register"/>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ggm-26-Puy">
-                                        <rect key="frame" x="306.5" y="0.0" width="153.5" height="44"/>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
-                                        <state key="normal" title="Apply now"/>
-                                    </button>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="7Z7-TM-Wt8"/>
-                                    <constraint firstAttribute="bottom" secondItem="szB-23-tQy" secondAttribute="bottom" id="HFY-V5-3uZ"/>
-                                    <constraint firstItem="szB-23-tQy" firstAttribute="leading" secondItem="h6I-lK-bAM" secondAttribute="trailing" id="J9m-Pe-yXR"/>
-                                    <constraint firstItem="Ggm-26-Puy" firstAttribute="top" secondItem="XPS-63-n6R" secondAttribute="top" id="M11-LY-v2S"/>
-                                    <constraint firstItem="Ggm-26-Puy" firstAttribute="leading" secondItem="szB-23-tQy" secondAttribute="trailing" id="MwK-mY-KdN"/>
-                                    <constraint firstAttribute="bottom" secondItem="h6I-lK-bAM" secondAttribute="bottom" id="Tcy-hg-nvJ"/>
-                                    <constraint firstItem="h6I-lK-bAM" firstAttribute="top" secondItem="XPS-63-n6R" secondAttribute="top" id="de2-Jp-TDf"/>
-                                    <constraint firstItem="szB-23-tQy" firstAttribute="top" secondItem="XPS-63-n6R" secondAttribute="top" id="gW3-Ak-lpt"/>
-                                    <constraint firstAttribute="trailing" secondItem="Ggm-26-Puy" secondAttribute="trailing" id="gw4-wT-e3d"/>
-                                    <constraint firstItem="Ggm-26-Puy" firstAttribute="width" secondItem="h6I-lK-bAM" secondAttribute="width" id="hQU-U4-kEW"/>
-                                    <constraint firstItem="szB-23-tQy" firstAttribute="width" secondItem="h6I-lK-bAM" secondAttribute="width" id="pP4-0O-lvi"/>
-                                    <constraint firstItem="h6I-lK-bAM" firstAttribute="leading" secondItem="XPS-63-n6R" secondAttribute="leading" id="qmx-bo-Ni4"/>
-                                    <constraint firstAttribute="bottom" secondItem="Ggm-26-Puy" secondAttribute="bottom" id="xUA-8t-6KK"/>
-                                </constraints>
-                            </view>
                         </subviews>
                         <constraints>
                             <constraint firstItem="dZN-Sd-EH8" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="3Jd-V1-g4P"/>
                             <constraint firstItem="4Zp-hn-1v6" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="9VX-2p-PzY"/>
                             <constraint firstItem="4Zp-hn-1v6" firstAttribute="top" secondItem="dZN-Sd-EH8" secondAttribute="bottom" id="CKL-1A-dIn"/>
-                            <constraint firstAttribute="trailing" secondItem="XPS-63-n6R" secondAttribute="trailing" id="CRY-lI-Z1G"/>
                             <constraint firstItem="UcE-Qa-3Rw" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="CTE-fK-3tk"/>
-                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="XPS-63-n6R" secondAttribute="bottom" id="DTY-uV-7FX"/>
-                            <constraint firstItem="XPS-63-n6R" firstAttribute="top" secondItem="4Zp-hn-1v6" secondAttribute="bottom" id="IJ3-97-SnM"/>
                             <constraint firstAttribute="trailing" secondItem="4Zp-hn-1v6" secondAttribute="trailing" id="IOX-Ul-6fN"/>
                             <constraint firstItem="dZN-Sd-EH8" firstAttribute="top" secondItem="UcE-Qa-3Rw" secondAttribute="bottom" id="IwB-uU-bvj"/>
                             <constraint firstItem="UcE-Qa-3Rw" firstAttribute="top" secondItem="0a6-Ha-uVR" secondAttribute="top" id="LSd-bW-3w4"/>
                             <constraint firstAttribute="trailing" secondItem="dZN-Sd-EH8" secondAttribute="trailing" id="Mev-Yz-mxl"/>
                             <constraint firstAttribute="trailing" secondItem="UcE-Qa-3Rw" secondAttribute="trailing" id="O8e-gM-ADD"/>
-                            <constraint firstItem="XPS-63-n6R" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="hBE-NP-PKJ"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="4Zp-hn-1v6" secondAttribute="bottom" id="U63-xb-jcQ"/>
                         </constraints>
                     </view>
                 </subviews>

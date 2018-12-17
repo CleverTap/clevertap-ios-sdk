@@ -19,8 +19,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) IBOutlet AVPlayerLayer *playerLayer;
 @property (strong, nonatomic) IBOutlet CTInboxActionView *actionView;
 @property (nonatomic, strong) IBOutlet UIView *avPlayerContainerView;
-@property (strong, nonatomic) AVPlayer *avPlayer;
+@property (strong, nonatomic) IBOutlet UIView *mediaContainerView;
 
+@property (nonatomic, strong) IBOutlet UIButton *volume;
+
+@property (nonatomic, strong) IBOutlet UIButton *playButton;
+@property (strong, nonatomic) AVPlayer *avPlayer;
+@property (strong, nonatomic) AVPlayerLayer *avPlayerLayer;
+@property (strong, nonatomic) AVPlayerItem *avPlayerItem;
+@property (assign, nonatomic) BOOL isVideoMuted;
+@property (nonatomic, assign) BOOL isControlsHidden;
+
+- (IBAction)volumeButtonTapped:(UIButton *)sender;
 - (void)setupSimpleMessage:(CTInboxNotificationContentItem *)message;
 - (void)setupVideoPlayer:(CleverTapInboxMessage *)message;
 @end

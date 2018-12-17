@@ -1,22 +1,23 @@
 #import <UIKit/UIKit.h>
-#import "CleverTap+Inbox.h"
+#import "CTButton.h"
 
 @protocol CTInboxActionViewDelegate <NSObject>
 @required
 - (void)inboxButtonDidTapped;
+- (void)handleInboxNotificationFromIndex:(UIButton *)sender;
+- (void)handleInboxNotificationFromIndexPath:(NSIndexPath *)indexPath withIndex:(int)index;
 @end
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInboxActionView : UIView
 
-@property (strong, nonatomic) IBOutlet UIButton *firstButton;
-@property (strong, nonatomic) IBOutlet UIButton *secondButton;
-@property (strong, nonatomic) IBOutlet UIButton *thirdButton;
+@property (strong, nonatomic) IBOutlet CTButton *firstButton;
+@property (strong, nonatomic) IBOutlet CTButton *secondButton;
+@property (strong, nonatomic) IBOutlet CTButton *thirdButton;
 @property (nonatomic, weak) id<CTInboxActionViewDelegate> delegate;
-@property (nonatomic, strong) CTInboxNotificationContentItem *notification;
 
-- (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTInboxNotificationContentItem *)message withIndex:(NSInteger)index;
+- (CTButton*)setupViewForButton:(CTButton *)buttonView forText:(NSString *)text withIndexPath:(NSIndexPath *)indexPath andIndex:(int)index;
 
 @end
 
