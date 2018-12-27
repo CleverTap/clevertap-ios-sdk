@@ -71,12 +71,11 @@
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
     BOOL haveUpdates = NO;
     for (NSDictionary *message in messages) {
-        NSString *messageId = message[@"id"];
+        NSString *messageId = message[@"_id"];
         if (!messageId) {
             CleverTapLogStaticDebug(@"CTUserMO dropping message: %@, missing id property", message);
             continue;
         }
-        // TODO update the message
         NSOrderedSet *results = [self.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
         
         BOOL existing = results && [results count] > 0;

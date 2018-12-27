@@ -13,29 +13,35 @@
     self = [self initWithEntity:[NSEntityDescription entityForName:@"CTMessage" inManagedObjectContext:context] insertIntoManagedObjectContext:context];
     
     if (self != nil) {
-        self.json = [json copy];
         
+        self.json = [json copy];
         self.tags = json[@"tags"];
         
-        NSString *id = json[@"id"];
+        NSString *id = json[@"_id"];
         if (id) {
             self.id = id;
         }
         
-        NSDate *date = json[@"date"];
-        self.date = date ? date : [NSDate new];
+        NSString *wzrkId = json[@"wzrk_id"];
+        if (wzrkId) {
+            self.wzrk_id = wzrkId;
+        }
         
-        NSDate *expires = json[@"expires"];
-        self.expires = expires ? expires : nil;
+        NSString *timeStamp = json[@"date"];
+        if (timeStamp && ![timeStamp isEqual:[NSNull null]]) {
+            NSTimeInterval _interval = [timeStamp doubleValue];
+            NSDate *date = [NSDate dateWithTimeIntervalSince1970:_interval];
+            self.date = date ? date : [NSDate new];
+        }
+
+        NSString *expireTimeStamp = json[@"wzrk_ttl"];
+        if (expireTimeStamp && ![expireTimeStamp isEqual:[NSNull null]]) {
+            NSTimeInterval _interval = [expireTimeStamp doubleValue];
+            NSDate *expires = [NSDate dateWithTimeIntervalSince1970:_interval];
+            self.expires = expires ? expires : nil;
+        }
     }
     return self;
-}
-
-- (instancetype)updateWithJson:(NSDictionary *)json forMessage:(CTMessageMO*)msg{
-    
-    CTMessageMO *obj =  [self init];
-    obj = msg;
-    return obj;
 }
 
 - (NSDictionary *)toJSON {
@@ -47,6 +53,7 @@
 @dynamic date;
 @dynamic expires;
 @dynamic id;
+@dynamic wzrk_id;
 @dynamic user;
 @dynamic json;
 @dynamic isRead;

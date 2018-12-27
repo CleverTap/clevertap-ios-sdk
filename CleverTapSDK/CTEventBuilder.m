@@ -6,6 +6,7 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTInAppNotification.h"
+#import "CleverTap+Inbox.h"
 
 NSString *const kCHARGED_EVENT = @"Charged";
 
@@ -311,6 +312,39 @@ NSString *const kCHARGED_EVENT = @"Charged";
         }
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Notification does not have any wzrk_* field");
+        }
+        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[@"evtData"] = notif;
+        completion(event, nil);
+    } @catch (NSException *e) {
+        completion(nil, nil);
+    }
+}
+
+/**
+ * Raises the Inbox Message Clicked event, if clicked is true,
+ * otherwise the Inbox Message Viewed event, if clicked is false.
+ *
+ */
++ (void)buildInboxMessageStateEvent:(BOOL)clicked
+                         forMessage:(CleverTapInboxMessage *)message
+                      andQueryParameters:(NSDictionary *)params
+                       completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *notif = [[NSMutableDictionary alloc] init];
+    @try {
+        NSDictionary *data = message.json;
+        for (NSString *x in [data allKeys]) {
+            if (![CTUtils doesString:x startWith:@"wzrk_"])
+                continue;
+            id value = data[x];
+            notif[x] = value;
+        }
+        if (params) {
+            [notif addEntriesFromDictionary:params];
+        }
+        if ([notif count] == 0) {
+            CleverTapLogStaticInternal(@"Inbox Message does not have any wzrk_* field");
         }
         event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
         event[@"evtData"] = notif;

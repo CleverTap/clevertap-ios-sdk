@@ -44,25 +44,15 @@
                                     <constraint firstAttribute="height" constant="44" id="mJF-50-qzd"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Zp-hn-1v6">
-                                <rect key="frame" x="0.0" y="244" width="460" height="2"/>
-                                <color key="backgroundColor" red="0.91764705879999997" green="0.91764705879999997" blue="0.91764705879999997" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="2" id="Wto-ge-3JJ"/>
-                                </constraints>
-                            </view>
                         </subviews>
                         <constraints>
                             <constraint firstItem="dZN-Sd-EH8" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="3Jd-V1-g4P"/>
-                            <constraint firstItem="4Zp-hn-1v6" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="9VX-2p-PzY"/>
-                            <constraint firstItem="4Zp-hn-1v6" firstAttribute="top" secondItem="dZN-Sd-EH8" secondAttribute="bottom" id="CKL-1A-dIn"/>
                             <constraint firstItem="UcE-Qa-3Rw" firstAttribute="leading" secondItem="0a6-Ha-uVR" secondAttribute="leading" id="CTE-fK-3tk"/>
-                            <constraint firstAttribute="trailing" secondItem="4Zp-hn-1v6" secondAttribute="trailing" id="IOX-Ul-6fN"/>
                             <constraint firstItem="dZN-Sd-EH8" firstAttribute="top" secondItem="UcE-Qa-3Rw" secondAttribute="bottom" id="IwB-uU-bvj"/>
                             <constraint firstItem="UcE-Qa-3Rw" firstAttribute="top" secondItem="0a6-Ha-uVR" secondAttribute="top" id="LSd-bW-3w4"/>
                             <constraint firstAttribute="trailing" secondItem="dZN-Sd-EH8" secondAttribute="trailing" id="Mev-Yz-mxl"/>
                             <constraint firstAttribute="trailing" secondItem="UcE-Qa-3Rw" secondAttribute="trailing" id="O8e-gM-ADD"/>
-                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="4Zp-hn-1v6" secondAttribute="bottom" id="U63-xb-jcQ"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="dZN-Sd-EH8" secondAttribute="bottom" id="aNt-SC-Bc2"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -77,6 +67,7 @@
                 <outlet property="carouselView" destination="UcE-Qa-3Rw" id="cPp-wn-9aa"/>
                 <outlet property="carouselViewHeight" destination="xsd-BN-6Wl" id="DSO-6G-AhD"/>
                 <outlet property="containerView" destination="0a6-Ha-uVR" id="09t-nB-I2r"/>
+                <outlet property="dateLabel" destination="Nqe-Am-6Ld" id="tJq-gv-6Ml"/>
             </connections>
             <point key="canvasLocation" x="164.80000000000001" y="231.63418290854574"/>
         </tableViewCell>

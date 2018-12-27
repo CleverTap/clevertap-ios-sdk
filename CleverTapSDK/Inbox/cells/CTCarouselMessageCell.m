@@ -1,4 +1,5 @@
 #import "CTCarouselMessageCell.h"
+#import "CTConstants.h"
 
 @implementation CTCarouselMessageCell
 
@@ -7,8 +8,7 @@ static CGFloat kCornerRadius = 0.0;
 static const float kLandscapeMultiplier = 0.5625; // 16:9 in landscape
 static const float kPageControlViewHeight = 30.f;
 
-static NSString * const kOrientationKey = @"orientation";
-static NSString * const kOrientationLandscape = @"landscape";
+static NSString * const kOrientationLandscape = @"l";
 
 - (instancetype)init {
     if (self = [super init]) {
@@ -53,15 +53,18 @@ static NSString * const kOrientationLandscape = @"landscape";
 
 - (void)setupCarouselMessage:(CleverTapInboxMessage *)message {
     
+    self.message = message;
+    
+    self.dateLabel.text = message.relativeDate;
     self.carouselView.translatesAutoresizingMaskIntoConstraints = NO;
     captionHeight = [CTCaptionedImageView captionHeight];
     
-    NSString *orientation = message.media[kOrientationKey];
+    NSString *orientation = message.orientation;
     // assume square image orientation
     CGFloat viewWidth = self.frame.size.width;
     CGFloat viewHeight = viewWidth + captionHeight;
     
-    if ([orientation isEqualToString:kOrientationLandscape]) {
+    if ([orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString]) {
         viewHeight = (viewWidth*kLandscapeMultiplier) + captionHeight;
     }
     
@@ -86,11 +89,13 @@ static NSString * const kOrientationLandscape = @"landscape";
     [self.carouselView addSubview:self.swipeView];
     self.itemViews = [NSMutableArray new];
     
-    for (NSDictionary *item in (message.media[@"items"])) {
-        NSString *caption = item[@"caption"];
-        NSString *subcaption = item[@"subcaption"];
-        NSString *imageUrl = item[@"imageUrl"];
-        NSString *actionUrl = item[@"actionUrl"];
+    NSUInteger index = 0;
+    
+    for (CleverTapInboxMessageContent *content in (message.content)) {
+        NSString *caption = content.title;
+        NSString *subcaption = content.message;
+        NSString *imageUrl = content.mediaUrl;
+        NSString *actionUrl = content.actionUrl;
         
         if (imageUrl == nil) {
             continue;
@@ -102,20 +107,22 @@ static NSString * const kOrientationLandscape = @"landscape";
             itemView = [[CTCaptionedImageView alloc] initWithFrame:self.carouselView.bounds
                                                            caption:caption subcaption:subcaption  imageUrl:imageUrl actionUrl:actionUrl];
         }
+        
+        UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
+        itemView.userInteractionEnabled = YES;
+        itemView.tag = index;
+        [itemView addGestureRecognizer:itemViewTapGesture];
         [self.itemViews addObject:itemView];
+        index++;
     }
-    
-    
-//    viewHeight-(captionHeight+kPageControlViewHeight) -44
-//    if (self.pageControl == nil) {
-        self.pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
-        [self.pageControl addTarget:self action:@selector(pageControlTapped:) forControlEvents:UIControlEventValueChanged];
-        self.pageControl.numberOfPages = [self.itemViews count];
-        self.pageControl.hidesForSinglePage = YES;
-        self.pageControl.currentPageIndicatorTintColor = [UIColor blueColor];
-        self.pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
-        [self.carouselView addSubview:self.pageControl];
-//    }
+
+    self.pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
+    [self.pageControl addTarget:self action:@selector(pageControlTapped:) forControlEvents:UIControlEventValueChanged];
+    self.pageControl.numberOfPages = [self.itemViews count];
+    self.pageControl.hidesForSinglePage = YES;
+    self.pageControl.currentPageIndicatorTintColor = [UIColor blueColor];
+    self.pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
+    [self.carouselView addSubview:self.pageControl];
     
     [self.swipeView reloadData];
 }
@@ -148,6 +155,15 @@ static NSString * const kOrientationLandscape = @"landscape";
 - (void)copyTapped:(NSString *)text {
     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
     pasteboard.string = text;
+}
+
+- (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender{
+    
+    CTCaptionedImageView *itemView = (CTCaptionedImageView*)sender.view;
+    NSInteger index = itemView.tag;
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 @end

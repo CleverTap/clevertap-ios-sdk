@@ -1,6 +1,8 @@
 #import "CTInboxSimpleMessageCell.h"
 #import <SDWebImage/FLAnimatedImageView+WebCache.h>
 #import <SDWebImage/UIImageView+WebCache.h>
+#import "CTConstants.h"
+#import "CTInAppUtils.h"
 
 static CGFloat kBorderWidth = 0.0;
 static CGFloat kCornerRadius = 0.0;
@@ -36,7 +38,9 @@ static CGFloat kCornerRadius = 0.0;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    _playerLayer.frame = self.avPlayerContainerView.bounds;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.playerLayer.frame = self.avPlayerContainerView.bounds;
+    });
 }
 
 - (void)awakeFromNib {
@@ -45,29 +49,80 @@ static CGFloat kCornerRadius = 0.0;
     self.containerView.layer.masksToBounds = YES;
     self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
     self.containerView.layer.borderWidth = kBorderWidth;
-    self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
+    
+    self.readView.layer.cornerRadius = 5;
+    self.readView.layer.masksToBounds = YES;
 }
 
-- (void)prepareForReuse {
-    [super prepareForReuse];
-    for (AVPlayerLayer *layer in self.cellImageView.layer.sublayers) {
-        [layer removeFromSuperlayer];
+- (void)layoutNotification:(CleverTapInboxMessage *)message {
+    
+    CleverTapInboxMessageContent *content = message.content[0];
+
+    if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
+        self.imageViewHeightContraint.priority = 999;
+        self.imageViewLRatioContraint.priority = 750;
+        self.imageViewPRatioContraint.priority = 750;
+    } else if ([message.orientation.uppercaseString isEqualToString:@"P"] || message.orientation == nil ) {
+        self.imageViewPRatioContraint.priority = 999;
+        self.imageViewLRatioContraint.priority = 750;
+        self.imageViewHeightContraint.priority = 750;
+    } else {
+        self.imageViewHeightContraint.priority = 750;
+        self.imageViewPRatioContraint.priority = 750;
+        self.imageViewLRatioContraint.priority = 999;
     }
-    [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
+    
+    if (content.links.count == 0) {
+        _actionViewHeightContraint.constant = 0;
+    } else {
+        _actionViewHeightContraint.constant = 44;
+    }
+    
+    self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
+    self.playButton.layer.borderWidth = 2.0;
+    self.actionView.hidden = YES;
+    
+    self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
+    self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
+    
+    [self layoutSubviews];
+    [self layoutIfNeeded];
 }
 
-- (void)setupSimpleMessage:(CTInboxNotificationContentItem *)message {
+- (void)setupSimpleMessage:(CleverTapInboxMessage *)message {
+    
+    self.message = message;
+    CleverTapInboxMessageContent *content = message.content[0];
     
     self.actionView.hidden = YES;
-    self.volume.hidden = YES;
-    self.playButton.hidden = YES;
+    self.avPlayerControlsView.hidden = YES;
+    self.avPlayerContainerView.hidden = YES;
     self.cellImageView.image = nil;
     self.cellImageView.animatedImage = nil;
-    self.titleLabel.text = message.title;
-    self.bodyLabel.text = message.message;
-    if (message.mediaUrl) {
+    self.cellImageView.clipsToBounds = YES;
+    
+    self.titleLabel.text = content.title;
+    self.bodyLabel.text = content.message;
+    
+    if  (content.links.count > 0) {
+        [self setupInboxMessageActions:content];
+    }
+    
+    if (message.isRead) {
+        self.readView.hidden = YES;
+    } else {
+        self.readView.hidden = NO;
+    }
+    
+    if (content.mediaIsGif) {
+        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
+    } else {
+        self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
+    }
+    
+    if (content.mediaUrl) {
         self.cellImageView.hidden = NO;
-        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:message.mediaUrl]
+        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:nil
                                        options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
     }
@@ -75,9 +130,11 @@ static CGFloat kCornerRadius = 0.0;
 
 - (void)setupVideoPlayer: (CleverTapInboxMessage *)message  {
     
-    self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
+    CleverTapInboxMessageContent *content = message.content[0];
 
+    self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
+    self.avPlayerControlsView.hidden = NO;
     self.cellImageView.hidden = YES;
     self.volume.hidden = NO;
     self.playButton.hidden = NO;
@@ -86,28 +143,30 @@ static CGFloat kCornerRadius = 0.0;
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     UIImage *imagePlay = [UIImage imageNamed:@"ic_play.png" inBundle:bundle compatibleWithTraitCollection:nil];
     UIImage *imagePause = [UIImage imageNamed:@"ic_pause.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    [self.playButton setSelected:NO];
     [self.playButton setImage:imagePlay forState:UIControlStateNormal];
     [self.playButton setImage:imagePause forState:UIControlStateSelected];
     [self.playButton addTarget:self action:@selector(togglePlay) forControlEvents:UIControlEventTouchUpInside];
     
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-//    _avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:message.media[@"url"]]];
-    _avPlayer = [[AVPlayer alloc] initWithURL: [NSURL URLWithString:message.media[@"url"]]];
-    _playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
-    _playerLayer.videoGravity = AVLayerVideoGravityResizeAspect;
-    _avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    _playerLayer.frame = self.avPlayerContainerView.bounds;
-    _playerLayer.needsDisplayOnBoundsChange = YES;
+//  self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:message.media[@"url"]]];
+    self.avPlayer = [[AVPlayer alloc] initWithURL: [NSURL URLWithString:content.mediaUrl]];
+    self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
+    self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect;
+    self.avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    self.playerLayer.frame = self.avPlayerContainerView.bounds;
+    self.playerLayer.needsDisplayOnBoundsChange = YES;
     for (AVPlayerLayer *layer in self.avPlayerContainerView.layer.sublayers) {
         [layer removeFromSuperlayer];
     }
     for (AVPlayerLayer *layer in self.cellImageView.layer.sublayers) {
         [layer removeFromSuperlayer];
     }
-    [self.avPlayerContainerView.layer addSublayer:_playerLayer];
+    
+    [self.avPlayerContainerView.layer addSublayer:self.playerLayer];
     
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(togglePlayControls:)];
-    [self.avPlayerContainerView addGestureRecognizer:tapGesture];
+    [self.avPlayerControlsView addGestureRecognizer:tapGesture];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loopVideo) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
     
@@ -120,14 +179,46 @@ static CGFloat kCornerRadius = 0.0;
     }
     
     [self layoutSubviews];
-//    [_avPlayer play];
-//    [self.avPlayerContainerView addSubview:_avPlayer];
+    [self layoutIfNeeded];
+}
+
+- (void)setupInboxMessageActions: (CleverTapInboxMessageContent *)content {
+    
+    _actionView.hidden = NO;
+    if (content.links && content.links.count > 0) {
+        _actionView.firstButton.hidden = YES;
+        _actionView.secondButton.hidden = YES;
+        _actionView.thirdButton.hidden = YES;
+        
+        _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
+        
+        if (content.links.count == 1) {
+            
+            [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
+                                          attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                             toItem:self.containerView attribute:NSLayoutAttributeWidth
+                                         multiplier:1 constant:0] setActive:YES];
+        }
+        
+        if (content.links.count > 1) {
+            _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forText:content.links[1] withIndex:1];
+            
+            [[NSLayoutConstraint constraintWithItem:self.actionView.secondButton
+                                          attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                         multiplier:1 constant:0] setActive:YES];
+            
+        } else if (content.links.count > 2) {
+            _actionView.thirdButton = [_actionView setupViewForButton:_actionView.thirdButton forText:content.links[1] withIndex:1];
+            _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forText:content.links[2] withIndex:2];
+        }
+    }
 }
 
 #pragma mark - Player Controls
 
 - (IBAction)volumeButtonTapped:(UIButton *)sender {
-    if (self.avPlayer.isMuted) {
+    if ([self isMuted]) {
         [self.avPlayer setMuted:NO];
         self.isVideoMuted = NO;
         [sender setTitle:@"🔈" forState:UIControlStateNormal];
@@ -138,6 +229,9 @@ static CGFloat kCornerRadius = 0.0;
     }
 }
 
+- (BOOL)isMuted{
+    return self.avPlayer.muted;
+}
 - (BOOL)isPlaying {
     return self.avPlayer && self.avPlayer.rate > 0;
 }
@@ -162,7 +256,6 @@ static CGFloat kCornerRadius = 0.0;
     if (self.avPlayer != nil) {
         [self.avPlayer seekToTime:kCMTimeZero];
         [self.playButton setSelected:NO];
-//        [self stopAVIdleCountdown];
     }
 }
 
@@ -170,7 +263,6 @@ static CGFloat kCornerRadius = 0.0;
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
         [self.playButton setSelected:NO];
-//        [self stopAVIdleCountdown];
     }
 }
 
@@ -211,6 +303,16 @@ static CGFloat kCornerRadius = 0.0;
     } completion:^(BOOL finished) {
         self.isControlsHidden = true;
     }];
+}
+
+#pragma mark Delegate
+
+- (void)handleInboxNotificationFromIndex:(UIButton *)sender {
+    
+    NSInteger index = sender.tag;
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 

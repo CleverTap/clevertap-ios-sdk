@@ -11,6 +11,7 @@
     copy.contentBorderColor = self.contentBorderColor;
     copy.messageTitleColor = self.messageTitleColor;
     copy.messageBodyColor = self.messageBodyColor;
+    copy.messageTags = self.messageTags;
     return copy;
 }
 

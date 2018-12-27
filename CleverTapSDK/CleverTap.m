@@ -530,9 +530,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self initializeInboxWithCallback:^(BOOL success) {
         if (success) {
             [self runSerialAsync:^{
-                NSArray <NSDictionary*> *messages = @[@{@"id":@"1", @"title": @"oneTitle", @"body": @"Time your apps' push notifications. What you say doesn't matter, it's all about ", @"tags": @[@"offers", @"christmas"], @"type": @"simple-message",@"media": @{@"content_type": @"gif", @"url": @"https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/d0e0943576e14a5baa3615260fb9523c.gif?v=1541057886"}}, @{@"id":@"3", @"title": @"threeTitle", @"body": @"Time your apps' push notifications. What you say doesn't matter, it's all about ",@"type": @"simple-message",@"media": @{@"content_type": @"video", @"url": @"https://www.w3schools.com/html/mov_bbb.mp4"}}, @{@"id":@"12", @"title": @"Video Play", @"body": @"Time your apps' push notifications. What you say doesn't matter, it's all about ",@"type": @"simple-message",@"media": @{@"content_type": @"video", @"url": @"https://www.radiantmediaplayer.com/media/bbb-360p.mp4"}}, @{@"id":@"5", @"title": @"Apple", @"type": @"simple-message", @"body": @"Enhance your history, design, engineering or geography lessons with the famous Indian Railways in #GoogleExpeditions. Download the free app now and see breathtaking scenery in #VR: http://g.co/IndianRailways  @GoogleArts #RailYatra" }, @{@"id":@"6", @"title": @"sixTitle", @"body": @"If you want to stay relevant as a software developer for the next ten years?These are the 3 major things you should focus on", @"type": @"simple-message", @"media": @{@"content_type": @"image", @"url": @"https://media.giphy.com/media/DBfgKX9yjSKSQ/200w_d.gif"}}, @{@"id":@"9", @"title": @"sixTitle", @"body": @"If you want to stay relevant as a software developer for the next ten years?These are the 3 major things you should focus on", @"type": @"carousel", @"media": @{@"content_type": @"gif", @"url": @"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg", @"items":@[@{@"caption":@"caption one",@"subcaption":@"subcaption one",@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg",@"actionUrl":@"com.clevertap.ctcontent.example://item/one"},@{@"caption":@"caption two", @"subcaption":@"Experience the new MacBook Air, now with Touch ID. Available in silver, gold and space grey.",@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg",                                                                                                                                                               @"actionUrl":@"com.clevertap.ctcontent.example://item/two"}]}},  @{@"id":@"94", @"title": @"When you're visiting a new place, it's always nice to receive such a warm welcome from a local, isn't it? ", @"body": @"I've spent six years without email on my iPhone, and it's been really helpful. Here's my story:", @"type": @"carousel-image", @"media": @{@"orientation":@"landscape",@"items":@[@{@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg",@"actionUrl":@"com.clevertap.ctcontent.example://item/one"},@{@"imageUrl":@"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg",                                                                                                                                                               @"actionUrl":@"com.clevertap.ctcontent.example://item/two"}]}}, @{@"id":@"618", @"tags": @[@"offers", @"promotions"],@"title": @"Music List", @"body": @"Here are 10 times whispering in party songs", @"type": @"icon-message", @"content": @[@{@"icon": @{@"url": @"https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg"}, @"title":@{@"text":@"Hello!", @"color":@"blue"}, @"body":@{@"text":@"Hello!Goodbye!"}, @"action": @{@"links": @[@{@"type": @"copy", @"text": @"Copy code", @"url": @{@"ios": @""}, @"copyText": @"Roller Coster Ride"}, @{@"type": @"url", @"text": @"Click Me", @"url": @{@"ios": @""}, @"copyText": @""}]}}]}];
-                
-                [self.inboxController updateMessages:messages];
+                NSArray <NSDictionary*> *messages = [self getInboxMessages];
+                 [self.inboxController updateMessages:messages];
             }];
         }
     }];
@@ -1303,6 +1302,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     // check to see whether the push includes a test in-app notification, if so don't process further
     if ([self didHandleInAppTestFromPushNotificaton:notification]) return;
+    
+    // check to see whether the push includes a test inbox message, if so don't process further
+    if ([self didHandleInboxMessageTestFromPushNotificaton:notification]) return;
     
     // determine application state
     UIApplication *application = [[self class] getSharedApplication];
@@ -3591,12 +3593,105 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)messageDidShow:(CleverTapInboxMessage *)message {
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message viewed: %@", self, message);
-    // TODO
+    [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
+
 }
+
 - (void)messageDidSelect:(CleverTapInboxMessage *)message {
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
-    // TODO
+    [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
 }
+
+- (void)recordInboxMessageStateEvent:(BOOL)clicked
+                          forMessage:(CleverTapInboxMessage *)message andQueryParameters:(NSDictionary *)params {
+    
+    [self runSerialAsync:^{
+        [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                if (clicked) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                }
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+}
+
+#pragma mark Inbox Message private
+
+- (BOOL)didHandleInboxMessageTestFromPushNotificaton:(NSDictionary*)notification {
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+    if ([[self class] runningInsideAppExtension]) {
+        return NO;
+    }
+    
+    if (!notification || [notification count] <= 0 || !notification[@"wzrk_inbox"]) return NO;
+    
+    @try {
+        [self.inAppFCManager resetSession];
+        CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
+        
+        NSString *jsonString = notification[@"wzrk_inbox"];
+        
+        NSArray <NSDictionary*> *inboxMsg = [NSJSONSerialization
+                                             JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                                                              options:0
+                                                                error:nil];
+        
+        if (inboxMsg) {
+            float delay = self.isAppForeground ? 0.5 : 2.0;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                @try {
+                    [self initializeInboxWithCallback:^(BOOL success) {
+                        if (success) {
+                            [self runSerialAsync:^{
+                                [self.inboxController updateMessages:inboxMsg];
+                            }];
+                        }
+                    }];
+                } @catch (NSException *e) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display the inbox message from payload: %@", self, e.debugDescription);
+                }
+            });
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the inbox message as JSON", self);
+            return YES;
+        }
+        
+    } @catch (NSException *e) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display the inbox message from payload: %@", self, e.debugDescription);
+        return YES;
+    }
+    
+#endif
+    return YES;
+}
+
+#pragma mark Inbox Notification Json -- TODO - Remove
+
+- (NSArray *)getInboxMessages{
+    
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *filePath = [bundle pathForResource:@"inbox" ofType:@"json"];
+    NSData *responseData = [NSData dataWithContentsOfFile:filePath];
+    
+    if (responseData) {
+        @try {
+            id jsonResp = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
+            
+            NSArray *jsonA = [NSArray new];
+            jsonA = jsonResp[@"inbox_notifs"];
+            return jsonA;
+            
+        }@catch (NSException *ex) {
+            // Ignore
+        }
+    }
+}
+
 #endif  //!CLEVERTAP_NO_INBOX_SUPPORT
 
 @end

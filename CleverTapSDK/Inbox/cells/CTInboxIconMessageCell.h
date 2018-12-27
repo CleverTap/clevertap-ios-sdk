@@ -1,21 +1,28 @@
 #import <UIKit/UIKit.h>
 #import "CleverTap+Inbox.h"
-#import "CTInboxActionView.h"
+#import "CTInboxMessageActionView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTInboxIconMessageCell : UITableViewCell
+@interface CTInboxIconMessageCell : UITableViewCell <CTInboxActionViewDelegate>
 
 @property (strong, nonatomic) IBOutlet UIView *containerView;
 @property (strong, nonatomic) IBOutlet UIImageView *cellImageView;
 @property (strong, nonatomic) IBOutlet UIImageView *cellIcon;
 @property (strong, nonatomic) IBOutlet UILabel *titleLabel;
 @property (strong, nonatomic) IBOutlet UILabel *bodyLabel;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewRatioContraint;
-@property (strong, nonatomic) IBOutlet CTInboxActionView *actionView;
+@property (strong, nonatomic) IBOutlet UILabel *dateLabel;
+@property (strong, nonatomic) IBOutlet CTInboxMessageActionView *actionView;
 
-- (void)setupIconMessage:(CTInboxNotificationContentItem *)message forIndexpath:(NSIndexPath *)indexPath;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightContraint;
+
+@property (strong, nonatomic) CleverTapInboxMessage *message;
+
+- (void)setupIconMessage:(CleverTapInboxMessageContent *)message;
+- (void)layoutNotification:(CleverTapInboxMessage *)message;
 
 @end
 

@@ -1,33 +1,28 @@
 @import Foundation;
 #import "CleverTap.h"
-@class CTInboxNotificationContentItem;
+@class CleverTapInboxMessageContent;
 
 @interface CleverTapInboxMessage : NSObject
 
-@property (nullable, nonatomic, copy, readonly) NSString *title;
-@property (nullable, nonatomic, copy, readonly) NSString *body;
-@property (nullable, nonatomic, copy, readonly) NSString *imageUrl;
-@property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
-@property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
-@property (nullable, nonatomic, copy, readonly) NSDictionary *media;
-@property (nullable, nonatomic, copy, readonly) NSDictionary *action;
 @property (nullable, nonatomic, copy, readonly) NSDictionary *json;
 @property (nullable, nonatomic, copy, readonly) NSDictionary *customData;
 
 @property (nonatomic, assign, readonly) BOOL isRead;
 @property (nullable, nonatomic, copy, readonly) NSDate *date;
 @property (nullable, nonatomic, copy, readonly) NSDate *expires;
+@property (nullable, nonatomic, copy, readonly) NSString *relativeDate;
 @property (nullable, nonatomic, copy, readonly) NSString *type;
 @property (nullable, nonatomic, copy, readonly) NSString *messageId;
+@property (nullable, nonatomic, copy, readonly) NSString *campaignId;
 @property (nullable, nonatomic, copy, readonly) NSString *tagString;
 @property (nullable, nonatomic, copy, readonly) NSArray *tags;
 @property (nullable, nonatomic, copy, readonly) NSString *orientation;
 @property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
-@property (nullable, nonatomic, copy, readonly) NSArray<CTInboxNotificationContentItem *> *content;
+@property (nullable, nonatomic, copy, readonly) NSArray<CleverTapInboxMessageContent *> *content;
 
 @end
 
-@interface CTInboxNotificationContentItem : NSObject
+@interface CleverTapInboxMessageContent : NSObject
 
 @property (nullable, nonatomic, copy, readonly) NSString *title;
 @property (nullable, nonatomic, copy, readonly) NSString *titleColor;
@@ -39,6 +34,9 @@
 @property (nullable, nonatomic, copy, readonly) NSString *actionType;
 @property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
 @property (nullable, nonatomic, copy, readonly) NSArray *links;
+@property (nonatomic, readonly, assign) BOOL mediaIsVideo;
+@property (nonatomic, readonly, assign) BOOL mediaIsImage;
+@property (nonatomic, readonly, assign) BOOL mediaIsGif;
 
 @end
 
@@ -55,6 +53,7 @@
 @property (nonatomic, strong) UIColor *contentBorderColor;
 @property (nonatomic, strong) UIColor *messageTitleColor;
 @property (nonatomic, strong) UIColor *messageBodyColor;
+@property (nonatomic, strong) NSArray *messageTags;
 
 @end
 

@@ -1,0 +1,345 @@
+{
+    "inbox_notifs": [
+        {
+            "_id": "1544171480",
+            "tags": ["offers", "promotions"],
+            "date": 1544094125,
+            "wzrk_ttl": 1565742575,
+            "wzrk_id": "1544171480_20181225",
+            "msg": {
+                "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "p",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message sprop13 and deflang",
+                            "color": "#434761",
+                            "og": "Message <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@sProp-profile@-2\">profile - sProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:sProp\" data-originalreplacement=\"$replacement$##w:sProp[ add your default value here ]$/replacement$\" data-special-attr=\"@sProp-profile@-2\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defsprop\"></span><span style=\"display:none\">----@sProp-profile@-2</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>&nbsp;and <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@lang-profile@-3\">profile - lang <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:lang\" data-originalreplacement=\"$replacement$##w:lang[ add your default value here ]$/replacement$\" data-special-attr=\"@lang-profile@-3\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"deflang\"></span><span style=\"display:none\">----@lang-profile@-3</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Message $replacement$##w:sProp[defsprop]$/replacement$ and $replacement$##w:lang[deflang]$/replacement$"
+                        },
+                        "title": {
+                            "text": "Title 445",
+                            "color": "#434761",
+                            "og": "Title <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@IntegerProp-profile@-1\">profile - IntegerProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:IntegerProp\" data-originalreplacement=\"$replacement$##w:IntegerProp[ add your default value here ]$/replacement$\" data-special-attr=\"@IntegerProp-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defip\"></span><span style=\"display:none\">----@IntegerProp-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": "https://www.youtube.com"
+                            },
+                            "links": []
+                        },
+                        "media": {
+                            "content_type": "image",
+                            "url": "https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/0f28ab872b2d4d6d96c066ad41279f2e.jpeg?v=1545636193"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "1544686416",
+            "tags": [],
+            "date": 1545720679,
+            "wzrk_ttl": 1595742575,
+            "wzrk_id": "1544686416_20181225",
+            "msg": {
+                "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "l",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message",
+                            "color": "#434761",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Title",
+                            "color": "#434761",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": ""
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#007bff",
+                                    "bg": "#ffffff",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": "",
+                                        "ios": ""
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content_type": "video",
+                            "url": "https://www.w3schools.com/html/mov_bbb.mp4"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "1544091901",
+            "tags": [],
+            "date": 1545807079,
+            "wzrk_ttl": 1575742575,
+            "wzrk_id": "1544091901_20181225",
+            "msg": {
+                "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "l",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message ios",
+                            "color": "#434761",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Title",
+                            "color": "#434761",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": {
+                                    "text": "abc"
+                                },
+                                "ios": {}
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#007bff",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": {
+                                            "text": "abc"
+                                        },
+                                        "ios": {}
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content_type": "image/gif",
+                            "url": "https://media.giphy.com/media/DBfgKX9yjSKSQ/200w_d.gif"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "1543817421",
+            "tags": [],
+            "date": 1545799859,
+            "wzrk_ttl": 1555742575,
+            "wzrk_id": "1543817421_20181225",
+            "msg": {
+                "type": "carousel",
+                "bg": "#F30C0C",
+                "orientation": "p",
+                "content": [
+                    {
+                        "message": {
+                            "text": "MessageExample",
+                            "color": "#434761",
+                            "og": "MessageExample",
+                            "replacements": "MessageExample"
+                        },
+                        "title": {
+                            "text": "TitleExample",
+                            "color": "#434761",
+                            "og": "TitleExample",
+                            "replacements": "TitleExample"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": ""
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "pppp",
+                                    "color": "#007bff",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": "",
+                                        "ios": ""
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content-type": "image",
+                            "url": "https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg"
+                        },
+                        "icon": {}
+                    },
+                    {
+                        "message": {
+                            "text": "MessageExample 2",
+                            "color": "#434761",
+                            "og": "MessageExample",
+                            "replacements": "MessageExample"
+                        },
+                        "title": {
+                            "text": "TitleExample 2",
+                            "color": "#434761",
+                            "og": "TitleExample",
+                            "replacements": "TitleExample"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": "https://www.apple.com"
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "pppp",
+                                    "color": "#007bff",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": "",
+                                        "ios": ""
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content-type": "image",
+                            "url": "https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "1544094119",
+            "tags": [],
+            "date": 1545489079,
+            "wzrk_ttl": 1585742575,
+            "wzrk_id": "1544094119_20181225",
+            "msg": {
+                "type": "carousel-image",
+                "bg": "#ffffff",
+                "orientation": "l",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message",
+                            "color": "#434761",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Hello Sambit Test",
+                            "color": "#434761",
+                            "og": "Hello <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@Name-profile@-1\">profile - Name <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##n\" data-originalreplacement=\"$replacement$##n:[ add your default value here ]$/replacement$\" data-special-attr=\"@Name-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"Person\"></span><span style=\"display:none\">----@Name-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Hello $replacement$##n[Person]$/replacement$"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": "https://www.google.com"
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#007bff",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": "",
+                                        "ios": "https://www.google.com"
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content-type": "image",
+                            "url": "https://s3.amazonaws.com/ct-demo-images/landscape-2.jpg"},
+                        "icon": {}
+                    },
+                    
+                    {
+                        "message": {
+                            "text": "Message 2",
+                            "color": "#434761",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Hello Sambit Test 2",
+                            "color": "#434761",
+                            "og": "Hello <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@Name-profile@-1\">profile - Name <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##n\" data-originalreplacement=\"$replacement$##n:[ add your default value here ]$/replacement$\" data-special-attr=\"@Name-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"Person\"></span><span style=\"display:none\">----@Name-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Hello $replacement$##n[Person]$/replacement$"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": {
+                                    "text": "How are you doing fellow?",
+                                    "replacements": "Hello are you doing $replacement$##n[fellow]$/replacement$?"
+                                },
+                                "ios": {
+                                    "text": "How are you doing fellow?",
+                                    "replacements": "Hello are you doing $replacement$##n[fellow]$/replacement$?"
+                                }
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#007bff",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": {
+                                            "text": "How are you doing fellow?",
+                                            "replacements": "Hello are you doing $replacement$##n[fellow]$/replacement$?"
+                                        },
+                                        "ios": {
+                                            "text": "How are you doing fellow?",
+                                            "replacements": "Hello are you doing $replacement$##n[fellow]$/replacement$?"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content-type": "image",
+                            "url": "https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg"},
+                        "icon": {}
+                    }
+                ]
+            }
+        }
+    ]
+}

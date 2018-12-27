@@ -1,6 +1,7 @@
-#import "CTInboxActionView.h"
+#import "CTInboxMessageActionView.h"
+#import "CTInAppUtils.h"
 
-@implementation CTInboxActionView
+@implementation CTInboxMessageActionView
 
 /*
  Only override drawRect: if you perform custom drawing.
@@ -38,22 +39,20 @@
     self.thirdButton.hidden = YES;
 }
 
-- (CTButton*)setupViewForButton:(CTButton *)buttonView forText:(NSString *)text withIndexPath:(NSIndexPath *)indexPath andIndex:(int)index; {
-    [buttonView setTag:index];
-    buttonView.indexPath = indexPath;
-    buttonView.index = index;
+- (UIButton*)setupViewForButton:(UIButton *)buttonView forText:(NSDictionary *)messageButton withIndex:(int)index; {
+    buttonView.tag = index;
     buttonView.titleLabel.adjustsFontSizeToFitWidth = YES;
     buttonView.hidden = NO;
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [buttonView setTitle:text forState:UIControlStateNormal];
+    [buttonView setTitle:messageButton[@"text"] forState:UIControlStateNormal];
+//    [buttonView setBackgroundColor:[CTInAppUtils ct_colorWithHexString:data[@"color"]]];
     return buttonView;
 }
 
-- (void)buttonTapped:(CTButton*)button {
+- (void)buttonTapped:(UIButton*)button {
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(inboxButtonDidTapped)]) {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleInboxNotificationFromIndex:)]) {
         [self.delegate handleInboxNotificationFromIndex:button];
-        [self.delegate handleInboxNotificationFromIndexPath:button.indexPath withIndex:button.index];
     }
 }
 
