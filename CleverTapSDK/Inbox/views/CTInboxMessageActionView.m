@@ -45,7 +45,9 @@
     buttonView.hidden = NO;
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [buttonView setTitle:messageButton[@"text"] forState:UIControlStateNormal];
-//    [buttonView setBackgroundColor:[CTInAppUtils ct_colorWithHexString:data[@"color"]]];
+    buttonView.backgroundColor = [CTInAppUtils ct_colorWithHexString:messageButton[@"bg"]];
+    [buttonView setTitleColor:[CTInAppUtils ct_colorWithHexString:messageButton[@"color"]] forState:UIControlStateNormal];
+   
     return buttonView;
 }
 

@@ -3634,13 +3634,26 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.inAppFCManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
         
-        NSString *jsonString = notification[@"wzrk_inbox"];
+        NSString *jsonString = notification[@"wzrk_inbox"][@"inbox_notifications"];
+        NSDictionary *msg = [NSJSONSerialization
+                                 JSONObjectWithData:[jsonString
+                                    dataUsingEncoding:NSUTF8StringEncoding]
+                                                 options:0
+                                                    error:nil];
         
-        NSArray <NSDictionary*> *inboxMsg = [NSJSONSerialization
-                                             JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
-                                                              options:0
-                                                                error:nil];
+        NSDate *now = [NSDate date];
+        NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970];
+        NSString * nowEpoch = [NSString stringWithFormat:@"%.2f", nowEpochSeconds];
+       
+        NSMutableDictionary *message = [NSMutableDictionary dictionary];
+        [message setObject:nowEpoch forKey:@"_id"];
+        [message addEntriesFromDictionary:msg];
         
+        NSMutableArray *messages = [NSMutableArray new];
+        [messages addObject:message];
+        
+        NSArray<NSDictionary*> * inboxMsg = [messages mutableCopy];
+    
         if (inboxMsg) {
             float delay = self.isAppForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{

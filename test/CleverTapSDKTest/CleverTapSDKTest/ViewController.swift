@@ -20,7 +20,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     }
     
     @IBAction func inboxButtonTapped(_ sender: Any) {
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "869-Z79-K74Z", accountToken: "ca1-c6b")
+        let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
         let ct1  = CleverTap.instance(with: ctConfig)
             let style = CleverTapInboxStyleConfig.init()
             style.backgroundColor = UIColor.lightGray
@@ -40,7 +40,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     
     func inboxRegister() {
         
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "869-Z79-K74Z", accountToken: "ca1-c6b")
+        let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
         ctConfig.logLevel = .debug
         let ct1  = CleverTap.instance(with: ctConfig)
         ct1.onUserLogin(["foo1":"bar1", "Email":"aditi@clevertap.com", "identity":"654321"])
@@ -48,7 +48,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
         
         ct1.registerInboxUpdatedBlock(({
-            NSLog("CleverTapInbox.869-Z79-K74Z.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
+            NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
             let messageCount = ct1.getInboxMessageCount()
             let unreadCount = ct1.getInboxMessageUnreadCount()
             
@@ -61,13 +61,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         }))
         
         ct1.initializeInbox(callback: ({ (success) in
-//                NSLog("CleverTapInbox.869-Z79-K74Z.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")
-//                NSLog("CleverTapInbox.869-Z79-K74Z.%@ Message Count is: %@", ct1.profileGetID() ?? "", [ct1.getInboxMessageCount()])
-//                NSLog("CleverTapInbox.869-Z79-K74Z.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
-//                NSLog("CleverTapInbox.869-Z79-K74Z.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
-//                NSLog("CleverTapInbox.869-Z79-K74Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
+//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")
+//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Count is: %@", ct1.profileGetID() ?? "", [ct1.getInboxMessageCount()])
+//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
+//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
+//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
             //let unread = ct1.getUnreadInboxMessages();
-            //NSLog("CleverTapInbox.869-Z79-K74Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
+            //NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
             
             /*
              if (unread.count > 0) {
@@ -79,11 +79,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
              
              ct1.onUserLogin(["foo2":"bar2", "Email":"peter+test2@clevertap.com", "identity":"765432"])
              ct1.initializeInbox(callback: ({ (success) in
-             NSLog("CleverTapInbox.869-Z79-K74Z.%@ is: %@", ct1.profileGetID(), success ? "ready" : "unavailable")
-             NSLog("CleverTapInbox.869-Z79-K74Z.%@ Message Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageCount()])
-             NSLog("CleverTapInbox.869-Z79-K74Z.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
-             NSLog("CleverTapInbox.869-Z79-K74Z.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
-             NSLog("CleverTapInbox.869-Z79-K74Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
+             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ is: %@", ct1.profileGetID(), success ? "ready" : "unavailable")
+             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageCount()])
+             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
+             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
+             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
              }))
              */
             let messageCount = ct1.getInboxMessageCount()

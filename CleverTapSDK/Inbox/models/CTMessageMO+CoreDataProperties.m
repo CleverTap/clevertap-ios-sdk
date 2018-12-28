@@ -28,18 +28,20 @@
         }
         
         NSString *timeStamp = json[@"date"];
+        NSDate *date;
         if (timeStamp && ![timeStamp isEqual:[NSNull null]]) {
             NSTimeInterval _interval = [timeStamp doubleValue];
-            NSDate *date = [NSDate dateWithTimeIntervalSince1970:_interval];
-            self.date = date ? date : [NSDate new];
+            date = [NSDate dateWithTimeIntervalSince1970:_interval];
         }
+        self.date = date ? date : [NSDate new];
 
         NSString *expireTimeStamp = json[@"wzrk_ttl"];
+        NSDate *expires;
         if (expireTimeStamp && ![expireTimeStamp isEqual:[NSNull null]]) {
             NSTimeInterval _interval = [expireTimeStamp doubleValue];
-            NSDate *expires = [NSDate dateWithTimeIntervalSince1970:_interval];
-            self.expires = expires ? expires : nil;
+            expires = [NSDate dateWithTimeIntervalSince1970:_interval];
         }
+        self.expires = expires ? expires : nil;
     }
     return self;
 }

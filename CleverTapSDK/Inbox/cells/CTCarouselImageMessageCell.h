@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) SwipeView *swipeView;
 @property (strong, nonatomic) IBOutlet UILabel *dateLabel;
+@property (nonatomic, strong) IBOutlet UIView *readView;
 @property (strong, nonatomic) IBOutlet UIView *containerView;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *containerViewHeight;
 

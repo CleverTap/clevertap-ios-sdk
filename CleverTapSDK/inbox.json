@@ -4,7 +4,7 @@
             "_id": "1544171480",
             "tags": ["offers", "promotions"],
             "date": 1544094125,
-            "wzrk_ttl": 1565742575,
+            "wzrk_ttl": 1545825073,
             "wzrk_id": "1544171480_20181225",
             "msg": {
                 "type": "simple",
@@ -13,7 +13,7 @@
                 "content": [
                     {
                         "message": {
-                            "text": "Message sprop13 and deflang",
+                            "text": "Stand a chance to win free food for one whole year by sharing your fun foodie moments using #EatsLikeAFoodie (For T&Cs, check out the pinned tweet on our handle)",
                             "color": "#434761",
                             "og": "Message <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@sProp-profile@-2\">profile - sProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:sProp\" data-originalreplacement=\"$replacement$##w:sProp[ add your default value here ]$/replacement$\" data-special-attr=\"@sProp-profile@-2\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defsprop\"></span><span style=\"display:none\">----@sProp-profile@-2</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>&nbsp;and <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@lang-profile@-3\">profile - lang <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:lang\" data-originalreplacement=\"$replacement$##w:lang[ add your default value here ]$/replacement$\" data-special-attr=\"@lang-profile@-3\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"deflang\"></span><span style=\"display:none\">----@lang-profile@-3</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
                             "replacements": "Message $replacement$##w:sProp[defsprop]$/replacement$ and $replacement$##w:lang[deflang]$/replacement$"
@@ -336,6 +336,89 @@
                         "media": {
                             "content-type": "image",
                             "url": "https://s3.amazonaws.com/ct-demo-images/landscape-1.jpg"},
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "1544171485",
+            "tags": ["offers", "promotions"],
+            "date": 1544094125,
+            "wzrk_ttl": 1565742575,
+            "wzrk_id": "1544171480_20181225",
+            "msg": {
+                "type": "icon-message",
+                "bg": "#ffffff",
+                "orientation": "p",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message sprop13 and deflang",
+                            "color": "#434761",
+                            "og": "Message <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@sProp-profile@-2\">profile - sProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:sProp\" data-originalreplacement=\"$replacement$##w:sProp[ add your default value here ]$/replacement$\" data-special-attr=\"@sProp-profile@-2\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defsprop\"></span><span style=\"display:none\">----@sProp-profile@-2</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>&nbsp;and <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@lang-profile@-3\">profile - lang <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:lang\" data-originalreplacement=\"$replacement$##w:lang[ add your default value here ]$/replacement$\" data-special-attr=\"@lang-profile@-3\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"deflang\"></span><span style=\"display:none\">----@lang-profile@-3</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Message $replacement$##w:sProp[defsprop]$/replacement$ and $replacement$##w:lang[deflang]$/replacement$"
+                        },
+                        "title": {
+                            "text": "Title 445",
+                            "color": "#434761",
+                            "og": "Title <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@IntegerProp-profile@-1\">profile - IntegerProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:IntegerProp\" data-originalreplacement=\"$replacement$##w:IntegerProp[ add your default value here ]$/replacement$\" data-special-attr=\"@IntegerProp-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defip\"></span><span style=\"display:none\">----@IntegerProp-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": "https://www.youtube.com"
+                            },
+                            "links": []
+                        },
+                        "media": {
+                            "content_type": "image",
+                            "url": "https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/0f28ab872b2d4d6d96c066ad41279f2e.jpeg?v=1545636193"
+                        },
+                        "icon": {
+                            "url": "https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/0f28ab872b2d4d6d96c066ad41279f2e.jpeg?v=1545636193"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "15441231480",
+            "tags": ["offers", "promotions"],
+            "date": 1544094125,
+            "wzrk_ttl": 1545825073,
+            "wzrk_id": "1544171480_20181225",
+            "msg": {
+                "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "p",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Stand a chance to win free food for one whole year by sharing your fun foodie moments using #EatsLikeAFoodie (For T&Cs, check out the pinned tweet on our handle)",
+                            "color": "#434761",
+                            "og": "Message <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@sProp-profile@-2\">profile - sProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:sProp\" data-originalreplacement=\"$replacement$##w:sProp[ add your default value here ]$/replacement$\" data-special-attr=\"@sProp-profile@-2\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defsprop\"></span><span style=\"display:none\">----@sProp-profile@-2</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>&nbsp;and <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@lang-profile@-3\">profile - lang <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:lang\" data-originalreplacement=\"$replacement$##w:lang[ add your default value here ]$/replacement$\" data-special-attr=\"@lang-profile@-3\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"deflang\"></span><span style=\"display:none\">----@lang-profile@-3</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Message $replacement$##w:sProp[defsprop]$/replacement$ and $replacement$##w:lang[deflang]$/replacement$"
+                        },
+                        "title": {
+                            "text": "Title 445",
+                            "color": "#434761",
+                            "og": "Title <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@IntegerProp-profile@-1\">profile - IntegerProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:IntegerProp\" data-originalreplacement=\"$replacement$##w:IntegerProp[ add your default value here ]$/replacement$\" data-special-attr=\"@IntegerProp-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defip\"></span><span style=\"display:none\">----@IntegerProp-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
+                            "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "",
+                                "ios": "https://www.youtube.com"
+                            },
+                            "links": []
+                        },
+                        "media": {
+                       
+                        },
                         "icon": {}
                     }
                 ]

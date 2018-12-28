@@ -26,9 +26,6 @@ NSString* const kIconMessage = @"icon-message";
 NSString* const kCarouselMessage = @"carousel";
 NSString* const kCarouselImageMessage = @"carousel-image";
 
-static CGFloat kSegmentHeight = 32.0;
-static CGFloat kToolbarHeight = 48.0;
-
 NSString* const kACTION_TYPE_COPY = @"copy";
 NSString* const kACTION_TYPE_URL = @"url";
 
@@ -85,7 +82,6 @@ NSString* const kACTION_DL = @"url";
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    CGFloat topOffset = self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
 }
 
 - (void)registerNibs {
@@ -98,8 +94,8 @@ NSString* const kACTION_DL = @"url";
 
 - (void)loadData {
     self.filterMessages = self.messages;
-    self.tags = [NSArray arrayWithObjects:@"All", @"Offers", @"Promotions", nil];
-//    self.tags = _config.messageTags;
+//    self.tags = [NSArray arrayWithObjects:@"All", @"Offers", @"Promotions", nil];
+    self.tags = _config.messageTags;
 }
 
 #pragma mark - setup layout
@@ -260,11 +256,10 @@ NSString* const kACTION_DL = @"url";
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
    
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    NSArray *visiblePaths = [self.tableView indexPathsForVisibleRows];
 
     if (!message.isRead){
         [self _notifyMessageViewed:message];
-//        [[CleverTap sharedInstance] markReadInboxMessage:message];
+        [[CleverTap sharedInstance] markReadInboxMessage:message];
     }
 
     if ([message.type isEqualToString:kSimpleMessage]) {
@@ -276,16 +271,6 @@ NSString* const kACTION_DL = @"url";
         if (message.content && message.content.count > 0) {
             [cell setupSimpleMessage:message];
         }
-
-        cell.dateLabel.text = message.relativeDate;
-        
-        if (message.content[0].mediaIsVideo) {
-            
-            cell.avPlayerContainerView.hidden = NO;
-            cell.cellImageView.hidden = YES;
-            [cell setupVideoPlayer:message];
-        }
-
         cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
         
         return cell;
@@ -296,12 +281,14 @@ NSString* const kACTION_DL = @"url";
         [cell setupCarouselMessage:message];
         cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
         return cell;
+        
     } else if ([message.type isEqualToString:kCarouselImageMessage]) {
         
         CTCarouselImageMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselImgMessageIdentifier forIndexPath:indexPath];
         [cell setupCarouselImageMessage:message];
         cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
         return cell;
+        
     } else if ([message.type isEqualToString:kIconMessage]) {
         
         CTInboxIconMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellIconMessageIdentifier forIndexPath:indexPath];
@@ -313,8 +300,8 @@ NSString* const kACTION_DL = @"url";
         cell.actionView.delegate = cell;
         cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
         return cell;
-    } else {
         
+    } else {
         CTInboxSimpleMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellSimpleMessageIdentifier forIndexPath:indexPath];
         return cell;
     }
@@ -328,6 +315,7 @@ NSString* const kACTION_DL = @"url";
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+  
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
     CleverTapLogStaticDebug(@"%@: message selected: %@", self, message);
     if (message.content.count == 1) {
@@ -382,7 +370,7 @@ NSString* const kACTION_DL = @"url";
     if (message.content.count > 1) {
         
         CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
-        if (content.actionUrl && content.actionUrl != @""){
+        if (content.actionUrl && ![content.actionUrl  isEqual: @""]){
             [self handleDeeplinks:content.actionUrl];
         }
     } else {

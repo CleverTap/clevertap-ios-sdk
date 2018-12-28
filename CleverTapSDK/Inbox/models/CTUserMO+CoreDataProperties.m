@@ -77,12 +77,20 @@
             continue;
         }
         NSOrderedSet *results = [self.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
-        
+       
         BOOL existing = results && [results count] > 0;
         if (existing) {
             CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
             CTMessageMO *msg = (CTMessageMO*)results[0];
-            [msg setValue:message forKey:@"json"];
+            
+            NSDate *today = [NSDate date];
+            NSDate *expires = msg.expires;
+           
+            if([today compare:expires] == NSOrderedDescending){
+                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
+            } else {
+                [msg setValue:message forKey:@"json"];
+            }
             continue;
         }
         CTMessageMO *_msg = [[CTMessageMO alloc] initWithJSON:message forContext:context];
@@ -91,7 +99,6 @@
         }
     } 
     
-    // TODO addMessages
     if ([newMessages count] > 0) {
         [self addMessages:newMessages];
         haveUpdates = YES;

@@ -106,7 +106,7 @@ static NSManagedObjectContext *privateContext;
     CTMessageMO *message = [self _messageForId:messageId];
     if (message) {
         [message setValue:@YES forKey:@"isRead"];
-        [self notifyUpdate];
+//        [self notifyUpdate];
         [privateContext performBlock:^{
             [self _save];
         }];

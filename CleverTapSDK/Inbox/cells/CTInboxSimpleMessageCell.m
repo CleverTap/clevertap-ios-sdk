@@ -45,10 +45,13 @@ static CGFloat kCornerRadius = 0.0;
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-    self.containerView.layer.cornerRadius = kCornerRadius;
-    self.containerView.layer.masksToBounds = YES;
-    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
-    self.containerView.layer.borderWidth = kBorderWidth;
+    
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+
+//    self.containerView.layer.cornerRadius = kCornerRadius;
+//    self.containerView.layer.masksToBounds = YES;
+//    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
+//    self.containerView.layer.borderWidth = kBorderWidth;
     
     self.readView.layer.cornerRadius = 5;
     self.readView.layer.masksToBounds = YES;
@@ -57,6 +60,10 @@ static CGFloat kCornerRadius = 0.0;
 - (void)layoutNotification:(CleverTapInboxMessage *)message {
     
     CleverTapInboxMessageContent *content = message.content[0];
+    
+    self.cellImageView.hidden = YES;
+    self.avPlayerControlsView.alpha = 0.0;
+    self.avPlayerContainerView.hidden = YES;
 
     if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
         self.imageViewHeightContraint.priority = 999;
@@ -94,47 +101,49 @@ static CGFloat kCornerRadius = 0.0;
     self.message = message;
     CleverTapInboxMessageContent *content = message.content[0];
     
-    self.actionView.hidden = YES;
-    self.avPlayerControlsView.hidden = YES;
-    self.avPlayerContainerView.hidden = YES;
     self.cellImageView.image = nil;
     self.cellImageView.animatedImage = nil;
     self.cellImageView.clipsToBounds = YES;
     
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
-    
+    self.dateLabel.text = message.relativeDate;;
+
     if  (content.links.count > 0) {
         [self setupInboxMessageActions:content];
     }
     
+    // mark read/unread
     if (message.isRead) {
         self.readView.hidden = YES;
     } else {
         self.readView.hidden = NO;
     }
     
+    // set content mode for media
     if (content.mediaIsGif) {
         self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
     } else {
         self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
     }
     
-    if (content.mediaUrl) {
+    if (content.mediaUrl && !content.mediaIsVideo) {
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:nil
                                        options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+    } else {
+        [self setupVideoPlayer:message];
     }
 }
 
 - (void)setupVideoPlayer: (CleverTapInboxMessage *)message  {
     
     CleverTapInboxMessageContent *content = message.content[0];
-
+    
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
-    self.avPlayerControlsView.hidden = NO;
+    self.avPlayerControlsView.alpha = 1.0;
     self.cellImageView.hidden = YES;
     self.volume.hidden = NO;
     self.playButton.hidden = NO;
@@ -190,25 +199,31 @@ static CGFloat kCornerRadius = 0.0;
         _actionView.secondButton.hidden = YES;
         _actionView.thirdButton.hidden = YES;
         
-        _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
-        
         if (content.links.count == 1) {
             
             [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                             toItem:self.containerView attribute:NSLayoutAttributeWidth
-                                         multiplier:1 constant:0] setActive:YES];
-        }
-        
-        if (content.links.count > 1) {
+                                             toItem:self attribute:NSLayoutAttributeWidth
+                                         multiplier:1.0 constant:0] setActive:YES];
+            
+            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
+
+        } else if (content.links.count == 2) {
+            
+            [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
+                                          attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                             toItem:self attribute:NSLayoutAttributeWidth
+                                         multiplier:0.5 constant:0] setActive:YES];
+            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
             _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forText:content.links[1] withIndex:1];
             
-            [[NSLayoutConstraint constraintWithItem:self.actionView.secondButton
-                                          attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                         multiplier:1 constant:0] setActive:YES];
-            
         } else if (content.links.count > 2) {
+          
+            [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
+                                          attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                             toItem:self attribute:NSLayoutAttributeWidth
+                                         multiplier:0.33 constant:0] setActive:YES];
+            _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
             _actionView.thirdButton = [_actionView setupViewForButton:_actionView.thirdButton forText:content.links[1] withIndex:1];
             _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forText:content.links[2] withIndex:2];
         }

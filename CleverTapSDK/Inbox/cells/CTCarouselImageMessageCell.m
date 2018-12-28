@@ -41,10 +41,15 @@ static NSString * const kOrientationLandscape = @"l";
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-    self.containerView.layer.cornerRadius = kCornerRadius;
-    self.containerView.layer.masksToBounds = YES;
-    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
-    self.containerView.layer.borderWidth = kBorderWidth;
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+//
+//    self.containerView.layer.cornerRadius = kCornerRadius;
+//    self.containerView.layer.masksToBounds = YES;
+//    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
+//    self.containerView.layer.borderWidth = kBorderWidth;
+    
+    self.readView.layer.cornerRadius = 5;
+    self.readView.layer.masksToBounds = YES;
 }
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
@@ -55,6 +60,13 @@ static NSString * const kOrientationLandscape = @"l";
     
     self.message = message;
     self.dateLabel.text = message.relativeDate;
+    
+    if (message.isRead) {
+        self.readView.hidden = YES;
+    } else {
+        self.readView.hidden = NO;
+    }
+    
     NSString *orientation = message.orientation;
     // assume square image orientation
     CGFloat viewWidth = self.frame.size.width;
