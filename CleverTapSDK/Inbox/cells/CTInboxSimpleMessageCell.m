@@ -132,7 +132,7 @@ static CGFloat kCornerRadius = 0.0;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:nil
                                        options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
-    } else {
+    } else if (content.mediaIsVideo) {
         [self setupVideoPlayer:message];
     }
 }

@@ -123,6 +123,13 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZQU-8D-RQn" customClass="CTInboxMessageActionView">
                                 <rect key="frame" x="0.0" y="583.5" width="469" height="44"/>
                                 <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Y0J-Gl-9Ac">
+                                        <rect key="frame" x="0.0" y="0.0" width="469" height="1"/>
+                                        <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="1" id="Ns4-l1-9M6"/>
+                                        </constraints>
+                                    </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wPN-1x-P4p">
                                         <rect key="frame" x="0.0" y="3" width="155" height="41"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
@@ -144,14 +151,17 @@
                                     <constraint firstAttribute="bottom" secondItem="zkj-Ay-AJC" secondAttribute="bottom" id="8HG-Ue-R4G"/>
                                     <constraint firstAttribute="trailing" secondItem="zkj-Ay-AJC" secondAttribute="trailing" id="DlO-UY-B4i"/>
                                     <constraint firstItem="zkj-Ay-AJC" firstAttribute="top" secondItem="ZQU-8D-RQn" secondAttribute="top" constant="3" id="F6c-bR-lgN"/>
+                                    <constraint firstAttribute="trailing" secondItem="Y0J-Gl-9Ac" secondAttribute="trailing" id="LWZ-a6-EJn"/>
                                     <constraint firstItem="wPN-1x-P4p" firstAttribute="width" secondItem="ZQU-8D-RQn" secondAttribute="width" multiplier="0.33" id="Ljx-d8-dNz"/>
                                     <constraint firstItem="wPN-1x-P4p" firstAttribute="leading" secondItem="ZQU-8D-RQn" secondAttribute="leading" id="OKq-91-KK5"/>
-                                    <constraint firstItem="zkj-Ay-AJC" firstAttribute="leading" secondItem="YRp-2f-eA5" secondAttribute="trailing" constant="1" id="Obf-dt-65N"/>
+                                    <constraint firstItem="zkj-Ay-AJC" firstAttribute="leading" relation="lessThanOrEqual" secondItem="YRp-2f-eA5" secondAttribute="trailing" constant="1" id="Obf-dt-65N"/>
                                     <constraint firstAttribute="bottom" secondItem="wPN-1x-P4p" secondAttribute="bottom" id="R5w-UM-fRK"/>
+                                    <constraint firstItem="Y0J-Gl-9Ac" firstAttribute="top" secondItem="ZQU-8D-RQn" secondAttribute="top" id="Rki-HX-yGC"/>
                                     <constraint firstItem="zkj-Ay-AJC" firstAttribute="width" secondItem="wPN-1x-P4p" secondAttribute="width" priority="750" id="SbO-oo-Wwq"/>
                                     <constraint firstItem="YRp-2f-eA5" firstAttribute="leading" secondItem="wPN-1x-P4p" secondAttribute="trailing" constant="1" id="XZg-Jz-kdx"/>
                                     <constraint firstItem="wPN-1x-P4p" firstAttribute="top" secondItem="ZQU-8D-RQn" secondAttribute="top" constant="3" id="aMh-5s-FcO"/>
                                     <constraint firstItem="YRp-2f-eA5" firstAttribute="top" secondItem="ZQU-8D-RQn" secondAttribute="top" constant="3" id="l3J-rL-4Y8"/>
+                                    <constraint firstItem="Y0J-Gl-9Ac" firstAttribute="leading" secondItem="ZQU-8D-RQn" secondAttribute="leading" id="nsh-Up-Kad"/>
                                     <constraint firstItem="YRp-2f-eA5" firstAttribute="width" secondItem="wPN-1x-P4p" secondAttribute="width" priority="999" id="nxg-z8-cfb"/>
                                     <constraint firstAttribute="bottom" secondItem="YRp-2f-eA5" secondAttribute="bottom" id="pwk-Rv-iTw"/>
                                 </constraints>

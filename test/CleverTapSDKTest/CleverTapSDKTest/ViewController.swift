@@ -52,13 +52,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             let messageCount = ct1.getInboxMessageCount()
             let unreadCount = ct1.getInboxMessageUnreadCount()
             
-            DispatchQueue.main.sync {
+            DispatchQueue.main.async {
                 self.inboxButton.isHidden = messageCount <= 0
                 self.inboxButton.setTitle("Show Inbox: \(unreadCount) unread", for: .normal)
             }
-            
-            
-        }))
+     }))
         
         ct1.initializeInbox(callback: ({ (success) in
 //                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")

@@ -100,11 +100,8 @@ NSString* const kACTION_DL = @"url";
 
 #pragma mark - setup layout
 
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration{
-}
+- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
 
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation{
-    [self setupSegmentController];
 }
 
 - (void)setupLayout {
@@ -116,12 +113,36 @@ NSString* const kACTION_DL = @"url";
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
     self.automaticallyAdjustsScrollViewInsets = NO;
     
-    [self setupSegmentController];
+    if (self.tags.count == 0) {
+        UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
+                                       initWithTitle:@"✕"
+                                       style:UIBarButtonItemStylePlain
+                                       target:self
+                                       action:@selector(dismisstapped)];
+        self.navigationItem.rightBarButtonItem = backButton;
+        self.navigationItem.title = @"Notifications";
+        self.navigationController.navigationBar.translucent = false;
+        self.navigationController.navigationBar.tintColor = [UIColor blackColor];
+        
+//        NSShadow *shadow = [[NSShadow alloc] init];
+//        shadow.shadowColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8];
+//        shadow.shadowOffset = CGSizeMake(0, 1);
+//        [[UINavigationBar appearance] setTitleTextAttributes: [NSDictionary dictionaryWithObjectsAndKeys:
+//                                                               [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0], NSForegroundColorAttributeName,
+//                                                               shadow, NSShadowAttributeName,
+//                                                               [UIFont fontWithName:@"HelveticaNeue-CondensedBlack" size:21.0], NSFontAttributeName, nil]];
+//
+//        self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+//        self.navigationController.navigationBar.barTintColor = [UIColor blueColor];
+        
+    } else {
+        [self setupSegmentController];
+    }
 }
 
 - (void)setupSegmentController {
    
-    // set navigatiob bar
+    // set navigation bar
     self.navigationController.navigationBar.translucent = NO;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
     
@@ -142,7 +163,7 @@ NSString* const kACTION_DL = @"url";
     
     [self.navigation removeFromSuperview];
     _navigation = [[UIView alloc] init];
-    [self.navigationController.navigationBar addSubview:_navigation];
+    [self.navigationController.view addSubview:_navigation];
     _navigation.translatesAutoresizingMaskIntoConstraints = NO;
 //    _navigation.backgroundColor = [UIColor redColor];
     
@@ -259,7 +280,6 @@ NSString* const kACTION_DL = @"url";
 
     if (!message.isRead){
         [self _notifyMessageViewed:message];
-        [[CleverTap sharedInstance] markReadInboxMessage:message];
     }
 
     if ([message.type isEqualToString:kSimpleMessage]) {
@@ -330,6 +350,7 @@ NSString* const kACTION_DL = @"url";
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+    [[CleverTap sharedInstance] markReadInboxMessage:message];
     if ([message.type isEqualToString:kSimpleMessage]) {
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
          if (message.content[0].mediaIsVideo) {

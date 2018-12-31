@@ -524,19 +524,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self notifyUserProfileInitialized];
-    
-    // TODO REMOVE FOR TEST ONLY - move to parseResponse
-#if !CLEVERTAP_NO_INBOX_SUPPORT
-    [self initializeInboxWithCallback:^(BOOL success) {
-        if (success) {
-            [self runSerialAsync:^{
-                NSArray <NSDictionary*> *messages = [self getInboxMessages];
-                 [self.inboxController updateMessages:messages];
-            }];
-        }
-    }];
-    
-#endif
+
     return self;
 }
 
@@ -2456,6 +2444,39 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
 #endif
+                
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+                NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
+                if (inboxJSON) {
+                    NSMutableArray *inboxNotifs;
+                    @try {
+                        inboxNotifs = [[NSMutableArray alloc] initWithArray:inboxJSON];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Inbox Message JSON: %@", self, e.debugDescription);
+                    }
+                    if (inboxNotifs && [inboxNotifs count] > 0) {
+                        [self initializeInboxWithCallback:^(BOOL success) {
+                            if (success) {
+                                [self runSerialAsync:^{
+                                    NSArray <NSDictionary*> *messages =  [inboxNotifs mutableCopy];;
+                                    [self.inboxController updateMessages:messages];
+                                }];
+                            }
+                        }];
+                    }
+                }
+                
+                //-- TODO - Remove - Just for Testing
+                [self initializeInboxWithCallback:^(BOOL success) {
+                    if (success) {
+                        [self runSerialAsync:^{
+                            NSArray <NSDictionary*> *messages = [self getInboxMessages];
+                            [self.inboxController updateMessages:messages];
+                        }];
+                    }
+                }];
+#endif
+
                 // Handle events/profiles sync data
                 @try {
                     NSDictionary *evpr = jsonResp[@"evpr"];
@@ -3581,7 +3602,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark CTInboxDelegate
 
 - (void)inboxMessagesDidUpdate {
-    CleverTapLogInternal(self.config.logLevel, @"%@: Inbox messages did update: %@", self, [self getAllInboxMessages]);
+//    CleverTapLogInternal(self.config.logLevel, @"%@: Inbox messages did update: %@", self, [self getAllInboxMessages]);
     for (CleverTapInboxUpdatedBlock block in self.inboxUpdateBlocks) {
         if (block) {
             block();
@@ -3634,7 +3655,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.inAppFCManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
         
-        NSString *jsonString = notification[@"wzrk_inbox"][@"inbox_notifications"];
+        NSString *jsonString = notification[@"wzrk_inbox"];
         NSDictionary *msg = [NSJSONSerialization
                                  JSONObjectWithData:[jsonString
                                     dataUsingEncoding:NSUTF8StringEncoding]
@@ -3643,7 +3664,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         NSDate *now = [NSDate date];
         NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970];
-        NSString * nowEpoch = [NSString stringWithFormat:@"%.2f", nowEpochSeconds];
+        NSInteger epochTime = nowEpochSeconds;
+        NSString * nowEpoch = [NSString stringWithFormat:@"%li", (long)epochTime];
        
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];
