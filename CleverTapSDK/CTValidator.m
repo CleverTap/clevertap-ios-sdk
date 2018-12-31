@@ -23,7 +23,7 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
  *         and the error code(if any)
  */
 + (CTValidationResult *)cleanEventName:(NSString *)name {
-    NSArray *eventNameCharsNotAllowed = @[@".", @":", @"$", @"'", @"\"", @"\\", @"|"];
+    NSArray *eventNameCharsNotAllowed = @[@".", @":", @"$", @"'", @"\"", @"\\"];
     CTValidationResult *vr = [[CTValidationResult alloc] init];
     
     name = [name stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -52,7 +52,7 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
  *         and the error code(if any)
  */
 + (CTValidationResult *)cleanObjectKey:(NSString *)name {
-    NSArray *objectKeyCharsNotAllowed = @[@".", @":", @"$", @"'", @"\"", @"\\", @"|"];
+    NSArray *objectKeyCharsNotAllowed = @[@".", @":", @"$", @"'", @"\"", @"\\"];
     CTValidationResult *vr = [[CTValidationResult alloc] init];
     name = [name stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     for (NSString *x in objectKeyCharsNotAllowed)
@@ -117,7 +117,7 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
     value = [value lowercaseString];
     
     // remove reserved characters
-    NSArray *objectValueCharsNotAllowed = @[@"'", @"\"", @"\\", @"|"];
+    NSArray *objectValueCharsNotAllowed = @[@"'", @"\"", @"\\"];
     for (NSString *x in objectValueCharsNotAllowed)
         value = [value stringByReplacingOccurrencesOfString:x withString:@""];
     
@@ -166,7 +166,7 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
         NSString *value = (NSString *) o;
         value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
-        NSArray *objectValueCharsNotAllowed = @[@"'", @"\"", @"\\", @"|"];
+        NSArray *objectValueCharsNotAllowed = @[@"'", @"\"", @"\\"];
         for (NSString *x in objectValueCharsNotAllowed)
             value = [value stringByReplacingOccurrencesOfString:x withString:@""];
         

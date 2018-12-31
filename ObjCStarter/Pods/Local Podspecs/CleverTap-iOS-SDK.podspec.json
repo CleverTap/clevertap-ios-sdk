@@ -25,7 +25,10 @@
         "4.4.2"
       ]
     },
-    "resources": "CleverTapSDK/**/*.{png,xib}",
+    "resources": [
+      "CleverTapSDK/**/*.{png,xib}",
+      "CleverTapSDK/**/*.xcdatamodeld"
+    ],
     "source_files": "CleverTapSDK/**/*.{h,m}",
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",

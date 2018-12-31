@@ -102,7 +102,7 @@
 		0796FB6A21AE5B6300FC380D /* CTCarouselImageMessageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0796FB6721AE5B6300FC380D /* CTCarouselImageMessageCell.m */; };
 		0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell.xib */; };
 		079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */ = {isa = PBXBuildFile; fileRef = 079701E42180A055008BF668 /* sound-wave-headphones.png */; };
-		0797132821A2DE9A0011C9A3 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0797132721A2DE9A0011C9A3 /* SDWebImage.framework */; };
+		0797132821A2DE9A0011C9A3 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0797132721A2DE9A0011C9A3 /* SDWebImage.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		0797132F21A2F09A0011C9A3 /* SwipeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797132D21A2F09A0011C9A3 /* SwipeView.h */; };
 		0797133021A2F09A0011C9A3 /* SwipeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797132E21A2F09A0011C9A3 /* SwipeView.m */; };
 		0797133921A309720011C9A3 /* CTCaptionedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797133721A309710011C9A3 /* CTCaptionedImageView.h */; };
