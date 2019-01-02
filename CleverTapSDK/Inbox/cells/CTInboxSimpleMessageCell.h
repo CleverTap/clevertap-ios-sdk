@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) AVPlayer *avPlayer;
 @property (strong, nonatomic) AVPlayerLayer *avPlayerLayer;
 @property (strong, nonatomic) AVPlayerItem *avPlayerItem;
+@property (nonatomic, weak) NSTimer *controllersTimer;
+@property (nonatomic, assign) NSInteger controllersTimeoutPeriod;
 @property (assign, nonatomic) BOOL isVideoMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
 

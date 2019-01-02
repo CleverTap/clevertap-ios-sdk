@@ -40,12 +40,22 @@
                             <constraint firstAttribute="trailing" secondItem="ZUK-ve-wXm" secondAttribute="trailing" constant="20" id="znf-gw-cq7"/>
                         </constraints>
                     </view>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RVp-gZ-oYo">
+                        <rect key="frame" x="479" y="15" width="10" height="10"/>
+                        <color key="backgroundColor" red="0.047058823530000002" green="0.20392156859999999" blue="0.53725490200000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="10" id="I0V-Xn-OAt"/>
+                            <constraint firstAttribute="width" constant="10" id="JGG-2o-x8m"/>
+                        </constraints>
+                    </view>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="RVp-gZ-oYo" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="15" id="14y-FR-2fi"/>
                     <constraint firstItem="LlB-bw-rkG" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="25l-hP-9GE"/>
                     <constraint firstItem="LlB-bw-rkG" firstAttribute="top" secondItem="J0a-5P-8NV" secondAttribute="bottom" id="3gj-4G-nDz"/>
                     <constraint firstAttribute="trailing" secondItem="J0a-5P-8NV" secondAttribute="trailing" id="AVN-Qa-a86"/>
                     <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="LlB-bw-rkG" secondAttribute="bottom" id="Huo-3c-DHZ"/>
+                    <constraint firstAttribute="trailing" secondItem="RVp-gZ-oYo" secondAttribute="trailing" constant="15" id="IdQ-qV-5XM"/>
                     <constraint firstItem="J0a-5P-8NV" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="SNU-74-hNY"/>
                     <constraint firstItem="J0a-5P-8NV" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="hT9-sz-H8y"/>
                     <constraint firstAttribute="trailing" secondItem="LlB-bw-rkG" secondAttribute="trailing" id="oiO-7t-kBs"/>
@@ -55,6 +65,7 @@
                 <outlet property="containerView" destination="J0a-5P-8NV" id="X8D-5F-y3z"/>
                 <outlet property="containerViewHeight" destination="Qtl-Ub-Jfc" id="6Cl-zz-kqi"/>
                 <outlet property="dateLabel" destination="ZUK-ve-wXm" id="ZDz-Uh-wqG"/>
+                <outlet property="readView" destination="RVp-gZ-oYo" id="m3N-5M-56G"/>
             </connections>
             <point key="canvasLocation" x="284.80000000000001" y="190.25487256371815"/>
         </tableViewCell>

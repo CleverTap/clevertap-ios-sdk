@@ -74,7 +74,6 @@ NSString* const kACTION_DL = @"url";
                                              selector:@selector(handleMessageTapped:)
                                                  name:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:nil];
     
-    [self.navigationController.navigationBar sizeToFit];
     [self registerNibs];
     [self loadData];
     [self setupLayout];
@@ -94,14 +93,22 @@ NSString* const kACTION_DL = @"url";
 
 - (void)loadData {
     self.filterMessages = self.messages;
-//    self.tags = [NSArray arrayWithObjects:@"All", @"Offers", @"Promotions", nil];
-    self.tags = _config.messageTags;
+    if (_config.messageTags.count > 0) {
+        NSString *defaultTag = @"All";
+        NSMutableArray *tags = [NSMutableArray new];
+        [tags addObject:defaultTag];
+        [tags addObjectsFromArray:_config.messageTags];
+        self.tags = [tags mutableCopy];
+    }
 }
 
 #pragma mark - setup layout
 
-- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-
+- (void) traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
+    [super traitCollectionDidChange: previousTraitCollection];
+    if (_config.messageTags.count > 0) {
+        [self setupSegmentController];
+    }
 }
 
 - (void)setupLayout {
@@ -115,7 +122,7 @@ NSString* const kACTION_DL = @"url";
     
     if (self.tags.count == 0) {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
-                                       initWithTitle:@"✕"
+                                       initWithTitle:@"✖️"
                                        style:UIBarButtonItemStylePlain
                                        target:self
                                        action:@selector(dismisstapped)];
@@ -123,17 +130,6 @@ NSString* const kACTION_DL = @"url";
         self.navigationItem.title = @"Notifications";
         self.navigationController.navigationBar.translucent = false;
         self.navigationController.navigationBar.tintColor = [UIColor blackColor];
-        
-//        NSShadow *shadow = [[NSShadow alloc] init];
-//        shadow.shadowColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8];
-//        shadow.shadowOffset = CGSizeMake(0, 1);
-//        [[UINavigationBar appearance] setTitleTextAttributes: [NSDictionary dictionaryWithObjectsAndKeys:
-//                                                               [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0], NSForegroundColorAttributeName,
-//                                                               shadow, NSShadowAttributeName,
-//                                                               [UIFont fontWithName:@"HelveticaNeue-CondensedBlack" size:21.0], NSFontAttributeName, nil]];
-//
-//        self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
-//        self.navigationController.navigationBar.barTintColor = [UIColor blueColor];
         
     } else {
         [self setupSegmentController];
@@ -143,7 +139,7 @@ NSString* const kACTION_DL = @"url";
 - (void)setupSegmentController {
    
     // set navigation bar
-    self.navigationController.navigationBar.translucent = NO;
+    self.navigationController.navigationBar.translucent = false;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
     
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc]initWithItems: self.tags];
@@ -152,20 +148,20 @@ NSString* const kACTION_DL = @"url";
     segmentedControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     segmentedControl.selectedSegmentIndex = 0;
     
-    CGFloat topOffset = self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
-    
-    CGFloat statusOffset = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
-    
     if (self.tags.count > 1) {
         self.navigationItem.prompt = @"";
         self.navigationItem.titleView = segmentedControl;
     }
     
+    [self.navigationController.view layoutSubviews];
+    CGFloat topOffset = (self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height) - 34;
+    
+    CGFloat statusOffset = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
+    
     [self.navigation removeFromSuperview];
     _navigation = [[UIView alloc] init];
     [self.navigationController.view addSubview:_navigation];
     _navigation.translatesAutoresizingMaskIntoConstraints = NO;
-//    _navigation.backgroundColor = [UIColor redColor];
     
     [[NSLayoutConstraint constraintWithItem:_navigation
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
@@ -179,7 +175,6 @@ NSString* const kACTION_DL = @"url";
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:0] setActive:YES];
-    
     [[NSLayoutConstraint constraintWithItem:_navigation
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
@@ -244,12 +239,8 @@ NSString* const kACTION_DL = @"url";
     }
     
     [self.tableView reloadData];
-    [self.tableView layoutSubviews];
     [self.tableView layoutIfNeeded];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.tableView.contentOffset = CGPointMake(0, -self.tableView.contentInset.top);
-    });
+    self.tableView.contentOffset = CGPointMake(0, -self.tableView.contentInset.top);
 }
 
 - (void)filterNotifications: (NSString *)filter{
@@ -300,6 +291,8 @@ NSString* const kACTION_DL = @"url";
         CTCarouselMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselMessageIdentifier forIndexPath:indexPath];
         [cell setupCarouselMessage:message];
         cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        [cell layoutIfNeeded];
+        [cell layoutSubviews];
         return cell;
         
     } else if ([message.type isEqualToString:kCarouselImageMessage]) {
@@ -307,6 +300,8 @@ NSString* const kACTION_DL = @"url";
         CTCarouselImageMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselImgMessageIdentifier forIndexPath:indexPath];
         [cell setupCarouselImageMessage:message];
         cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        [cell layoutIfNeeded];
+        [cell layoutSubviews];
         return cell;
         
     } else if ([message.type isEqualToString:kIconMessage]) {
@@ -350,7 +345,27 @@ NSString* const kACTION_DL = @"url";
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    [[CleverTap sharedInstance] markReadInboxMessage:message];
+    if (!message.isRead) {
+        [[CleverTap sharedInstance] markReadInboxMessage:message];
+        if ([cell isKindOfClass:[CTInboxSimpleMessageCell class]]) {
+            CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
+            messageCell.readView.hidden = YES;
+        } else if ([cell isKindOfClass:[CTCarouselMessageCell class]]) {
+            CTCarouselMessageCell *messageCell = (CTCarouselMessageCell*)cell;
+            messageCell.readView.hidden = YES;
+        } else if ([cell isKindOfClass:[CTCarouselImageMessageCell class]]) {
+            CTCarouselImageMessageCell *messageCell = (CTCarouselImageMessageCell*)cell;
+            messageCell.readView.hidden = YES;
+        } else if ([cell isKindOfClass:[CTInboxIconMessageCell class]]) {
+            CTInboxIconMessageCell *messageCell = (CTInboxIconMessageCell*)cell;
+            messageCell.readView.hidden = YES;
+        }
+        
+        [self.tableView beginUpdates];
+        [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:indexPath, nil] withRowAnimation:UITableViewRowAnimationNone];
+        [self.tableView endUpdates];
+    }
+    
     if ([message.type isEqualToString:kSimpleMessage]) {
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
          if (message.content[0].mediaIsVideo) {
@@ -360,16 +375,15 @@ NSString* const kACTION_DL = @"url";
 }
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (self.filterMessages.count > 0) {
+//    if (self.filterMessages.count > 0) {
 //        CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
 //        if ([message.type isEqualToString:kSimpleMessage]) {
-//            CTInboxSimpleMessageCell *messageCell = cell;
-//            if ([message.media[@"content_type"]  isEqual: @"video"]) {
-//                //            [messageCell.playerLayer.player pause];
-//                //            messageCell.playerLayer.player = nil;
+//            CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
+//            if (message.content[0].mediaIsVideo) {
+//                [messageCell.playerLayer.player pause];
 //            }
 //        }
-    }
+//    }
 }
 
 #pragma mark - Actions
@@ -394,6 +408,7 @@ NSString* const kACTION_DL = @"url";
         if (content.actionUrl && ![content.actionUrl  isEqual: @""]){
             [self handleDeeplinks:content.actionUrl];
         }
+        
     } else {
         
         if ([message.content[0] isKindOfClass:[CleverTapInboxMessageContent class]]) {
@@ -462,5 +477,6 @@ NSString* const kACTION_DL = @"url";
         [self.analyticsDelegate messageDidSelect:message];
     }
 }
+
 
 @end

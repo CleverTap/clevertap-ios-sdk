@@ -30,6 +30,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             style.contentBorderColor = UIColor.orange
             style.messageTitleColor = UIColor.cyan
             style.messageBodyColor = UIColor.gray
+            style.messageTags = ["Promotions", "Offers"];
             if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
 //                inboxController.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
                 let navigationController = UINavigationController.init(rootViewController: inboxController)

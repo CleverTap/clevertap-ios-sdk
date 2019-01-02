@@ -3602,7 +3602,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark CTInboxDelegate
 
 - (void)inboxMessagesDidUpdate {
-//    CleverTapLogInternal(self.config.logLevel, @"%@: Inbox messages did update: %@", self, [self getAllInboxMessages]);
+    CleverTapLogInternal(self.config.logLevel, @"%@: Inbox messages did update: %@", self, [self getAllInboxMessages]);
     for (CleverTapInboxUpdatedBlock block in self.inboxUpdateBlocks) {
         if (block) {
             block();
@@ -3666,9 +3666,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970];
         NSInteger epochTime = nowEpochSeconds;
         NSString * nowEpoch = [NSString stringWithFormat:@"%li", (long)epochTime];
-       
+        
+        NSDate *expireDate = [now dateByAddingTimeInterval:(24 * 60 * 60)];
+        NSTimeInterval expireEpochSeconds = [expireDate timeIntervalSince1970];
+        NSInteger expireTime = expireEpochSeconds;
+        NSString * expireEpoch = [NSString stringWithFormat:@"%li", (long)expireTime];
+
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];
+        [message setObject:expireEpoch forKey:@"wzrk_ttl"];
         [message addEntriesFromDictionary:msg];
         
         NSMutableArray *messages = [NSMutableArray new];

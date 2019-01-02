@@ -8,7 +8,7 @@
             "wzrk_id": "1544171480_20181225",
             "msg": {
                 "type": "simple",
-                "bg": "#ffffff",
+                "bg": "#D6DA7C",
                 "orientation": "p",
                 "content": [
                     {
@@ -68,8 +68,12 @@
                         "action": {
                             "type": "onmessage",
                             "url": {
-                                "android": "",
-                                "ios": ""
+                                "android": "https://www.google.com",
+                                "ios": {
+                                    "text": "https://www.google.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
                             },
                             "links": [
                                 {
@@ -124,7 +128,7 @@
                                 "android": {
                                     "text": "abc"
                                 },
-                                "ios": {}
+                                "ios": ""
                             },
                             "links": [
                                 {
@@ -158,7 +162,7 @@
             "wzrk_id": "1543817421_20181225",
             "msg": {
                 "type": "carousel",
-                "bg": "#F30C0C",
+                "bg": "#679998",
                 "orientation": "p",
                 "content": [
                     {
@@ -435,7 +439,7 @@
             "wzrk_id": "1544171480_20181225",
             "msg": {
                 "type": "simple",
-                "bg": "#ffffff",
+                "bg": "#7CDA9A",
                 "orientation": "p",
                 "content": [
                     {

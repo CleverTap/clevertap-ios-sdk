@@ -49,7 +49,7 @@ static CGFloat kCornerRadius = 0.0;
     self.selectionStyle = UITableViewCellSelectionStyleNone;
 
 //    self.containerView.layer.cornerRadius = kCornerRadius;
-//    self.containerView.layer.masksToBounds = YES;
+    self.containerView.layer.masksToBounds = YES;
 //    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
 //    self.containerView.layer.borderWidth = kBorderWidth;
     
@@ -80,7 +80,7 @@ static CGFloat kCornerRadius = 0.0;
     }
     
     if (content.links.count == 0) {
-        _actionViewHeightContraint.constant = 0;
+        _actionViewHeightContraint.constant = 0.1;
     } else {
         _actionViewHeightContraint.constant = 44;
     }
@@ -140,6 +140,7 @@ static CGFloat kCornerRadius = 0.0;
 - (void)setupVideoPlayer: (CleverTapInboxMessage *)message  {
     
     CleverTapInboxMessageContent *content = message.content[0];
+    self.controllersTimeoutPeriod = 2;
     
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
@@ -263,6 +264,7 @@ static CGFloat kCornerRadius = 0.0;
     if (self.avPlayer != nil) {
         [self.avPlayer play];
         [self.playButton setSelected:YES];
+        [self startAVIdleCountdown];
     }
 }
 
@@ -271,6 +273,7 @@ static CGFloat kCornerRadius = 0.0;
     if (self.avPlayer != nil) {
         [self.avPlayer seekToTime:kCMTimeZero];
         [self.playButton setSelected:NO];
+        [self stopAVIdleCountdown];
     }
 }
 
@@ -278,6 +281,7 @@ static CGFloat kCornerRadius = 0.0;
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
         [self.playButton setSelected:NO];
+        [self stopAVIdleCountdown];
     }
 }
 
@@ -318,6 +322,21 @@ static CGFloat kCornerRadius = 0.0;
     } completion:^(BOOL finished) {
         self.isControlsHidden = true;
     }];
+}
+
+- (void)startAVIdleCountdown {
+    if (self.controllersTimer) {
+        [self.controllersTimer invalidate];
+    }
+    if (self.controllersTimeoutPeriod > 0) {
+        self.controllersTimer = [NSTimer scheduledTimerWithTimeInterval:self.controllersTimeoutPeriod target:self selector:@selector(hideControls:) userInfo:nil repeats:NO];
+    }
+}
+
+- (void)stopAVIdleCountdown {
+    if (self.controllersTimer) {
+        [self.controllersTimer invalidate];
+    }
 }
 
 #pragma mark Delegate

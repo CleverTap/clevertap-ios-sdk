@@ -3,8 +3,6 @@
 
 @implementation CTCarouselMessageCell
 
-static CGFloat kBorderWidth = 2.0;
-static CGFloat kCornerRadius = 0.0;
 static const float kLandscapeMultiplier = 0.5625; // 16:9 in landscape
 static const float kPageControlViewHeight = 30.f;
 
@@ -44,7 +42,7 @@ static NSString * const kOrientationLandscape = @"l";
     self.selectionStyle = UITableViewCellSelectionStyleNone;
 
 //    self.containerView.layer.cornerRadius = kCornerRadius;
-//    self.containerView.layer.masksToBounds = YES;
+    self.containerView.layer.masksToBounds = YES;
 //    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
 //    self.containerView.layer.borderWidth = kBorderWidth;
     
@@ -84,6 +82,24 @@ static NSString * const kOrientationLandscape = @"l";
     self.frame = frame;
     self.carouselView.frame = frame;
     self.carouselViewHeight.constant = viewHeight;
+    
+    [[NSLayoutConstraint constraintWithItem:self.carouselView
+                                  attribute:NSLayoutAttributeLeading
+                                  relatedBy:NSLayoutRelationEqual
+                                     toItem:self.containerView attribute:NSLayoutAttributeLeading
+                                 multiplier:1 constant:0] setActive:YES];
+    
+    [[NSLayoutConstraint constraintWithItem:self.carouselView
+                                  attribute:NSLayoutAttributeTrailing
+                                  relatedBy:NSLayoutRelationEqual
+                                     toItem:self.containerView attribute:NSLayoutAttributeTrailing
+                                 multiplier:1 constant:0] setActive:YES];
+    
+    [[NSLayoutConstraint constraintWithItem:self.carouselView
+                                  attribute:NSLayoutAttributeTop
+                                  relatedBy:NSLayoutRelationEqual
+                                     toItem:self.containerView attribute:NSLayoutAttributeTop
+                                 multiplier:1 constant:0] setActive:YES];
     
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
