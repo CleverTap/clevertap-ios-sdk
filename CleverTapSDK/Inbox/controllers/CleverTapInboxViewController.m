@@ -26,13 +26,6 @@ NSString* const kIconMessage = @"icon-message";
 NSString* const kCarouselMessage = @"carousel";
 NSString* const kCarouselImageMessage = @"carousel-image";
 
-NSString* const kACTION_TYPE_COPY = @"copy";
-NSString* const kACTION_TYPE_URL = @"url";
-
-NSString* const kACTION_TYPE = @"type";
-NSString* const kACTION_COPY_TEXT = @"copyText";
-NSString* const kACTION_DL = @"url";
-
 @interface CleverTapInboxViewController () <UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, copy) NSArray<CleverTapInboxMessage *> *messages;
@@ -268,9 +261,9 @@ NSString* const kACTION_DL = @"url";
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
    
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-
     if (!message.isRead){
         [self _notifyMessageViewed:message];
+        [message setRead:YES];
     }
 
     if ([message.type isEqualToString:kSimpleMessage]) {
@@ -329,42 +322,9 @@ NSString* const kACTION_DL = @"url";
 
 #pragma mark - Table view delegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-  
-    CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    CleverTapLogStaticDebug(@"%@: message selected: %@", self, message);
-    if (message.content.count == 1) {
-        CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[0];
-        if ([content.actionType isEqualToString:@"onmessage"]) {
-            [self _notifyMessageSelected:message];
-            [self handleDeeplinks: content.actionUrl];
-        }
-    }
-}
-
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    if (!message.isRead) {
-        [[CleverTap sharedInstance] markReadInboxMessage:message];
-        if ([cell isKindOfClass:[CTInboxSimpleMessageCell class]]) {
-            CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
-            messageCell.readView.hidden = YES;
-        } else if ([cell isKindOfClass:[CTCarouselMessageCell class]]) {
-            CTCarouselMessageCell *messageCell = (CTCarouselMessageCell*)cell;
-            messageCell.readView.hidden = YES;
-        } else if ([cell isKindOfClass:[CTCarouselImageMessageCell class]]) {
-            CTCarouselImageMessageCell *messageCell = (CTCarouselImageMessageCell*)cell;
-            messageCell.readView.hidden = YES;
-        } else if ([cell isKindOfClass:[CTInboxIconMessageCell class]]) {
-            CTInboxIconMessageCell *messageCell = (CTInboxIconMessageCell*)cell;
-            messageCell.readView.hidden = YES;
-        }
-        
-        [self.tableView beginUpdates];
-        [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:indexPath, nil] withRowAnimation:UITableViewRowAnimationNone];
-        [self.tableView endUpdates];
-    }
     
     if ([message.type isEqualToString:kSimpleMessage]) {
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
@@ -374,92 +334,20 @@ NSString* const kACTION_DL = @"url";
     }
 }
 
-- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-//    if (self.filterMessages.count > 0) {
-//        CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-//        if ([message.type isEqualToString:kSimpleMessage]) {
-//            CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
-//            if (message.content[0].mediaIsVideo) {
-//                [messageCell.playerLayer.player pause];
-//            }
-//        }
-//    }
-}
-
 #pragma mark - Actions
 
 - (void)dismisstapped {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-#pragma mark - Message Handling
+#pragma mark - Inbox Message Handling
 
 - (void)handleMessageTapped:(NSNotification *)notification {
     
     CleverTapInboxMessage *message = (CleverTapInboxMessage*)notification.object;
-    [self _notifyMessageSelected:message];
-    
     NSDictionary *userInfo = (NSDictionary *)notification.userInfo;
     int index = [[userInfo objectForKey:@"index"] intValue];
-    
-    if (message.content.count > 1) {
-        
-        CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
-        if (content.actionUrl && ![content.actionUrl  isEqual: @""]){
-            [self handleDeeplinks:content.actionUrl];
-        }
-        
-    } else {
-        
-        if ([message.content[0] isKindOfClass:[CleverTapInboxMessageContent class]]) {
-            
-            CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[0];
-            NSDictionary *link = content.links[index];
-            NSString *actionType = link[kACTION_TYPE];
-            
-            if ([actionType isEqualToString:kACTION_TYPE_COPY]) {
-                NSString *copyText = link[kACTION_COPY_TEXT];
-                UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-                pasteboard.string = copyText;
-            } else if ( [actionType isEqualToString:kACTION_TYPE_URL]) {
-                [self handleDeeplinks:link[@"url"][@"ios"]];
-            }
-        }
-    }
-}
-
-- (void)handleDeeplinks:(NSString *)dl {
-    
-    UIApplication *application = [CTInAppResources getSharedApplication];
-    
-    if (dl && [dl isKindOfClass:[NSString class]]) {
-        __block NSURL *dlURL = [NSURL URLWithString:dl];
-        if (dlURL) {
-            if (@available(iOS 10.0, *)) {
-                if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                    NSMethodSignature *signature = [UIApplication instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                    NSInvocation *invocation = [NSInvocation
-                                                invocationWithMethodSignature:signature];
-                    [invocation setTarget:application];
-                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                    NSDictionary *options = @{};
-                    id completionHandler = nil;
-                    [invocation setArgument:&dlURL atIndex:2];
-                    [invocation setArgument:&options atIndex:3];
-                    [invocation setArgument:&completionHandler atIndex:4];
-                    [invocation invoke];
-                } else {
-                    if ([application respondsToSelector:@selector(openURL:)]) {
-                        [application performSelector:@selector(openURL:) withObject:dlURL];
-                    }
-                }
-            } else {
-                if ([application respondsToSelector:@selector(openURL:)]) {
-                    [application performSelector:@selector(openURL:) withObject:dlURL];
-                }
-            }
-        }
-    }
+    [self _notifyMessageSelected:message atIndex:index];
 }
 
 - (void)_notifyMessageViewed:(CleverTapInboxMessage *)message {
@@ -468,13 +356,13 @@ NSString* const kACTION_DL = @"url";
     }
 }
 
-- (void)_notifyMessageSelected:(CleverTapInboxMessage *)message {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:)]) {
-        [self.delegate messageDidSelect:message];
+- (void)_notifyMessageSelected:(CleverTapInboxMessage *)message atIndex:(int)index {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:atIndex:)]) {
+        [self.delegate messageDidSelect:message atIndex:index];
     }
     
-    if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:)]) {
-        [self.analyticsDelegate messageDidSelect:message];
+    if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:atIndex:)]) {
+        [self.analyticsDelegate messageDidSelect:message atIndex:index];
     }
 }
 

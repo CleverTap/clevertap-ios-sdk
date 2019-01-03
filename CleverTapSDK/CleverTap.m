@@ -3614,13 +3614,71 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)messageDidShow:(CleverTapInboxMessage *)message {
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message viewed: %@", self, message);
+    [self markReadInboxMessage:message];
     [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
 
 }
 
-- (void)messageDidSelect:(CleverTapInboxMessage *)message {
+- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(NSUInteger)index {
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
+    
+    CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
+    NSURL *ctaURL;
+   
+    if ([content.actionType isEqualToString:@"onmessage"]) {
+        ctaURL = [NSURL URLWithString:content.actionUrl];
+        
+    }else {
+        
+        NSDictionary *link = content.links[index];
+        NSString *actionType = link[@"type"];
+        if ([actionType isEqualToString:@"copy"]) {
+            NSString *copy = link[@"copyText"];
+            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+            pasteboard.string = copy;
+            return;
+            
+        } else if ( [actionType isEqualToString:@"url"]) {
+            ctaURL = [NSURL URLWithString:link[@"url"][@"ios"][@"text"]];
+        }
+    }
+    
+    if (ctaURL && ![ctaURL.absoluteString  isEqual: @""]) {
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+            [[self class] runSyncMainQueue:^{
+                UIApplication *sharedApplication = [[self class] getSharedApplication];
+                if (sharedApplication == nil) {
+                    return;
+                }
+                CleverTapLogDebug(self.config.logLevel, @"%@: Inbox message: firing deep link: %@", self, ctaURL);
+#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_9_0
+                if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                    NSMethodSignature *signature = [UIApplication
+                                                    instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                    NSInvocation *invocation = [NSInvocation
+                                                invocationWithMethodSignature:signature];
+                    [invocation setTarget:sharedApplication];
+                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                    NSDictionary *options = @{};
+                    id completionHandler = nil;
+                    [invocation setArgument:&ctaURL atIndex:2];
+                    [invocation setArgument:&options atIndex:3];
+                    [invocation setArgument:&completionHandler atIndex:4];
+                    [invocation invoke];
+                } else {
+                    if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                        [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                    }
+                }
+#else
+                if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                    [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                }
+#endif
+            }];
+#endif
+        }
 }
 
 - (void)recordInboxMessageStateEvent:(BOOL)clicked
@@ -3665,23 +3723,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSDate *now = [NSDate date];
         NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970];
         NSInteger epochTime = nowEpochSeconds;
-        NSString * nowEpoch = [NSString stringWithFormat:@"%li", (long)epochTime];
+        NSString *nowEpoch = [NSString stringWithFormat:@"%li", (long)epochTime];
         
         NSDate *expireDate = [now dateByAddingTimeInterval:(24 * 60 * 60)];
         NSTimeInterval expireEpochSeconds = [expireDate timeIntervalSince1970];
-        NSInteger expireTime = expireEpochSeconds;
-        NSString * expireEpoch = [NSString stringWithFormat:@"%li", (long)expireTime];
+        NSUInteger expireTime = (long)expireEpochSeconds;
+        NSString *expireEpoch = [NSString stringWithFormat:@"%li", (long)expireTime];
 
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];
-        [message setObject:expireEpoch forKey:@"wzrk_ttl"];
+        [message setObject:[NSNumber numberWithLong:expireTime] forKey:@"wzrk_ttl"];
         [message addEntriesFromDictionary:msg];
         
-        NSMutableArray *messages = [NSMutableArray new];
-        [messages addObject:message];
+        NSMutableArray<NSDictionary*> *inboxMsg = [NSMutableArray new];
+        [inboxMsg addObject:message];
         
-        NSArray<NSDictionary*> * inboxMsg = [messages mutableCopy];
-    
         if (inboxMsg) {
             float delay = self.isAppForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{

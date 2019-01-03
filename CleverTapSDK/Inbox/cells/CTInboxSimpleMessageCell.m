@@ -4,9 +4,6 @@
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
 
-static CGFloat kBorderWidth = 0.0;
-static CGFloat kCornerRadius = 0.0;
-
 @implementation CTInboxSimpleMessageCell
 
 - (instancetype)init {
@@ -47,7 +44,11 @@ static CGFloat kCornerRadius = 0.0;
     [super awakeFromNib];
     
     self.selectionStyle = UITableViewCellSelectionStyleNone;
-
+    
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleOnMessageTapGesture:)];
+    self.userInteractionEnabled = YES;
+    [self addGestureRecognizer:tapGesture];
+    
 //    self.containerView.layer.cornerRadius = kCornerRadius;
     self.containerView.layer.masksToBounds = YES;
 //    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
@@ -341,13 +342,17 @@ static CGFloat kCornerRadius = 0.0;
 
 #pragma mark Delegate
 
-- (void)handleInboxNotificationFromIndex:(UIButton *)sender {
-    
-    NSInteger index = sender.tag;
+- (void)handleInboxNotificationAtIndex:(int)index {
+    int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
-    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"index"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
+- (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender{
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
+}
 
 @end

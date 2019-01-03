@@ -27,21 +27,11 @@
             self.wzrk_id = wzrkId;
         }
         
-        NSString *timeStamp = json[@"date"];
-        NSDate *date;
-        if (timeStamp && ![timeStamp isEqual:[NSNull null]]) {
-            NSTimeInterval _interval = [timeStamp doubleValue];
-            date = [NSDate dateWithTimeIntervalSince1970:_interval];
-        }
-        self.date = date ? date : [NSDate new];
+        NSUInteger date = [json[@"date"] longValue];
+        self.date = date ? date : (long)[[NSDate date] timeIntervalSince1970];
 
-        NSString *expireTimeStamp = json[@"wzrk_ttl"];
-        NSDate *expires;
-        if (expireTimeStamp && ![expireTimeStamp isEqual:[NSNull null]]) {
-            NSTimeInterval _interval = [expireTimeStamp doubleValue];
-            expires = [NSDate dateWithTimeIntervalSince1970:_interval];
-        }
-        self.expires = expires ? expires : nil;
+        NSUInteger expires = [json[@"wzrk_ttl"] longValue];
+        self.expires = expires ? expires : 0;
     }
     return self;
 }

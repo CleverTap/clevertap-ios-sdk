@@ -68,17 +68,16 @@
             _relativeDate = relativeDate ;
         }
         
-        NSString *expireTimeStamp = json[@"wzrk_ttl"];
-        NSDate *expires;
-        if (expireTimeStamp && ![expireTimeStamp isEqual:[NSNull null]]) {
-            NSTimeInterval _interval = [expireTimeStamp doubleValue];
-            expires = [NSDate dateWithTimeIntervalSince1970:_interval];
-        }
-        _expires = expires ? expires : nil;
+        NSUInteger expires = [json[@"wzrk_ttl"] longValue];
+        _expires = expires? expires : 0;
         
         _isRead = [json[@"isRead"] boolValue];
     }
     return self;
+}
+
+- (void)setRead:(BOOL)read {
+    _isRead = read;
 }
 
 - (NSString*)description {

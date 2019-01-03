@@ -129,8 +129,7 @@ static NSManagedObjectContext *privateContext;
 
 - (NSUInteger)unreadCount {
     if (!self.isInitialized) return -1;
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
-    return [results count];
+    return [self unreadMessages].count;
 }
 
 - (NSArray<NSDictionary *> *)messages {

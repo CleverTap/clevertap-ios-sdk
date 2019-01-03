@@ -9,8 +9,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context;
 - (NSDictionary *)toJSON;
 
-@property (nullable, nonatomic, copy) NSDate *date;
-@property (nullable, nonatomic, copy) NSDate *expires;
+@property (nonatomic, assign) NSUInteger date;
+@property (nonatomic, assign) NSUInteger expires;
 @property (nullable, nonatomic, copy) NSString *wzrk_id;
 @property (nullable, nonatomic, copy) NSString *id;
 @property (nullable, nonatomic, copy) id tags;

@@ -42,11 +42,7 @@ static NSString * const kOrientationLandscape = @"l";
 - (void)awakeFromNib {
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
-//
-//    self.containerView.layer.cornerRadius = kCornerRadius;
 //    self.containerView.layer.masksToBounds = YES;
-//    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
-//    self.containerView.layer.borderWidth = kBorderWidth;
     
     self.readView.layer.cornerRadius = 5;
     self.readView.layer.masksToBounds = YES;
@@ -89,7 +85,7 @@ static NSString * const kOrientationLandscape = @"l";
         [subview removeFromSuperview];
     }
     
-    self.swipeView = [[SwipeView alloc] init];
+    self.swipeView = [[CTSwipeView alloc] init];
     CGRect swipeViewFrame = self.containerView.bounds;
     swipeViewFrame.size.height =  frame.size.height - kPageControlViewHeight;
     self.swipeView.frame = swipeViewFrame;
@@ -107,11 +103,11 @@ static NSString * const kOrientationLandscape = @"l";
         if (imageUrl == nil) {
             continue;
         }
-        CTCaptionedImageView *itemView;
+        CTCarouselImageView *itemView;
         if (itemView == nil){
             CGRect frame = self.containerView.bounds;
             frame.size.height =  frame.size.height - kPageControlViewHeight;
-            itemView = [[CTCaptionedImageView alloc] initWithFrame:frame
+            itemView = [[CTCarouselImageView alloc] initWithFrame:frame
                                                   imageUrl:imageUrl actionUrl:actionUrl];
         }
         
@@ -136,18 +132,18 @@ static NSString * const kOrientationLandscape = @"l";
 
 #pragma mark - Swipe View
 
-- (NSInteger)numberOfItemsInSwipeView:(SwipeView *)swipeView{
+- (NSInteger)numberOfItemsInSwipeView:(CTSwipeView *)swipeView{
     
     return [self.itemViews count];
 }
-- (UIView *)swipeView:(SwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view{
+- (UIView *)swipeView:(CTSwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view{
     return self.itemViews[index];
 }
-- (void)swipeViewDidScroll:(SwipeView *)swipeView {
+- (void)swipeViewDidScroll:(CTSwipeView *)swipeView {
     self.pageControl.currentPage = (int)swipeView.currentItemIndex;
 }
 
-- (CGSize)swipeViewItemSize:(SwipeView *)swipeView{
+- (CGSize)swipeViewItemSize:(CTSwipeView *)swipeView{
     return self.swipeView.bounds.size;
 }
 
@@ -159,12 +155,11 @@ static NSString * const kOrientationLandscape = @"l";
 
 - (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender{
     
-    CTCaptionedImageView *itemView = (CTCaptionedImageView*)sender.view;
+    CTCarouselImageView *itemView = (CTCarouselImageView*)sender.view;
     NSInteger index = itemView.tag;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
-    
 }
 
 @end

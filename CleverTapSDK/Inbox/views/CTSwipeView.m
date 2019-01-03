@@ -31,7 +31,7 @@
 //
 
 
-#import "SwipeView.h"
+#import "CTSwipeView.h"
 #import <objc/message.h>
 
 
@@ -50,21 +50,21 @@
 
 @implementation NSObject (SwipeView)
 
-- (CGSize)swipeViewItemSize:(__unused SwipeView *)swipeView { return CGSizeZero; }
-- (void)swipeViewDidScroll:(__unused SwipeView *)swipeView {}
-- (void)swipeViewCurrentItemIndexDidChange:(__unused SwipeView *)swipeView {}
-- (void)swipeViewWillBeginDragging:(__unused SwipeView *)swipeView {}
-- (void)swipeViewDidEndDragging:(__unused SwipeView *)swipeView willDecelerate:(__unused BOOL)decelerate {}
-- (void)swipeViewWillBeginDecelerating:(__unused SwipeView *)swipeView {}
-- (void)swipeViewDidEndDecelerating:(__unused SwipeView *)swipeView {}
-- (void)swipeViewDidEndScrollingAnimation:(__unused SwipeView *)swipeView {}
-- (BOOL)swipeView:(__unused SwipeView *)swipeView shouldSelectItemAtIndex:(__unused NSInteger)index { return YES; }
-- (void)swipeView:(__unused SwipeView *)swipeView didSelectItemAtIndex:(__unused NSInteger)index {}
+- (CGSize)swipeViewItemSize:(__unused CTSwipeView *)swipeView { return CGSizeZero; }
+- (void)swipeViewDidScroll:(__unused CTSwipeView *)swipeView {}
+- (void)swipeViewCurrentItemIndexDidChange:(__unused CTSwipeView *)swipeView {}
+- (void)swipeViewWillBeginDragging:(__unused CTSwipeView *)swipeView {}
+- (void)swipeViewDidEndDragging:(__unused CTSwipeView *)swipeView willDecelerate:(__unused BOOL)decelerate {}
+- (void)swipeViewWillBeginDecelerating:(__unused CTSwipeView *)swipeView {}
+- (void)swipeViewDidEndDecelerating:(__unused CTSwipeView *)swipeView {}
+- (void)swipeViewDidEndScrollingAnimation:(__unused CTSwipeView *)swipeView {}
+- (BOOL)swipeView:(__unused CTSwipeView *)swipeView shouldSelectItemAtIndex:(__unused NSInteger)index { return YES; }
+- (void)swipeView:(__unused CTSwipeView *)swipeView didSelectItemAtIndex:(__unused NSInteger)index {}
 
 @end
 
 
-@interface SwipeView () <UIScrollViewDelegate, UIGestureRecognizerDelegate>
+@interface CTSwipeView () <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) NSMutableDictionary *itemViews;
@@ -85,7 +85,7 @@
 @end
 
 
-@implementation SwipeView
+@implementation CTSwipeView
 
 #pragma mark -
 #pragma mark Initialisation

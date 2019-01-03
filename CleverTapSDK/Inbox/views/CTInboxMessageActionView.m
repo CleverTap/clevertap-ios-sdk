@@ -53,8 +53,8 @@
 
 - (void)buttonTapped:(UIButton*)button {
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleInboxNotificationFromIndex:)]) {
-        [self.delegate handleInboxNotificationFromIndex:button];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleInboxNotificationAtIndex:)]) {
+        [self.delegate handleInboxNotificationAtIndex:(int)button.tag];
     }
 }
 

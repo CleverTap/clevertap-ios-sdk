@@ -1,5 +1,5 @@
 #import <SDWebImage/UIImageView+WebCache.h>
-#import "CTCaptionedImageView.h"
+#import "CTCarouselImageView.h"
 #import "UIImage+CTImage.h"
 
 static const float kCaptionHeight = 20.f;
@@ -12,7 +12,7 @@ static const float kImageBorderWidth = 1.f;
 static const float kImageLayerBorderWidth = 0.4f;
 static float captionHeight = 0.f;
 
-@interface CTCaptionedImageView ()
+@interface CTCarouselImageView ()
 
 @property (nonatomic, strong, nullable, readwrite) NSString *actionUrl;
 @property (nonatomic, strong) NSString *caption;
@@ -25,7 +25,7 @@ static float captionHeight = 0.f;
 
 @end
 
-@implementation CTCaptionedImageView
+@implementation CTCarouselImageView
 
 + (CGFloat)captionHeight {
     if (captionHeight <= 0) {

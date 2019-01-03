@@ -3,7 +3,7 @@ import CoreLocation
 import CleverTapSDK
 
 class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
-    
+       
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: UIButton!
     
@@ -95,6 +95,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
    
     func messageDidSelect(_ message: CleverTapInboxMessage!) {
         NSLog("CleverTap Message Did Select: %@", message)
+    }
+    
+    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: UInt) {
+        
     }
     
     @IBAction func testButtonTapped(_ sender: Any) {

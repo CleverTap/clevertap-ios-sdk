@@ -70,28 +70,39 @@
 - (BOOL)updateMessages:(NSArray<NSDictionary*> *)messages forContext:(NSManagedObjectContext *)context {
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
     BOOL haveUpdates = NO;
+    
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+
     for (NSDictionary *message in messages) {
         NSString *messageId = message[@"_id"];
         if (!messageId) {
             CleverTapLogStaticDebug(@"CTUserMO dropping message: %@, missing id property", message);
             continue;
         }
+        
         NSOrderedSet *results = [self.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
        
         BOOL existing = results && [results count] > 0;
         if (existing) {
-            CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
-            CTMessageMO *msg = (CTMessageMO*)results[0];
-            
-            NSDate *today = [NSDate date];
-            NSDate *expires = msg.expires;
-           
-            if([today compare:expires] == NSOrderedDescending){
-                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
-            } else {
-                [msg setValue:message forKey:@"json"];
-            }
+//            CTMessageMO *msg = (CTMessageMO*)results[0];
+//
+//            int ttl = msg.expires;
+//            if (now >= ttl) { // TODO handle TTL is negative/ 0
+//                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
+//                [self removeMessagesObject:msg];
+//                haveUpdates = YES;
+//            } else {
+//                CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
+//                [msg setValue:message forKey:@"json"];
+//                haveUpdates = YES;
+//            }
             continue;
+        } else {
+//            int ttl = message[@"wzrk_ttl"];
+//            if (now >= ttl){
+//                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
+//                continue;
+//            }
         }
         CTMessageMO *_msg = [[CTMessageMO alloc] initWithJSON:message forContext:context];
         if (_msg) {

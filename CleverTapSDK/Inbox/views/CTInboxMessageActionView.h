@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 
-@protocol CTInboxActionViewDelegate <NSObject> //TODO make the cell as action view delegate | 
+@protocol CTInboxActionViewDelegate <NSObject>
 @required
-- (void)handleInboxNotificationFromIndex:(UIButton *)sender;
+- (void)handleInboxNotificationAtIndex:(int)index;
 @end
 
 NS_ASSUME_NONNULL_BEGIN

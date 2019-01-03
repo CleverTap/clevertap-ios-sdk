@@ -1,7 +1,9 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
+#if !(TARGET_OS_TV)
 #import <SDWebImage/FLAnimatedImageView+WebCache.h>
 #import <SDWebImage/UIImageView+WebCache.h>
+#endif
 
 @interface CTInAppNotification() {
 }
@@ -217,6 +219,7 @@
 }
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler {
+#if !(TARGET_OS_TV)
     if ([NSThread isMainThread]) {
         self.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
         completionHandler();
@@ -238,7 +241,8 @@
             self.image = self.error ? nil : imageData;
         }
     }
-    
+#endif
+
     completionHandler();
 }
 

@@ -103,10 +103,9 @@
 		0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell.xib */; };
 		079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */ = {isa = PBXBuildFile; fileRef = 079701E42180A055008BF668 /* sound-wave-headphones.png */; };
 		0797132821A2DE9A0011C9A3 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0797132721A2DE9A0011C9A3 /* SDWebImage.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		0797132F21A2F09A0011C9A3 /* SwipeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797132D21A2F09A0011C9A3 /* SwipeView.h */; };
-		0797133021A2F09A0011C9A3 /* SwipeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797132E21A2F09A0011C9A3 /* SwipeView.m */; };
-		0797133921A309720011C9A3 /* CTCaptionedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797133721A309710011C9A3 /* CTCaptionedImageView.h */; };
-		0797133A21A309720011C9A3 /* CTCaptionedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797133821A309720011C9A3 /* CTCaptionedImageView.m */; };
+		0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797132D21A2F09A0011C9A3 /* CTSwipeView.h */; };
+		0797133021A2F09A0011C9A3 /* CTSwipeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797132E21A2F09A0011C9A3 /* CTSwipeView.m */; };
+		0797133A21A309720011C9A3 /* CTCarouselImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797133821A309720011C9A3 /* CTCarouselImageView.m */; };
 		0797133D21A309910011C9A3 /* UIImage+CTImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797133B21A309910011C9A3 /* UIImage+CTImage.h */; };
 		0797133E21A309910011C9A3 /* UIImage+CTImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797133C21A309910011C9A3 /* UIImage+CTImage.m */; };
 		07B9453B219EA34300D4C542 /* CTInboxSimpleMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 07B94522219EA34300D4C542 /* CTInboxSimpleMessageCell.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -137,6 +136,7 @@
 		07BF4661217F80C1002E166D /* CTInAppResources.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A7217F6427008F0FAB /* CTInAppResources.m */; };
 		07BF4662217F8359002E166D /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AE217F6427008F0FAB /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07BF4663217F838D002E166D /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47D217F6427008F0FAB /* CTInAppUtils.m */; };
+		07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -330,10 +330,9 @@
 		0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CTCarouselImageMessageCell.xib; sourceTree = "<group>"; };
 		079701E42180A055008BF668 /* sound-wave-headphones.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sound-wave-headphones.png"; sourceTree = "<group>"; };
 		0797132721A2DE9A0011C9A3 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		0797132D21A2F09A0011C9A3 /* SwipeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwipeView.h; sourceTree = "<group>"; };
-		0797132E21A2F09A0011C9A3 /* SwipeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwipeView.m; sourceTree = "<group>"; };
-		0797133721A309710011C9A3 /* CTCaptionedImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCaptionedImageView.h; sourceTree = "<group>"; };
-		0797133821A309720011C9A3 /* CTCaptionedImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCaptionedImageView.m; sourceTree = "<group>"; };
+		0797132D21A2F09A0011C9A3 /* CTSwipeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTSwipeView.h; sourceTree = "<group>"; };
+		0797132E21A2F09A0011C9A3 /* CTSwipeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTSwipeView.m; sourceTree = "<group>"; };
+		0797133821A309720011C9A3 /* CTCarouselImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCarouselImageView.m; sourceTree = "<group>"; };
 		0797133B21A309910011C9A3 /* UIImage+CTImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CTImage.h"; sourceTree = "<group>"; };
 		0797133C21A309910011C9A3 /* UIImage+CTImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CTImage.m"; sourceTree = "<group>"; };
 		07B94522219EA34300D4C542 /* CTInboxSimpleMessageCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInboxSimpleMessageCell.h; sourceTree = "<group>"; };
@@ -358,6 +357,7 @@
 		07B9453A219EA34300D4C542 /* CTUserMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTUserMO.m; sourceTree = "<group>"; };
 		07B9454F219EA38F00D4C542 /* CleverTap+Inbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+Inbox.h"; sourceTree = "<group>"; };
 		07B94552219EA44100D4C542 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCarouselImageView.h; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
@@ -513,10 +513,10 @@
 		0797134121A338B40011C9A3 /* views */ = {
 			isa = PBXGroup;
 			children = (
-				0797132D21A2F09A0011C9A3 /* SwipeView.h */,
-				0797132E21A2F09A0011C9A3 /* SwipeView.m */,
-				0797133721A309710011C9A3 /* CTCaptionedImageView.h */,
-				0797133821A309720011C9A3 /* CTCaptionedImageView.m */,
+				0797132D21A2F09A0011C9A3 /* CTSwipeView.h */,
+				0797132E21A2F09A0011C9A3 /* CTSwipeView.m */,
+				07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */,
+				0797133821A309720011C9A3 /* CTCarouselImageView.m */,
 				0797133B21A309910011C9A3 /* UIImage+CTImage.h */,
 				0797133C21A309910011C9A3 /* UIImage+CTImage.m */,
 				072F9E4021B14ECC00BC6313 /* CTInboxMessageActionView.h */,
@@ -775,13 +775,13 @@
 				072F9E3D21B1368000BC6313 /* CTInboxIconMessageCell.h in Headers */,
 				D01651B62097B81400660178 /* CTKnownProfileFields.h in Headers */,
 				071EB4D7217F6427008F0FAB /* CTCoverViewController.h in Headers */,
-				0797133921A309720011C9A3 /* CTCaptionedImageView.h in Headers */,
 				D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */,
 				D033FB83208FE51200B4390F /* CTUtils.h in Headers */,
 				D0CACF9020B8A44C00A02327 /* CTCertificatePinning.h in Headers */,
 				071EB503217F6427008F0FAB /* CTHalfInterstitialImageViewController.h in Headers */,
+				07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */,
 				071EB515217F6427008F0FAB /* CTInterstitialViewController.h in Headers */,
-				0797132F21A2F09A0011C9A3 /* SwipeView.h in Headers */,
+				0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */,
 				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
 				0797133D21A309910011C9A3 /* UIImage+CTImage.h in Headers */,
 				D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */,
@@ -1015,7 +1015,7 @@
 				0797133E21A309910011C9A3 /* UIImage+CTImage.m in Sources */,
 				D0047B0F2098E2F00019C6FD /* CTProfileBuilder.m in Sources */,
 				D0A6626E20801E7F00B403F3 /* CTDeviceInfo.m in Sources */,
-				0797133A21A309720011C9A3 /* CTCaptionedImageView.m in Sources */,
+				0797133A21A309720011C9A3 /* CTCarouselImageView.m in Sources */,
 				072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */,
 				0796FB6A21AE5B6300FC380D /* CTCarouselImageMessageCell.m in Sources */,
 				071EB4D1217F6427008F0FAB /* CTNotificationButton.m in Sources */,
@@ -1051,7 +1051,7 @@
 				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
 				072F9E3E21B1368000BC6313 /* CTInboxIconMessageCell.m in Sources */,
 				071EB4D8217F6427008F0FAB /* CTHalfInterstitialImageViewController.m in Sources */,
-				0797133021A2F09A0011C9A3 /* SwipeView.m in Sources */,
+				0797133021A2F09A0011C9A3 /* CTSwipeView.m in Sources */,
 				071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */,
 				D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */,
 			);

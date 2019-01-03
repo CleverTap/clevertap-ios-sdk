@@ -1,7 +1,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CTCaptionedImageView : UIView
+@interface CTCarouselImageView : UIView
 
 @property(nonatomic, strong, nullable, readonly) NSString *actionUrl;
 

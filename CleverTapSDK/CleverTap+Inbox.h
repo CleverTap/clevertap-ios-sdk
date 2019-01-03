@@ -9,7 +9,7 @@
 
 @property (nonatomic, assign, readonly) BOOL isRead;
 @property (nullable, nonatomic, copy, readonly) NSDate *date;
-@property (nullable, nonatomic, copy, readonly) NSDate *expires;
+@property (nonatomic, assign, readonly) NSUInteger expires;
 @property (nullable, nonatomic, copy, readonly) NSString *relativeDate;
 @property (nullable, nonatomic, copy, readonly) NSString *type;
 @property (nullable, nonatomic, copy, readonly) NSString *messageId;
@@ -19,6 +19,8 @@
 @property (nullable, nonatomic, copy, readonly) NSString *orientation;
 @property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
 @property (nullable, nonatomic, copy, readonly) NSArray<CleverTapInboxMessageContent *> *content;
+
+- (void)setRead:(BOOL)read;
 
 @end
 
@@ -41,7 +43,7 @@
 @end
 
 @protocol CleverTapInboxViewControllerDelegate <NSObject>
-- (void)messageDidSelect:(CleverTapInboxMessage *)message;
+- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(NSUInteger)index;
 @end
 
 @interface CleverTapInboxStyleConfig : NSObject

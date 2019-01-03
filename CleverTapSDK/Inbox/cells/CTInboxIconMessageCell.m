@@ -8,9 +8,12 @@
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
+    
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleOnMessageTapGesture:)];
+    self.userInteractionEnabled = YES;
+    [self addGestureRecognizer:tapGesture];
 
     self.selectionStyle = UITableViewCellSelectionStyleNone;
-    
     self.readView.layer.cornerRadius = 5;
     self.readView.layer.masksToBounds = YES;
 }
@@ -141,12 +144,17 @@
     }
 }
 
-- (void)handleInboxNotificationFromIndex:(UIButton *)sender {
-    
-    NSInteger index = sender.tag;
+- (void)handleInboxNotificationAtIndex:(int)index {
+    int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
-    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"index"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
+- (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender{
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
+}
+
 
 @end

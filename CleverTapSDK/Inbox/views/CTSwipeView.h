@@ -57,7 +57,7 @@ typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
 
 @protocol SwipeViewDataSource, SwipeViewDelegate;
 
-@interface SwipeView : UIView
+@interface CTSwipeView : UIView
 
 @property (nonatomic, weak_delegate) IBOutlet id<SwipeViewDataSource> dataSource;
 @property (nonatomic, weak_delegate) IBOutlet id<SwipeViewDelegate> delegate;
@@ -102,8 +102,8 @@ typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
 
 @protocol SwipeViewDataSource <NSObject>
 
-- (NSInteger)numberOfItemsInSwipeView:(SwipeView *)swipeView;
-- (UIView *)swipeView:(SwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view;
+- (NSInteger)numberOfItemsInSwipeView:(CTSwipeView *)swipeView;
+- (UIView *)swipeView:(CTSwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view;
 
 @end
 
@@ -111,16 +111,16 @@ typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
 @protocol SwipeViewDelegate <NSObject>
 @optional
 
-- (CGSize)swipeViewItemSize:(SwipeView *)swipeView;
-- (void)swipeViewDidScroll:(SwipeView *)swipeView;
-- (void)swipeViewCurrentItemIndexDidChange:(SwipeView *)swipeView;
-- (void)swipeViewWillBeginDragging:(SwipeView *)swipeView;
-- (void)swipeViewDidEndDragging:(SwipeView *)swipeView willDecelerate:(BOOL)decelerate;
-- (void)swipeViewWillBeginDecelerating:(SwipeView *)swipeView;
-- (void)swipeViewDidEndDecelerating:(SwipeView *)swipeView;
-- (void)swipeViewDidEndScrollingAnimation:(SwipeView *)swipeView;
-- (BOOL)swipeView:(SwipeView *)swipeView shouldSelectItemAtIndex:(NSInteger)index;
-- (void)swipeView:(SwipeView *)swipeView didSelectItemAtIndex:(NSInteger)index;
+- (CGSize)swipeViewItemSize:(CTSwipeView *)swipeView;
+- (void)swipeViewDidScroll:(CTSwipeView *)swipeView;
+- (void)swipeViewCurrentItemIndexDidChange:(CTSwipeView *)swipeView;
+- (void)swipeViewWillBeginDragging:(CTSwipeView *)swipeView;
+- (void)swipeViewDidEndDragging:(CTSwipeView *)swipeView willDecelerate:(BOOL)decelerate;
+- (void)swipeViewWillBeginDecelerating:(CTSwipeView *)swipeView;
+- (void)swipeViewDidEndDecelerating:(CTSwipeView *)swipeView;
+- (void)swipeViewDidEndScrollingAnimation:(CTSwipeView *)swipeView;
+- (BOOL)swipeView:(CTSwipeView *)swipeView shouldSelectItemAtIndex:(NSInteger)index;
+- (void)swipeView:(CTSwipeView *)swipeView didSelectItemAtIndex:(NSInteger)index;
 
 @end
 
