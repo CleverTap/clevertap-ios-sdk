@@ -71,7 +71,7 @@
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
     BOOL haveUpdates = NO;
     
-    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
 
     for (NSDictionary *message in messages) {
         NSString *messageId = message[@"_id"];
@@ -84,25 +84,25 @@
        
         BOOL existing = results && [results count] > 0;
         if (existing) {
-//            CTMessageMO *msg = (CTMessageMO*)results[0];
-//
-//            int ttl = msg.expires;
-//            if (now >= ttl) { // TODO handle TTL is negative/ 0
-//                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
-//                [self removeMessagesObject:msg];
-//                haveUpdates = YES;
-//            } else {
-//                CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
-//                [msg setValue:message forKey:@"json"];
-//                haveUpdates = YES;
-//            }
+            CTMessageMO *msg = (CTMessageMO*)results[0];
+
+            int ttl = (int)msg.expires;
+            if (now >= ttl) {
+                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
+                [self removeMessagesObject:msg];
+                haveUpdates = YES;
+            } else {
+                CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
+                [msg setValue:message forKey:@"json"];
+                haveUpdates = YES;
+            }
             continue;
         } else {
-//            int ttl = message[@"wzrk_ttl"];
-//            if (now >= ttl){
-//                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
-//                continue;
-//            }
+            int ttl = (int)[message[@"wzrk_ttl"] longValue];
+            if (now >= ttl){
+                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
+                continue;
+            }
         }
         CTMessageMO *_msg = [[CTMessageMO alloc] initWithJSON:message forContext:context];
         if (_msg) {

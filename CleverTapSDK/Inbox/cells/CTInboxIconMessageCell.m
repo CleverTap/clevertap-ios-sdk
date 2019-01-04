@@ -95,11 +95,15 @@
     
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
+    self.dateLabel.text = message.relativeDate;;
     [self setupInboxMessageActions:content];
     
     if (content.mediaUrl && !content.mediaIsVideo) {
-        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl] placeholderImage: nil options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+    }
+    
+    if (content.iconUrl) {
+        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
     }
 }
 

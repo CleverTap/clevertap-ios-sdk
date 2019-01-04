@@ -8,7 +8,7 @@
 @property (nullable, nonatomic, copy, readonly) NSDictionary *customData;
 
 @property (nonatomic, assign, readonly) BOOL isRead;
-@property (nullable, nonatomic, copy, readonly) NSDate *date;
+@property (nonatomic, assign, readonly) NSUInteger date;
 @property (nonatomic, assign, readonly) NSUInteger expires;
 @property (nullable, nonatomic, copy, readonly) NSString *relativeDate;
 @property (nullable, nonatomic, copy, readonly) NSString *type;

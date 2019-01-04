@@ -25,13 +25,15 @@
         if (customData) {
             _customData = customData;
         }
-        NSArray *tags = json[@"tags"];
+        NSArray *tags = json[@"msg"][@"tags"];
         if (tags) {
             _tags = tags;
         }
-        NSString *tagString = [tags componentsJoinedByString:@","];
-        if (tagString) {
-            _tagString = tagString;
+        if ([_tags isKindOfClass:[NSArray class]]) {
+            NSString *tagString = [tags componentsJoinedByString:@","];
+            if (tagString) {
+                _tagString = tagString;
+            }
         }
         NSString *backgroundColor = json[@"msg"][@"bg"];
         if (backgroundColor) {
@@ -55,15 +57,10 @@
         }
         _content = _contents;
         
-        NSString *timeStamp = json[@"date"];
-        NSDate *date;
-        if (timeStamp && ![timeStamp isEqual:[NSNull null]]) {
-            NSTimeInterval _interval = [timeStamp doubleValue];
-            date = [NSDate dateWithTimeIntervalSince1970:_interval];
-        }
-        _date = date ? date : [NSDate new];
+        _date = (long)[json[@"date"] longValue];
         
-        NSString *relativeDate = [self relativeDateStringForDate:_date];
+        NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:_date];
+        NSString *relativeDate = [self relativeDateStringForDate:date];
         if (relativeDate ) {
             _relativeDate = relativeDate ;
         }

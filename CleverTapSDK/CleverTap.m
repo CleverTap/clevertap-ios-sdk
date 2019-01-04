@@ -3626,6 +3626,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
     NSURL *ctaURL;
    
+    //TODO create constant for handle message parsing keys
     if ([content.actionType isEqualToString:@"onmessage"]) {
         ctaURL = [NSURL URLWithString:content.actionUrl];
         
@@ -3710,7 +3711,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!notification || [notification count] <= 0 || !notification[@"wzrk_inbox"]) return NO;
     
     @try {
-        [self.inAppFCManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_inbox"];
@@ -3728,7 +3728,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSDate *expireDate = [now dateByAddingTimeInterval:(24 * 60 * 60)];
         NSTimeInterval expireEpochSeconds = [expireDate timeIntervalSince1970];
         NSUInteger expireTime = (long)expireEpochSeconds;
-        NSString *expireEpoch = [NSString stringWithFormat:@"%li", (long)expireTime];
 
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];

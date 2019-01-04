@@ -2,13 +2,12 @@
     "inbox_notifs": [
         {
             "_id": "1544171480",
-            "tags": ["offers", "promotions"],
-            "date": 1544094125,
             "wzrk_ttl": 1546661783,
             "wzrk_id": "1544171480_20181225",
             "msg": {
                 "type": "simple",
                 "bg": "#D6DA7C",
+                "tags": ["promotions"],
                 "orientation": "p",
                 "content": [
                     {
@@ -44,7 +43,6 @@
         {
             "_id": "1544686416",
             "tags": [],
-            "date": 1545720679,
             "wzrk_ttl": 1595742575,
             "wzrk_id": "1544686416_20181225",
             "msg": {
@@ -79,12 +77,16 @@
                                 {
                                     "type": "copy",
                                     "text": "Link",
-                                    "color": "#007bff",
-                                    "bg": "#ffffff",
+                                    "color": "#F8F9F9",
+                                    "bg": "#B27032",
                                     "copyText": "",
                                     "url": {
                                         "android": "",
-                                        "ios": ""
+                                        "ios": {
+                                            "text": "https://www.google.com",
+                                            "replacements": "",
+                                            "og": ""
+                                        }
                                     }
                                 }
                             ]
@@ -101,12 +103,11 @@
         {
             "_id": "1544091901",
             "tags": [],
-            "date": 1545807079,
             "wzrk_ttl": 1575742575,
             "wzrk_id": "1544091901_20181225",
             "msg": {
                 "type": "simple",
-                "bg": "#ffffff",
+                "bg": "#E59866",
                 "orientation": "l",
                 "content": [
                     {
@@ -157,7 +158,6 @@
         {
             "_id": "1543817421",
             "tags": [],
-            "date": 1545799859,
             "wzrk_ttl": 1555742575,
             "wzrk_id": "1543817421_20181225",
             "msg": {
@@ -182,7 +182,11 @@
                             "type": "onmessage",
                             "url": {
                                 "android": "",
-                                "ios": ""
+                                "ios": {
+                                    "text": "https://www.google.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
                             },
                             "links": [
                                 {
@@ -220,7 +224,11 @@
                             "type": "onmessage",
                             "url": {
                                 "android": "",
-                                "ios": "https://www.apple.com"
+                                "ios": {
+                                    "text": "https://www.apple.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
                             },
                             "links": [
                                 {
@@ -247,7 +255,6 @@
         {
             "_id": "1544094119",
             "tags": [],
-            "date": 1545489079,
             "wzrk_ttl": 1585742575,
             "wzrk_id": "1544094119_20181225",
             "msg": {
@@ -272,7 +279,11 @@
                             "type": "onmessage",
                             "url": {
                                 "android": "",
-                                "ios": "https://www.google.com"
+                                "ios": {
+                                    "text": "https://www.google.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
                             },
                             "links": [
                                 {
@@ -282,7 +293,11 @@
                                     "copyText": "",
                                     "url": {
                                         "android": "",
-                                        "ios": "https://www.google.com"
+                                        "ios": {
+                                            "text": "https://www.google.com",
+                                            "replacements": "",
+                                            "og": ""
+                                        }
                                     }
                                 }
                             ]
@@ -348,11 +363,10 @@
         {
             "_id": "1544171485",
             "tags": ["offers", "promotions"],
-            "date": 1544094125,
             "wzrk_ttl": 1565742575,
             "wzrk_id": "1544171480_20181225",
             "msg": {
-                "type": "icon-message",
+                "type": "message-icon",
                 "bg": "#ffffff",
                 "orientation": "p",
                 "content": [
@@ -373,7 +387,11 @@
                             "type": "onmessage",
                             "url": {
                                 "android": "",
-                                "ios": "https://www.youtube.com"
+                                "ios": {
+                                    "text": "https://www.youtube.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
                             },
                             "links": []
                         },
@@ -391,11 +409,10 @@
         {
             "_id": "1544171494",
             "tags": ["offers", "promotions"],
-            "date": 1544094125,
             "wzrk_ttl": 1565742575,
             "wzrk_id": "1544171480_20181225",
             "msg": {
-                "type": "icon-message",
+                "type": "message-icon",
                 "bg": "#ffffff",
                 "orientation": "l",
                 "content": [
@@ -434,8 +451,7 @@
         {
             "_id": "15441231480",
             "tags": ["offers", "promotions"],
-            "date": 1544094125,
-            "wzrk_ttl": 1545825073,
+            "wzrk_ttl": 1546661783,
             "wzrk_id": "1544171480_20181225",
             "msg": {
                 "type": "simple",

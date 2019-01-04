@@ -134,19 +134,33 @@ static NSManagedObjectContext *privateContext;
 
 - (NSArray<NSDictionary *> *)messages {
     if (!self.isInitialized) return nil;
+    NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     for (CTMessageMO *msg in self.user.messages) {
-        [messages addObject:[msg toJSON]];
+        int ttl = (int)msg.expires;
+        if (now >= ttl) {
+            CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
+            [self _deleteMessage:msg];
+        } else {
+             [messages addObject:[msg toJSON]];
+        }
     }
     return messages;
 }
 
 - (NSArray<NSDictionary *> *)unreadMessages {
     if (!self.isInitialized) return nil;
+    NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
     for (CTMessageMO *msg in results) {
-        [messages addObject:[msg toJSON]];
+        int ttl = (int)msg.expires;
+        if (now >= ttl) {
+            CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
+            [self _deleteMessage:msg];
+        } else {
+            [messages addObject:[msg toJSON]];
+        }
     }
     return messages;
 }
@@ -158,6 +172,16 @@ static NSManagedObjectContext *privateContext;
     NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
     BOOL existing = results && [results count] > 0;
     return existing ? results[0] : nil;
+}
+
+-(void)_deleteMessage :(CTMessageMO *)message {
+    if (message) {
+        [privateContext performBlock:^{
+            [privateContext deleteObject:message];
+            [self notifyUpdate];
+            [self _save];
+        }];
+    }
 }
 
 // always call from inside privateContext performBlock

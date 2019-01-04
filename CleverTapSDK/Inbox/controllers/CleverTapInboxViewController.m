@@ -22,7 +22,7 @@ NSString* const kCellCarouselImgMessageIdentifier = @"CTCarouselImageMessageCell
 NSString* const kCellIconMessageIdentifier = @"CTInboxIconMessageCell";
 
 NSString* const kSimpleMessage = @"simple";
-NSString* const kIconMessage = @"icon-message";
+NSString* const kIconMessage = @"message-icon";
 NSString* const kCarouselMessage = @"carousel";
 NSString* const kCarouselImageMessage = @"carousel-image";
 
@@ -112,6 +112,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
     self.automaticallyAdjustsScrollViewInsets = NO;
+    self.edgesForExtendedLayout = UIRectEdgeNone;
     
     if (self.tags.count == 0) {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
@@ -233,7 +234,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     
     [self.tableView reloadData];
     [self.tableView layoutIfNeeded];
-    self.tableView.contentOffset = CGPointMake(0, -self.tableView.contentInset.top);
+    [self.tableView setContentOffset:CGPointZero animated:YES];
+
 }
 
 - (void)filterNotifications: (NSString *)filter{

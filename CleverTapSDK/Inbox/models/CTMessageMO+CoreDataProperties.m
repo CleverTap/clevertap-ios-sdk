@@ -15,7 +15,7 @@
     if (self != nil) {
         
         self.json = [json copy];
-        self.tags = json[@"tags"];
+        self.tags = json[@"msg"][@"tags"];
         
         NSString *id = json[@"_id"];
         if (id) {
@@ -27,8 +27,7 @@
             self.wzrk_id = wzrkId;
         }
         
-        NSUInteger date = [json[@"date"] longValue];
-        self.date = date ? date : (long)[[NSDate date] timeIntervalSince1970];
+        self.date = (long)[[NSDate date] timeIntervalSince1970];
 
         NSUInteger expires = [json[@"wzrk_ttl"] longValue];
         self.expires = expires ? expires : 0;
@@ -39,6 +38,7 @@
 - (NSDictionary *)toJSON {
     NSMutableDictionary *json = [NSMutableDictionary dictionaryWithDictionary:self.json];
     json[@"isRead"] = @(self.isRead);
+    json[@"date"] = @(self.date);
     return json;
 }
 

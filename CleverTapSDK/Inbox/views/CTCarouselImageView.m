@@ -1,6 +1,5 @@
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "CTCarouselImageView.h"
-#import "UIImage+CTImage.h"
 
 static const float kCaptionHeight = 20.f;
 static const float kSubCaptionHeight = 54.f;

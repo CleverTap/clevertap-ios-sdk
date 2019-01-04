@@ -11,7 +11,9 @@
             _messageColor = jsonObject[@"message"][@"color"];
             _iconUrl = jsonObject[@"icon"][@"url"];
             _mediaUrl = jsonObject[@"media"][@"url"];
-            _actionUrl = jsonObject[@"action"][@"url"][@"ios"];
+            if ([jsonObject[@"action"][@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
+                _actionUrl = jsonObject[@"action"][@"url"][@"ios"][@"text"];
+            }
             _actionType = jsonObject[@"action"][@"type"];
             
             NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
