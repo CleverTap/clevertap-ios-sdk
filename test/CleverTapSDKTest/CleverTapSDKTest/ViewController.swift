@@ -3,6 +3,7 @@ import CoreLocation
 import CleverTapSDK
 
 class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
+  
        
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: UIButton!
@@ -25,11 +26,6 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             let style = CleverTapInboxStyleConfig.init()
             style.backgroundColor = UIColor.lightGray
             style.cellBackgroundColor = UIColor.yellow
-            style.cellBorderColor = UIColor.blue
-            style.contentBackgroundColor = UIColor.cyan
-            style.contentBorderColor = UIColor.orange
-            style.messageTitleColor = UIColor.cyan
-            style.messageBodyColor = UIColor.gray
             style.messageTags = ["Promotions", "Offers"];
             if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
 //                inboxController.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
@@ -92,12 +88,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             self.inboxButton.setTitle("Show Inbox: \(unreadCount) unread", for: .normal)
         }))
     }
-   
-    func messageDidSelect(_ message: CleverTapInboxMessage!) {
-        NSLog("CleverTap Message Did Select: %@", message)
-    }
     
-    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: UInt) {
+    func messageDidSelect(_ message: CleverTapInboxMessage!, andTapped tapped: Bool, at index: UInt) {
         
     }
     

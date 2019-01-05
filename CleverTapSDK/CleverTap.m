@@ -3619,28 +3619,31 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 }
 
-- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(NSUInteger)index {
+- (void)messageDidSelect:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(NSUInteger)index{
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
     
-    CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
+    CleverTapInboxMessageContent *content;
+    if (tapped) {
+        content = (CleverTapInboxMessageContent*)message.content[index];
+    } else {
+        content = (CleverTapInboxMessageContent*)message.content[0];
+    }
+    
     NSURL *ctaURL;
    
-    //TODO create constant for handle message parsing keys
-    if ([content.actionType isEqualToString:@"onmessage"]) {
+    if (content.actionHasUrl && tapped) {
         ctaURL = [NSURL URLWithString:content.actionUrl];
         
-    }else {
-        
+    }else if (content.actionHasLinks && !tapped){
         NSDictionary *link = content.links[index];
         NSString *actionType = link[@"type"];
-        if ([actionType isEqualToString:@"copy"]) {
-            NSString *copy = link[@"copyText"];
+        if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
+            NSString *copy = link[@"copyText"][@"text"];
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
             return;
-            
-        } else if ( [actionType isEqualToString:@"url"]) {
+        } else if ([actionType caseInsensitiveCompare:@"url"] == NSOrderedSame) {
             ctaURL = [NSURL URLWithString:link[@"url"][@"ios"][@"text"]];
         }
     }

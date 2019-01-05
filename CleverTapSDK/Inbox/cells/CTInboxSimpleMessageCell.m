@@ -80,10 +80,12 @@
         self.imageViewLRatioContraint.priority = 999;
     }
     
-    if (content.links.count == 0) {
-        _actionViewHeightContraint.constant = 0.1;
+    if (content.actionHasLinks) {
+        _actionView.hidden = NO;
+        _actionViewHeightContraint.constant = 45;
     } else {
-        _actionViewHeightContraint.constant = 44;
+        _actionView.hidden = YES;
+        _actionViewHeightContraint.constant = 0;
     }
     
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
@@ -110,7 +112,7 @@
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;;
 
-    if  (content.links.count > 0) {
+    if  (content.links.count > 0 && content.actionHasLinks) {
         [self setupInboxMessageActions:content];
     }
     
@@ -205,7 +207,7 @@
             
             [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                             toItem:self attribute:NSLayoutAttributeWidth
+                                             toItem:self.containerView attribute:NSLayoutAttributeWidth
                                          multiplier:1.0 constant:0] setActive:YES];
             
             _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
@@ -214,7 +216,7 @@
             
             [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                             toItem:self attribute:NSLayoutAttributeWidth
+                                             toItem:self.containerView attribute:NSLayoutAttributeWidth
                                          multiplier:0.5 constant:0] setActive:YES];
             _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
             _actionView.secondButton = [_actionView setupViewForButton:_actionView.secondButton forText:content.links[1] withIndex:1];
@@ -223,7 +225,7 @@
           
             [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                             toItem:self attribute:NSLayoutAttributeWidth
+                                             toItem:self.containerView attribute:NSLayoutAttributeWidth
                                          multiplier:0.33 constant:0] setActive:YES];
             _actionView.firstButton = [_actionView setupViewForButton:_actionView.firstButton forText:content.links[0] withIndex:0];
             _actionView.thirdButton = [_actionView setupViewForButton:_actionView.thirdButton forText:content.links[1] withIndex:1];
@@ -346,12 +348,14 @@
     int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"index"];
+    [userInfo setObject:@NO forKey:@"tapped"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender{
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
+    [userInfo setObject:@YES forKey:@"tapped"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 

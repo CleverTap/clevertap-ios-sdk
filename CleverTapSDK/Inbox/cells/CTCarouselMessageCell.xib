@@ -19,7 +19,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0a6-Ha-uVR">
-                        <rect key="frame" x="0.0" y="0.0" width="482" height="244"/>
+                        <rect key="frame" x="0.0" y="0.0" width="482" height="238"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UcE-Qa-3Rw">
                                 <rect key="frame" x="0.0" y="0.0" width="482" height="200"/>
@@ -28,19 +28,19 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dZN-Sd-EH8">
-                                <rect key="frame" x="0.0" y="200" width="482" height="44"/>
+                                <rect key="frame" x="0.0" y="200" width="482" height="38"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="8 hours ago" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nqe-Am-6Ld">
-                                        <rect key="frame" x="394.5" y="14.5" width="67.5" height="14.5"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nqe-Am-6Ld">
+                                        <rect key="frame" x="450.5" y="12" width="11.5" height="14.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <color key="textColor" red="0.45882352941176469" green="0.45882352941176469" blue="0.45882352941176469" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="Nqe-Am-6Ld" secondAttribute="bottom" constant="15" id="2Q8-Cp-cIL"/>
                                     <constraint firstAttribute="trailing" secondItem="Nqe-Am-6Ld" secondAttribute="trailing" constant="20" id="RSE-6z-h31"/>
-                                    <constraint firstAttribute="height" constant="44" id="mJF-50-qzd"/>
+                                    <constraint firstItem="Nqe-Am-6Ld" firstAttribute="centerY" secondItem="dZN-Sd-EH8" secondAttribute="centerY" id="T0H-Ln-40S"/>
+                                    <constraint firstAttribute="height" constant="38" id="mJF-50-qzd"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yqy-mV-dTe">
@@ -72,6 +72,7 @@
                     <constraint firstAttribute="bottom" secondItem="0a6-Ha-uVR" secondAttribute="bottom" priority="750" id="zn0-Ip-bgv"/>
                 </constraints>
             </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="carouselView" destination="UcE-Qa-3Rw" id="cPp-wn-9aa"/>
                 <outlet property="carouselViewHeight" destination="xsd-BN-6Wl" id="DSO-6G-AhD"/>

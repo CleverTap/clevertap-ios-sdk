@@ -14,7 +14,9 @@
             if ([jsonObject[@"action"][@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
                 _actionUrl = jsonObject[@"action"][@"url"][@"ios"][@"text"];
             }
-            _actionType = jsonObject[@"action"][@"type"];
+            
+            _actionHasUrl = [(jsonObject[@"action"][@"hasUrl"]) boolValue];
+            _actionHasLinks = [(jsonObject[@"action"][@"hasLinks"]) boolValue];
             
             NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
             if (_media) {

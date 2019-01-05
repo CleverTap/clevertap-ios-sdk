@@ -6,12 +6,13 @@
     CleverTapInboxStyleConfig *copy = [[[self class] allocWithZone:zone] init];
     copy.backgroundColor = self.backgroundColor;
     copy.cellBackgroundColor = self.cellBackgroundColor;
-    copy.cellBorderColor = self.cellBorderColor;
-    copy.contentBackgroundColor = self.contentBackgroundColor;
-    copy.contentBorderColor = self.contentBorderColor;
-    copy.messageTitleColor = self.messageTitleColor;
-    copy.messageBodyColor = self.messageBodyColor;
     copy.messageTags = self.messageTags;
+    copy.navigationBarTintColor = self.navigationBarTintColor;
+    copy.navigationTintColor = self.navigationTintColor;
+    copy.tabUnSelectedTextColor = self.tabUnSelectedTextColor;
+    copy.tabSelectedTextColor = self.tabSelectedTextColor;
+    copy.tabSelectedBgColor = self.tabSelectedBgColor;
+    copy.tabBackgroundColor = self.tabBackgroundColor;
     return copy;
 }
 

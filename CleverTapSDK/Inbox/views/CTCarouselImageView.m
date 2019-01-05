@@ -75,7 +75,9 @@ static float captionHeight = 0.f;
     self.imageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0];
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
+    self.imageView.backgroundColor = [UIColor redColor];
     self.imageView.layer.masksToBounds = YES;
+    self.imageView.clipsToBounds = YES;
     [self addSubview:self.imageView];
     [self loadImage];
 }

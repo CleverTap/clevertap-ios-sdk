@@ -33,29 +33,31 @@
 @property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
 @property (nullable, nonatomic, copy, readonly) NSString *mediaUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
-@property (nullable, nonatomic, copy, readonly) NSString *actionType;
 @property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
 @property (nullable, nonatomic, copy, readonly) NSArray *links;
 @property (nonatomic, readonly, assign) BOOL mediaIsVideo;
 @property (nonatomic, readonly, assign) BOOL mediaIsImage;
 @property (nonatomic, readonly, assign) BOOL mediaIsGif;
+@property (nonatomic, readonly, assign) BOOL actionHasUrl;
+@property (nonatomic, readonly, assign) BOOL actionHasLinks;
 
 @end
 
 @protocol CleverTapInboxViewControllerDelegate <NSObject>
-- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(NSUInteger)index;
+- (void)messageDidSelect:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(NSUInteger)index;
 @end
 
 @interface CleverTapInboxStyleConfig : NSObject
 
 @property (nonatomic, strong) UIColor *backgroundColor;
 @property (nonatomic, strong) UIColor *cellBackgroundColor;
-@property (nonatomic, strong) UIColor *contentBackgroundColor;
-@property (nonatomic, strong) UIColor *cellBorderColor;
-@property (nonatomic, strong) UIColor *contentBorderColor;
-@property (nonatomic, strong) UIColor *messageTitleColor;
-@property (nonatomic, strong) UIColor *messageBodyColor;
 @property (nonatomic, strong) NSArray *messageTags;
+@property (nonatomic, strong) UIColor *navigationBarTintColor;
+@property (nonatomic, strong) UIColor *navigationTintColor;
+@property (nonatomic, strong) UIColor *tabBackgroundColor;
+@property (nonatomic, strong) UIColor *tabSelectedBgColor;
+@property (nonatomic, strong) UIColor *tabSelectedTextColor;
+@property (nonatomic, strong) UIColor *tabUnSelectedTextColor;
 
 @end
 

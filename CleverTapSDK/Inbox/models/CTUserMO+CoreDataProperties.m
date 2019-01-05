@@ -85,9 +85,8 @@
         BOOL existing = results && [results count] > 0;
         if (existing) {
             CTMessageMO *msg = (CTMessageMO*)results[0];
-
             int ttl = (int)msg.expires;
-            if (now >= ttl) {
+            if (now >= ttl && ttl > 0) {
                 CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
                 [self removeMessagesObject:msg];
                 haveUpdates = YES;
@@ -99,7 +98,7 @@
             continue;
         } else {
             int ttl = (int)[message[@"wzrk_ttl"] longValue];
-            if (now >= ttl){
+            if (now >= ttl && ttl > 0){
                 CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
                 continue;
             }
@@ -108,9 +107,9 @@
         if (_msg) {
             [newMessages addObject:_msg];
         }
-    } 
+    }
     
-    if ([newMessages count] > 0) {
+    if ([newMessages count] > 0) {  
         [self addMessages:newMessages];
         haveUpdates = YES;
     }

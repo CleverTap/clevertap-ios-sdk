@@ -116,7 +116,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     
     if (self.tags.count == 0) {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
-                                       initWithTitle:@"✖️"
+                                       initWithTitle:@"✕"
                                        style:UIBarButtonItemStylePlain
                                        target:self
                                        action:@selector(dismisstapped)];
@@ -136,11 +136,32 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     self.navigationController.navigationBar.translucent = false;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
     
+    if (_config && _config.navigationBarTintColor) {
+        [self.navigationController.navigationBar setBarTintColor:_config.navigationBarTintColor];
+    } else {
+        [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
+    }
+    
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc]initWithItems: self.tags];
     [segmentedControl addTarget:self action:@selector(segmentSelected:) forControlEvents:UIControlEventValueChanged];
     segmentedControl.frame = CGRectMake(0, 0, 300.0f, 0.0f);
     segmentedControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     segmentedControl.selectedSegmentIndex = 0;
+    segmentedControl.layer.masksToBounds = YES;
+    segmentedControl.clipsToBounds = YES;
+    
+    if (_config && _config.tabBackgroundColor) {
+        segmentedControl.backgroundColor = _config.tabBackgroundColor;
+    }
+    if (_config && _config.tabSelectedBgColor) {
+        segmentedControl.tintColor = _config.tabSelectedBgColor;
+    }
+    if (_config && _config.tabSelectedTextColor) {
+        [[UISegmentedControl appearance] setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
+    }
+    if (_config && _config.tabUnSelectedTextColor) {
+        [[UISegmentedControl appearance] setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabUnSelectedTextColor} forState:UIControlStateNormal];
+    }
     
     if (self.tags.count > 1) {
         self.navigationItem.prompt = @"";
@@ -177,7 +198,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     UILabel *lblTitle = [[UILabel alloc] init];
     lblTitle.text = @"Notifications";
     [lblTitle setFont: [UIFont boldSystemFontOfSize:18.0]];
-
     [_navigation addSubview:lblTitle];
     lblTitle.translatesAutoresizingMaskIntoConstraints = NO;
     
@@ -200,11 +220,16 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     lblTitle.textAlignment = NSTextAlignmentCenter;
     
     UIButton *dismiss = [[UIButton alloc] init];
-    [dismiss setTitle:@"✖️" forState:UIControlStateNormal];
+    [dismiss setTitle:@"✕" forState:UIControlStateNormal];
+    [dismiss setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [dismiss addTarget:self action:@selector(dismisstapped) forControlEvents:UIControlEventTouchUpInside];
-    
     [_navigation addSubview:dismiss];
     dismiss.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    if (_config && _config.navigationTintColor) {
+        lblTitle.textColor = _config.navigationTintColor;
+        [dismiss setTitleColor:_config.navigationTintColor forState:UIControlStateNormal];
+    }
     
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
@@ -277,15 +302,22 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         if (message.content && message.content.count > 0) {
             [cell setupSimpleMessage:message];
         }
-        cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
-        
+        if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
+            cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        } else {
+            cell.containerView.backgroundColor = [UIColor whiteColor];
+        }
         return cell;
         
     } else if ([message.type isEqualToString:kCarouselMessage]) {
         
         CTCarouselMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselMessageIdentifier forIndexPath:indexPath];
         [cell setupCarouselMessage:message];
-        cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
+            cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        } else {
+            cell.containerView.backgroundColor = [UIColor whiteColor];
+        }
         [cell layoutIfNeeded];
         [cell layoutSubviews];
         return cell;
@@ -294,7 +326,12 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         
         CTCarouselImageMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselImgMessageIdentifier forIndexPath:indexPath];
         [cell setupCarouselImageMessage:message];
-        cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        
+        if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
+            cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        } else {
+            cell.containerView.backgroundColor = [UIColor whiteColor];
+        }
         [cell layoutIfNeeded];
         [cell layoutSubviews];
         return cell;
@@ -308,7 +345,11 @@ NSString* const kCarouselImageMessage = @"carousel-image";
             [cell setupIconMessage:message];
         }
         cell.actionView.delegate = cell;
-        cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
+            cell.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        } else {
+            cell.containerView.backgroundColor = [UIColor whiteColor];
+        }
         return cell;
         
     } else {
@@ -349,7 +390,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     CleverTapInboxMessage *message = (CleverTapInboxMessage*)notification.object;
     NSDictionary *userInfo = (NSDictionary *)notification.userInfo;
     int index = [[userInfo objectForKey:@"index"] intValue];
-    [self _notifyMessageSelected:message atIndex:index];
+    bool tapped = [[userInfo objectForKey:@"tapped"] boolValue];
+    [self _notifyMessageSelected:message andTapped:tapped atIndex:index];
 }
 
 - (void)_notifyMessageViewed:(CleverTapInboxMessage *)message {
@@ -358,13 +400,13 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     }
 }
 
-- (void)_notifyMessageSelected:(CleverTapInboxMessage *)message atIndex:(int)index {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:atIndex:)]) {
-        [self.delegate messageDidSelect:message atIndex:index];
+- (void)_notifyMessageSelected:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(int)index {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:andTapped:atIndex:)]) {
+        [self.delegate messageDidSelect:message andTapped:tapped atIndex:index];
     }
     
-    if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:atIndex:)]) {
-        [self.analyticsDelegate messageDidSelect:message atIndex:index];
+    if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:andTapped:atIndex:)]) {
+        [self.analyticsDelegate messageDidSelect:message andTapped:tapped atIndex:index];
     }
 }
 

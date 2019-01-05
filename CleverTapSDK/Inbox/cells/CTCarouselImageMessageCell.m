@@ -3,10 +3,8 @@
 
 @implementation CTCarouselImageMessageCell
 
-static CGFloat kBorderWidth = 0.0;
-static CGFloat kCornerRadius = 0.0;
 static const float kLandscapeMultiplier = 0.5625; // 16:9 in landscape
-static const float kPageControlViewHeight = 44.f;
+static const float kPageControlViewHeight = 30.f;
 
 static NSString * const kOrientationLandscape = @"l";
 
@@ -65,7 +63,7 @@ static NSString * const kOrientationLandscape = @"l";
     
     NSString *orientation = message.orientation;
     // assume square image orientation
-    CGFloat viewWidth = self.frame.size.width;
+    CGFloat viewWidth = self.carouselView.frame.size.width;
     CGFloat viewHeight = viewWidth + kPageControlViewHeight;
     
     if ([orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString]) {
@@ -74,25 +72,25 @@ static NSString * const kOrientationLandscape = @"l";
     
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
     self.frame = frame;
-    self.containerView.frame = frame;
-    self.containerViewHeight.constant = viewHeight;
+    self.carouselView.frame = frame;
+    self.carouselViewHeight.constant = viewHeight;
     
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
     }
     
-    for (UIView *subview in [self.containerView subviews]) {
+    for (UIView *subview in [self.carouselView subviews]) {
         [subview removeFromSuperview];
     }
     
     self.swipeView = [[CTSwipeView alloc] init];
-    CGRect swipeViewFrame = self.containerView.bounds;
+    CGRect swipeViewFrame = self.carouselView.bounds;
     swipeViewFrame.size.height =  frame.size.height - kPageControlViewHeight;
     self.swipeView.frame = swipeViewFrame;
     self.swipeView.delegate = self;
     self.swipeView.dataSource = self;
   
-    [self.containerView addSubview:self.swipeView];
+    [self.carouselView addSubview:self.swipeView];
     self.itemViews = [NSMutableArray new];
     
     int index = 0;
@@ -105,12 +103,12 @@ static NSString * const kOrientationLandscape = @"l";
         }
         CTCarouselImageView *itemView;
         if (itemView == nil){
-            CGRect frame = self.containerView.bounds;
+            CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height - kPageControlViewHeight;
+            frame.size.width = frame.size.width;
             itemView = [[CTCarouselImageView alloc] initWithFrame:frame
                                                   imageUrl:imageUrl actionUrl:actionUrl];
         }
-        
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         itemView.userInteractionEnabled = YES;
@@ -120,14 +118,16 @@ static NSString * const kOrientationLandscape = @"l";
         index++;
     }
 
-    self.pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, self.containerView.frame.size.height - kPageControlViewHeight, viewWidth, kPageControlViewHeight)];
+    self.pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, self.carouselView.frame.size.height - kPageControlViewHeight, viewWidth, kPageControlViewHeight)];
     [self.pageControl addTarget:self action:@selector(pageControlTapped:) forControlEvents:UIControlEventValueChanged];
     self.pageControl.numberOfPages = [self.itemViews count];
     self.pageControl.hidesForSinglePage = YES;
+    self.pageControl.backgroundColor = [UIColor clearColor];
     self.pageControl.currentPageIndicatorTintColor = [UIColor blueColor];
     self.pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
-    [self.containerView addSubview:self.pageControl];
+    [self.carouselView addSubview:self.pageControl];
     [self.swipeView reloadData];
+    
 }
 
 #pragma mark - Swipe View
@@ -159,6 +159,7 @@ static NSString * const kOrientationLandscape = @"l";
     NSInteger index = itemView.tag;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [userInfo setObject:@YES forKey:@"tapped"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 

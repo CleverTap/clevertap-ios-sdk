@@ -6,7 +6,7 @@
 @protocol CleverTapInboxViewControllerAnalyticsDelegate <NSObject>
 @required
 - (void)messageDidShow:(CleverTapInboxMessage *)message;
-- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(NSUInteger)index;
+- (void)messageDidSelect:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(NSUInteger)index;
 @end
 
 @interface CleverTapInboxViewController ()

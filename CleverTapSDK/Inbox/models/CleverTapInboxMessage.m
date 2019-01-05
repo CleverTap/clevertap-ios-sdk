@@ -99,7 +99,7 @@
     } else if (components.day > 0) {
         return (components.day > 1) ? [NSString stringWithFormat:@"%ld days ago", (long)components.day] : @"Yesterday";
     } else if (components.hour > 0) {
-        return (components.hour > 1) ? [NSString stringWithFormat:@"%ld hours ago", (long)components.minute] : [NSString stringWithFormat:@"%ld hour ago", (long)components.hour];
+        return (components.hour > 1) ? [NSString stringWithFormat:@"%ld hours ago", (long)components.hour] : [NSString stringWithFormat:@"%ld hour ago", (long)components.hour];
     } else if (components.minute > 0) {
         return (components.minute > 1) ? [NSString stringWithFormat:@"%ld minutes ago", (long)components.minute] : [NSString stringWithFormat:@"%ld minute ago", (long)components.minute];
     } else {
