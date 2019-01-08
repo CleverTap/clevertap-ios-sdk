@@ -10,13 +10,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMutableArray<CTCarouselImageView*> *itemViews;
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) CTSwipeView *swipeView;
-@property (strong, nonatomic) IBOutlet UILabel *dateLabel;
+@property (nonatomic, strong) IBOutlet UILabel *dateLabel;
 @property (nonatomic, strong) IBOutlet UIView *readView;
-@property (strong, nonatomic) IBOutlet UIView *containerView;
-@property (strong, nonatomic) IBOutlet UIView *carouselView;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *carouselViewHeight;
+@property (nonatomic, strong) IBOutlet UIView *containerView;
+@property (nonatomic, strong) IBOutlet UIView *carouselView;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselViewHeight;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *readViewWidthContraint;
 
-@property (strong, nonatomic) CleverTapInboxMessage *message;
+@property (nonatomic, strong) CleverTapInboxMessage *message;
 
 - (void)setupCarouselImageMessage:(CleverTapInboxMessage *)message;
 

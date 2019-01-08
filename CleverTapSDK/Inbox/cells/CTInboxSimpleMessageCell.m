@@ -35,6 +35,13 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
+
+//    self.containerView.layer.shadowRadius  = 1.0f;
+//    self.containerView.layer.shadowColor   = [UIColor blackColor].CGColor;
+//    self.containerView.layer.shadowOffset  = CGSizeMake(0.0f, 1.0f);
+//    self.containerView.layer.shadowOpacity = 0.1f;
+//    self.containerView.layer.masksToBounds = NO;
+  
     dispatch_async(dispatch_get_main_queue(), ^{
         self.playerLayer.frame = self.avPlayerContainerView.bounds;
     });
@@ -54,8 +61,12 @@
 //    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
 //    self.containerView.layer.borderWidth = kBorderWidth;
     
-    self.readView.layer.cornerRadius = 5;
-    self.readView.layer.masksToBounds = YES;
+}
+
+- (void)prepareForReuse {
+    [super prepareForReuse];
+    [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
+    self.cellImageView.animatedImage = nil;
 }
 
 - (void)layoutNotification:(CleverTapInboxMessage *)message {
@@ -94,6 +105,7 @@
     
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
+    self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     
     [self layoutSubviews];
     [self layoutIfNeeded];
@@ -116,11 +128,13 @@
         [self setupInboxMessageActions:content];
     }
     
-    // mark read/unread
+     // mark read/unread
     if (message.isRead) {
         self.readView.hidden = YES;
+        self.readViewWidthContraint.constant = 0;
     } else {
         self.readView.hidden = NO;
+        self.readViewWidthContraint.constant = 16;
     }
     
     // set content mode for media
@@ -151,6 +165,7 @@
     self.cellImageView.hidden = YES;
     self.volume.hidden = NO;
     self.playButton.hidden = NO;
+    self.isVideoMuted = YES;
     
     self.playButton.layer.cornerRadius = 30;
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
@@ -162,8 +177,7 @@
     [self.playButton addTarget:self action:@selector(togglePlay) forControlEvents:UIControlEventTouchUpInside];
     
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-//  self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:message.media[@"url"]]];
-    self.avPlayer = [[AVPlayer alloc] initWithURL: [NSURL URLWithString:content.mediaUrl]];
+    self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:content.mediaUrl]];
     self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
     self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect;
     self.avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
@@ -181,7 +195,7 @@
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(togglePlayControls:)];
     [self.avPlayerControlsView addGestureRecognizer:tapGesture];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loopVideo) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
     
     if (self.isVideoMuted) {
         [_avPlayer setMuted:YES];
@@ -293,6 +307,17 @@
     [self.avPlayer seekToTime:kCMTimeZero];
 }
 
+- (void)playerItemDidReachEnd:(NSNotification *)notification {
+
+    id object = [notification object];
+    if (object && [object isKindOfClass:[AVPlayerItem class]]) {
+        AVPlayerItem* item = (AVPlayerItem*)[notification object];
+        [item seekToTime:kCMTimeZero];
+    }
+    [self pause];
+    [self togglePlayControls:nil];
+}
+
 - (void)togglePlayControls:(UIGestureRecognizer *)sender {
     if (self.isControlsHidden) {
         [self showControls:YES];
@@ -347,15 +372,15 @@
 - (void)handleInboxNotificationAtIndex:(int)index {
     int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
-    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"index"];
-    [userInfo setObject:@NO forKey:@"tapped"];
+    [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
+    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender{
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
-    [userInfo setObject:@YES forKey:@"tapped"];
+    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 

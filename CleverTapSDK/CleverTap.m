@@ -2727,11 +2727,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
 #if !CLEVERTAP_NO_INBOX_SUPPORT
         [self _resetInbox];
-        // TODO REMOVE test only
-        [self runSerialAsync:^{
-            NSArray <NSDictionary*> *messages = @[@{@"id":@"1", @"title": @"oneTitle", @"body": @"oneBody"}, @{@"id":@"5", @"title": @"FiveTitle", @"body": @"ThreeBody"}, @{@"id":@"6", @"title": @"sixTitle", @"body": @"SixBody"}];
-            [self.inboxController updateMessages:messages];
-        }];
 #endif
         
         // push data on reset profile
@@ -3568,7 +3563,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return nil;
     }
     NSArray *messages = [self getAllInboxMessages];
-    if (! messages || [messages count] <= 0) {
+    if (! messages) {
         return nil;
     }
     return [[CleverTapInboxViewController alloc] initWithMessages:messages config:config delegate:delegate analyticsDelegate:self];
@@ -3619,24 +3614,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 }
 
-- (void)messageDidSelect:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(NSUInteger)index{
+- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
+    
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
     
     CleverTapInboxMessageContent *content;
-    if (tapped) {
         content = (CleverTapInboxMessageContent*)message.content[index];
-    } else {
-        content = (CleverTapInboxMessageContent*)message.content[0];
-    }
     
     NSURL *ctaURL;
    
-    if (content.actionHasUrl && tapped) {
+    if (content.actionHasUrl && buttonIndex == -1) {
         ctaURL = [NSURL URLWithString:content.actionUrl];
         
-    }else if (content.actionHasLinks && !tapped){
-        NSDictionary *link = content.links[index];
+    }else if (content.actionHasLinks){
+        NSDictionary *link = content.links[buttonIndex];
         NSString *actionType = link[@"type"];
         if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
             NSString *copy = link[@"copyText"][@"text"];

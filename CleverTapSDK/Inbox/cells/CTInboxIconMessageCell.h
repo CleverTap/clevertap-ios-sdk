@@ -12,13 +12,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) IBOutlet UILabel *titleLabel;
 @property (strong, nonatomic) IBOutlet UILabel *bodyLabel;
 @property (strong, nonatomic) IBOutlet UILabel *dateLabel;
-@property (nonatomic, strong) IBOutlet UIView *readView;
+@property (strong, nonatomic) IBOutlet UIView *readView;
 @property (strong, nonatomic) IBOutlet CTInboxMessageActionView *actionView;
 
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightContraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioContraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioContraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthContraint;
 
 @property (strong, nonatomic) CleverTapInboxMessage *message;
 

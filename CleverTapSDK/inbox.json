@@ -13,13 +13,13 @@
                     {
                         "message": {
                             "text": "Stand a chance to win free food for one whole year by sharing your fun foodie moments using #EatsLikeAFoodie (For T&Cs, check out the pinned tweet on our handle)",
-                            "color": "#434761",
+                            "color": "#09ff09",
                             "og": "Message <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@sProp-profile@-2\">profile - sProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:sProp\" data-originalreplacement=\"$replacement$##w:sProp[ add your default value here ]$/replacement$\" data-special-attr=\"@sProp-profile@-2\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defsprop\"></span><span style=\"display:none\">----@sProp-profile@-2</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>&nbsp;and <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@lang-profile@-3\">profile - lang <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:lang\" data-originalreplacement=\"$replacement$##w:lang[ add your default value here ]$/replacement$\" data-special-attr=\"@lang-profile@-3\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"deflang\"></span><span style=\"display:none\">----@lang-profile@-3</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
                             "replacements": "Message $replacement$##w:sProp[defsprop]$/replacement$ and $replacement$##w:lang[deflang]$/replacement$"
                         },
                         "title": {
                             "text": "Title 445",
-                            "color": "#434761",
+                            "color": "#ff880a",
                             "og": "Title <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@IntegerProp-profile@-1\">profile - IntegerProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:IntegerProp\" data-originalreplacement=\"$replacement$##w:IntegerProp[ add your default value here ]$/replacement$\" data-special-attr=\"@IntegerProp-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defip\"></span><span style=\"display:none\">----@IntegerProp-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
@@ -53,13 +53,13 @@
                     {
                         "message": {
                             "text": "Message",
-                            "color": "#434761",
+                            "color": "#08fff6",
                             "replacements": "",
                             "og": ""
                         },
                         "title": {
                             "text": "Title",
-                            "color": "#434761",
+                            "color": "#08fff6",
                             "replacements": "",
                             "og": ""
                         },
@@ -167,14 +167,14 @@
                 "content": [
                     {
                         "message": {
-                            "text": "MessageExample",
-                            "color": "#434761",
+                            "text": "Avoiding those Tinda moments? @aliaa08 has been there, done that! Tell us about your Tinda moments and how you get around them, using #MyTindaMoment to win exciting goodies from @ubereats_ind",
+                            "color": "000000",
                             "og": "MessageExample",
                             "replacements": "MessageExample"
                         },
                         "title": {
                             "text": "TitleExample",
-                            "color": "#434761",
+                            "color": "#c6a017",
                             "og": "TitleExample",
                             "replacements": "TitleExample"
                         },
@@ -418,7 +418,7 @@
                                 }
                             }, {
                                 "type": "url",
-                                "text": "Cancel",
+                                "text": "Cancelwwwwwwwwwwwwwwwwwww",
                                 "color": "#528144",
                                 "bg": "#6A4141",
                                 "copyText": {
@@ -470,7 +470,7 @@
                         },
                         "title": {
                             "text": "Swift India",
-                            "color": "#434761",
+                            "color": "#F90000",
                             "og": "Title <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@IntegerProp-profile@-1\">profile - IntegerProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:IntegerProp\" data-originalreplacement=\"$replacement$##w:IntegerProp[ add your default value here ]$/replacement$\" data-special-attr=\"@IntegerProp-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defip\"></span><span style=\"display:none\">----@IntegerProp-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
@@ -625,13 +625,13 @@
                     {
                         "message": {
                             "text": "jdjdjdasjdsajldsal",
-                            "color": "#434761",
+                            "color": "#09ff09",
                             "og": "Message <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@sProp-profile@-2\">profile - sProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:sProp\" data-originalreplacement=\"$replacement$##w:sProp[ add your default value here ]$/replacement$\" data-special-attr=\"@sProp-profile@-2\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defsprop\"></span><span style=\"display:none\">----@sProp-profile@-2</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>&nbsp;and <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@lang-profile@-3\">profile - lang <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:lang\" data-originalreplacement=\"$replacement$##w:lang[ add your default value here ]$/replacement$\" data-special-attr=\"@lang-profile@-3\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"deflang\"></span><span style=\"display:none\">----@lang-profile@-3</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
                             "replacements": "Message $replacement$##w:sProp[defsprop]$/replacement$ and $replacement$##w:lang[deflang]$/replacement$"
                         },
                         "title": {
                             "text": "Title 445",
-                            "color": "#434761",
+                            "color": "#08fff6",
                             "og": "Title <span contenteditable=\"false\"><span id=\"undefined\"><span data-str=\"@IntegerProp-profile@-1\">profile - IntegerProp <input class=\"default_value_text_box\" type=\"text\" data-special-token=\"##w:IntegerProp\" data-originalreplacement=\"$replacement$##w:IntegerProp[ add your default value here ]$/replacement$\" data-special-attr=\"@IntegerProp-profile@-1\" style=\"border: none;  text-align: center;;\" placeholder=\"Default value\" value=\"defip\"></span><span style=\"display:none\">----@IntegerProp-profile@-1</span></span><span contenteditable=\"false\">&nbsp;<span></span></span></span>",
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
@@ -646,6 +646,126 @@
                         "media": {
                             "content_type": "image",
                             "url": "https://db7hsdc8829us.cloudfront.net/dist/1504684291/i/0f28ab872b2d4d6d96c066ad41279f2e.jpeg?v=1545636193"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "15446845416",
+            "tags": [],
+            "wzrk_ttl": 1595742575,
+            "wzrk_id": "1544686416_20181225",
+            "msg": {
+                "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "l",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message",
+                            "color": "#08fff6",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Title",
+                            "color": "#08fff6",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "https://www.google.com",
+                                "ios": {
+                                    "text": "https://www.google.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#F8F9F9",
+                                    "bg": "#B27032",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": "",
+                                        "ios": {
+                                            "text": "https://www.google.com",
+                                            "replacements": "",
+                                            "og": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content_type": "video",
+                            "url": "https://wolverine.raywenderlich.com/content/ios/tutorials/video_streaming/foxVillage.m3u8"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "15446845417",
+            "tags": [],
+            "wzrk_ttl": 1595742575,
+            "wzrk_id": "1544686416_20181225",
+            "msg": {
+                "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "l",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message",
+                            "color": "#08fff6",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Title",
+                            "color": "#08fff6",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "action": {
+                            "type": "onmessage",
+                            "url": {
+                                "android": "https://www.google.com",
+                                "ios": {
+                                    "text": "https://www.google.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#F8F9F9",
+                                    "bg": "#B27032",
+                                    "copyText": "",
+                                    "url": {
+                                        "android": "",
+                                        "ios": {
+                                            "text": "https://www.google.com",
+                                            "replacements": "",
+                                            "og": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content_type": "video",
+                            "url": "https://wolverine.raywenderlich.com/content/ios/tutorials/video_streaming/foxVillage.m3u8"
                         },
                         "icon": {}
                     }

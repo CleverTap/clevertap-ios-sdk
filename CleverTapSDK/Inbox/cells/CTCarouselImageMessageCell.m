@@ -1,5 +1,7 @@
 #import "CTCarouselImageMessageCell.h"
+#import "CTInAppResources.h"
 #import "CTConstants.h"
+#import "CTInAppUtils.h"
 
 @implementation CTCarouselImageMessageCell
 
@@ -40,10 +42,6 @@ static NSString * const kOrientationLandscape = @"l";
 - (void)awakeFromNib {
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
-//    self.containerView.layer.masksToBounds = YES;
-    
-    self.readView.layer.cornerRadius = 5;
-    self.readView.layer.masksToBounds = YES;
 }
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
@@ -57,13 +55,21 @@ static NSString * const kOrientationLandscape = @"l";
     
     if (message.isRead) {
         self.readView.hidden = YES;
+        self.readViewWidthContraint.constant = 0;
     } else {
         self.readView.hidden = NO;
+        self.readViewWidthContraint.constant = 16;
     }
     
     NSString *orientation = message.orientation;
     // assume square image orientation
-    CGFloat viewWidth = self.carouselView.frame.size.width;
+    CGFloat leftMargin = 0;
+    if (@available(iOS 11.0, *)) {
+        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+        leftMargin = window.safeAreaInsets.left;
+    }
+    
+    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
     CGFloat viewHeight = viewWidth + kPageControlViewHeight;
     
     if ([orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString]) {
@@ -159,7 +165,7 @@ static NSString * const kOrientationLandscape = @"l";
     NSInteger index = itemView.tag;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
-    [userInfo setObject:@YES forKey:@"tapped"];
+    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 

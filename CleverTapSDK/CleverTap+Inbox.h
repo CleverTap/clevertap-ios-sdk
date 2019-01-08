@@ -44,7 +44,7 @@
 @end
 
 @protocol CleverTapInboxViewControllerDelegate <NSObject>
-- (void)messageDidSelect:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(NSUInteger)index;
+- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex;
 @end
 
 @interface CleverTapInboxStyleConfig : NSObject

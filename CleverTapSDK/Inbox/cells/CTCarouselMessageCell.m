@@ -1,4 +1,5 @@
 #import "CTCarouselMessageCell.h"
+#import "CTInAppResources.h"
 #import "CTConstants.h"
 
 @implementation CTCarouselMessageCell
@@ -40,10 +41,7 @@ static NSString * const kOrientationLandscape = @"l";
 - (void)awakeFromNib {
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
-
     self.containerView.layer.masksToBounds = YES;
-    self.readView.layer.cornerRadius = 5;
-    self.readView.layer.masksToBounds = YES;
 }
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
@@ -53,49 +51,39 @@ static NSString * const kOrientationLandscape = @"l";
 - (void)setupCarouselMessage:(CleverTapInboxMessage *)message {
     
     self.message = message;
-    
     self.dateLabel.text = message.relativeDate;
     
     if (message.isRead) {
         self.readView.hidden = YES;
+        self.readViewWidthContraint.constant = 0;
     } else {
         self.readView.hidden = NO;
+        self.readViewWidthContraint.constant = 16;
     }
     
-    self.carouselView.translatesAutoresizingMaskIntoConstraints = NO;
     captionHeight = [CTCarouselImageView captionHeight];
     
     NSString *orientation = message.orientation;
     // assume square image orientation
-    CGFloat viewWidth = self.frame.size.width;
+    
+    CGFloat leftMargin = 0;
+    if (@available(iOS 11.0, *)) {
+        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+        leftMargin = window.safeAreaInsets.left;
+    }
+    
+    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
     CGFloat viewHeight = viewWidth + captionHeight;
     
     if ([orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString]) {
         viewHeight = (viewWidth*kLandscapeMultiplier) + captionHeight;
     }
     
+   
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
     self.frame = frame;
     self.carouselView.frame = frame;
     self.carouselViewHeight.constant = viewHeight;
-    
-    [[NSLayoutConstraint constraintWithItem:self.carouselView
-                                  attribute:NSLayoutAttributeLeading
-                                  relatedBy:NSLayoutRelationEqual
-                                     toItem:self.containerView attribute:NSLayoutAttributeLeading
-                                 multiplier:1 constant:0] setActive:YES];
-    
-    [[NSLayoutConstraint constraintWithItem:self.carouselView
-                                  attribute:NSLayoutAttributeTrailing
-                                  relatedBy:NSLayoutRelationEqual
-                                     toItem:self.containerView attribute:NSLayoutAttributeTrailing
-                                 multiplier:1 constant:0] setActive:YES];
-    
-    [[NSLayoutConstraint constraintWithItem:self.carouselView
-                                  attribute:NSLayoutAttributeTop
-                                  relatedBy:NSLayoutRelationEqual
-                                     toItem:self.containerView attribute:NSLayoutAttributeTop
-                                 multiplier:1 constant:0] setActive:YES];
     
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
@@ -120,6 +108,8 @@ static NSString * const kOrientationLandscape = @"l";
         NSString *subcaption = content.message;
         NSString *imageUrl = content.mediaUrl;
         NSString *actionUrl = content.actionUrl;
+        NSString *captionColor = content.titleColor? content.titleColor : @"#000000";
+        NSString *subcaptionColor = content.messageColor? content.messageColor : @"#7E7E7E";
         
         if (imageUrl == nil) {
             continue;
@@ -129,7 +119,7 @@ static NSString * const kOrientationLandscape = @"l";
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height ;
             itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
-                                                           caption:caption subcaption:subcaption  imageUrl:imageUrl actionUrl:actionUrl];
+                                    caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -186,7 +176,7 @@ static NSString * const kOrientationLandscape = @"l";
     NSInteger index = itemView.tag;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
-    [userInfo setObject:@YES forKey:@"tapped"];
+    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 

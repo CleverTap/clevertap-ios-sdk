@@ -138,11 +138,11 @@ static NSManagedObjectContext *privateContext;
     NSMutableArray *messages = [NSMutableArray new];
     for (CTMessageMO *msg in self.user.messages) {
         int ttl = (int)msg.expires;
-        if (now >= ttl && ttl > 0) {
+        if (ttl > 0 && now >= ttl) {
             CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
             [self _deleteMessage:msg];
         } else {
-             [messages addObject:[msg toJSON]];
+            [messages addObject:[msg toJSON]];
         }
     }
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
@@ -157,7 +157,7 @@ static NSManagedObjectContext *privateContext;
     NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
     for (CTMessageMO *msg in results) {
         int ttl = (int)msg.expires;
-        if (now >= ttl && ttl > 0) {
+        if (ttl > 0 && now >= ttl) {
             CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
             [self _deleteMessage:msg];
         } else {

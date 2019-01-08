@@ -4,27 +4,32 @@ import CleverTapSDK
 
 class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
   
-       
+    
+           
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         NSLog("running viewDidLoad")
-        
         inboxRegister()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //CleverTap.sharedInstance().recordScreenView("MainViewController")
+        
+//        if (@available(iOS 11.0, *)) {
+//            UIWindow *window = UIApplication.sharedApplication.keyWindow;
+//            CGFloat topPadding = window.safeAreaInsets.left;
+//            CGFloat bottomPadding = window.safeAreaInsets.bottom;
+//        }
     }
     
     @IBAction func inboxButtonTapped(_ sender: Any) {
         let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
         let ct1  = CleverTap.instance(with: ctConfig)
             let style = CleverTapInboxStyleConfig.init()
-            style.backgroundColor = UIColor.lightGray
             style.cellBackgroundColor = UIColor.yellow
             style.messageTags = ["Promotions", "Offers"];
             if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
@@ -50,7 +55,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             let unreadCount = ct1.getInboxMessageUnreadCount()
             
             DispatchQueue.main.async {
-                self.inboxButton.isHidden = messageCount <= 0
+                self.inboxButton.isHidden = false;
                 self.inboxButton.setTitle("Show Inbox: \(unreadCount) unread", for: .normal)
             }
      }))
@@ -84,12 +89,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             let messageCount = ct1.getInboxMessageCount()
             let unreadCount = ct1.getInboxMessageUnreadCount()
             
-            self.inboxButton.isHidden = messageCount <= 0
+            self.inboxButton.isHidden = false;
             self.inboxButton.setTitle("Show Inbox: \(unreadCount) unread", for: .normal)
         }))
     }
+ 
     
-    func messageDidSelect(_ message: CleverTapInboxMessage!, andTapped tapped: Bool, at index: UInt) {
+    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: UInt, withButtonIndex buttonIndex: UInt) {
         
     }
     
@@ -98,6 +104,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         CleverTap.sharedInstance()?.recordEvent("test ios")
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
         CleverTap.sharedInstance()?.recordEvent("Cover")
+    }
+    
+    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: Int32, withButtonIndex buttonIndex: Int32) {
+        
     }
     
     @objc func doneButtonTapped() {

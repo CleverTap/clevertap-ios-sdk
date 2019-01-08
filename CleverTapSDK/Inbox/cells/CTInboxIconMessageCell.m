@@ -5,6 +5,31 @@
 
 @implementation CTInboxIconMessageCell
 
+- (instancetype)init {
+    if (self = [super init]) {
+        [self setup];
+    }
+    return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        [self setup];
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        [self setup];
+    }
+    return self;
+}
+
+- (void)setup {
+    // no-op for now
+}
+
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
@@ -18,18 +43,17 @@
     self.readView.layer.masksToBounds = YES;
 }
 
+- (void)prepareForReuse {
+    [super prepareForReuse];
+    [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
+    [self.cellIcon sd_cancelCurrentAnimationImagesLoad];
+    self.cellImageView.image = nil;
+    self.cellIcon.image = nil;
+}
+
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
     // Configure the view for the selected state
-}
-
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
-{
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self) {
-        // Initialization code
-    }
-    return self;
 }
 
 - (void)layoutSubviews {
@@ -65,6 +89,7 @@
 
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
+    self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     
     if (content.actionHasLinks) {
         _actionView.hidden = NO;
@@ -89,8 +114,10 @@
     
     if (message.isRead) {
         self.readView.hidden = YES;
+        self.readViewWidthContraint.constant = 0;
     } else {
         self.readView.hidden = NO;
+        self.readViewWidthContraint.constant = 16;
     }
     
     self.titleLabel.text = content.title;
@@ -153,14 +180,14 @@
 - (void)handleInboxNotificationAtIndex:(int)index {
     int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
-    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"index"];
-    [userInfo setObject:@NO forKey:@"tapped"];
+    [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
+    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender{
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
-    [userInfo setObject:@YES forKey:@"tapped"];
+    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 

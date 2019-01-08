@@ -70,6 +70,11 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     [self registerNibs];
     [self loadData];
     [self setupLayout];
+    if (_config.backgroundColor) {
+        self.tableView.backgroundColor =  _config.backgroundColor;
+    } else {
+        self.tableView.backgroundColor =  [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
+    }
 }
 
 - (void)viewDidLayoutSubviews {
@@ -109,10 +114,26 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     // set tableview
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 44.0;
-    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
+    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 6.0)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
+    self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
+    
+    if (self.filterMessages.count == 0) {
+        
+        UILabel *lblMessage = [[UILabel alloc] initWithFrame:CGRectMake(0, (CGFloat) [[UIScreen mainScreen] bounds].size.height/2, (CGFloat) [[UIScreen mainScreen] bounds].size.width, 44)];
+        lblMessage.text = @"No message(s) to show";
+        lblMessage.tag = 108;
+        lblMessage.textAlignment = NSTextAlignmentCenter;
+        [self.view addSubview:lblMessage];
+        
+    } else {
+        UILabel *removeLabel;
+        while((removeLabel = [self.view viewWithTag:108]) != nil) {
+            [removeLabel removeFromSuperview];
+        }
+    }
     
     if (self.tags.count == 0) {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
@@ -123,7 +144,18 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         self.navigationItem.rightBarButtonItem = backButton;
         self.navigationItem.title = @"Notifications";
         self.navigationController.navigationBar.translucent = false;
-        self.navigationController.navigationBar.tintColor = [UIColor blackColor];
+        if (_config.navigationBarTintColor) {
+            self.navigationController.navigationBar.barTintColor = _config.navigationBarTintColor;
+        } else  {
+            self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+        }
+        
+        if (_config.navigationBarTintColor) {
+            self.navigationController.navigationBar.tintColor = _config.navigationTintColor;
+            self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : _config.navigationTintColor};
+        } else  {
+            self.navigationController.navigationBar.tintColor = [UIColor blackColor];
+        }
         
     } else {
         [self setupSegmentController];
@@ -290,7 +322,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
     if (!message.isRead){
         [self _notifyMessageViewed:message];
-        [message setRead:YES];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [message setRead:YES];
+        });
     }
 
     if ([message.type isEqualToString:kSimpleMessage]) {
@@ -325,6 +359,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     } else if ([message.type isEqualToString:kCarouselImageMessage]) {
         
         CTCarouselImageMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellCarouselImgMessageIdentifier forIndexPath:indexPath];
+        
         [cell setupCarouselImageMessage:message];
         
         if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
@@ -367,15 +402,29 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    
-    if ([message.type isEqualToString:kSimpleMessage]) {
+    if([cell isKindOfClass:[CTInboxSimpleMessageCell class]]){
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
-         if (message.content[0].mediaIsVideo) {
-//             [messageCell.playerLayer.player play];
-         }
+        CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+        if(message.content[0].mediaIsVideo){
+            messageCell.currentVideoIndex = (int)indexPath.section;
+            [messageCell togglePlay];
+        }
     }
 }
+
+- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
+    
+    if([cell isKindOfClass:[CTInboxSimpleMessageCell class]]){
+        CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
+        if  (self.filterMessages.count > 0 && self.filterMessages.count < indexPath.section) {
+            CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+            if(message.content[0].mediaIsVideo){
+                [messageCell togglePlay];
+            }
+        }
+    }
+}
+
 
 #pragma mark - Actions
 
@@ -390,8 +439,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     CleverTapInboxMessage *message = (CleverTapInboxMessage*)notification.object;
     NSDictionary *userInfo = (NSDictionary *)notification.userInfo;
     int index = [[userInfo objectForKey:@"index"] intValue];
-    bool tapped = [[userInfo objectForKey:@"tapped"] boolValue];
-    [self _notifyMessageSelected:message andTapped:tapped atIndex:index];
+    int buttonIndex = [[userInfo objectForKey:@"buttonIndex"] intValue];
+    [self _notifyMessageSelected:message atIndex:index withButtonIndex:buttonIndex];
 }
 
 - (void)_notifyMessageViewed:(CleverTapInboxMessage *)message {
@@ -400,13 +449,13 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     }
 }
 
-- (void)_notifyMessageSelected:(CleverTapInboxMessage *)message andTapped:(BOOL)tapped atIndex:(int)index {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:andTapped:atIndex:)]) {
-        [self.delegate messageDidSelect:message andTapped:tapped atIndex:index];
+- (void)_notifyMessageSelected:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:atIndex:withButtonIndex:)]) {
+        [self.delegate messageDidSelect:message atIndex:index withButtonIndex:buttonIndex];
     }
     
-    if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:andTapped:atIndex:)]) {
-        [self.analyticsDelegate messageDidSelect:message andTapped:tapped atIndex:index];
+    if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:atIndex:withButtonIndex:)]) {
+        [self.analyticsDelegate messageDidSelect:message atIndex:index withButtonIndex:buttonIndex];
     }
 }
 

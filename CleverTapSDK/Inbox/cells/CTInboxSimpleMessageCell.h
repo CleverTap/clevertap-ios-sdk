@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) IBOutlet UILabel *titleLabel;
 @property (strong, nonatomic) IBOutlet UILabel *bodyLabel;
 @property (strong, nonatomic) IBOutlet UILabel *dateLabel;
-@property (nonatomic, strong) IBOutlet UIView *readView;
+@property (strong, nonatomic) IBOutlet UIView *readView;
 @property (strong, nonatomic) IBOutlet AVPlayerLayer *playerLayer;
 @property (strong, nonatomic) IBOutlet CTInboxMessageActionView *actionView;
 @property (strong, nonatomic) IBOutlet UIView *avPlayerContainerView;
@@ -26,23 +26,27 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioContraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioContraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthContraint;
 
+// video controls
 @property (nonatomic, strong) IBOutlet UIButton *volume;
 @property (nonatomic, strong) IBOutlet UIButton *playButton;
-@property (strong, nonatomic) AVPlayer *avPlayer;
-@property (strong, nonatomic) AVPlayerLayer *avPlayerLayer;
-@property (strong, nonatomic) AVPlayerItem *avPlayerItem;
-@property (nonatomic, weak) NSTimer *controllersTimer;
+@property (nonatomic, strong) AVPlayer *avPlayer;
+@property (nonatomic, strong) AVPlayerLayer *avPlayerLayer;
+@property (nonatomic, strong) AVPlayerItem *avPlayerItem;
+@property (nonatomic, weak)   NSTimer *controllersTimer;
 @property (nonatomic, assign) NSInteger controllersTimeoutPeriod;
-@property (assign, nonatomic) BOOL isVideoMuted;
+@property (nonatomic, assign) BOOL isVideoMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
+@property (nonatomic, assign) int currentVideoIndex;
 
-@property (strong, nonatomic) CleverTapInboxMessage *message;
+@property (nonatomic, strong) CleverTapInboxMessage *message;
 
 - (IBAction)volumeButtonTapped:(UIButton *)sender;
 - (void)layoutNotification:(CleverTapInboxMessage *)message;
 - (void)setupSimpleMessage:(CleverTapInboxMessage *)message;
 - (void)setupVideoPlayer:(CleverTapInboxMessage *)message;
+- (void)togglePlay;
 @end
 
 NS_ASSUME_NONNULL_END

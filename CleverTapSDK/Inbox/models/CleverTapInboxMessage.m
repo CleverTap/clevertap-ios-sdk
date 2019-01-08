@@ -90,13 +90,12 @@
                                                                      toDate:[NSDate date]
                                                                     options:0];
     
-    if (components.year > 0) {
-        return [NSString stringWithFormat:@"%ld years ago", (long)components.year];
-    } else if (components.month > 0) {
-        return [NSString stringWithFormat:@"%ld months ago", (long)components.month];
-    } else if (components.weekOfYear > 0) {
-        return [NSString stringWithFormat:@"%ld weeks ago", (long)components.weekOfYear];
-    } else if (components.day > 0) {
+    if (components.year > 0 || components.month > 0 || components.weekOfYear > 0 || components.day > 2) {
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"dd MMM"];
+        NSString *dateString = [formatter stringFromDate:date];
+        return dateString;
+    } else if (components.day > 0 && components.day < 3) {
         return (components.day > 1) ? [NSString stringWithFormat:@"%ld days ago", (long)components.day] : @"Yesterday";
     } else if (components.hour > 0) {
         return (components.hour > 1) ? [NSString stringWithFormat:@"%ld hours ago", (long)components.hour] : [NSString stringWithFormat:@"%ld hour ago", (long)components.hour];
