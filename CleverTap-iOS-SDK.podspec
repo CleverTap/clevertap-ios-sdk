@@ -10,7 +10,6 @@ s.requires_arc              = true
 s.module_name               = 'CleverTapSDK' 
 s.resources                 = 'CleverTapSDK/*.crt'
 s.ios.dependency             'SDWebImage/GIF'
-s.ios.dependency             'SDWebImage', '4.4.2'
 s.ios.resources             = 'CleverTapSDK/**/*.{png,xib}', 'CleverTapSDK/**/*.xcdatamodeld'
 s.ios.deployment_target     = '8.0'
 s.ios.source_files          = 'CleverTapSDK/**/*.{h,m}'
