@@ -116,6 +116,10 @@
     return haveUpdates;
 }
 
+- (void)deleteMessage:(CTMessageMO *)message {
+    [self removeMessagesObject:message];
+}
+
 @dynamic accountId;
 @dynamic guid;
 @dynamic identifier;

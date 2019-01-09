@@ -93,13 +93,7 @@ static NSManagedObjectContext *privateContext;
 
 - (void)deleteMessageWithId:(NSString *)messageId {
     CTMessageMO *message = [self _messageForId:messageId];
-    if (message) {
-        [privateContext performBlock:^{
-            [privateContext deleteObject:message];
-            [self notifyUpdate];
-            [self _save];
-        }];
-    }
+    [self _deleteMessage:message];
 }
 
 - (void)markReadMessageWithId:(NSString *)messageId {
@@ -124,12 +118,12 @@ static NSManagedObjectContext *privateContext;
 
 - (NSUInteger)count {
     if (!self.isInitialized) return -1;
-    return [self.user.messages count];
+    return [self.messages count];
 }
 
 - (NSUInteger)unreadCount {
     if (!self.isInitialized) return -1;
-    return [self unreadMessages].count;
+    return [self.unreadMessages count];
 }
 
 - (NSArray<NSDictionary *> *)messages {
@@ -176,10 +170,10 @@ static NSManagedObjectContext *privateContext;
     return existing ? results[0] : nil;
 }
 
--(void)_deleteMessage :(CTMessageMO *)message {
+-(void)_deleteMessage:(CTMessageMO *)message {
     if (message) {
         [privateContext performBlock:^{
-            [privateContext deleteObject:message];
+            [self.user deleteMessage:message];
             [self notifyUpdate];
             [self _save];
         }];

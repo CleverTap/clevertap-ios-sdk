@@ -3611,23 +3611,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message viewed: %@", self, message);
     [self markReadInboxMessage:message];
     [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
-
 }
 
 - (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
-    
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
     
-    CleverTapInboxMessageContent *content;
-        content = (CleverTapInboxMessageContent*)message.content[index];
+    CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
     
     NSURL *ctaURL;
    
-    if (content.actionHasUrl && buttonIndex == -1) {
+    if (content.actionHasUrl && buttonIndex < 0) {
         ctaURL = [NSURL URLWithString:content.actionUrl];
         
-    }else if (content.actionHasLinks){
+    } else if (content.actionHasLinks){
         NSDictionary *link = content.links[buttonIndex];
         NSString *actionType = link[@"type"];
         if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
@@ -3640,7 +3637,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     
-    if (ctaURL && ![ctaURL.absoluteString  isEqual: @""]) {
+    if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
             [[self class] runSyncMainQueue:^{
                 UIApplication *sharedApplication = [[self class] getSharedApplication];
@@ -3763,7 +3760,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark Inbox Notification Json -- TODO - Remove
 
-- (NSArray *)getInboxMessages{
+- (NSArray *)getInboxMessages {
     
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *filePath = [bundle pathForResource:@"inbox" ofType:@"json"];
