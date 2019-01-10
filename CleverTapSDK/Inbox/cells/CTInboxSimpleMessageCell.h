@@ -32,10 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) IBOutlet UIButton *playButton;
 @property (nonatomic, strong, readwrite) AVPlayer *avPlayer;
 @property (nonatomic, strong) AVPlayerLayer *avPlayerLayer;
-@property (nonatomic, strong) AVPlayerItem *avPlayerItem;
 @property (nonatomic, weak)   NSTimer *controllersTimer;
 @property (nonatomic, assign) NSInteger controllersTimeoutPeriod;
-@property (nonatomic, assign) BOOL isVideoMuted;
+@property (nonatomic, assign) BOOL isAVMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
 
 @property (nonatomic, strong) CleverTapInboxMessage *message;

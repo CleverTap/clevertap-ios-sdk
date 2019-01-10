@@ -406,7 +406,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
     if([cell isKindOfClass:[CTInboxSimpleMessageCell class]]){
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
         CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
@@ -421,15 +420,12 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
         if  (self.filterMessages.count > 0 && self.filterMessages.count > indexPath.section) {
             CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-            if(message.content[0].mediaIsVideo){
+            if(message.content[0].mediaIsVideo || message.content[0].mediaIsAudio){
                 [messageCell pause];
-             }else if (message.content[0].mediaIsAudio) {
-                 [messageCell pause];
            }
         }
     }
 }
-
 
 #pragma mark - Actions
 
