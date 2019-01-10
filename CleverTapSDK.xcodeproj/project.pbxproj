@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		07053B7221E653E70085B44A /* UIView+CTToast.h in Headers */ = {isa = PBXBuildFile; fileRef = 07053B7021E653E70085B44A /* UIView+CTToast.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07053B7321E653E70085B44A /* UIView+CTToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 07053B7121E653E70085B44A /* UIView+CTToast.m */; };
+		070BB5CC21E70BC000428DEE /* volume_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CA21E70BBF00428DEE /* volume_on.png */; };
+		070BB5CD21E70BC000428DEE /* volume_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CB21E70BC000428DEE /* volume_off.png */; };
 		071EB4C7217F6427008F0FAB /* CTFooterViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB477217F6427008F0FAB /* CTFooterViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB478217F6427008F0FAB /* CTDismissButton.m */; };
 		071EB4C9217F6427008F0FAB /* CTHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB479217F6427008F0FAB /* CTHeaderViewController.m */; };
@@ -243,6 +245,8 @@
 /* Begin PBXFileReference section */
 		07053B7021E653E70085B44A /* UIView+CTToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+CTToast.h"; sourceTree = "<group>"; };
 		07053B7121E653E70085B44A /* UIView+CTToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+CTToast.m"; sourceTree = "<group>"; };
+		070BB5CA21E70BBF00428DEE /* volume_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = volume_on.png; sourceTree = "<group>"; };
+		070BB5CB21E70BC000428DEE /* volume_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = volume_off.png; sourceTree = "<group>"; };
 		071EB477217F6427008F0FAB /* CTFooterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFooterViewController.h; sourceTree = "<group>"; };
 		071EB478217F6427008F0FAB /* CTDismissButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDismissButton.m; sourceTree = "<group>"; };
 		071EB479217F6427008F0FAB /* CTHeaderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHeaderViewController.m; sourceTree = "<group>"; };
@@ -561,6 +565,8 @@
 			isa = PBXGroup;
 			children = (
 				07B94526219EA34300D4C542 /* placeholder.png */,
+				070BB5CB21E70BC000428DEE /* volume_off.png */,
+				070BB5CA21E70BBF00428DEE /* volume_on.png */,
 			);
 			path = images;
 			sourceTree = "<group>";
@@ -921,6 +927,7 @@
 				071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
 				0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell.xib in Resources */,
+				070BB5CC21E70BC000428DEE /* volume_on.png in Resources */,
 				071EB500217F6427008F0FAB /* CTHeaderViewController~ipad.xib in Resources */,
 				0769897921D375410011AC81 /* inbox.json in Resources */,
 				071EB4F7217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib in Resources */,
@@ -936,6 +943,7 @@
 				071EB4DD217F6427008F0FAB /* ic_thumb.png in Resources */,
 				079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */,
 				071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */,
+				070BB5CD21E70BC000428DEE /* volume_off.png in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
 				07B9453D219EA34300D4C542 /* CTInboxSimpleMessageCell.xib in Resources */,
 				071EB4DC217F6427008F0FAB /* ic_shrink@3x.png in Resources */,

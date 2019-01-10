@@ -79,7 +79,6 @@ static NSString * const kOrientationLandscape = @"l";
         viewHeight = (viewWidth*kLandscapeMultiplier) + captionHeight;
     }
     
-   
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
     self.frame = frame;
     self.carouselView.frame = frame;
@@ -161,7 +160,7 @@ static NSString * const kOrientationLandscape = @"l";
 
 #pragma mark - Actions
 
--(void)pageControlTapped:(UIPageControl *)sender{
+- (void)pageControlTapped:(UIPageControl *)sender{
     [self.swipeView scrollToItemAtIndex:sender.currentPage duration:0.5];
 }
 

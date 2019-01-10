@@ -35,6 +35,7 @@
 @property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
 @property (nullable, nonatomic, copy, readonly) NSArray *links;
+@property (nonatomic, readonly, assign) BOOL mediaIsAudio;
 @property (nonatomic, readonly, assign) BOOL mediaIsVideo;
 @property (nonatomic, readonly, assign) BOOL mediaIsImage;
 @property (nonatomic, readonly, assign) BOOL mediaIsGif;

@@ -43,7 +43,7 @@
 //    self.containerView.layer.masksToBounds = NO;
   
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.playerLayer.frame = self.avPlayerContainerView.bounds;
+        self.avPlayerLayer.frame = self.avPlayerContainerView.bounds;
     });
 }
 
@@ -56,17 +56,14 @@
     self.userInteractionEnabled = YES;
     [self addGestureRecognizer:tapGesture];
     
-//    self.containerView.layer.cornerRadius = kCornerRadius;
-    self.containerView.layer.masksToBounds = YES;
-//    self.containerView.layer.borderColor = [UIColor colorWithWhite:0.5f alpha:1.0].CGColor;
-//    self.containerView.layer.borderWidth = kBorderWidth;
-    
 }
 
 - (void)prepareForReuse {
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     self.cellImageView.animatedImage = nil;
+    [self.avPlayer pause];
+    _avPlayer = nil;
 }
 
 - (void)layoutNotification:(CleverTapInboxMessage *)message {
@@ -144,12 +141,12 @@
         self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
     }
     
-    if (content.mediaUrl && !content.mediaIsVideo) {
+    if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:nil
                                        options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
-    } else if (content.mediaIsVideo) {
+    } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupVideoPlayer:message];
     }
 }
@@ -158,14 +155,17 @@
     
     CleverTapInboxMessageContent *content = message.content[0];
     self.controllersTimeoutPeriod = 2;
-    
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
     self.avPlayerControlsView.alpha = 1.0;
     self.cellImageView.hidden = YES;
     self.volume.hidden = NO;
     self.playButton.hidden = NO;
-    self.isVideoMuted = YES;
+    if (content.mediaIsVideo) {
+       self.isVideoMuted = YES;
+    } else if (content.mediaIsAudio) {
+        self.isVideoMuted = NO;
+    }
     
     self.playButton.layer.cornerRadius = 30;
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
@@ -178,11 +178,11 @@
     
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:content.mediaUrl]];
-    self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
-    self.playerLayer.videoGravity = AVLayerVideoGravityResizeAspect;
+    self.avPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
+    self.avPlayerLayer.videoGravity = AVLayerVideoGravityResizeAspect;
     self.avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    self.playerLayer.frame = self.avPlayerContainerView.bounds;
-    self.playerLayer.needsDisplayOnBoundsChange = YES;
+    self.avPlayerLayer.frame = self.avPlayerContainerView.bounds;
+    self.avPlayerLayer.needsDisplayOnBoundsChange = YES;
     for (AVPlayerLayer *layer in self.avPlayerContainerView.layer.sublayers) {
         [layer removeFromSuperlayer];
     }
@@ -190,23 +190,37 @@
         [layer removeFromSuperlayer];
     }
     
-    [self.avPlayerContainerView.layer addSublayer:self.playerLayer];
+    [self.avPlayerContainerView.layer addSublayer:self.avPlayerLayer];
     
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(togglePlayControls:)];
     [self.avPlayerControlsView addGestureRecognizer:tapGesture];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
     
+    UIImage *volumeOff = [UIImage imageNamed:@"volume_off.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    UIImage *volumeOn = [UIImage imageNamed:@"volume_on.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    
     if (self.isVideoMuted) {
         [_avPlayer setMuted:YES];
-        [self.volume setTitle:@"🔇" forState:UIControlStateNormal];
+        [self.volume setImage:volumeOff forState:UIControlStateNormal];
     } else {
         [_avPlayer setMuted:NO];
-        [self.volume setTitle:@"🔈" forState:UIControlStateNormal];
+        [self.volume setImage:volumeOn forState:UIControlStateNormal];
     }
     
-    [self layoutSubviews];
+    if (content.mediaIsAudio) {
+        
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        self.cellImageView.backgroundColor = [UIColor blackColor];
+        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
+        self.cellImageView.image = image;
+        self.cellImageView.hidden = NO;
+        self.volume.hidden = YES;
+    }
+    
     [self layoutIfNeeded];
+    [self layoutSubviews];
 }
 
 - (void)setupInboxMessageActions: (CleverTapInboxMessageContent *)content {
@@ -251,14 +265,18 @@
 #pragma mark - Player Controls
 
 - (IBAction)volumeButtonTapped:(UIButton *)sender {
+   
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    UIImage *volumeOff = [UIImage imageNamed:@"volume_off.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    UIImage *volumeOn = [UIImage imageNamed:@"volume_on.png" inBundle:bundle compatibleWithTraitCollection:nil];
     if ([self isMuted]) {
         [self.avPlayer setMuted:NO];
         self.isVideoMuted = NO;
-        [sender setTitle:@"🔈" forState:UIControlStateNormal];
+        [self.volume setImage:volumeOn forState:UIControlStateNormal];
     } else {
         [self.avPlayer setMuted:YES];
         self.isVideoMuted = YES;
-        [sender setTitle:@"🔇" forState:UIControlStateNormal];
+        [self.volume setImage:volumeOff forState:UIControlStateNormal];
     }
 }
 
@@ -298,13 +316,9 @@
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
         [self.playButton setSelected:NO];
+        [self showControls:YES];
         [self stopAVIdleCountdown];
     }
-}
-
-- (void)loopVideo {
-    
-    [self.avPlayer seekToTime:kCMTimeZero];
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification {

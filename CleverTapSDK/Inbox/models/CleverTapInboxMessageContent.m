@@ -33,6 +33,9 @@
                         if ([contentType hasPrefix:@"video"]) {
                             _mediaIsVideo = YES;
                         }
+                        if ([contentType hasPrefix:@"audio"]) {
+                            _mediaIsAudio = YES;
+                        }
                     }
                 }
             }

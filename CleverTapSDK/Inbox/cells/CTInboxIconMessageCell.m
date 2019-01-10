@@ -181,7 +181,7 @@
     int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
-    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"buttonIndex"];
+    [userInfo setObject:[NSNumber numberWithInt:i] forKey:@"buttonIndex"];   
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender{

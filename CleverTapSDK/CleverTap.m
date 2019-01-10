@@ -3618,7 +3618,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
     
     CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
-    
     NSURL *ctaURL;
    
     if (content.actionHasUrl && buttonIndex < 0) {
@@ -3627,12 +3626,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else if (content.actionHasLinks){
         NSDictionary *link = content.links[buttonIndex];
         NSString *actionType = link[@"type"];
-        if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
-            NSString *copy = link[@"copyText"][@"text"];
-            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-            pasteboard.string = copy;
-            return;
-        } else if ([actionType caseInsensitiveCompare:@"url"] == NSOrderedSame) {
+        if ([actionType caseInsensitiveCompare:@"url"] == NSOrderedSame) {
             ctaURL = [NSURL URLWithString:link[@"url"][@"ios"][@"text"]];
         }
     }

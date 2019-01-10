@@ -47,7 +47,6 @@
     [buttonView setTitle:messageButton[@"text"] forState:UIControlStateNormal];
     buttonView.backgroundColor = [CTInAppUtils ct_colorWithHexString:messageButton[@"bg"]];
     [buttonView setTitleColor:[CTInAppUtils ct_colorWithHexString:messageButton[@"color"]] forState:UIControlStateNormal];
-   
     return buttonView;
 }
 
@@ -57,7 +56,6 @@
         [self.delegate handleInboxNotificationAtIndex:(int)button.tag];
     }
 }
-
 
 @end
     

@@ -7,6 +7,7 @@
 #import "CTConstants.h"
 #import "CTInAppResources.h"
 #import "CTInAppUtils.h"
+#import "UIView+CTToast.h"
 
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/UIImage+GIF.h>
@@ -32,6 +33,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 @property (nonatomic, copy) NSArray<CleverTapInboxMessage *> *filterMessages;
 @property (nonatomic, copy) NSArray *tags;
 
+@property (nonatomic, assign) NSIndexPath *currentVideoIndex;
 @property (nonatomic, strong) UIView *navigation;
 
 @property (nonatomic, strong) CleverTapInboxStyleConfig *config;
@@ -95,7 +97,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         NSString *defaultTag = @"All";
         NSMutableArray *tags = [NSMutableArray new];
         [tags addObject:defaultTag];
-        [tags addObjectsFromArray:_config.messageTags];
+        [tags addObject:_config.messageTags[0]];
+        [tags addObject:_config.messageTags[1]];
         self.tags = [tags mutableCopy];
     }
 }
@@ -406,21 +409,21 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
         CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
         if(message.content[0].mediaIsVideo){
-            messageCell.currentVideoIndex = (int)indexPath.section;
-            [messageCell togglePlay];
+            [messageCell play];
         }
     }
 }
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
-    
     if([cell isKindOfClass:[CTInboxSimpleMessageCell class]]){
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
-        if  (self.filterMessages.count > 0 && self.filterMessages.count < indexPath.section) {
+        if  (self.filterMessages.count > 0 && self.filterMessages.count > indexPath.section) {
             CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
             if(message.content[0].mediaIsVideo){
-                [messageCell togglePlay];
-            }
+                [messageCell pause];
+             }else if (message.content[0].mediaIsAudio) {
+                 [messageCell pause];
+           }
         }
     }
 }
@@ -440,6 +443,19 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     NSDictionary *userInfo = (NSDictionary *)notification.userInfo;
     int index = [[userInfo objectForKey:@"index"] intValue];
     int buttonIndex = [[userInfo objectForKey:@"buttonIndex"] intValue];
+    if  (buttonIndex >= 0) {
+        // handle copy to clipboard
+        CleverTapInboxMessageContent *content = message.content[index];
+        NSDictionary *link = content.links[buttonIndex];
+        NSString *actionType = link[@"type"];
+        if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
+            NSString *copy = link[@"copyText"][@"text"];
+            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+            pasteboard.string = copy;
+            [self.parentViewController.view makeToast:@"Copied to clipboard" duration:2.0 position:CSToastPositionBottom];
+        }
+    }
+    
     [self _notifyMessageSelected:message atIndex:index withButtonIndex:buttonIndex];
 }
 
@@ -458,6 +474,5 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         [self.analyticsDelegate messageDidSelect:message atIndex:index withButtonIndex:buttonIndex];
     }
 }
-
 
 @end
