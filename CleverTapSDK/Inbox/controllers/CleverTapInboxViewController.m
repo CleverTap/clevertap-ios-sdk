@@ -98,7 +98,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         NSMutableArray *tags = [NSMutableArray new];
         [tags addObject:defaultTag];
         [tags addObject:_config.messageTags[0]];
-        [tags addObject:_config.messageTags[1]];
+        if (_config.messageTags.count > 1) {
+            [tags addObject:_config.messageTags[1]];
+        }
         self.tags = [tags mutableCopy];
     }
 }
