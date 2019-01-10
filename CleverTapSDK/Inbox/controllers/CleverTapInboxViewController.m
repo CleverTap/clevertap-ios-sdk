@@ -418,11 +418,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
     if([cell isKindOfClass:[CTInboxSimpleMessageCell class]]){
         CTInboxSimpleMessageCell *messageCell = (CTInboxSimpleMessageCell*)cell;
-        if  (self.filterMessages.count > 0 && self.filterMessages.count > indexPath.section) {
-            CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-            if(message.content[0].mediaIsVideo || message.content[0].mediaIsAudio){
-                [messageCell pause];
-           }
+        if (messageCell.avPlayer) {
+            [messageCell pause];
         }
     }
 }
