@@ -536,7 +536,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     // Find first cell need play video in visible cells.
     CTInboxBaseMessageCell *targetCell = nil;
     for (CTInboxBaseMessageCell *cell in visibleCells) {
-        if ([cell hasVideo] || [cell hasAudio] ) {
+        if ([cell hasVideo]) {
             targetCell = cell;
             break;
         }
