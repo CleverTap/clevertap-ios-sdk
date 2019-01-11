@@ -820,6 +820,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     header[@"tk"] = self.config.accountToken;
     header[@"id"] = self.config.accountId;
     
+    header[@"ddnd"] = @([self getStoredDeviceToken].length <= 0);
+    
     int lastTS = [self getLastRequestTimeStamp];
     header[@"l_ts"] = @(lastTS);
     
@@ -3206,8 +3208,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: registering APNs device token %@", self, pushTokenString);
-    [self pushDeviceToken:pushTokenString forRegisterAction:CleverTapPushTokenRegister];
     [self storeDeviceToken:pushTokenString];
+    [self pushDeviceToken:pushTokenString forRegisterAction:CleverTapPushTokenRegister];
 }
 
 - (void)handleNotificationWithData:(id)data {
