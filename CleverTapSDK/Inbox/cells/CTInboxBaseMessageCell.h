@@ -57,6 +57,7 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 - (void)setupMediaPlayer;
 - (void)pause;
 - (void)play;
+- (void)mute:(BOOL)mute;
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content;
 - (void)handleInboxNotificationAtIndex:(int)index;

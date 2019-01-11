@@ -198,6 +198,15 @@ static UIImage *audioPlaceholderImage;
         self.isAVMuted = YES;
         [self.volume setImage:[self getVolumeOffImage] forState:UIControlStateNormal];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:self userInfo:@{@"muted":@(self.isAVMuted)}];
+}
+
+-(void)mute:(BOOL)mute {
+    if (self.avPlayer == nil) return;
+    [self.avPlayer setMuted:mute];
+    self.isAVMuted = mute;
+    UIImage *image = mute ? [self getVolumeOffImage] : [self getVolumeOnImage];
+    [self.volume setImage: image forState:UIControlStateNormal];
 }
 
 - (BOOL)isMuted {

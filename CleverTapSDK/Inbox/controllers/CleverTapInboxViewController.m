@@ -46,6 +46,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 @property (nonatomic, assign) CGRect tableViewVisibleFrame;
 @property (nonatomic, strong) NSDictionary<NSString *, NSString *> *unreachableCellDictionary;
 
+@property (nonatomic, assign) BOOL muted;
+
 @end
 
 @implementation CleverTapInboxViewController
@@ -78,6 +80,10 @@ NSString* const kCarouselImageMessage = @"carousel-image";
                                              selector:@selector(handleMediaPlayingNotification:)
                                                  name:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleMediaMutedNotification:)
+                                                 name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
+    
     [self registerNibs];
     [self loadData];
     [self setupLayout];
@@ -87,6 +93,11 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         self.tableView.backgroundColor =  [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
     }
     
+    self.muted = YES;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
     [self playVideoInVisibleCellsIfNeed];
 }
 
@@ -302,6 +313,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     } else {
         [self filterNotifications: self.tags[sender.selectedSegmentIndex]];
     }
+    [self stopPlayIfNeed];
     [self.tableView reloadData];
     [self.tableView layoutIfNeeded];
     [self.tableView setContentOffset:CGPointZero animated:YES];
@@ -347,8 +359,12 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     else if ([message.type isEqualToString:kIconMessage]) {
         identifier = kCellIconMessageIdentifier;
     }
-    CTInboxSimpleMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
+    CTInboxBaseMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
     [cell configureForMessage:message];
+    if ([cell hasVideo]) {
+        [cell mute:self.muted];
+    }
+    
     return cell;
 }
 
@@ -415,6 +431,33 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 
 #pragma mark - Video Player Handling
 
+/*
+ Video Player Handling
+ Inspired in part by https://github.com/newyjp/JPVideoPlayer
+ 
+ MIT License:
+ 
+ Copyright (c) 2016 NewPan
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+
 -(void)handleMediaPlayingNotification:(NSNotification*)notification {
     CTInboxBaseMessageCell *cell = (CTInboxBaseMessageCell*)notification.object;
     if (!self.playingVideoCell) {
@@ -424,6 +467,10 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         [self stopPlayIfNeed];
         self.playingVideoCell = cell;
     }
+}
+
+-(void)handleMediaMutedNotification:(NSNotification*)notification {
+    self.muted = [notification.userInfo[@"muted"] boolValue];
 }
 
 - (void)handleCellUnreachableTypeInVisibleCellsAfterReloadData {
@@ -545,8 +592,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     if(CGRectIsEmpty(self.tableViewVisibleFrame)){
         return nil;
     }
-    
-    // To find next cell need play video.
     CTInboxBaseMessageCell *targetCell = nil;
     UITableView *tableView = self.tableView;
     NSArray<CTInboxBaseMessageCell *> *visibleCells = [tableView visibleCells];
@@ -555,12 +600,11 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     CGRect referenceRect = [tableView.superview convertRect:self.tableViewVisibleFrame toView:nil];
     
     for (CTInboxBaseMessageCell *cell in visibleCells) {
-        if (!([cell hasVideo] || [cell hasAudio])) {
+        if (![cell hasVideo]) {
             continue;
         }
         
         if (cell.unreachableCellType != CTVideoPlayerUnreachableCellTypeNone) {
-            // Must the all area of the cell is visible.
             if (cell.unreachableCellType == CTVideoPlayerUnreachableCellTypeTop) {
                 CGPoint strategyViewLeftUpPoint = cell.frame.origin;
                 strategyViewLeftUpPoint.y += 2;
@@ -620,8 +664,8 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     if(!cell){
         return;
     }
-    
     self.playingVideoCell = cell;
+    [cell mute:self.muted];
     [cell play];
 }
 
@@ -629,8 +673,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     if (!self.playingVideoCell) {
         return;
     }
-    
-    // Stop play when the cell playing video is un-visible.
     if (![self playingCellIsVisible]) {
         [self stopPlayIfNeed];
     }
@@ -642,7 +684,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         return;
     }
     
-    // If the found cell is the cell playing video, this situation cannot play video again.
     if(bestCell == self.playingVideoCell){
         return;
     }
