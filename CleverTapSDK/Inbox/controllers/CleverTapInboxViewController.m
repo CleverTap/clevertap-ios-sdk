@@ -528,12 +528,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         [self playVideoWithCell:self.playingVideoCell];
         return;
     }
-    
-    // handle the first cell cannot play video when initialized.
     [self handleCellUnreachableTypeInVisibleCellsAfterReloadData];
     
     NSArray<CTInboxBaseMessageCell *> *visibleCells = [self.tableView visibleCells];
-    // Find first cell need play video in visible cells.
     CTInboxBaseMessageCell *targetCell = nil;
     for (CTInboxBaseMessageCell *cell in visibleCells) {
         if ([cell hasVideo]) {
@@ -541,8 +538,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
             break;
         }
     }
-    
-    // Play if found.
     if (targetCell) {
         [self playVideoWithCell:targetCell];
     }
@@ -645,8 +640,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 
 - (NSDictionary<NSString *, NSString *> *)unreachableCellDictionary {
     if(!_unreachableCellDictionary){
-        // The key is the number of visible cells in screen,
-        // the value is the number of cells cannot stop in screen center.
         _unreachableCellDictionary = @{
                                        @"4" : @"1",
                                        @"3" : @"1",
@@ -657,7 +650,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 }
 
 - (void)playVideoWithCell:(CTInboxBaseMessageCell *)cell {
-    NSParameterAssert(cell);
     if(!cell){
         return;
     }
