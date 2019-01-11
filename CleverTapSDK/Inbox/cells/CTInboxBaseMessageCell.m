@@ -326,30 +326,36 @@ static UIImage *audioPlaceholderImage;
     self.actionView.secondButton.hidden = YES;
     self.actionView.thirdButton.hidden = YES;
     
+    CGFloat leftMargin = 0;
+    if (@available(iOS 11.0, *)) {
+        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+        leftMargin = window.safeAreaInsets.left;
+    }
+    
+    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
+    
     if (content.links.count == 1) {
-        [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
-                                      attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                         toItem:self.containerView attribute:NSLayoutAttributeWidth
-                                     multiplier:1.0 constant:0] setActive:YES];
         
+        self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth, 44);
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         
     } else if (content.links.count == 2) {
-        [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
-                                      attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                         toItem:self.containerView attribute:NSLayoutAttributeWidth
-                                     multiplier:0.5 constant:0] setActive:YES];
+        
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[1] withIndex:1];
         
+        self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth/2, 44);
+        self.actionView.secondButton.frame =  CGRectMake(viewWidth/2, 1, viewWidth, 44);
+        
     } else if (content.links.count > 2) {
-        [[NSLayoutConstraint constraintWithItem:self.actionView.firstButton
-                                      attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                         toItem:self.containerView attribute:NSLayoutAttributeWidth
-                                     multiplier:0.33 constant:0] setActive:YES];
+
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         self.actionView.thirdButton = [self.actionView setupViewForButton:self.actionView.thirdButton forText:content.links[1] withIndex:1];
         self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[2] withIndex:2];
+        
+        self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth/3, 44);
+        self.actionView.secondButton.frame =  CGRectMake(viewWidth/3, 1, viewWidth/3, 44);
+        self.actionView.thirdButton.frame = CGRectMake(((viewWidth/3)*2), 1, viewWidth/3, 44);
     }
 }
 
@@ -367,6 +373,7 @@ static UIImage *audioPlaceholderImage;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
     [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 @end

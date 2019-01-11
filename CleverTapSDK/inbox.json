@@ -465,6 +465,23 @@
                                         "replacements": "ios link for on link 2"
                                     }
                                 }
+                            }, {
+                                "type": "url",
+                                "text": "Third Button",
+                                "color": "#000000",
+                                "bg": "#ffffff",
+                                "url": {
+                                    "android": {
+                                        "text": "android link for on link 2",
+                                        "og": "android link for on link 2",
+                                        "replacements": "android link for on link 2"
+                                    },
+                                    "ios": {
+                                        "text": "https://www.apple.com",
+                                        "og": "ios link for on link 2",
+                                        "replacements": "ios link for on link 2"
+                                    }
+                                }
                             }]
                         },
                         "media": {
@@ -819,6 +836,71 @@
             "wzrk_id": "1594686416_20181225",
             "msg": {
                 "type": "simple",
+                "bg": "#ffffff",
+                "orientation": "l",
+                "content": [
+                    {
+                        "message": {
+                            "text": "Message",
+                            "color": "#08fff6",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "title": {
+                            "text": "Title",
+                            "color": "#08fff6",
+                            "replacements": "",
+                            "og": ""
+                        },
+                        "action": {
+                            "hasUrl": false,
+                            "hasLinks": true,
+                            "url": {
+                                "android": "https://www.google.com",
+                                "ios": {
+                                    "text": "https://www.google.com",
+                                    "replacements": "",
+                                    "og": ""
+                                }
+                            },
+                            "links": [
+                                {
+                                    "type": "copy",
+                                    "text": "Link",
+                                    "color": "#F8F9F9",
+                                    "bg": "#B27032",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
+                                    "url": {
+                                        "android": "",
+                                        "ios": {
+                                            "text": "https://www.google.com",
+                                            "replacements": "",
+                                            "og": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "media": {
+                            "content_type": "audio",
+                            "url": "https://sample-videos.com/audio/mp3/wave.mp3"
+                        },
+                        "icon": {}
+                    }
+                ]
+            }
+        },
+        {
+            "_id": "17846845567",
+            "tags": [],
+            "wzrk_ttl": 0,
+            "wzrk_id": "1594686416_20181225",
+            "msg": {
+                "type": "message-icon",
                 "bg": "#ffffff",
                 "orientation": "l",
                 "content": [

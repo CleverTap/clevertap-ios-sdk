@@ -34,9 +34,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         style.messageTags = ["Promotions", "Offers"];
         
             if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
-//                inboxController.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
                 let navigationController = UINavigationController.init(rootViewController: inboxController)
-//                navigationController.navigationBar.isTranslucent = false
                 self.present(navigationController, animated: true, completion: nil)
             }
     }

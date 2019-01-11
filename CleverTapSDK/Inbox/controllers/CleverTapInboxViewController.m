@@ -34,6 +34,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 @property (nonatomic, copy) NSArray<CleverTapInboxMessage *> *filterMessages;
 @property (nonatomic, copy) NSArray *tags;
 
+@property (nonatomic, assign) int selectedSegmentIndex;
 @property (nonatomic, assign) NSIndexPath *currentVideoIndex;
 @property (nonatomic, strong) UIView *navigation;
 
@@ -83,7 +84,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleMediaMutedNotification:)
                                                  name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
-    
     [self registerNibs];
     [self loadData];
     [self setupLayout];
@@ -190,6 +190,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 }
 
 - (void)setupSegmentController {
+    
     // set navigation bar
     self.navigationController.navigationBar.translucent = false;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
@@ -200,11 +201,11 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
     }
     
-    UISegmentedControl *segmentedControl = [[UISegmentedControl alloc]initWithItems: self.tags];
+    UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems: self.tags];
     [segmentedControl addTarget:self action:@selector(segmentSelected:) forControlEvents:UIControlEventValueChanged];
     segmentedControl.frame = CGRectMake(0, 0, 300.0f, 0.0f);
     segmentedControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    segmentedControl.selectedSegmentIndex = 0;
+    segmentedControl.selectedSegmentIndex = _selectedSegmentIndex? _selectedSegmentIndex : 0;
     segmentedControl.layer.masksToBounds = YES;
     segmentedControl.clipsToBounds = YES;
     
@@ -228,7 +229,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     
     [self.navigationController.view layoutSubviews];
     CGFloat topOffset = (self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height) - 34;
-    
     CGFloat statusOffset = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
     
     [self.navigation removeFromSuperview];
@@ -251,7 +251,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     [[NSLayoutConstraint constraintWithItem:_navigation
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:topOffset-3] setActive:YES];
+                                 multiplier:1 constant:topOffset-4] setActive:YES];
     
     UILabel *lblTitle = [[UILabel alloc] init];
     lblTitle.text = [self getTitle];
@@ -308,6 +308,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 }
 
 - (void)segmentSelected:(UISegmentedControl *)sender {
+    _selectedSegmentIndex = (int)sender.selectedSegmentIndex;
     if (sender.selectedSegmentIndex == 0) {
         self.filterMessages = [self.messages mutableCopy];
     } else {

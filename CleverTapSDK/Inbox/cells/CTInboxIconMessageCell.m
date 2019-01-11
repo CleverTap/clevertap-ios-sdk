@@ -23,6 +23,9 @@
 }
 
 - (void)doLayoutForMessage:(CleverTapInboxMessage *)message {
+    self.cellImageView.hidden = YES;
+    self.avPlayerControlsView.alpha = 0.0;
+    self.avPlayerContainerView.hidden = YES;
     CleverTapInboxMessageContent *content = message.content[0];
     if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
         self.imageViewHeightContraint.priority = 999;
