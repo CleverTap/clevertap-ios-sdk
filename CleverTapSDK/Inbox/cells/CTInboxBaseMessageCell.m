@@ -345,7 +345,7 @@ static UIImage *audioPlaceholderImage;
         self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[1] withIndex:1];
         
         self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth/2, 44);
-        self.actionView.secondButton.frame =  CGRectMake(viewWidth/2, 1, viewWidth, 44);
+        self.actionView.secondButton.frame =  CGRectMake(viewWidth/2, 1, viewWidth/2, 44);
         
     } else if (content.links.count > 2) {
 

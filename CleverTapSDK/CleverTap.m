@@ -3623,7 +3623,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (content.actionHasUrl && buttonIndex < 0) {
         ctaURL = [NSURL URLWithString:content.actionUrl];
         
-    } else if (content.actionHasLinks){
+    } else if (content.actionHasLinks && buttonIndex >= 0){
         NSDictionary *link = content.links[buttonIndex];
         NSString *actionType = link[@"type"];
         if ([actionType caseInsensitiveCompare:@"url"] == NSOrderedSame) {

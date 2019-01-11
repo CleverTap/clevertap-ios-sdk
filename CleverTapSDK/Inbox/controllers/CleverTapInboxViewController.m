@@ -344,7 +344,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
     if (!message.isRead){
         [self _notifyMessageViewed:message];
-        [message setRead:YES];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [message setRead:YES];
+        });
     }
     NSString *identifier = kCellSimpleMessageIdentifier;
     if ([message.type isEqualToString:kCarouselMessage]) {
