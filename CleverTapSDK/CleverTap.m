@@ -3619,15 +3619,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
     NSURL *ctaURL;
-   
+    // no button index, means use the on message click url if any
     if (content.actionHasUrl && buttonIndex < 0) {
-        ctaURL = [NSURL URLWithString:content.actionUrl];
-        
-    } else if (content.actionHasLinks && buttonIndex >= 0){
-        NSDictionary *link = content.links[buttonIndex];
-        NSString *actionType = link[@"type"];
-        if ([actionType caseInsensitiveCompare:@"url"] == NSOrderedSame) {
-            ctaURL = [NSURL URLWithString:link[@"url"][@"ios"][@"text"]];
+        if (content.actionUrl && content.actionUrl.length > 0) {
+             ctaURL = [NSURL URLWithString:content.actionUrl];
+        }
+    } else if (content.actionHasLinks){
+        NSString *linkUrl = [content urlForLinkAtIndex:buttonIndex];
+        if (linkUrl && linkUrl.length > 0) {
+            ctaURL = [NSURL URLWithString:linkUrl];
         }
     }
     

@@ -53,7 +53,9 @@
         
         for (NSDictionary *content in contents) {
             CleverTapInboxMessageContent *ct_content = [[CleverTapInboxMessageContent alloc] initWithJSON:content];
-            [_contents addObject:ct_content];
+            if (ct_content) {
+                [_contents addObject:ct_content];
+            }
         }
         _content = _contents;
         

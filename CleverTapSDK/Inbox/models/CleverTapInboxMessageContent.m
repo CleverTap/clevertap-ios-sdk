@@ -1,4 +1,5 @@
 #import "CleverTap+Inbox.h"
+#import "CTConstants.h"
 
 @implementation CleverTapInboxMessageContent
 
@@ -39,7 +40,6 @@
                     }
                 }
             }
-            
             id buttons = jsonObject[@"action"][@"links"];
             NSMutableArray *_buttons = [NSMutableArray new];
             
@@ -50,11 +50,28 @@
                 }
             }
             _links = _buttons;
-            
         } @catch (NSException *e) {
+            CleverTapLogStaticDebug(@"Error intitializing CleverTapInboxMessageContent: %@", e.reason);
+            return nil;
         }
     }
     return self;
+}
+
+- (NSString*)urlForLinkAtIndex:(int)index {
+    NSString *url;
+    @try {
+        NSDictionary *link = self.links[index];
+        NSString *actionType = link[@"type"];
+        if ([actionType caseInsensitiveCompare:@"url"] == NSOrderedSame) {
+            if ([link[@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
+                url = link[@"url"][@"ios"][@"text"];
+            }
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error getting url for link: %@", e.reason);
+    }
+    return url;
 }
 
 @end

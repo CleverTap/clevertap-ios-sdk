@@ -42,6 +42,8 @@
 @property (nonatomic, readonly, assign) BOOL actionHasUrl;
 @property (nonatomic, readonly, assign) BOOL actionHasLinks;
 
+- (NSString*)urlForLinkAtIndex:(int)index;
+
 @end
 
 @protocol CleverTapInboxViewControllerDelegate <NSObject>
