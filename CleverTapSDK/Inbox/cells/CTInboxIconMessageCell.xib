@@ -39,7 +39,8 @@
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OzK-2J-sU6">
                                         <rect key="frame" x="10" y="10" width="96" height="96"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" secondItem="OzK-2J-sU6" secondAttribute="height" multiplier="1:1" id="5ZC-lR-xvU"/>
+                                            <constraint firstAttribute="width" secondItem="OzK-2J-sU6" secondAttribute="height" multiplier="1:1" priority="750" id="5ZC-lR-xvU"/>
+                                            <constraint firstAttribute="width" priority="750" id="mj9-cS-10T"/>
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4AH-xE-XCe">
@@ -225,6 +226,8 @@
                 <outlet property="avPlayerControlsView" destination="Gd4-yo-YOB" id="It6-Xe-HZf"/>
                 <outlet property="bodyLabel" destination="yGM-Em-VQ5" id="vBY-nU-8x6"/>
                 <outlet property="cellIcon" destination="OzK-2J-sU6" id="G9H-ms-bYs"/>
+                <outlet property="cellIconRatioContraint" destination="5ZC-lR-xvU" id="GMJ-M9-D82"/>
+                <outlet property="cellIconWidthContraint" destination="mj9-cS-10T" id="nGQ-Pj-Mex"/>
                 <outlet property="cellImageView" destination="rRw-Zn-DXx" id="Tuc-MM-mfE"/>
                 <outlet property="containerView" destination="78G-sO-c1P" id="gaq-X8-8gN"/>
                 <outlet property="dateLabel" destination="4AH-xE-XCe" id="OCc-fs-pqL"/>

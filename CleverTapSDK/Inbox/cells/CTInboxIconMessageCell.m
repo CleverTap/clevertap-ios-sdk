@@ -107,6 +107,11 @@
     
     if (content.iconUrl) {
         [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+        self.cellIconRatioContraint.priority = 999;
+        self.cellIconWidthContraint.priority = 750;
+    } else {
+        self.cellIconRatioContraint.priority = 750;
+        self.cellIconWidthContraint.priority = 999;
     }
 }
 @end

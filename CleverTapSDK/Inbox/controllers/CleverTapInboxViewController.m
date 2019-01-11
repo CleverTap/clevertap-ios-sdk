@@ -228,9 +228,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     }
     
     [self.navigationController.view layoutSubviews];
-    CGFloat topOffset = (self.navigationController.navigationBar.frame.size.height + [[CTInAppResources getSharedApplication] statusBarFrame].size.height) - 34;
-    CGFloat statusOffset = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
-    
+   
     [self.navigation removeFromSuperview];
     _navigation = [[UIView alloc] init];
     [self.navigationController.view addSubview:_navigation];
@@ -249,9 +247,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:0] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:_navigation
-                                  attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
-                                     toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:topOffset-4] setActive:YES];
+                                  attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
+                                     toItem:self.view attribute:NSLayoutAttributeTop
+                                 multiplier:1 constant:-32] setActive:YES];
     
     UILabel *lblTitle = [[UILabel alloc] init];
     lblTitle.text = [self getTitle];
@@ -260,9 +258,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     lblTitle.translatesAutoresizingMaskIntoConstraints = NO;
     
     [[NSLayoutConstraint constraintWithItem:lblTitle
-                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeTop
-                                 multiplier:1 constant:statusOffset] setActive:YES];
+                                  attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                     toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                 multiplier:1 constant:44] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
                                      toItem:_navigation attribute:NSLayoutAttributeLeading
@@ -290,9 +288,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     }
     
     [[NSLayoutConstraint constraintWithItem:dismiss
-                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeTop
-                                 multiplier:1 constant:statusOffset] setActive:YES];
+                                  attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                     toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                 multiplier:1 constant:44] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:_navigation attribute:NSLayoutAttributeTrailing
@@ -346,9 +344,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
     if (!message.isRead){
         [self _notifyMessageViewed:message];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [message setRead:YES];
-        });
+        [message setRead:YES];
     }
     NSString *identifier = kCellSimpleMessageIdentifier;
     if ([message.type isEqualToString:kCarouselMessage]) {
