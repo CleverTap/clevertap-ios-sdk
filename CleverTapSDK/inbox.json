@@ -24,7 +24,8 @@
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": false,
                             "url": {
                                 "android": "",
                                 "ios": "https://www.youtube.com"
@@ -64,7 +65,8 @@
                             "og": ""
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": true,
                             "url": {
                                 "android": "https://www.google.com",
                                 "ios": {
@@ -79,7 +81,11 @@
                                     "text": "Link",
                                     "color": "#F8F9F9",
                                     "bg": "#B27032",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": {
@@ -124,7 +130,8 @@
                             "og": ""
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": false,
+                            "hasLinks": true,
                             "url": {
                                 "android": {
                                     "text": "abc"
@@ -136,7 +143,11 @@
                                     "type": "copy",
                                     "text": "Link",
                                     "color": "#007bff",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": {
                                             "text": "abc"
@@ -179,7 +190,8 @@
                             "replacements": "TitleExample"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": false,
                             "url": {
                                 "android": "",
                                 "ios": {
@@ -193,7 +205,11 @@
                                     "type": "copy",
                                     "text": "pppp",
                                     "color": "#007bff",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": ""
@@ -221,7 +237,8 @@
                             "replacements": "TitleExample"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": true,
                             "url": {
                                 "android": "",
                                 "ios": {
@@ -235,7 +252,11 @@
                                     "type": "copy",
                                     "text": "pppp",
                                     "color": "#007bff",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": ""
@@ -276,7 +297,8 @@
                             "replacements": "Hello $replacement$##n[Person]$/replacement$"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": true,
                             "url": {
                                 "android": "",
                                 "ios": {
@@ -290,7 +312,11 @@
                                     "type": "copy",
                                     "text": "Link",
                                     "color": "#007bff",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": {
@@ -322,7 +348,8 @@
                             "replacements": "Hello $replacement$##n[Person]$/replacement$"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": true,
                             "url": {
                                 "android": {
                                     "text": "How are you doing fellow?",
@@ -338,7 +365,11 @@
                                     "type": "copy",
                                     "text": "Link",
                                     "color": "#007bff",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": {
                                             "text": "How are you doing fellow?",
@@ -421,11 +452,7 @@
                                 "text": "Cancelwwwwwwwwwwwwwwwwwww",
                                 "color": "#528144",
                                 "bg": "#6A4141",
-                                "copyText": {
-                                    "text": "",
-                                    "replacements": "",
-                                    "og": ""
-                                },
+                                
                                 "url": {
                                     "android": {
                                         "text": "android link for on link 2",
@@ -518,7 +545,7 @@
                         },
                         "action": {
                             "hasUrl" : true,
-                            "hasLinks": true,
+                            "hasLinks": false,
                             "url": {
                                 "android": "",
                                 "ios": "https://www.youtube.com"
@@ -557,7 +584,8 @@
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": false,
                             "url": {
                                 "android": "",
                                 "ios": "https://www.youtube.com"
@@ -596,7 +624,8 @@
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": false,
                             "url": {
                                 "android": "",
                                 "ios": "https://www.youtube.com"
@@ -636,7 +665,8 @@
                             "replacements": "Title $replacement$##w:IntegerProp[defip]$/replacement$"
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": false,
                             "url": {
                                 "android": "",
                                 "ios": "https://www.youtube.com"
@@ -676,7 +706,8 @@
                             "og": ""
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": true,
                             "url": {
                                 "android": "https://www.google.com",
                                 "ios": {
@@ -691,7 +722,11 @@
                                     "text": "Link",
                                     "color": "#F8F9F9",
                                     "bg": "#B27032",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": {
@@ -736,7 +771,8 @@
                             "og": ""
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": true,
+                            "hasLinks": true,
                             "url": {
                                 "android": "https://www.google.com",
                                 "ios": {
@@ -751,7 +787,11 @@
                                     "text": "Link",
                                     "color": "#F8F9F9",
                                     "bg": "#B27032",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": {
@@ -796,7 +836,8 @@
                             "og": ""
                         },
                         "action": {
-                            "type": "onmessage",
+                            "hasUrl": false,
+                            "hasLinks": true,
                             "url": {
                                 "android": "https://www.google.com",
                                 "ios": {
@@ -811,7 +852,11 @@
                                     "text": "Link",
                                     "color": "#F8F9F9",
                                     "bg": "#B27032",
-                                    "copyText": "",
+                                    "copyText": {
+                                        "text": "",
+                                        "replacements": "",
+                                        "og": ""
+                                    },
                                     "url": {
                                         "android": "",
                                         "ios": {

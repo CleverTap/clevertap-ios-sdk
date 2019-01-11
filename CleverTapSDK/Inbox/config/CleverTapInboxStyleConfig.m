@@ -4,6 +4,7 @@
 
 - (instancetype)copyWithZone:(NSZone*)zone {
     CleverTapInboxStyleConfig *copy = [[[self class] allocWithZone:zone] init];
+    copy.title = self.title;
     copy.backgroundColor = self.backgroundColor;
     copy.cellBackgroundColor = self.cellBackgroundColor;
     copy.messageTags = self.messageTags;

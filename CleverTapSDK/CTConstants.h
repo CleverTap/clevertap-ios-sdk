@@ -95,6 +95,7 @@ extern NSString *const kCTApiDomain;
 
 // inbox notifications
 #define CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION @"CleverTapInboxMessageTappedNotification"
+#define CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION @"CleverTapInboxMediaPlayingNotification"
 
 // valid profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"FBID", @"GPID"]

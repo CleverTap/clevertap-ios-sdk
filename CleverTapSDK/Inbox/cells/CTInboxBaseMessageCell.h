@@ -11,6 +11,12 @@
 
 @class FLAnimatedImageView;
 
+typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
+    CTVideoPlayerUnreachableCellTypeNone = 0,
+    CTVideoPlayerUnreachableCellTypeTop = 1,
+    CTVideoPlayerUnreachableCellTypeDown = 2
+};
+
 @interface CTInboxBaseMessageCell : UITableViewCell <CTInboxActionViewDelegate>
 
 @property (strong, nonatomic) IBOutlet UIView *containerView;
@@ -40,11 +46,14 @@
 @property (nonatomic, assign) BOOL isAVMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
+@property(nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
 
 - (IBAction)volumeButtonTapped:(UIButton *)sender;
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message;
 
+- (BOOL)hasAudio;
+- (BOOL)hasVideo;
 - (void)setupMediaPlayer;
 - (void)pause;
 - (void)play;

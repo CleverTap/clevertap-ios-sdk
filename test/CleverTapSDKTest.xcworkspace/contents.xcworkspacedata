@@ -5,7 +5,7 @@
       location = "group:SDWebImage/SDWebImage.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../CleverTapSDK.xcodeproj">
+      location = "group:SDWebImage/../../CleverTapSDK.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:CTNotificationService/CTNotificationService.xcodeproj">

@@ -1,11 +1,10 @@
-#import <UIKit/UIKit.h>
-#import "CTCarouselImageView.h"
-#import "CleverTap+Inbox.h"
+#import "CTInboxBaseMessageCell.h"
 #import "CTSwipeView.h"
+#import "CTCarouselImageView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTCarouselMessageCell : UITableViewCell<SwipeViewDataSource, SwipeViewDelegate>{
+@interface CTCarouselMessageCell : CTInboxBaseMessageCell<SwipeViewDataSource, SwipeViewDelegate>{
     CGFloat captionHeight;
 }
 
@@ -13,17 +12,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) long currentItemIndex;
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) CTSwipeView *swipeView;
-@property (nonatomic, strong) IBOutlet UILabel *dateLabel;
-@property (nonatomic, strong) IBOutlet UIView *readView;
-@property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UIView *carouselView;
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselViewHeight;
-@property (nonatomic, strong) IBOutlet NSLayoutConstraint *readViewWidthContraint;
 
-
-@property (nonatomic, strong) CleverTapInboxMessage *message;
-
-- (void)setupCarouselMessage:(CleverTapInboxMessage *)message;
+- (CGFloat)heightForPageControl;
+- (float)getLandscapeMultiplier;
+- (BOOL)orientationIsLandscape;
+- (void)configurePageControlWithRect:(CGRect)rect;
+- (void)configureSwipeViewWithHeightAdjustment:(CGFloat)adjustment;
+- (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender;
 
 @end
 

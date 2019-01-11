@@ -173,6 +173,20 @@ static UIImage *audioPlaceholderImage;
     [self layoutSubviews];
 }
 
+- (BOOL)hasAudio {
+    if (!self.message.content || self.message.content.count < 0) {
+        return false;
+    }
+    return self.message.content[0].mediaIsAudio;
+}
+
+- (BOOL)hasVideo {
+    if (!self.message.content || self.message.content.count < 0) {
+        return false;
+    }
+    return self.message.content[0].mediaIsVideo;
+}
+
 - (IBAction)volumeButtonTapped:(UIButton *)sender {
     if (self.avPlayer == nil) return;
     if ([self isMuted]) {
@@ -215,6 +229,7 @@ static UIImage *audioPlaceholderImage;
         [self.avPlayer play];
         [self.playButton setSelected:YES];
         [self startAVIdleCountdown];
+        [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:self userInfo:nil];
     }
 }
 
@@ -295,7 +310,7 @@ static UIImage *audioPlaceholderImage;
 }
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content {
-    if (!content || !content.links || content.links.count < 0) return;
+    if (!content || !content.actionHasLinks || !content.links || content.links.count < 0) return;
     
     self.actionView.hidden = NO;
     self.actionView.firstButton.hidden = YES;
@@ -343,7 +358,6 @@ static UIImage *audioPlaceholderImage;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
     [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 @end

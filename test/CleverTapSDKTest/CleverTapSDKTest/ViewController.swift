@@ -3,9 +3,8 @@ import CoreLocation
 import CleverTapSDK
 
 class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
-  
     
-           
+    
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: UIButton!
     
@@ -29,9 +28,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     @IBAction func inboxButtonTapped(_ sender: Any) {
         let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
         let ct1  = CleverTap.instance(with: ctConfig)
-            let style = CleverTapInboxStyleConfig.init()
-            style.cellBackgroundColor = UIColor.yellow
-            style.messageTags = ["Promotions", "Offers"];
+        let style = CleverTapInboxStyleConfig.init()
+        style.title = "AppInbox"
+        style.cellBackgroundColor = UIColor.yellow
+        style.messageTags = ["Promotions", "Offers"];
+        
             if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
 //                inboxController.navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
                 let navigationController = UINavigationController.init(rootViewController: inboxController)
@@ -45,18 +46,18 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
         ctConfig.logLevel = .debug
         let ct1  = CleverTap.instance(with: ctConfig)
-        ct1.onUserLogin(["foo1":"bar1", "Email":"aditi@clevertap.com", "identity":"654321"])
+        ct1.onUserLogin(["foo1":"bar1", "Email":"peter@clevertap.com", "identity":"89899999999999"])
         ct1.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1), "shouldFail":["foo":"bar"]])
         ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
         
         ct1.registerInboxUpdatedBlock(({
-            NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
+            // NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
             let messageCount = ct1.getInboxMessageCount()
             let unreadCount = ct1.getInboxMessageUnreadCount()
             
             DispatchQueue.main.async {
                 self.inboxButton.isHidden = false;
-                self.inboxButton.setTitle("Show Inbox: \(unreadCount) unread", for: .normal)
+                self.inboxButton.setTitle("Show Inbox:\(messageCount)/\(unreadCount) unread", for: .normal)
             }
      }))
         
@@ -88,9 +89,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
              */
             let messageCount = ct1.getInboxMessageCount()
             let unreadCount = ct1.getInboxMessageUnreadCount()
-            
             self.inboxButton.isHidden = false;
-            self.inboxButton.setTitle("Show Inbox: \(unreadCount) unread", for: .normal)
+            self.inboxButton.setTitle("Show Inbox:\(messageCount)/\(unreadCount) unread", for: .normal)
         }))
     }
  

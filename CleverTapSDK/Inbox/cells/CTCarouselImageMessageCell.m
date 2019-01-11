@@ -1,106 +1,16 @@
 #import "CTCarouselImageMessageCell.h"
-#import "CTInAppResources.h"
-#import "CTConstants.h"
-#import "CTInAppUtils.h"
+
 
 @implementation CTCarouselImageMessageCell
 
-static const float kLandscapeMultiplier = 0.5625; // 16:9 in landscape
-static const float kPageControlViewHeight = 30.f;
-
-static NSString * const kOrientationLandscape = @"l";
-
-- (instancetype)init {
-    if (self = [super init]) {
-        [self setup];
-    }
-    return self;
+-(void)onAwake {
+    // no-op here
 }
 
-- (instancetype)initWithCoder:(NSCoder *)aDecoder {
-    if (self = [super initWithCoder:aDecoder]) {
-        [self setup];
-    }
-    return self;
-}
-
-- (instancetype)initWithFrame:(CGRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        [self setup];
-    }
-    return self;
-}
-
-- (void)setup {
-    // no-op for now
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-}
-
-- (void)awakeFromNib {
-    [super awakeFromNib];
-    self.selectionStyle = UITableViewCellSelectionStyleNone;
-}
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
-    // Configure the view for the selected state
-}
-
-- (void)setupCarouselImageMessage:(CleverTapInboxMessage *)message {
-    
-    self.message = message;
-    self.dateLabel.text = message.relativeDate;
-    
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
-    
-    NSString *orientation = message.orientation;
-    // assume square image orientation
-    CGFloat leftMargin = 0;
-    if (@available(iOS 11.0, *)) {
-        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
-        leftMargin = window.safeAreaInsets.left;
-    }
-    
-    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
-    CGFloat viewHeight = viewWidth + kPageControlViewHeight;
-    
-    if ([orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString]) {
-        viewHeight = (viewWidth*kLandscapeMultiplier) + kPageControlViewHeight;
-    }
-    
-    CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
-    self.frame = frame;
-    self.carouselView.frame = frame;
-    self.carouselViewHeight.constant = viewHeight;
-    
-    for (UIView *view in self.itemViews) {
-        [view removeFromSuperview];
-    }
-    
-    for (UIView *subview in [self.carouselView subviews]) {
-        [subview removeFromSuperview];
-    }
-    
-    self.swipeView = [[CTSwipeView alloc] init];
-    CGRect swipeViewFrame = self.carouselView.bounds;
-    swipeViewFrame.size.height =  frame.size.height - kPageControlViewHeight;
-    self.swipeView.frame = swipeViewFrame;
-    self.swipeView.delegate = self;
-    self.swipeView.dataSource = self;
-  
-    [self.carouselView addSubview:self.swipeView];
+-(void)populateItemViews {
     self.itemViews = [NSMutableArray new];
-    
     int index = 0;
-    for (CleverTapInboxMessageContent *content in (message.content)) {
+    for (CleverTapInboxMessageContent *content in (self.message.content)) {
         NSString *imageUrl = content.mediaUrl;
         NSString *actionUrl = content.actionUrl;
         
@@ -110,10 +20,10 @@ static NSString * const kOrientationLandscape = @"l";
         CTCarouselImageView *itemView;
         if (itemView == nil){
             CGRect frame = self.carouselView.bounds;
-            frame.size.height =  frame.size.height - kPageControlViewHeight;
+            frame.size.height =  frame.size.height - [self heightForPageControl];
             frame.size.width = frame.size.width;
             itemView = [[CTCarouselImageView alloc] initWithFrame:frame
-                                                  imageUrl:imageUrl actionUrl:actionUrl];
+                                                         imageUrl:imageUrl actionUrl:actionUrl];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -123,50 +33,47 @@ static NSString * const kOrientationLandscape = @"l";
         [self.itemViews addObject:itemView];
         index++;
     }
+}
 
-    self.pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, self.carouselView.frame.size.height - kPageControlViewHeight, viewWidth, kPageControlViewHeight)];
-    [self.pageControl addTarget:self action:@selector(pageControlTapped:) forControlEvents:UIControlEventValueChanged];
-    self.pageControl.numberOfPages = [self.itemViews count];
-    self.pageControl.hidesForSinglePage = YES;
-    self.pageControl.backgroundColor = [UIColor clearColor];
-    self.pageControl.currentPageIndicatorTintColor = [UIColor blueColor];
-    self.pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
-    [self.carouselView addSubview:self.pageControl];
+- (void)setupMessage:(CleverTapInboxMessage *)message {
+    self.message = message;
+    self.dateLabel.text = message.relativeDate;
+    if (message.isRead) {
+        self.readView.hidden = YES;
+        self.readViewWidthContraint.constant = 0;
+    } else {
+        self.readView.hidden = NO;
+        self.readViewWidthContraint.constant = 16;
+    }
+    // assume square image orientation
+    CGFloat leftMargin = 0;
+    if (@available(iOS 11.0, *)) {
+        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+        leftMargin = window.safeAreaInsets.left;
+    }
+    
+    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
+    CGFloat viewHeight = viewWidth + [self heightForPageControl];
+    
+    if ([self orientationIsLandscape]) {
+        viewHeight = (viewWidth*[self getLandscapeMultiplier]) + [self heightForPageControl];
+    }
+    CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
+    self.frame = frame;
+    self.carouselView.frame = frame;
+    self.carouselViewHeight.constant = viewHeight;
+    for (UIView *view in self.itemViews) {
+        [view removeFromSuperview];
+    }
+    for (UIView *subview in [self.carouselView subviews]) {
+        [subview removeFromSuperview];
+    }
+    [self configureSwipeViewWithHeightAdjustment:[self heightForPageControl]];
+    [self populateItemViews];
+    [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height -[self heightForPageControl], viewWidth, [self heightForPageControl])];
+    
     [self.swipeView reloadData];
     
-}
-
-#pragma mark - Swipe View
-
-- (NSInteger)numberOfItemsInSwipeView:(CTSwipeView *)swipeView{
-    
-    return [self.itemViews count];
-}
-- (UIView *)swipeView:(CTSwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view{
-    return self.itemViews[index];
-}
-- (void)swipeViewDidScroll:(CTSwipeView *)swipeView {
-    self.pageControl.currentPage = (int)swipeView.currentItemIndex;
-}
-
-- (CGSize)swipeViewItemSize:(CTSwipeView *)swipeView{
-    return self.swipeView.bounds.size;
-}
-
-#pragma mark - Actions
-
-- (void)pageControlTapped:(UIPageControl *)sender{
-    [self.swipeView scrollToItemAtIndex:sender.currentPage duration:0.5];
-}
-
-- (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender{
-    
-    CTCarouselImageView *itemView = (CTCarouselImageView*)sender.view;
-    NSInteger index = itemView.tag;
-    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
-    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
-    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
 
 @end

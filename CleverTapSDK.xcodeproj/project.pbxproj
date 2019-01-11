@@ -221,6 +221,8 @@
 		D033FB84208FE51200B4390F /* CTUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = D033FB82208FE51200B4390F /* CTUtils.m */; };
 		D0596EFA208A6A9000A80753 /* CTSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = D0596EF8208A6A9000A80753 /* CTSwizzle.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = D0596EF9208A6A9000A80753 /* CTSwizzle.m */; };
+		D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */; };
+		D06F052921E802D400D1B6BD /* CTInboxBaseMessageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D06F052721E802D400D1B6BD /* CTInboxBaseMessageCell.m */; };
 		D0A6626A207EE6F500B403F3 /* CleverTapBuildInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBCD207D8EAE001345EF /* CleverTapBuildInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D0A6626D20801E7F00B403F3 /* CTDeviceInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A6626B20801E7F00B403F3 /* CTDeviceInfo.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0A6626E20801E7F00B403F3 /* CTDeviceInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A6626C20801E7F00B403F3 /* CTDeviceInfo.m */; };
@@ -397,6 +399,8 @@
 		D033FB82208FE51200B4390F /* CTUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUtils.m; sourceTree = "<group>"; };
 		D0596EF8208A6A9000A80753 /* CTSwizzle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSwizzle.h; sourceTree = "<group>"; };
 		D0596EF9208A6A9000A80753 /* CTSwizzle.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSwizzle.m; sourceTree = "<group>"; };
+		D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInboxBaseMessageCell.h; sourceTree = "<group>"; };
+		D06F052721E802D400D1B6BD /* CTInboxBaseMessageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInboxBaseMessageCell.m; sourceTree = "<group>"; };
 		D0A6626B20801E7F00B403F3 /* CTDeviceInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDeviceInfo.h; sourceTree = "<group>"; };
 		D0A6626C20801E7F00B403F3 /* CTDeviceInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDeviceInfo.m; sourceTree = "<group>"; };
 		D0A84AD6209135D400191B1F /* CTPreferences.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPreferences.h; sourceTree = "<group>"; };
@@ -545,6 +549,8 @@
 		07B94521219EA34300D4C542 /* cells */ = {
 			isa = PBXGroup;
 			children = (
+				D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */,
+				D06F052721E802D400D1B6BD /* CTInboxBaseMessageCell.m */,
 				07B94522219EA34300D4C542 /* CTInboxSimpleMessageCell.h */,
 				07B94523219EA34300D4C542 /* CTInboxSimpleMessageCell.m */,
 				07B94524219EA34300D4C542 /* CTInboxSimpleMessageCell.xib */,
@@ -789,6 +795,7 @@
 				07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */,
 				071EB515217F6427008F0FAB /* CTInterstitialViewController.h in Headers */,
 				0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */,
+				D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */,
 				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
 				D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */,
 				071EB4FC217F6427008F0FAB /* CTHalfInterstitialViewController.h in Headers */,
@@ -1043,6 +1050,7 @@
 				D0047B132098EDA90019C6FD /* CTLocationManager.m in Sources */,
 				071EB4EB217F6427008F0FAB /* CTCoverImageViewController.m in Sources */,
 				071EB4D4217F6427008F0FAB /* CTBaseHeaderFooterViewController.m in Sources */,
+				D06F052921E802D400D1B6BD /* CTInboxBaseMessageCell.m in Sources */,
 				07B9453F219EA34300D4C542 /* CleverTapInboxStyleConfig.m in Sources */,
 				0796FB6421AE5B2900FC380D /* CTCarouselMessageCell.m in Sources */,
 				071EB4F6217F6427008F0FAB /* CTInAppResources.m in Sources */,

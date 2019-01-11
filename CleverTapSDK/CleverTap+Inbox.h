@@ -50,6 +50,7 @@
 
 @interface CleverTapInboxStyleConfig : NSObject
 
+@property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) UIColor *backgroundColor;
 @property (nonatomic, strong) UIColor *cellBackgroundColor;
 @property (nonatomic, strong) NSArray *messageTags;
