@@ -342,12 +342,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    if (!message.isRead){
-        [self _notifyMessageViewed:message];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [message setRead:YES];
-        });
-    }
     NSString *identifier = kCellSimpleMessageIdentifier;
     if ([message.type isEqualToString:kCarouselMessage]) {
         identifier = kCellCarouselMessageIdentifier;
@@ -367,6 +361,15 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+    if (!message.isRead){
+        [self _notifyMessageViewed:message];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [message setRead:YES];
+        });
+    }
+}
 #pragma mark - Actions
 
 - (void)dismissTapped {
