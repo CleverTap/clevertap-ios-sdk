@@ -118,6 +118,7 @@ static NSString * const kOrientationLandscape = @"l";
     self.swipeView.frame = self.carouselView.bounds;
     self.swipeView.delegate = self;
     self.swipeView.dataSource = self;
+    self.swipeView.bounces = NO;
     [self.carouselView addSubview:self.swipeView];
 }
 
