@@ -2467,16 +2467,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         }];
                     }
                 }
-                
-                //-- TODO - Remove - Just for Testing
-                [self initializeInboxWithCallback:^(BOOL success) {
-                    if (success) {
-                        [self runSerialAsync:^{
-                            NSArray <NSDictionary*> *messages = [self getInboxMessages];
-                            [self.inboxController updateMessages:messages];
-                        }];
-                    }
-                }];
 #endif
 
                 // Handle events/profiles sync data
@@ -3758,28 +3748,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
 #endif
     return YES;
-}
-
-#pragma mark Inbox Notification Json -- TODO - Remove
-
-- (NSArray *)getInboxMessages {
-    
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *filePath = [bundle pathForResource:@"inbox" ofType:@"json"];
-    NSData *responseData = [NSData dataWithContentsOfFile:filePath];
-    
-    if (responseData) {
-        @try {
-            id jsonResp = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
-            
-            NSArray *jsonA = [NSArray new];
-            jsonA = jsonResp[@"inbox_notifs"];
-            return jsonA;
-            
-        }@catch (NSException *ex) {
-            // Ignore
-        }
-    }
 }
 
 #endif  //!CLEVERTAP_NO_INBOX_SUPPORT
