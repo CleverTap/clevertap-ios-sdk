@@ -38,10 +38,6 @@ static NSString * const kOrientationLandscape = @"l";
     return viewHeight;
 }
 
--(CGFloat) calculatePageControlY {
-    return 0;
-}
-
 -(void)populateItemViews {
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;

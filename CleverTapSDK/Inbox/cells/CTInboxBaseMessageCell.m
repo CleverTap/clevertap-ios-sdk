@@ -43,6 +43,15 @@ static UIImage *audioPlaceholderImage;
     }
 }
 
+- (void)prepareForReuse {
+    [super prepareForReuse];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    if (self.avPlayer) {
+        [self.avPlayer pause];
+        self.avPlayer = nil;
+    }
+}
+
 - (void)setup {
     // no-op in base
 }
@@ -86,7 +95,7 @@ static UIImage *audioPlaceholderImage;
     return playImage;
 }
 
--(UIImage*)getPauseImage {
+- (UIImage*)getPauseImage {
     if (pauseImage == nil) {
         NSBundle *bundle = [NSBundle bundleForClass:[self class]];
         pauseImage = [UIImage imageNamed:@"ic_pause.png" inBundle:bundle compatibleWithTraitCollection:nil];

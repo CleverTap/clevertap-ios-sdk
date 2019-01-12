@@ -18,10 +18,6 @@
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     self.cellImageView.animatedImage = nil;
-    if (self.avPlayer) {
-        [self.avPlayer pause];
-        self.avPlayer = nil;
-    }
 }
 
 - (void)doLayoutForMessage:(CleverTapInboxMessage *)message {
