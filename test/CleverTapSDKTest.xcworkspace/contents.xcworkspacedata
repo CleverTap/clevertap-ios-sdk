@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:SDWebImage/SDWebImage.xcodeproj">
+      location = "group:../Vendors/SDWebImage/SDWebImage.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:SDWebImage/../../CleverTapSDK.xcodeproj">

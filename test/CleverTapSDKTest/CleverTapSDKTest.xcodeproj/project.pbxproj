@@ -26,9 +26,9 @@
 		D0A662702080283800B403F3 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A6626F2080283800B403F3 /* AdSupport.framework */; };
 		D0A9E9C920EE9D3F0004BC6F /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A9E9C820EE9D3F0004BC6F /* CleverTapSDK.framework */; };
 		D0A9E9CA20EE9D3F0004BC6F /* CleverTapSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D0A9E9C820EE9D3F0004BC6F /* CleverTapSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		D0AF3F2421A8BC5200398780 /* SDWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D0AF3F2221A8BC5200398780 /* SDWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D0AF3F2821A8BF4700398780 /* CleverTapSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D0AF3F2A21A8C81A00398780 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D0AF3F2921A8C81A00398780 /* libsqlite3.tbd */; };
+		D0D0494421E9819D00B34B17 /* SDWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D0D0494121E9819000B34B17 /* SDWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,8 +63,8 @@
 			dstSubfolderSpec = 10;
 			files = (
 				D0AF3F2821A8BF4700398780 /* CleverTapSDK.framework in Embed Frameworks */,
+				D0D0494421E9819D00B34B17 /* SDWebImage.framework in Embed Frameworks */,
 				D014B92C20E30C68001E0780 /* CTNotificationService.framework in Embed Frameworks */,
-				D0AF3F2421A8BC5200398780 /* SDWebImage.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -126,8 +126,8 @@
 		D0A6626F2080283800B403F3 /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 		D0A9E9C820EE9D3F0004BC6F /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0A9E9CF20EEB3320004BC6F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		D0AF3F2221A8BC5200398780 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0AF3F2921A8C81A00398780 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		D0D0494121E9819000B34B17 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,7 +211,6 @@
 		D0A6623A207EE4FF00B403F3 = {
 			isa = PBXGroup;
 			children = (
-				D0AF3F2221A8BC5200398780 /* SDWebImage.framework */,
 				D0A9E9C820EE9D3F0004BC6F /* CleverTapSDK.framework */,
 				D0A66245207EE4FF00B403F3 /* CleverTapSDKTest */,
 				D0A6625A207EE50000B403F3 /* CleverTapSDKTestUITests */,
@@ -260,6 +259,7 @@
 		D0A66266207EE60A00B403F3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D0D0494121E9819000B34B17 /* SDWebImage.framework */,
 				D0AF3F2921A8C81A00398780 /* libsqlite3.tbd */,
 				D0A9E9CF20EEB3320004BC6F /* WebKit.framework */,
 				D014B92920E30B73001E0780 /* CTNotificationService.framework */,

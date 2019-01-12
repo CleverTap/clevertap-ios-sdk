@@ -231,6 +231,7 @@
 		D0A84ADD209136D500191B1F /* CTLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A84ADB209136D500191B1F /* CTLogger.m */; };
 		D0A9E9CD20EEA8630004BC6F /* CTLocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B102098EDA90019C6FD /* CTLocationManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0A9E9CE20EEA8770004BC6F /* CTLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B112098EDA90019C6FD /* CTLocationManager.m */; };
+		D0BF278521E97C95007CD11C /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0BF278421E97C95007CD11C /* SDWebImage.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		D0C7BBCA207D8837001345EF /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D0C7BBCB207D8837001345EF /* CleverTap.m in Sources */ = {isa = PBXBuildFile; fileRef = D0C7BBC9207D8837001345EF /* CleverTap.m */; };
 		D0CACF8B20B8923700A02327 /* CleverTap+SSLPinning.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF8A20B890EA00A02327 /* CleverTap+SSLPinning.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -241,7 +242,6 @@
 		D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = D0CACF9820B8A78600A02327 /* CTConstants.m */; };
 		D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */; };
 		D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */; };
-		D0E0291921E91C5D00521838 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0E0291821E91C5D00521838 /* SDWebImage.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -406,6 +406,7 @@
 		D0A84AD7209135D400191B1F /* CTPreferences.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPreferences.m; sourceTree = "<group>"; };
 		D0A84ADA209136D500191B1F /* CTLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLogger.h; sourceTree = "<group>"; };
 		D0A84ADB209136D500191B1F /* CTLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLogger.m; sourceTree = "<group>"; };
+		D0BF278421E97C95007CD11C /* SDWebImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDWebImage.framework; path = Vendors/SDWebImage.framework; sourceTree = "<group>"; };
 		D0C7BBBD207D82C0001345EF /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7BBC8207D8837001345EF /* CleverTap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTap.h; sourceTree = "<group>"; };
 		D0C7BBC9207D8837001345EF /* CleverTap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTap.m; sourceTree = "<group>"; };
@@ -418,7 +419,6 @@
 		D0CACF9820B8A78600A02327 /* CTConstants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTConstants.m; sourceTree = "<group>"; };
 		D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertGlobalRootCA.crt; sourceTree = "<group>"; };
 		D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertSHA2SecureServerCA.crt; sourceTree = "<group>"; };
-		D0E0291821E91C5D00521838 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -433,7 +433,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0E0291921E91C5D00521838 /* SDWebImage.framework in Frameworks */,
+				D0BF278521E97C95007CD11C /* SDWebImage.framework in Frameworks */,
 				07B94553219EA44100D4C542 /* libsqlite3.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -618,7 +618,7 @@
 		07B94551219EA44100D4C542 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D0E0291821E91C5D00521838 /* SDWebImage.framework */,
+				D0BF278421E97C95007CD11C /* SDWebImage.framework */,
 				07B94552219EA44100D4C542 /* libsqlite3.tbd */,
 			);
 			name = Frameworks;
@@ -1267,6 +1267,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Vendors",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1307,6 +1308,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Vendors",
 				);
 				INFOPLIST_FILE = CleverTapSDK/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
