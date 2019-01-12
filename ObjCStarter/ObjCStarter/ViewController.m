@@ -2,7 +2,7 @@
 #import "ViewController.h"
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
-#import <CleverTapSDK/CleverTap+Inbox.h>
+//#import <CleverTapSDK/CleverTap+Inbox.h>
 
 @interface ViewController () <UITableViewDelegate, UITableViewDataSource>
 

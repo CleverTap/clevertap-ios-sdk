@@ -1,12 +1,7 @@
 import UIKit
 import CleverTapSDK
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
-  
-    func messageDidSelect(_ message: CleverTapInboxMessage!) {
-        
-    }
-    
+class ViewController: UIViewController {
     
     @IBOutlet var tblEvent: UITableView!
     var eventList: [String] = [String]()
