@@ -378,7 +378,6 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     if ([cell hasVideo]) {
         [cell mute:self.muted];
     }
-    
     return cell;
 }
 
