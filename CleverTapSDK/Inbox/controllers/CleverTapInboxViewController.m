@@ -312,6 +312,19 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     } else {
         [self filterNotifications: self.tags[sender.selectedSegmentIndex]];
     }
+    
+    if (self.filterMessages.count <= 0) {
+        UILabel *lblMessage = [[UILabel alloc] initWithFrame:CGRectMake(0, (CGFloat) [[UIScreen mainScreen] bounds].size.height/2, (CGFloat) [[UIScreen mainScreen] bounds].size.width, 44)];
+        lblMessage.text = @"No message(s) to show";
+        lblMessage.tag = 108;
+        lblMessage.textAlignment = NSTextAlignmentCenter;
+        [self.view addSubview:lblMessage];
+    } else {
+        UILabel *removeLabel;
+        while((removeLabel = [self.view viewWithTag:108]) != nil) {
+            [removeLabel removeFromSuperview];
+        }
+    }    
     [self stopPlayIfNeed];
     [self.tableView reloadData];
     [self.tableView layoutIfNeeded];
