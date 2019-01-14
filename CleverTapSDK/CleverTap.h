@@ -13,6 +13,7 @@
 #if defined(CLEVERTAP_TVOS)
 #define CLEVERTAP_NO_INAPP_SUPPORT 1
 #define CLEVERTAP_NO_REACHABILITY_SUPPORT 1
+#define CLEVERTAP_NO_INBOX_SUPPORT 1
 #endif
 
 @protocol CleverTapSyncDelegate;

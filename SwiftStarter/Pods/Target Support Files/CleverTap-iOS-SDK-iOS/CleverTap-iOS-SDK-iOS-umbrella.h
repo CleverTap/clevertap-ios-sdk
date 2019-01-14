@@ -12,6 +12,7 @@
 
 #import "CleverTap.h"
 #import "CleverTap+SSLPinning.h"
+#import "CleverTap+Inbox.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapBuildInfo.h"
 #import "CleverTapEventDetail.h"

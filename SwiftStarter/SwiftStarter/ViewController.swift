@@ -1,7 +1,7 @@
 import UIKit
 import CleverTapSDK
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     
     @IBOutlet var tblEvent: UITableView!
     var eventList: [String] = [String]()
@@ -16,6 +16,8 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         loadData()
+        registerInboxMessage()
+        initializeInboxMessage()
         tblEvent.tableFooterView = UIView()
     }
 
@@ -23,19 +25,39 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: Int32, withButtonIndex buttonIndex: Int32) {
+        //  This is called when an inbox message is clicked(tapped or call to action)
+    }
 }
 
 extension ViewController {
     
     func loadData(){
-        
         eventList.append("Record User Profile")
         eventList.append("Record User Profile with Properties")
         eventList.append("Record User Event called Product Viewed")
         eventList.append("Record User Event with Properties")
         eventList.append("Record User Charged Event")
         eventList.append("Record User event to an Additional instance")
+        eventList.append("Open Application Inbox")
         self.tblEvent.reloadData()
+    }
+    
+    func registerInboxMessage() {
+        CleverTap.sharedInstance()?.registerInboxUpdatedBlock({
+            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+            print("Inbox Message:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread")
+        })
+    }
+    
+    func initializeInboxMessage() {
+        CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
+            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+            print("Inbox Message:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread")
+        }))
     }
 }
 extension ViewController: UITableViewDataSource, UITableViewDelegate{
@@ -73,6 +95,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             break;
         case 5:
             recordUserEventforAdditionalInstance()
+            break;
+        case 6:
+            openAppInboxController()
             break;
         default:
             break;
@@ -177,6 +202,17 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     func recordUserEventforAdditionalInstance() {
         cleverTapAdditionalInstance.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1)])
         cleverTapAdditionalInstance.profileSetMultiValues(["a"], forKey: "letters")
+    }
+    
+    func openAppInboxController() {
+        
+        // config the style of App Inbox Controller
+        let style = CleverTapInboxStyleConfig.init()
+        style.title = "App Inbox"
+        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
+            let navigationController = UINavigationController.init(rootViewController: inboxController)
+            self.present(navigationController, animated: true, completion: nil)
+        }
     }
 }
 

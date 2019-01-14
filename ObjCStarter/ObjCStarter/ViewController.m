@@ -2,8 +2,9 @@
 #import "ViewController.h"
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
+#import <CleverTapSDK/CleverTap+Inbox.h>
 
-@interface ViewController () <UITableViewDelegate, UITableViewDataSource>
+@interface ViewController () <UITableViewDelegate, UITableViewDataSource, CleverTapInboxViewControllerDelegate>
 
 @property (nonatomic, strong) IBOutlet UITableView *tblEvent;
 @property (nonatomic, strong) NSMutableArray *eventList;
@@ -18,6 +19,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     [self loadData];
+    [self initializeInboxMessage];
     self.tblEvent.tableFooterView = [UIView new];
 }
 
@@ -33,8 +35,17 @@
                       @"Record User Event called Product Viewed",
                       @"Record User Event with Properties",
                       @"Record User Charged Event",
-                      @"Record User event to an Additional instance", nil];
+                      @"Record User event to an Additional instance",
+                      @"Open App Inbox Message", nil];
     [self. tblEvent reloadData];
+}
+    
+- (void)initializeInboxMessage {
+    [[CleverTap sharedInstance] initializeInboxWithCallback:^(BOOL success) {
+        int messageCount = (int)[[CleverTap sharedInstance] getInboxMessageCount];
+        int unreadCount = (int)[[CleverTap sharedInstance] getInboxMessageUnreadCount];
+        NSLog(@"Inbox Message: %d/%d", messageCount, unreadCount);
+    }];
 }
 
 #pragma mark - Table view Delegate and Data Source
@@ -77,6 +88,9 @@
             break;
         case 5:
             [self recordUserEventforAdditionalInstance];
+            break;
+        case 6:
+            [self openAppInboxController];
             break;
         default:
             break;
@@ -184,5 +198,17 @@
     [_cleverTapAdditionalInstance recordEvent:@"TestCT1WProps" withProps:@{@"one": @1}];
     [_cleverTapAdditionalInstance profileSetMultiValues:@[@"bag", @"shoes"] forKey:@"myStuff"];
 }
-
+- (void)openAppInboxController {
+    
+    CleverTapInboxStyleConfig *style = [[CleverTapInboxStyleConfig alloc] init];
+    CleverTapInboxViewController *inboxController = [[CleverTap sharedInstance] newInboxViewControllerWithConfig:style andDelegate:self];
+    if (inboxController) {
+        UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:inboxController];
+        [self presentViewController:navigationController animated:YES completion:nil];
+    }
+}
+- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
+    //  This is called when an inbox message is clicked(tapped or call to action)
+}
+    
 @end

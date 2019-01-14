@@ -34,7 +34,11 @@
 #import "CTHalfInterstitialImageViewController.h"
 #endif
 #import "CTLocationManager.h"
-
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+#import "CTInboxController.h"
+#import "CleverTap+Inbox.h"
+#import "CleverTapInboxViewControllerPrivate.h"
+#endif
 #if CLEVERTAP_SSL_PINNING
 #import "CTPinnedNSURLSessionDelegate.h"
 static NSArray* sslCertNames;
@@ -97,6 +101,20 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenRegister,
     CleverTapPushTokenUnregister,
 };
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+@interface CleverTapInboxMessage ()
+- (instancetype) init __unavailable;
+- (instancetype)initWithJSON:(NSDictionary *)json;
+@end
+#endif
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+@interface CleverTap () <CTInboxDelegate, CleverTapInboxViewControllerAnalyticsDelegate> {}
+@property(atomic, strong) CTInboxController *inboxController;
+@property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
+@end
+#endif
 
 @interface CleverTap () <CTInAppNotificationDisplayDelegate> {}
 #if CLEVERTAP_SSL_PINNING
@@ -506,6 +524,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self notifyUserProfileInitialized];
+
     return self;
 }
 
@@ -800,6 +819,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     header[@"g"] = self.deviceInfo.deviceId;
     header[@"tk"] = self.config.accountToken;
     header[@"id"] = self.config.accountId;
+    
+    header[@"ddnd"] = @([self getStoredDeviceToken].length <= 0);
     
     int lastTS = [self getLastRequestTimeStamp];
     header[@"l_ts"] = @(lastTS);
@@ -1271,6 +1292,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     // check to see whether the push includes a test in-app notification, if so don't process further
     if ([self didHandleInAppTestFromPushNotificaton:notification]) return;
+    
+    // check to see whether the push includes a test inbox message, if so don't process further
+    if ([self didHandleInboxMessageTestFromPushNotificaton:notification]) return;
     
     // determine application state
     UIApplication *application = [[self class] getSharedApplication];
@@ -2422,6 +2446,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
 #endif
+                
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+                NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
+                if (inboxJSON) {
+                    NSMutableArray *inboxNotifs;
+                    @try {
+                        inboxNotifs = [[NSMutableArray alloc] initWithArray:inboxJSON];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Inbox Message JSON: %@", self, e.debugDescription);
+                    }
+                    if (inboxNotifs && [inboxNotifs count] > 0) {
+                        [self initializeInboxWithCallback:^(BOOL success) {
+                            if (success) {
+                                [self runSerialAsync:^{
+                                    NSArray <NSDictionary*> *messages =  [inboxNotifs mutableCopy];;
+                                    [self.inboxController updateMessages:messages];
+                                }];
+                            }
+                        }];
+                    }
+                }
+#endif
+
                 // Handle events/profiles sync data
                 @try {
                     NSDictionary *evpr = jsonResp[@"evpr"];
@@ -2669,6 +2716,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
+        
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+        [self _resetInbox];
+#endif
         
         // push data on reset profile
         [self recordAppLaunched:@"onUserLogin"];
@@ -3147,8 +3198,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: registering APNs device token %@", self, pushTokenString);
-    [self pushDeviceToken:pushTokenString forRegisterAction:CleverTapPushTokenRegister];
     [self storeDeviceToken:pushTokenString];
+    [self pushDeviceToken:pushTokenString forRegisterAction:CleverTapPushTokenRegister];
 }
 
 - (void)handleNotificationWithData:(id)data {
@@ -3392,5 +3443,313 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return handled;
 }
 #endif
+
+#pragma mark - Inbox
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+
+#pragma mark public
+
+- (void)initializeInboxWithCallback:(CleverTapInboxSuccessBlock)callback {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Inbox unavailable in app extensions", self);
+        self.inboxController = nil;
+        return;
+    }
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Inbox unavailable", self);
+        self.inboxController = nil;
+        return;
+    }
+    [self runSerialAsync:^{
+        if (self.inboxController) {
+            [[self class] runSyncMainQueue: ^{
+                callback(self.inboxController.isInitialized);
+            }];
+            return;
+        }
+        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.inboxController.delegate = self;
+        [[self class] runSyncMainQueue: ^{
+            callback(self.inboxController.isInitialized);
+        }];
+    }];
+}
+
+- (NSUInteger)getInboxMessageCount {
+    if (![self _isInboxInitialized]) {
+        return -1;
+    }
+    return self.inboxController.count;
+}
+
+- (NSUInteger)getInboxMessageUnreadCount {
+    if (![self _isInboxInitialized]) {
+        return -1;
+    }
+    return self.inboxController.unreadCount;
+}
+
+- (NSArray<CleverTapInboxMessage *> * _Nonnull )getAllInboxMessages {
+    NSMutableArray *all = [NSMutableArray new];
+    if (![self _isInboxInitialized]) {
+        return all;
+    }
+    for (NSDictionary *m in self.inboxController.messages) {
+        @try {
+            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+        } @catch (NSException *e) {
+            CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
+        }
+    };
+    
+    return all;
+}
+
+- (NSArray<CleverTapInboxMessage *> * _Nonnull )getUnreadInboxMessages {
+    NSMutableArray *all = [NSMutableArray new];
+    if (![self _isInboxInitialized]) {
+        return all;
+    }
+    for (NSDictionary *m in self.inboxController.unreadMessages) {
+        @try {
+            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+        } @catch (NSException *e) {
+            CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
+        }
+    };
+    return all;
+}
+
+- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString *)messageId {
+    if (![self _isInboxInitialized]) {
+        return nil;
+    }
+    NSDictionary *m = [self.inboxController messageForId:messageId];
+    return (m != nil) ? [[CleverTapInboxMessage alloc] initWithJSON:m] : nil;
+}
+
+- (void)deleteInboxMessage:(CleverTapInboxMessage * _Nonnull )message {
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    [self.inboxController deleteMessageWithId:message.messageId];
+}
+
+- (void)markReadInboxMessage:(CleverTapInboxMessage * _Nonnull) message {
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    [self.inboxController markReadMessageWithId:message.messageId];
+}
+
+- (void)registerInboxUpdatedBlock:(CleverTapInboxUpdatedBlock)block {
+    if (!_inboxUpdateBlocks) {
+        _inboxUpdateBlocks = [NSMutableArray new];
+    }
+    [_inboxUpdateBlocks addObject:block];
+}
+
+- (CleverTapInboxViewController * _Nullable)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
+    if (![self _isInboxInitialized]) {
+        return nil;
+    }
+    NSArray *messages = [self getAllInboxMessages];
+    if (! messages) {
+        return nil;
+    }
+    return [[CleverTapInboxViewController alloc] initWithMessages:messages config:config delegate:delegate analyticsDelegate:self];
+}
+
+#pragma mark private
+
+// call async always
+- (void)_resetInbox {
+    self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+    self.inboxController.delegate = self;
+}
+
+- (BOOL)_isInboxInitialized {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Inbox unavailable in app extensions", self);
+        return NO;
+    }
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Inbox unavailable", self);
+        return NO;
+    }
+    
+    if (!self.inboxController || !self.inboxController.isInitialized) {
+        CleverTapLogDebug(_config.logLevel, @"%@: Inbox not initialized.  Did you call initializeInboxWithCallback: ?", self);
+        return NO;
+    }
+    return YES;
+}
+
+#pragma mark CTInboxDelegate
+
+- (void)inboxMessagesDidUpdate {
+    CleverTapLogInternal(self.config.logLevel, @"%@: Inbox messages did update: %@", self, [self getAllInboxMessages]);
+    for (CleverTapInboxUpdatedBlock block in self.inboxUpdateBlocks) {
+        if (block) {
+            block();
+        }
+    }
+}
+
+#pragma mark CleverTapInboxViewControllerAnalyticsDelegate
+
+- (void)messageDidShow:(CleverTapInboxMessage *)message {
+    CleverTapLogDebug(_config.logLevel, @"%@: inbox message viewed: %@", self, message);
+    [self markReadInboxMessage:message];
+    [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
+}
+
+- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
+    CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
+    [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
+    
+    CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
+    NSURL *ctaURL;
+    // no button index, means use the on message click url if any
+    if (buttonIndex < 0) {
+        if (content.actionHasUrl) {
+            if (content.actionUrl && content.actionUrl.length > 0) {
+                ctaURL = [NSURL URLWithString:content.actionUrl];
+            }
+        }
+    }
+    // button index so find the corresponding action link if any
+    else {
+        if (content.actionHasLinks){
+            NSString *linkUrl = [content urlForLinkAtIndex:buttonIndex];
+            if (linkUrl && linkUrl.length > 0) {
+                ctaURL = [NSURL URLWithString:linkUrl];
+            }
+        }
+    }
+    
+    if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+            [[self class] runSyncMainQueue:^{
+                UIApplication *sharedApplication = [[self class] getSharedApplication];
+                if (sharedApplication == nil) {
+                    return;
+                }
+                CleverTapLogDebug(self.config.logLevel, @"%@: Inbox message: firing deep link: %@", self, ctaURL);
+#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_9_0
+                if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                    NSMethodSignature *signature = [UIApplication
+                                                    instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                    NSInvocation *invocation = [NSInvocation
+                                                invocationWithMethodSignature:signature];
+                    [invocation setTarget:sharedApplication];
+                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                    NSDictionary *options = @{};
+                    id completionHandler = nil;
+                    [invocation setArgument:&ctaURL atIndex:2];
+                    [invocation setArgument:&options atIndex:3];
+                    [invocation setArgument:&completionHandler atIndex:4];
+                    [invocation invoke];
+                } else {
+                    if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                        [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                    }
+                }
+#else
+                if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                    [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                }
+#endif
+            }];
+#endif
+        }
+}
+
+- (void)recordInboxMessageStateEvent:(BOOL)clicked
+                          forMessage:(CleverTapInboxMessage *)message andQueryParameters:(NSDictionary *)params {
+    
+    [self runSerialAsync:^{
+        [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                if (clicked) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                }
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+}
+
+#pragma mark Inbox Message private
+
+- (BOOL)didHandleInboxMessageTestFromPushNotificaton:(NSDictionary*)notification {
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+    if ([[self class] runningInsideAppExtension]) {
+        return NO;
+    }
+    
+    if (!notification || [notification count] <= 0 || !notification[@"wzrk_inbox"]) return NO;
+    
+    @try {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
+        
+        NSString *jsonString = notification[@"wzrk_inbox"];
+        NSDictionary *msg = [NSJSONSerialization
+                                 JSONObjectWithData:[jsonString
+                                    dataUsingEncoding:NSUTF8StringEncoding]
+                                                 options:0
+                                                    error:nil];
+        
+        NSDate *now = [NSDate date];
+        NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970];
+        NSInteger epochTime = nowEpochSeconds;
+        NSString *nowEpoch = [NSString stringWithFormat:@"%li", (long)epochTime];
+        
+        NSDate *expireDate = [now dateByAddingTimeInterval:(24 * 60 * 60)];
+        NSTimeInterval expireEpochSeconds = [expireDate timeIntervalSince1970];
+        NSUInteger expireTime = (long)expireEpochSeconds;
+
+        NSMutableDictionary *message = [NSMutableDictionary dictionary];
+        [message setObject:nowEpoch forKey:@"_id"];
+        [message setObject:[NSNumber numberWithLong:expireTime] forKey:@"wzrk_ttl"];
+        [message addEntriesFromDictionary:msg];
+        
+        NSMutableArray<NSDictionary*> *inboxMsg = [NSMutableArray new];
+        [inboxMsg addObject:message];
+        
+        if (inboxMsg) {
+            float delay = self.isAppForeground ? 0.5 : 2.0;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                @try {
+                    [self initializeInboxWithCallback:^(BOOL success) {
+                        if (success) {
+                            [self runSerialAsync:^{
+                                [self.inboxController updateMessages:inboxMsg];
+                            }];
+                        }
+                    }];
+                } @catch (NSException *e) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display the inbox message from payload: %@", self, e.debugDescription);
+                }
+            });
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the inbox message as JSON", self);
+            return YES;
+        }
+        
+    } @catch (NSException *e) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display the inbox message from payload: %@", self, e.debugDescription);
+        return YES;
+    }
+    
+#endif
+    return YES;
+}
+
+#endif  //!CLEVERTAP_NO_INBOX_SUPPORT
 
 @end

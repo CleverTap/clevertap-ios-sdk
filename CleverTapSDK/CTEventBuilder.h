@@ -2,6 +2,7 @@
 
 @class CTValidationResult;
 @class CTInAppNotification;
+@class CleverTapInboxMessage;
 
 @interface CTEventBuilder : NSObject
 
@@ -19,5 +20,10 @@
                                forNotification:(CTInAppNotification *)notification
                       andQueryParameters:(NSDictionary *)params
                        completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
+
++ (void)buildInboxMessageStateEvent:(BOOL)clicked
+                         forMessage:(CleverTapInboxMessage *)message
+                      andQueryParameters:(NSDictionary *)params
+                       completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion;
 
 @end

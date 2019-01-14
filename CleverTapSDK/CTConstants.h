@@ -43,6 +43,7 @@ extern NSString *const kCTApiDomain;
 #define CLTAP_INAPP_NOTIF_DARKEN_SCREEN @"dk"
 #define CLTAP_INAPP_NOTIF_SHOW_CLOSE @"sc"
 #define CLTAP_INAPP_JSON_RESPONSE_KEY @"inapp_notifs"
+#define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
@@ -91,6 +92,11 @@ extern NSString *const kCTApiDomain;
 // profile init/sync notifications
 #define CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION @"CleverTapProfileDidInitializeNotification"
 #define CLTAP_PROFILE_DID_CHANGE_NOTIFICATION @"CleverTapProfileDidChangeNotification"
+
+// inbox notifications
+#define CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION @"CleverTapInboxMessageTappedNotification"
+#define CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION @"CleverTapInboxMediaPlayingNotification"
+#define CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION @"CleverTapInboxMediaMutedNotification"
 
 // valid profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"FBID", @"GPID"]
