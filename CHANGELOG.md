@@ -1,5 +1,8 @@
 # CHANGE LOG
 
+## Version 3.4.0 (January 14, 2019)
+* Adds support for App Inbox
+
 ## Version 3.3.0 (October 26, 2018)
 * Adds support for Native InApp Notifications
 
