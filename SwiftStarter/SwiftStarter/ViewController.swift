@@ -53,12 +53,9 @@ extension ViewController {
     }
     
     func initializeInboxMessage() {
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
-        ctConfig.logLevel = .debug
-        let ct1 = CleverTap.instance(with: ctConfig)
-        ct1.initializeInbox(callback: ({ (success) in
-            let messageCount = ct1.getInboxMessageCount()
-            let unreadCount = ct1.getInboxMessageUnreadCount()
+        CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
+            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
             print("Inbox Message:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread")
         }))
     }
@@ -209,13 +206,10 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func openAppInboxController() {
         
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
-        ctConfig.logLevel = .debug
-        let ct1 = CleverTap.instance(with: ctConfig)
-        // config the properties of App Inbox
+        // config the style of App Inbox Controller
         let style = CleverTapInboxStyleConfig.init()
-        style.title = "AppInbox"
-        if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
+        style.title = "App Inbox"
+        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
             self.present(navigationController, animated: true, completion: nil)
         }

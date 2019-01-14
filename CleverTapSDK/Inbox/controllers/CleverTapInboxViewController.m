@@ -151,6 +151,10 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     self.tableViewVisibleFrame = self.tableView.frame;
     
     if (self.filterMessages.count <= 0) {
+        UILabel *removeLabel;
+        while((removeLabel = [self.view viewWithTag:108]) != nil) {
+            [removeLabel removeFromSuperview];
+        }
         UILabel *lblMessage = [[UILabel alloc] initWithFrame:CGRectMake(0, (CGFloat) [[UIScreen mainScreen] bounds].size.height/2, (CGFloat) [[UIScreen mainScreen] bounds].size.width, 44)];
         lblMessage.text = @"No message(s) to show";
         lblMessage.tag = 108;
@@ -177,7 +181,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
             self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
         }
         
-        if (_config.navigationBarTintColor) {
+        if (_config.navigationTintColor) {
             self.navigationController.navigationBar.tintColor = _config.navigationTintColor;
             self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : _config.navigationTintColor};
         } else  {
@@ -314,6 +318,10 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     }
     
     if (self.filterMessages.count <= 0) {
+        UILabel *removeLabel;
+        while((removeLabel = [self.view viewWithTag:108]) != nil) {
+            [removeLabel removeFromSuperview];
+        }
         UILabel *lblMessage = [[UILabel alloc] initWithFrame:CGRectMake(0, (CGFloat) [[UIScreen mainScreen] bounds].size.height/2, (CGFloat) [[UIScreen mainScreen] bounds].size.width, 44)];
         lblMessage.text = @"No message(s) to show";
         lblMessage.tag = 108;
