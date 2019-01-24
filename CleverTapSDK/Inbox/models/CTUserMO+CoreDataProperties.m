@@ -71,9 +71,10 @@
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
     BOOL haveUpdates = NO;
     
+    NSArray<NSDictionary*> *filterMessages = [[NSOrderedSet orderedSetWithArray:messages] array];
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
 
-    for (NSDictionary *message in messages) {
+    for (NSDictionary *message in filterMessages) {
         NSString *messageId = message[@"_id"];
         if (!messageId) {
             CleverTapLogStaticDebug(@"CTUserMO dropping message: %@, missing id property", message);
@@ -88,7 +89,7 @@
             int ttl = (int)msg.expires;
             if (ttl > 0 && now >= ttl) {
                 CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, message);
-                [self removeMessagesObject:msg];
+                [context deleteObject:msg];
                 haveUpdates = YES;
             } else {
                 CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
@@ -114,10 +115,6 @@
         haveUpdates = YES;
     }
     return haveUpdates;
-}
-
-- (void)deleteMessage:(CTMessageMO *)message {
-    [self removeMessagesObject:message];
 }
 
 @dynamic accountId;

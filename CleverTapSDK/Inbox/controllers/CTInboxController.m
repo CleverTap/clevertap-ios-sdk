@@ -173,7 +173,7 @@ static NSManagedObjectContext *privateContext;
 -(void)_deleteMessage:(CTMessageMO *)message {
     if (message) {
         [privateContext performBlock:^{
-            [self.user deleteMessage:message];
+            [privateContext deleteObject:message];
             [self notifyUpdate];
             [self _save];
         }];

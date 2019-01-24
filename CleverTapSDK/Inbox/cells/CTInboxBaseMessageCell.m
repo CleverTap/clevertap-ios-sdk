@@ -344,12 +344,10 @@ static UIImage *audioPlaceholderImage;
     CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
     
     if (content.links.count == 1) {
-        
         self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth, 44);
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         
     } else if (content.links.count == 2) {
-        
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[1] withIndex:1];
         
@@ -357,10 +355,9 @@ static UIImage *audioPlaceholderImage;
         self.actionView.secondButton.frame =  CGRectMake(viewWidth/2, 1, viewWidth/2, 44);
         
     } else if (content.links.count > 2) {
-
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
-        self.actionView.thirdButton = [self.actionView setupViewForButton:self.actionView.thirdButton forText:content.links[1] withIndex:1];
-        self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[2] withIndex:2];
+        self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[1] withIndex:1];
+        self.actionView.thirdButton = [self.actionView setupViewForButton:self.actionView.thirdButton forText:content.links[2] withIndex:2];
         
         self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth/3, 44);
         self.actionView.secondButton.frame =  CGRectMake(viewWidth/3, 1, viewWidth/3, 44);
