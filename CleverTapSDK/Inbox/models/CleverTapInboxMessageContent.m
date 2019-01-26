@@ -12,6 +12,13 @@
             _messageColor = jsonObject[@"message"][@"color"];
             _iconUrl = jsonObject[@"icon"][@"url"];
             _mediaUrl = jsonObject[@"media"][@"url"];
+            _videoPosterUrl = jsonObject[@"media"][@"poster"];
+            /*
+            // TODO remove
+            if (!_videoPosterUrl) {
+                _videoPosterUrl = @"https://cdn.clevertap.tech/video/a978f1cc71994ddcae010c8c36040038/8f182e55a3404b128a1f07a005c0169d/poster-00001.jpg?v=1548456991";
+            }
+            */
             if ([jsonObject[@"action"][@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
                 _actionUrl = jsonObject[@"action"][@"url"][@"ios"][@"text"];
             }

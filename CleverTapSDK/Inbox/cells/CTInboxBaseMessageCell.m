@@ -123,6 +123,7 @@ static UIImage *audioPlaceholderImage;
     if (!self.message || !self.message.content || self.message.content.count <= 0) return;
     
     CleverTapInboxMessageContent *content = self.message.content[0];
+    self.hasVideoPoster = content.videoPosterUrl != nil;
     self.controllersTimeoutPeriod = 2;
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
@@ -177,6 +178,14 @@ static UIImage *audioPlaceholderImage;
         self.cellImageView.hidden = NO;
         self.volume.hidden = YES;
     }
+    
+    if (self.hasVideoPoster) {
+        self.cellImageView.hidden = NO;
+        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
+                              placeholderImage:nil
+                                       options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+    }
+    
     [self prepareToPlay];
     [self layoutIfNeeded];
     [self layoutSubviews];
@@ -244,6 +253,7 @@ static UIImage *audioPlaceholderImage;
 
 - (void)play {
     if (self.avPlayer != nil) {
+        self.cellImageView.hidden = YES;
         [self.avPlayer play];
         [self.playButton setSelected:YES];
         [self startAVIdleCountdown];
@@ -255,6 +265,7 @@ static UIImage *audioPlaceholderImage;
     [self pause];
     if (self.avPlayer != nil) {
         [self.avPlayer seekToTime:kCMTimeZero];
+         self.cellImageView.hidden = !self.hasVideoPoster;
         [self.playButton setSelected:NO];
         [self stopAVIdleCountdown];
     }
@@ -263,6 +274,7 @@ static UIImage *audioPlaceholderImage;
 - (void)pause {
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
+        self.cellImageView.hidden = !self.hasVideoPoster;
         [self.playButton setSelected:NO];
         [self stopAVIdleCountdown];
     }

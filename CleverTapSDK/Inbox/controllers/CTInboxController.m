@@ -97,14 +97,14 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)markReadMessageWithId:(NSString *)messageId {
-    CTMessageMO *message = [self _messageForId:messageId];
-    if (message) {
-        [message setValue:@YES forKey:@"isRead"];
-        [self notifyUpdate];
-        [privateContext performBlock:^{
+    [privateContext performBlock:^{
+        CTMessageMO *message = [self _messageForId:messageId];
+        if (message) {
+            [message setValue:@YES forKey:@"isRead"];
+            [self notifyUpdate];
             [self _save];
-        }];
-    }
+        }
+    }];
 }
 
 - (NSDictionary *)messageForId:(NSString *)messageId {

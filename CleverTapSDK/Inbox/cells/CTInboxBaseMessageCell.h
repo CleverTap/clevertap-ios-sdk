@@ -45,6 +45,7 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (nonatomic, assign) NSInteger controllersTimeoutPeriod;
 @property (nonatomic, assign) BOOL isAVMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
+@property (nonatomic, assign) BOOL hasVideoPoster;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
 @property(nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
 
