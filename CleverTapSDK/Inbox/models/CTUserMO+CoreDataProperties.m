@@ -71,7 +71,8 @@
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
     BOOL haveUpdates = NO;
     
-    NSArray<NSDictionary*> *filterMessages = [[NSOrderedSet orderedSetWithArray:messages] array];
+    NSArray *sortMessages = [[messages reverseObjectEnumerator] allObjects];
+    NSArray<NSDictionary*> *filterMessages = [[NSOrderedSet orderedSetWithArray:sortMessages] array];
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
 
     for (NSDictionary *message in filterMessages) {

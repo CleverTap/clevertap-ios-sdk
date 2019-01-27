@@ -124,6 +124,34 @@ static UIImage *audioPlaceholderImage;
     
     CleverTapInboxMessageContent *content = self.message.content[0];
     self.hasVideoPoster = content.videoPosterUrl != nil;
+    
+    if (!self.hasVideoPoster) {
+        // create a thumbnail
+        SDWebImageManager *manager = [SDWebImageManager sharedManager];
+        [manager loadImageWithURL:[NSURL URLWithString:content.mediaUrl] options:0 progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
+            if (image) {
+                self.cellImageView.hidden = NO;
+                self.cellImageView.image = image;
+            } else {
+                __block UIImage *thumbnail = [self generateThumbnail:content.mediaUrl];
+                if (thumbnail) {
+                    [[SDWebImageManager sharedManager] saveImageToCache:thumbnail forURL:[NSURL URLWithString:content.mediaUrl]];
+                    self.cellImageView.hidden = NO;
+                    self.cellImageView.image = thumbnail;
+                } else {
+                    double bitRate = 1000000;
+                    self.thumbnailGenerator = [[CThumbnailGenerator alloc] initWithPreferredBitRate:bitRate];
+                    int position = 10;
+                    [self.thumbnailGenerator loadImageFrom:[NSURL URLWithString:content.mediaUrl] position:position withCompletionBlock:^(UIImage *image) {
+                        [[SDWebImageManager sharedManager] saveImageToCache:image forURL:[NSURL URLWithString:content.mediaUrl]];
+                        self.cellImageView.hidden = NO;
+                        self.cellImageView.image = image;
+                    }];
+                }
+            }
+        }];
+    }
+    
     self.controllersTimeoutPeriod = 2;
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
@@ -338,6 +366,22 @@ static UIImage *audioPlaceholderImage;
         [self.controllersTimer invalidate];
     }
 }
+
+-(UIImage *)generateThumbnail:(NSString *)mediaUrl {
+    NSURL *url = [NSURL fileURLWithPath:mediaUrl];
+    AVAsset *asset = [AVAsset assetWithURL:url];
+    CMTime duration = [asset duration];
+    CMTime snapshot = CMTimeMake(duration.value / 2, duration.timescale);
+    AVAssetImageGenerator *generator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
+    generator.appliesPreferredTrackTransform = YES;
+    CGImageRef imageRef = [generator copyCGImageAtTime:snapshot
+                                            actualTime:nil
+                                                 error:nil];
+    __block UIImage *thumbnail = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    return thumbnail;
+}
+
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content {
     if (!content || !content.actionHasLinks || !content.links || content.links.count < 0) return;

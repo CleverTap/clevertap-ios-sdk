@@ -8,6 +8,7 @@
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
 #import "CTInAppResources.h"
+#import "CThumbnailGenerator.h"
 
 @class FLAnimatedImageView;
 
@@ -46,6 +47,7 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (nonatomic, assign) BOOL isAVMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
 @property (nonatomic, assign) BOOL hasVideoPoster;
+@property (nonatomic, strong) CThumbnailGenerator *thumbnailGenerator;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
 @property(nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
 

@@ -97,6 +97,8 @@
 		072F9E3F21B1368000BC6313 /* CTInboxIconMessageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 072F9E3C21B1368000BC6313 /* CTInboxIconMessageCell.xib */; };
 		072F9E4221B14ECC00BC6313 /* CTInboxMessageActionView.h in Headers */ = {isa = PBXBuildFile; fileRef = 072F9E4021B14ECC00BC6313 /* CTInboxMessageActionView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 072F9E4121B14ECC00BC6313 /* CTInboxMessageActionView.m */; };
+		07393CA321FD564F00253308 /* CThumbnailGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 07393CA121FD564F00253308 /* CThumbnailGenerator.h */; };
+		07393CA421FD564F00253308 /* CThumbnailGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 07393CA221FD564F00253308 /* CThumbnailGenerator.m */; };
 		07961B7621B50A4C0081953E /* CleverTapInboxMessageContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 07961B7421B50A4C0081953E /* CleverTapInboxMessageContent.m */; };
 		0796FB6321AE5B2900FC380D /* CTCarouselMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 0796FB6021AE5B2900FC380D /* CTCarouselMessageCell.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0796FB6421AE5B2900FC380D /* CTCarouselMessageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0796FB6121AE5B2900FC380D /* CTCarouselMessageCell.m */; };
@@ -327,6 +329,8 @@
 		072F9E3C21B1368000BC6313 /* CTInboxIconMessageCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CTInboxIconMessageCell.xib; sourceTree = "<group>"; };
 		072F9E4021B14ECC00BC6313 /* CTInboxMessageActionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInboxMessageActionView.h; sourceTree = "<group>"; };
 		072F9E4121B14ECC00BC6313 /* CTInboxMessageActionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInboxMessageActionView.m; sourceTree = "<group>"; };
+		07393CA121FD564F00253308 /* CThumbnailGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CThumbnailGenerator.h; sourceTree = "<group>"; };
+		07393CA221FD564F00253308 /* CThumbnailGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CThumbnailGenerator.m; sourceTree = "<group>"; };
 		07961B7421B50A4C0081953E /* CleverTapInboxMessageContent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxMessageContent.m; sourceTree = "<group>"; };
 		0796FB6021AE5B2900FC380D /* CTCarouselMessageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTCarouselMessageCell.h; sourceTree = "<group>"; };
 		0796FB6121AE5B2900FC380D /* CTCarouselMessageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCarouselMessageCell.m; sourceTree = "<group>"; };
@@ -527,6 +531,8 @@
 				072F9E4121B14ECC00BC6313 /* CTInboxMessageActionView.m */,
 				07053B7021E653E70085B44A /* UIView+CTToast.h */,
 				07053B7121E653E70085B44A /* UIView+CTToast.m */,
+				07393CA121FD564F00253308 /* CThumbnailGenerator.h */,
+				07393CA221FD564F00253308 /* CThumbnailGenerator.m */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -783,6 +789,7 @@
 				071EB511217F6427008F0FAB /* CTInAppResources.h in Headers */,
 				D01651AE2097B38400660178 /* CTEventBuilder.h in Headers */,
 				072F9E3D21B1368000BC6313 /* CTInboxIconMessageCell.h in Headers */,
+				07393CA321FD564F00253308 /* CThumbnailGenerator.h in Headers */,
 				D01651B62097B81400660178 /* CTKnownProfileFields.h in Headers */,
 				071EB4D7217F6427008F0FAB /* CTCoverViewController.h in Headers */,
 				D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */,
@@ -1054,6 +1061,7 @@
 				071EB506217F6427008F0FAB /* CTInAppFCManager.m in Sources */,
 				D01651B72097B81400660178 /* CTKnownProfileFields.m in Sources */,
 				07B94545219EA34300D4C542 /* CTUserMO+CoreDataProperties.m in Sources */,
+				07393CA421FD564F00253308 /* CThumbnailGenerator.m in Sources */,
 				07B94542219EA34300D4C542 /* CleverTapInboxViewController.m in Sources */,
 				D0C7BBCB207D8837001345EF /* CleverTap.m in Sources */,
 				07B9454E219EA34300D4C542 /* CTUserMO.m in Sources */,
