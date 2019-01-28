@@ -68,21 +68,31 @@
 }
 
 - (BOOL)updateMessages:(NSArray<NSDictionary*> *)messages forContext:(NSManagedObjectContext *)context {
-    NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
-    BOOL haveUpdates = NO;
-    
-    NSArray *sortMessages = [[messages reverseObjectEnumerator] allObjects];
-    NSArray<NSDictionary*> *filterMessages = [[NSOrderedSet orderedSetWithArray:sortMessages] array];
-    NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
-
-    for (NSDictionary *message in filterMessages) {
+    // de-dupe incoming batch
+    NSMutableDictionary *deduped = [NSMutableDictionary new];
+    for (NSDictionary *message in messages) {
         NSString *messageId = message[@"_id"];
         if (!messageId) {
             CleverTapLogStaticDebug(@"CTUserMO dropping message: %@, missing id property", message);
             continue;
         }
-        
-        NSOrderedSet *results = [self.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
+        NSDictionary *existing = deduped[messageId];
+        if (!existing) {
+            deduped[messageId] = message;
+        } else {
+            if ([message[@"date"] longValue] > [existing[@"date"] longValue]) {
+                deduped[messageId] = message;
+            }
+        }
+    }
+    
+    BOOL haveUpdates = NO;
+    NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
+    NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
+
+    for (NSString *key in [deduped allKeys]) {
+        NSDictionary *message = deduped[key];
+        NSOrderedSet *results = [self.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", message[@"_id"]]];
        
         BOOL existing = results && [results count] > 0;
         if (existing) {
