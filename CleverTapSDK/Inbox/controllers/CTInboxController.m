@@ -146,7 +146,6 @@ static NSManagedObjectContext *privateContext;
     if ([toDelete count] > 0) {
         [self _deleteMessages:toDelete];
     }
-    
     return messages;
 }
 
@@ -165,8 +164,8 @@ static NSManagedObjectContext *privateContext;
             [messages addObject:[msg toJSON]];
         }
     }
-    
-    // TODO should unread also sorted by date ???
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
+    [messages sortUsingDescriptors:@[sortDescriptor]];
     
     if ([toDelete count] > 0) {
         [self _deleteMessages:toDelete];
