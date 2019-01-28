@@ -1,7 +1,7 @@
 #import "CTVideoThumbnailGenerator.h"
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
-#import <SDWebImage/SDWebImage.h>
+#import <SDWebImage/SDImageCache.h>
 
 @interface CTVideoThumbnailGenerator ()
 

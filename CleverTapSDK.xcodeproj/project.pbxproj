@@ -221,7 +221,7 @@
 		D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = D0596EF9208A6A9000A80753 /* CTSwizzle.m */; };
 		D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */; };
 		D06F052921E802D400D1B6BD /* CTInboxBaseMessageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D06F052721E802D400D1B6BD /* CTInboxBaseMessageCell.m */; };
-		D079742921FE2F2300773602 /* CTVideoThumbnailGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D079742721FE2F2300773602 /* CTVideoThumbnailGenerator.h */; };
+		D079742921FE2F2300773602 /* CTVideoThumbnailGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D079742721FE2F2300773602 /* CTVideoThumbnailGenerator.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D079742A21FE2F2300773602 /* CTVideoThumbnailGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D079742821FE2F2300773602 /* CTVideoThumbnailGenerator.m */; };
 		D09A5E0321EA33C50032DDDF /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D09A5E0221EA33C50032DDDF /* SDWebImage.framework */; };
 		D0A6626A207EE6F500B403F3 /* CleverTapBuildInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBCD207D8EAE001345EF /* CleverTapBuildInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
