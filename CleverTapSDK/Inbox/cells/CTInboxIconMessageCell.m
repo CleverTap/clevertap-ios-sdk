@@ -100,13 +100,13 @@
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:nil
-                                       options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+                                       options:self.sdWebImageOptions];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
     
     if (content.iconUrl) {
-        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:self.sdWebImageOptions];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
     } else {

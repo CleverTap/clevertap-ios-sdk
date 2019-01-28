@@ -10,6 +10,7 @@ static UIImage *audioPlaceholderImage;
 
 - (instancetype)init {
     if (self = [super init]) {
+        [self _sharedInit];
         [self setup];
     }
     return self;
@@ -17,6 +18,7 @@ static UIImage *audioPlaceholderImage;
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     if (self = [super initWithCoder:aDecoder]) {
+        [self _sharedInit];
         [self setup];
     }
     return self;
@@ -24,9 +26,21 @@ static UIImage *audioPlaceholderImage;
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        [self _sharedInit];
         [self setup];
     }
     return self;
+}
+
+- (void)_sharedInit {
+    self.sdWebImageOptions = (SDWebImageCacheMemoryOnly);
+}
+
+- (void)dealloc {
+    if (self.thumbnailGenerator) {
+        [self.thumbnailGenerator cleanup];
+        self.thumbnailGenerator = nil;
+    }
 }
 
 - (void)awakeFromNib {
@@ -123,35 +137,8 @@ static UIImage *audioPlaceholderImage;
     if (!self.message || !self.message.content || self.message.content.count <= 0) return;
     
     CleverTapInboxMessageContent *content = self.message.content[0];
-    self.hasVideoPoster = content.videoPosterUrl != nil;
     
-    if (!self.hasVideoPoster) {
-        // create a thumbnail
-        SDWebImageManager *manager = [SDWebImageManager sharedManager];
-        [manager loadImageWithURL:[NSURL URLWithString:content.mediaUrl] options:0 progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
-            if (image) {
-                self.cellImageView.hidden = NO;
-                self.cellImageView.image = image;
-            } else {
-                __block UIImage *thumbnail = [self generateThumbnail:content.mediaUrl];
-                if (thumbnail) {
-                    [[SDWebImageManager sharedManager] saveImageToCache:thumbnail forURL:[NSURL URLWithString:content.mediaUrl]];
-                    self.cellImageView.hidden = NO;
-                    self.cellImageView.image = thumbnail;
-                } else {
-                    double bitRate = 1000000;
-                    self.thumbnailGenerator = [[CThumbnailGenerator alloc] initWithPreferredBitRate:bitRate];
-                    int position = 10;
-                    [self.thumbnailGenerator loadImageFrom:[NSURL URLWithString:content.mediaUrl] position:position withCompletionBlock:^(UIImage *image) {
-                        [[SDWebImageManager sharedManager] saveImageToCache:image forURL:[NSURL URLWithString:content.mediaUrl]];
-                        self.cellImageView.hidden = NO;
-                        self.cellImageView.image = image;
-                    }];
-                }
-            }
-        }];
-    }
-    
+    self.hasVideoPoster = NO;
     self.controllersTimeoutPeriod = 2;
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
@@ -159,11 +146,8 @@ static UIImage *audioPlaceholderImage;
     self.cellImageView.hidden = YES;
     self.volume.hidden = NO;
     self.playButton.hidden = NO;
-    if (content.mediaIsVideo) {
-        self.isAVMuted = YES;
-    } else if (content.mediaIsAudio) {
-        self.isAVMuted = NO;
-    }
+    self.isAVMuted = content.mediaIsVideo;
+    
     self.playButton.layer.cornerRadius = 30;
     [self.playButton setSelected:NO];
     [self.playButton setImage:[self getPlayImage] forState:UIControlStateNormal];
@@ -207,13 +191,28 @@ static UIImage *audioPlaceholderImage;
         self.volume.hidden = YES;
     }
     
-    if (self.hasVideoPoster) {
-        self.cellImageView.hidden = NO;
-        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
-                              placeholderImage:nil
-                                       options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+    if (content.mediaIsVideo) {
+        if (content.videoPosterUrl != nil && content.videoPosterUrl.length > 0) {
+            self.hasVideoPoster = YES;
+            self.cellImageView.hidden = NO;
+            [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
+                                  placeholderImage:nil
+                                           options:self.sdWebImageOptions];
+        } else {
+            if (!self.thumbnailGenerator) {
+                self.thumbnailGenerator = [[CTVideoThumbnailGenerator alloc] init];
+            }
+            [self.thumbnailGenerator generateImageFromUrl:content.mediaUrl withCompletionBlock:^(UIImage *image) {
+                dispatch_async(dispatch_get_main_queue(), ^ {
+                    if (image) {
+                        self.hasVideoPoster = YES;
+                        self.cellImageView.hidden = [self isPlaying];
+                        self.cellImageView.image = image;
+                    }
+                });
+            }];
+        }
     }
-    
     [self prepareToPlay];
     [self layoutIfNeeded];
     [self layoutSubviews];
@@ -366,22 +365,6 @@ static UIImage *audioPlaceholderImage;
         [self.controllersTimer invalidate];
     }
 }
-
--(UIImage *)generateThumbnail:(NSString *)mediaUrl {
-    NSURL *url = [NSURL fileURLWithPath:mediaUrl];
-    AVAsset *asset = [AVAsset assetWithURL:url];
-    CMTime duration = [asset duration];
-    CMTime snapshot = CMTimeMake(duration.value / 2, duration.timescale);
-    AVAssetImageGenerator *generator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
-    generator.appliesPreferredTrackTransform = YES;
-    CGImageRef imageRef = [generator copyCGImageAtTime:snapshot
-                                            actualTime:nil
-                                                 error:nil];
-    __block UIImage *thumbnail = [UIImage imageWithCGImage:imageRef];
-    CGImageRelease(imageRef);
-    return thumbnail;
-}
-
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content {
     if (!content || !content.actionHasLinks || !content.links || content.links.count < 0) return;

@@ -8,7 +8,7 @@
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
 #import "CTInAppResources.h"
-#import "CThumbnailGenerator.h"
+#import "CTVideoThumbnailGenerator.h"
 
 @class FLAnimatedImageView;
 
@@ -46,10 +46,12 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (nonatomic, assign) NSInteger controllersTimeoutPeriod;
 @property (nonatomic, assign) BOOL isAVMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
-@property (nonatomic, assign) BOOL hasVideoPoster;
-@property (nonatomic, strong) CThumbnailGenerator *thumbnailGenerator;
+@property (atomic, assign) BOOL hasVideoPoster;
+@property (nonatomic, strong) CTVideoThumbnailGenerator *thumbnailGenerator;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
 @property(nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
+
+@property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
 
 - (IBAction)volumeButtonTapped:(UIButton *)sender;
 

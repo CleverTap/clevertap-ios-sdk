@@ -130,7 +130,7 @@ static float captionHeight = 0.f;
     if (!self.imageUrl) return;
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
                           placeholderImage:[self getPlaceHolderImage]
-                                   options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+                                   options:(SDWebImageCacheMemoryOnly)];
     
 }
 

@@ -100,7 +100,7 @@
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:nil
-                                       options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+                                       options:self.sdWebImageOptions];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
