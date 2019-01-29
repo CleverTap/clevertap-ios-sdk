@@ -57,7 +57,7 @@ static NSString * const kOrientationLandscape = @"l";
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height ;
             itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
-                                                          caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl];
+                     caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -71,13 +71,9 @@ static NSString * const kOrientationLandscape = @"l";
 - (void)setupMessage:(CleverTapInboxMessage *)message {
     self.message = message;
     self.dateLabel.text = message.relativeDate;
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
+    self.readView.hidden = message.isRead;
+    self.readViewWidthContraint.constant = message.isRead ? 0 : 16;
+    
     captionHeight = [CTCarouselImageView captionHeight];
     // assume square image orientation
     CGFloat leftMargin = 0;

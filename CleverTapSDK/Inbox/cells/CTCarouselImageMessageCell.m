@@ -38,13 +38,9 @@
 - (void)setupMessage:(CleverTapInboxMessage *)message {
     self.message = message;
     self.dateLabel.text = message.relativeDate;
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
+    self.readView.hidden = message.isRead;
+    self.readViewWidthContraint.constant = message.isRead ? 0 : 16;
+    
     // assume square image orientation
     CGFloat leftMargin = 0;
     if (@available(iOS 11.0, *)) {
@@ -71,7 +67,6 @@
     [self configureSwipeViewWithHeightAdjustment:[self heightForPageControl]];
     [self populateItemViews];
     [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height -[self heightForPageControl], viewWidth, [self heightForPageControl])];
-    
     [self.swipeView reloadData];
     
 }

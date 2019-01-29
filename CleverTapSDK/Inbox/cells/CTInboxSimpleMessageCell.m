@@ -42,17 +42,9 @@
         self.imageViewPRatioContraint.priority = 750;
         self.imageViewLRatioContraint.priority = 999;
     }
-    if (content.actionHasLinks) {
-        self.actionView.hidden = NO;
-        self.actionViewHeightContraint.constant = 45;
-        self.actionView.delegate = self;
-    } else {
-        self.actionView.hidden = YES;
-        self.actionViewHeightContraint.constant = 0;
-    }
+    [self hideActionView:!content.actionHasLinks];
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;
-    self.actionView.hidden = YES;
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
     self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
@@ -78,25 +70,10 @@
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;
-    
+    self.readView.hidden = message.isRead;
+    self.readViewWidthContraint.constant = message.isRead ? 0 : 16;
     [self setupInboxMessageActions:content];
-    
-     // mark read/unread
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
-    
-    // set content mode for media
-    if (content.mediaIsGif) {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
-    } else {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
-    }
-    
+    self.cellImageView.contentMode = content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
@@ -105,6 +82,12 @@
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
+}
+
+- (void)hideActionView:(BOOL)hide {
+    self.actionView.hidden = hide;
+    self.actionViewHeightContraint.constant = hide ? 0 : 45;
+    self.actionView.delegate = self;
 }
 
 @end
