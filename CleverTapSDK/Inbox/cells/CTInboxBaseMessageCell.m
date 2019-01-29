@@ -41,6 +41,9 @@ static UIImage *audioPlaceholderImage;
         [self.thumbnailGenerator cleanup];
         self.thumbnailGenerator = nil;
     }
+    if (self.avPlayer) {
+        [self.avPlayer.currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
+    }
 }
 
 - (void)awakeFromNib {
@@ -61,6 +64,7 @@ static UIImage *audioPlaceholderImage;
     [super prepareForReuse];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (self.avPlayer) {
+        [self.avPlayer.currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
         [self.avPlayer pause];
         self.avPlayer = nil;
     }
@@ -139,12 +143,14 @@ static UIImage *audioPlaceholderImage;
     CleverTapInboxMessageContent *content = self.message.content[0];
     
     self.hasVideoPoster = NO;
-    self.controllersTimeoutPeriod = 2;
+    self.controllersTimeoutPeriod = 1.0;
     self.avPlayerContainerView.backgroundColor = [UIColor blackColor];
     self.avPlayerContainerView.hidden = NO;
     self.avPlayerControlsView.alpha = 1.0;
+    self.activityIndicator.hidden = NO;
     self.cellImageView.hidden = YES;
-    self.volume.hidden = NO;
+    self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.volume.hidden = YES;
     self.playButton.hidden = NO;
     self.isAVMuted = content.mediaIsVideo;
     
@@ -170,9 +176,11 @@ static UIImage *audioPlaceholderImage;
     
     [self.avPlayerContainerView.layer addSublayer:self.avPlayerLayer];
     
+    [self hideControls:NO];
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(togglePlayControls:)];
     [self.avPlayerControlsView addGestureRecognizer:tapGesture];
     
+    [self.avPlayer.currentItem addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
     
     if (self.isAVMuted) {
@@ -189,6 +197,7 @@ static UIImage *audioPlaceholderImage;
         self.cellImageView.image = [self getAudioPlaceholderImage];
         self.cellImageView.hidden = NO;
         self.volume.hidden = YES;
+        [self.activityIndicator startAnimating];
     }
     
     if (content.mediaIsVideo) {
@@ -280,7 +289,11 @@ static UIImage *audioPlaceholderImage;
 
 - (void)play {
     if (self.avPlayer != nil) {
-        self.cellImageView.hidden = YES;
+        [self.activityIndicator startAnimating];
+        if ([self hasVideo]) {
+            //            [self fadeOutThumbnail];
+            self.cellImageView.hidden = YES;
+        }
         [self.avPlayer play];
         [self.playButton setSelected:YES];
         [self startAVIdleCountdown];
@@ -292,7 +305,7 @@ static UIImage *audioPlaceholderImage;
     [self pause];
     if (self.avPlayer != nil) {
         [self.avPlayer seekToTime:kCMTimeZero];
-         self.cellImageView.hidden = !self.hasVideoPoster;
+        self.cellImageView.hidden = !self.hasVideoPoster;
         [self.playButton setSelected:NO];
         [self stopAVIdleCountdown];
     }
@@ -301,7 +314,6 @@ static UIImage *audioPlaceholderImage;
 - (void)pause {
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
-        self.cellImageView.hidden = !self.hasVideoPoster;
         [self.playButton setSelected:NO];
         [self stopAVIdleCountdown];
     }
@@ -310,16 +322,22 @@ static UIImage *audioPlaceholderImage;
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
     id object = [notification object];
     if (object && [object isKindOfClass:[AVPlayerItem class]]) {
-        AVPlayerItem* item = (AVPlayerItem*)[notification object];
+        AVPlayerItem *item = (AVPlayerItem*)[notification object];
         [item seekToTime:kCMTimeZero];
     }
     [self pause];
+    if (self.hasVideoPoster) {
+        [self.cellImageView setHidden:NO];
+    }
     [self showControls:YES];
 }
 
 - (void)togglePlayControls:(UIGestureRecognizer *)sender {
     if (self.isControlsHidden) {
         [self showControls:YES];
+        if ([self isPlaying]) {
+            [self startAVIdleCountdown];
+        }
     }else {
         [self hideControls:YES];
     }
@@ -328,26 +346,26 @@ static UIImage *audioPlaceholderImage;
 - (void)showControls:(BOOL)animated {
     if (!animated) {
         self.playButton.hidden = NO;
-        self.isControlsHidden = false;
+        self.isControlsHidden = NO;
         return;
     }
     [UIView animateWithDuration:0.3f animations:^{
         self.playButton.hidden = NO;
     } completion:^(BOOL finished) {
-        self.isControlsHidden = false;
+        self.isControlsHidden = NO;
     }];
 }
 
 - (void)hideControls:(BOOL)animated {
     if (!animated) {
         self.playButton.hidden = YES;
-        self.isControlsHidden = true;
+        self.isControlsHidden = YES;
         return;
     }
     [UIView animateWithDuration:0.3f animations:^{
         self.playButton.hidden = YES;
     } completion:^(BOOL finished) {
-        self.isControlsHidden = true;
+        self.isControlsHidden = YES;
     }];
 }
 
@@ -363,6 +381,33 @@ static UIImage *audioPlaceholderImage;
 - (void)stopAVIdleCountdown {
     if (self.controllersTimer) {
         [self.controllersTimer invalidate];
+    }
+}
+
+- (void)fadeOutThumbnail {
+    [UIView animateWithDuration:0.5 delay:0.0 options:UIViewAnimationOptionCurveEaseOut  animations:^{
+        [self.cellImageView setAlpha:0.0];
+    } completion:^(BOOL finished) {
+        if (finished) {
+            [self.cellImageView setHidden:YES];
+            [self.cellImageView setAlpha:1.0];
+        }
+    }];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    
+    if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"]) {
+        if (![self isPlaying]) {
+            [self showControls:YES];
+        }
+        if (!self.activityIndicator.isHidden) {
+            [self.activityIndicator stopAnimating];
+            [self.activityIndicator setHidden:YES];
+        }
+        if (self.volume.isHidden && [self hasVideo]) {
+            self.volume.hidden = NO;
+        }
     }
 }
 

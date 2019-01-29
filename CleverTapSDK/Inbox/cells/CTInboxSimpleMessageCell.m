@@ -28,6 +28,7 @@
     self.cellImageView.hidden = YES;
     self.avPlayerControlsView.alpha = 0.0;
     self.avPlayerContainerView.hidden = YES;
+    self.activityIndicator.hidden = YES;
     if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
         self.imageViewHeightContraint.priority = 999;
         self.imageViewLRatioContraint.priority = 750;

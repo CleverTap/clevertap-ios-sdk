@@ -49,7 +49,9 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (atomic, assign) BOOL hasVideoPoster;
 @property (nonatomic, strong) CTVideoThumbnailGenerator *thumbnailGenerator;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
-@property(nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
+@property (nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
+@property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
+
 
 @property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
 
