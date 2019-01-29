@@ -58,6 +58,7 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 - (IBAction)volumeButtonTapped:(UIButton *)sender;
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message;
+- (void)configureActionView:(BOOL)hide;
 
 - (BOOL)hasAudio;
 - (BOOL)hasVideo;

@@ -7,7 +7,8 @@
 
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) AVPlayerItemVideoOutput *videoOutput;
-@property (nonatomic, copy) void (^onImageReadyBlock)(UIImage *);
+@property (nonatomic, strong) NSString *sourceUrl;
+@property (nonatomic, copy) void (^onImageReadyBlock)(UIImage *, NSString *);
 
 @end
 
@@ -18,6 +19,7 @@
 }
 
 - (void)cleanup {
+    self.sourceUrl = nil;
     if (self.player != nil) {
         [self.player.currentItem removeObserver:self forKeyPath:@"status"];
         [self.player pause];
@@ -31,22 +33,23 @@
     }
 }
 
-- (void)generateImageFromUrl:(NSString *)videoURL withCompletionBlock:(void (^)(UIImage *image))completion {
+- (void)generateImageFromUrl:(NSString *)videoURL withCompletionBlock:(void (^)(UIImage *image, NSString *sourceUrl))completion {
+    self.sourceUrl = videoURL;
     NSURL *url = [NSURL URLWithString:videoURL];
     SDImageCache *cache = [SDImageCache sharedImageCache];
     // ok to load sync as it just in mem
     UIImage *image = [cache imageFromCacheForKey:videoURL];
     if (image) {
         if (completion) {
-           completion(image);
+           completion(image, videoURL);
         }
     } else {
-        void (^onImageReadyBlock)(UIImage *) = ^(UIImage *thumbnail) {
+        void (^onImageReadyBlock)(UIImage *, NSString *sourceUrl) = ^(UIImage *thumbnail, NSString *sourceUrl) {
             if (thumbnail) {
                 [cache storeImage:thumbnail forKey:videoURL toDisk:NO completion:nil];
             }
             if (completion) {
-              completion(thumbnail);
+              completion(thumbnail, sourceUrl);
             }
         };
         if ([videoURL containsString:@"m3u8"]) {
@@ -58,7 +61,7 @@
     return;
 }
 
-- (void)_generateImage:(NSURL *)url withCompletionBlock:(void (^)(UIImage *image))completion {
+- (void)_generateImage:(NSURL *)url withCompletionBlock:(void (^)(UIImage *image, NSString *sourceUrl))completion {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     NSArray *keys = @[@"playable", @"tracks", @"duration"];
     [asset loadValuesAsynchronouslyForKeys:keys completionHandler:^{
@@ -72,12 +75,12 @@
                                                          error:nil];
             UIImage *thumbnail = [UIImage imageWithCGImage:imageRef];
             CGImageRelease(imageRef);
-            completion(thumbnail);
+            completion(thumbnail, self.sourceUrl);
         }
     }];
 }
 
-- (void)_generateImageFromStream:(NSURL *)streamURL withCompletionBlock:(void (^)(UIImage *image))completion {
+- (void)_generateImageFromStream:(NSURL *)streamURL withCompletionBlock:(void (^)(UIImage *image, NSString *sourceUrl))completion {
     [self cleanup];
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:streamURL options:nil];
     NSArray *keys = @[@"playable", @"tracks", @"duration"];
@@ -109,7 +112,7 @@
         CGImageRef videoImage = [temporaryContext createCGImage:ciImage fromRect:CGRectMake(0, 0, CVPixelBufferGetWidth(buffer), CVPixelBufferGetHeight(buffer))];
         UIImage *image = [UIImage imageWithCGImage:videoImage];
         if (self.onImageReadyBlock) {
-            self.onImageReadyBlock(image);
+            self.onImageReadyBlock(image, self.sourceUrl);
         }
     }
     [self cleanup];

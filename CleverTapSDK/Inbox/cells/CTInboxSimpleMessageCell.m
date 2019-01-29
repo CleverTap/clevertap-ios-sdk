@@ -42,7 +42,7 @@
         self.imageViewPRatioContraint.priority = 750;
         self.imageViewLRatioContraint.priority = 999;
     }
-    [self hideActionView:!content.actionHasLinks];
+    [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
@@ -82,12 +82,6 @@
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
-}
-
-- (void)hideActionView:(BOOL)hide {
-    self.actionView.hidden = hide;
-    self.actionViewHeightContraint.constant = hide ? 0 : 45;
-    self.actionView.delegate = self;
 }
 
 @end

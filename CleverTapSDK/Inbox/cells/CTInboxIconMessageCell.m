@@ -40,10 +40,12 @@
         self.imageViewLRatioContraint.priority = 999;
     }
     self.cellImageView.clipsToBounds = YES;
+    self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
+    self.playButton.layer.borderWidth = 2.0;
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
     self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
-    [self hideActionView:!content.actionHasLinks];
+    [self configureActionView:!content.actionHasLinks];
     [self layoutSubviews];
     [self layoutIfNeeded];
 }
@@ -84,11 +86,4 @@
         self.cellIconWidthContraint.priority = 999;
     }
 }
-
-- (void)hideActionView:(BOOL)hide {
-    self.actionView.hidden = hide;
-    self.actionViewHeightContraint.constant = hide ? 0 : 45;
-    self.actionView.delegate = self;
-}
-
 @end

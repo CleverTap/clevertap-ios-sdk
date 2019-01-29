@@ -42,7 +42,7 @@ static UIImage *audioPlaceholderImage;
         self.thumbnailGenerator = nil;
     }
     if (self.avPlayer) {
-        [self.avPlayer.currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
+        [self.avPlayer.currentItem removeObserver:self forKeyPath:@"status"];
     }
 }
 
@@ -64,7 +64,7 @@ static UIImage *audioPlaceholderImage;
     [super prepareForReuse];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (self.avPlayer) {
-        [self.avPlayer.currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
+        [self.avPlayer.currentItem removeObserver:self forKeyPath:@"status"];
         [self.avPlayer pause];
         self.avPlayer = nil;
     }
@@ -94,6 +94,12 @@ static UIImage *audioPlaceholderImage;
 }
 - (void)setupMessage:(CleverTapInboxMessage *)message {
     // no-op in base
+}
+
+- (void)configureActionView:(BOOL)hide {
+    self.actionView.hidden = hide;
+    self.actionViewHeightContraint.constant = hide ? 0 : 45;
+    self.actionView.delegate = hide ? nil : self;
 }
 
 #pragma mark - Player Controls
@@ -180,7 +186,7 @@ static UIImage *audioPlaceholderImage;
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(togglePlayControls:)];
     [self.avPlayerControlsView addGestureRecognizer:tapGesture];
     
-    [self.avPlayer.currentItem addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
+    [self.avPlayer.currentItem addObserver:self forKeyPath:@"status" options:0 context:NULL];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
     
     if (self.isAVMuted) {
@@ -211,9 +217,10 @@ static UIImage *audioPlaceholderImage;
             if (!self.thumbnailGenerator) {
                 self.thumbnailGenerator = [[CTVideoThumbnailGenerator alloc] init];
             }
-            [self.thumbnailGenerator generateImageFromUrl:content.mediaUrl withCompletionBlock:^(UIImage *image) {
+            [self.thumbnailGenerator generateImageFromUrl:content.mediaUrl withCompletionBlock:^(UIImage *image, NSString *sourceUrl) {
                 dispatch_async(dispatch_get_main_queue(), ^ {
-                    if (image) {
+                    CleverTapInboxMessageContent *content = self.message.content[0];
+                    if (image && [sourceUrl isEqualToString:content.mediaUrl]) {
                         self.hasVideoPoster = YES;
                         self.cellImageView.hidden = [self isPlaying];
                         self.cellImageView.image = image;
@@ -222,7 +229,6 @@ static UIImage *audioPlaceholderImage;
             }];
         }
     }
-    [self prepareToPlay];
     [self layoutIfNeeded];
     [self layoutSubviews];
 }
@@ -280,21 +286,14 @@ static UIImage *audioPlaceholderImage;
         [self pause];
     }
 }
-
-- (void)prepareToPlay {
-    if (self.avPlayer == nil) return;
-    [self.avPlayer play];
-    [self.avPlayer pause];
-}
-
 - (void)play {
     if (self.avPlayer != nil) {
         [self.activityIndicator startAnimating];
         if ([self hasVideo]) {
-            //            [self fadeOutThumbnail];
             self.cellImageView.hidden = YES;
         }
         [self.avPlayer play];
+        [self hideControls:NO];
         [self.playButton setSelected:YES];
         [self startAVIdleCountdown];
         [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:self userInfo:nil];
@@ -384,20 +383,8 @@ static UIImage *audioPlaceholderImage;
     }
 }
 
-- (void)fadeOutThumbnail {
-    [UIView animateWithDuration:0.5 delay:0.0 options:UIViewAnimationOptionCurveEaseOut  animations:^{
-        [self.cellImageView setAlpha:0.0];
-    } completion:^(BOOL finished) {
-        if (finished) {
-            [self.cellImageView setHidden:YES];
-            [self.cellImageView setAlpha:1.0];
-        }
-    }];
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    
-    if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"]) {
+    if (self.avPlayer.currentItem.status == AVPlayerStatusReadyToPlay) {
         if (![self isPlaying]) {
             [self showControls:YES];
         }
