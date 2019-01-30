@@ -139,35 +139,52 @@
                                             <constraint firstAttribute="height" priority="750" constant="1" id="SY2-wC-6aE"/>
                                         </constraints>
                                     </view>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QWB-ev-5hD">
-                                        <rect key="frame" x="0.0" y="0.0" width="125" height="44"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QWB-ev-5hD">
+                                        <rect key="frame" x="0.0" y="1" width="179.5" height="44"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 1"/>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IVo-bl-2cG">
-                                        <rect key="frame" x="125" y="1" width="125" height="44"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IVo-bl-2cG">
+                                        <rect key="frame" x="179.5" y="1" width="179" height="44"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" priority="750" id="IjT-vN-1Bl"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 2"/>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EwP-OB-Gva">
-                                        <rect key="frame" x="250" y="1" width="125" height="44"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EwP-OB-Gva">
+                                        <rect key="frame" x="358.5" y="1" width="179.5" height="44"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" priority="750" id="dEO-ty-urf"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 3"/>
                                     </button>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="EwP-OB-Gva" secondAttribute="trailing" id="0dR-G2-6SL"/>
                                     <constraint firstItem="Lm3-g3-uEh" firstAttribute="leading" secondItem="UXU-9m-Gtr" secondAttribute="leading" id="7mZ-YA-dK5"/>
+                                    <constraint firstItem="IVo-bl-2cG" firstAttribute="top" secondItem="Lm3-g3-uEh" secondAttribute="bottom" id="8W0-UK-hsT"/>
+                                    <constraint firstItem="EwP-OB-Gva" firstAttribute="width" secondItem="QWB-ev-5hD" secondAttribute="width" priority="750" id="Ed4-t5-dvx"/>
+                                    <constraint firstAttribute="bottom" secondItem="EwP-OB-Gva" secondAttribute="bottom" id="Fcb-ge-h75"/>
                                     <constraint firstAttribute="trailing" secondItem="Lm3-g3-uEh" secondAttribute="trailing" id="Iw6-cM-0xt"/>
+                                    <constraint firstItem="IVo-bl-2cG" firstAttribute="leading" secondItem="QWB-ev-5hD" secondAttribute="trailing" id="KyP-FM-xrM"/>
+                                    <constraint firstItem="QWB-ev-5hD" firstAttribute="top" secondItem="Lm3-g3-uEh" secondAttribute="bottom" id="LNx-WW-GpD"/>
+                                    <constraint firstItem="QWB-ev-5hD" firstAttribute="leading" secondItem="UXU-9m-Gtr" secondAttribute="leading" id="Mhe-h1-B8d"/>
                                     <constraint firstItem="Lm3-g3-uEh" firstAttribute="top" secondItem="UXU-9m-Gtr" secondAttribute="top" id="id4-Lc-h9n"/>
+                                    <constraint firstItem="EwP-OB-Gva" firstAttribute="leading" secondItem="IVo-bl-2cG" secondAttribute="trailing" id="idm-iJ-cS4"/>
+                                    <constraint firstAttribute="bottom" secondItem="QWB-ev-5hD" secondAttribute="bottom" id="jOh-KK-uEz"/>
+                                    <constraint firstItem="EwP-OB-Gva" firstAttribute="top" secondItem="Lm3-g3-uEh" secondAttribute="bottom" id="oH5-yL-hCo"/>
                                     <constraint firstAttribute="height" constant="45" id="t57-o3-M7W"/>
+                                    <constraint firstAttribute="bottom" secondItem="IVo-bl-2cG" secondAttribute="bottom" id="vrh-38-qnF"/>
+                                    <constraint firstItem="IVo-bl-2cG" firstAttribute="width" secondItem="QWB-ev-5hD" secondAttribute="width" priority="750" id="wUC-yA-8sF"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="firstButton" destination="QWB-ev-5hD" id="BLr-Fh-49V"/>
                                     <outlet property="secondButton" destination="IVo-bl-2cG" id="HzH-ba-aB5"/>
+                                    <outlet property="secondButtonWidthConstraint" destination="IjT-vN-1Bl" id="i6P-7x-qMs"/>
                                     <outlet property="thirdButton" destination="EwP-OB-Gva" id="gKB-UO-Qdl"/>
+                                    <outlet property="thirdButtonWidthConstraint" destination="dEO-ty-urf" id="MnB-mx-kWs"/>
                                 </connections>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yvf-7r-33j">
@@ -238,7 +255,7 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="actionView" destination="UXU-9m-Gtr" id="SPC-jl-v62"/>
-                <outlet property="actionViewHeightContraint" destination="t57-o3-M7W" id="vPJ-Dy-MRa"/>
+                <outlet property="actionViewHeightConstraint" destination="t57-o3-M7W" id="TU0-kp-gP3"/>
                 <outlet property="activityIndicator" destination="KEc-Wl-x3A" id="AUn-jf-qNF"/>
                 <outlet property="avPlayerContainerView" destination="eh2-L8-aSu" id="Wbr-kU-8dh"/>
                 <outlet property="avPlayerControlsView" destination="Gd4-yo-YOB" id="It6-Xe-HZf"/>
@@ -249,13 +266,13 @@
                 <outlet property="cellImageView" destination="rRw-Zn-DXx" id="Tuc-MM-mfE"/>
                 <outlet property="containerView" destination="78G-sO-c1P" id="gaq-X8-8gN"/>
                 <outlet property="dateLabel" destination="ajn-pQ-Rbz" id="XPD-3p-toX"/>
-                <outlet property="imageViewHeightContraint" destination="Xpr-ow-Cck" id="CGl-jS-I6y"/>
-                <outlet property="imageViewLRatioContraint" destination="smy-KK-ytU" id="yEK-30-z1Q"/>
-                <outlet property="imageViewPRatioContraint" destination="16e-dW-iNS" id="8td-va-fTV"/>
+                <outlet property="imageViewHeightConstraint" destination="Xpr-ow-Cck" id="6hB-Wo-eA6"/>
+                <outlet property="imageViewLRatioConstraint" destination="smy-KK-ytU" id="MwZ-e0-mCx"/>
+                <outlet property="imageViewPRatioConstraint" destination="16e-dW-iNS" id="gnv-J2-lIR"/>
                 <outlet property="mediaContainerView" destination="D8z-Zl-tS0" id="q19-d1-wTi"/>
                 <outlet property="playButton" destination="xnF-ZC-VGS" id="4Ic-ak-gIg"/>
                 <outlet property="readView" destination="f8l-cz-7LI" id="RbI-Je-nDa"/>
-                <outlet property="readViewWidthContraint" destination="PUg-9L-MEi" id="eqp-6d-yuJ"/>
+                <outlet property="readViewWidthConstraint" destination="PUg-9L-MEi" id="c0D-he-esm"/>
                 <outlet property="titleLabel" destination="PZ3-PM-IHL" id="9Mq-yz-GdC"/>
                 <outlet property="volume" destination="fSY-jJ-qXq" id="tEV-A7-lp4"/>
             </connections>

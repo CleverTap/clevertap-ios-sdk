@@ -30,17 +30,17 @@
     self.avPlayerContainerView.hidden = YES;
     self.activityIndicator.hidden = YES;
     if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
-        self.imageViewHeightContraint.priority = 999;
-        self.imageViewLRatioContraint.priority = 750;
-        self.imageViewPRatioContraint.priority = 750;
+        self.imageViewHeightConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 750;
     } else if ([message.orientation.uppercaseString isEqualToString:@"P"] || message.orientation == nil ) {
-        self.imageViewPRatioContraint.priority = 999;
-        self.imageViewLRatioContraint.priority = 750;
-        self.imageViewHeightContraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = 750;
+        self.imageViewHeightConstraint.priority = 750;
     } else {
-        self.imageViewHeightContraint.priority = 750;
-        self.imageViewPRatioContraint.priority = 750;
-        self.imageViewLRatioContraint.priority = 999;
+        self.imageViewHeightConstraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 750;
+        self.imageViewLRatioConstraint.priority = 999;
     }
     [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
@@ -71,7 +71,7 @@
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
-    self.readViewWidthContraint.constant = message.isRead ? 0 : 16;
+    self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     [self setupInboxMessageActions:content];
     self.cellImageView.contentMode = content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {

@@ -72,7 +72,7 @@ static NSString * const kOrientationLandscape = @"l";
     self.message = message;
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
-    self.readViewWidthContraint.constant = message.isRead ? 0 : 16;
+    self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     
     captionHeight = [CTCarouselImageView captionHeight];
     // assume square image orientation

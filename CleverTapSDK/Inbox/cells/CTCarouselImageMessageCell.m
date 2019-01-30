@@ -39,7 +39,7 @@
     self.message = message;
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
-    self.readViewWidthContraint.constant = message.isRead ? 0 : 16;
+    self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     
     // assume square image orientation
     CGFloat leftMargin = 0;

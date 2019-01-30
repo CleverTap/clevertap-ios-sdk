@@ -159,35 +159,52 @@
                                             <constraint firstAttribute="height" priority="750" constant="1" id="Ns4-l1-9M6"/>
                                         </constraints>
                                     </view>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wPN-1x-P4p">
-                                        <rect key="frame" x="0.0" y="1" width="125" height="44"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wPN-1x-P4p">
+                                        <rect key="frame" x="0.0" y="1" width="195.5" height="44"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 1"/>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRp-2f-eA5">
-                                        <rect key="frame" x="125" y="0.0" width="125" height="44"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRp-2f-eA5">
+                                        <rect key="frame" x="195.5" y="0.0" width="196" height="45"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" priority="750" id="RFb-uq-ADi"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 2"/>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zkj-Ay-AJC">
-                                        <rect key="frame" x="250" y="1" width="125" height="44"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zkj-Ay-AJC">
+                                        <rect key="frame" x="391.5" y="1" width="195.5" height="44"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" priority="750" id="apg-wv-wA7"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 3"/>
                                     </button>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="YRp-2f-eA5" secondAttribute="bottom" id="0J6-Kx-csy"/>
                                     <constraint firstAttribute="height" constant="45" id="4cU-eN-9Z8"/>
+                                    <constraint firstItem="zkj-Ay-AJC" firstAttribute="top" secondItem="Y0J-Gl-9Ac" secondAttribute="bottom" id="Atc-Mx-lPG"/>
+                                    <constraint firstItem="zkj-Ay-AJC" firstAttribute="leading" secondItem="YRp-2f-eA5" secondAttribute="trailing" id="CNd-Uk-AQ4"/>
+                                    <constraint firstItem="wPN-1x-P4p" firstAttribute="leading" secondItem="ZQU-8D-RQn" secondAttribute="leading" id="E91-Ng-1df"/>
+                                    <constraint firstAttribute="bottom" secondItem="wPN-1x-P4p" secondAttribute="bottom" id="EWx-Fe-wvR"/>
                                     <constraint firstAttribute="trailing" secondItem="Y0J-Gl-9Ac" secondAttribute="trailing" id="LWZ-a6-EJn"/>
+                                    <constraint firstItem="YRp-2f-eA5" firstAttribute="leading" secondItem="wPN-1x-P4p" secondAttribute="trailing" id="MkJ-Y7-ap2"/>
+                                    <constraint firstAttribute="bottom" secondItem="zkj-Ay-AJC" secondAttribute="bottom" id="MvZ-Lu-7oW"/>
                                     <constraint firstItem="Y0J-Gl-9Ac" firstAttribute="top" secondItem="ZQU-8D-RQn" secondAttribute="top" id="Rki-HX-yGC"/>
+                                    <constraint firstItem="YRp-2f-eA5" firstAttribute="top" secondItem="ZQU-8D-RQn" secondAttribute="top" id="aiR-OX-VyW"/>
+                                    <constraint firstItem="wPN-1x-P4p" firstAttribute="top" secondItem="Y0J-Gl-9Ac" secondAttribute="bottom" id="b1O-AT-4Hn"/>
+                                    <constraint firstAttribute="trailing" secondItem="zkj-Ay-AJC" secondAttribute="trailing" id="d7Y-l8-Sal"/>
                                     <constraint firstItem="Y0J-Gl-9Ac" firstAttribute="leading" secondItem="ZQU-8D-RQn" secondAttribute="leading" id="nsh-Up-Kad"/>
+                                    <constraint firstItem="zkj-Ay-AJC" firstAttribute="width" secondItem="wPN-1x-P4p" secondAttribute="width" priority="750" id="oZ1-QF-MGG"/>
+                                    <constraint firstItem="YRp-2f-eA5" firstAttribute="width" secondItem="wPN-1x-P4p" secondAttribute="width" priority="750" id="tom-HE-cYe"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="firstButton" destination="wPN-1x-P4p" id="pHJ-tO-9tc"/>
                                     <outlet property="secondButton" destination="YRp-2f-eA5" id="Lg6-IO-xWs"/>
+                                    <outlet property="secondButtonWidthConstraint" destination="RFb-uq-ADi" id="SXT-mi-xlz"/>
                                     <outlet property="thirdButton" destination="zkj-Ay-AJC" id="64V-hk-ys2"/>
+                                    <outlet property="thirdButtonWidthConstraint" destination="apg-wv-wA7" id="bpq-1J-nkL"/>
                                 </connections>
                             </view>
                         </subviews>
@@ -215,7 +232,7 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="actionView" destination="ZQU-8D-RQn" id="aCc-NE-WHc"/>
-                <outlet property="actionViewHeightContraint" destination="4cU-eN-9Z8" id="Ug2-Qa-ybb"/>
+                <outlet property="actionViewHeightConstraint" destination="4cU-eN-9Z8" id="NAn-Je-lVd"/>
                 <outlet property="activityIndicator" destination="LKG-Tc-qI8" id="yr3-rq-pJd"/>
                 <outlet property="avPlayerContainerView" destination="JOS-ac-Aeb" id="gAw-gG-4EN"/>
                 <outlet property="avPlayerControlsView" destination="Cfa-19-4JU" id="tQT-Sh-s9f"/>
@@ -223,13 +240,13 @@
                 <outlet property="cellImageView" destination="uzp-gk-ozr" id="sIY-wi-NYZ"/>
                 <outlet property="containerView" destination="hcn-aw-C14" id="VLs-qa-2jU"/>
                 <outlet property="dateLabel" destination="u27-73-QQU" id="WXm-3E-K7I"/>
-                <outlet property="imageViewHeightContraint" destination="tFB-AZ-2zm" id="SfE-Lq-yii"/>
-                <outlet property="imageViewLRatioContraint" destination="DLY-3t-oJe" id="CBk-Kg-ADO"/>
-                <outlet property="imageViewPRatioContraint" destination="4Ru-3h-lTe" id="v2g-Vr-n2Z"/>
+                <outlet property="imageViewHeightConstraint" destination="tFB-AZ-2zm" id="qk5-oB-8Jz"/>
+                <outlet property="imageViewLRatioConstraint" destination="DLY-3t-oJe" id="RGg-jz-wH8"/>
+                <outlet property="imageViewPRatioConstraint" destination="4Ru-3h-lTe" id="Ote-Ca-hnr"/>
                 <outlet property="mediaContainerView" destination="HXE-Oo-cxq" id="r3p-6c-lmF"/>
                 <outlet property="playButton" destination="44R-3K-Inn" id="BZ5-LP-6B0"/>
                 <outlet property="readView" destination="HtY-OK-xYn" id="oio-E2-L19"/>
-                <outlet property="readViewWidthContraint" destination="t5K-Eg-oXx" id="6B3-78-a7c"/>
+                <outlet property="readViewWidthConstraint" destination="t5K-Eg-oXx" id="cUv-A4-AMh"/>
                 <outlet property="titleLabel" destination="7E9-kS-pP3" id="Ztn-tj-Jj9"/>
                 <outlet property="volume" destination="lse-xH-n21" id="MAt-vC-tj1"/>
             </connections>
