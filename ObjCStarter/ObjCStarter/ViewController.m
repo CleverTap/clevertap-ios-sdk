@@ -19,7 +19,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     [self loadData];
-    [self initializeInboxMessage];
+    [self initializeAppInbox];
     self.tblEvent.tableFooterView = [UIView new];
 }
 
@@ -36,11 +36,11 @@
                       @"Record User Event with Properties",
                       @"Record User Charged Event",
                       @"Record User event to an Additional instance",
-                      @"Open App Inbox Message", nil];
+                      @"Open App Inbox", nil];
     [self. tblEvent reloadData];
 }
     
-- (void)initializeInboxMessage {
+- (void)initializeAppInbox {
     [[CleverTap sharedInstance] initializeInboxWithCallback:^(BOOL success) {
         int messageCount = (int)[[CleverTap sharedInstance] getInboxMessageCount];
         int unreadCount = (int)[[CleverTap sharedInstance] getInboxMessageUnreadCount];
@@ -90,7 +90,7 @@
             [self recordUserEventforAdditionalInstance];
             break;
         case 6:
-            [self openAppInboxController];
+            [self showAppInbox];
             break;
         default:
             break;
@@ -198,7 +198,7 @@
     [_cleverTapAdditionalInstance recordEvent:@"TestCT1WProps" withProps:@{@"one": @1}];
     [_cleverTapAdditionalInstance profileSetMultiValues:@[@"bag", @"shoes"] forKey:@"myStuff"];
 }
-- (void)openAppInboxController {
+- (void)showAppInbox {
     
     CleverTapInboxStyleConfig *style = [[CleverTapInboxStyleConfig alloc] init];
     CleverTapInboxViewController *inboxController = [[CleverTap sharedInstance] newInboxViewControllerWithConfig:style andDelegate:self];

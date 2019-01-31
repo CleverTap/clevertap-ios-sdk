@@ -31,11 +31,11 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (strong, nonatomic) IBOutlet UIView *avPlayerControlsView;
 @property (strong, nonatomic) IBOutlet UIView *mediaContainerView;
 
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthConstraint;
 
 // video controls
 @property (nonatomic, strong) IBOutlet UIButton *volume;

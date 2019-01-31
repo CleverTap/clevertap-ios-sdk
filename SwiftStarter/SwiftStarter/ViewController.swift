@@ -16,8 +16,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         
         loadData()
-        registerInboxMessage()
-        initializeInboxMessage()
+        registerAppInbox()
+        initializeAppInbox()
         tblEvent.tableFooterView = UIView()
     }
 
@@ -40,11 +40,11 @@ extension ViewController {
         eventList.append("Record User Event with Properties")
         eventList.append("Record User Charged Event")
         eventList.append("Record User event to an Additional instance")
-        eventList.append("Open Application Inbox")
+        eventList.append("Show App Inbox")
         self.tblEvent.reloadData()
     }
     
-    func registerInboxMessage() {
+    func registerAppInbox() {
         CleverTap.sharedInstance()?.registerInboxUpdatedBlock({
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
             let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
@@ -52,7 +52,7 @@ extension ViewController {
         })
     }
     
-    func initializeInboxMessage() {
+    func initializeAppInbox() {
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
             let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
@@ -97,7 +97,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             recordUserEventforAdditionalInstance()
             break;
         case 6:
-            openAppInboxController()
+            showAppInbox()
             break;
         default:
             break;
@@ -204,7 +204,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         cleverTapAdditionalInstance.profileSetMultiValues(["a"], forKey: "letters")
     }
     
-    func openAppInboxController() {
+    func showAppInbox() {
         
         // config the style of App Inbox Controller
         let style = CleverTapInboxStyleConfig.init()

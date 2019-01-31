@@ -98,7 +98,7 @@ static UIImage *audioPlaceholderImage;
 
 - (void)configureActionView:(BOOL)hide {
     self.actionView.hidden = hide;
-    self.actionViewHeightContraint.constant = hide ? 0 : 45;
+    self.actionViewHeightConstraint.constant = hide ? 0 : 45;
     self.actionView.delegate = hide ? nil : self;
 }
 
@@ -405,34 +405,27 @@ static UIImage *audioPlaceholderImage;
     self.actionView.firstButton.hidden = YES;
     self.actionView.secondButton.hidden = YES;
     self.actionView.thirdButton.hidden = YES;
+    self.actionView.secondButtonWidthConstraint.priority = 750;
+    self.actionView.thirdButtonWidthConstraint.priority = 750;
     
     CGFloat leftMargin = 0;
     if (@available(iOS 11.0, *)) {
         UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
         leftMargin = window.safeAreaInsets.left;
     }
-    
-    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
-    
-    if (content.links.count == 1) {
-        self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth, 44);
-        self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         
+    if (content.links.count == 1) {
+        self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
+        self.actionView.secondButtonWidthConstraint.priority = 999;
+        self.actionView.thirdButtonWidthConstraint.priority = 999;
     } else if (content.links.count == 2) {
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[1] withIndex:1];
-        
-        self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth/2, 44);
-        self.actionView.secondButton.frame =  CGRectMake(viewWidth/2, 1, viewWidth/2, 44);
-        
+        self.actionView.thirdButtonWidthConstraint.priority = 999;
     } else if (content.links.count > 2) {
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         self.actionView.secondButton = [self.actionView setupViewForButton:self.actionView.secondButton forText:content.links[1] withIndex:1];
         self.actionView.thirdButton = [self.actionView setupViewForButton:self.actionView.thirdButton forText:content.links[2] withIndex:2];
-        
-        self.actionView.firstButton.frame = CGRectMake(0, 1, viewWidth/3, 44);
-        self.actionView.secondButton.frame =  CGRectMake(viewWidth/3, 1, viewWidth/3, 44);
-        self.actionView.thirdButton.frame = CGRectMake(((viewWidth/3)*2), 1, viewWidth/3, 44);
     }
 }
 
