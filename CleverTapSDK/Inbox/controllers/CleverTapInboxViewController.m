@@ -28,6 +28,9 @@ NSString* const kIconMessage = @"message-icon";
 NSString* const kCarouselMessage = @"carousel";
 NSString* const kCarouselImageMessage = @"carousel-image";
 
+static const float kCellSpacing = 6;
+static const float kSegmentControlSpacing = 3;
+
 @interface CleverTapInboxViewController () <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate>
 
 @property (nonatomic, copy) NSArray<CleverTapInboxMessage *> *messages;
@@ -88,9 +91,9 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     [self loadData];
     [self setupLayout];
     if (_config.backgroundColor) {
-        self.tableView.backgroundColor =  _config.backgroundColor;
+        self.tableView.backgroundColor = _config.backgroundColor;
     } else {
-        self.tableView.backgroundColor =  [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
+        self.tableView.backgroundColor = [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
     }
     
     self.muted = YES;
@@ -143,29 +146,14 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     // set tableview
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 44.0;
-    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 6.0)];
+    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
     self.tableViewVisibleFrame = self.tableView.frame;
-    
-    if (self.filterMessages.count <= 0) {
-        UILabel *removeLabel;
-        while((removeLabel = [self.view viewWithTag:108]) != nil) {
-            [removeLabel removeFromSuperview];
-        }
-        UILabel *lblMessage = [[UILabel alloc] initWithFrame:CGRectMake(0, (CGFloat) [[UIScreen mainScreen] bounds].size.height/2, (CGFloat) [[UIScreen mainScreen] bounds].size.width, 44)];
-        lblMessage.text = @"No message(s) to show";
-        lblMessage.tag = 108;
-        lblMessage.textAlignment = NSTextAlignmentCenter;
-        [self.view addSubview:lblMessage];
-    } else {
-        UILabel *removeLabel;
-        while((removeLabel = [self.view viewWithTag:108]) != nil) {
-            [removeLabel removeFromSuperview];
-        }
-    }
+    [self showNoMessageLabel];
+   
     if (self.tags.count <= 0) {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
                                        initWithTitle:@"✕"
@@ -194,88 +182,64 @@ NSString* const kCarouselImageMessage = @"carousel-image";
 }
 
 - (void)setupSegmentController {
-    
-    // set navigation bar
     self.navigationController.navigationBar.translucent = false;
     [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
     
-    if (_config && _config.navigationBarTintColor) {
-        [self.navigationController.navigationBar setBarTintColor:_config.navigationBarTintColor];
-    } else {
-        [self.navigationController.navigationBar setBarTintColor:[UIColor whiteColor]];
-    }
-    
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems: self.tags];
     [segmentedControl addTarget:self action:@selector(segmentSelected:) forControlEvents:UIControlEventValueChanged];
-    segmentedControl.frame = CGRectMake(0, 0, 300.0f, 0.0f);
     segmentedControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     segmentedControl.selectedSegmentIndex = _selectedSegmentIndex? _selectedSegmentIndex : 0;
     segmentedControl.layer.masksToBounds = YES;
     segmentedControl.clipsToBounds = YES;
-    
-    if (_config && _config.tabBackgroundColor) {
-        segmentedControl.backgroundColor = _config.tabBackgroundColor;
-    }
-    if (_config && _config.tabSelectedBgColor) {
-        segmentedControl.tintColor = _config.tabSelectedBgColor;
-    }
-    if (_config && _config.tabSelectedTextColor) {
-        [[UISegmentedControl appearance] setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
-    }
-    if (_config && _config.tabUnSelectedTextColor) {
-        [[UISegmentedControl appearance] setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabUnSelectedTextColor} forState:UIControlStateNormal];
-    }
-    
-    if (self.tags.count > 1) {
-        self.navigationItem.prompt = @"";
-        self.navigationItem.titleView = segmentedControl;
-    }
+    self.navigationItem.prompt = @"";
+    self.navigationItem.titleView = segmentedControl;
     
     [self.navigationController.view layoutSubviews];
-   
     [self.navigation removeFromSuperview];
-    _navigation = [[UIView alloc] init];
-    [self.navigationController.view addSubview:_navigation];
-    _navigation.translatesAutoresizingMaskIntoConstraints = NO;
+    self.navigation = [[UIView alloc] init];
+    [self.navigationController.view addSubview:self.navigation];
+    self.navigation.translatesAutoresizingMaskIntoConstraints = NO;
     
-    [[NSLayoutConstraint constraintWithItem:_navigation
+    CGFloat navigationBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat segmentControlHeight = self.navigationItem.titleView.frame.size.height + kSegmentControlSpacing;
+    [[NSLayoutConstraint constraintWithItem:self.navigation
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeTop
                                  multiplier:1 constant:0] setActive:YES];
-    [[NSLayoutConstraint constraintWithItem:_navigation
+    [[NSLayoutConstraint constraintWithItem:self.navigation
                                   attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeLeading
                                  multiplier:1 constant:0] setActive:YES];
-    [[NSLayoutConstraint constraintWithItem:_navigation
+    [[NSLayoutConstraint constraintWithItem:self.navigation
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:0] setActive:YES];
-    [[NSLayoutConstraint constraintWithItem:_navigation
+    [[NSLayoutConstraint constraintWithItem:self.navigation
                                   attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
                                      toItem:self.view attribute:NSLayoutAttributeTop
-                                 multiplier:1 constant:-32] setActive:YES];
+                                 multiplier:1 constant:-segmentControlHeight] setActive:YES];
     
     UILabel *lblTitle = [[UILabel alloc] init];
     lblTitle.text = [self getTitle];
     [lblTitle setFont: [UIFont boldSystemFontOfSize:18.0]];
-    [_navigation addSubview:lblTitle];
+    [self.navigation addSubview:lblTitle];
     lblTitle.translatesAutoresizingMaskIntoConstraints = NO;
     
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:44] setActive:YES];
+                                 multiplier:1 constant:navigationBarHeight - segmentControlHeight] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeLeading
+                                     toItem:self.navigation attribute:NSLayoutAttributeLeading
                                  multiplier:1 constant:0] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeTrailing
+                                     toItem:self.navigation attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:0] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:lblTitle
                                   attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeBottom
+                                     toItem:self.navigation attribute:NSLayoutAttributeBottom
                                  multiplier:1 constant:0] setActive:YES];
     lblTitle.textAlignment = NSTextAlignmentCenter;
     
@@ -283,30 +247,45 @@ NSString* const kCarouselImageMessage = @"carousel-image";
     [dismiss setTitle:@"✕" forState:UIControlStateNormal];
     [dismiss setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [dismiss addTarget:self action:@selector(dismissTapped) forControlEvents:UIControlEventTouchUpInside];
-    [_navigation addSubview:dismiss];
+    [self.navigation addSubview:dismiss];
     dismiss.translatesAutoresizingMaskIntoConstraints = NO;
-    
-    if (_config && _config.navigationTintColor) {
-        lblTitle.textColor = _config.navigationTintColor;
-        [dismiss setTitleColor:_config.navigationTintColor forState:UIControlStateNormal];
-    }
     
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:44] setActive:YES];
+                                 multiplier:1 constant:navigationBarHeight - segmentControlHeight] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeTrailing
+                                     toItem:self.navigation attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:0] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
-                                     toItem:_navigation attribute:NSLayoutAttributeBottom
+                                     toItem:self.navigation attribute:NSLayoutAttributeBottom
                                  multiplier:1 constant:0] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:dismiss
                                   attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                  multiplier:1 constant:60] setActive:YES];
+    
+    if (_config && _config.navigationBarTintColor) {
+        self.navigationController.navigationBar.barTintColor = _config.navigationBarTintColor;
+    }
+    if (_config && _config.tabBackgroundColor) {
+        segmentedControl.backgroundColor = _config.tabBackgroundColor;
+    }
+    if (_config && _config.tabSelectedBgColor) {
+        segmentedControl.tintColor = _config.tabSelectedBgColor;
+    }
+    if (_config && _config.tabSelectedTextColor) {
+        [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
+    }
+    if (_config && _config.tabUnSelectedTextColor) {
+        [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabUnSelectedTextColor} forState:UIControlStateNormal];
+    }
+    if (_config && _config.navigationTintColor) {
+        lblTitle.textColor = _config.navigationTintColor;
+        [dismiss setTitleColor:_config.navigationTintColor forState:UIControlStateNormal];
+    }
 }
 
 - (void)segmentSelected:(UISegmentedControl *)sender {
@@ -317,6 +296,15 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         [self filterNotifications: self.tags[sender.selectedSegmentIndex]];
     }
     
+    [self showNoMessageLabel];
+    [self stopPlayIfNeed];
+    [self.tableView reloadData];
+    [self.tableView layoutIfNeeded];
+    [self.tableView setContentOffset:CGPointZero animated:YES];
+    [self playVideoInVisibleCellsIfNeed];
+}
+
+- (void)showNoMessageLabel {
     if (self.filterMessages.count <= 0) {
         UILabel *removeLabel;
         while((removeLabel = [self.view viewWithTag:108]) != nil) {
@@ -332,12 +320,7 @@ NSString* const kCarouselImageMessage = @"carousel-image";
         while((removeLabel = [self.view viewWithTag:108]) != nil) {
             [removeLabel removeFromSuperview];
         }
-    }    
-    [self stopPlayIfNeed];
-    [self.tableView reloadData];
-    [self.tableView layoutIfNeeded];
-    [self.tableView setContentOffset:CGPointZero animated:YES];
-    [self playVideoInVisibleCellsIfNeed];
+    }
 }
 
 - (void)filterNotifications: (NSString *)filter{
