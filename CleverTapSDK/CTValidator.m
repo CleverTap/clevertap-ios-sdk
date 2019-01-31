@@ -235,7 +235,6 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
             [error setErrorCode:513];
             NSString *errStr = [NSString stringWithFormat:@"%@%@", name, @" is a restricted event name. Last event aborted."];
             [error setErrorDesc:errStr];
-            //[[CleverTapAPI sharedInstance] pushValidationResult:error];
             return true;
         }
     return false;
