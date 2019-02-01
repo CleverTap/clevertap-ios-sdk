@@ -105,12 +105,12 @@ static const int kMaxTags = 3;
     
     self.muted = YES;
     
-    UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
+    UIBarButtonItem *closeButton = [[UIBarButtonItem alloc]
                                    initWithTitle:@"✕"
                                    style:UIBarButtonItemStylePlain
                                    target:self
                                    action:@selector(dismissTapped)];
-    self.navigationItem.rightBarButtonItem = backButton;
+    self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;
     
@@ -189,6 +189,7 @@ static const int kMaxTags = 3;
             self.tableView.frame = CGRectMake(0, currentFrame.origin.y, self.view.frame.size.width, currentFrame.size.height);
         }
         [self showListEmptyLabel];
+        [self stopPlayIfNeed];
         [self.tableView reloadData];
         [self playVideoInVisibleCellsIfNeed];
     }];
