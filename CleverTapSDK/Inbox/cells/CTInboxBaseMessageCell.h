@@ -12,10 +12,14 @@
 
 @class FLAnimatedImageView;
 
-typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
-    CTVideoPlayerUnreachableCellTypeNone = 0,
-    CTVideoPlayerUnreachableCellTypeTop = 1,
-    CTVideoPlayerUnreachableCellTypeDown = 2
+typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
+    CTMediaPlayerCellTypeNone,
+    CTMediaPlayerCellTypeTopLandscape,
+    CTMediaPlayerCellTypeTopPortrait,
+    CTMediaPlayerCellTypeMiddleLandscape,
+    CTMediaPlayerCellTypeMiddlePortrait,
+    CTMediaPlayerCellTypeBottomLandscape,
+    CTMediaPlayerCellTypeBottomPortrait
 };
 
 @interface CTInboxBaseMessageCell : UITableViewCell <CTInboxActionViewDelegate>
@@ -49,7 +53,7 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (atomic, assign) BOOL hasVideoPoster;
 @property (nonatomic, strong) CTVideoThumbnailGenerator *thumbnailGenerator;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
-@property (nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
+@property (atomic, assign) CTMediaPlayerCellType mediaPlayerCellType;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 

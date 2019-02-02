@@ -8,6 +8,7 @@
 #import "CTConstants.h"
 #import "CTInAppResources.h"
 #import "CTInAppUtils.h"
+#import "CTInboxUtils.h"
 #import "UIView+CTToast.h"
 
 #import <SDWebImage/UIImageView+WebCache.h>
@@ -23,10 +24,6 @@ NSString* const kCellCarouselMessageIdentifier = @"CTCarouselMessageCell";
 NSString* const kCellCarouselImgMessageIdentifier = @"CTCarouselImageMessageCell";
 NSString* const kCellIconMessageIdentifier = @"CTInboxIconMessageCell";
 
-NSString* const kSimpleMessage = @"simple";
-NSString* const kIconMessage = @"message-icon";
-NSString* const kCarouselMessage = @"carousel";
-NSString* const kCarouselImageMessage = @"carousel-image";
 NSString* const kDefaultTag = @"All";
 
 static const float kCellSpacing = 6;
@@ -49,7 +46,7 @@ static const int kMaxTags = 3;
 @property (nonatomic, weak) id<CleverTapInboxViewControllerDelegate> delegate;
 @property (nonatomic, weak) id<CleverTapInboxViewControllerAnalyticsDelegate> analyticsDelegate;
 
-@property (nonatomic, weak) CTInboxBaseMessageCell *playingVideoCell;
+@property (nonatomic, weak) CTInboxBaseMessageCell *playingCell;
 @property (nonatomic, assign) CGRect tableViewVisibleFrame;
 @property (nonatomic, strong) NSDictionary<NSString *, NSString *> *unreachableCellDictionary;
 
@@ -146,12 +143,23 @@ static const int kMaxTags = 3;
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+        BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+        CGRect screenBounds = [[UIScreen mainScreen] bounds];
+        CGRect currentFrame = self.tableView.frame;
+        if (landscape) {
+            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
+        }
+        self.tableViewVisibleFrame = self.tableView.frame;
+    });
     self.tableViewVisibleFrame = self.tableView.frame;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self playVideoInVisibleCellsIfNeed];
+    [self playVideoInVisibleCells];
 }
 
 - (void)dealloc {
@@ -188,10 +196,11 @@ static const int kMaxTags = 3;
         } else {
             self.tableView.frame = CGRectMake(0, currentFrame.origin.y, self.view.frame.size.width, currentFrame.size.height);
         }
+        self.tableViewVisibleFrame = self.tableView.frame;
         [self showListEmptyLabel];
-        [self stopPlayIfNeed];
+        [self stopPlay];
         [self.tableView reloadData];
-        [self playVideoInVisibleCellsIfNeed];
+        [self playVideoInVisibleCells];
     }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
@@ -276,12 +285,12 @@ static const int kMaxTags = 3;
 
 - (void)_reloadTableView {
     [self showListEmptyLabel];
-    [self stopPlayIfNeed];
+    [self stopPlay];
     [self.tableView setContentOffset:CGPointMake(0, -_topContentOffset) animated:NO];
     [self.tableView reloadData];
     [self.tableView layoutIfNeeded];
     [self.tableView setContentOffset:CGPointMake(0, -_topContentOffset) animated:NO];
-    [self playVideoInVisibleCellsIfNeed];
+    [self playVideoInVisibleCells];
 }
 
 - (void)showListEmptyLabel {
@@ -322,15 +331,26 @@ static const int kMaxTags = 3;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
+    
+    CTInboxMessageType messageType = [CTInboxUtils inboxMessageTypeFromString:message.type];
     NSString *identifier = kCellSimpleMessageIdentifier;
-    if ([message.type isEqualToString:kCarouselMessage]) {
-        identifier = kCellCarouselMessageIdentifier;
-    }
-    else if ([message.type isEqualToString:kCarouselImageMessage]) {
-        identifier = kCellCarouselImgMessageIdentifier;
-    }
-    else if ([message.type isEqualToString:kIconMessage]) {
-        identifier = kCellIconMessageIdentifier;
+    switch (messageType) {
+        case CTInboxMessageTypeSimple:
+            identifier = kCellSimpleMessageIdentifier;
+            break;
+        case CTInboxMessageTypeCarousel:
+            identifier = kCellCarouselMessageIdentifier;
+            break;
+        case CTInboxMessageTypeCarouselImage:
+            identifier = kCellCarouselImgMessageIdentifier;
+            break;
+        case CTInboxMessageTypeMessageIcon:
+           identifier = kCellIconMessageIdentifier;
+            break;
+        default:
+            CleverTapLogStaticDebug(@"unknown Inbox Message Type, defaulting to Simple message");
+            identifier = kCellSimpleMessageIdentifier;
+            break;
     }
     CTInboxBaseMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
     [cell configureForMessage:message];
@@ -391,178 +411,109 @@ static const int kMaxTags = 3;
     }
 }
 
+#pragma mark - Video Player Handling
+
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    [self handleQuickScrollIfNeed];
+    [self handleScroll];
 }
 
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
-                  willDecelerate:(BOOL)decelerate {
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
     if (decelerate == NO) {
-        [self handleScrollStopIfNeed];
+        [self handleScrollStop];
     }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    [self handleScrollStopIfNeed];
+    [self handleScrollStop];
 }
 
-#pragma mark - Video Player Handling
-
-/*
- Video Player Handling
- Inspired in part by https://github.com/newyjp/JPVideoPlayer
- 
- MIT License:
- 
- Copyright (c) 2016 NewPan
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
- */
-
--(void)handleMediaPlayingNotification:(NSNotification*)notification {
+- (void)handleMediaPlayingNotification:(NSNotification*)notification {
     CTInboxBaseMessageCell *cell = (CTInboxBaseMessageCell*)notification.object;
-    if (!self.playingVideoCell) {
-        self.playingVideoCell = cell;
-    }
-    else if (self.playingVideoCell != cell) {
-        [self stopPlayIfNeed];
-        self.playingVideoCell = cell;
+    if (!self.playingCell) {
+        self.playingCell = cell;
+    } else if (self.playingCell != cell) {
+        [self stopPlay];
+        self.playingCell = cell;
     }
 }
 
--(void)handleMediaMutedNotification:(NSNotification*)notification {
+- (void)handleMediaMutedNotification:(NSNotification*)notification {
     self.muted = [notification.userInfo[@"muted"] boolValue];
 }
 
-- (void)handleCellUnreachableTypeInVisibleCellsAfterReloadData {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        UITableView *tableView = self.tableView;
-        for(CTInboxBaseMessageCell *cell in tableView.visibleCells){
-            [self handleCellUnreachableTypeForCell:cell atIndexPath:[tableView indexPathForCell:cell]];
-        }
-    });
-}
-
-- (void)handleCellUnreachableTypeForCell:(CTInboxBaseMessageCell *)cell
-                             atIndexPath:(NSIndexPath *)indexPath {
-    UITableView *tableView = self.tableView;
-    NSArray<UITableViewCell *> *visibleCells = [tableView visibleCells];
-    if(!visibleCells.count){
+- (void)playVideoInVisibleCells {
+    if (self.playingCell) {
+        [self playWithCell:self.playingCell];
         return;
     }
-    
-    NSUInteger unreachableCellCount = [self fetchUnreachableCellCountWithVisibleCellsCount:visibleCells.count];
-    NSInteger sectionsCount = 1;
-    if(tableView.dataSource && [tableView.dataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]){
-        sectionsCount = [tableView.dataSource numberOfSectionsInTableView:tableView];
-    }
-    BOOL isFirstSectionInSections = YES;
-    BOOL isLastSectionInSections = YES;
-    if(sectionsCount > 1){
-        if(indexPath.section != 0){
-            isFirstSectionInSections = NO;
-        }
-        if(indexPath.section != (sectionsCount - 1)){
-            isLastSectionInSections = NO;
-        }
-    }
-    NSUInteger rows = [tableView numberOfRowsInSection:indexPath.section];
-    if (unreachableCellCount > 0) {
-        if (indexPath.row <= (unreachableCellCount - 1)) {
-            if(isFirstSectionInSections){
-                cell.unreachableCellType = CTVideoPlayerUnreachableCellTypeTop;
-            }
-        }
-        else if (indexPath.row >= (rows - unreachableCellCount)){
-            if(isLastSectionInSections){
-                cell.unreachableCellType = CTVideoPlayerUnreachableCellTypeDown;
-            }
-        }
-        else{
-            cell.unreachableCellType = CTVideoPlayerUnreachableCellTypeNone;
-        }
-    }
-    else{
-        cell.unreachableCellType = CTVideoPlayerUnreachableCellTypeNone;
-    }
+    [self playWithCell:[self findTheBestPlayCell]];
 }
 
-- (void)playVideoInVisibleCellsIfNeed {
-    if(self.playingVideoCell){
-        [self playVideoWithCell:self.playingVideoCell];
-        return;
-    }
-    [self handleCellUnreachableTypeInVisibleCellsAfterReloadData];
-    
-    NSArray<CTInboxBaseMessageCell *> *visibleCells = [self.tableView visibleCells];
-    CTInboxBaseMessageCell *targetCell = nil;
-    for (CTInboxBaseMessageCell *cell in visibleCells) {
-        if ([cell hasVideo]) {
-            targetCell = cell;
-            break;
-        }
-    }
-    if (targetCell) {
-        [self playVideoWithCell:targetCell];
-    }
+- (void)stopPlay {
+    [self.playingCell pause];
+    self.playingCell = nil;
 }
 
-- (void)stopPlayIfNeed {
-    [self.playingVideoCell pause];
-    self.playingVideoCell = nil;
-}
-
-- (BOOL)viewIsVisibleInVisibleFrameAtScrollViewDidScroll:(UIView *)view {
-    return [self viewIsVisibleInTableViewVisibleFrame:view];
-}
-
-- (BOOL)playingCellIsVisible {
-    if(CGRectIsEmpty(self.tableViewVisibleFrame)){
+- (BOOL)cellIsVisible:(CTInboxBaseMessageCell *)cell {
+    if (CGRectIsEmpty(self.tableViewVisibleFrame) || !cell) {
         return NO;
     }
-    if(!self.playingVideoCell){
-        return NO;
-    }
-    return [self viewIsVisibleInTableViewVisibleFrame:self.playingVideoCell];
-}
-
-- (BOOL)viewIsVisibleInTableViewVisibleFrame:(UIView *)view {
     CGRect referenceRect = [self.tableView.superview convertRect:self.tableViewVisibleFrame toView:nil];
-    CGPoint viewLeftTopPoint = view.frame.origin;
-    viewLeftTopPoint.y += 1;
-    CGPoint topCoordinatePoint = [view.superview convertPoint:viewLeftTopPoint toView:nil];
+    CGPoint viewTopPoint = cell.frame.origin;
+    
+    CGFloat topOffset = 1;
+    CGFloat bottomOffset = 2;
+    CGFloat cellHeight =  cell.bounds.size.height;
+    CGFloat multiplier = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 1.5 : 1;
+    
+    switch (cell.mediaPlayerCellType) {
+        case CTMediaPlayerCellTypeTopLandscape:
+            topOffset = 30.0 * multiplier;
+            bottomOffset = 100.0 * multiplier;
+            break;
+        case CTMediaPlayerCellTypeTopPortrait:
+            topOffset = 80.0 * multiplier;
+            bottomOffset = 150.0 * multiplier;
+            break;
+        case CTMediaPlayerCellTypeMiddleLandscape:
+            topOffset = 75.0 * multiplier;
+            bottomOffset = 100.0 * multiplier;
+            break;
+        case CTMediaPlayerCellTypeMiddlePortrait:
+            topOffset = 125.0 * multiplier;
+            bottomOffset = 150.0 * multiplier;
+            break;
+        case CTMediaPlayerCellTypeBottomLandscape:
+            topOffset = 100.0 * multiplier;
+            bottomOffset = 50.0 * multiplier;
+            break;
+        case CTMediaPlayerCellTypeBottomPortrait:
+            topOffset = 150.0 * multiplier;
+            bottomOffset = 100.0 * multiplier;
+            break;
+        default:
+            return NO;
+            break;
+    }
+    CGPoint viewLeftTopPoint = viewTopPoint;
+    viewLeftTopPoint.y += topOffset;
+    CGPoint topCoordinatePoint = [cell.superview convertPoint:viewLeftTopPoint toView:nil];
     BOOL isTopContain = CGRectContainsPoint(referenceRect, topCoordinatePoint);
     
-    CGFloat viewBottomY = viewLeftTopPoint.y + view.bounds.size.height;
-    viewBottomY -= 2;
-    CGPoint viewLeftBottomPoint = CGPointMake(viewLeftTopPoint.x, viewBottomY);
-    CGPoint bottomCoordinatePoint = [view.superview convertPoint:viewLeftBottomPoint toView:nil];
+    CGFloat viewBottomY = viewTopPoint.y + cellHeight;
+    viewBottomY -= bottomOffset;
+    CGPoint viewLeftBottomPoint = CGPointMake(viewTopPoint.x, viewBottomY);
+    CGPoint bottomCoordinatePoint = [cell.superview convertPoint:viewLeftBottomPoint toView:nil];
     BOOL isBottomContain = CGRectContainsPoint(referenceRect, bottomCoordinatePoint);
-    if(!isTopContain && !isBottomContain){
+    if(!isTopContain || !isBottomContain){
         return NO;
     }
     return YES;
 }
 
-- (CTInboxBaseMessageCell *)findTheBestPlayVideoCell {
+- (CTInboxBaseMessageCell *)findTheBestPlayCell {
     if(CGRectIsEmpty(self.tableViewVisibleFrame)){
         return nil;
     }
@@ -570,97 +521,48 @@ static const int kMaxTags = 3;
     UITableView *tableView = self.tableView;
     NSArray<CTInboxBaseMessageCell *> *visibleCells = [tableView visibleCells];
     
-    CGFloat gap = MAXFLOAT;
-    CGRect referenceRect = [tableView.superview convertRect:self.tableViewVisibleFrame toView:nil];
-    
     for (CTInboxBaseMessageCell *cell in visibleCells) {
         if (![cell hasVideo]) {
             continue;
         }
-        
-        if (cell.unreachableCellType != CTVideoPlayerUnreachableCellTypeNone) {
-            if (cell.unreachableCellType == CTVideoPlayerUnreachableCellTypeTop) {
-                CGPoint strategyViewLeftUpPoint = cell.frame.origin;
-                strategyViewLeftUpPoint.y += 2;
-                CGPoint coordinatePoint = [cell.superview convertPoint:strategyViewLeftUpPoint toView:nil];
-                if (CGRectContainsPoint(referenceRect, coordinatePoint)){
-                    targetCell = cell;
-                    break;
-                }
-            }
-            else if (cell.unreachableCellType == CTVideoPlayerUnreachableCellTypeDown){
-                CGPoint strategyViewLeftUpPoint = cell.frame.origin;
-                CGFloat strategyViewDownY = strategyViewLeftUpPoint.y + cell.bounds.size.height;
-                CGPoint strategyViewLeftDownPoint = CGPointMake(strategyViewLeftUpPoint.x, strategyViewDownY);
-                strategyViewLeftDownPoint.y -= 1;
-                CGPoint coordinatePoint = [cell.superview convertPoint:strategyViewLeftDownPoint toView:nil];
-                if (CGRectContainsPoint(referenceRect, coordinatePoint)){
-                    targetCell = cell;
-                    break;
-                }
-            }
-        }
-        else{
-            CGPoint coordinateCenterPoint = [cell.superview convertPoint:cell.center toView:nil];
-            CGFloat delta = fabs(coordinateCenterPoint.y - referenceRect.size.height * 0.5 - referenceRect.origin.y);
-            if (delta < gap) {
-                gap = delta;
-                targetCell = cell;
-            }
+        if ([self cellIsVisible:cell]) {
+            targetCell = cell;
+            break;
         }
     }
-    
     return targetCell;
 }
 
-- (NSUInteger)fetchUnreachableCellCountWithVisibleCellsCount:(NSUInteger)visibleCellsCount {
-    if(![self.unreachableCellDictionary.allKeys containsObject:[NSString stringWithFormat:@"%d", (int)visibleCellsCount]]){
-        return 0;
-    }
-    return [[self.unreachableCellDictionary valueForKey:[NSString stringWithFormat:@"%d", (int)visibleCellsCount]] intValue];
-}
-
-- (NSDictionary<NSString *, NSString *> *)unreachableCellDictionary {
-    if(!_unreachableCellDictionary){
-        _unreachableCellDictionary = @{
-                                       @"4" : @"1",
-                                       @"3" : @"1",
-                                       @"2" : @"0"
-                                       };
-    }
-    return _unreachableCellDictionary;
-}
-
-- (void)playVideoWithCell:(CTInboxBaseMessageCell *)cell {
-    if(!cell){
+- (void)playWithCell:(CTInboxBaseMessageCell *)cell {
+    if (!cell) {
         return;
     }
-    self.playingVideoCell = cell;
+    self.playingCell = cell;
     [cell mute:self.muted];
     [cell play];
 }
 
-- (void)handleQuickScrollIfNeed {
-    if (!self.playingVideoCell) {
+- (void)handleScroll {
+    if (!self.playingCell) {
         return;
     }
-    if (![self playingCellIsVisible]) {
-        [self stopPlayIfNeed];
+    if (![self cellIsVisible:self.playingCell]) {
+        [self stopPlay];
     }
 }
 
-- (void)handleScrollStopIfNeed {
-    CTInboxBaseMessageCell *bestCell = [self findTheBestPlayVideoCell];
-    if(!bestCell){
+- (void)handleScrollStop {
+    if (self.playingCell && [self cellIsVisible:self.playingCell]) {
         return;
     }
     
-    if(bestCell == self.playingVideoCell){
+    CTInboxBaseMessageCell *bestCell = [self findTheBestPlayCell];
+    if (!bestCell) {
+        [self stopPlay];
         return;
     }
-    
-    [self.playingVideoCell pause];
-    [self playVideoWithCell:bestCell];
+    [self stopPlay];
+    [self playWithCell:bestCell];
 }
 
 @end

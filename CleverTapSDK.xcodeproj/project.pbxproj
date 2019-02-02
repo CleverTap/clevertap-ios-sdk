@@ -217,9 +217,11 @@
 		D032F3A92093EC9700F98D74 /* CTValidationResult.m in Sources */ = {isa = PBXBuildFile; fileRef = D032F3A72093EC9700F98D74 /* CTValidationResult.m */; };
 		D033FB83208FE51200B4390F /* CTUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = D033FB81208FE51200B4390F /* CTUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D033FB84208FE51200B4390F /* CTUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = D033FB82208FE51200B4390F /* CTUtils.m */; };
+		D0405B4622050C5200D64EC3 /* CTInboxUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = D0405B4422050C5200D64EC3 /* CTInboxUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		D0405B4722050C5200D64EC3 /* CTInboxUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = D0405B4522050C5200D64EC3 /* CTInboxUtils.m */; };
 		D0596EFA208A6A9000A80753 /* CTSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = D0596EF8208A6A9000A80753 /* CTSwizzle.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = D0596EF9208A6A9000A80753 /* CTSwizzle.m */; };
-		D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */; };
+		D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D06F052921E802D400D1B6BD /* CTInboxBaseMessageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D06F052721E802D400D1B6BD /* CTInboxBaseMessageCell.m */; };
 		D079742921FE2F2300773602 /* CTVideoThumbnailGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D079742721FE2F2300773602 /* CTVideoThumbnailGenerator.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D079742A21FE2F2300773602 /* CTVideoThumbnailGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D079742821FE2F2300773602 /* CTVideoThumbnailGenerator.m */; };
@@ -396,6 +398,8 @@
 		D032F3A72093EC9700F98D74 /* CTValidationResult.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidationResult.m; sourceTree = "<group>"; };
 		D033FB81208FE51200B4390F /* CTUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTUtils.h; sourceTree = "<group>"; };
 		D033FB82208FE51200B4390F /* CTUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUtils.m; sourceTree = "<group>"; };
+		D0405B4422050C5200D64EC3 /* CTInboxUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInboxUtils.h; sourceTree = "<group>"; };
+		D0405B4522050C5200D64EC3 /* CTInboxUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInboxUtils.m; sourceTree = "<group>"; };
 		D0596EF8208A6A9000A80753 /* CTSwizzle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSwizzle.h; sourceTree = "<group>"; };
 		D0596EF9208A6A9000A80753 /* CTSwizzle.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSwizzle.m; sourceTree = "<group>"; };
 		D06F052621E802D400D1B6BD /* CTInboxBaseMessageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInboxBaseMessageCell.h; sourceTree = "<group>"; };
@@ -615,6 +619,8 @@
 				07B94536219EA34300D4C542 /* CleverTapInboxMessage.m */,
 				07961B7421B50A4C0081953E /* CleverTapInboxMessageContent.m */,
 				07B94538219EA34300D4C542 /* Inbox.xcdatamodeld */,
+				D0405B4422050C5200D64EC3 /* CTInboxUtils.h */,
+				D0405B4522050C5200D64EC3 /* CTInboxUtils.m */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -798,7 +804,6 @@
 				07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */,
 				071EB515217F6427008F0FAB /* CTInterstitialViewController.h in Headers */,
 				0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */,
-				D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */,
 				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
 				D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */,
 				D079742921FE2F2300773602 /* CTVideoThumbnailGenerator.h in Headers */,
@@ -829,7 +834,9 @@
 				071EB50C217F6427008F0FAB /* CTCoverImageViewController.h in Headers */,
 				D0213D4B207D905800FE5740 /* CleverTapInAppNotificationDelegate.h in Headers */,
 				072F9E4221B14ECC00BC6313 /* CTInboxMessageActionView.h in Headers */,
+				D06F052821E802D400D1B6BD /* CTInboxBaseMessageCell.h in Headers */,
 				07B94548219EA34300D4C542 /* CTUserMO.h in Headers */,
+				D0405B4622050C5200D64EC3 /* CTInboxUtils.h in Headers */,
 				07B94547219EA34300D4C542 /* CTMessageMO.h in Headers */,
 				071EB4FF217F6427008F0FAB /* CTHeaderViewController.h in Headers */,
 				071EB4D6217F6427008F0FAB /* CTInAppFCManager.h in Headers */,
@@ -1028,6 +1035,7 @@
 				071EB4CD217F6427008F0FAB /* CTInAppUtils.m in Sources */,
 				D0CACF9120B8A44C00A02327 /* CTCertificatePinning.m in Sources */,
 				D033FB84208FE51200B4390F /* CTUtils.m in Sources */,
+				D0405B4722050C5200D64EC3 /* CTInboxUtils.m in Sources */,
 				071EB50B217F6427008F0FAB /* CTAVPlayerControlsViewController.m in Sources */,
 				D01651B32097B42C00660178 /* CTValidator.m in Sources */,
 				071EB513217F6427008F0FAB /* CTInAppNotification.m in Sources */,

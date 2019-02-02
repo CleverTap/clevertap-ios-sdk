@@ -1,4 +1,5 @@
 #import "CTInboxBaseMessageCell.h"
+#import "CTInboxUtils.h"
 
 static UIImage *volumeOffImage;
 static UIImage *volumeOnImage;
@@ -53,6 +54,7 @@ static UIImage *audioPlaceholderImage;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
+    self.cellImageView.backgroundColor = [UIColor clearColor];
     if (self.avPlayerContainerView) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.avPlayerLayer.frame = self.avPlayerContainerView.bounds;
@@ -79,11 +81,42 @@ static UIImage *audioPlaceholderImage;
 }
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message {
+    self.message = message;
     if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
         self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
     } else {
         self.containerView.backgroundColor = [UIColor whiteColor];
     }
+    
+    if ([self hasAudio] || [self hasVideo]) {
+        CTInboxMessageType messageType = [CTInboxUtils inboxMessageTypeFromString:message.type];
+        Boolean isPortrait = [message.orientation.uppercaseString isEqualToString:@"P"];
+        switch (messageType) {
+            case CTInboxMessageTypeSimple:
+                self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeTopPortrait : CTMediaPlayerCellTypeTopLandscape;
+                break;
+            case CTInboxMessageTypeCarousel:
+                self.mediaPlayerCellType = CTMediaPlayerCellTypeNone;
+                break;
+            case CTInboxMessageTypeCarouselImage:
+                self.mediaPlayerCellType = CTMediaPlayerCellTypeNone;
+                break;
+            case CTInboxMessageTypeMessageIcon:
+                if (message.content[0].actionHasLinks) {
+                    self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeMiddlePortrait : CTMediaPlayerCellTypeMiddleLandscape;
+                } else {
+                    self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeBottomPortrait : CTMediaPlayerCellTypeBottomLandscape;
+                }
+                break;
+            default:
+                self.mediaPlayerCellType = CTMediaPlayerCellTypeNone;
+                CleverTapLogStaticDebug(@"unknown Inbox Message Type, defaulting to CTMediaPlayerCellTypeNone");
+                break;
+        }
+    } else {
+        self.mediaPlayerCellType = CTMediaPlayerCellTypeNone;
+    }
+    
     [self doLayoutForMessage:message];
     [self setupMessage:message];
     [self layoutIfNeeded];
@@ -286,12 +319,10 @@ static UIImage *audioPlaceholderImage;
         [self pause];
     }
 }
+
 - (void)play {
     if (self.avPlayer != nil) {
         [self.activityIndicator startAnimating];
-        if ([self hasVideo]) {
-            self.cellImageView.hidden = YES;
-        }
         [self.avPlayer play];
         [self hideControls:NO];
         [self.playButton setSelected:YES];
@@ -394,6 +425,14 @@ static UIImage *audioPlaceholderImage;
         }
         if (self.volume.isHidden && [self hasVideo]) {
             self.volume.hidden = NO;
+        }
+        if ([self hasVideo] && !self.cellImageView.isHidden) {
+            [UIView animateWithDuration:0.5f animations:^{
+                self ->_cellImageView.alpha = 0.0;
+            } completion:^(BOOL finished) {
+                self->_cellImageView.hidden = YES;
+                self->_cellImageView.alpha = 1.0;
+            }];
         }
     }
 }

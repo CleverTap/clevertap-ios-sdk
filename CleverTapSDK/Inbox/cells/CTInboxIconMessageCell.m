@@ -51,7 +51,6 @@
 }
 
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-    self.message = message;
      if (!message.content || message.content.count < 0) {
          self.titleLabel.text = nil;
          self.bodyLabel.text = nil;

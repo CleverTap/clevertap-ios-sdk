@@ -53,7 +53,6 @@
 }
 
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-    self.message = message;
     if (!message.content || message.content.count < 0) {
         self.cellImageView.image = nil;
         self.cellImageView.animatedImage = nil;

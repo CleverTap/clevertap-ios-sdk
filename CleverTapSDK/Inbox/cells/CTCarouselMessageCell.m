@@ -69,7 +69,6 @@ static NSString * const kOrientationLandscape = @"l";
     }
 }
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-    self.message = message;
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
