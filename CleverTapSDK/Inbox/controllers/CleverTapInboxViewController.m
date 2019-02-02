@@ -261,11 +261,11 @@ static const int kMaxTags = 3;
     [[NSLayoutConstraint constraintWithItem:segmentedControl
                                   attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
                                      toItem:self.segmentedControlContainer attribute:NSLayoutAttributeLeading
-                                 multiplier:1 constant:5] setActive:YES];
+                                 multiplier:1 constant:25] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:segmentedControl
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:self.segmentedControlContainer attribute:NSLayoutAttributeTrailing
-                                 multiplier:1 constant:-5] setActive:YES];
+                                 multiplier:1 constant:-25] setActive:YES];
     [[NSLayoutConstraint constraintWithItem:segmentedControl
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute

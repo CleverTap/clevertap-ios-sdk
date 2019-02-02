@@ -39,17 +39,10 @@
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
-    
-    // assume square image orientation
-    CGFloat leftMargin = 0;
-    if (@available(iOS 11.0, *)) {
-        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
-        leftMargin = window.safeAreaInsets.left;
-    }
-    
-    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
+    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+    BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+    CGFloat viewWidth = landscape ? self.frame.size.width : (CGFloat) [[UIScreen mainScreen] bounds].size.width;
     CGFloat viewHeight = viewWidth + [self heightForPageControl];
-    
     if ([self orientationIsLandscape]) {
         viewHeight = (viewWidth*[self getLandscapeMultiplier]) + [self heightForPageControl];
     }
