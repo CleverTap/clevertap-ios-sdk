@@ -7,6 +7,7 @@
 #import "CTInboxMessageActionView.h"
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
+#import "CTInboxUtils.h"
 #import "CTInAppResources.h"
 #import "CTVideoThumbnailGenerator.h"
 
@@ -42,7 +43,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthConstraint;
 
 // video controls
-@property (nonatomic, strong) IBOutlet UIButton *volume;
+@property (nonatomic, strong) UIButton *volumeButton;
 @property (nonatomic, strong) IBOutlet UIButton *playButton;
 @property (nonatomic, strong, readwrite) AVPlayer *avPlayer;
 @property (nonatomic, strong) AVPlayerLayer *avPlayerLayer;
@@ -54,12 +55,13 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @property (nonatomic, strong) CTVideoThumbnailGenerator *thumbnailGenerator;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
 @property (atomic, assign) CTMediaPlayerCellType mediaPlayerCellType;
+@property (atomic, assign) CTInboxMessageType messageType;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 
 @property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
 
-- (IBAction)volumeButtonTapped:(UIButton *)sender;
+- (void)volumeButtonTapped:(UIButton *)sender;
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message;
 - (void)configureActionView:(BOOL)hide;
@@ -70,6 +72,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 - (void)pause;
 - (void)play;
 - (void)mute:(BOOL)mute;
+- (CGRect)videoRect;
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content;
 - (void)handleInboxNotificationAtIndex:(int)index;

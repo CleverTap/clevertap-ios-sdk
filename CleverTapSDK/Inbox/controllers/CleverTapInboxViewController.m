@@ -151,10 +151,12 @@ static const int kMaxTags = 3;
         CGRect currentFrame = self.tableView.frame;
         if (landscape) {
             self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
+            [self calculateTableViewVisibleFrame];
+            [self.tableView reloadData];
+            [self playVideoInVisibleCells];
         }
-        self.tableViewVisibleFrame = self.tableView.frame;
     });
-    self.tableViewVisibleFrame = self.tableView.frame;
+   [self calculateTableViewVisibleFrame];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -183,6 +185,7 @@ static const int kMaxTags = 3;
         [self setupSegmentedControl];
     }
     [self showListEmptyLabel];
+    [self calculateTableViewVisibleFrame];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -196,13 +199,25 @@ static const int kMaxTags = 3;
         } else {
             self.tableView.frame = CGRectMake(0, currentFrame.origin.y, self.view.frame.size.width, currentFrame.size.height);
         }
-        self.tableViewVisibleFrame = self.tableView.frame;
+       
+        [self calculateTableViewVisibleFrame];
         [self showListEmptyLabel];
         [self stopPlay];
         [self.tableView reloadData];
         [self playVideoInVisibleCells];
     }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
+- (void)calculateTableViewVisibleFrame {
+    CGRect frame = self.tableView.frame;
+    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+    BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+    if (landscape) {
+        frame.origin.y += self.topContentOffset;
+        frame.size.height -= self.topContentOffset;
+    }
+    self.tableViewVisibleFrame = frame;
 }
 
 - (void)setupSegmentedControl {
@@ -441,6 +456,12 @@ static const int kMaxTags = 3;
 
 - (void)handleMediaMutedNotification:(NSNotification*)notification {
     self.muted = [notification.userInfo[@"muted"] boolValue];
+    NSArray<CTInboxBaseMessageCell *> *visibleCells = [self.tableView visibleCells];
+    for (CTInboxBaseMessageCell *cell in visibleCells) {
+        if ([cell hasVideo]) {
+            [cell mute:self.muted];
+        }
+    }
 }
 
 - (void)playVideoInVisibleCells {
@@ -456,13 +477,20 @@ static const int kMaxTags = 3;
     self.playingCell = nil;
 }
 
-- (BOOL)cellIsVisible:(CTInboxBaseMessageCell *)cell {
+- (BOOL)cellMediaIsVisible:(CTInboxBaseMessageCell *)cell {
     if (CGRectIsEmpty(self.tableViewVisibleFrame) || !cell) {
         return NO;
     }
     CGRect referenceRect = [self.tableView.superview convertRect:self.tableViewVisibleFrame toView:nil];
+    // use fallback for MessageIcon
+    CGRect localMediaRect = (cell.messageType == CTInboxMessageTypeMessageIcon) ? CGRectZero : [cell videoRect];
+    // video
+    if (!CGRectIsEmpty(localMediaRect)) {
+        CGRect referenceMediaRect = [cell convertRect:localMediaRect toView:nil];
+        return CGRectContainsRect(referenceRect, referenceMediaRect);
+    }
+    // audio/fallback test
     CGPoint viewTopPoint = cell.frame.origin;
-    
     CGFloat topOffset = 1;
     CGFloat bottomOffset = 2;
     CGFloat cellHeight =  cell.bounds.size.height;
@@ -525,7 +553,7 @@ static const int kMaxTags = 3;
         if (![cell hasVideo]) {
             continue;
         }
-        if ([self cellIsVisible:cell]) {
+        if ([self cellMediaIsVisible:cell]) {
             targetCell = cell;
             break;
         }
@@ -546,13 +574,13 @@ static const int kMaxTags = 3;
     if (!self.playingCell) {
         return;
     }
-    if (![self cellIsVisible:self.playingCell]) {
+    if (![self cellMediaIsVisible:self.playingCell]) {
         [self stopPlay];
     }
 }
 
 - (void)handleScrollStop {
-    if (self.playingCell && [self cellIsVisible:self.playingCell]) {
+    if (self.playingCell && [self cellMediaIsVisible:self.playingCell]) {
         return;
     }
     

@@ -89,21 +89,9 @@
                                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </state>
                                             </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fSY-jJ-qXq">
-                                                <rect key="frame" x="20" y="252.5" width="30" height="30"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="30" id="QXP-Xi-jFX"/>
-                                                    <constraint firstAttribute="width" constant="30" id="sgb-0p-uNB"/>
-                                                </constraints>
-                                                <connections>
-                                                    <action selector="volumeButtonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="QDG-No-fx1"/>
-                                                </connections>
-                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
-                                            <constraint firstItem="fSY-jJ-qXq" firstAttribute="leading" secondItem="Gd4-yo-YOB" secondAttribute="leading" constant="20" id="5j4-0A-TLv"/>
-                                            <constraint firstAttribute="bottom" secondItem="fSY-jJ-qXq" secondAttribute="bottom" constant="20" id="X1W-FI-UDL"/>
                                             <constraint firstItem="xnF-ZC-VGS" firstAttribute="centerY" secondItem="Gd4-yo-YOB" secondAttribute="centerY" id="p8P-c2-YGA"/>
                                             <constraint firstItem="xnF-ZC-VGS" firstAttribute="centerX" secondItem="Gd4-yo-YOB" secondAttribute="centerX" id="r6a-1r-ZCa"/>
                                         </constraints>
@@ -274,7 +262,6 @@
                 <outlet property="readView" destination="f8l-cz-7LI" id="RbI-Je-nDa"/>
                 <outlet property="readViewWidthConstraint" destination="PUg-9L-MEi" id="c0D-he-esm"/>
                 <outlet property="titleLabel" destination="PZ3-PM-IHL" id="9Mq-yz-GdC"/>
-                <outlet property="volume" destination="fSY-jJ-qXq" id="tEV-A7-lp4"/>
             </connections>
             <point key="canvasLocation" x="233.59999999999999" y="388.15592203898052"/>
         </tableViewCell>

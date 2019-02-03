@@ -19,7 +19,6 @@
 }
 
 - (void)cleanup {
-    self.sourceUrl = nil;
     if (self.player != nil) {
         [self.player.currentItem removeObserver:self forKeyPath:@"status"];
         [self.player pause];
