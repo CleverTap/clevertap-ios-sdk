@@ -74,6 +74,10 @@ static UIImage *videoPlaceholderImage;
         [self.avPlayer pause];
         self.avPlayer = nil;
     }
+    if (self.avPlayerLayer) {
+        [self.avPlayerLayer removeObserver:self forKeyPath:@"readyForDisplay"];
+        self.avPlayerLayer = nil;
+    }
 }
 
 - (void)setup {
