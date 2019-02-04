@@ -1,6 +1,5 @@
 #import "CTCarouselMessageCell.h"
-#import "CTInAppResources.h"
-#import "CTConstants.h"
+#import "CTCarouselImageView.h"
 
 @implementation CTCarouselMessageCell
 

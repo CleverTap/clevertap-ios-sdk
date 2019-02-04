@@ -18,6 +18,7 @@
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     self.cellImageView.animatedImage = nil;
+    self.cellImageView.image = nil;
 }
 
 - (void)doLayoutForMessage:(CleverTapInboxMessage *)message {

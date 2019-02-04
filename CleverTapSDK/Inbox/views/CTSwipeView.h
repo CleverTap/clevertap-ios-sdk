@@ -48,19 +48,19 @@
 #import <UIKit/UIKit.h>
 
 
-typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
+typedef NS_ENUM(NSUInteger, CTSwipeViewAlignment)
 {
-    SwipeViewAlignmentEdge = 0,
-    SwipeViewAlignmentCenter
+    CTSwipeViewAlignmentEdge = 0,
+    CTSwipeViewAlignmentCenter
 };
 
 
-@protocol SwipeViewDataSource, SwipeViewDelegate;
+@protocol CTSwipeViewDataSource, CTSwipeViewDelegate;
 
 @interface CTSwipeView : UIView
 
-@property (nonatomic, weak_delegate) IBOutlet id<SwipeViewDataSource> dataSource;
-@property (nonatomic, weak_delegate) IBOutlet id<SwipeViewDelegate> delegate;
+@property (nonatomic, weak_delegate) IBOutlet id<CTSwipeViewDataSource> dataSource;
+@property (nonatomic, weak_delegate) IBOutlet id<CTSwipeViewDelegate> delegate;
 @property (nonatomic, readonly) NSInteger numberOfItems;
 @property (nonatomic, readonly) NSInteger numberOfPages;
 @property (nonatomic, readonly) CGSize itemSize;
@@ -71,7 +71,7 @@ typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
 @property (nonatomic, strong, readonly) UIView *currentItemView;
 @property (nonatomic, assign) NSInteger currentItemIndex;
 @property (nonatomic, assign) NSInteger currentPage;
-@property (nonatomic, assign) SwipeViewAlignment alignment;
+@property (nonatomic, assign) CTSwipeViewAlignment alignment;
 @property (nonatomic, assign) CGFloat scrollOffset;
 @property (nonatomic, assign, getter = isPagingEnabled) BOOL pagingEnabled;
 @property (nonatomic, assign, getter = isScrollEnabled) BOOL scrollEnabled;
@@ -100,7 +100,7 @@ typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
 @end
 
 
-@protocol SwipeViewDataSource <NSObject>
+@protocol CTSwipeViewDataSource <NSObject>
 
 - (NSInteger)numberOfItemsInSwipeView:(CTSwipeView *)swipeView;
 - (UIView *)swipeView:(CTSwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view;
@@ -108,7 +108,7 @@ typedef NS_ENUM(NSUInteger, SwipeViewAlignment)
 @end
 
 
-@protocol SwipeViewDelegate <NSObject>
+@protocol CTSwipeViewDelegate <NSObject>
 @optional
 
 - (CGSize)swipeViewItemSize:(CTSwipeView *)swipeView;

@@ -1,7 +1,4 @@
 #import "CTInboxIconMessageCell.h"
-#import <SDWebImage/UIImageView+WebCache.h>
-#import "CTConstants.h"
-#import "CTInAppUtils.h"
 
 @implementation CTInboxIconMessageCell
 
@@ -16,7 +13,7 @@
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     [self.cellIcon sd_cancelCurrentAnimationImagesLoad];
-    self.cellImageView.image = nil;
+    self.cellImageView.animatedImage = nil;
     self.cellIcon.image = nil;
 }
 

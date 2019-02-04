@@ -2,7 +2,7 @@
 
 @protocol CTInboxActionViewDelegate <NSObject>
 @required
-- (void)handleInboxNotificationAtIndex:(int)index;
+- (void)handleInboxNotificationTappedAtIndex:(int)index;
 @end
 
 NS_ASSUME_NONNULL_BEGIN

@@ -79,8 +79,6 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 - (CGRect)videoRect;
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content;
-- (void)handleInboxNotificationAtIndex:(int)index;
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender;
-
 
 @end

@@ -1,10 +1,9 @@
 #import "CTInboxBaseMessageCell.h"
 #import "CTSwipeView.h"
-#import "CTCarouselImageView.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@class CTCarouselImageView;
 
-@interface CTCarouselMessageCell : CTInboxBaseMessageCell<SwipeViewDataSource, SwipeViewDelegate>{
+@interface CTCarouselMessageCell : CTInboxBaseMessageCell<CTSwipeViewDataSource, CTSwipeViewDelegate>{
     CGFloat captionHeight;
 }
 
@@ -22,5 +21,3 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender;
 
 @end
-
-NS_ASSUME_NONNULL_END

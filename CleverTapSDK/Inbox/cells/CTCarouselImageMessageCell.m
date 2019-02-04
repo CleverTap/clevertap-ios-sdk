@@ -1,5 +1,5 @@
 #import "CTCarouselImageMessageCell.h"
-
+#import "CTCarouselImageView.h"
 
 @implementation CTCarouselImageMessageCell
 

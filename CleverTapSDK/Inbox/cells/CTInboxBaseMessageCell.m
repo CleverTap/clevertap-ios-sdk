@@ -1,5 +1,4 @@
 #import "CTInboxBaseMessageCell.h"
-#import "CTInboxUtils.h"
 
 static UIImage *volumeOffImage;
 static UIImage *volumeOnImage;
@@ -163,11 +162,11 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)orientationIsPortrait {
-     return [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString];
+     return (!self.message.orientation || [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString]);
 }
 
 - (BOOL)mediaIsEmpty {
-    CleverTapInboxMessageContent *content = self.message.content[0];
+    CleverTapInboxMessageContent *content = [self.message.content firstObject];
     return (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]);
 }
 
@@ -527,7 +526,7 @@ static NSString * const kOrientationPortrait = @"p";
 
 #pragma mark CTInboxActionViewDelegate
 
-- (void)handleInboxNotificationAtIndex:(int)index {
+- (void)handleInboxNotificationTappedAtIndex:(int)index {
     int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];

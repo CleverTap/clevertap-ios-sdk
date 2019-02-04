@@ -1,7 +1,6 @@
 #import "CTInboxBaseMessageCell.h"
-#import "CTInboxMessageActionView.h"
 
-@interface CTInboxIconMessageCell : CTInboxBaseMessageCell <CTInboxActionViewDelegate>
+@interface CTInboxIconMessageCell : CTInboxBaseMessageCell
 
 @property (strong, nonatomic) IBOutlet UIImageView *cellIcon;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *cellIconWidthContraint;
