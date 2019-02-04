@@ -17,7 +17,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (CGFloat)heightForPageControl;
 - (float)getLandscapeMultiplier;
-- (BOOL)orientationIsLandscape;
 - (void)configurePageControlWithRect:(CGRect)rect;
 - (void)configureSwipeViewWithHeightAdjustment:(CGFloat)adjustment;
 - (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender;

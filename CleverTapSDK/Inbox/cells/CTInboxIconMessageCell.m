@@ -26,11 +26,11 @@
     self.avPlayerContainerView.hidden = YES;
     self.activityIndicator.hidden = YES;
     CleverTapInboxMessageContent *content = message.content[0];
-    if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
+    if ([self mediaIsEmpty]) {
         self.imageViewHeightConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewPRatioConstraint.priority = 750;
-    } else if ([message.orientation.uppercaseString isEqualToString:@"P"] || message.orientation == nil ) {
+    } else if ([self orientationIsPortrait]) {
         self.imageViewPRatioConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewHeightConstraint.priority = 750;
@@ -40,6 +40,8 @@
         self.imageViewLRatioConstraint.priority = 999;
     }
     self.cellImageView.clipsToBounds = YES;
+    self.cellIcon.clipsToBounds = YES;
+    self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
@@ -70,14 +72,15 @@
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:[self getPlaceHolderImage]
+                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                        options:self.sdWebImageOptions];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
     
     if (content.iconUrl) {
-        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:self.sdWebImageOptions];
+        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
+                         placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
     } else {

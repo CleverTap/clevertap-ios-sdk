@@ -29,7 +29,7 @@
     self.avPlayerControlsView.alpha = 0.0;
     self.avPlayerContainerView.hidden = YES;
     self.activityIndicator.hidden = YES;
-    if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
+    if ([self mediaIsEmpty]) {
         self.imageViewHeightConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewPRatioConstraint.priority = 750;
@@ -76,8 +76,7 @@
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:[self getPlaceHolderImage]
-                                       options:self.sdWebImageOptions];
+                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }

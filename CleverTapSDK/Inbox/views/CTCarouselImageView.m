@@ -20,6 +20,7 @@ static float captionHeight = 0.f;
 @property (nonatomic, strong) NSString *captionColor;
 @property (nonatomic, strong) NSString *subcaptionColor;
 @property (nonatomic, strong) NSString *imageUrl;
+@property (nonatomic, assign) BOOL orientationPortrait;
 
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *captionLabel;
@@ -42,7 +43,8 @@ static float captionHeight = 0.f;
                           captionColor:(NSString * _Nullable)captionColor
                        subcaptionColor:(NSString * _Nullable)subcaptionColor
                               imageUrl:(NSString * _Nonnull)imageUrl
-                             actionUrl:(NSString * _Nullable)actionUrl {
+                             actionUrl:(NSString * _Nullable)actionUrl
+                   orientationPortrait:(BOOL)orientationPortrait{
     
     self = [super initWithFrame:frame];
     if (self) {
@@ -52,6 +54,7 @@ static float captionHeight = 0.f;
         self.captionColor = captionColor;
         self.subcaptionColor = subcaptionColor;
         self.actionUrl = actionUrl;
+        self.orientationPortrait = orientationPortrait;
         [self setup];
     }
     return self;
@@ -59,12 +62,14 @@ static float captionHeight = 0.f;
 
 - (instancetype _Nonnull)initWithFrame:(CGRect)frame
                               imageUrl:(NSString * _Nonnull)imageUrl
-                             actionUrl:(NSString * _Nullable)actionUrl {
+                             actionUrl:(NSString * _Nullable)actionUrl
+                   orientationPortrait:(BOOL)orientationPortrait{
     
     self = [super initWithFrame:frame];
     if (self) {
         self.imageUrl = imageUrl;
         self.actionUrl = actionUrl;
+        self.orientationPortrait = orientationPortrait;
         [self setupImageOnly];
     }
     return self;
@@ -121,16 +126,21 @@ static float captionHeight = 0.f;
     [self addSubview:self.subcaptionLabel];
 }
 
-- (UIImage *)getPlaceHolderImage {
-    NSString *imagePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"placeholder" ofType:@"png"];
-    return [UIImage imageWithContentsOfFile:imagePath];
+- (UIImage *)getLandscapePlaceHolderImage {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+}
+
+- (UIImage *)getPortraitPlaceHolderImage {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
 }
 
 - (void)loadImage {
     if (!self.imageUrl) return;
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
-                          placeholderImage:[self getPlaceHolderImage]
-                                   options:(SDWebImageCacheMemoryOnly)];
+                      placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                               options:(SDWebImageCacheMemoryOnly)];
     
 }
 

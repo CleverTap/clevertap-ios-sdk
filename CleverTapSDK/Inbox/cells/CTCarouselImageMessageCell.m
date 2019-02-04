@@ -23,7 +23,8 @@
             frame.size.height =  frame.size.height - [self heightForPageControl];
             frame.size.width = frame.size.width;
             itemView = [[CTCarouselImageView alloc] initWithFrame:frame
-                                                         imageUrl:imageUrl actionUrl:actionUrl];
+                                                         imageUrl:imageUrl actionUrl:actionUrl
+                                              orientationPortrait: [self orientationIsPortrait]];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -43,7 +44,7 @@
     BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
     CGFloat viewWidth = landscape ? self.frame.size.width : (CGFloat) [[UIScreen mainScreen] bounds].size.width;
     CGFloat viewHeight = viewWidth + [self heightForPageControl];
-    if ([self orientationIsLandscape]) {
+    if (![self orientationIsPortrait]) {
         viewHeight = (viewWidth*[self getLandscapeMultiplier]) + [self heightForPageControl];
     }
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);

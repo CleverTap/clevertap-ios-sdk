@@ -6,7 +6,6 @@
 
 static const float kLandscapeMultiplier = 0.5625; // 16:9 in landscape
 static const float kPageControlViewHeight = 30.f;
-static NSString * const kOrientationLandscape = @"l";
 
 - (void)awakeFromNib {
     [super awakeFromNib];
@@ -25,14 +24,9 @@ static NSString * const kOrientationLandscape = @"l";
     return kLandscapeMultiplier;
 }
 
-- (BOOL)orientationIsLandscape {
-    return [self.message.orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString];
-}
-
 - (CGFloat)calculateHeight:(CGFloat)viewWidth {
     CGFloat viewHeight = viewWidth + captionHeight;
-    NSString *orientation = self.message.orientation;
-    if ([orientation.uppercaseString isEqualToString:kOrientationLandscape.uppercaseString]) {
+    if (![self orientationIsPortrait]) {
         viewHeight = (viewWidth*kLandscapeMultiplier) + captionHeight;
     }
     return viewHeight;
@@ -57,7 +51,7 @@ static NSString * const kOrientationLandscape = @"l";
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height ;
             itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
-                     caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl];
+                     caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait]];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];

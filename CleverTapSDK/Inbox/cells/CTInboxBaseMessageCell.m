@@ -7,7 +7,9 @@ static UIImage *playImage;
 static UIImage *pauseImage;
 static UIImage *audioPlaceholderImage;
 static UIImage *videoPlaceholderImage;
-static UIImage *placeholderImage;
+static UIImage *portraitPlaceholderImage;
+static UIImage *landscapePlaceholderImage;
+static NSString * const kOrientationPortrait = @"p";
 
 @implementation CTInboxBaseMessageCell
 
@@ -144,12 +146,29 @@ static UIImage *placeholderImage;
     self.actionView.delegate = hide ? nil : self;
 }
 
-- (UIImage *)getPlaceHolderImage {
-    if (placeholderImage == nil) {
+- (UIImage *)getPortraitPlaceHolderImage {
+    if (portraitPlaceholderImage == nil) {
         NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        placeholderImage = [UIImage imageNamed:@"placeholder.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        portraitPlaceholderImage = [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
     }
-    return placeholderImage;
+    return portraitPlaceholderImage;
+}
+
+- (UIImage *)getLandscapePlaceHolderImage {
+    if (landscapePlaceholderImage == nil) {
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        landscapePlaceholderImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    }
+    return landscapePlaceholderImage;
+}
+
+- (BOOL)orientationIsPortrait {
+     return [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString];
+}
+
+- (BOOL)mediaIsEmpty {
+    CleverTapInboxMessageContent *content = self.message.content[0];
+    return (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]);
 }
 
 #pragma mark - Player Controls
@@ -165,7 +184,7 @@ static UIImage *placeholderImage;
 - (UIImage *)getVideoPlaceHolderImage {
     if (videoPlaceholderImage == nil) {
         NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        videoPlaceholderImage = [UIImage imageNamed:@"placeholder.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        videoPlaceholderImage = [UIImage imageNamed:@"ct_default_video.png" inBundle:bundle compatibleWithTraitCollection:nil];
     }
     return videoPlaceholderImage;
 }
