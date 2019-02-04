@@ -65,6 +65,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message;
 - (void)configureActionView:(BOOL)hide;
+- (UIImage *)getPlaceHolderImage;
 
 - (BOOL)hasAudio;
 - (BOOL)hasVideo;

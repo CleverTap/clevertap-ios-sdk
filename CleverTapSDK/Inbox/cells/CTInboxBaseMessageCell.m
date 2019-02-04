@@ -7,6 +7,7 @@ static UIImage *playImage;
 static UIImage *pauseImage;
 static UIImage *audioPlaceholderImage;
 static UIImage *videoPlaceholderImage;
+static UIImage *placeholderImage;
 
 @implementation CTInboxBaseMessageCell
 
@@ -141,6 +142,14 @@ static UIImage *videoPlaceholderImage;
     self.actionView.hidden = hide;
     self.actionViewHeightConstraint.constant = hide ? 0 : 45;
     self.actionView.delegate = hide ? nil : self;
+}
+
+- (UIImage *)getPlaceHolderImage {
+    if (placeholderImage == nil) {
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        placeholderImage = [UIImage imageNamed:@"placeholder.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    }
+    return placeholderImage;
 }
 
 #pragma mark - Player Controls
