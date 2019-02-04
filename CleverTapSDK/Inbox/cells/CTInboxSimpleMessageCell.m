@@ -33,7 +33,7 @@
         self.imageViewHeightConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewPRatioConstraint.priority = 750;
-    } else if ([message.orientation.uppercaseString isEqualToString:@"P"] || message.orientation == nil ) {
+    } else if ([self orientationIsPortrait]) {
         self.imageViewPRatioConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewHeightConstraint.priority = 750;
