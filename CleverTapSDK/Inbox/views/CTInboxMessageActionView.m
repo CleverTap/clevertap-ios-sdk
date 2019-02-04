@@ -43,9 +43,8 @@
 }
 
 - (void)buttonTapped:(UIButton*)button {
-    
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleInboxNotificationTappedAtIndex:)]) {
-        [self.delegate handleInboxNotificationTappedAtIndex:(int)button.tag];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleInboxMessageTappedAtIndex:)]) {
+        [self.delegate handleInboxMessageTappedAtIndex:(int)button.tag];
     }
 }
 

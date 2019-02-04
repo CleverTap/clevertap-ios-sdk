@@ -14,6 +14,7 @@
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     [self.cellIcon sd_cancelCurrentAnimationImagesLoad];
     self.cellImageView.animatedImage = nil;
+    self.cellImageView.image = nil;
     self.cellIcon.image = nil;
 }
 
@@ -55,10 +56,13 @@
          self.bodyLabel.text = nil;
          self.dateLabel.text = nil;
          self.cellImageView.image = nil;
+         self.cellImageView.animatedImage = nil;
          self.cellIcon = nil;
          return;
      }
     CleverTapInboxMessageContent *content = message.content[0];
+    self.cellImageView.image = nil;
+    self.cellImageView.animatedImage = nil;
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;
@@ -68,6 +72,7 @@
     self.cellImageView.contentMode = content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
+        self.cellImageView.alpha = 1.0;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                        options:self.sdWebImageOptions];

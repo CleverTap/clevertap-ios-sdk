@@ -162,7 +162,7 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)orientationIsPortrait {
-     return (!self.message.orientation || [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString]);
+     return [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString];
 }
 
 - (BOOL)mediaIsEmpty {
@@ -256,11 +256,10 @@ static NSString * const kOrientationPortrait = @"p";
     self.avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
     self.avPlayerLayer.frame = self.avPlayerContainerView.bounds;
     self.avPlayerLayer.needsDisplayOnBoundsChange = YES;
-    for (AVPlayerLayer *layer in self.avPlayerContainerView.layer.sublayers) {
-        [layer removeFromSuperlayer];
-    }
-    for (AVPlayerLayer *layer in self.cellImageView.layer.sublayers) {
-        [layer removeFromSuperlayer];
+    for (CALayer *layer in self.avPlayerContainerView.layer.sublayers) {
+        if ([layer isKindOfClass:[AVPlayerLayer class]]) {
+            [layer removeFromSuperlayer];
+        }
     }
     
     [self.avPlayerContainerView.layer addSublayer:self.avPlayerLayer];
@@ -286,15 +285,16 @@ static NSString * const kOrientationPortrait = @"p";
         self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
         self.cellImageView.image = [self getAudioPlaceholderImage];
         self.cellImageView.hidden = NO;
+        self.cellImageView.alpha = 1.0;
         self.volumeButton.hidden = YES;
         [self.activityIndicator startAnimating];
     }
     
     if (content.mediaIsVideo) {
         self.cellImageView.hidden = NO;
+        self.cellImageView.alpha = 1.0;
         self.hasVideoPoster = YES;
         if (content.videoPosterUrl != nil && content.videoPosterUrl.length > 0) {
-            self.hasVideoPoster = YES;
             [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
                                   placeholderImage: [self getVideoPlaceHolderImage]
                                            options:self.sdWebImageOptions];
@@ -465,7 +465,6 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    
     if ([keyPath isEqualToString:@"readyForDisplay"]) {
         if ([self hasVideo] && !self.cellImageView.isHidden) {
             [UIView animateWithDuration:0.5f animations:^{
@@ -526,7 +525,7 @@ static NSString * const kOrientationPortrait = @"p";
 
 #pragma mark CTInboxActionViewDelegate
 
-- (void)handleInboxNotificationTappedAtIndex:(int)index {
+- (void)handleInboxMessageTappedAtIndex:(int)index {
     int i = index;
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
