@@ -20,6 +20,7 @@ static float captionHeight = 0.f;
 @property (nonatomic, strong) NSString *captionColor;
 @property (nonatomic, strong) NSString *subcaptionColor;
 @property (nonatomic, strong) NSString *imageUrl;
+@property (nonatomic, assign) BOOL orientationPortrait;
 
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *captionLabel;
@@ -42,7 +43,8 @@ static float captionHeight = 0.f;
                           captionColor:(NSString * _Nullable)captionColor
                        subcaptionColor:(NSString * _Nullable)subcaptionColor
                               imageUrl:(NSString * _Nonnull)imageUrl
-                             actionUrl:(NSString * _Nullable)actionUrl {
+                             actionUrl:(NSString * _Nullable)actionUrl
+                   orientationPortrait:(BOOL)orientationPortrait{
     
     self = [super initWithFrame:frame];
     if (self) {
@@ -52,6 +54,7 @@ static float captionHeight = 0.f;
         self.captionColor = captionColor;
         self.subcaptionColor = subcaptionColor;
         self.actionUrl = actionUrl;
+        self.orientationPortrait = orientationPortrait;
         [self setup];
     }
     return self;
@@ -59,12 +62,14 @@ static float captionHeight = 0.f;
 
 - (instancetype _Nonnull)initWithFrame:(CGRect)frame
                               imageUrl:(NSString * _Nonnull)imageUrl
-                             actionUrl:(NSString * _Nullable)actionUrl {
+                             actionUrl:(NSString * _Nullable)actionUrl
+                   orientationPortrait:(BOOL)orientationPortrait{
     
     self = [super initWithFrame:frame];
     if (self) {
         self.imageUrl = imageUrl;
         self.actionUrl = actionUrl;
+        self.orientationPortrait = orientationPortrait;
         [self setupImageOnly];
     }
     return self;
@@ -79,7 +84,6 @@ static float captionHeight = 0.f;
     // gyrations to draw a corresponding gray border below the image
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.f-kImageBorderWidth, 0.f-kImageBorderWidth, imageViewSize.width + (kImageBorderWidth*2), imageViewSize.height)];
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-    self.imageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0];
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
     self.imageView.layer.masksToBounds = YES;
@@ -96,7 +100,6 @@ static float captionHeight = 0.f;
     // gyrations to draw a corresponding gray border below the image
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.f-kImageBorderWidth, 0.f-kImageBorderWidth, imageViewSize.width + (kImageBorderWidth*2), imageViewSize.height)];
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-    self.imageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0];
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
     self.imageView.layer.masksToBounds = YES;
@@ -121,16 +124,21 @@ static float captionHeight = 0.f;
     [self addSubview:self.subcaptionLabel];
 }
 
-- (UIImage *)getPlaceHolderImage {
-    NSString *imagePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"placeholder" ofType:@"png"];
-    return [UIImage imageWithContentsOfFile:imagePath];
+- (UIImage *)getLandscapePlaceHolderImage {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+}
+
+- (UIImage *)getPortraitPlaceHolderImage {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
 }
 
 - (void)loadImage {
     if (!self.imageUrl) return;
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
-                          placeholderImage:[self getPlaceHolderImage]
-                                   options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+                      placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                               options:(SDWebImageCacheMemoryOnly)];
     
 }
 

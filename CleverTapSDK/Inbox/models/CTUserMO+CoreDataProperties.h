@@ -9,7 +9,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context;
 - (BOOL)updateMessages:(NSArray<NSDictionary*> *)messages forContext:(NSManagedObjectContext *)context;
-- (void)deleteMessage:(CTMessageMO*)message;
 
 @property (nullable, nonatomic, copy) NSString *accountId;
 @property (nullable, nonatomic, copy) NSString *guid;

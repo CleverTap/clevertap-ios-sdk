@@ -1,7 +1,4 @@
 #import "CTInboxIconMessageCell.h"
-#import <SDWebImage/UIImageView+WebCache.h>
-#import "CTConstants.h"
-#import "CTInAppUtils.h"
 
 @implementation CTInboxIconMessageCell
 
@@ -10,14 +7,13 @@
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleOnMessageTapGesture:)];
     self.userInteractionEnabled = YES;
     [self addGestureRecognizer:tapGesture];
-    self.readView.layer.cornerRadius = 5;
-    self.readView.layer.masksToBounds = YES;
 }
 
 - (void)prepareForReuse {
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     [self.cellIcon sd_cancelCurrentAnimationImagesLoad];
+    self.cellImageView.animatedImage = nil;
     self.cellImageView.image = nil;
     self.cellIcon.image = nil;
 }
@@ -26,87 +22,67 @@
     self.cellImageView.hidden = YES;
     self.avPlayerControlsView.alpha = 0.0;
     self.avPlayerContainerView.hidden = YES;
+    self.activityIndicator.hidden = YES;
     CleverTapInboxMessageContent *content = message.content[0];
-    if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
-        self.imageViewHeightContraint.priority = 999;
-        self.imageViewLRatioContraint.priority = 750;
-        self.imageViewPRatioContraint.priority = 750;
-    } else if ([message.orientation.uppercaseString isEqualToString:@"P"] || message.orientation == nil ) {
-        self.imageViewPRatioContraint.priority = 999;
-        self.imageViewLRatioContraint.priority = 750;
-        self.imageViewHeightContraint.priority = 750;
+    if ([self mediaIsEmpty]) {
+        self.imageViewHeightConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 750;
+    } else if ([self orientationIsPortrait]) {
+        self.imageViewPRatioConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = 750;
+        self.imageViewHeightConstraint.priority = 750;
     } else {
-        self.imageViewHeightContraint.priority = 750;
-        self.imageViewPRatioContraint.priority = 750;
-        self.imageViewLRatioContraint.priority = 999;
-    }
-    // set content mode for media
-    if (content.mediaIsGif) {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
-    } else {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
+        self.imageViewHeightConstraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 750;
+        self.imageViewLRatioConstraint.priority = 999;
     }
     self.cellImageView.clipsToBounds = YES;
+    self.cellIcon.clipsToBounds = YES;
+    self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;
+    self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
+    self.playButton.layer.borderWidth = 2.0;
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
     self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
-    if (content.actionHasLinks) {
-        self.actionView.hidden = NO;
-        self.actionViewHeightContraint.constant = 45;
-        self.actionView.delegate = self;
-    } else {
-        self.actionView.hidden = YES;
-        self.actionViewHeightContraint.constant = 0;
-    }
-    self.actionView.firstButton.hidden = YES;
-    self.actionView.secondButton.hidden = YES;
-    self.actionView.thirdButton.hidden = YES;
+    [self configureActionView:!content.actionHasLinks];
     [self layoutSubviews];
     [self layoutIfNeeded];
 }
 
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-    self.message = message;
      if (!message.content || message.content.count < 0) {
          self.titleLabel.text = nil;
          self.bodyLabel.text = nil;
          self.dateLabel.text = nil;
          self.cellImageView.image = nil;
+         self.cellImageView.animatedImage = nil;
          self.cellIcon = nil;
          return;
      }
     CleverTapInboxMessageContent *content = message.content[0];
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
+    self.cellImageView.image = nil;
+    self.cellImageView.animatedImage = nil;
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;
-
+    self.readView.hidden = message.isRead;
+    self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     [self setupInboxMessageActions:content];
-
-    // set content mode for media
-    if (content.mediaIsGif) {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
-    } else {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
-    }
-    
+    self.cellImageView.contentMode = content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
+        self.cellImageView.alpha = 1.0;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:nil
-                                       options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                                       options:self.sdWebImageOptions];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
     
     if (content.iconUrl) {
-        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl] placeholderImage: nil options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
+                         placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
     } else {

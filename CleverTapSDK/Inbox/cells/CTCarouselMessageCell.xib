@@ -93,7 +93,7 @@
                 <outlet property="containerView" destination="0a6-Ha-uVR" id="09t-nB-I2r"/>
                 <outlet property="dateLabel" destination="Nqe-Am-6Ld" id="tJq-gv-6Ml"/>
                 <outlet property="readView" destination="UkQ-KR-W7d" id="CdE-Da-NMy"/>
-                <outlet property="readViewWidthContraint" destination="G5X-zm-LN6" id="m3B-pU-zxg"/>
+                <outlet property="readViewWidthConstraint" destination="G5X-zm-LN6" id="q13-0y-zlo"/>
             </connections>
             <point key="canvasLocation" x="179.71014492753625" y="266.18303571428572"/>
         </tableViewCell>

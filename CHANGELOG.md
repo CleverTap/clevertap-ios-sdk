@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+## Version 3.4.1 (February 5, 2019)
+* Added support for Landscape mode in custom HTML InApps and App Inbox
+* Performance improvements for App Inbox
+
 ## Version 3.4.0 (January 14, 2019)
 * Adds support for App Inbox
 

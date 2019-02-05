@@ -67,7 +67,7 @@ typedef enum {
 }
     
 - (BOOL)shouldAutorotate {
-    return NO;
+    return YES;
 }
     
 - (void)layoutNotification {

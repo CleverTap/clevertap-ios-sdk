@@ -1,5 +1,5 @@
 #import "CTCarouselImageMessageCell.h"
-
+#import "CTCarouselImageView.h"
 
 @implementation CTCarouselImageMessageCell
 
@@ -23,7 +23,8 @@
             frame.size.height =  frame.size.height - [self heightForPageControl];
             frame.size.width = frame.size.width;
             itemView = [[CTCarouselImageView alloc] initWithFrame:frame
-                                                         imageUrl:imageUrl actionUrl:actionUrl];
+                                                         imageUrl:imageUrl actionUrl:actionUrl
+                                              orientationPortrait: [self orientationIsPortrait]];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -36,26 +37,14 @@
 }
 
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-    self.message = message;
     self.dateLabel.text = message.relativeDate;
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
-    // assume square image orientation
-    CGFloat leftMargin = 0;
-    if (@available(iOS 11.0, *)) {
-        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
-        leftMargin = window.safeAreaInsets.left;
-    }
-    
-    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width - (leftMargin*2);
+    self.readView.hidden = message.isRead;
+    self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
+    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+    BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+    CGFloat viewWidth = landscape ? self.frame.size.width : (CGFloat) [[UIScreen mainScreen] bounds].size.width;
     CGFloat viewHeight = viewWidth + [self heightForPageControl];
-    
-    if ([self orientationIsLandscape]) {
+    if (![self orientationIsPortrait]) {
         viewHeight = (viewWidth*[self getLandscapeMultiplier]) + [self heightForPageControl];
     }
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
@@ -71,7 +60,6 @@
     [self configureSwipeViewWithHeightAdjustment:[self heightForPageControl]];
     [self populateItemViews];
     [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height -[self heightForPageControl], viewWidth, [self heightForPageControl])];
-    
     [self.swipeView reloadData];
     
 }

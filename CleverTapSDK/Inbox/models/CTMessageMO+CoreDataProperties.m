@@ -27,8 +27,9 @@
             self.wzrk_id = wzrkId;
         }
         
-        self.date = (long)[[NSDate date] timeIntervalSince1970];
-
+        NSUInteger date = [json[@"date"] longValue];
+        self.date = date ? date : (long)[[NSDate date] timeIntervalSince1970];
+        
         NSUInteger expires = [json[@"wzrk_ttl"] longValue];
         self.expires = expires ? expires : 0;
     }

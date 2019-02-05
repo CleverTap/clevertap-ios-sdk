@@ -44,6 +44,7 @@
 @property (nullable, nonatomic, copy, readonly) NSString *messageColor;
 @property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
 @property (nullable, nonatomic, copy, readonly) NSString *mediaUrl;
+@property (nullable, nonatomic, copy, readonly) NSString *videoPosterUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
 @property (nullable, nonatomic, copy, readonly) NSArray *links;

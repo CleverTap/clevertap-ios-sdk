@@ -293,7 +293,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             } else if (class_getInstanceMethod(ncdCls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
                 sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
                 __block NSInvocation *invocation = nil;
-                invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(UIBackgroundFetchResult result) ) {
+                invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(UIBackgroundFetchResult result) ) {
                     [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
                     [invocation setArgument:&center atIndex:2];
                     [invocation setArgument:&response atIndex:3];
@@ -3697,12 +3697,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     @try {
         CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
         
-        NSString *jsonString = notification[@"wzrk_inbox"];
-        NSDictionary *msg = [NSJSONSerialization
-                                 JSONObjectWithData:[jsonString
-                                    dataUsingEncoding:NSUTF8StringEncoding]
-                                                 options:0
-                                                    error:nil];
+        NSDictionary *msg;
+        id data = notification[@"wzrk_inbox"];
+        if ([data isKindOfClass:[NSString class]]) {
+            NSString *jsonString = (NSString*)data;
+            msg = [NSJSONSerialization
+                   JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                   options:0
+                   error:nil];
+            
+        } else if ([data isKindOfClass:[NSDictionary class]]) {
+            msg = (NSDictionary*)data;
+        }
+        
+        if (!msg) {
+             CleverTapLogDebug(self.config.logLevel, @"%@: Unable to decode inbox message from push payload: %@", self, notification);
+        }
         
         NSDate *now = [NSDate date];
         NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970];

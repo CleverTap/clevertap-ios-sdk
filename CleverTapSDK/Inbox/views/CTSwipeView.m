@@ -164,7 +164,7 @@
     [_timer invalidate];
 }
 
-- (void)setDataSource:(id<SwipeViewDataSource>)dataSource
+- (void)setDataSource:(id<CTSwipeViewDataSource>)dataSource
 {
     if (_dataSource != dataSource)
     {
@@ -176,7 +176,7 @@
     }
 }
 
-- (void)setDelegate:(id<SwipeViewDelegate>)delegate
+- (void)setDelegate:(id<CTSwipeViewDelegate>)delegate
 {
     if (_delegate != delegate)
     {
@@ -185,7 +185,7 @@
     }
 }
 
-- (void)setAlignment:(SwipeViewAlignment)alignment
+- (void)setAlignment:(CTSwipeViewAlignment)alignment
 {
     if (_alignment != alignment)
     {
@@ -416,7 +416,7 @@
     
     switch (_alignment)
     {
-        case SwipeViewAlignmentCenter:
+        case CTSwipeViewAlignmentCenter:
         {
             if (_vertical)
             {
@@ -432,7 +432,7 @@
             }
             break;
         }
-        case SwipeViewAlignmentEdge:
+        case CTSwipeViewAlignmentEdge:
         {
             if (_vertical)
             {
@@ -489,7 +489,7 @@
     CGFloat offset = index - _scrollOffset;
     if (_wrapEnabled)
     {
-        if (_alignment == SwipeViewAlignmentCenter)
+        if (_alignment == CTSwipeViewAlignmentCenter)
         {
             if (offset > _numberOfItems/2)
             {

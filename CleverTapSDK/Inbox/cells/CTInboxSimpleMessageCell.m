@@ -18,6 +18,7 @@
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
     self.cellImageView.animatedImage = nil;
+    self.cellImageView.image = nil;
 }
 
 - (void)doLayoutForMessage:(CleverTapInboxMessage *)message {
@@ -28,30 +29,23 @@
     self.cellImageView.hidden = YES;
     self.avPlayerControlsView.alpha = 0.0;
     self.avPlayerContainerView.hidden = YES;
-    if (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]) {
-        self.imageViewHeightContraint.priority = 999;
-        self.imageViewLRatioContraint.priority = 750;
-        self.imageViewPRatioContraint.priority = 750;
-    } else if ([message.orientation.uppercaseString isEqualToString:@"P"] || message.orientation == nil ) {
-        self.imageViewPRatioContraint.priority = 999;
-        self.imageViewLRatioContraint.priority = 750;
-        self.imageViewHeightContraint.priority = 750;
+    self.activityIndicator.hidden = YES;
+    if ([self mediaIsEmpty]) {
+        self.imageViewHeightConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 750;
+    } else if ([self orientationIsPortrait]) {
+        self.imageViewPRatioConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = 750;
+        self.imageViewHeightConstraint.priority = 750;
     } else {
-        self.imageViewHeightContraint.priority = 750;
-        self.imageViewPRatioContraint.priority = 750;
-        self.imageViewLRatioContraint.priority = 999;
+        self.imageViewHeightConstraint.priority = 750;
+        self.imageViewPRatioConstraint.priority = 750;
+        self.imageViewLRatioConstraint.priority = 999;
     }
-    if (content.actionHasLinks) {
-        self.actionView.hidden = NO;
-        self.actionViewHeightContraint.constant = 45;
-        self.actionView.delegate = self;
-    } else {
-        self.actionView.hidden = YES;
-        self.actionViewHeightContraint.constant = 0;
-    }
+    [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;
-    self.actionView.hidden = YES;
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
     self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
@@ -60,7 +54,6 @@
 }
 
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-    self.message = message;
     if (!message.content || message.content.count < 0) {
         self.cellImageView.image = nil;
         self.cellImageView.animatedImage = nil;
@@ -77,30 +70,15 @@
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;
-    
+    self.readView.hidden = message.isRead;
+    self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     [self setupInboxMessageActions:content];
-    
-     // mark read/unread
-    if (message.isRead) {
-        self.readView.hidden = YES;
-        self.readViewWidthContraint.constant = 0;
-    } else {
-        self.readView.hidden = NO;
-        self.readViewWidthContraint.constant = 16;
-    }
-    
-    // set content mode for media
-    if (content.mediaIsGif) {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
-    } else {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
-    }
-    
+    self.cellImageView.contentMode = content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
+        self.cellImageView.alpha = 1.0;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:nil
-                                       options:(SDWebImageQueryDataWhenInMemory | SDWebImageQueryDiskSync)];
+                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }

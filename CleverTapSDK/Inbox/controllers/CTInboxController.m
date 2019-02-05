@@ -93,18 +93,18 @@ static NSManagedObjectContext *privateContext;
 
 - (void)deleteMessageWithId:(NSString *)messageId {
     CTMessageMO *message = [self _messageForId:messageId];
-    [self _deleteMessage:message];
+    [self _deleteMessages:@[message]];
 }
 
 - (void)markReadMessageWithId:(NSString *)messageId {
-    CTMessageMO *message = [self _messageForId:messageId];
-    if (message) {
-        [message setValue:@YES forKey:@"isRead"];
-        [self notifyUpdate];
-        [privateContext performBlock:^{
+    [privateContext performBlock:^{
+        CTMessageMO *message = [self _messageForId:messageId];
+        if (message) {
+            [message setValue:@YES forKey:@"isRead"];
+            [self notifyUpdate];
             [self _save];
-        }];
-    }
+        }
+    }];
 }
 
 - (NSDictionary *)messageForId:(NSString *)messageId {
@@ -130,17 +130,22 @@ static NSManagedObjectContext *privateContext;
     if (!self.isInitialized) return nil;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
+    NSMutableArray *toDelete = [NSMutableArray new];
     for (CTMessageMO *msg in self.user.messages) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
             CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
-            [self _deleteMessage:msg];
+            [toDelete addObject:msg];
         } else {
             [messages addObject:[msg toJSON]];
         }
     }
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
     [messages sortUsingDescriptors:@[sortDescriptor]];
+    
+    if ([toDelete count] > 0) {
+        [self _deleteMessages:toDelete];
+    }
     return messages;
 }
 
@@ -148,15 +153,22 @@ static NSManagedObjectContext *privateContext;
     if (!self.isInitialized) return nil;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
+    NSMutableArray *toDelete = [NSMutableArray new];
     NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
     for (CTMessageMO *msg in results) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
             CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
-            [self _deleteMessage:msg];
+            [toDelete addObject:msg];
         } else {
             [messages addObject:[msg toJSON]];
         }
+    }
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
+    [messages sortUsingDescriptors:@[sortDescriptor]];
+    
+    if ([toDelete count] > 0) {
+        [self _deleteMessages:toDelete];
     }
     return messages;
 }
@@ -170,14 +182,14 @@ static NSManagedObjectContext *privateContext;
     return existing ? results[0] : nil;
 }
 
--(void)_deleteMessage:(CTMessageMO *)message {
-    if (message) {
-        [privateContext performBlock:^{
-            [self.user deleteMessage:message];
-            [self notifyUpdate];
-            [self _save];
-        }];
-    }
+-(void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
+    [privateContext performBlock:^{
+        for (CTMessageMO *msg in messages) {
+            [privateContext deleteObject:msg];
+        }
+        [self notifyUpdate];
+        [self _save];
+    }];
 }
 
 // always call from inside privateContext performBlock

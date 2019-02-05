@@ -7,14 +7,20 @@
 #import "CTInboxMessageActionView.h"
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
+#import "CTInboxUtils.h"
 #import "CTInAppResources.h"
+#import "CTVideoThumbnailGenerator.h"
 
 @class FLAnimatedImageView;
 
-typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
-    CTVideoPlayerUnreachableCellTypeNone = 0,
-    CTVideoPlayerUnreachableCellTypeTop = 1,
-    CTVideoPlayerUnreachableCellTypeDown = 2
+typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
+    CTMediaPlayerCellTypeNone,
+    CTMediaPlayerCellTypeTopLandscape,
+    CTMediaPlayerCellTypeTopPortrait,
+    CTMediaPlayerCellTypeMiddleLandscape,
+    CTMediaPlayerCellTypeMiddlePortrait,
+    CTMediaPlayerCellTypeBottomLandscape,
+    CTMediaPlayerCellTypeBottomPortrait
 };
 
 @interface CTInboxBaseMessageCell : UITableViewCell <CTInboxActionViewDelegate>
@@ -30,14 +36,14 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (strong, nonatomic) IBOutlet UIView *avPlayerControlsView;
 @property (strong, nonatomic) IBOutlet UIView *mediaContainerView;
 
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightContraint;
-@property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthContraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightConstraint;
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthConstraint;
 
 // video controls
-@property (nonatomic, strong) IBOutlet UIButton *volume;
+@property (nonatomic, strong) UIButton *volumeButton;
 @property (nonatomic, strong) IBOutlet UIButton *playButton;
 @property (nonatomic, strong, readwrite) AVPlayer *avPlayer;
 @property (nonatomic, strong) AVPlayerLayer *avPlayerLayer;
@@ -45,12 +51,24 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 @property (nonatomic, assign) NSInteger controllersTimeoutPeriod;
 @property (nonatomic, assign) BOOL isAVMuted;
 @property (nonatomic, assign) BOOL isControlsHidden;
+@property (atomic, assign) BOOL hasVideoPoster;
+@property (nonatomic, strong) CTVideoThumbnailGenerator *thumbnailGenerator;
 @property (nonatomic, strong) CleverTapInboxMessage *message;
-@property(nonatomic) CTVideoPlayerUnreachableCellType unreachableCellType;
+@property (atomic, assign) CTMediaPlayerCellType mediaPlayerCellType;
+@property (atomic, assign) CTInboxMessageType messageType;
+@property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
 
-- (IBAction)volumeButtonTapped:(UIButton *)sender;
+
+@property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
+
+- (void)volumeButtonTapped:(UIButton *)sender;
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message;
+- (void)configureActionView:(BOOL)hide;
+- (BOOL)mediaIsEmpty;
+- (BOOL)orientationIsPortrait;
+- (UIImage *)getPortraitPlaceHolderImage;
+- (UIImage *)getLandscapePlaceHolderImage;
 
 - (BOOL)hasAudio;
 - (BOOL)hasVideo;
@@ -58,10 +76,9 @@ typedef NS_OPTIONS(NSUInteger , CTVideoPlayerUnreachableCellType) {
 - (void)pause;
 - (void)play;
 - (void)mute:(BOOL)mute;
+- (CGRect)videoRect;
 
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content;
-- (void)handleInboxNotificationAtIndex:(int)index;
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender;
-
 
 @end
