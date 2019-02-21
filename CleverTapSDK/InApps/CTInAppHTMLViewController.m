@@ -101,6 +101,10 @@ typedef enum {
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     
+    //    TODO: check for request url
+    //    if request url available - loadRequest otherwise load HTM:
+    //    [webView loadRequest:];
+    
     [webView loadHTMLString:self.notification.html baseURL:nil];
     
     boolean_t fixedWidth = false, fixedHeight = false;

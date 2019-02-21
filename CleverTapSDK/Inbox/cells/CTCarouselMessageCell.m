@@ -48,7 +48,7 @@ static const float kPageControlViewHeight = 30.f;
         CTCarouselImageView *itemView;
         if (itemView == nil){
             CGRect frame = self.carouselView.bounds;
-            frame.size.height =  frame.size.height ;
+            frame.size.height =  frame.size.height;
             itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
                      caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait]];
         }

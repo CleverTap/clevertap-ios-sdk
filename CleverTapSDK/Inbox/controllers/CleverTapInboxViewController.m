@@ -150,7 +150,7 @@ static const int kMaxTags = 3;
         CGRect screenBounds = [[UIScreen mainScreen] bounds];
         CGRect currentFrame = self.tableView.frame;
         if (landscape) {
-            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
+//            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
             [self calculateTableViewVisibleFrame];
             [self.tableView reloadData];
             [self playVideoInVisibleCells];
@@ -169,10 +169,10 @@ static const int kMaxTags = 3;
 }
 
 - (void)registerNibs {
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTInboxSimpleMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTCarouselMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTCarouselImageMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTInboxIconMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellIconMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselMessageCell.class]] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselImageMessageCell.class]] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxIconMessageCell.class]] forCellReuseIdentifier:kCellIconMessageIdentifier];
 }
 
 - (NSString*)getTitle {
@@ -195,7 +195,7 @@ static const int kMaxTags = 3;
         CGRect screenBounds = [[UIScreen mainScreen] bounds];
         CGRect currentFrame = self.tableView.frame;
         if (landscape) {
-            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
+//            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
         } else {
             self.tableView.frame = CGRectMake(0, currentFrame.origin.y, self.view.frame.size.width, currentFrame.size.height);
         }

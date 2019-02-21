@@ -20,7 +20,7 @@
         CTCarouselImageView *itemView;
         if (itemView == nil){
             CGRect frame = self.carouselView.bounds;
-            frame.size.height =  frame.size.height - [self heightForPageControl];
+            frame.size.height =  frame.size.height;
             frame.size.width = frame.size.width;
             itemView = [[CTCarouselImageView alloc] initWithFrame:frame
                                                          imageUrl:imageUrl actionUrl:actionUrl
@@ -43,25 +43,29 @@
     UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
     BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
     CGFloat viewWidth = landscape ? self.frame.size.width : (CGFloat) [[UIScreen mainScreen] bounds].size.width;
-    CGFloat viewHeight = viewWidth + [self heightForPageControl];
+    CGFloat viewHeight = viewWidth;
     if (![self orientationIsPortrait]) {
-        viewHeight = (viewWidth*[self getLandscapeMultiplier]) + [self heightForPageControl];
+        viewHeight = (viewWidth*[self getLandscapeMultiplier]);
     }
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
     self.frame = frame;
-    self.carouselView.frame = frame;
-    self.carouselViewHeight.constant = viewHeight;
+    if (!landscape) {
+        self.carouselViewHeight.constant = viewHeight;
+        self.carouselView.frame = frame;
+    } else {
+        viewWidth = self.carouselView.frame.size.width;
+        self.carouselViewHeight.constant = [[UIScreen mainScreen] bounds].size.height - 80;
+    }
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
     }
     for (UIView *subview in [self.carouselView subviews]) {
         [subview removeFromSuperview];
     }
-    [self configureSwipeViewWithHeightAdjustment:[self heightForPageControl]];
+    [self configureSwipeViewWithHeightAdjustment:0];
     [self populateItemViews];
-    [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height -[self heightForPageControl], viewWidth, [self heightForPageControl])];
+    [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, viewWidth, [self heightForPageControl])];
     [self.swipeView reloadData];
-    
 }
 
 @end

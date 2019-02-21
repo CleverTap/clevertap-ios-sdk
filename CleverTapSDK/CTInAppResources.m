@@ -6,15 +6,23 @@
     return [NSBundle bundleForClass:self.class];
 }
 
+#if !(TARGET_OS_TV)
 + (NSString *)XibNameForControllerName:(NSString *)controllerName {
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        [xib appendString:@"~iphoneport"];
+        UIApplication *sharedApplication = [self getSharedApplication];
+        BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+        if (landscape) {
+            [xib appendString:@"~iphoneland"];
+        } else {
+            [xib appendString:@"~iphoneport"];
+        }
     } else {
         [xib appendString:@"~ipad"];
     }
     return [xib copy];
 }
+#endif
 
 + (UIImage *)imageForName:(NSString *)name type:(NSString *)type {
     NSString *imagePath = [[self bundle] pathForResource:name ofType:type];

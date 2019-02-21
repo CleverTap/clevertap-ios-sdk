@@ -96,6 +96,10 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  */
 + (instancetype _Nonnull )instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config;
 
+// TODO - setCleverTapID for CleverTap Instances
++ (instancetype _Nonnull )instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config andCleverTapId:(NSString *)cleverTapId;
+
+
 /*!
  @method
  

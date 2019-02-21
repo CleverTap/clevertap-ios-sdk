@@ -33,10 +33,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         style.cellBackgroundColor = UIColor.yellow
         style.messageTags = ["Promotions", "Offers"];
         
-            if let inboxController = ct1.newInboxViewController(with: style, andDelegate: self) {
-                let navigationController = UINavigationController.init(rootViewController: inboxController)
-                self.present(navigationController, animated: true, completion: nil)
-            }
+        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
+            let navigationController = UINavigationController.init(rootViewController: inboxController)
+            self.present(navigationController, animated: true, completion: nil)
+        }
     }
     
     func inboxRegister() {
@@ -48,10 +48,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         ct1.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1), "shouldFail":["foo":"bar"]])
         ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
         
-        ct1.registerInboxUpdatedBlock(({
+        CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
             // NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
-            let messageCount = ct1.getInboxMessageCount()
-            let unreadCount = ct1.getInboxMessageUnreadCount()
+            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
             
             DispatchQueue.main.async {
                 self.inboxButton.isHidden = false;
@@ -59,7 +59,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
             }
      }))
         
-        ct1.initializeInbox(callback: ({ (success) in
+        CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
 //                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")
 //                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Count is: %@", ct1.profileGetID() ?? "", [ct1.getInboxMessageCount()])
 //                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
@@ -85,10 +85,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
              NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
              }))
              */
-            let messageCount = ct1.getInboxMessageCount()
-            let unreadCount = ct1.getInboxMessageUnreadCount()
+            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
             self.inboxButton.isHidden = false;
-            self.inboxButton.setTitle("Show Inbox:\(messageCount)/\(unreadCount) unread", for: .normal)
+            self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
         }))
     }
  

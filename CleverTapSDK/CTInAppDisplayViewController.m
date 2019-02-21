@@ -39,11 +39,8 @@
 
 #if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    if (_notification.inAppType == CTInAppTypeHTML) {
-        return UIInterfaceOrientationMaskAll;
-    } else {
-        return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
-    }
+    
+    return UIInterfaceOrientationMaskAll;
 }
 #endif
 
