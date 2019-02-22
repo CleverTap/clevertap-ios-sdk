@@ -230,10 +230,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)autoIntegrate {
+    return [self autoIntegrateWithCleverTapID:nil];
+}
+
++ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
     CleverTapLogStaticDebug("%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [self swizzleAppDelegate];
-    CleverTap *instance = [CleverTap sharedInstance];
+    CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
     return instance;
 }
 
@@ -448,6 +452,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark instance lifecycle
 
 + (nullable instancetype)sharedInstance {
+    return [self sharedInstanceWithCleverTapID:nil];
+}
+
++ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
     if (_defaultInstanceConfig == nil) {
         if (!_plistInfo.accountId || !_plistInfo.accountToken) {
             if (!sharedInstanceErrorLogged) {
@@ -463,6 +471,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
+        _defaultInstanceConfig.cleverTapId = cleverTapID;
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
     return [self instanceWithConfig:_defaultInstanceConfig];
@@ -2628,7 +2637,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
      return identifier == nil ? NO : [self.processingLoginUserIdentifier isEqualToString:identifier];
 }
 
-- (void)_onUserLogin:(NSDictionary*)properties {
+- (void)_onUserLogin:(NSDictionary *)properties withCleverTapID:(NSString *)cleverTapID {
     if (!properties) return;
     
     NSString *currentGUID = [self profileGetCleverTapID];
@@ -2681,7 +2690,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // reset profile, creating or restoring guid
     
     // prevent dupes
-     self.processingLoginUserIdentifier = profileToString;
+    self.processingLoginUserIdentifier = profileToString;
     
     [self runSerialAsync:^{
         CleverTapLogDebug(self.config.logLevel, @"onUserLogin: generating new user profile for:  %@", properties);
@@ -2709,7 +2718,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self resetSession];
         
         // create or update guid
-        if (cachedGUID) {
+        if (cleverTapID){
+            [self.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-%@", cleverTapID]];
+        }else if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
         } else {
             [self.deviceInfo forceNewDeviceID];
@@ -2841,8 +2852,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (BOOL)offline {
     return _offline;
 }
-- (void)onUserLogin:(NSDictionary *)properties {
-    [self _onUserLogin:properties];
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties {
+    [self _onUserLogin:properties withCleverTapID:nil];
+}
+
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString *)cleverTapID {
+    [self _onUserLogin:properties withCleverTapID:cleverTapID];
 }
 
 - (void)profilePush:(NSDictionary *)properties {

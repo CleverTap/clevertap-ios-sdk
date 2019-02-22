@@ -26,7 +26,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     }
     
     @IBAction func inboxButtonTapped(_ sender: Any) {
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
+        let ctConfig = CleverTapInstanceConfig.init(accountId: "W9R-486-4W5Z", accountToken: "6b4-2c0")
         let ct1  = CleverTap.instance(with: ctConfig)
         let style = CleverTapInboxStyleConfig.init()
         style.title = "AppInbox"
@@ -41,15 +41,15 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     
     func inboxRegister() {
         
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "ZWW-WWW-WWRZ", accountToken: "000-001")
+        let ctConfig = CleverTapInstanceConfig.init(accountId: "TEST-Z9R-486-4W5Z", accountToken: "TEST-6b4-2c1")
         ctConfig.logLevel = .debug
+        ctConfig.cleverTapId = "7898732794941280-84180-48-01"
         let ct1  = CleverTap.instance(with: ctConfig)
-        ct1.onUserLogin(["foo1":"bar1", "Email":"peter@clevertap.com", "identity":"89899999999999"])
         ct1.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1), "shouldFail":["foo":"bar"]])
         ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
         
         CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
-            // NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
+            // NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
             let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
             
@@ -60,13 +60,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
      }))
         
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
-//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")
-//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Count is: %@", ct1.profileGetID() ?? "", [ct1.getInboxMessageCount()])
-//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
-//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
-//                NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
+//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")
+//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Count is: %@", ct1.profileGetID() ?? "", [ct1.getInboxMessageCount()])
+//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
+//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
+//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
             //let unread = ct1.getUnreadInboxMessages();
-            //NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
+            //NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
             
             /*
              if (unread.count > 0) {
@@ -78,11 +78,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
              
              ct1.onUserLogin(["foo2":"bar2", "Email":"peter+test2@clevertap.com", "identity":"765432"])
              ct1.initializeInbox(callback: ({ (success) in
-             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ is: %@", ct1.profileGetID(), success ? "ready" : "unavailable")
-             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageCount()])
-             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
-             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
-             NSLog("CleverTapInbox.ZWW-WWW-WWRZ.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
+             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ is: %@", ct1.profileGetID(), success ? "ready" : "unavailable")
+             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageCount()])
+             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
+             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
+             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
              }))
              */
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
@@ -99,9 +99,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
-        CleverTap.sharedInstance()?.recordEvent("test ios")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Cover")
+//        CleverTap.sharedInstance()?.recordEvent("test ios")
+//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+//        CleverTap.sharedInstance()?.recordEvent("Cover")
+        
+//        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
+        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
+
     }
     
     func messageDidSelect(_ message: CleverTapInboxMessage!, at index: Int32, withButtonIndex buttonIndex: Int32) {

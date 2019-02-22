@@ -17,8 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue+1)
-        CleverTap.enablePersonalization()
+//        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue+1)
+//        CleverTap.enablePersonalization()
         
         //CleverTap.sharedInstance()?.setOffline(true)
         if #available(iOS 10.0, *) {
@@ -27,11 +27,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
-        
-        CleverTap.setDebugLevel(2)
         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-        CleverTap.autoIntegrate()
+//        CleverTap.sharedInstance(withCleverTapID: "909090909090")
+        CleverTap.setDebugLevel(2)
+//        CleverTap.autoIntegrate()
+        CleverTap.autoIntegrate(withCleverTapID: "222211111222222")
         registerPush()
         
         return true

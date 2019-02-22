@@ -172,10 +172,16 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         // Is the device ID already present?
         NSString *existingDeviceID = [self getDeviceID];
         if (existingDeviceID) {
+            if (_config.cleverTapId) {
+                CleverTapLogStaticDebug("%@: CleverTap ID already exist. Cannot change to %@", self, _config.cleverTapId);
+            }
             self.deviceId = existingDeviceID;
             return;
         }
-        
+        if (_config.cleverTapId) {
+            [self forceUpdateDeviceID:[NSString stringWithFormat:@"-%@", _config.cleverTapId]];
+            return;
+        }
         if (self.advertisingIdentitier) {
             [self forceUpdateDeviceID:[NSString stringWithFormat:@"-g%@", self.advertisingIdentitier]];
             return;

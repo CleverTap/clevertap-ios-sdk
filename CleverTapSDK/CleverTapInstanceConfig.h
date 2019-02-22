@@ -7,6 +7,7 @@
 @property (nonatomic, strong, readonly, nonnull) NSString* accountId;
 @property (nonatomic, strong, readonly, nonnull) NSString* accountToken;
 @property (nonatomic, strong, readonly) NSString* accountRegion;
+@property (nonatomic, strong) NSString* cleverTapId;
 
 @property (nonatomic, assign) BOOL analyticsOnly;
 @property (nonatomic, assign) BOOL disableAppLaunchedEvent;
