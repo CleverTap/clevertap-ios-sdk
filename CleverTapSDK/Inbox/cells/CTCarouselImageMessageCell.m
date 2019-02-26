@@ -40,16 +40,14 @@
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
-    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
-    BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
-    CGFloat viewWidth = landscape ? self.frame.size.width : (CGFloat) [[UIScreen mainScreen] bounds].size.width;
+    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
     CGFloat viewHeight = viewWidth;
     if (![self orientationIsPortrait]) {
         viewHeight = (viewWidth*[self getLandscapeMultiplier]);
     }
     CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
     self.frame = frame;
-    if (!landscape) {
+    if (![self deviceOrientationIsLandscape]) {
         self.carouselViewHeight.constant = viewHeight;
         self.carouselView.frame = frame;
     } else {

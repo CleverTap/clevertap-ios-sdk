@@ -31,6 +31,26 @@ static const float kPageControlViewHeight = 30.f;
     return viewHeight;
 }
 
+- (void)populateLandscapeViews {
+    self.itemViews = [NSMutableArray new];
+    NSUInteger index = 0;
+    for (CleverTapInboxMessageContent *content in (self.message.content)) {
+        CTCarouselImageView *carouselView = [[[CTInAppUtils bundle] loadNibNamed:@"CTCarouselImageView" owner:nil options:nil] lastObject];
+        [carouselView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
+        carouselView.titleLabel.text = content.title;
+        carouselView.titleLabel.textColor = content.titleColor ? [CTInAppUtils ct_colorWithHexString:content.titleColor] : [CTInAppUtils ct_colorWithHexString:@"#000000"];
+        carouselView.bodyLabel.text = content.message;
+        carouselView.bodyLabel.textColor = content.messageColor ? [CTInAppUtils ct_colorWithHexString:content.messageColor] :  [CTInAppUtils ct_colorWithHexString:@"#7E7E7E"];
+        UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
+        carouselView.userInteractionEnabled = YES;
+        carouselView.tag = index;
+        [carouselView addGestureRecognizer:itemViewTapGesture];
+        [self.itemViews addObject:carouselView];
+        index++;
+    }
+}
+
 -(void)populateItemViews {
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;
@@ -39,8 +59,8 @@ static const float kPageControlViewHeight = 30.f;
         NSString *subcaption = content.message;
         NSString *imageUrl = content.mediaUrl;
         NSString *actionUrl = content.actionUrl;
-        NSString *captionColor = content.titleColor? content.titleColor : @"#000000";
-        NSString *subcaptionColor = content.messageColor? content.messageColor : @"#7E7E7E";
+        NSString *captionColor = content.titleColor ? content.titleColor : @"#000000";
+        NSString *subcaptionColor = content.messageColor ? content.messageColor : @"#7E7E7E";
         
         if (imageUrl == nil) {
             continue;
@@ -65,24 +85,30 @@ static const float kPageControlViewHeight = 30.f;
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
-    captionHeight = [CTCarouselImageView captionHeight];
-    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
-    BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
-    CGFloat viewWidth = landscape ? self.frame.size.width : (CGFloat) [[UIScreen mainScreen] bounds].size.width;
-    CGFloat viewHeight = [self calculateHeight:viewWidth];
-    CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
-    self.frame = frame;
-    self.carouselView.frame = frame;
-    self.carouselViewHeight.constant = viewHeight;
-    for (UIView *view in self.itemViews) {
-        [view removeFromSuperview];
-    }
-    for (UIView *subview in [self.carouselView subviews]) {
-        [subview removeFromSuperview];
+    if ([self deviceOrientationIsLandscape]) {
+        self.carouselLandRatioConstraint.priority = [self orientationIsPortrait]? 750 : 999;
+        self.carouselPortRatioConstraint.priority = [self orientationIsPortrait]? 999 : 750;
+        [self populateLandscapeViews];
+        [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.carouselView.frame.size.width, kPageControlViewHeight)];
+    } else {
+        captionHeight = [CTCarouselImageView captionHeight];
+        CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
+        CGFloat viewHeight = [self calculateHeight:viewWidth];
+        CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
+        self.frame = frame;
+        self.carouselView.frame = frame;
+        self.carouselViewHeight.constant = viewHeight;
+        for (UIView *view in self.itemViews) {
+            [view removeFromSuperview];
+        }
+        for (UIView *subview in [self.carouselView subviews]) {
+            [subview removeFromSuperview];
+        }
+        [self populateItemViews];
+        [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
+
     }
     [self configureSwipeViewWithHeightAdjustment:0];
-    [self populateItemViews];
-    [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
     [self.swipeView reloadData];
 }
 
@@ -93,7 +119,6 @@ static const float kPageControlViewHeight = 30.f;
         swipeViewFrame.size.height =  self.frame.size.height - adjustment;
     }
     self.swipeView.frame = swipeViewFrame;
-    self.swipeView.frame = self.carouselView.bounds;
     self.swipeView.delegate = self;
     self.swipeView.dataSource = self;
     self.swipeView.bounces = NO;
@@ -102,12 +127,28 @@ static const float kPageControlViewHeight = 30.f;
 
 - (void)configurePageControlWithRect:(CGRect)rect {
     self.pageControl = [[UIPageControl alloc] initWithFrame:rect];
+    self.pageControl.userInteractionEnabled = YES;
     [self.pageControl addTarget:self action:@selector(pageControlTapped:) forControlEvents:UIControlEventValueChanged];
     self.pageControl.numberOfPages = [self.itemViews count];
     self.pageControl.hidesForSinglePage = YES;
     self.pageControl.currentPageIndicatorTintColor = [UIColor blueColor];
     self.pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
-    [self.carouselView addSubview:self.pageControl];
+    for (UIPageControl *pageControl in self.carouselView.subviews) {
+        if ([pageControl isKindOfClass:[UIPageControl class]]) {
+            [pageControl removeFromSuperview];
+        }
+    }
+    for (UIPageControl *pageControl in self.containerView.subviews) {
+        if ([pageControl isKindOfClass:[UIPageControl class]]) {
+            [pageControl removeFromSuperview];
+        }
+    }
+    CTInboxMessageType messageType = [CTInboxUtils inboxMessageTypeFromString:self.message.type];
+    if (messageType == CTInboxMessageTypeCarousel && ![self deviceOrientationIsLandscape])  {
+         [self.carouselView addSubview:self.pageControl];
+    } else {
+         [self.containerView addSubview:self.pageControl];
+    }
 }
 
 #pragma mark - Swipe View Delegates

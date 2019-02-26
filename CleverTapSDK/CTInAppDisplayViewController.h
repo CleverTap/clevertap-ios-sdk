@@ -20,5 +20,6 @@
 
 - (void)show:(BOOL)animated;
 - (void)hide:(BOOL)animated;
+- (BOOL)deviceOrientationIsLandscape;
 
 @end

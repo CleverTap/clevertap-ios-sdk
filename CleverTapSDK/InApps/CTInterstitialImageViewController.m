@@ -91,7 +91,7 @@
     // set image
     if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
-        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+        self.imageView.contentMode = ![self deviceOrientationIsLandscape] ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
         self.imageView.userInteractionEnabled = YES;
         UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];

@@ -1,5 +1,6 @@
 #import "CTInAppDisplayViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
+#import "CTInAppResources.h"
 
 @implementation CTInAppPassThroughWindow
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -32,17 +33,16 @@
 }
 
 #if !(TARGET_OS_TV)
-- (BOOL)shouldAutorotate {
-    return NO;
-}
-#endif
-
-#if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    
     return UIInterfaceOrientationMaskAll;
 }
 #endif
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [self initWithNotification:_notification];
+    [self loadView];
+    [self viewDidLoad];
+}
 
 -(void)show:(BOOL)animated {
     NSAssert(false, @"Override in sub-class");
@@ -131,6 +131,13 @@
     [buttonView setTitle:button.text forState:UIControlStateNormal];
     return buttonView;
 }
+
+#if !(TARGET_OS_TV)
+- (BOOL)deviceOrientationIsLandscape {
+    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+}
+#endif
 
 #pragma mark - Actions
 

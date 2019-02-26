@@ -25,20 +25,19 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="90"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" verticalCompressionResistancePriority="751" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PZ3-PM-IHL">
-                                        <rect key="frame" x="29" y="15" width="326" height="18"/>
+                                        <rect key="frame" x="90" y="15" width="265" height="18"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yGM-Em-VQ5">
-                                        <rect key="frame" x="29" y="40" width="326" height="31.5"/>
-                                        <string key="text">Bullet time rigs use a series of cameras aligned on a track to capture a series of still images that are then combined to make a fluid panning video shot. This is probably the first time iPhone cameras have ever been used on a bullet time rig, partly because it would cost nearly $24,000 for all those iPhones</string>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yGM-Em-VQ5">
+                                        <rect key="frame" x="90" y="40" width="265" height="16"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                         <color key="textColor" red="0.4941176471" green="0.4941176471" blue="0.4941176471" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OzK-2J-sU6">
-                                        <rect key="frame" x="10" y="10" width="9" height="70"/>
+                                        <rect key="frame" x="10" y="10" width="70" height="70"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="OzK-2J-sU6" secondAttribute="height" multiplier="1:1" priority="750" id="5ZC-lR-xvU"/>
                                             <constraint firstAttribute="width" priority="750" id="mj9-cS-10T"/>

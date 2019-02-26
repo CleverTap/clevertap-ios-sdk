@@ -15,6 +15,9 @@
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselViewHeight;
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselViewWidth;
 
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselLandRatioConstraint;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselPortRatioConstraint;
+
 - (CGFloat)heightForPageControl;
 - (float)getLandscapeMultiplier;
 - (void)configurePageControlWithRect:(CGRect)rect;

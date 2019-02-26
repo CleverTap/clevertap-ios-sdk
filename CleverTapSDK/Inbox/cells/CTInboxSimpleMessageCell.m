@@ -43,6 +43,18 @@
         self.imageViewPRatioConstraint.priority = 750;
         self.imageViewLRatioConstraint.priority = 999;
     }
+    
+    // handle landscape
+    if ([self deviceOrientationIsLandscape]) {
+        if ([self mediaIsEmpty]) {
+            self.imageViewWidthConstraint.priority = 999;
+            self.dividerCenterXConstraint.priority = 750;
+        } else {
+            self.imageViewWidthConstraint.priority = 750;
+            self.dividerCenterXConstraint.priority = 999;
+        }
+    }
+   
     [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;

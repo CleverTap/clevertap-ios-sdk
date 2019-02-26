@@ -170,6 +170,11 @@ static NSString * const kOrientationPortrait = @"p";
     return (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]);
 }
 
+- (BOOL)deviceOrientationIsLandscape {
+    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+}
+
 #pragma mark - Player Controls
 
 - (UIImage*)getAudioPlaceholderImage {

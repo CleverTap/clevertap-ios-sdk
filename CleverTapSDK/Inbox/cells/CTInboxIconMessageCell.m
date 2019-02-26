@@ -37,6 +37,17 @@
         self.imageViewPRatioConstraint.priority = 750;
         self.imageViewLRatioConstraint.priority = 999;
     }
+    
+    // handle landscape
+    if ([self deviceOrientationIsLandscape]) {
+        if ([self mediaIsEmpty]) {
+            self.imageViewWidthConstraint.priority = 999;
+            self.dividerCenterXConstraint.priority = 750;
+        } else {
+            self.imageViewWidthConstraint.priority = 750;
+            self.dividerCenterXConstraint.priority = 999;
+        }
+    }
     self.cellImageView.clipsToBounds = YES;
     self.cellIcon.clipsToBounds = YES;
     self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;

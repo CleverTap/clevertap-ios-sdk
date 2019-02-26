@@ -44,9 +44,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         let ctConfig = CleverTapInstanceConfig.init(accountId: "TEST-Z9R-486-4W5Z", accountToken: "TEST-6b4-2c1")
         ctConfig.logLevel = .debug
         ctConfig.cleverTapId = "7898732794941280-84180-48-01"
-        let ct1  = CleverTap.instance(with: ctConfig)
-        ct1.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1), "shouldFail":["foo":"bar"]])
-        ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
+//        let ct1  = CleverTap.instance(with: ctConfig)
+//        ct1.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1), "shouldFail":["foo":"bar"]])
+//        ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
         
         CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
             // NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
@@ -102,9 +102,22 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
 //        CleverTap.sharedInstance()?.recordEvent("test ios")
 //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
 //        CleverTap.sharedInstance()?.recordEvent("Cover")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial")
+//        CleverTap.sharedInstance()?.recordEvent("Header")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
+//        CleverTap.sharedInstance()?.recordEvent("Footer")
+//        CleverTap.sharedInstance()?.recordEvent("Cover Image")
+//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+//        CleverTap.sharedInstance()?.recordEvent("Footer")
+//        CleverTap.sharedInstance()?.recordEvent("Header")
+//        CleverTap.sharedInstance()?.recordEvent("Cover Image")
+//        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
+        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
         
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
+//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
-        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
+//        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
 
     }
     

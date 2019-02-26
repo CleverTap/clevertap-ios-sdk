@@ -28,10 +28,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         };
         
         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-//        CleverTap.sharedInstance(withCleverTapID: "909090909090")
+//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+
+        CleverTap.sharedInstance(withCleverTapID: "909090909090")
+        
         CleverTap.setDebugLevel(2)
 //        CleverTap.autoIntegrate()
-        CleverTap.autoIntegrate(withCleverTapID: "222211111222222")
+//        CleverTap.autoIntegrate(withCleverTapID: "222211111222222")
         registerPush()
         
         return true

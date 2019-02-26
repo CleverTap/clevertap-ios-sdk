@@ -14,6 +14,9 @@
 		07053B7321E653E70085B44A /* UIView+CTToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 07053B7121E653E70085B44A /* UIView+CTToast.m */; };
 		070BB5CC21E70BC000428DEE /* volume_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CA21E70BBF00428DEE /* volume_on.png */; };
 		070BB5CD21E70BC000428DEE /* volume_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CB21E70BC000428DEE /* volume_off.png */; };
+		070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */; };
+		070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */; };
+		070CDC0F2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */; };
 		071EB4C7217F6427008F0FAB /* CTFooterViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB477217F6427008F0FAB /* CTFooterViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB478217F6427008F0FAB /* CTDismissButton.m */; };
 		071EB4C9217F6427008F0FAB /* CTHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB479217F6427008F0FAB /* CTHeaderViewController.m */; };
@@ -144,6 +147,10 @@
 		07BF4661217F80C1002E166D /* CTInAppResources.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A7217F6427008F0FAB /* CTInAppResources.m */; };
 		07BF4662217F8359002E166D /* CTInAppUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4AE217F6427008F0FAB /* CTInAppUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07BF4663217F838D002E166D /* CTInAppUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47D217F6427008F0FAB /* CTInAppUtils.m */; };
+		07D0D08F2223F24E000D5686 /* CTFooterViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D0D08E2223F24E000D5686 /* CTFooterViewController~iphoneland.xib */; };
+		07D0D0912223F44E000D5686 /* CTHeaderViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */; };
+		07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */; };
+		07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3822255087009EE610 /* CTCarouselImageView.xib */; };
 		07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -263,6 +270,9 @@
 		07053B7121E653E70085B44A /* UIView+CTToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+CTToast.m"; sourceTree = "<group>"; };
 		070BB5CA21E70BBF00428DEE /* volume_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = volume_on.png; sourceTree = "<group>"; };
 		070BB5CB21E70BC000428DEE /* volume_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = volume_off.png; sourceTree = "<group>"; };
+		070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~iphoneland.xib"; sourceTree = "<group>"; };
+		070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~iphoneland.xib"; sourceTree = "<group>"; };
+		070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~iphoneland.xib"; sourceTree = "<group>"; };
 		071EB477217F6427008F0FAB /* CTFooterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFooterViewController.h; sourceTree = "<group>"; };
 		071EB478217F6427008F0FAB /* CTDismissButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDismissButton.m; sourceTree = "<group>"; };
 		071EB479217F6427008F0FAB /* CTHeaderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHeaderViewController.m; sourceTree = "<group>"; };
@@ -380,6 +390,10 @@
 		07B9453A219EA34300D4C542 /* CTUserMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTUserMO.m; sourceTree = "<group>"; };
 		07B9454F219EA38F00D4C542 /* CleverTap+Inbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+Inbox.h"; sourceTree = "<group>"; };
 		07B94552219EA44100D4C542 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		07D0D08E2223F24E000D5686 /* CTFooterViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTFooterViewController~iphoneland.xib"; sourceTree = "<group>"; };
+		07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHeaderViewController~iphoneland.xib"; sourceTree = "<group>"; };
+		07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverImageViewController~iphoneland.xib"; sourceTree = "<group>"; };
+		07D86D3822255087009EE610 /* CTCarouselImageView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CTCarouselImageView.xib; sourceTree = "<group>"; };
 		07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCarouselImageView.h; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
@@ -467,24 +481,30 @@
 			isa = PBXGroup;
 			children = (
 				071EB48A217F6427008F0FAB /* images */,
-				071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */,
 				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
 				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
+				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
 				071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */,
+				07D0D08E2223F24E000D5686 /* CTFooterViewController~iphoneland.xib */,
+				071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */,
 				071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */,
-				071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */,
 				071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */,
-				071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */,
+				070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */,
 				071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */,
 				071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */,
-				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
+				070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */,
 				071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */,
-				071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */,
+				07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */,
+				071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */,
+				071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */,
 				071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */,
+				070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */,
 				071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */,
 				071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */,
 				071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */,
+				071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */,
 				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
+				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
 				071EB478217F6427008F0FAB /* CTDismissButton.m */,
 				071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */,
@@ -548,6 +568,7 @@
 				0797132E21A2F09A0011C9A3 /* CTSwipeView.m */,
 				07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */,
 				0797133821A309720011C9A3 /* CTCarouselImageView.m */,
+				07D86D3822255087009EE610 /* CTCarouselImageView.xib */,
 				072F9E4021B14ECC00BC6313 /* CTInboxMessageActionView.h */,
 				072F9E4121B14ECC00BC6313 /* CTInboxMessageActionView.m */,
 				07053B7021E653E70085B44A /* UIView+CTToast.h */,
@@ -959,6 +980,7 @@
 				071EB4E0217F6427008F0FAB /* ic_expand@2x.png in Resources */,
 				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
 				D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */,
+				07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */,
 				072F9E3F21B1368000BC6313 /* CTInboxIconMessageCell~port.xib in Resources */,
 				071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */,
 				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
@@ -968,6 +990,8 @@
 				0796FB6521AE5B2900FC380D /* CTCarouselMessageCell~port.xib in Resources */,
 				070229A8220831CB0093CA41 /* ct_default_landscape_image.png in Resources */,
 				071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */,
+				070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */,
+				070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
 				070229AD22084B0B0093CA41 /* ct_default_portrait_image.png in Resources */,
 				0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib in Resources */,
@@ -979,15 +1003,19 @@
 				071EB4F4217F6427008F0FAB /* CTCoverViewController~ipad.xib in Resources */,
 				071EB50E217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib in Resources */,
 				071EB4E3217F6427008F0FAB /* ic_expand@1x.png in Resources */,
+				070CDC0F2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib in Resources */,
 				07238E3B221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib in Resources */,
 				071EB504217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib in Resources */,
 				07B9453E219EA34300D4C542 /* placeholder.png in Resources */,
+				07D0D0912223F44E000D5686 /* CTHeaderViewController~iphoneland.xib in Resources */,
 				071EB4E2217F6427008F0FAB /* ic_pause@2x.png in Resources */,
 				071EB4E8217F6427008F0FAB /* CTFooterViewController~ipad.xib in Resources */,
 				071EB4DD217F6427008F0FAB /* ic_thumb.png in Resources */,
 				079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */,
 				071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */,
+				07D0D08F2223F24E000D5686 /* CTFooterViewController~iphoneland.xib in Resources */,
 				070BB5CD21E70BC000428DEE /* volume_off.png in Resources */,
+				07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
 				07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,
