@@ -9,16 +9,20 @@
 #if !(TARGET_OS_TV)
 + (NSString *)XibNameForControllerName:(NSString *)controllerName {
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
+    UIApplication *sharedApplication = [self getSharedApplication];
+    BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        UIApplication *sharedApplication = [self getSharedApplication];
-        BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
         if (landscape) {
             [xib appendString:@"~iphoneland"];
         } else {
             [xib appendString:@"~iphoneport"];
         }
     } else {
-        [xib appendString:@"~ipad"];
+        if (landscape) {
+            [xib appendString:@"~ipadland"];
+        } else {
+            [xib appendString:@"~ipad"];
+        }
     }
     return [xib copy];
 }

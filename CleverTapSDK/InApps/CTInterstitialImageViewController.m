@@ -74,6 +74,7 @@
                                          multiplier:0.85 constant:0] setActive:YES];
             
         }else {
+          if (![self deviceOrientationIsLandscape]) {
             [[NSLayoutConstraint constraintWithItem:self.containerView
                                           attribute:NSLayoutAttributeLeading
                                           relatedBy:NSLayoutRelationEqual
@@ -84,7 +85,7 @@
                                           relatedBy:NSLayoutRelationEqual
                                              toItem:self.view attribute:NSLayoutAttributeTrailing
                                          multiplier:1 constant:-160] setActive:YES];
-            
+           }
         }
     }
 

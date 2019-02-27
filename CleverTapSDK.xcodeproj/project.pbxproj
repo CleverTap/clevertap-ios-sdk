@@ -151,6 +151,13 @@
 		07D0D0912223F44E000D5686 /* CTHeaderViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */; };
 		07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */; };
 		07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3822255087009EE610 /* CTCarouselImageView.xib */; };
+		07D86D3B22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3A22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib */; };
+		07D86D3D22269462009EE610 /* CTFooterViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3C22269462009EE610 /* CTFooterViewController~ipadland.xib */; };
+		07D86D3F22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3E22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib */; };
+		07D86D41222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D40222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib */; };
+		07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D42222695B7009EE610 /* CTCoverImageViewController~ipadland.xib */; };
+		07D86D45222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D44222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib */; };
+		07D86D4722269638009EE610 /* CTHeaderViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D4622269638009EE610 /* CTHeaderViewController~ipadland.xib */; };
 		07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -394,6 +401,13 @@
 		07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHeaderViewController~iphoneland.xib"; sourceTree = "<group>"; };
 		07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverImageViewController~iphoneland.xib"; sourceTree = "<group>"; };
 		07D86D3822255087009EE610 /* CTCarouselImageView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CTCarouselImageView.xib; sourceTree = "<group>"; };
+		07D86D3A22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialViewController~ipadland.xib"; sourceTree = "<group>"; };
+		07D86D3C22269462009EE610 /* CTFooterViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTFooterViewController~ipadland.xib"; sourceTree = "<group>"; };
+		07D86D3E22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~ipadland.xib"; sourceTree = "<group>"; };
+		07D86D40222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~ipadland.xib"; sourceTree = "<group>"; };
+		07D86D42222695B7009EE610 /* CTCoverImageViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverImageViewController~ipadland.xib"; sourceTree = "<group>"; };
+		07D86D44222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~ipadland.xib"; sourceTree = "<group>"; };
+		07D86D4622269638009EE610 /* CTHeaderViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHeaderViewController~ipadland.xib"; sourceTree = "<group>"; };
 		07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCarouselImageView.h; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
@@ -484,25 +498,32 @@
 				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
 				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
 				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
+				07D86D3A22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib */,
 				071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */,
 				07D0D08E2223F24E000D5686 /* CTFooterViewController~iphoneland.xib */,
 				071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */,
+				07D86D3C22269462009EE610 /* CTFooterViewController~ipadland.xib */,
 				071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */,
+				07D86D40222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib */,
 				071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */,
 				070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */,
 				071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */,
+				07D86D3E22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib */,
 				071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */,
 				070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */,
 				071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */,
 				07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */,
+				07D86D42222695B7009EE610 /* CTCoverImageViewController~ipadland.xib */,
 				071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */,
 				071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */,
+				07D86D44222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib */,
 				071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */,
 				070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */,
 				071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */,
 				071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */,
 				071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */,
 				071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */,
+				07D86D4622269638009EE610 /* CTHeaderViewController~ipadland.xib */,
 				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
 				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
@@ -980,18 +1001,22 @@
 				071EB4E0217F6427008F0FAB /* ic_expand@2x.png in Resources */,
 				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
 				D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */,
+				07D86D3B22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib in Resources */,
 				07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */,
 				072F9E3F21B1368000BC6313 /* CTInboxIconMessageCell~port.xib in Resources */,
 				071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */,
+				07D86D4722269638009EE610 /* CTHeaderViewController~ipadland.xib in Resources */,
 				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
 				071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */,
 				071EB507217F6427008F0FAB /* CTFooterViewController~iphoneport.xib in Resources */,
 				071EB4E5217F6427008F0FAB /* ic_play@3x.png in Resources */,
+				07D86D45222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib in Resources */,
 				0796FB6521AE5B2900FC380D /* CTCarouselMessageCell~port.xib in Resources */,
 				070229A8220831CB0093CA41 /* ct_default_landscape_image.png in Resources */,
 				071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */,
 				070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */,
 				070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */,
+				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
 				070229AD22084B0B0093CA41 /* ct_default_portrait_image.png in Resources */,
 				0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib in Resources */,
@@ -1000,6 +1025,7 @@
 				071EB4F7217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib in Resources */,
 				071EB4DF217F6427008F0FAB /* ic_expand@3x.png in Resources */,
 				071EB4E6217F6427008F0FAB /* ic_play@2x.png in Resources */,
+				07D86D3F22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib in Resources */,
 				071EB4F4217F6427008F0FAB /* CTCoverViewController~ipad.xib in Resources */,
 				071EB50E217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib in Resources */,
 				071EB4E3217F6427008F0FAB /* ic_expand@1x.png in Resources */,
@@ -1026,12 +1052,14 @@
 				071EB4DA217F6427008F0FAB /* ic_shrink@2x.png in Resources */,
 				071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */,
 				071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */,
+				07D86D3D22269462009EE610 /* CTFooterViewController~ipadland.xib in Resources */,
 				D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */,
 				071EB4D0217F6427008F0FAB /* CTInterstitialViewController~ipad.xib in Resources */,
 				071EB4CB217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib in Resources */,
 				071EB50A217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib in Resources */,
 				071EB514217F6427008F0FAB /* CTCoverImageViewController~ipad.xib in Resources */,
 				07238E41221E7A270012DFAE /* CTCarouselImageMessageCell~land.xib in Resources */,
+				07D86D41222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib in Resources */,
 				07238E3D221E79F80012DFAE /* CTInboxSimpleMessageCell~land.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

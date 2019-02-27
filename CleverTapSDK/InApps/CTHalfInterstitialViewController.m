@@ -64,16 +64,19 @@
                                          multiplier:0.5 constant:0] setActive:YES];
             
         }else {
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeTrailing
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeTrailing
-                                         multiplier:1 constant:-160] setActive:YES];
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeLeading
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeLeading
-                                         multiplier:1 constant:160] setActive:YES];
+            if (![self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTrailing
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTrailing
+                                             multiplier:1 constant:-160] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeLeading
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeLeading
+                                             multiplier:1 constant:160] setActive:YES];
+
+            }
         }
     }
     
