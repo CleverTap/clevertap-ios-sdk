@@ -105,7 +105,7 @@ static const float kPageControlViewHeight = 30.f;
             [subview removeFromSuperview];
         }
         [self populateItemViews];
-        [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
+        [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight)-[self heightForPageControl], viewWidth, kPageControlViewHeight)];
 
     }
     [self configureSwipeViewWithHeightAdjustment:0];
@@ -133,22 +133,13 @@ static const float kPageControlViewHeight = 30.f;
     self.pageControl.hidesForSinglePage = YES;
     self.pageControl.currentPageIndicatorTintColor = [UIColor blueColor];
     self.pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
-    for (UIPageControl *pageControl in self.carouselView.subviews) {
-        if ([pageControl isKindOfClass:[UIPageControl class]]) {
-            [pageControl removeFromSuperview];
-        }
-    }
     for (UIPageControl *pageControl in self.containerView.subviews) {
         if ([pageControl isKindOfClass:[UIPageControl class]]) {
             [pageControl removeFromSuperview];
         }
     }
-    CTInboxMessageType messageType = [CTInboxUtils inboxMessageTypeFromString:self.message.type];
-    if (messageType == CTInboxMessageTypeCarousel && ![self deviceOrientationIsLandscape])  {
-         [self.carouselView addSubview:self.pageControl];
-    } else {
-         [self.containerView addSubview:self.pageControl];
-    }
+  
+    [self.containerView addSubview:self.pageControl];
 }
 
 #pragma mark - Swipe View Delegates
