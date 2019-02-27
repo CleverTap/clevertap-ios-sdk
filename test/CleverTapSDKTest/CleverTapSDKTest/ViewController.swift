@@ -112,7 +112,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
 //        CleverTap.sharedInstance()?.recordEvent("Header")
 //        CleverTap.sharedInstance()?.recordEvent("Cover Image")
 //        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
+//        CleverTap.sharedInstance()?.recordEvent("Charged")
+        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
+
         
 //        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
 //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")

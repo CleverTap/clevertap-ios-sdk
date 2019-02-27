@@ -35,7 +35,7 @@ static const float kPageControlViewHeight = 30.f;
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
-        CTCarouselImageView *carouselView = [[[CTInAppUtils bundle] loadNibNamed:@"CTCarouselImageView" owner:nil options:nil] lastObject];
+        CTCarouselImageView *carouselView = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
         [carouselView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
         carouselView.titleLabel.text = content.title;
@@ -86,8 +86,8 @@ static const float kPageControlViewHeight = 30.f;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     if ([self deviceOrientationIsLandscape]) {
-        self.carouselLandRatioConstraint.priority = [self orientationIsPortrait]? 750 : 999;
-        self.carouselPortRatioConstraint.priority = [self orientationIsPortrait]? 999 : 750;
+        self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
+        self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
         [self populateLandscapeViews];
         [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.carouselView.frame.size.width, kPageControlViewHeight)];
     } else {

@@ -138,22 +138,22 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v1V-X5-Ym9" customClass="CTInboxMessageActionView">
-                                <rect key="frame" x="333" y="329.5" width="334" height="45"/>
+                                <rect key="frame" x="334" y="329.5" width="333" height="45"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2gC-Da-oGx">
-                                        <rect key="frame" x="0.0" y="0.0" width="334" height="1"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="333" height="1"/>
                                         <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="height" priority="750" constant="1" id="jE0-Ai-lHj"/>
                                         </constraints>
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tNp-hZ-n1O">
-                                        <rect key="frame" x="0.0" y="1" width="111.5" height="44"/>
+                                        <rect key="frame" x="0.0" y="1" width="111" height="44"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <state key="normal" title="Button 1"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6HR-4n-3kW">
-                                        <rect key="frame" x="111.5" y="1" width="111" height="44"/>
+                                        <rect key="frame" x="111" y="1" width="111" height="44"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="dlI-8G-GZi"/>
                                         </constraints>
@@ -161,7 +161,7 @@
                                         <state key="normal" title="Button 2"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gK8-Zm-MZc">
-                                        <rect key="frame" x="222.5" y="1" width="111.5" height="44"/>
+                                        <rect key="frame" x="222" y="1" width="111" height="44"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="h2I-7h-XWN"/>
                                         </constraints>
@@ -207,7 +207,7 @@
                             <constraint firstItem="xbq-gB-il1" firstAttribute="trailing" secondItem="1S2-so-ixK" secondAttribute="trailing" id="AB8-PC-RL6"/>
                             <constraint firstItem="v1V-X5-Ym9" firstAttribute="top" secondItem="Lvj-LW-ipT" secondAttribute="bottom" id="AK6-co-SRk"/>
                             <constraint firstItem="Lvj-LW-ipT" firstAttribute="leading" secondItem="1S2-so-ixK" secondAttribute="leading" id="MRL-rx-Vhm"/>
-                            <constraint firstItem="v1V-X5-Ym9" firstAttribute="leading" secondItem="1S2-so-ixK" secondAttribute="leading" id="PYX-vT-vmp"/>
+                            <constraint firstItem="v1V-X5-Ym9" firstAttribute="leading" secondItem="1S2-so-ixK" secondAttribute="leading" constant="1" id="PYX-vT-vmp"/>
                             <constraint firstItem="xbq-gB-il1" firstAttribute="leading" secondItem="FwL-V1-IzQ" secondAttribute="leading" id="Qmz-pG-qJP"/>
                             <constraint firstAttribute="bottom" secondItem="1S2-so-ixK" secondAttribute="bottom" id="SC1-54-j41"/>
                             <constraint firstItem="Lvj-LW-ipT" firstAttribute="top" secondItem="FwL-V1-IzQ" secondAttribute="top" id="cRv-AH-EAo"/>

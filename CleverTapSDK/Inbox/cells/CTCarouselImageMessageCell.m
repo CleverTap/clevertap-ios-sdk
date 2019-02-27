@@ -40,20 +40,21 @@
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
-    CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
-    CGFloat viewHeight = viewWidth;
-    if (![self orientationIsPortrait]) {
-        viewHeight = (viewWidth*[self getLandscapeMultiplier]);
-    }
-    CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
-    self.frame = frame;
-    if (![self deviceOrientationIsLandscape]) {
+    if ([self deviceOrientationIsLandscape]) {
+        self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
+        self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
+    } else {
+        CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width;
+        CGFloat viewHeight = viewWidth;
+        if (![self orientationIsPortrait]) {
+            viewHeight = (viewWidth*[self getLandscapeMultiplier]);
+        }
+        CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
+        self.frame = frame;
         self.carouselViewHeight.constant = viewHeight;
         self.carouselView.frame = frame;
-    } else {
-        viewWidth = self.carouselView.frame.size.width;
-        self.carouselViewHeight.constant = [[UIScreen mainScreen] bounds].size.height - 80;
     }
+    
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
     }
@@ -62,7 +63,7 @@
     }
     [self configureSwipeViewWithHeightAdjustment:0];
     [self populateItemViews];
-    [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, viewWidth, [self heightForPageControl])];
+    [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.containerView.frame.size.width, [self heightForPageControl])];
     [self.swipeView reloadData];
 }
 
