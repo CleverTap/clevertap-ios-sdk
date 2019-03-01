@@ -38,12 +38,6 @@
 }
 #endif
 
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    [self initWithNotification:_notification];
-    [self loadView];
-    [self viewDidLoad];
-}
-
 -(void)show:(BOOL)animated {
     NSAssert(false, @"Override in sub-class");
 }

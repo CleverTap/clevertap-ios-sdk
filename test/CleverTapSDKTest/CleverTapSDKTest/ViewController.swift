@@ -1,33 +1,60 @@
 import UIKit
 import CoreLocation
 import CleverTapSDK
+import WebKit
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
-    
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler {
     
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: UIButton!
+    var webView: WKWebView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSLog("running viewDidLoad")
         inboxRegister()
+        addWebview()
+    }
+    
+    func addWebview() {
+        
+        let config = WKWebViewConfiguration()
+        let userContentController = WKUserContentController()
+        userContentController.add(self, name: "clevertap")
+        let scriptSource = "window.webkit.messageHandlers.clevertap1.postMessage(`Hello, world!`);"
+        let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+        userContentController.addUserScript(userScript)
+        config.userContentController = userContentController
+        
+        let customFrame =  CGRect(x: 40, y: 70, width: self.view.frame.width, height: 400)
+        self.webView = WKWebView (frame: customFrame , configuration: config)
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(webView)
+        webView.navigationDelegate = self
+        let myURL = URL(string: "https://www.apple.com")
+        let myRequest = URLRequest(url: myURL!)
+//        webView.load(myRequest)
+        
+        self.webView.loadHTMLString(self.htmlStringFromFile(with: "sampleHTMLCode"), baseURL: nil)
+
+    }
+    
+    private func htmlStringFromFile(with name: String) -> String {
+        let path = Bundle.main.path(forResource: name, ofType: "html")
+        if let result = try? String(contentsOfFile: path!, encoding: String.Encoding.utf8) {
+            return result
+        }
+        return ""
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        //CleverTap.sharedInstance().recordScreenView("MainViewController")
-        
-//        if (@available(iOS 11.0, *)) {
-//            UIWindow *window = UIApplication.sharedApplication.keyWindow;
-//            CGFloat topPadding = window.safeAreaInsets.left;
-//            CGFloat bottomPadding = window.safeAreaInsets.bottom;
-//        }
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        decisionHandler(.allow)
     }
     
     @IBAction func inboxButtonTapped(_ sender: Any) {
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "W9R-486-4W5Z", accountToken: "6b4-2c0")
-        let ct1  = CleverTap.instance(with: ctConfig)
         let style = CleverTapInboxStyleConfig.init()
         style.title = "AppInbox"
         style.cellBackgroundColor = UIColor.yellow
@@ -40,63 +67,34 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     }
     
     func inboxRegister() {
-        
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "TEST-Z9R-486-4W5Z", accountToken: "TEST-6b4-2c1")
-        ctConfig.logLevel = .debug
-        ctConfig.cleverTapId = "7898732794941280-84180-48-01"
-//        let ct1  = CleverTap.instance(with: ctConfig)
-//        ct1.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1), "shouldFail":["foo":"bar"]])
-//        ct1.profileSetMultiValues(["a", "b", "c"], forKey:"letters")
-        
-        CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
-            // NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages Did Update: %@", ct1.profileGetID() ?? "", [ct1.getAllInboxMessages()])
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
-            
-            DispatchQueue.main.async {
-                self.inboxButton.isHidden = false;
-                self.inboxButton.setTitle("Show Inbox:\(messageCount)/\(unreadCount) unread", for: .normal)
-            }
-     }))
+         CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
+                let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+                let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+                
+                DispatchQueue.main.async {
+                    self.inboxButton.isHidden = false;
+                    self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
+                }
+         }))
         
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
-//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ is: %@", ct1.profileGetID() ?? ", success ? "ready" : "unavailable")
-//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Count is: %@", ct1.profileGetID() ?? "", [ct1.getInboxMessageCount()])
-//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
-//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
-//                NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
-            //let unread = ct1.getUnreadInboxMessages();
-            //NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
-            
-            /*
-             if (unread.count > 0) {
-             ct1.markRead(unread[0])
-             }
-             if let m = ct1.getInboxMessage(forId: "1") {
-             ct1.delete(m)
-             }
-             
-             ct1.onUserLogin(["foo2":"bar2", "Email":"peter+test2@clevertap.com", "identity":"765432"])
-             ct1.initializeInbox(callback: ({ (success) in
-             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ is: %@", ct1.profileGetID(), success ? "ready" : "unavailable")
-             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageCount()])
-             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Message Unread Count is: %@", ct1.profileGetID(), [ct1.getInboxMessageUnreadCount()])
-             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Messages is: %@", ct1.profileGetID(), [ct1.getAllInboxMessages()])
-             NSLog("CleverTapInbox.W9R-486-4W5Z.%@ Unread Messages is: %@", ct1.profileGetID(), [ct1.getUnreadInboxMessages()])
-             }))
-             */
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
             let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
             self.inboxButton.isHidden = false;
             self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
         }))
     }
- 
     
-    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: UInt, withButtonIndex buttonIndex: UInt) {
-        
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+//        guard let body = message.body as? [String: Any] else { return }
+//        guard let command = body["action"] as? String else { return }
+//        guard let name = body["event"] as? String else { return }
+//
+//        if command == "recordEvent" {
+//            guard let value = body["value"] as? String else { return }
+//        }
     }
-    
+  
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
         CleverTap.sharedInstance()?.recordEvent("test ios")

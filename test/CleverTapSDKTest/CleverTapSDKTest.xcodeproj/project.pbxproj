@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */; };
 		D014B8A320E2F20B001E0780 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D014B8A220E2F20B001E0780 /* NotificationService.m */; };
 		D014B8A720E2F20B001E0780 /* testNotifServiceExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D014B8AC20E2F216001E0780 /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; };
@@ -94,6 +95,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = testNotifServiceExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D014B8A120E2F20B001E0780 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		D014B8A220E2F20B001E0780 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
@@ -237,6 +239,7 @@
 		D0A66245207EE4FF00B403F3 /* CleverTapSDKTest */ = {
 			isa = PBXGroup;
 			children = (
+				07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */,
 				D0596EFC208BDC6800A80753 /* CleverTapSDKTest.entitlements */,
 				D0A66246207EE4FF00B403F3 /* AppDelegate.swift */,
 				D0A66248207EE4FF00B403F3 /* ViewController.swift */,
@@ -460,6 +463,7 @@
 			files = (
 				D0A6624E207EE50000B403F3 /* Assets.xcassets in Resources */,
 				D0A6624C207EE4FF00B403F3 /* Main.storyboard in Resources */,
+				07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

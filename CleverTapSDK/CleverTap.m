@@ -1723,6 +1723,26 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [controller hide:true];
 }
 
+-(void)handleMessageFromWebview:(NSDictionary<NSString *,id> *)message {
+    if ([message[@"action"] isEqual:@"recordEvent"]) {
+        [self recordEvent:message[@"event"] withProps:message[@"properties"]];
+    } else if ([message[@"action"] isEqual: @"profilePush"]) {
+        [self profilePush:message[@"properties"]];
+    } else if ([message[@"action"] isEqual: @"profileSetMultiValues"]) {
+        [self profileSetMultiValues:message[@"values"] forKey:message[@"key"]];
+    } else if ([message[@"action"] isEqual: @"profileAddMultiValue"]) {
+        [self profileAddMultiValue:message[@"value"] forKey:message[@"key"]];
+    } else if ([message[@"action"] isEqual: @"profileAddMultiValues"]) {
+        [self profileAddMultiValues:message[@"values"] forKey:message[@"key"]];
+    } else if ([message[@"action"] isEqual: @"profileRemoveValueForKey"]) {
+        [self profileRemoveValueForKey:message[@"key"]];
+    } else if ([message[@"action"] isEqual: @"profileRemoveMultiValue"]) {
+        [self profileRemoveMultiValue:message[@"value"] forKey:message[@"key"]];
+    } else if ([message[@"action"] isEqual: @"profileRemoveMultiValues"]) {
+        [self profileRemoveMultiValues:message[@"values"] forKey:message[@"key"]];
+    }
+}
+
 #pragma mark Serial Queue Operations
 
 - (void)runSerialAsync:(void (^)(void))taskBlock {

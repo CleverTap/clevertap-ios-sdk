@@ -21,7 +21,7 @@ typedef enum {
 #define kMinimumPan       60.0
 #define kBOUNCE_DISTANCE  0.0
 
-@interface CTInAppHTMLViewController () <WKNavigationDelegate, UIGestureRecognizerDelegate> {
+@interface CTInAppHTMLViewController () <WKNavigationDelegate, WKScriptMessageHandler,  UIGestureRecognizerDelegate> {
     WKWebView *webView;
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
@@ -78,6 +78,7 @@ typedef enum {
     WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
     WKUserContentController *wkController = [[WKUserContentController alloc] init];
     [wkController addUserScript:wkScript];
+    [wkController addScriptMessageHandler:self name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
@@ -100,13 +101,14 @@ typedef enum {
     
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
-    
-    //    TODO: check for request url
-    //    if request url available - loadRequest otherwise load HTM:
-    //    [webView loadRequest:];
-    
-    [webView loadHTMLString:self.notification.html baseURL:nil];
-    
+    //    TODO: Remove Test url
+    NSString *url = @"https://www.apple.com";
+    if (url && ![url  isEqual: @""]) {
+        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
+        webView.navigationDelegate = nil;
+    } else{
+        [webView loadHTMLString:self.notification.html baseURL:nil];
+    }
     boolean_t fixedWidth = false, fixedHeight = false;
     
     CGSize size = CGSizeZero;
@@ -245,6 +247,14 @@ typedef enum {
     }
     decisionHandler(WKNavigationActionPolicyCancel);
     
+}
+
+- (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
+    if ([message.body isKindOfClass:[NSDictionary class]]) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(handleMessageFromWebview:)]) {
+            [self.delegate handleMessageFromWebview:message.body];
+        }
+    }
 }
     
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
@@ -508,5 +518,5 @@ typedef enum {
 -(void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
-    
-    @end
+
+@end

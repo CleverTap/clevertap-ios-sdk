@@ -5,6 +5,7 @@
 
 @protocol CTInAppNotificationDisplayDelegate <NSObject>
 - (void)handleNotificationCTA:(NSURL*)ctaURL forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras;
+- (void)handleMessageFromWebview:(NSDictionary<NSString *, id> *)message;
 - (void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller;
 @optional
 - (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller;
