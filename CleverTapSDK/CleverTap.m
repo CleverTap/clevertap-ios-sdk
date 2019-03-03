@@ -1217,7 +1217,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if ([[self class] runningInsideAppExtension]) return;
     NSString *token = [self getStoredDeviceToken];
     if (token != nil && ![token isEqualToString:@""])
-        [self setPushTokenAsString:token];
+    [self pushDeviceToken:token forRegisterAction:action];
 }
 
 - (void)pushDeviceToken:(NSString *)deviceToken forRegisterAction:(CleverTapPushTokenRegistrationAction)action {
