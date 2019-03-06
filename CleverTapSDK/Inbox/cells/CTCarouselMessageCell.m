@@ -89,7 +89,7 @@ static const float kPageControlViewHeight = 30.f;
         self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
         self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
         [self populateLandscapeViews];
-        [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.carouselView.frame.size.width, kPageControlViewHeight)];
+        [self configurePageControlWithRect:CGRectMake(self.contentView.frame.size.width/2, self.carouselView.frame.size.height - kPageControlViewHeight, self.carouselView.frame.size.width/2, kPageControlViewHeight)];
     } else {
         captionHeight = [CTCarouselImageView captionHeight];
         CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
@@ -105,7 +105,7 @@ static const float kPageControlViewHeight = 30.f;
             [subview removeFromSuperview];
         }
         [self populateItemViews];
-        [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight)-[self heightForPageControl], viewWidth, kPageControlViewHeight)];
+        [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
 
     }
     [self configureSwipeViewWithHeightAdjustment:0];

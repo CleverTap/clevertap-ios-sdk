@@ -25,6 +25,7 @@
                                 <rect key="frame" x="167" y="0.0" width="333.5" height="333.5"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="Smr-KH-rfz" secondAttribute="height" priority="750" id="Cm7-wc-0Vm"/>
+                                    <constraint firstAttribute="height" constant="333.5" id="NZE-d9-CO5"/>
                                     <constraint firstAttribute="height" secondItem="Smr-KH-rfz" secondAttribute="width" multiplier="9:16" priority="750" id="q8Q-mL-Zf2"/>
                                 </constraints>
                             </view>
@@ -72,7 +73,6 @@
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="Smr-KH-rfz" secondAttribute="bottom" constant="30" id="3Sv-KO-Q5v"/>
                             <constraint firstItem="Smr-KH-rfz" firstAttribute="centerX" secondItem="sJM-Gb-zfU" secondAttribute="centerX" id="DHK-rL-v4P"/>
-                            <constraint firstItem="Smr-KH-rfz" firstAttribute="width" secondItem="sJM-Gb-zfU" secondAttribute="width" multiplier="0.5" id="Hag-Ft-E6D"/>
                             <constraint firstAttribute="bottom" secondItem="cPF-Xk-CZ5" secondAttribute="bottom" id="Qpo-9B-nfh"/>
                             <constraint firstItem="Smr-KH-rfz" firstAttribute="top" secondItem="sJM-Gb-zfU" secondAttribute="top" id="hbU-a1-Zk6"/>
                             <constraint firstAttribute="trailing" secondItem="cPF-Xk-CZ5" secondAttribute="trailing" id="o7d-HZ-T31"/>
@@ -92,6 +92,7 @@
                 <outlet property="carouselLandRatioConstraint" destination="q8Q-mL-Zf2" id="GXm-Li-uwc"/>
                 <outlet property="carouselPortRatioConstraint" destination="Cm7-wc-0Vm" id="FQx-AG-DzA"/>
                 <outlet property="carouselView" destination="Smr-KH-rfz" id="Hrj-Zo-yOc"/>
+                <outlet property="carouselViewHeight" destination="NZE-d9-CO5" id="yhl-Eg-JDz"/>
                 <outlet property="containerView" destination="sJM-Gb-zfU" id="Cul-zW-OJv"/>
                 <outlet property="dateLabel" destination="ZbX-3u-YLM" id="3hN-cH-jOG"/>
                 <outlet property="readView" destination="2LW-C3-gw1" id="tLf-Jd-Z7x"/>

@@ -41,6 +41,7 @@
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     if ([self deviceOrientationIsLandscape]) {
+        self.carouselViewHeight.constant =  [[UIScreen mainScreen] bounds].size.height - 120;
         self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
         self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
     } else {
@@ -61,6 +62,8 @@
     for (UIView *subview in [self.carouselView subviews]) {
         [subview removeFromSuperview];
     }
+    [self layoutIfNeeded];
+    [self layoutSubviews];
     [self configureSwipeViewWithHeightAdjustment:0];
     [self populateItemViews];
     [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.containerView.frame.size.width, [self heightForPageControl])];

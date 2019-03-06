@@ -19,27 +19,27 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1gS-iQ-erU">
-                        <rect key="frame" x="0.0" y="0.0" width="667" height="363.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="667" height="242.5"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JEX-jE-5Df">
-                                <rect key="frame" x="0.0" y="0.0" width="667" height="333.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="667" height="242.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="JEX-jE-5Df" secondAttribute="height" multiplier="3.5:1" priority="250" id="2UI-1D-Oif"/>
-                                    <constraint firstAttribute="width" secondItem="JEX-jE-5Df" secondAttribute="height" multiplier="2:1" priority="750" id="Dib-Ja-8vO"/>
+                                    <constraint firstAttribute="width" secondItem="JEX-jE-5Df" secondAttribute="height" multiplier="2.75:1" priority="750" id="Dib-Ja-8vO"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4GD-U4-fYg">
-                                <rect key="frame" x="0.0" y="333.5" width="667" height="30"/>
+                                <rect key="frame" x="333.5" y="212.5" width="333.5" height="30"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sLW-ZY-OVT">
-                                        <rect key="frame" x="619.5" y="8" width="11.5" height="14.5"/>
+                                        <rect key="frame" x="286" y="8" width="11.5" height="14.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <color key="textColor" red="0.45882352939999999" green="0.45882352939999999" blue="0.45882352939999999" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Lf0-Yy-0WQ">
-                                        <rect key="frame" x="631" y="10" width="16" height="10"/>
+                                        <rect key="frame" x="297.5" y="10" width="16" height="10"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" horizontalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="Ytz-zM-nfG">
                                                 <rect key="frame" x="6" y="0.0" width="10" height="10"/>
@@ -71,12 +71,12 @@
                             </view>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="4GD-U4-fYg" secondAttribute="bottom" id="4a7-8B-yRb"/>
-                            <constraint firstItem="4GD-U4-fYg" firstAttribute="top" secondItem="JEX-jE-5Df" secondAttribute="bottom" id="5gT-FM-bhC"/>
+                            <constraint firstItem="4GD-U4-fYg" firstAttribute="width" secondItem="1gS-iQ-erU" secondAttribute="width" multiplier="0.5" id="5Az-qk-KPx"/>
+                            <constraint firstAttribute="bottom" secondItem="4GD-U4-fYg" secondAttribute="bottom" id="74h-44-ldZ"/>
                             <constraint firstItem="JEX-jE-5Df" firstAttribute="top" secondItem="1gS-iQ-erU" secondAttribute="top" id="8Zp-Ad-3nX"/>
                             <constraint firstItem="JEX-jE-5Df" firstAttribute="leading" secondItem="1gS-iQ-erU" secondAttribute="leading" id="MWs-GV-aNu"/>
+                            <constraint firstAttribute="bottom" secondItem="JEX-jE-5Df" secondAttribute="bottom" id="Zpw-cL-nMC"/>
                             <constraint firstAttribute="trailing" secondItem="4GD-U4-fYg" secondAttribute="trailing" id="cPW-fB-qop"/>
-                            <constraint firstItem="4GD-U4-fYg" firstAttribute="leading" secondItem="1gS-iQ-erU" secondAttribute="leading" id="jbZ-kC-DcU"/>
                             <constraint firstAttribute="trailing" secondItem="JEX-jE-5Df" secondAttribute="trailing" id="yvO-KO-8g6"/>
                         </constraints>
                     </view>

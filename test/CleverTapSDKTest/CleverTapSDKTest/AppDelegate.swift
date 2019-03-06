@@ -27,14 +27,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-
-        CleverTap.sharedInstance(withCleverTapID: "909090909090")
-        let arr: NSMutableArray = ["a1", "a2", "a3"]
-        CleverTap.sharedInstance()?.profileSetMultiValues(arr as! [String], forKey: "test")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)
-//        CleverTap.autoIntegrate()
+
+//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+
+//        CleverTap.sharedInstance(withCleverTapID: "909090909090")
+//        let arr: NSMutableArray = ["a1", "a2", "a3"]
+//        CleverTap.sharedInstance()?.profileSetMultiValues(arr as! [String], forKey: "test")
 //        CleverTap.autoIntegrate(withCleverTapID: "222211111222222")
         registerPush()
         

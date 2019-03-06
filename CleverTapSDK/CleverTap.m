@@ -1226,7 +1226,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if ([[self class] runningInsideAppExtension]) return;
     NSString *token = [self getStoredDeviceToken];
     if (token != nil && ![token isEqualToString:@""])
-        [self setPushTokenAsString:token];
+    [self pushDeviceToken:token forRegisterAction:action];
 }
 
 - (void)pushDeviceToken:(NSString *)deviceToken forRegisterAction:(CleverTapPushTokenRegistrationAction)action {
@@ -1724,22 +1724,24 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 -(void)handleMessageFromWebview:(NSDictionary<NSString *,id> *)message {
-    if ([message[@"action"] isEqual:@"recordEvent"]) {
-        [self recordEvent:message[@"event"] withProps:message[@"properties"]];
-    } else if ([message[@"action"] isEqual: @"profilePush"]) {
-        [self profilePush:message[@"properties"]];
-    } else if ([message[@"action"] isEqual: @"profileSetMultiValues"]) {
-        [self profileSetMultiValues:message[@"values"] forKey:message[@"key"]];
-    } else if ([message[@"action"] isEqual: @"profileAddMultiValue"]) {
-        [self profileAddMultiValue:message[@"value"] forKey:message[@"key"]];
-    } else if ([message[@"action"] isEqual: @"profileAddMultiValues"]) {
-        [self profileAddMultiValues:message[@"values"] forKey:message[@"key"]];
-    } else if ([message[@"action"] isEqual: @"profileRemoveValueForKey"]) {
-        [self profileRemoveValueForKey:message[@"key"]];
-    } else if ([message[@"action"] isEqual: @"profileRemoveMultiValue"]) {
-        [self profileRemoveMultiValue:message[@"value"] forKey:message[@"key"]];
-    } else if ([message[@"action"] isEqual: @"profileRemoveMultiValues"]) {
-        [self profileRemoveMultiValues:message[@"values"] forKey:message[@"key"]];
+    NSString *action = [message objectForKey:@"action"];
+    
+    if ([action isEqual:@"recordEventWithProps"]) {
+        [self recordEvent: message[@"event"] withProps: message[@"props"]];
+    } else if ([action isEqual: @"profilePush"]) {
+        [self profilePush: message[@"properties"]];
+    } else if ([action isEqual: @"profileSetMultiValues"]) {
+        [self profileSetMultiValues: message[@"values"] forKey: message[@"key"]];
+    } else if ([action isEqual: @"profileAddMultiValue"]) {
+        [self profileAddMultiValue: message[@"value"] forKey: message[@"key"]];
+    } else if ([action isEqual: @"profileAddMultiValues"]) {
+        [self profileAddMultiValues: message[@"values"] forKey: message[@"key"]];
+    } else if ([action isEqual: @"profileRemoveValueForKey"]) {
+        [self profileRemoveValueForKey: message[@"key"]];
+    } else if ([action isEqual: @"profileRemoveMultiValue"]) {
+        [self profileRemoveMultiValue: message[@"value"] forKey: message[@"key"]];
+    } else if ([action isEqual: @"profileRemoveMultiValues"]) {
+        [self profileRemoveMultiValues: message[@"values"] forKey: message[@"key"]];
     }
 }
 

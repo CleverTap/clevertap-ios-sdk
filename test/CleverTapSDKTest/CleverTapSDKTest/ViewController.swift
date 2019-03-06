@@ -12,7 +12,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     override func viewDidLoad() {
         super.viewDidLoad()
         inboxRegister()
-        addWebview()
+//        addWebview()
     }
     
     func addWebview() {
@@ -58,7 +58,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         let style = CleverTapInboxStyleConfig.init()
         style.title = "AppInbox"
         style.cellBackgroundColor = UIColor.yellow
-        style.messageTags = ["Promotions", "Offers"];
+//        style.messageTags = ["Promotions", "Offers"];
         
         if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
