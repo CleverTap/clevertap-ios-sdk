@@ -13,7 +13,8 @@
 + (void)buildChargedEventWithDetails:(NSDictionary *)chargeDetails
                            andItems:(NSArray *)items completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*> *errors))completion;
 
-+ (void)buildPushNotificationEventForNotification:(NSDictionary*)notification
++ (void)buildPushNotificationEvent:(BOOL)clicked
+                                   forNotification:(NSDictionary*)notification
                                 completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
 + (void)buildInAppNotificationStateEvent:(BOOL)clicked

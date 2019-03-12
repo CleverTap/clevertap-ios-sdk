@@ -14,6 +14,8 @@
 @property (nonatomic, readwrite) CTInAppType inAppType;
 
 @property (nonatomic, strong) NSURL *imageURL;
+@property (nonatomic, strong) NSURL *imageUrlLand;
+
 @property (nonatomic, readwrite, strong) NSData *image;
 @property (nonatomic, copy, readwrite) NSString *contentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
@@ -103,9 +105,11 @@
     if (_media) {
         self.contentType = _media[@"content_type"];
         NSString *_mediaUrl = _media[@"url"];
+        // TODO: add url_land
         if (_mediaUrl) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
+                // TODO: add landscape url
                 if ([self.contentType isEqualToString:@"image/gif"] ) {
                     _mediaIsGif = YES;
                 }else {

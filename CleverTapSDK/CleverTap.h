@@ -656,6 +656,16 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @method
  
  @abstract
+ Record Notification Viewed for Push Notifications.
+ 
+ @param notificationData       notificationData id
+ */
+- (void)recordNotificationViewedEventWithData:(id)notificationData;
+
+/*!
+ @method
+ 
+ @abstract
  Get the time of the first recording of the event.
  
  Be sure to call enablePersonalization prior to invoking this method.

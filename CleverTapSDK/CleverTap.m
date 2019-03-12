@@ -52,6 +52,7 @@ static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static const int kMaxBatchSize = 49;
 NSString* const kQUEUE_NAME_PROFILE = @"net_queue_profile";
 NSString* const kQUEUE_NAME_EVENTS = @"events";
+NSString* const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
 
 NSString* const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
 
@@ -95,6 +96,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeProfile,
     CleverTapEventTypeRaised,
     CleverTapEventTypeData,
+    CleverTapEventTypeNotification,
 };
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
@@ -138,6 +140,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
 @property (nonatomic, strong) NSMutableArray *profileQueue;
+@property (nonatomic, strong) NSMutableArray *notificationsQueue;
 @property (nonatomic, strong) NSURLSession *urlSession;
 @property (nonatomic, strong) NSString *redirectDomain;
 @property (nonatomic, strong) NSString *explictEndpointDomain;
@@ -810,11 +813,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return request;
 }
 
-- (NSString *)endpoint {
+- (NSString *)endpointForQueue: (NSMutableArray *)queue {
     if (!self.redirectDomain) return nil;
     NSString *accountId = self.config.accountId;
     NSString *sdkRevision = self.deviceInfo.sdkVersion;
-    NSString *endpointDomain = self.redirectDomain;
+    NSString *endpointDomain;
+    if (queue == _notificationsQueue) {
+        endpointDomain = self.redirectDomain;
+    } else {
+        endpointDomain = self.redirectDomain;
+    }
     NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/a1?os=iOS&t=%@&z=%@", endpointDomain, sdkRevision, accountId];
     currentRequestTimestamp = (int) [[[NSDate alloc] init] timeIntervalSince1970];
     endpointUrl = [endpointUrl stringByAppendingFormat:@"&ts=%d", currentRequestTimestamp];
@@ -1318,7 +1326,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self _checkAndFireDeepLinkForNotification:notification];
         }
         [self runSerialAsync:^{
-            [CTEventBuilder buildPushNotificationEventForNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                 if (event) {
                     self.wzrkParams = [event[@"evtData"] copy];
                     [self queueEvent:event withType:CleverTapEventTypeRaised];
@@ -1725,7 +1733,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 -(void)handleMessageFromWebview:(NSDictionary<NSString *,id> *)message {
     NSString *action = [message objectForKey:@"action"];
-    
     if ([action isEqual:@"recordEventWithProps"]) {
         [self recordEvent: message[@"event"] withProps: message[@"props"]];
     } else if ([action isEqual: @"profilePush"]) {
@@ -2108,9 +2115,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             type = @"page";
         } else if (eventType == CleverTapEventTypePing) {
             type = @"ping";
-        } else if (eventType == CleverTapEventTypeProfile)
+        } else if (eventType == CleverTapEventTypeProfile){
             type = @"profile";
-        else if (eventType == CleverTapEventTypeData) {
+        } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
         } else {
             type = @"event";
@@ -2147,7 +2154,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if ([self.profileQueue count] > 500) {
                 [self.profileQueue removeObjectAtIndex:0];
             }
-            
+        } else if (eventType == CleverTapEventTypeNotification) {
+            [self.notificationsQueue addObject:mutableEvent];
+            if ([self.notificationsQueue count] > 100) {
+                [self.notificationsQueue removeObjectAtIndex:0];
+            }
         } else {
             [self.eventsQueue addObject:mutableEvent];
             if ([self.eventsQueue count] > 500) {
@@ -2197,12 +2208,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if ([self isMuted] || _offline) return;
     [self sendQueue:_profileQueue];
     [self sendQueue:_eventsQueue];
+    [self sendQueue:_notificationsQueue];
 }
 
 - (void)inflateQueuesAsync {
     [self runSerialAsync:^{
         [self inflateProfileQueue];
         [self inflateEventsQueue];
+        [self inflateNotificationsQueue];
     }];
 }
 
@@ -2220,9 +2233,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (void)inflateNotificationsQueue {
+    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] removeFile:YES];
+    if (!self.notificationsQueue || [self isMuted]) {
+        self.notificationsQueue = [NSMutableArray array];
+    }
+}
+
 - (void)clearQueues {
     [self clearProfileQueue];
     [self clearEventsQueue];
+    [self clearNotificationsQueue];
 }
 
 - (void)clearEventsQueue {
@@ -2235,6 +2256,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     self.profileQueue = [NSMutableArray array];
 }
 
+- (void)clearNotificationsQueue {
+    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] removeFile:YES];
+    self.notificationsQueue = [NSMutableArray array];
+}
+
 - (void)persistQueues {
     [self runSerialAsync:^{
         if ([self isMuted]) {
@@ -2242,8 +2268,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         } else {
             [self persistProfileQueue];
             [self persistEventsQueue];
+            [self persistNotificationsQueue];
         }
-        
     }];
 }
 - (void)persistEventsQueue {
@@ -2264,6 +2290,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [CTPreferences archiveObject:profileEventsCopy forFileName:fileName];
 }
 
+- (void)persistNotificationsQueue {
+    NSString *fileName = [self notificationsFileName];
+    NSMutableArray *notificationsCopy;
+    @synchronized (self) {
+        notificationsCopy = [NSMutableArray arrayWithArray:[self.notificationsQueue copy]];
+    }
+    [CTPreferences archiveObject:notificationsCopy forFileName:fileName];
+}
+
 - (NSString *)fileNameForQueue:(NSString *)queueName {
     return [NSString stringWithFormat:@"clevertap-%@-%@.plist", self.config.accountId, queueName];
 }
@@ -2274,6 +2309,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSString *)profileEventsFileName {
     return [self fileNameForQueue:kQUEUE_NAME_PROFILE];
+}
+
+- (NSString *)notificationsFileName {
+    return [self fileNameForQueue:kQUEUE_NAME_NOTIFICATIONS];
 }
 
 #pragma mark Validation Error Handling
@@ -2307,14 +2346,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogInternal(self.config.logLevel, @"%@: No events in the queue", self);
         return;
     }
-    
     // just belt and suspenders here, should never get here in muted state
     if ([self isMuted]) {
         CleverTapLogInternal(self.config.logLevel, @"%@: is muted won't send queue", self);
         return;
     }
     
-    NSString *endpoint = [self endpoint];
+    NSString *endpoint = [self endpointForQueue:queue];
     
     if (endpoint == nil) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Endpoint is not set, will not start sending queue", self);
@@ -2340,7 +2378,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to CleverTap servers at %@", self, jsonBody, endpoint);
             
             // update endpoint for current timestamp
-            endpoint = [self endpoint];
+            endpoint = [self endpointForQueue:queue];
             if (endpoint == nil) {
                 CleverTapLogInternal(self.config.logLevel, @"%@: Endpoint is not set, won't send queue", self);
                 return;
@@ -3146,6 +3184,28 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self recordPageEventWithExtras:nil];
 }
 
+- (void)recordNotificationViewedEventWithData:(id)notificationData {
+    // normalize the notification data
+#if !defined(CLEVERTAP_TVOS)
+    NSDictionary *notification;
+    if ([notificationData isKindOfClass:[UILocalNotification class]]) {
+        notification = [((UILocalNotification *) notificationData) userInfo];
+    } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
+        notification = notificationData;
+    }
+    [self runSerialAsync:^{
+        [CTEventBuilder buildPushNotificationEvent:NO forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                self.wzrkParams = [event[@"evtData"] copy];
+                [self queueEvent:event withType:CleverTapEventTypeNotification];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
 - (NSTimeInterval)eventGetFirstTime:(NSString *)event {
     
     if (!self.config.enablePersonalization) {

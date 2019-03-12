@@ -58,7 +58,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         let style = CleverTapInboxStyleConfig.init()
         style.title = "AppInbox"
         style.cellBackgroundColor = UIColor.yellow
-//        style.messageTags = ["Promotions", "Offers"];
+        style.messageTags = ["Promotions", "Offers"];
         
         if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
@@ -97,25 +97,25 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
   
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
-        CleverTap.sharedInstance()?.recordEvent("test ios")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Cover")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Header")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
-        CleverTap.sharedInstance()?.recordEvent("Footer")
+//        CleverTap.sharedInstance()?.recordEvent("test ios")
+//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+//        CleverTap.sharedInstance()?.recordEvent("Cover")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial")
+//        CleverTap.sharedInstance()?.recordEvent("Header")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
+//        CleverTap.sharedInstance()?.recordEvent("Footer")
         CleverTap.sharedInstance()?.recordEvent("Cover Image")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Footer")
-        CleverTap.sharedInstance()?.recordEvent("Header")
-        CleverTap.sharedInstance()?.recordEvent("Cover Image")
-        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
-        CleverTap.sharedInstance()?.recordEvent("Charged")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+//        CleverTap.sharedInstance()?.recordEvent("Footer")
+//        CleverTap.sharedInstance()?.recordEvent("Header")
+//        CleverTap.sharedInstance()?.recordEvent("Cover Image")
+//        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
+//        CleverTap.sharedInstance()?.recordEvent("Charged")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
+//        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
+//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
 

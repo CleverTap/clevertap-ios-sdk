@@ -19,21 +19,20 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1gS-iQ-erU">
-                        <rect key="frame" x="0.0" y="0.0" width="667" height="242.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="667" height="187.5"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JEX-jE-5Df">
-                                <rect key="frame" x="0.0" y="0.0" width="667" height="242.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="667" height="187.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="JEX-jE-5Df" secondAttribute="height" multiplier="3.5:1" priority="250" id="2UI-1D-Oif"/>
-                                    <constraint firstAttribute="width" secondItem="JEX-jE-5Df" secondAttribute="height" multiplier="2.75:1" priority="750" id="Dib-Ja-8vO"/>
+                                    <constraint firstAttribute="width" secondItem="JEX-jE-5Df" secondAttribute="height" multiplier="3.56:1" id="Dib-Ja-8vO"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4GD-U4-fYg">
-                                <rect key="frame" x="333.5" y="212.5" width="333.5" height="30"/>
+                                <rect key="frame" x="333.5" y="157.5" width="333.5" height="30"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sLW-ZY-OVT">
-                                        <rect key="frame" x="286" y="8" width="11.5" height="14.5"/>
+                                        <rect key="frame" x="286" y="7.5" width="11.5" height="14.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <color key="textColor" red="0.45882352939999999" green="0.45882352939999999" blue="0.45882352939999999" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
@@ -90,7 +89,6 @@
             </tableViewCellContentView>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
-                <outlet property="carouselLandRatioConstraint" destination="2UI-1D-Oif" id="L2V-Kw-mQH"/>
                 <outlet property="carouselPortRatioConstraint" destination="Dib-Ja-8vO" id="sBt-fc-tcp"/>
                 <outlet property="carouselView" destination="JEX-jE-5Df" id="IXP-Xw-cT4"/>
                 <outlet property="containerView" destination="1gS-iQ-erU" id="yac-W5-zAe"/>

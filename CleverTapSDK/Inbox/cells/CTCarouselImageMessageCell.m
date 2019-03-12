@@ -41,7 +41,6 @@
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     if ([self deviceOrientationIsLandscape]) {
-        self.carouselViewHeight.constant =  [[UIScreen mainScreen] bounds].size.height - 120;
         self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
         self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
     } else {
