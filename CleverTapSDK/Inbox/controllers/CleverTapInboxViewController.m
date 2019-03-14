@@ -111,8 +111,21 @@ static const int kMaxTags = 3;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;
     
+    [self setup];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self playVideoInVisibleCells];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self calculateTableViewVisibleFrame];
+}
+
+- (void)setup {
     if (_config && _config.backgroundColor) {
-        self.view.backgroundColor = _config.backgroundColor;
         self.tableView.backgroundColor = _config.backgroundColor;
         self.view.backgroundColor = _config.backgroundColor;
         self.navigationController.view.backgroundColor = _config.backgroundColor;
@@ -152,16 +165,7 @@ static const int kMaxTags = 3;
             [self playVideoInVisibleCells];
         }
     });
-   [self calculateTableViewVisibleFrame];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    [self playVideoInVisibleCells];
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self calculateTableViewVisibleFrame];
 }
 
 - (void)registerNibs {
@@ -186,7 +190,12 @@ static const int kMaxTags = 3;
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> completion) {
-        [self calculateTableViewVisibleFrame];
+        [self loadView];
+        [self registerNibs];
+        [self setup];
+        if ([self.tags count] > 0) {
+            [self setupSegmentedControl];
+        }
         [self showListEmptyLabel];
         [self stopPlay];
         [self.tableView reloadData];
@@ -236,7 +245,6 @@ static const int kMaxTags = 3;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.tableView setContentOffset:CGPointMake(0, -(self->_topContentOffset)) animated:NO];
     });
-    
     
     [[NSLayoutConstraint constraintWithItem:self.segmentedControlContainer
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual

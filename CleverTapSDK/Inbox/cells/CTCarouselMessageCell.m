@@ -89,7 +89,7 @@ static const float kPageControlViewHeight = 30.f;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     if ([self deviceOrientationIsLandscape]) {
         [self populateLandscapeViews];
-        [self configurePageControlWithRect:CGRectMake(self.contentView.frame.size.width/2, self.carouselView.frame.size.height - kPageControlViewHeight, self.carouselView.frame.size.width/2, kPageControlViewHeight)];
+        [self configurePageControlWithRect:CGRectMake(self.contentView.frame.size.width/2, self.carouselView.frame.size.height - kPageControlViewHeight, 22 * [self.itemViews count], kPageControlViewHeight)];
     } else {
         captionHeight = [CTCarouselImageView captionHeight];
         CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
@@ -138,7 +138,6 @@ static const float kPageControlViewHeight = 30.f;
             [pageControl removeFromSuperview];
         }
     }
-  
     [self.containerView addSubview:self.pageControl];
 }
 

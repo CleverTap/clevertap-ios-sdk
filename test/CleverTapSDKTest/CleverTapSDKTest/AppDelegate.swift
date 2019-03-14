@@ -16,6 +16,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+//        CleverTap.sharedInstance(withCleverTapID: "9-093-09--09090-90")
+
+        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
+
         // Override point for customization after application launch.
 //        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue+1)
 //        CleverTap.enablePersonalization()
@@ -26,17 +32,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         } else {
             // Fallback on earlier versions
         };
+       
         
-       CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-
-//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)
         
-        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
-
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-
 //        CleverTap.sharedInstance(withCleverTapID: "909090909090")
 //        let arr: NSMutableArray = ["a1", "a2", "a3"]
 //        CleverTap.sharedInstance()?.profileSetMultiValues(arr as! [String], forKey: "test")

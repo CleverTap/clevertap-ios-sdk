@@ -32,6 +32,14 @@
     return self;
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
+         [self loadView];
+         [self viewDidLoad];
+     } completion:nil];
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
 #if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskAll;
@@ -126,12 +134,14 @@
     return buttonView;
 }
 
-#if !(TARGET_OS_TV)
 - (BOOL)deviceOrientationIsLandscape {
+#if (TARGET_OS_TV)
+    return nil;
+#else
     UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
-}
 #endif
+}
 
 #pragma mark - Actions
 

@@ -28,11 +28,11 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>CleverTapAccountID</key>
-	<string>TEST-Z9R-486-4W5Z</string>
+	<string></string>
 	<key>CleverTapDisableAppLaunched</key>
 	<string>0</string>
 	<key>CleverTapToken</key>
-	<string>TEST-6b4-2c1</string>
+	<string></string>
 	<key>CleverTapUseIFA</key>
 	<string>0</string>
 	<key>LSRequiresIPhoneOS</key>
