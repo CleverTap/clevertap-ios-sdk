@@ -43,6 +43,7 @@
         CTPlistInfo *plist = [CTPlistInfo sharedInstance];
         _useIDFA = isDefault ? plist.useIDFA : NO;
         _disableAppLaunchedEvent = isDefault ? plist.disableAppLaunchedEvent : NO;
+        _enableCustomCleverTapId = isDefault ? plist.enableCustomCleverTapId : NO;
         _enablePersonalization = YES;
         _logLevel = 0;
         _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
@@ -57,6 +58,7 @@
     copy.enablePersonalization = self.enablePersonalization;
     copy.useIDFA = self.useIDFA;
     copy.logLevel = self.logLevel;
+    copy.enableCustomCleverTapId = self.enableCustomCleverTapId;
     copy.cleverTapId = self.cleverTapId;
     return copy;
 }

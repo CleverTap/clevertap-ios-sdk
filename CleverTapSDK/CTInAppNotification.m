@@ -109,7 +109,6 @@
         if (_mediaUrl) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
-                // TODO: add landscape url
                 if ([self.contentType isEqualToString:@"image/gif"] ) {
                     _mediaIsGif = YES;
                 }else {

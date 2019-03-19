@@ -99,9 +99,7 @@ static const int kMaxTags = 3;
                                              selector:@selector(handleMediaMutedNotification:)
                                                  name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
     [self registerNibs];
-    
     self.muted = YES;
-    
     UIBarButtonItem *closeButton = [[UIBarButtonItem alloc]
                                    initWithTitle:@"✕"
                                    style:UIBarButtonItemStylePlain
@@ -110,7 +108,6 @@ static const int kMaxTags = 3;
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;
-    
     [self setup];
 }
 
@@ -122,6 +119,10 @@ static const int kMaxTags = 3;
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self calculateTableViewVisibleFrame];
+}
+
+- (void)loadView {
+    [super loadView];
 }
 
 - (void)setup {
@@ -156,15 +157,6 @@ static const int kMaxTags = 3;
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
-        BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
-        if (landscape) {
-            [self calculateTableViewVisibleFrame];
-            [self.tableView reloadData];
-            [self playVideoInVisibleCells];
-        }
-    });
     [self calculateTableViewVisibleFrame];
 }
 
@@ -189,7 +181,8 @@ static const int kMaxTags = 3;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> completion) {
+    // TODO: load view call directly
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
         [self loadView];
         [self registerNibs];
         [self setup];
@@ -200,7 +193,19 @@ static const int kMaxTags = 3;
         [self stopPlay];
         [self.tableView reloadData];
         [self playVideoInVisibleCells];
-    }];
+    } completion:nil];
+//    [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> completion) {
+//        [self loadView];
+//        [self registerNibs];
+//        [self setup];
+//        if ([self.tags count] > 0) {
+//            [self setupSegmentedControl];
+//        }
+//        [self showListEmptyLabel];
+//        [self stopPlay];
+//        [self.tableView reloadData];
+//        [self playVideoInVisibleCells];
+//    }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 

@@ -8,6 +8,7 @@
 @property (nonatomic, strong, readonly) NSArray<NSString*>* registeredUrlSchemes;
 @property (nonatomic, assign, readonly) BOOL useIDFA;
 @property (nonatomic, assign, readonly) BOOL disableAppLaunchedEvent;
+@property (nonatomic, assign, readonly) BOOL enableCustomCleverTapId;
 
 + (instancetype)sharedInstance;
 - (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nullable)region;

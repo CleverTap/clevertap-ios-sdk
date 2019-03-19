@@ -7,7 +7,7 @@
     // no-op here
 }
 
--(void)populateItemViews {
+- (void)populateItemViews {
     self.itemViews = [NSMutableArray new];
     int index = 0;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
@@ -40,7 +40,16 @@
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
+    
     if ([self deviceOrientationIsLandscape]) {
+        CGFloat margins = 0;
+        if (@available(iOS 11.0, *)) {
+            UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+            margins = window.safeAreaInsets.left;
+        }
+        CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;
+        CGFloat viewHeight = viewWidth / 3.5;
+        self.carouselViewHeight.constant  = viewHeight;
         self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
         self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
     } else {

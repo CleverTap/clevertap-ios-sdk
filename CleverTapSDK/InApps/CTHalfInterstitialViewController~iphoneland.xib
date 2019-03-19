@@ -52,17 +52,17 @@
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalCompressionResistancePriority="751" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IlZ-SG-Stw">
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IlZ-SG-Stw">
                             <rect key="frame" x="20" y="70" width="369.5" height="19.5"/>
                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GuT-MH-Nzg">
-                            <rect key="frame" x="20" y="199" width="369.5" height="92"/>
+                            <rect key="frame" x="20" y="251" width="369.5" height="40"/>
                             <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wpo-5T-Wxo">
-                                    <rect key="frame" x="0.0" y="0.0" width="369.5" height="40"/>
+                                <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wpo-5T-Wxo">
+                                    <rect key="frame" x="0.0" y="0.0" width="176.5" height="40"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="40" id="fba-dO-T0p"/>
                                     </constraints>
@@ -70,10 +70,10 @@
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ekX-v2-tp0">
-                                    <rect key="frame" x="0.0" y="40" width="369.5" height="52"/>
+                                    <rect key="frame" x="176.5" y="0.0" width="193" height="40"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2j3-ZZ-HfF">
-                                            <rect key="frame" x="0.0" y="12" width="369.5" height="40"/>
+                                            <rect key="frame" x="16" y="0.0" width="177" height="40"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                             <state key="normal" title="Button"/>
                                         </button>
@@ -82,21 +82,21 @@
                                     <constraints>
                                         <constraint firstAttribute="trailing" secondItem="2j3-ZZ-HfF" secondAttribute="trailing" id="F8U-wx-NiQ"/>
                                         <constraint firstAttribute="bottom" secondItem="2j3-ZZ-HfF" secondAttribute="bottom" id="I4M-VG-om3"/>
-                                        <constraint firstItem="2j3-ZZ-HfF" firstAttribute="top" secondItem="ekX-v2-tp0" secondAttribute="top" constant="12" id="Len-5R-tyx"/>
-                                        <constraint firstItem="2j3-ZZ-HfF" firstAttribute="leading" secondItem="ekX-v2-tp0" secondAttribute="leading" id="bSD-uc-9Wj"/>
+                                        <constraint firstItem="2j3-ZZ-HfF" firstAttribute="top" secondItem="ekX-v2-tp0" secondAttribute="top" id="Len-5R-tyx"/>
+                                        <constraint firstItem="2j3-ZZ-HfF" firstAttribute="leading" relation="lessThanOrEqual" secondItem="ekX-v2-tp0" secondAttribute="leading" constant="16" id="bSD-uc-9Wj"/>
                                     </constraints>
                                 </view>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
+                                <constraint firstItem="2j3-ZZ-HfF" firstAttribute="width" secondItem="Wpo-5T-Wxo" secondAttribute="width" id="4Wv-OW-qxM"/>
+                                <constraint firstItem="ekX-v2-tp0" firstAttribute="leading" secondItem="Wpo-5T-Wxo" secondAttribute="trailing" id="8JF-On-ZBb"/>
                                 <constraint firstItem="2j3-ZZ-HfF" firstAttribute="height" secondItem="Wpo-5T-Wxo" secondAttribute="height" id="9qX-Hh-ed8"/>
                                 <constraint firstAttribute="bottom" secondItem="ekX-v2-tp0" secondAttribute="bottom" id="ENX-CU-8lw"/>
-                                <constraint firstAttribute="trailing" secondItem="Wpo-5T-Wxo" secondAttribute="trailing" id="Kfh-aE-FR8"/>
+                                <constraint firstItem="ekX-v2-tp0" firstAttribute="top" secondItem="GuT-MH-Nzg" secondAttribute="top" id="Jr0-8w-rQC"/>
                                 <constraint firstItem="Wpo-5T-Wxo" firstAttribute="leading" secondItem="GuT-MH-Nzg" secondAttribute="leading" id="Noh-8I-fDC"/>
                                 <constraint firstItem="Wpo-5T-Wxo" firstAttribute="top" secondItem="GuT-MH-Nzg" secondAttribute="top" id="XtZ-Xh-Mt9"/>
                                 <constraint firstAttribute="trailing" secondItem="ekX-v2-tp0" secondAttribute="trailing" id="Y10-HB-XAJ"/>
-                                <constraint firstItem="ekX-v2-tp0" firstAttribute="leading" secondItem="GuT-MH-Nzg" secondAttribute="leading" id="eJT-IV-f2t"/>
-                                <constraint firstItem="ekX-v2-tp0" firstAttribute="top" secondItem="Wpo-5T-Wxo" secondAttribute="bottom" id="xsq-6l-Ved"/>
                             </constraints>
                         </view>
                     </subviews>
@@ -144,7 +144,7 @@
                 <constraint firstItem="4Tz-YD-tXf" firstAttribute="top" secondItem="B5F-fG-ukC" secondAttribute="bottom" constant="-15" id="xkk-QW-Ivv"/>
                 <constraint firstAttribute="bottom" secondItem="4Tz-YD-tXf" secondAttribute="bottom" constant="30" id="xwW-yy-kjZ"/>
             </constraints>
-            <point key="canvasLocation" x="50.5" y="53.5"/>
+            <point key="canvasLocation" x="49.925037481259373" y="52"/>
         </view>
     </objects>
 </document>

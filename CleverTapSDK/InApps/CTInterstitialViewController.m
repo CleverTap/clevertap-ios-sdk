@@ -45,12 +45,9 @@ struct FrameRotation {
 
 #pragma mark - UIViewController Lifecycle
 
-- (instancetype) initWithNotification:(CTInAppNotification *)notification {
-    self = [super initWithNibName:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTInterstitialViewController class])] bundle:[CTInAppUtils bundle]];
-    if (self) {
-        self.notification = notification;
-    }
-    return self;
+- (void)loadView {
+    [super loadView];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTInterstitialViewController class])] owner:self options:nil];
 }
 
 -(void)viewDidLoad {
@@ -157,7 +154,6 @@ struct FrameRotation {
         self.bodyLabel.textAlignment = NSTextAlignmentCenter;
         self.bodyLabel.backgroundColor = [UIColor clearColor];
         self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.messageColor];
-        self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
     }
     
@@ -170,10 +166,19 @@ struct FrameRotation {
             self.secondButton = [self setupViewForButton:self.secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
             [self.secondButton setHidden: YES];
-            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
-                                          attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
-                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                         multiplier:1 constant:0] setActive:YES];
+            if ([self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                              attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                              attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+
+            }
         }
     }
 }

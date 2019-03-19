@@ -25,5 +25,7 @@ typedef NS_ENUM(int, CTValidatorContext) {
 
 + (BOOL)isRestrictedEventName:(NSString *)name;
 
++ (BOOL)isValidCleverTapId:(NSString *)cleverTapID;
+
 
 @end

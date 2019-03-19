@@ -24,12 +24,9 @@
 
 #pragma mark - UIViewController Lifecycle
 
-- (instancetype) initWithNotification:(CTInAppNotification *)notification {
-    self = [super initWithNibName:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTCoverViewController class])] bundle:[CTInAppUtils bundle]];
-    if (self) {
-        self.notification = notification;
-    }
-    return self;
+- (void)loadView {
+    [super loadView];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTCoverViewController class])] owner:self options:nil];
 }
 
 -(void)viewDidLoad {
@@ -90,9 +87,18 @@
             self.secondButton = [self setupViewForButton:self.secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
             [self.secondButton setHidden:YES];
-            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
-                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                         multiplier:1 constant:0] setActive:YES];
+            if ([self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                              attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+                
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                              attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+            }
         }
     }
 }

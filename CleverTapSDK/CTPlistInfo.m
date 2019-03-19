@@ -76,9 +76,12 @@ static NSArray *registeredURLSchemes;
         _accountRegion = [CTPlistInfo getMetaDataForAttribute:CLTAP_REGION_LABEL];
         _registeredUrlSchemes = [CTPlistInfo getRegisteredURLSchemes];
         
-        NSString *useIFA = [CTPlistInfo getMetaDataForAttribute:@"CleverTapUseIFA"];
+        NSString *useIFA = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IFA_LABEL];
         _useIDFA = (useIFA && [useIFA isEqualToString:@"1"]);
         
+        NSString *enableCustomCleverTapId = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENABLE_CUSTOM_CLEVERTAP_ID_LABEL];
+        _enableCustomCleverTapId = (enableCustomCleverTapId && [enableCustomCleverTapId isEqualToString:@"1"]);
+    
         NSString *shouldDisableAppLaunchReporting = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_APP_LAUNCH_LABEL];
         _disableAppLaunchedEvent = (shouldDisableAppLaunchReporting && [shouldDisableAppLaunchReporting isEqualToString:@"1"]);
     }

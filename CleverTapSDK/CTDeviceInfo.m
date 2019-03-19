@@ -179,7 +179,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             return;
         }
         if (_config.cleverTapId) {
-            [self forceUpdateDeviceID:[NSString stringWithFormat:@"-%@", _config.cleverTapId]];
+            [self forceUpdateDeviceID:[NSString stringWithFormat:@"--%@", _config.cleverTapId]];
             return;
         }
         if (self.advertisingIdentitier) {

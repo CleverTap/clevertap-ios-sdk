@@ -12,12 +12,9 @@
 
 @implementation CTInterstitialImageViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification *)notification {
-    self = [super initWithNibName:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTInterstitialImageViewController class])] bundle:[CTInAppUtils bundle]];
-    if (self) {
-        self.notification = notification;
-    }
-    return self;
+- (void)loadView {
+    [super loadView];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTInterstitialImageViewController class])] owner:self options:nil];
 }
 
 - (void)viewDidLoad {
@@ -92,7 +89,7 @@
     // set image
     if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
-        self.imageView.contentMode = ![self deviceOrientationIsLandscape] ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
+        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
         self.imageView.userInteractionEnabled = YES;
         UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];

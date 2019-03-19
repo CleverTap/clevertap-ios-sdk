@@ -14,6 +14,7 @@
 #import "CTUtils.h"
 #import "CTUriHelper.h"
 #import "CTValidationResult.h"
+#import "CTValidator.h"
 #import "CTEventBuilder.h"
 #import "CTProfileBuilder.h"
 #import "CTLocalDataStore.h"
@@ -96,7 +97,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeProfile,
     CleverTapEventTypeRaised,
     CleverTapEventTypeData,
-    CleverTapEventTypeNotification,
+    CleverTapEventTypeNotificationViewed,
 };
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
@@ -468,13 +469,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return nil;
         }
         _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
-        
+      
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
+        // TODO: already present GUID and enable custom id check - optimisation - not sure required or not 
+        if (_plistInfo.enableCustomCleverTapId && !_defaultInstanceConfig.cleverTapId) {
+            if (![CTValidator isValidCleverTapId:cleverTapID]) {
+                CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. Provided Custom CleverTap ID is not valid. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
+                return nil;
+            } else {
+                _defaultInstanceConfig.cleverTapId = cleverTapID;
+            }
+        }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        _defaultInstanceConfig.cleverTapId = cleverTapID;
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
     return [self instanceWithConfig:_defaultInstanceConfig];
@@ -1891,8 +1900,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self clearFirstRequestTimestamp];
 }
 
-
-
 #pragma mark Session and Related Handling
 
 - (void)createSessionIfNeeded {
@@ -2106,7 +2113,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return;
         }
         
-        if (eventType != CleverTapEventTypeRaised) {
+        if (eventType != CleverTapEventTypeRaised || eventType != CleverTapEventTypeNotificationViewed) {
             event = [self convertDataToPrimitive:event];
         }
         
@@ -2145,7 +2152,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.localDataStore addDataSyncFlag:mutableEvent];
         }
         
-        if (eventType == CleverTapEventTypeRaised) {
+        if (eventType == CleverTapEventTypeRaised || eventType == CleverTapEventTypeNotificationViewed) {
             [self.localDataStore persistEvent:mutableEvent];
         }
         
@@ -2154,7 +2161,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if ([self.profileQueue count] > 500) {
                 [self.profileQueue removeObjectAtIndex:0];
             }
-        } else if (eventType == CleverTapEventTypeNotification) {
+        } else if (eventType == CleverTapEventTypeNotificationViewed) {
             [self.notificationsQueue addObject:mutableEvent];
             if ([self.notificationsQueue count] > 100) {
                 [self.notificationsQueue removeObjectAtIndex:0];
@@ -3197,7 +3204,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [CTEventBuilder buildPushNotificationEvent:NO forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 self.wzrkParams = [event[@"evtData"] copy];
-                [self queueEvent:event withType:CleverTapEventTypeNotification];
+                [self queueEvent:event withType:CleverTapEventTypeNotificationViewed];
             };
             if (errors) {
                 [self pushValidationResults:errors];

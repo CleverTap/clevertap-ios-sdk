@@ -59,42 +59,42 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UmI-OD-0hH">
-                            <rect key="frame" x="20" y="588" width="875" height="92"/>
+                            <rect key="frame" x="20" y="632" width="875" height="48"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gtw-uA-GQL">
-                                    <rect key="frame" x="0.0" y="0.0" width="875" height="40"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="429.5" height="48"/>
                                     <constraints>
-                                        <constraint firstAttribute="height" constant="40" id="NAt-o5-tMP"/>
+                                        <constraint firstAttribute="height" constant="48" id="NAt-o5-tMP"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tr7-Xl-EzC">
-                                    <rect key="frame" x="0.0" y="40" width="875" height="52"/>
+                                    <rect key="frame" x="429.5" y="0.0" width="445.5" height="48"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1mV-s4-2op">
-                                            <rect key="frame" x="0.0" y="12" width="875" height="40"/>
+                                            <rect key="frame" x="16" y="0.0" width="429.5" height="48"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                             <state key="normal" title="Button"/>
                                         </button>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
-                                        <constraint firstItem="1mV-s4-2op" firstAttribute="leading" secondItem="tr7-Xl-EzC" secondAttribute="leading" id="IBh-If-WHg"/>
+                                        <constraint firstItem="1mV-s4-2op" firstAttribute="leading" relation="lessThanOrEqual" secondItem="tr7-Xl-EzC" secondAttribute="leading" constant="16" id="IBh-If-WHg"/>
                                         <constraint firstAttribute="bottom" secondItem="1mV-s4-2op" secondAttribute="bottom" id="jf1-iQ-dn1"/>
-                                        <constraint firstItem="1mV-s4-2op" firstAttribute="top" secondItem="tr7-Xl-EzC" secondAttribute="top" constant="12" id="uLQ-Er-4ip"/>
+                                        <constraint firstItem="1mV-s4-2op" firstAttribute="top" secondItem="tr7-Xl-EzC" secondAttribute="top" id="uLQ-Er-4ip"/>
                                         <constraint firstAttribute="trailing" secondItem="1mV-s4-2op" secondAttribute="trailing" id="vI9-ac-LjE"/>
                                     </constraints>
                                 </view>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
+                                <constraint firstItem="tr7-Xl-EzC" firstAttribute="top" secondItem="UmI-OD-0hH" secondAttribute="top" id="9RM-p6-63D"/>
                                 <constraint firstItem="Gtw-uA-GQL" firstAttribute="leading" secondItem="UmI-OD-0hH" secondAttribute="leading" id="NVl-0s-iF1"/>
-                                <constraint firstItem="tr7-Xl-EzC" firstAttribute="top" secondItem="Gtw-uA-GQL" secondAttribute="bottom" id="ZcH-hf-3hs"/>
-                                <constraint firstAttribute="trailing" secondItem="Gtw-uA-GQL" secondAttribute="trailing" id="bSi-3o-4gg"/>
-                                <constraint firstItem="tr7-Xl-EzC" firstAttribute="leading" secondItem="UmI-OD-0hH" secondAttribute="leading" id="m5K-fU-ddM"/>
                                 <constraint firstItem="Gtw-uA-GQL" firstAttribute="top" secondItem="UmI-OD-0hH" secondAttribute="top" id="nn6-8L-PRO"/>
+                                <constraint firstItem="1mV-s4-2op" firstAttribute="width" secondItem="Gtw-uA-GQL" secondAttribute="width" id="pNc-oN-5ai"/>
                                 <constraint firstAttribute="trailing" secondItem="tr7-Xl-EzC" secondAttribute="trailing" id="pcp-AZ-UOz"/>
+                                <constraint firstItem="tr7-Xl-EzC" firstAttribute="leading" secondItem="Gtw-uA-GQL" secondAttribute="trailing" id="vfV-FT-zaz"/>
                                 <constraint firstAttribute="bottom" secondItem="tr7-Xl-EzC" secondAttribute="bottom" id="wbD-rN-ksR"/>
                                 <constraint firstItem="1mV-s4-2op" firstAttribute="height" secondItem="Gtw-uA-GQL" secondAttribute="height" id="xDg-UA-w73"/>
                             </constraints>
@@ -144,7 +144,7 @@
                 <constraint firstItem="W10-kK-OmP" firstAttribute="centerX" secondItem="L1w-6g-pWH" secondAttribute="centerX" id="jgp-zc-A27"/>
                 <constraint firstAttribute="bottom" secondItem="W10-kK-OmP" secondAttribute="bottom" constant="160" id="yzy-eh-mmY"/>
             </constraints>
-            <point key="canvasLocation" x="50.5" y="53.5"/>
+            <point key="canvasLocation" x="50.073206442166907" y="53.3203125"/>
         </view>
     </objects>
 </document>

@@ -14,6 +14,8 @@ extern NSString *const kCTApiDomain;
 #define CLTAP_TOKEN_LABEL @"CleverTapToken"
 #define CLTAP_REGION_LABEL @"CleverTapRegion"
 #define CLTAP_DISABLE_APP_LAUNCH_LABEL @"CleverTapDisableAppLaunched"
+#define CLTAP_USE_IFA_LABEL @"CleverTapUseIFA"
+#define CLTAP_ENABLE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapEnableCustomId"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"
 #define CLTAP_FB_DOB_DATE_FORMAT @"MM/dd/yyyy"

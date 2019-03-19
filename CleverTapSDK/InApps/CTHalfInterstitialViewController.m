@@ -112,10 +112,17 @@
         if (self.notification.buttons.count == 2) {
             self.secondButton = [self setupViewForButton:_secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
-            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
-                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                         multiplier:1 constant:0] setActive:YES];
-            
+            if ([self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+                
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+            }
+          
             [self.secondButton setHidden:YES];
         }
     }
