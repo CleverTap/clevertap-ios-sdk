@@ -1740,27 +1740,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [controller hide:true];
 }
 
--(void)handleMessageFromWebview:(NSDictionary<NSString *,id> *)message {
-    NSString *action = [message objectForKey:@"action"];
-    if ([action isEqual:@"recordEventWithProps"]) {
-        [self recordEvent: message[@"event"] withProps: message[@"props"]];
-    } else if ([action isEqual: @"profilePush"]) {
-        [self profilePush: message[@"properties"]];
-    } else if ([action isEqual: @"profileSetMultiValues"]) {
-        [self profileSetMultiValues: message[@"values"] forKey: message[@"key"]];
-    } else if ([action isEqual: @"profileAddMultiValue"]) {
-        [self profileAddMultiValue: message[@"value"] forKey: message[@"key"]];
-    } else if ([action isEqual: @"profileAddMultiValues"]) {
-        [self profileAddMultiValues: message[@"values"] forKey: message[@"key"]];
-    } else if ([action isEqual: @"profileRemoveValueForKey"]) {
-        [self profileRemoveValueForKey: message[@"key"]];
-    } else if ([action isEqual: @"profileRemoveMultiValue"]) {
-        [self profileRemoveMultiValue: message[@"value"] forKey: message[@"key"]];
-    } else if ([action isEqual: @"profileRemoveMultiValues"]) {
-        [self profileRemoveMultiValues: message[@"values"] forKey: message[@"key"]];
-    }
-}
-
 #pragma mark Serial Queue Operations
 
 - (void)runSerialAsync:(void (^)(void))taskBlock {

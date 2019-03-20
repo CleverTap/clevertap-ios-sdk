@@ -1,6 +1,7 @@
 #import <WebKit/WebKit.h>
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
+#import "CleverTapJSInterface.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
 
@@ -58,16 +59,11 @@ typedef enum {
         [super loadView];
     }
 }
-    
-    
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor clearColor];
     [self layoutNotification];
-}
-    
-- (BOOL)shouldAutorotate {
-    return YES;
 }
     
 - (void)layoutNotification {
@@ -76,11 +72,10 @@ typedef enum {
     // control the initial scale of the WKWebView
     NSString *js = @"var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'); document.getElementsByTagName('head')[0].appendChild(meta);";
     WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
-    WKUserContentController *wkController = [[WKUserContentController alloc] init];
-    [wkController addUserScript:wkScript];
-    [wkController addScriptMessageHandler:self name:@"clevertap"];
+    CleverTapJSInterface *ctJSInterface = [[CleverTapJSInterface alloc] initWithConfig:nil];
+    [ctJSInterface.ctUserContentController addUserScript:wkScript];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
-    wkConfig.userContentController = wkController;
+    wkConfig.userContentController = ctJSInterface.ctUserContentController;
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
@@ -105,6 +100,9 @@ typedef enum {
     NSString *url = @"https://www.apple.com";
     if (url && ![url  isEqual: @""]) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
+        NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"sampleHTMLCode" ofType:@"html"];
+        NSString* htmlString = [NSString stringWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:nil];
+        [webView loadHTMLString:htmlString baseURL: nil];
         webView.navigationDelegate = nil;
     } else{
         [webView loadHTMLString:self.notification.html baseURL:nil];
@@ -249,14 +247,6 @@ typedef enum {
     
 }
 
-- (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
-    if ([message.body isKindOfClass:[NSDictionary class]]) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(handleMessageFromWebview:)]) {
-            [self.delegate handleMessageFromWebview:message.body];
-        }
-    }
-}
-    
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
     //begin pan...
     if (recognizer.state == UIGestureRecognizerStateBegan) {

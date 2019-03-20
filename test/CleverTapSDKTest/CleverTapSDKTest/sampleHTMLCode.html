@@ -70,12 +70,12 @@
              lang: 'French'
         };
         var message1 = {
-            action: 'recordEvent',
+            action: 'recordEventWithProps',
             event: 'From WebView',
             properties: props
         };
         var message2 = {
-            action: 'recordEvent',
+            action: 'recordEventWithProps',
             event: 'From WebView no props'
         };
         var message3 = {
@@ -120,7 +120,8 @@
 <!--        window.webkit.messageHandlers.clevertap.postMessage(message6);-->
 <!--        window.webkit.messageHandlers.clevertap.postMessage(message7);-->
 <!--        window.webkit.messageHandlers.clevertap.postMessage(message8);-->
-        window.webkit.messageHandlers.clevertap.postMessage(message4);
+        window.webkit.messageHandlers.clevertap.postMessage(message1);
+        window.webkit.messageHandlers.testJS.postMessage(message8);
 
         </script>
         </body>
