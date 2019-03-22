@@ -58,20 +58,19 @@
 
             </script>
     </head>
-    <body>
+    <body bgcolor="#9A9A9A">
         <button onclick='invokeMessage()'>Send to iOS</button><br/><br/>
         First Name: <input type='text' name='firstname' id='firstName' value='Jamie'/><br>
         Last Name: <input type='text' name='lastname' id='lastName' value='Lannister'/><br>
         
         <script>
-            
         var props = {
              foo:  'xyz',
              lang: 'French'
         };
         var message1 = {
             action: 'recordEventWithProps',
-            event: 'From WebView',
+            event: 'From Application WebView',
             properties: props
         };
         var message2 = {
@@ -120,8 +119,8 @@
 <!--        window.webkit.messageHandlers.clevertap.postMessage(message6);-->
 <!--        window.webkit.messageHandlers.clevertap.postMessage(message7);-->
 <!--        window.webkit.messageHandlers.clevertap.postMessage(message8);-->
-        window.webkit.messageHandlers.clevertap.postMessage(message1);
-        window.webkit.messageHandlers.testJS.postMessage(message8);
+        window.webkit.messageHandlers.clevertap1.postMessage(message1);
+        window.webkit.messageHandlers.appDefault.postMessage(message8);
 
         </script>
         </body>

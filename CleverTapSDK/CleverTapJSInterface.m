@@ -3,7 +3,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 
-@interface CleverTapJSInterface ()<WKScriptMessageHandler>{}
+@interface CleverTapJSInterface (){}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 
@@ -20,14 +20,14 @@
 }
 
 - (void)initUserContentController {
-    _ctUserContentController = [[WKUserContentController alloc] init];
-    [_ctUserContentController addScriptMessageHandler:self name:@"clevertap"];
+    _userContentController = [[WKUserContentController alloc] init];
+    [_userContentController addScriptMessageHandler:self name:@"clevertap"];
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
     if ([message.body isKindOfClass:[NSDictionary class]]) {
         CleverTap *cleverTap;
-        if (self.config.isDefaultInstance || !self.config){
+        if (!self.config || self.config.isDefaultInstance){
             cleverTap = [CleverTap sharedInstance];
         } else {
             cleverTap = [CleverTap instanceWithConfig:self.config];

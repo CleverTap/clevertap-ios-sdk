@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "CTInAppNotification.h"
+#import "CleverTapJSInterface.h"
 
 @class CTInAppDisplayViewController;
 
@@ -17,6 +18,8 @@
 
 - (instancetype)init __unavailable;
 - (instancetype)initWithNotification:(CTInAppNotification*)notification;
+- (instancetype)initWithNotification:(CTInAppNotification*)notification jsInterface:(CleverTapJSInterface *)jsInterface;
+
 
 - (void)show:(BOOL)animated;
 - (void)hide:(BOOL)animated;

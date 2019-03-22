@@ -18,17 +18,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRd-pI-6F2">
-                                <rect key="frame" x="133" y="374" width="108" height="82"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRd-pI-6F2">
+                                <rect key="frame" x="20" y="144" width="335" height="30"/>
+                                <state key="normal" title="Hit me, I'll show you inapps"/>
                                 <connections>
                                     <action selector="testButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XAL-Vy-t37"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RK4-zQ-uy9">
-                                <rect key="frame" x="127" y="70" width="121" height="30"/>
-                                <state key="normal" title="Notification Inbox"/>
+                                <rect key="frame" x="153" y="70" width="69" height="30"/>
+                                <state key="normal" title="App Inbox"/>
                                 <connections>
                                     <action selector="inboxButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cBX-QT-nhc"/>
                                 </connections>
@@ -36,7 +35,10 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="YRd-pI-6F2" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="Ayb-ay-WmQ"/>
+                            <constraint firstItem="YRd-pI-6F2" firstAttribute="top" secondItem="RK4-zQ-uy9" secondAttribute="bottom" constant="44" id="Gm9-1Q-Lt0"/>
                             <constraint firstItem="RK4-zQ-uy9" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="IaK-OM-YoL"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="YRd-pI-6F2" secondAttribute="trailing" constant="20" id="N1P-3R-Bk6"/>
                             <constraint firstItem="RK4-zQ-uy9" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="dDE-eM-RtX"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>

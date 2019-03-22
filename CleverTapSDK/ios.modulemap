@@ -9,5 +9,6 @@ framework module CleverTapSDK {
     header "CleverTapUTMDetail.h"
     header "CleverTapTrackedViewController.h"
     header "CleverTapInstanceConfig.h"
+    header "CleverTapJSInterface.h"
     export *
 }

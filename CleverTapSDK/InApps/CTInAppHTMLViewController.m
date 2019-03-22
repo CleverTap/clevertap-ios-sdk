@@ -22,10 +22,11 @@ typedef enum {
 #define kMinimumPan       60.0
 #define kBOUNCE_DISTANCE  0.0
 
-@interface CTInAppHTMLViewController () <WKNavigationDelegate, WKScriptMessageHandler,  UIGestureRecognizerDelegate> {
+@interface CTInAppHTMLViewController () <WKNavigationDelegate,  UIGestureRecognizerDelegate> {
     WKWebView *webView;
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
+    CleverTapJSInterface *_jsInterface;
 }
     
     @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
@@ -47,6 +48,12 @@ typedef enum {
     if (self) {
         self.shouldPassThroughTouches = (self.notification.position == CLTAP_INAPP_POSITION_TOP || self.notification.position == CLTAP_INAPP_POSITION_BOTTOM);
     }
+    return self;
+}
+
+- (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
+    self = [super initWithNotification:notification];
+    _jsInterface = jsInterface;
     return self;
 }
     
@@ -72,10 +79,11 @@ typedef enum {
     // control the initial scale of the WKWebView
     NSString *js = @"var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'); document.getElementsByTagName('head')[0].appendChild(meta);";
     WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
-    CleverTapJSInterface *ctJSInterface = [[CleverTapJSInterface alloc] initWithConfig:nil];
-    [ctJSInterface.ctUserContentController addUserScript:wkScript];
+    WKUserContentController *wkController = [[WKUserContentController alloc] init];
+    [wkController addUserScript:wkScript];
+    [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
-    wkConfig.userContentController = ctJSInterface.ctUserContentController;
+    wkConfig.userContentController = wkController;
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
@@ -97,12 +105,9 @@ typedef enum {
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     //    TODO: Remove Test url
-    NSString *url = @"https://www.apple.com";
+    NSString *url = @"";
     if (url && ![url  isEqual: @""]) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
-        NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"sampleHTMLCode" ofType:@"html"];
-        NSString* htmlString = [NSString stringWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:nil];
-        [webView loadHTMLString:htmlString baseURL: nil];
         webView.navigationDelegate = nil;
     } else{
         [webView loadHTMLString:self.notification.html baseURL:nil];

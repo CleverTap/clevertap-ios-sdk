@@ -22,6 +22,7 @@
 #import "CTInAppFCManager.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
+#import "CleverTapJSInterface.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppHTMLViewController.h"
 #import "CTInterstitialViewController.h"
@@ -1598,10 +1599,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
+    CleverTapJSInterface *jsInterface = nil;
     
     switch (notification.inAppType) {
         case CTInAppTypeHTML:
-            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification];
+            jsInterface = [[CleverTapJSInterface alloc] initWithConfig:self.config];
+            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification jsInterface:jsInterface];
             break;
         case CTInAppTypeInterstitial:
             controller = [[CTInterstitialViewController alloc] initWithNotification:notification];

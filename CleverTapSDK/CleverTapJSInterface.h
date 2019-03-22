@@ -3,9 +3,9 @@
 
 @class CleverTapInstanceConfig;
 
-@interface CleverTapJSInterface : NSObject
+@interface CleverTapJSInterface : NSObject <WKScriptMessageHandler>
 
-@property (nonatomic, strong) WKUserContentController *ctUserContentController;
+@property (nonatomic, strong) WKUserContentController *userContentController;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 
