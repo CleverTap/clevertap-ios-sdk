@@ -29,7 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         };
         
 //        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        
+        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", token: "TEST-6b4-2c1", region: "in1")
 
         CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)

@@ -1,6 +1,7 @@
 #import "CTLogger.h"
 
 extern NSString *const kCTApiDomain;
+extern NSString *const kCTNotifViewedApiDomain;
 
 #define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }

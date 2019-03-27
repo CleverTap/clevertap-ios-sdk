@@ -59,9 +59,11 @@ NSString* const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
 NSString* const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
 
 NSString* const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
+NSString* const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
 NSString* const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 
 NSString* const kREDIRECT_HEADER = @"X-WZRK-RD";
+NSString* const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
 NSString* const kMUTE_HEADER = @"X-WZRK-MUTE";
 
 NSString* const kACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
@@ -146,6 +148,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) NSURLSession *urlSession;
 @property (nonatomic, strong) NSString *redirectDomain;
 @property (nonatomic, strong) NSString *explictEndpointDomain;
+@property (nonatomic, strong) NSString *redirectNotifViewedDomain;
+@property (nonatomic, strong) NSString *explictNotifViewedEndpointDomain;
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
 @property (nonatomic, assign) int sendQueueFails;
 
@@ -639,6 +643,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
      self.lastMutedTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:0];
     }
     self.redirectDomain = [self loadRedirectDomain];
+    self.redirectNotifViewedDomain = [self loadRedirectNotifViewedDomain];
     [self setUpUrlSession];
     [self doHandshakeAsync];
 }
@@ -691,8 +696,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)clearRedirectDomain {
     self.redirectDomain = nil;
+    self.redirectNotifViewedDomain = nil;
     [self persistRedirectDomain]; // if nil persist will remove
     self.redirectDomain = [self loadRedirectDomain]; // reload explicit domain if we have one else will be nil
+    self.redirectNotifViewedDomain = [self loadRedirectNotifViewedDomain]; // reload explicit notification viewe domain if we have one else will be nil
 }
 
 - (NSString *)loadRedirectDomain {
@@ -713,6 +720,24 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return domain;
 }
 
+- (NSString *)loadRedirectNotifViewedDomain {
+    NSString *region = self.config.accountRegion;
+    if (region) {
+        region = [region stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
+        if (region.length > 0) {
+            self.explictNotifViewedEndpointDomain = [NSString stringWithFormat:@"%@-%@", region, kCTNotifViewedApiDomain];
+            return self.explictNotifViewedEndpointDomain;
+        }
+    }
+    NSString *domain = nil;
+    if (self.config.isDefaultInstance) {
+        domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY] withResetValue:[CTPreferences getStringForKey:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY withResetValue:nil]];
+    } else {
+        domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY] withResetValue:nil];
+    }
+    return domain;
+}
+
 - (void)persistRedirectDomain {
     if (self.redirectDomain != nil) {
         [CTPreferences putString:self.redirectDomain forKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY]];
@@ -725,6 +750,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (void)persistRedirectNotifViewedDomain {
+    if (self.redirectNotifViewedDomain != nil) {
+        [CTPreferences putString:self.redirectNotifViewedDomain forKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY]];
+#if CLEVERTAP_SSL_PINNING
+        [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[kCTNotifViewedApiDomain, self.redirectNotifViewedDomain]];
+#endif
+    } else {
+        [CTPreferences removeObjectForKey:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY];
+        [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY]];
+    }
+}
 - (void)persistMutedTs {
     self.lastMutedTs = [NSDate new].timeIntervalSince1970;
     [CTPreferences putInt:self.lastMutedTs forKey:[self storageKeyWithSuffix:kMUTED_TS_KEY]];
@@ -772,6 +808,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 shouldRedirect = YES;
                 self.redirectDomain = redirectDomain;
                 [self persistRedirectDomain];
+            }
+        }
+        NSString *redirectNotifViewedDomain = headers[kREDIRECT_NOTIF_VIEWED_HEADER];
+        if (redirectNotifViewedDomain != nil) {
+            NSString *currentDomain = self.redirectNotifViewedDomain;
+            self.redirectNotifViewedDomain = redirectNotifViewedDomain;
+            if (![self.redirectNotifViewedDomain isEqualToString:currentDomain]) {
+                self.redirectNotifViewedDomain = redirectNotifViewedDomain;
+                [self persistRedirectNotifViewedDomain];
             }
         }
         NSString *mutedString = headers[kMUTE_HEADER];
@@ -828,6 +873,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSString *accountId = self.config.accountId;
     NSString *sdkRevision = self.deviceInfo.sdkVersion;
     NSString *endpointDomain;
+    // TODO: update the endpoint for the notification queue
     if (queue == _notificationsQueue) {
         endpointDomain = self.redirectDomain;
     } else {
@@ -2780,7 +2826,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_INBOX_SUPPORT
         [self _resetInbox];
 #endif
-        
         // push data on reset profile
         [self recordAppLaunched:@"onUserLogin"];
         [self profilePush:properties];
@@ -3649,10 +3694,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark private
 
-// call async always
 - (void)_resetInbox {
-    self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-    self.inboxController.delegate = self;
+    if (self.inboxController && self.inboxController.isInitialized) {
+        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.inboxController.delegate = self;
+    }
 }
 
 - (BOOL)_isInboxInitialized {
