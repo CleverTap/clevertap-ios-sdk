@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		078CC2AD224B503D00E9C33B /* TestLoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078CC2AC224B503D00E9C33B /* TestLoginVC.swift */; };
 		07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */; };
 		D014B8A320E2F20B001E0780 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D014B8A220E2F20B001E0780 /* NotificationService.m */; };
 		D014B8A720E2F20B001E0780 /* testNotifServiceExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -95,6 +96,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		078CC2AC224B503D00E9C33B /* TestLoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestLoginVC.swift; sourceTree = "<group>"; };
 		07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = testNotifServiceExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D014B8A120E2F20B001E0780 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
@@ -243,6 +245,7 @@
 				D0596EFC208BDC6800A80753 /* CleverTapSDKTest.entitlements */,
 				D0A66246207EE4FF00B403F3 /* AppDelegate.swift */,
 				D0A66248207EE4FF00B403F3 /* ViewController.swift */,
+				078CC2AC224B503D00E9C33B /* TestLoginVC.swift */,
 				D0A6624A207EE4FF00B403F3 /* Main.storyboard */,
 				D0A6624D207EE50000B403F3 /* Assets.xcassets */,
 				D0A66252207EE50000B403F3 /* Info.plist */,
@@ -509,6 +512,7 @@
 			files = (
 				D0A66249207EE4FF00B403F3 /* ViewController.swift in Sources */,
 				D0A66247207EE4FF00B403F3 /* AppDelegate.swift in Sources */,
+				078CC2AD224B503D00E9C33B /* TestLoginVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

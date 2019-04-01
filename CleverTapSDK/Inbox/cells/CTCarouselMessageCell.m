@@ -88,6 +88,14 @@ static const float kPageControlViewHeight = 30.f;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     if ([self deviceOrientationIsLandscape]) {
+        CGFloat margins = 0;
+        if (@available(iOS 11.0, *)) {
+            UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+            margins = window.safeAreaInsets.left;
+        }
+        CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;
+        CGFloat viewHeight = viewWidth / 3.5;
+        self.carouselViewHeight.constant  = viewHeight;
         [self populateLandscapeViews];
         [self configurePageControlWithRect:CGRectMake(self.contentView.frame.size.width/2, self.carouselView.frame.size.height - kPageControlViewHeight, 22 * [self.itemViews count], kPageControlViewHeight)];
     } else {
