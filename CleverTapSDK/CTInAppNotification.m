@@ -14,9 +14,10 @@
 @property (nonatomic, readwrite) CTInAppType inAppType;
 
 @property (nonatomic, strong) NSURL *imageURL;
-@property (nonatomic, strong) NSURL *imageUrlLand;
+@property (nonatomic, strong) NSURL *imageUrlLandscape;
 
 @property (nonatomic, readwrite, strong) NSData *image;
+@property (nonatomic, readwrite, strong) NSData *imageLandscape;
 @property (nonatomic, copy, readwrite) NSString *contentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
 
@@ -30,6 +31,8 @@
 @property (nonatomic, readwrite, assign) BOOL hideMedia;
 @property (nonatomic, readwrite, assign) BOOL showCloseButton;
 @property (nonatomic, readwrite, assign) BOOL tablet;
+@property (nonatomic, readwrite, assign) BOOL handleLandscape;
+@property (nonatomic, readwrite, assign) BOOL handlePortrait;
 
 @property (nonatomic, copy, readwrite) NSString *html;
 @property (nonatomic, readwrite) BOOL showClose;
@@ -100,12 +103,13 @@
     self.messageColor = (NSString*) jsonObject[@"message"][@"color"];
     self.showCloseButton = [jsonObject[@"close"] boolValue];
     self.tablet = [jsonObject[@"tablet"] boolValue];
-    
+    self.handlePortrait = jsonObject[@"handle_portrait"] ? [jsonObject[@"handle_portrait"] boolValue] : YES;
+    self.handleLandscape = jsonObject[@"handle_landscape"] ? [jsonObject[@"handle_landscape"] boolValue] : NO;
+
     NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
     if (_media) {
         self.contentType = _media[@"content_type"];
         NSString *_mediaUrl = _media[@"url"];
-        // TODO: add url_land
         if (_mediaUrl) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
@@ -123,6 +127,15 @@
                     _mediaIsAudio = YES;
                 }
             }
+        }
+    }
+    
+    NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[@"media_landscape"];
+    if (_mediaLandscape) {
+        NSString *_mediaUrlLandscape = _mediaLandscape[@"url"];
+        // TODO: add url_land - only for testing
+        if (_mediaUrlLandscape) {
+            self.imageUrlLandscape = [NSURL URLWithString:_mediaUrlLandscape];
         }
     }
     

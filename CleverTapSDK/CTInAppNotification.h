@@ -25,6 +25,7 @@
 @property (nonatomic, assign, readonly) float widthPercent;
 
 @property (nonatomic, readonly) NSData *image;
+@property (nonatomic, readonly) NSData *imageLandscape;
 @property (nonatomic, copy, readonly) NSString *contentType;
 @property (nonatomic, copy, readonly) NSString *mediaUrl;
 @property (nonatomic, readonly, assign) BOOL mediaIsVideo;
@@ -40,6 +41,8 @@
 
 @property (nonatomic, readonly, assign) BOOL showCloseButton;
 @property (nonatomic, readonly, assign) BOOL tablet;
+@property (nonatomic, readonly, assign) BOOL handleLandscape;
+@property (nonatomic, readonly, assign) BOOL handlePortrait;
 
 @property (nonatomic, readonly) NSArray<CTNotificationButton *> *buttons;
 

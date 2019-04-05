@@ -7,7 +7,7 @@
     NSMutableDictionary *referrer = [[NSMutableDictionary alloc] init];
     @try {
         // Don't care for null values - they won't be added anyway
-        if (sourceApp != nil && ![sourceApp isEqualToString:@""]) {
+        if (sourceApp != nil && ![sourceApp isEqualToString:@""] && ![sourceApp hasPrefix:@"fb"]) {
             referrer[@"referrer"] = sourceApp;
         }
         @try {

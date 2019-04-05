@@ -35,20 +35,25 @@ static const float kPageControlViewHeight = 30.f;
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
-        CTCarouselImageView *carouselView = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
-        [carouselView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
-        carouselView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
-        carouselView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
-        carouselView.titleLabel.text = content.title;
-        carouselView.titleLabel.textColor = content.titleColor ? [CTInAppUtils ct_colorWithHexString:content.titleColor] : [CTInAppUtils ct_colorWithHexString:@"#000000"];
-        carouselView.bodyLabel.text = content.message;
-        carouselView.bodyLabel.textColor = content.messageColor ? [CTInAppUtils ct_colorWithHexString:content.messageColor] :  [CTInAppUtils ct_colorWithHexString:@"#7E7E7E"];
-        UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
-        carouselView.userInteractionEnabled = YES;
-        carouselView.tag = index;
-        [carouselView addGestureRecognizer:itemViewTapGesture];
-        [self.itemViews addObject:carouselView];
+        CTCarouselImageView *carouselItemView;
+        if (carouselItemView == nil){
+          carouselItemView  = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
+            carouselItemView.backgroundColor = [UIColor clearColor];
+            [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+                                          placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
+            carouselItemView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
+            carouselItemView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
+            carouselItemView.titleLabel.text = content.title;
+            carouselItemView.titleLabel.textColor = content.titleColor ? [CTInAppUtils ct_colorWithHexString:content.titleColor] : [CTInAppUtils ct_colorWithHexString:@"#000000"];
+            carouselItemView.bodyLabel.text = content.message;
+            carouselItemView.bodyLabel.textColor = content.messageColor ? [CTInAppUtils ct_colorWithHexString:content.messageColor] :  [CTInAppUtils ct_colorWithHexString:@"#7E7E7E"];
+        }
+        
+        UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
+        carouselItemView.userInteractionEnabled = YES;
+        carouselItemView.tag = index;
+        [carouselItemView addGestureRecognizer:carouselViewTapGesture];
+        [self.itemViews addObject:carouselItemView];
         index++;
     }
 }
@@ -87,6 +92,13 @@ static const float kPageControlViewHeight = 30.f;
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
+    for (UIView *view in self.itemViews) {
+        [view removeFromSuperview];
+    }
+    for (UIView *subview in [self.carouselView subviews]) {
+        [subview removeFromSuperview];
+    }
+    
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = 0;
         if (@available(iOS 11.0, *)) {
@@ -95,9 +107,14 @@ static const float kPageControlViewHeight = 30.f;
         }
         CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;
         CGFloat viewHeight = viewWidth / 3.5;
+        CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
+        self.frame = frame;
+        self.carouselView.frame = frame;
         self.carouselViewHeight.constant  = viewHeight;
+        [self layoutIfNeeded];
+        [self layoutSubviews];
         [self populateLandscapeViews];
-        [self configurePageControlWithRect:CGRectMake(self.contentView.frame.size.width/2, self.carouselView.frame.size.height - kPageControlViewHeight, 22 * [self.itemViews count], kPageControlViewHeight)];
+        [self configurePageControlWithRect:CGRectMake(viewWidth/2, self.carouselView.frame.size.height - kPageControlViewHeight, 22 * [self.itemViews count], kPageControlViewHeight)];
     } else {
         captionHeight = [CTCarouselImageView captionHeight];
         CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
@@ -106,15 +123,10 @@ static const float kPageControlViewHeight = 30.f;
         self.frame = frame;
         self.carouselView.frame = frame;
         self.carouselViewHeight.constant = viewHeight;
-        for (UIView *view in self.itemViews) {
-            [view removeFromSuperview];
-        }
-        for (UIView *subview in [self.carouselView subviews]) {
-            [subview removeFromSuperview];
-        }
+        [self layoutIfNeeded];
+        [self layoutSubviews];
         [self populateItemViews];
         [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
-
     }
     [self configureSwipeViewWithHeightAdjustment:0];
     [self.swipeView reloadData];

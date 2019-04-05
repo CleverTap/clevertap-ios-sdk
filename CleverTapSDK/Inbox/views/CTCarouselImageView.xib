@@ -29,7 +29,6 @@
                                     </constraints>
                                 </imageView>
                             </subviews>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="bottom" secondItem="WKe-ca-3L8" secondAttribute="bottom" id="5kL-vJ-494"/>
                                 <constraint firstItem="WKe-ca-3L8" firstAttribute="centerX" secondItem="lPO-vE-1l7" secondAttribute="centerX" id="CQI-xH-IIa"/>
@@ -70,7 +69,7 @@
                             </constraints>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstAttribute="bottom" secondItem="8q9-jI-ueJ" secondAttribute="bottom" constant="28" id="276-3X-m7q"/>
                         <constraint firstItem="2OG-1u-Ra6" firstAttribute="centerX" secondItem="KN6-rr-yQC" secondAttribute="centerX" id="PMz-F2-eyk"/>

@@ -18,26 +18,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         // Override point for customization after application launch.
-//        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue+1)
-//        CleverTap.enablePersonalization()
-        
-        //CleverTap.sharedInstance()?.setOffline(true)
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().delegate = self
         } else {
             // Fallback on earlier versions
         };
         
-        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-        
+//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", token: "TEST-6b4-2c1", region: "in1")
 
         CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)
         
-        CleverTap.sharedInstance(withCleverTapID: "Aditi09")
-        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
+//        CleverTap.sharedInstance()?."profi"(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         registerPush()
         
         return true
@@ -59,18 +53,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
     }
     
-    func profileDidInitialize(_ CleverTapID: String!, forAccountId accountId: String!) {
-        print(CleverTapID)
-        print(accountId)
-    }
-    
     func shouldShowInAppNotification(withExtras extras: [AnyHashable : Any]!) -> Bool {
-//        NSLog("shouldShowNotificationwithExtras called: %@", extras)
+        NSLog("shouldShowNotificationwithExtras called: %@", extras)
         return true;
     }
     
     func inAppNotificationDismissed(withExtras extras: [AnyHashable : Any]!, andActionExtras actionExtras: [AnyHashable : Any]!) {
-//        NSLog("inAppNotificationDismissed called withExtras: %@ actionExtras: %@", extras, actionExtras)
+        NSLog("inAppNotificationDismissed called withExtras: %@ actionExtras: %@", extras, actionExtras)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
