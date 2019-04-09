@@ -28,12 +28,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", token: "TEST-6b4-2c1", region: "in1")
 
-        CleverTap.autoIntegrate()
+//        CleverTap.autoIntegrate()
+        CleverTap.autoIntegrate(withCleverTapID: "Aditi10")
+        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: nil)
         CleverTap.setDebugLevel(2)
-        
-//        CleverTap.sharedInstance()?."profi"(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         registerPush()
-        
         return true
     }
 

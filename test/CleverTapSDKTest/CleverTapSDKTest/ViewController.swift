@@ -114,8 +114,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         CleverTap.sharedInstance()?.recordEvent("Interstitial video")
         CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
-        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
-        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
+//        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
+//        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
 
     }
     

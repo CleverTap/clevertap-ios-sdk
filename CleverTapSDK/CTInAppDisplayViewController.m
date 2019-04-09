@@ -32,10 +32,12 @@
     return self;
 }
 
+#if !TARGET_OS_TV
 - (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
     self = [self initWithNotification:notification];
     return self;
 }
+#endif
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){

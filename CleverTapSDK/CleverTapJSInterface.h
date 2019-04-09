@@ -1,3 +1,4 @@
+#if !TARGET_OS_TV
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 
@@ -10,3 +11,5 @@
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 
 @end
+#endif
+

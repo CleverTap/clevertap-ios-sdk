@@ -473,15 +473,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }
             return nil;
         }
+        
         _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
-      
+        
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
-        // TODO: already present GUID and enable custom id check - optimisation - not sure required or not 
+        // TODO: Check with Peter
         if (_plistInfo.enableCustomCleverTapId && !_defaultInstanceConfig.cleverTapId) {
-            if (![CTValidator isValidCleverTapId:cleverTapID]) {
+            CleverTapInstanceConfig *tempConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+            if ([CTDeviceInfo deviceIDExists:tempConfig]) {
+                CleverTapLogStaticInfo("%@: CleverTap ID already exist. Cannot change to %@", self, cleverTapID);
+            }else if (![CTValidator isValidCleverTapId:cleverTapID]) {
                 CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. Provided Custom CleverTap ID is not valid. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
+                _defaultInstanceConfig = nil;
                 return nil;
             } else {
                 _defaultInstanceConfig.cleverTapId = cleverTapID;

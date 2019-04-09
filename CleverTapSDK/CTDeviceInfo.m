@@ -104,6 +104,18 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
++ (NSString *)deviceIDExists:(CleverTapInstanceConfig *)config {
+    NSString *deviceID;
+    NSString * storageKey = [NSString stringWithFormat:@"%@:%@", config.accountId, kCLTAP_DEVICE_ID_TAG];
+    deviceID = [CTPreferences getStringForKey:storageKey withResetValue:nil];
+    if (deviceID
+        && [[deviceID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""]) {
+        deviceID = nil;
+    }
+    
+    return deviceID;
+}
+
 + (NSString *)getIDFV {
     NSString *identifier = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     if (identifier && ![identifier isEqualToString:@"00000000-0000-0000-0000-000000000000"]) {

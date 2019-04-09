@@ -27,5 +27,6 @@
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
 - (void)forceNewDeviceID;
++ (NSString *)deviceIDExists:(CleverTapInstanceConfig *)config;
 
 @end

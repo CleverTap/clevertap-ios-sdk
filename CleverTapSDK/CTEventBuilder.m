@@ -284,7 +284,7 @@ NSString *const kCHARGED_EVENT = @"Charged";
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
         // TODO: for test - remove 
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : @"Notification Viewed Push";
+        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
         event[@"evtData"] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
