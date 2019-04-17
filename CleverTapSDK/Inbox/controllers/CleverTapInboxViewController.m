@@ -194,18 +194,6 @@ static const int kMaxTags = 3;
         [self.tableView reloadData];
         [self playVideoInVisibleCells];
     } completion:nil];
-//    [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> completion) {
-//        [self loadView];
-//        [self registerNibs];
-//        [self setup];
-//        if ([self.tags count] > 0) {
-//            [self setupSegmentedControl];
-//        }
-//        [self showListEmptyLabel];
-//        [self stopPlay];
-//        [self.tableView reloadData];
-//        [self playVideoInVisibleCells];
-//    }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 

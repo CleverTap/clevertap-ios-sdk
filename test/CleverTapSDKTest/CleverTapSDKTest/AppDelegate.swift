@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  CleverTapSDKTest
-//
-//  Created by Peter Wilkniss on 4/11/18.
-//  Copyright © 2018 Peter Wilkniss. All rights reserved.
-//
-
 import UIKit
 import UserNotifications
 import CleverTapSDK
@@ -24,13 +16,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
+//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+        
 //        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", token: "TEST-6b4-2c1", region: "in1")
+        
+//        let profile: Dictionary<String, AnyObject> = [
+//            "Push_Data": "Aditi Agrawal" as AnyObject,                 // String
+//        ]
 
-//        CleverTap.autoIntegrate()
-        CleverTap.autoIntegrate(withCleverTapID: "Aditi10")
-        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: nil)
+        CleverTap.autoIntegrate()
+        CleverTap.sharedInstance()?.recordEvent("Alert ios")
+        CleverTap.autoIntegrate(withCleverTapID:"")
         CleverTap.setDebugLevel(2)
         registerPush()
         return true
@@ -70,14 +68,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     @available(iOS 10.0, *)
-    @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
+//        CleverTap.sharedInstance()?.handleNotification(withData: response.notification.request.content.userInfo)
+        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: response.notification.request.content.userInfo)
         completionHandler()
     }
     
-    @available(iOS 10.0, *)
-    @available(iOS 10.0, *)
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         NSLog("%@: will present notification: %@", self.description, notification.request.content.userInfo)

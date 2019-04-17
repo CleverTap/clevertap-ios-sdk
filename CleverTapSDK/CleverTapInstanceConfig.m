@@ -13,18 +13,18 @@
                  isDefaultInstance:NO];    
 }
 
-- (instancetype)initWithAccountId:(NSString*)accountId
-                     accountToken:(NSString*)accountToken
-                    accountRegion:(NSString*)accountRegion {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                    accountRegion:(NSString *)accountRegion {
     return [self initWithAccountId:accountId
                       accountToken:accountToken
                      accountRegion:accountRegion
                  isDefaultInstance:NO];
 }
 // SDK private
-- (instancetype)initWithAccountId:( NSString*)accountId
-                              accountToken:( NSString*)accountToken
-                             accountRegion:(NSString*)accountRegion
+- (instancetype)initWithAccountId:(NSString *)accountId
+                              accountToken:(NSString *)accountToken
+                             accountRegion:(NSString *)accountRegion
                          isDefaultInstance:(BOOL)isDefault {
     if (accountId.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountId is empty");

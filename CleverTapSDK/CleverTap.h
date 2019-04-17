@@ -80,7 +80,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  Returns nil if the CleverTap Account ID and Token are not provided in apps info.plist
  
  */
-+ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString *)cleverTapID;
++ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -112,7 +112,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  Returns nil if the CleverTap Account ID and Token are not provided in apps info.plist
  
  */
-+ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString *)cleverTapID;
++ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -338,7 +338,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param cleverTapID        the CleverTap id
 
  */
-- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString *)cleverTapID;
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 
 /*!
@@ -660,7 +660,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param notificationData       notificationData id
  */
-- (void)recordNotificationViewedEventWithData:(id)notificationData;
+- (void)recordNotificationViewedEventWithData:(id _Nonnull)notificationData;
 
 /*!
  @method

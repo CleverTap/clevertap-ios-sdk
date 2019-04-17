@@ -109,8 +109,8 @@
     NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
     if (_media) {
         self.contentType = _media[@"content_type"];
-        NSString *_mediaUrl = _media[@"url"];
-        if (_mediaUrl) {
+        NSString *_mediaUrl = _media[@"url"]; // TODO: Check for url if blank String
+        if (_mediaUrl && _mediaUrl.length > 0) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
                 if ([self.contentType isEqualToString:@"image/gif"] ) {

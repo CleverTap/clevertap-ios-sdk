@@ -32,7 +32,7 @@
 	<key>CleverTapDisableAppLaunched</key>
 	<string>0</string>
 	<key>CleverTapEnableCustomId</key>
-	<true/>
+	<false/>
 	<key>CleverTapToken</key>
 	<string></string>
 	<key>CleverTapUseIFA</key>

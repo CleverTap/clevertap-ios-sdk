@@ -60,7 +60,7 @@
     return self;
 }
 
-- (NSString*)urlForLinkAtIndex:(int)index {
+- (NSString *_Nullable)urlForLinkAtIndex:(int)index {
     NSString *url;
     @try {
         NSDictionary *link = self.links[index];

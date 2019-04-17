@@ -19,8 +19,13 @@
 @implementation NotificationService
 
 - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
-    [CleverTap setDebugLevel:CleverTapLogDebug+22];
-    [CleverTap autoIntegrate];
+    
+    self.contentHandler = contentHandler;
+    self.bestAttemptContent = [request.content mutableCopy];
+    NSDictionary *userInfo = request.content.userInfo;
+//    [CleverTap setDebugLevel:CleverTapLogDebug+22];
+//    [CleverTap autoIntegrate];
+    [[CleverTap sharedInstance] recordNotificationViewedEventWithData:userInfo];
     [[CleverTap sharedInstance] recordEvent:@"testEventFromAppex"];
     [super didReceiveNotificationRequest:request withContentHandler:contentHandler];
     

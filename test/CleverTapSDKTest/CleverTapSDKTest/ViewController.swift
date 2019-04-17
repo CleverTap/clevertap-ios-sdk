@@ -60,16 +60,16 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     // MARK: - Register Inbox
     
     func inboxRegister() {
-        CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
-            
-            DispatchQueue.main.async {
-                self.inboxButton.isHidden = false;
-                self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
-            }
-        }))
-        
+//        CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
+//            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+//            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+//            
+//            DispatchQueue.main.async {
+//                self.inboxButton.isHidden = false;
+//                self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
+//            }
+//        }))
+//        
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
             let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
@@ -83,8 +83,12 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBAction func inboxButtonTapped(_ sender: Any) {
         let style = CleverTapInboxStyleConfig.init()
         style.title = "AppInbox"
-        style.cellBackgroundColor = UIColor.yellow
         style.messageTags = ["Promotions", "Offers"];
+        style.backgroundColor = UIColor.brown
+        style.navigationBarTintColor = UIColor.gray
+        style.tabSelectedTextColor = UIColor.green
+        style.tabSelectedBgColor = UIColor.white
+        style.tabUnSelectedTextColor = UIColor.red
         
         if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
@@ -119,7 +123,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 
     }
     
-    func messageDidSelect(_ message: CleverTapInboxMessage!, at index: Int32, withButtonIndex buttonIndex: Int32) {
+    func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
         
     }
 }

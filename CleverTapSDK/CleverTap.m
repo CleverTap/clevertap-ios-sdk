@@ -239,10 +239,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)autoIntegrate {
-    return [self autoIntegrateWithCleverTapID:nil];
+    return [self _autoIntegrateWithCleverTapID:nil];
 }
 
 + (nullable instancetype)autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
+   return [self _autoIntegrateWithCleverTapID:cleverTapID];
+}
+
++ (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
     CleverTapLogStaticDebug("%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [self swizzleAppDelegate];
@@ -461,10 +465,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark instance lifecycle
 
 + (nullable instancetype)sharedInstance {
-    return [self sharedInstanceWithCleverTapID:nil];
+    return [self _sharedInstanceWithCleverTapID:nil];
 }
 
 + (nullable instancetype)sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
+     return [self _sharedInstanceWithCleverTapID:cleverTapID];
+}
+
++ (nullable instancetype)_sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
     if (_defaultInstanceConfig == nil) {
         if (!_plistInfo.accountId || !_plistInfo.accountToken) {
             if (!sharedInstanceErrorLogged) {
@@ -479,7 +487,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
-        // TODO: Check with Peter
         if (_plistInfo.enableCustomCleverTapId && !_defaultInstanceConfig.cleverTapId) {
             CleverTapInstanceConfig *tempConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
             if ([CTDeviceInfo deviceIDExists:tempConfig]) {
@@ -880,7 +887,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSString *endpointDomain;
     // TODO: update the endpoint for the notification queue
     if (queue == _notificationsQueue) {
-        endpointDomain = self.redirectDomain;
+        endpointDomain = self.redirectNotifViewedDomain;
     } else {
         endpointDomain = self.redirectDomain;
     }
@@ -2955,7 +2962,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _onUserLogin:properties withCleverTapID:nil];
 }
 
-- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString *)cleverTapID {
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString *_Nonnull)cleverTapID {
     [self _onUserLogin:properties withCleverTapID:cleverTapID];
 }
 
@@ -3223,7 +3230,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self recordPageEventWithExtras:nil];
 }
 
-- (void)recordNotificationViewedEventWithData:(id)notificationData {
+- (void)recordNotificationViewedEventWithData:(id _Nonnull)notificationData {
     // normalize the notification data
 #if !defined(CLEVERTAP_TVOS)
     NSDictionary *notification;
@@ -3657,7 +3664,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return all;
 }
 
-- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString *)messageId {
+- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString * _Nonnull)messageId {
     if (![self _isInboxInitialized]) {
         return nil;
     }
@@ -3665,7 +3672,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return (m != nil) ? [[CleverTapInboxMessage alloc] initWithJSON:m] : nil;
 }
 
-- (void)deleteInboxMessage:(CleverTapInboxMessage * _Nonnull )message {
+- (void)deleteInboxMessage:(CleverTapInboxMessage * _Nonnull)message {
     if (![self _isInboxInitialized]) {
         return;
     }
@@ -3742,7 +3749,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
 }
 
-- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
+- (void)messageDidSelect:(CleverTapInboxMessage *_Nonnull)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
     CleverTapLogDebug(_config.logLevel, @"%@: inbox message clicked: %@", self, message);
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
     

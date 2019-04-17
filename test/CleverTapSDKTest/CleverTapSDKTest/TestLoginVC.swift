@@ -1,11 +1,3 @@
-//
-//  TestLoginVC.swift
-//  CleverTapSDKTest
-//
-//  Created by Aditi Agrawal on 27/03/19.
-//  Copyright © 2019 Peter Wilkniss. All rights reserved.
-//
-
 import UIKit
 import Foundation
 import CleverTapSDK
@@ -18,7 +10,6 @@ class TestLoginVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         // Do any additional setup after loading the view.
     }
     
