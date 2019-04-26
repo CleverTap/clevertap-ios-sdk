@@ -122,39 +122,39 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2tf-qQ-yFg">
-                                        <rect key="frame" x="0.0" y="0.0" width="334" height="90"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="334" height="134.5"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" verticalCompressionResistancePriority="751" text="Title" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RTj-ot-rZd">
-                                                <rect key="frame" x="90" y="15" width="224" height="21.5"/>
+                                                <rect key="frame" x="95" y="15" width="219" height="21.5"/>
                                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="26k-os-5On">
-                                                <rect key="frame" x="90" y="43.5" width="224" height="19.5"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="26k-os-5On">
+                                                <rect key="frame" x="20" y="95" width="294" height="19.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                 <color key="textColor" red="0.4941176471" green="0.4941176471" blue="0.4941176471" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BpQ-59-JP3">
-                                                <rect key="frame" x="10" y="10" width="70" height="70"/>
+                                                <rect key="frame" x="10" y="10" width="75" height="75"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" priority="750" id="I05-1z-nO3"/>
+                                                    <constraint firstAttribute="height" constant="75" id="KHZ-ZB-rk6"/>
                                                     <constraint firstAttribute="width" secondItem="BpQ-59-JP3" secondAttribute="height" multiplier="1:1" priority="750" id="Ssf-r5-iiP"/>
                                                 </constraints>
                                             </imageView>
                                         </subviews>
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="RTj-ot-rZd" secondAttribute="trailing" constant="20" id="2eC-g9-YWf"/>
+                                            <constraint firstAttribute="bottom" secondItem="26k-os-5On" secondAttribute="bottom" constant="20" id="Bjn-RZ-hvY"/>
                                             <constraint firstItem="RTj-ot-rZd" firstAttribute="leading" secondItem="BpQ-59-JP3" secondAttribute="trailing" constant="10" id="Nyv-Mf-jfG"/>
-                                            <constraint firstItem="26k-os-5On" firstAttribute="top" secondItem="RTj-ot-rZd" secondAttribute="bottom" constant="7" id="OXV-6s-x3p"/>
-                                            <constraint firstItem="26k-os-5On" firstAttribute="leading" secondItem="RTj-ot-rZd" secondAttribute="leading" id="ScJ-qT-v7c"/>
                                             <constraint firstItem="BpQ-59-JP3" firstAttribute="top" secondItem="2tf-qQ-yFg" secondAttribute="top" constant="10" id="Vuy-mk-XoS"/>
+                                            <constraint firstItem="26k-os-5On" firstAttribute="leading" secondItem="2tf-qQ-yFg" secondAttribute="leading" constant="20" id="Wag-gY-mN5"/>
                                             <constraint firstAttribute="trailing" secondItem="26k-os-5On" secondAttribute="trailing" constant="20" id="Xud-oM-o47"/>
                                             <constraint firstItem="BpQ-59-JP3" firstAttribute="leading" secondItem="2tf-qQ-yFg" secondAttribute="leading" constant="10" id="bpb-Sk-XaV"/>
-                                            <constraint firstAttribute="height" constant="90" id="iqX-Pv-OMe"/>
-                                            <constraint firstAttribute="bottom" secondItem="BpQ-59-JP3" secondAttribute="bottom" constant="10" id="mFe-pm-s6C"/>
                                             <constraint firstItem="RTj-ot-rZd" firstAttribute="top" secondItem="2tf-qQ-yFg" secondAttribute="top" constant="15" id="nNz-sv-gdO"/>
+                                            <constraint firstItem="26k-os-5On" firstAttribute="top" secondItem="BpQ-59-JP3" secondAttribute="bottom" constant="10" id="utF-rE-i0Q"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -270,6 +270,7 @@
                 <outlet property="avPlayerControlsView" destination="f3P-fa-O82" id="jl3-XE-Bzk"/>
                 <outlet property="bodyLabel" destination="26k-os-5On" id="ElC-9l-73t"/>
                 <outlet property="cellIcon" destination="BpQ-59-JP3" id="Diq-VH-Ta2"/>
+                <outlet property="cellIconHeightContraint" destination="KHZ-ZB-rk6" id="jG2-aE-VHy"/>
                 <outlet property="cellIconRatioContraint" destination="Ssf-r5-iiP" id="qRu-wU-lzj"/>
                 <outlet property="cellIconWidthContraint" destination="I05-1z-nO3" id="tbQ-g0-dZR"/>
                 <outlet property="cellImageView" destination="cMG-fF-yhG" id="x1B-K8-OQM"/>

@@ -92,11 +92,13 @@
     }
     
     if (content.iconUrl) {
+        self.cellIconHeightContraint.constant = 75;
         [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
                          placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
     } else {
+        self.cellIconHeightContraint.constant = 28;
         self.cellIconRatioContraint.priority = 750;
         self.cellIconWidthContraint.priority = 999;
     }

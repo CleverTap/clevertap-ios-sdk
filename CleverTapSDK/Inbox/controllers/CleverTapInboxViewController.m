@@ -181,7 +181,6 @@ static const int kMaxTags = 3;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    // TODO: load view call directly
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
         [self loadView];
         [self registerNibs];
