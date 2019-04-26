@@ -81,10 +81,15 @@
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     }
     
+    self.imageView.clipsToBounds = YES;
+    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    
     if (self.notification.image) {
-        self.imageView.clipsToBounds = YES;
-        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
+    }
+    
+    if (self.notification.imageLandscape && [self deviceOrientationIsLandscape]) {
+        self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
     }
     
     self.closeButton.hidden = !self.notification.showCloseButton;

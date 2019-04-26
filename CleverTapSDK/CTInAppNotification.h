@@ -41,8 +41,8 @@
 
 @property (nonatomic, readonly, assign) BOOL showCloseButton;
 @property (nonatomic, readonly, assign) BOOL tablet;
-@property (nonatomic, readonly, assign) BOOL handleLandscape;
-@property (nonatomic, readonly, assign) BOOL handlePortrait;
+@property (nonatomic, readonly, assign) BOOL hasLandscape;
+@property (nonatomic, readonly, assign) BOOL hasPortrait;
 
 @property (nonatomic, readonly) NSArray<CTNotificationButton *> *buttons;
 

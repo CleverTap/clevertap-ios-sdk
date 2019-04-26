@@ -77,13 +77,18 @@
     }
         
     // set image
+    self.imageView.clipsToBounds = YES;
+    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.userInteractionEnabled = YES;
+    UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
+    [self.imageView addGestureRecognizer:imageTapGesture];
+    
     if (self.notification.image) {
-        self.imageView.clipsToBounds = YES;
-        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
-        self.imageView.userInteractionEnabled = YES;
-        UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
-        [self.imageView addGestureRecognizer:imageTapGesture];
+    }
+    
+    if (self.notification.imageLandscape && [self deviceOrientationIsLandscape]) {
+        self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
     }
 }
 

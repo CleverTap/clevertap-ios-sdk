@@ -57,10 +57,15 @@
     self.closeButton.hidden = !self.notification.showCloseButton;
 
     // set image
+    self.imageView.clipsToBounds = YES;
+    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+  
     if (self.notification.image) {
-        self.imageView.clipsToBounds = YES;
-        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
+    }
+    
+    if (self.notification.imageLandscape && [self deviceOrientationIsLandscape]) {
+        self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
     }
     
     if (self.notification.title) {

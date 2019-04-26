@@ -49,11 +49,11 @@
 
 #if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    if (_notification.handlePortrait && _notification.handleLandscape) {
+    if (_notification.hasPortrait && _notification.hasLandscape) {
         return UIInterfaceOrientationMaskAll;
-    } else if (_notification.handlePortrait) {
+    } else if (_notification.hasPortrait) {
         return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
-    } else if (_notification.handleLandscape) {
+    } else if (_notification.hasLandscape) {
         return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
     } else {
         return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);

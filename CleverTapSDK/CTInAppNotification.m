@@ -19,6 +19,7 @@
 @property (nonatomic, readwrite, strong) NSData *image;
 @property (nonatomic, readwrite, strong) NSData *imageLandscape;
 @property (nonatomic, copy, readwrite) NSString *contentType;
+@property (nonatomic, copy, readwrite) NSString *landscapeContentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
 
 @property (nonatomic, readwrite) NSString *title;
@@ -31,8 +32,8 @@
 @property (nonatomic, readwrite, assign) BOOL hideMedia;
 @property (nonatomic, readwrite, assign) BOOL showCloseButton;
 @property (nonatomic, readwrite, assign) BOOL tablet;
-@property (nonatomic, readwrite, assign) BOOL handleLandscape;
-@property (nonatomic, readwrite, assign) BOOL handlePortrait;
+@property (nonatomic, readwrite, assign) BOOL hasLandscape;
+@property (nonatomic, readwrite, assign) BOOL hasPortrait;
 
 @property (nonatomic, copy, readwrite) NSString *html;
 @property (nonatomic, readwrite) BOOL showClose;
@@ -103,13 +104,13 @@
     self.messageColor = (NSString*) jsonObject[@"message"][@"color"];
     self.showCloseButton = [jsonObject[@"close"] boolValue];
     self.tablet = [jsonObject[@"tablet"] boolValue];
-    self.handlePortrait = jsonObject[@"handle_portrait"] ? [jsonObject[@"handle_portrait"] boolValue] : YES;
-    self.handleLandscape = jsonObject[@"handle_landscape"] ? [jsonObject[@"handle_landscape"] boolValue] : NO;
+    self.hasPortrait = jsonObject[@"hasPortrait"] ? [jsonObject[@"hasPortrait"] boolValue] : YES;
+    self.hasLandscape = jsonObject[@"hasLandscape"] ? [jsonObject[@"hasLandscape"] boolValue] : NO;
 
     NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
     if (_media) {
         self.contentType = _media[@"content_type"];
-        NSString *_mediaUrl = _media[@"url"]; // TODO: Check for url if blank String
+        NSString *_mediaUrl = _media[@"url"];
         if (_mediaUrl && _mediaUrl.length > 0) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
@@ -130,12 +131,14 @@
         }
     }
     
-    NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[@"media_landscape"];
+    NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[@"mediaLandscape"];
     if (_mediaLandscape) {
+        self.landscapeContentType = _mediaLandscape[@"content_type"];
         NSString *_mediaUrlLandscape = _mediaLandscape[@"url"];
-        // TODO: add url_land - only for testing
-        if (_mediaUrlLandscape) {
-            self.imageUrlLandscape = [NSURL URLWithString:_mediaUrlLandscape];
+        if (_mediaUrlLandscape && _mediaUrlLandscape.length > 0) {
+            if ([self.landscapeContentType hasPrefix:@"image"]) {
+                self.imageUrlLandscape = [NSURL URLWithString:_mediaUrlLandscape];
+            }
         }
     }
     
@@ -257,8 +260,23 @@
             self.image = self.error ? nil : imageData;
         }
     }
+    if (self.imageUrlLandscape && self.hasLandscape) {
+        NSError *error = nil;
+        NSData *imageData = [NSData dataWithContentsOfURL:self.imageUrlLandscape options:NSDataReadingMappedIfSafe error:&error];
+        if (error || !imageData) {
+            self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
+        } else {
+            // TODO: not sure, Landscape should be added or not. Confirm with Peter
+            if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
+                FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:imageData];
+                if (gif == nil) {
+                    self.error = [NSString stringWithFormat:@"unable to decode landscape gif for URL: %@", self.imageUrlLandscape];
+                }
+            }
+            self.imageLandscape = self.error ? nil : imageData;
+        }
+    }
 #endif
-
     completionHandler();
 }
 
