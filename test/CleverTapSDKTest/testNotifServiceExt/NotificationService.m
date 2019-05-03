@@ -23,7 +23,7 @@
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     NSDictionary *userInfo = request.content.userInfo;
-//    [CleverTap setDebugLevel:CleverTapLogDebug+22];
+    [CleverTap setDebugLevel:CleverTapLogDebug+22];
 //    [CleverTap autoIntegrate];
     [[CleverTap sharedInstance] recordNotificationViewedEventWithData:userInfo];
     [[CleverTap sharedInstance] recordEvent:@"testEventFromAppex"];

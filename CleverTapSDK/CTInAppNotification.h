@@ -12,6 +12,7 @@
 @property (nonatomic, readonly) CTInAppType inAppType;
 
 @property (nonatomic, copy, readonly) NSString *html;
+@property (nonatomic, copy, readonly) NSString *url;
 @property (nonatomic, readonly) BOOL excludeFromCaps;
 @property (nonatomic, readonly) BOOL showClose;
 @property (nonatomic, readonly) BOOL darkenScreen;

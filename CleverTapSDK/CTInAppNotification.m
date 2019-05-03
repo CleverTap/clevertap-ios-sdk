@@ -36,6 +36,7 @@
 @property (nonatomic, readwrite, assign) BOOL hasPortrait;
 
 @property (nonatomic, copy, readwrite) NSString *html;
+@property (nonatomic, copy, readwrite) NSString *url;
 @property (nonatomic, readwrite) BOOL showClose;
 @property (nonatomic, readwrite) BOOL darkenScreen;
 @property (nonatomic, readwrite) BOOL excludeFromCaps;
@@ -203,6 +204,11 @@
         NSString *html = (NSString*) data[@"html"];
         if (html) {
             self.html = html;
+            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+        }
+        NSString *url = (NSString*) data[@"url"];
+        if (url) {
+            self.url = url;
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         }
         NSDictionary* customExtras = (NSDictionary *) data[@"kv"];
