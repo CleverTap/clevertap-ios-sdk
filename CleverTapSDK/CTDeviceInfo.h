@@ -24,9 +24,8 @@
 @property (assign, readonly) BOOL wifi;
 @property (assign, readonly) BOOL advertisingTrackingEnabled;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
 - (void)forceNewDeviceID;
-+ (NSString *)deviceIDExists:(CleverTapInstanceConfig *)config;
 
 @end

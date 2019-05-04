@@ -104,7 +104,7 @@ typedef enum {
     
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
-    if (self.notification.url && ![self.notification.url isEqual: @""]) {
+    if (self.notification.url) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
         webView.navigationDelegate = nil;
     } else{

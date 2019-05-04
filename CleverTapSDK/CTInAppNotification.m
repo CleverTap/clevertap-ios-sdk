@@ -207,9 +207,13 @@
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         }
         NSString *url = (NSString*) data[@"url"];
-        if (url) {
+        // TODO: Confirm With Peter
+        if (url && url.length > 5) {
             self.url = url;
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+        } else {
+            self.error = @"Bad url";
+            return;
         }
         NSDictionary* customExtras = (NSDictionary *) data[@"kv"];
         if (!customExtras) customExtras = [NSDictionary new];
@@ -272,7 +276,6 @@
         if (error || !imageData) {
             self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
         } else {
-            // TODO: not sure, Landscape should be added or not. Confirm with Peter
             if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
                 FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:imageData];
                 if (gif == nil) {

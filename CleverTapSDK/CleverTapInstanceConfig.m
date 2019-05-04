@@ -59,7 +59,6 @@
     copy.useIDFA = self.useIDFA;
     copy.logLevel = self.logLevel;
     copy.enableCustomCleverTapId = self.enableCustomCleverTapId;
-    copy.cleverTapId = self.cleverTapId;
     return copy;
 }
 

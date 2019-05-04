@@ -92,28 +92,16 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 #endif
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID{
     if (self = [super init]) {
         _config = config;
-        [self initDeviceID];
+        [self initDeviceID:cleverTapID];
     }
     return self;
 }
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-+ (NSString *)deviceIDExists:(CleverTapInstanceConfig *)config {
-    NSString *deviceID;
-    NSString * storageKey = [NSString stringWithFormat:@"%@:%@", config.accountId, kCLTAP_DEVICE_ID_TAG];
-    deviceID = [CTPreferences getStringForKey:storageKey withResetValue:nil];
-    if (deviceID
-        && [[deviceID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""]) {
-        deviceID = nil;
-    }
-    
-    return deviceID;
 }
 
 + (NSString *)getIDFV {
@@ -168,7 +156,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return platform;
 }
 
-- (void)initDeviceID {
+- (void)initDeviceID:(NSString *)cleverTapID {
     @try {
         [deviceIDLock lock];
 
@@ -184,14 +172,14 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         // Is the device ID already present?
         NSString *existingDeviceID = [self getDeviceID];
         if (existingDeviceID) {
-            if (_config.cleverTapId) {
-                CleverTapLogStaticDebug("%@: CleverTap ID already exist. Cannot change to %@", self, _config.cleverTapId);
+            if (cleverTapID && [existingDeviceID substringFromIndex:2] != cleverTapID) {
+                CleverTapLogStaticDebug("%@: CleverTap ID already exist. Cannot change to %@", self, cleverTapID);
             }
             self.deviceId = existingDeviceID;
             return;
         }
-        if (_config.cleverTapId) {
-            [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", _config.cleverTapId]];
+        if (cleverTapID) {
+            [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
             return;
         }
         if (self.advertisingIdentitier) {

@@ -131,6 +131,19 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @method
  
  @abstract
+ Returns the CleverTap instance corresponding to the config.accountId param. Use this for multiple instances of the SDK.
+ 
+ @discussion
+ Create an instance of CleverTapInstanceConfig with your CleverTap Account Id, Token, Region(if any) and other optional config properties.
+ Passing that into this method will create (if necessary, and on all subsequent calls return) a singleton instance mapped to the config.accountId property.
+ 
+ */
++ (instancetype _Nonnull)instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config andCleverTapID:(NSString * _Nonnull)cleverTapID;
+
+/*!
+ @method
+ 
+ @abstract
  Set the CleverTap AccountID and Token
  
  @discussion

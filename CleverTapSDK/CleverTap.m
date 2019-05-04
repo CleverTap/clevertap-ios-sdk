@@ -487,44 +487,50 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
-        if (_plistInfo.enableCustomCleverTapId && !_defaultInstanceConfig.cleverTapId) {
-            CleverTapInstanceConfig *tempConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
-            if ([CTDeviceInfo deviceIDExists:tempConfig]) {
-                CleverTapLogStaticInfo("%@: CleverTap ID already exist. Cannot change to %@", self, cleverTapID);
-            }else if (![CTValidator isValidCleverTapId:cleverTapID]) {
+        if (_plistInfo.enableCustomCleverTapId) {
+            // TODO: Confirm with Peter
+            if (![CTValidator isValidCleverTapId:cleverTapID]) {
                 CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. Provided Custom CleverTap ID is not valid. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
                 _defaultInstanceConfig = nil;
                 return nil;
-            } else {
-                _defaultInstanceConfig.cleverTapId = cleverTapID;
             }
+        } else {
+            cleverTapID = nil;
         }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
-    return [self instanceWithConfig:_defaultInstanceConfig];
+    return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
+    return [self _instanceWithConfig:config andCleverTapID:nil];
+}
+
++ (instancetype)instanceWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
+    return [self _instanceWithConfig:config andCleverTapID:cleverTapID];
+}
+
++ (instancetype)_instanceWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (!_instances) {
         _instances = [[NSMutableDictionary alloc] init];
     }
     CleverTap *instance = [_instances objectForKey:config.accountId];
     if (instance == nil) {
-        instance = [[self alloc] initWithConfig:config];
+        instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;
     }
     return instance;
 }
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig*)config {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig*)config andCleverTapID:(NSString *)cleverTapID {
     if ((self = [super init])) {
         _config = [config copy];
         if (_config.analyticsOnly) {
             CleverTapLogDebug(_config.logLevel, @"%@ is configured as analytics only!", self);
         }
-        _deviceInfo = [[CTDeviceInfo alloc] initWithConfig:_config];
+        _deviceInfo = [[CTDeviceInfo alloc] initWithConfig:_config andCleverTapID:cleverTapID];
         NSMutableDictionary *initialProfileValues = [NSMutableDictionary new];
         if (_deviceInfo.carrier && ![_deviceInfo.carrier isEqualToString:@""]) {
             initialProfileValues[CLTAP_SYS_CARRIER] = _deviceInfo.carrier;
@@ -798,6 +804,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                               NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                                               if (httpResponse.statusCode == 200) {
                                                   [self updateStateFromResponseHeadersShouldRedirect:httpResponse.allHeaderFields];
+                                                  [self updateStateFromResponseHeadersShouldRedirectForNotif:httpResponse.allHeaderFields];
                                                   [self handleHandshakeSuccess];
                                               }
                                           }
@@ -806,6 +813,32 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [task resume];
         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     }];
+}
+
+- (BOOL)updateStateFromResponseHeadersShouldRedirectForNotif:(NSDictionary *)headers {
+    CleverTapLogInternal(self.config.logLevel, @"%@: processing response with headers:%@", self, headers);
+    BOOL shouldRedirect = NO;
+    @try {
+        NSString *redirectNotifViewedDomain = headers[kREDIRECT_NOTIF_VIEWED_HEADER];
+        if (redirectNotifViewedDomain != nil) {
+            NSString *currentDomain = self.redirectNotifViewedDomain;
+            self.redirectNotifViewedDomain = redirectNotifViewedDomain;
+            if (![self.redirectNotifViewedDomain isEqualToString:currentDomain]) {
+                shouldRedirect = YES;
+                self.redirectNotifViewedDomain = redirectNotifViewedDomain;
+                [self persistRedirectNotifViewedDomain];
+            }
+        }
+        NSString *mutedString = headers[kMUTE_HEADER];
+        BOOL muted = (mutedString == nil ? NO : [mutedString boolValue]);
+        if (muted) {
+            [self persistMutedTs];
+            [self clearQueues];
+        }
+    } @catch(NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Error processing Notification Viewed response headers: %@", self, e.debugDescription);
+    }
+    return shouldRedirect;
 }
 
 - (BOOL)updateStateFromResponseHeadersShouldRedirect:(NSDictionary *)headers {
@@ -820,15 +853,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 shouldRedirect = YES;
                 self.redirectDomain = redirectDomain;
                 [self persistRedirectDomain];
-            }
-        }
-        NSString *redirectNotifViewedDomain = headers[kREDIRECT_NOTIF_VIEWED_HEADER];
-        if (redirectNotifViewedDomain != nil) {
-            NSString *currentDomain = self.redirectNotifViewedDomain;
-            self.redirectNotifViewedDomain = redirectNotifViewedDomain;
-            if (![self.redirectNotifViewedDomain isEqualToString:currentDomain]) {
-                self.redirectNotifViewedDomain = redirectNotifViewedDomain;
-                [self persistRedirectNotifViewedDomain];
             }
         }
         NSString *mutedString = headers[kMUTE_HEADER];
@@ -885,7 +909,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSString *accountId = self.config.accountId;
     NSString *sdkRevision = self.deviceInfo.sdkVersion;
     NSString *endpointDomain;
-    // TODO: update the endpoint for the notification queue
     if (queue == _notificationsQueue) {
         endpointDomain = self.redirectNotifViewedDomain;
     } else {
@@ -2166,8 +2189,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             type = @"profile";
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
+        } else if (eventType == CleverTapEventTypeNotificationViewed) {
+            type = @"event";
+            NSString *bundleIdentifier = _deviceInfo.bundleId;
+            if (bundleIdentifier) {
+                mutableEvent[@"pai"] = bundleIdentifier;
+            }
         } else {
             type = @"event";
+            // TODO: bundle id why?
             NSString *bundleIdentifier = _deviceInfo.bundleId;
             if (bundleIdentifier) {
                 mutableEvent[@"pai"] = bundleIdentifier;
@@ -2457,7 +2487,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                                           success = (httpResponse.statusCode == 200);
                                                           
                                                           if (success) {
-                                                              redirect = [self updateStateFromResponseHeadersShouldRedirect: httpResponse.allHeaderFields];
+                                                              // TODO: Confirm with Peter
+//                                                              redirect = [self updateStateFromResponseHeadersShouldRedirect:httpResponse.allHeaderFields forQueue:queue];
+                                                              if (queue == self->_notificationsQueue) {
+                                                                  redirect = [self updateStateFromResponseHeadersShouldRedirectForNotif: httpResponse.allHeaderFields];
+                                                              } else {
+                                                                  redirect = [self updateStateFromResponseHeadersShouldRedirect: httpResponse.allHeaderFields];
+                                                              }
+                                                              
                                                           } else {
                                                               CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                                                           }
@@ -2473,6 +2510,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self handleSendQueueFail];
             }
             
+            // TODO: redirect - false and why we can't persist queue App Extension
             if (!success || redirect) {
                 // error so return without removing events from the queue or parsing the response
                 // Note: in an APP Extension we don't persist any unsent queues
@@ -2826,7 +2864,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         // create or update guid
         if (cleverTapID){
-            [self.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-%@", cleverTapID]];
+            // TODO: validate the CleverTap id.
+            [self.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
         }else if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
         } else {
