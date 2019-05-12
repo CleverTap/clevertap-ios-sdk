@@ -21,11 +21,16 @@
 @property (strong, readonly) NSString *deviceWidth;
 @property (strong, readonly) NSString *deviceHeight;
 @property (atomic, readonly) NSString *deviceId;
+@property (atomic, readonly) NSString *fallbackDeviceId;
 @property (assign, readonly) BOOL wifi;
 @property (assign, readonly) BOOL advertisingTrackingEnabled;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
+- (void)forceUpdateFallbackDeviceID;
 - (void)forceNewDeviceID;
+- (void)forceRemoveDeviceID;
+
+- (NSString *)getDeviceID;
 
 @end

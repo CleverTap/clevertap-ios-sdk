@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="landscape">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -33,10 +33,10 @@
                     <rect key="frame" x="53" y="30" width="561" height="315"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gV9-Tc-ITh">
-                            <rect key="frame" x="20" y="247" width="521" height="48"/>
+                            <rect key="frame" x="40" y="247" width="481" height="48"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QzH-NW-XTg">
-                                    <rect key="frame" x="0.0" y="0.0" width="252.5" height="48"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="232.5" height="48"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="48" id="era-iC-DMW"/>
                                     </constraints>
@@ -44,10 +44,10 @@
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="0M4-1U-WwI">
-                                    <rect key="frame" x="252.5" y="0.0" width="268.5" height="48"/>
+                                    <rect key="frame" x="232.5" y="0.0" width="248.5" height="48"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vHd-8a-U9v">
-                                            <rect key="frame" x="16" y="0.0" width="252.5" height="48"/>
+                                            <rect key="frame" x="16" y="0.0" width="232.5" height="48"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                             <state key="normal" title="Button"/>
                                         </button>
@@ -118,11 +118,11 @@
                         <constraint firstAttribute="trailing" secondItem="hIV-uY-bzf" secondAttribute="trailing" constant="20" id="GEb-uA-7bi"/>
                         <constraint firstItem="ZT9-Jk-xak" firstAttribute="top" secondItem="aAI-jy-PGh" secondAttribute="bottom" constant="10" id="NWV-ek-S50"/>
                         <constraint firstItem="aAI-jy-PGh" firstAttribute="centerX" secondItem="NQB-HM-Jiu" secondAttribute="centerX" id="RBH-DM-96k"/>
-                        <constraint firstAttribute="trailing" secondItem="gV9-Tc-ITh" secondAttribute="trailing" constant="20" id="XaX-UO-Kbp"/>
+                        <constraint firstAttribute="trailing" secondItem="gV9-Tc-ITh" secondAttribute="trailing" constant="40" id="XaX-UO-Kbp"/>
                         <constraint firstItem="gV9-Tc-ITh" firstAttribute="top" secondItem="ZT9-Jk-xak" secondAttribute="bottom" constant="10" id="aAy-bC-Ghd"/>
                         <constraint firstItem="ZT9-Jk-xak" firstAttribute="trailing" secondItem="hIV-uY-bzf" secondAttribute="trailing" id="cbr-RZ-45Z"/>
                         <constraint firstItem="ZT9-Jk-xak" firstAttribute="leading" secondItem="hIV-uY-bzf" secondAttribute="leading" id="ft5-Rl-a7U"/>
-                        <constraint firstItem="gV9-Tc-ITh" firstAttribute="leading" secondItem="NQB-HM-Jiu" secondAttribute="leading" constant="20" id="g9d-l9-Oar"/>
+                        <constraint firstItem="gV9-Tc-ITh" firstAttribute="leading" secondItem="NQB-HM-Jiu" secondAttribute="leading" constant="40" id="g9d-l9-Oar"/>
                         <constraint firstAttribute="bottom" secondItem="gV9-Tc-ITh" secondAttribute="bottom" constant="20" id="jR5-EB-rWp"/>
                     </constraints>
                 </view>

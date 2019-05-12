@@ -487,15 +487,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
-        if (_plistInfo.enableCustomCleverTapId) {
-            // TODO: Confirm with Peter
-            if (![CTValidator isValidCleverTapId:cleverTapID]) {
-                CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. Provided Custom CleverTap ID is not valid. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
-                _defaultInstanceConfig = nil;
-                return nil;
-            }
-        } else {
+        if (!_plistInfo.useCustomCleverTapId && cleverTapID) {
             cleverTapID = nil;
+            CleverTapLogStaticInfo(@"CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
         }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
@@ -516,10 +510,54 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!_instances) {
         _instances = [[NSMutableDictionary alloc] init];
     }
-    CleverTap *instance = [_instances objectForKey:config.accountId];
+    // TODO: Confirm with Peter : update guid in same session
+    __block CleverTap *instance = [_instances objectForKey:config.accountId];
     if (instance == nil) {
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;
+    } else {
+        if ([[instance profileGetCleverTapID] hasPrefix:@"-i"] && _plistInfo.useCustomCleverTapId && cleverTapID) {
+            
+            if ([CTValidator isValidCleverTapId:cleverTapID]) {
+                
+                [instance runSerialAsync:^{
+                    
+                    // set OptOut to false for the old user
+                    [instance setOptOut:NO];
+                    
+                    // unregister the push token on the current user
+                    [instance pushDeviceTokenWithAction:CleverTapPushTokenUnregister];
+                    
+                    // clear any events in the queue
+                    [instance clearQueue];
+                    
+                    // clear ARP and other context for the old user
+                    [instance clearUserContext];
+                    
+                    // clear old profile data
+                    [instance.localDataStore changeUser];
+                    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+                    if (![[self class] runningInsideAppExtension]) {
+                        [instance.inAppFCManager changeUser];
+                    }
+#endif
+                    [instance resetSession];
+                    
+                    // if provided CleverTapId is valid update the guid
+                    [instance.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
+                    
+                    [instance _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
+                    
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+                    [instance _resetInbox];
+#endif
+                    // push data on reset profile
+                    [instance pushDeviceTokenWithAction:CleverTapPushTokenRegister];
+                    [instance notifyUserProfileInitialized];
+                }];
+            }
+        }
     }
     return instance;
 }
@@ -2190,6 +2228,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
         } else if (eventType == CleverTapEventTypeNotificationViewed) {
+            // TODO: bundle id required?
             type = @"event";
             NSString *bundleIdentifier = _deviceInfo.bundleId;
             if (bundleIdentifier) {
@@ -2197,7 +2236,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }
         } else {
             type = @"event";
-            // TODO: bundle id why?
             NSString *bundleIdentifier = _deviceInfo.bundleId;
             if (bundleIdentifier) {
                 mutableEvent[@"pai"] = bundleIdentifier;
@@ -2809,18 +2847,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     
-    // if no identifier provided or there are no identified users on the device; just push on the current profile
-    if (!haveIdentifier || [self isAnonymousDevice]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
-        [self profilePush:properties];
-        return;
-    }
-    
-    // if profile maps to current guid, push on current profile
-    if (cachedGUID && [cachedGUID isEqualToString:currentGUID]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: profile %@ maps to current device id %@, using current user profile", self, properties, currentGUID);
-        [self profilePush:properties];
-        return;
+    // if device id present, then only do identifier and anonymous device id checks
+    if ([self.deviceInfo getDeviceID]) { // TODO: should check the format of fallback guid or main guid exists or not
+        // if no identifier provided or there are no identified users on the device; just push on the current profile
+        if (!haveIdentifier || [self isAnonymousDevice]) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
+            [self profilePush:properties];
+            return;
+        }
+        
+        // if profile maps to current guid, push on current profile
+        if (cachedGUID && [cachedGUID isEqualToString:currentGUID]) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: profile %@ maps to current device id %@, using current user profile", self, properties, currentGUID);
+            // TODO: Account for provided guid (clevertap id) if any - same profile - logging
+            [self profilePush:properties];
+            return;
+        }
     }
     
     // stringify the profile dict to use as a concurrent dupe key
@@ -2863,9 +2905,23 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self resetSession];
         
         // create or update guid
-        if (cleverTapID){
-            // TODO: validate the CleverTap id.
-            [self.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
+        if (_plistInfo.useCustomCleverTapId){
+            // TODO: Confirm with Peter
+            if ([CTValidator isValidCleverTapId:cleverTapID]) {
+                [self.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
+            } else {
+                if (!self.deviceInfo.fallbackDeviceId) {
+                    CleverTapLogDebug(self.config.logLevel, @"onUserLogin: creating a fallback guid:  %@", properties);
+                    // create a fallback guid
+                    [self.deviceInfo forceUpdateFallbackDeviceID];
+                    // clear the guid for current user // TODO: Review again
+                    [self.deviceInfo forceRemoveDeviceID];
+                    return;
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"onUserLogin: fallback guid already exists, will not create a new fallback guid:  %@", properties);
+                    return;
+                }
+            }
         }else if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
         } else {
@@ -3650,11 +3706,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }];
             return;
         }
-        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-        self.inboxController.delegate = self;
-        [[self class] runSyncMainQueue: ^{
-            callback(self.inboxController.isInitialized);
-        }];
+        if (self.deviceInfo.deviceId) {
+            self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+            self.inboxController.delegate = self;
+            [[self class] runSyncMainQueue: ^{
+                callback(self.inboxController.isInitialized);
+            }];
+        }
     }];
 }
 
@@ -3746,7 +3804,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark private
 
 - (void)_resetInbox {
-    if (self.inboxController && self.inboxController.isInitialized) {
+    if (self.inboxController && self.inboxController.isInitialized && self.deviceInfo.deviceId) {
         self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
         self.inboxController.delegate = self;
     }

@@ -12,7 +12,7 @@
 @property (nonatomic, assign) BOOL disableAppLaunchedEvent;
 @property (nonatomic, assign) BOOL enablePersonalization;
 @property (nonatomic, assign) BOOL useIDFA;
-@property (nonatomic, assign) BOOL enableCustomCleverTapId;
+@property (nonatomic, assign) BOOL useCustomCleverTapId;
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 
 - (instancetype _Nonnull) init __unavailable;

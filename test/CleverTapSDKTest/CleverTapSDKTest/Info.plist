@@ -31,10 +31,10 @@
 	<string></string>
 	<key>CleverTapDisableAppLaunched</key>
 	<string>0</string>
-	<key>CleverTapEnableCustomId</key>
-	<false/>
 	<key>CleverTapToken</key>
 	<string></string>
+	<key>CleverTapUseCustomId</key>
+	<false/>
 	<key>CleverTapUseIFA</key>
 	<string>0</string>
 	<key>LSRequiresIPhoneOS</key>

@@ -52,7 +52,8 @@ class TestLoginVC: UIViewController {
             //            "MSG-sms": false as AnyObject                        // Disable SMS notifications
         ]
         
-        CleverTap.sharedInstance()?.profilePush(profile)
+//        CleverTap.sharedInstance()?.onUserLogin(profile)
+        CleverTap.sharedInstance()?.onUserLogin(profile, withCleverTapID: "iki80sf$%^9")
     }
 
     /*

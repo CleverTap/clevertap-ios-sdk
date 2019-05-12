@@ -241,15 +241,15 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
 }
 
 + (BOOL)isValidCleverTapId:(NSString *)cleverTapID {
-    NSString *allowedCharacters = @"[A-Za-z0-9^]*";
+    NSString *allowedCharacters = @"[A-Za-z0-9{}:()_!@#$%&-]*";
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", allowedCharacters];
     BOOL isValidCleverTapId = YES;
     if (!cleverTapID) {
         isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"CleverTapEnableCustomId has specified true in Info.plist but custom ID passed is NULL.");
+        CleverTapLogStaticInfo(@"CleverTapUseCustomId has specified true in Info.plist but custom ID passed is NULL.");
     } else if(cleverTapID.length <= 0){
         isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"CleverTapEnableCustomId has specified true in Info.plist but custom ID passed is empty.");
+        CleverTapLogStaticInfo(@"CleverTapUseCustomId has specified true in Info.plist but custom ID passed is empty.");
     } else if (cleverTapID.length > 64) {
         isValidCleverTapId = NO;
         CleverTapLogStaticInfo(@"Custom CleverTap ID set is greater than 64 characters. Provide a valid custom ID.")

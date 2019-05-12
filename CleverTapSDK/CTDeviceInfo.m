@@ -8,6 +8,7 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTDeviceInfo.h"
+#import "CTValidator.h"
 #import "CleverTapBuildInfo.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
@@ -19,6 +20,7 @@
 #endif
 
 NSString* const kCLTAP_DEVICE_ID_TAG = @"deviceId";
+NSString* const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
 
 static BOOL advertisingTrackingEnabled;
 static NSRecursiveLock *deviceIDLock;
@@ -48,14 +50,16 @@ SCNetworkReachabilityRef _reachability;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 
 @property (strong, readwrite) NSString *deviceId;
+@property (strong, readwrite) NSString *fallbackDeviceId;
 @property (strong, readwrite) NSString *advertisingIdentitier;
 @property (strong, readwrite) NSString *vendorIdentifier;
-
 @property (strong, readonly) NSObject *networkInfo;
 
 @end
 
 @implementation CTDeviceInfo
+
+@synthesize deviceId=_deviceId;
 
 static dispatch_queue_t backgroundQueue;
 static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
@@ -102,6 +106,14 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (NSString *)deviceId {
+    return _deviceId ? _deviceId : _fallbackDeviceId;
+}
+
+- (void)setDeviceId:(NSString *)deviceId {
+    _deviceId = deviceId;
 }
 
 + (NSString *)getIDFV {
@@ -178,9 +190,20 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             self.deviceId = existingDeviceID;
             return;
         }
-        if (cleverTapID) {
-            [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
-            return;
+        if (self.config.useCustomCleverTapId) {
+            if ([CTValidator isValidCleverTapId:cleverTapID]) {
+                [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
+                return;
+            } else {
+                NSString *existingFallbackDeviceID = [self getFallbackDeviceID];
+                if (existingFallbackDeviceID) {
+                    self.fallbackDeviceId = existingFallbackDeviceID;
+                    return;
+                }
+                [self forceUpdateFallbackDeviceID];
+                CleverTapLogStaticDebug("%@: CleverTap will create a fallback guid %@", self, self.fallbackDeviceId);
+                return;
+            }
         }
         if (self.advertisingIdentitier) {
             [self forceUpdateDeviceID:[NSString stringWithFormat:@"-g%@", self.advertisingIdentitier]];
@@ -201,6 +224,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString*)deviceIdStorageKey {
     return [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_DEVICE_ID_TAG];
+}
+
+- (NSString*)fallbackDeviceIdStorageKey {
+    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_FALLBACK_DEVICE_ID_TAG];
 }
 
 - (NSString *)getDeviceID {
@@ -235,6 +262,17 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     }
 }
 
+- (NSString *)getFallbackDeviceID {
+    NSString *fallbackdeviceID;
+    NSString *storageKey = [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_FALLBACK_DEVICE_ID_TAG];
+    fallbackdeviceID = [CTPreferences getStringForKey:storageKey withResetValue:nil];
+    if (fallbackdeviceID
+        && [[fallbackdeviceID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""]) {
+        fallbackdeviceID = nil;
+    }
+    
+    return fallbackdeviceID;
+}
 - (void)forceNewDeviceID {
     [self forceUpdateDeviceID:[self generateGUID]];
 }
@@ -246,6 +284,14 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return [guid lowercaseString];
 }
 
+- (NSString *)generateFallbackGUID {
+    NSString *guid = [[NSUUID UUID] UUIDString];
+    guid = [guid stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    // TODO: decide on the prefix of the guid
+    guid = [NSString stringWithFormat:@"-i%@", guid];
+    return [guid lowercaseString];
+}
+
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID {
     @try {
         [deviceIDLock lock];
@@ -254,6 +300,22 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     } @finally {
         [deviceIDLock unlock];
     }
+}
+
+- (void)forceUpdateFallbackDeviceID {
+    @try {
+        [deviceIDLock lock];
+        NSString *fallbackDeviceID = [self generateFallbackGUID];
+        self.fallbackDeviceId = fallbackDeviceID;
+        [CTPreferences putString:fallbackDeviceID forKey:[self fallbackDeviceIdStorageKey]];
+    } @finally {
+        [deviceIDLock unlock];
+    }
+}
+
+- (void)forceRemoveDeviceID {
+    self.deviceId = nil;
+    [CTPreferences removeObjectForKey:[self deviceIdStorageKey]];
 }
 
 - (NSString*)sdkVersion {

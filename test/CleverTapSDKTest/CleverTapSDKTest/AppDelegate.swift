@@ -21,15 +21,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 //        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", token: "TEST-6b4-2c1", region: "in1")
-        
 //        let profile: Dictionary<String, AnyObject> = [
 //            "Push_Data": "Aditi Agrawal" as AnyObject,                 // String
 //        ]
 
-        CleverTap.autoIntegrate(withCleverTapID: "Aditi09090")
-        CleverTap.sharedInstance()?.recordEvent("Alert ios")
-        CleverTap.autoIntegrate(withCleverTapID:"")
-        CleverTap.setDebugLevel(2)
+        CleverTap.autoIntegrate(withCleverTapID: "Adi#101*010#")
+//        CleverTap.sharedInstance(withCleverTapID: "Aditi9090")
+//        CleverTap.sharedInstance()?.recordEvent("Alert ios")
+//        CleverTap.autoIntegrate()
+        CleverTap.setDebugLevel(3)
         registerPush()
         return true
     }

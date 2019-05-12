@@ -107,7 +107,6 @@
     self.tablet = [jsonObject[@"tablet"] boolValue];
     self.hasPortrait = jsonObject[@"hasPortrait"] ? [jsonObject[@"hasPortrait"] boolValue] : YES;
     self.hasLandscape = jsonObject[@"hasLandscape"] ? [jsonObject[@"hasLandscape"] boolValue] : NO;
-
     NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
     if (_media) {
         self.contentType = _media[@"content_type"];
@@ -206,18 +205,22 @@
             self.html = html;
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         }
-        NSString *url = (NSString*) data[@"url"];
         // TODO: Confirm With Peter
+        NSString *url = (NSString*) data[@"url"];
         if (url && url.length > 5) {
             self.url = url;
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         } else {
-            self.error = @"Bad url";
-            return;
+            if (url) {
+                self.error = @"Bad url";
+                return;
+            }
         }
         NSDictionary* customExtras = (NSDictionary *) data[@"kv"];
         if (!customExtras) customExtras = [NSDictionary new];
         self.customExtras = customExtras;
+        self.hasLandscape = YES;
+        self.hasPortrait = YES;
     }
     NSDictionary *displayParams = jsonObject[@"w"];
     if (displayParams) {

@@ -79,6 +79,8 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  Returns nil if the CleverTap Account ID and Token are not provided in apps info.plist
  
+ CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
+ 
  */
 + (nullable instancetype)sharedInstanceWithCleverTapID:(NSString * _Nonnull)cleverTapID;
 
@@ -110,6 +112,8 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  when you want to make calls to CleverTap elsewhere in your code, you can use this singleton or call sharedInstance.
  
  Returns nil if the CleverTap Account ID and Token are not provided in apps info.plist
+ 
+ CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
  
  */
 + (nullable instancetype)autoIntegrateWithCleverTapID:(NSString * _Nonnull)cleverTapID;
@@ -346,6 +350,8 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  and data relating to the old user removed, and a new session is started
  for the new user and data for that user refreshed via a network call to CleverTap.
  In addition, any global frequency caps are reset as part of the switch.
+ 
+ CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
  
  @param properties       properties dictionary
  @param cleverTapID        the CleverTap id
