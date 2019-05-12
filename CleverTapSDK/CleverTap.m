@@ -516,7 +516,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;
     } else {
-        if ([[instance profileGetCleverTapID] hasPrefix:@"-i"] && _plistInfo.useCustomCleverTapId && cleverTapID) {
+        if ([[instance profileGetCleverTapID] hasPrefix:CLTAP_ERROR_PROFILE_PREFIX] && _plistInfo.useCustomCleverTapId && cleverTapID) {
             
             if ([CTValidator isValidCleverTapId:cleverTapID]) {
                 
