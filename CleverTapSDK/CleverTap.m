@@ -2910,15 +2910,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if ([CTValidator isValidCleverTapId:cleverTapID]) {
                 [self.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
             } else {
-                if (!self.deviceInfo.fallbackDeviceId) {
+                if (![self.deviceInfo getFallbackDeviceID]) {
                     CleverTapLogDebug(self.config.logLevel, @"onUserLogin: creating a fallback guid:  %@", properties);
                     // create a fallback guid
                     [self.deviceInfo forceUpdateFallbackDeviceID];
-                    // clear the guid for current user // TODO: Review again
+                    // clear the guid for current user
                     [self.deviceInfo forceRemoveDeviceID];
                     return;
                 } else {
                     CleverTapLogDebug(self.config.logLevel, @"onUserLogin: fallback guid already exists, will not create a new fallback guid:  %@", properties);
+                    // clear the guid for current user
+                    [self.deviceInfo forceRemoveDeviceID];
                     return;
                 }
             }

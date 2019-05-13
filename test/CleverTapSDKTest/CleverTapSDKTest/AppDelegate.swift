@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 //        CleverTap.sharedInstance(withCleverTapID: "Aditi9090")
 //        CleverTap.sharedInstance()?.recordEvent("Alert ios")
 //        CleverTap.autoIntegrate()
+        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
         CleverTap.setDebugLevel(3)
         registerPush()
         return true

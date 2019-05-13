@@ -287,8 +287,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)generateFallbackGUID {
     NSString *guid = [[NSUUID UUID] UUIDString];
     guid = [guid stringByReplacingOccurrencesOfString:@"-" withString:@""];
-    // TODO: decide on the prefix of the guid
-    guid = [NSString stringWithFormat:@"-i%@", guid];
+    guid = [NSString stringWithFormat:@"%@%@", CLTAP_ERROR_PROFILE_PREFIX ,guid];
     return [guid lowercaseString];
 }
 

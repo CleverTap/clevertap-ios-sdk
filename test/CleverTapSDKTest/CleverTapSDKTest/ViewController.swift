@@ -112,7 +112,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 //        CleverTap.sharedInstance()?.recordEvent("Footer")
 //        CleverTap.sharedInstance()?.recordEvent("Cover Image")
 //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-//        CleverTap.sharedInstance()?.recordEvent("Footer")
+        CleverTap.sharedInstance()?.recordEvent("Footer")
 //        CleverTap.sharedInstance()?.recordEvent("Header")
 //        CleverTap.sharedInstance()?.recordEvent("Cover Image")
 //        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
@@ -122,7 +122,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 //        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
 //        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
 //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
-        CleverTap.sharedInstance()?.recordEvent("in-app")
+//        CleverTap.sharedInstance()?.recordEvent("in-app")
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
 

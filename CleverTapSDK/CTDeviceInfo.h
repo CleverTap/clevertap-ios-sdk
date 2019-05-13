@@ -30,7 +30,7 @@
 - (void)forceUpdateFallbackDeviceID;
 - (void)forceNewDeviceID;
 - (void)forceRemoveDeviceID;
-
+- (NSString *)getFallbackDeviceID;
 - (NSString *)getDeviceID;
 
 @end
