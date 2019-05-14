@@ -21,9 +21,9 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>CleverTapAccountID</key>
-	<string>ZWW-WWW-WWRZ</string>
+	<string></string>
 	<key>CleverTapToken</key>
-	<string>000-001</string>
+	<string></string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>

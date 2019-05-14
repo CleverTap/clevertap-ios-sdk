@@ -53,7 +53,7 @@ class TestLoginVC: UIViewController {
         ]
         
 //        CleverTap.sharedInstance()?.onUserLogin(profile)
-        CleverTap.sharedInstance()?.onUserLogin(profile, withCleverTapID: "iki80sf$%^9")
+        CleverTap.sharedInstance()?.onUserLogin(profile, withCleverTapID: "**u90m**")
     }
 
     /*

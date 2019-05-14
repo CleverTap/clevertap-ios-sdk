@@ -138,6 +138,9 @@
         if (_mediaUrlLandscape && _mediaUrlLandscape.length > 0) {
             if ([self.landscapeContentType hasPrefix:@"image"]) {
                 self.imageUrlLandscape = [NSURL URLWithString:_mediaUrlLandscape];
+                if (![self.landscapeContentType isEqualToString:@"image/gif"] ) {
+                    _mediaIsImage = YES;
+                }
             }
         }
     }
@@ -212,7 +215,7 @@
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         } else {
             if (url) {
-                self.error = @"Bad url";
+                self.error = [NSString stringWithFormat:@"Invalid url:,%@",url];
                 return;
             }
         }

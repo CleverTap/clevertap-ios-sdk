@@ -246,16 +246,16 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
     BOOL isValidCleverTapId = YES;
     if (!cleverTapID) {
         isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"CleverTapUseCustomId has specified true in Info.plist but custom ID passed is NULL.");
+        CleverTapLogStaticInfo(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is NULL.");
     } else if(cleverTapID.length <= 0){
         isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"CleverTapUseCustomId has specified true in Info.plist but custom ID passed is empty.");
+        CleverTapLogStaticInfo(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is empty.");
     } else if (cleverTapID.length > 64) {
         isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"Custom CleverTap ID set is greater than 64 characters. Provide a valid custom ID.")
+        CleverTapLogStaticInfo(@"Custom CleverTap ID passed is greater than 64 characters.")
     } else if (![predicate evaluateWithObject:cleverTapID]) {
         isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"Custom CleverTap ID cannot contain special characters. Provide a valid custom ID.")
+        CleverTapLogStaticInfo(@"Custom CleverTap ID cannot contain special characters")
     }
     return isValidCleverTapId;
 }

@@ -27,10 +27,8 @@
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
-- (void)forceUpdateFallbackDeviceID;
 - (void)forceNewDeviceID;
-- (void)forceRemoveDeviceID;
-- (NSString *)getFallbackDeviceID;
+- (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID;
 - (NSString *)getDeviceID;
 
 @end
