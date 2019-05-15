@@ -208,7 +208,6 @@
             self.html = html;
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         }
-        // TODO: Confirm With Peter
         NSString *url = (NSString*) data[@"url"];
         if (url && url.length > 5) {
             self.url = url;

@@ -34,7 +34,7 @@
 	<key>CleverTapToken</key>
 	<string></string>
 	<key>CleverTapUseCustomId</key>
-	<false/>
+	<true/>
 	<key>CleverTapUseIFA</key>
 	<string>0</string>
 	<key>LSRequiresIPhoneOS</key>

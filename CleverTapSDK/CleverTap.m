@@ -511,7 +511,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!_instances) {
         _instances = [[NSMutableDictionary alloc] init];
     }
-    // TODO: Confirm with Peter : update guid in same session
     __block CleverTap *instance = [_instances objectForKey:config.accountId];
     if (instance == nil) {
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
@@ -2231,7 +2230,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
         } else if (eventType == CleverTapEventTypeNotificationViewed) {
-            // TODO: bundle id required?
             type = @"event";
             NSString *bundleIdentifier = _deviceInfo.bundleId;
             if (bundleIdentifier) {
@@ -2549,7 +2547,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self handleSendQueueFail];
             }
             
-            // TODO: redirect - false and why we can't persist queue App Extension
             if (!success || redirect) {
                 // error so return without removing events from the queue or parsing the response
                 // Note: in an APP Extension we don't persist any unsent queues

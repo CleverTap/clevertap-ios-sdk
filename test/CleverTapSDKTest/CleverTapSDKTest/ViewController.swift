@@ -13,8 +13,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        CleverTap.sharedInstance(withCleverTapID: "i1010")
-//        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
+        CleverTap.sharedInstance(withCleverTapID: "i1010")
+        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
         CleverTap.sharedInstance()?.recordEvent("Alert")
         CleverTap.setDebugLevel(3)
         inboxRegister()

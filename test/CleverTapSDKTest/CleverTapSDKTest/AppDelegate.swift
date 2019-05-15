@@ -18,8 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
 //        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
         
-        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", token: "TEST-6b4-2c1", region: "in1")
 //        let profile: Dictionary<String, AnyObject> = [
 //            "Push_Data": "Aditi Agrawal" as AnyObject,                 // String

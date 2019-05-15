@@ -243,20 +243,19 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
 + (BOOL)isValidCleverTapId:(NSString *)cleverTapID {
     NSString *allowedCharacters = @"[A-Za-z0-9{}:()_!@#$%&-]*";
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", allowedCharacters];
-    BOOL isValidCleverTapId = YES;
     if (!cleverTapID) {
-        isValidCleverTapId = NO;
         CleverTapLogStaticInfo(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is NULL.");
+        return NO;
     } else if(cleverTapID.length <= 0){
-        isValidCleverTapId = NO;
         CleverTapLogStaticInfo(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is empty.");
+        return NO;
     } else if (cleverTapID.length > 64) {
-        isValidCleverTapId = NO;
         CleverTapLogStaticInfo(@"Custom CleverTap ID passed is greater than 64 characters.")
+        return NO;
     } else if (![predicate evaluateWithObject:cleverTapID]) {
-        isValidCleverTapId = NO;
-        CleverTapLogStaticInfo(@"Custom CleverTap ID cannot contain special characters")
+        CleverTapLogStaticInfo(@"Custom CleverTap ID cannot contain special characters.");
+        return NO;
     }
-    return isValidCleverTapId;
+    return YES;
 }
 @end
