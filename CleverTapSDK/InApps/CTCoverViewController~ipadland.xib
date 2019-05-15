@@ -59,10 +59,10 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Eau-fN-lqf">
-                            <rect key="frame" x="160" y="726" width="874" height="48"/>
+                            <rect key="frame" x="240" y="726" width="714" height="48"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ag4-BW-Zdp">
-                                    <rect key="frame" x="0.0" y="0.0" width="429" height="48"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="337" height="48"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="48" id="Sd5-12-C2E"/>
                                     </constraints>
@@ -70,10 +70,10 @@
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ngh-zh-lxT">
-                                    <rect key="frame" x="429" y="0.0" width="445" height="48"/>
+                                    <rect key="frame" x="337" y="0.0" width="377" height="48"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pCf-22-81X">
-                                            <rect key="frame" x="16" y="0.0" width="429" height="48"/>
+                                            <rect key="frame" x="40" y="0.0" width="337" height="48"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                             <state key="normal" title="Button"/>
                                         </button>
@@ -83,7 +83,7 @@
                                         <constraint firstAttribute="trailing" secondItem="pCf-22-81X" secondAttribute="trailing" id="6p4-2Z-Zwo"/>
                                         <constraint firstAttribute="bottom" secondItem="pCf-22-81X" secondAttribute="bottom" id="K8p-iJ-MrH"/>
                                         <constraint firstItem="pCf-22-81X" firstAttribute="top" secondItem="ngh-zh-lxT" secondAttribute="top" id="VEz-kq-49t"/>
-                                        <constraint firstItem="pCf-22-81X" firstAttribute="leading" relation="lessThanOrEqual" secondItem="ngh-zh-lxT" secondAttribute="leading" constant="16" id="fxf-P9-8Pq"/>
+                                        <constraint firstItem="pCf-22-81X" firstAttribute="leading" relation="lessThanOrEqual" secondItem="ngh-zh-lxT" secondAttribute="leading" constant="40" id="fxf-P9-8Pq"/>
                                     </constraints>
                                 </view>
                             </subviews>
@@ -120,10 +120,10 @@
                         <constraint firstAttribute="trailing" secondItem="Eln-Hy-QcB" secondAttribute="trailing" id="0F5-Tl-kON"/>
                         <constraint firstItem="Eau-fN-lqf" firstAttribute="top" relation="greaterThanOrEqual" secondItem="RTP-DT-H8c" secondAttribute="bottom" constant="15" id="232-ui-8or"/>
                         <constraint firstItem="RTP-DT-H8c" firstAttribute="top" secondItem="6Dc-NL-GdO" secondAttribute="bottom" constant="30" id="37H-4J-6Sw"/>
-                        <constraint firstAttribute="trailing" secondItem="Eau-fN-lqf" secondAttribute="trailing" constant="160" id="52e-p5-mh3"/>
+                        <constraint firstAttribute="trailing" secondItem="Eau-fN-lqf" secondAttribute="trailing" constant="240" id="52e-p5-mh3"/>
                         <constraint firstAttribute="trailing" secondItem="6Dc-NL-GdO" secondAttribute="trailing" constant="180" id="BxD-ha-hCo"/>
                         <constraint firstAttribute="bottom" secondItem="Eln-Hy-QcB" secondAttribute="bottom" id="Mkm-fF-hHN"/>
-                        <constraint firstItem="Eau-fN-lqf" firstAttribute="leading" secondItem="n2C-lE-1fm" secondAttribute="leading" constant="160" id="Naa-dJ-UkM"/>
+                        <constraint firstItem="Eau-fN-lqf" firstAttribute="leading" secondItem="n2C-lE-1fm" secondAttribute="leading" constant="240" id="Naa-dJ-UkM"/>
                         <constraint firstAttribute="trailing" secondItem="jyt-3G-OyW" secondAttribute="trailing" constant="15" id="Tag-J2-oHN"/>
                         <constraint firstItem="Eln-Hy-QcB" firstAttribute="leading" secondItem="n2C-lE-1fm" secondAttribute="leading" id="WCc-Yl-hov"/>
                         <constraint firstAttribute="bottom" secondItem="Eau-fN-lqf" secondAttribute="bottom" constant="60" id="d1U-Ng-Izg"/>

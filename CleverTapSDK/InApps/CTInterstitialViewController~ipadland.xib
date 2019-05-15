@@ -36,7 +36,7 @@
                             <rect key="frame" x="160" y="636" width="933" height="48"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aoy-TZ-3I5">
-                                    <rect key="frame" x="0.0" y="0.0" width="458.5" height="48"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="446.5" height="48"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="48" id="J9W-vh-yw1"/>
                                     </constraints>
@@ -44,10 +44,10 @@
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="206-fK-ONe">
-                                    <rect key="frame" x="458.5" y="0.0" width="474.5" height="48"/>
+                                    <rect key="frame" x="446.5" y="0.0" width="486.5" height="48"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UNX-5J-A7t">
-                                            <rect key="frame" x="16" y="0.0" width="458.5" height="48"/>
+                                            <rect key="frame" x="40" y="0.0" width="446.5" height="48"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                             <state key="normal" title="Button"/>
                                         </button>
@@ -57,7 +57,7 @@
                                         <constraint firstAttribute="bottom" secondItem="UNX-5J-A7t" secondAttribute="bottom" id="cQw-HY-OYL"/>
                                         <constraint firstAttribute="trailing" secondItem="UNX-5J-A7t" secondAttribute="trailing" id="fti-dr-Spb"/>
                                         <constraint firstItem="UNX-5J-A7t" firstAttribute="top" secondItem="206-fK-ONe" secondAttribute="top" id="mrt-qm-zq1"/>
-                                        <constraint firstItem="UNX-5J-A7t" firstAttribute="leading" relation="lessThanOrEqual" secondItem="206-fK-ONe" secondAttribute="leading" constant="16" id="o8l-Jg-K2z"/>
+                                        <constraint firstItem="UNX-5J-A7t" firstAttribute="leading" relation="lessThanOrEqual" secondItem="206-fK-ONe" secondAttribute="leading" constant="40" id="o8l-Jg-K2z"/>
                                     </constraints>
                                 </view>
                             </subviews>

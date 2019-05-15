@@ -33,10 +33,10 @@
                     <rect key="frame" x="53" y="30" width="561" height="315"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gV9-Tc-ITh">
-                            <rect key="frame" x="40" y="247" width="481" height="48"/>
+                            <rect key="frame" x="80" y="247" width="401" height="48"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QzH-NW-XTg">
-                                    <rect key="frame" x="0.0" y="0.0" width="232.5" height="48"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="185.5" height="48"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="48" id="era-iC-DMW"/>
                                     </constraints>
@@ -44,17 +44,17 @@
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="0M4-1U-WwI">
-                                    <rect key="frame" x="232.5" y="0.0" width="248.5" height="48"/>
+                                    <rect key="frame" x="185.5" y="0.0" width="215.5" height="48"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vHd-8a-U9v">
-                                            <rect key="frame" x="16" y="0.0" width="232.5" height="48"/>
+                                            <rect key="frame" x="30" y="0.0" width="185.5" height="48"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                             <state key="normal" title="Button"/>
                                         </button>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
-                                        <constraint firstItem="vHd-8a-U9v" firstAttribute="leading" relation="lessThanOrEqual" secondItem="0M4-1U-WwI" secondAttribute="leading" constant="16" id="CBc-JN-qyB"/>
+                                        <constraint firstItem="vHd-8a-U9v" firstAttribute="leading" relation="lessThanOrEqual" secondItem="0M4-1U-WwI" secondAttribute="leading" constant="30" id="CBc-JN-qyB"/>
                                         <constraint firstItem="vHd-8a-U9v" firstAttribute="top" secondItem="0M4-1U-WwI" secondAttribute="top" id="P3P-yE-fGh"/>
                                         <constraint firstAttribute="bottom" secondItem="vHd-8a-U9v" secondAttribute="bottom" id="WPU-AB-cyw"/>
                                         <constraint firstAttribute="trailing" secondItem="vHd-8a-U9v" secondAttribute="trailing" id="hTX-y8-4Jq"/>
@@ -118,11 +118,11 @@
                         <constraint firstAttribute="trailing" secondItem="hIV-uY-bzf" secondAttribute="trailing" constant="20" id="GEb-uA-7bi"/>
                         <constraint firstItem="ZT9-Jk-xak" firstAttribute="top" secondItem="aAI-jy-PGh" secondAttribute="bottom" constant="10" id="NWV-ek-S50"/>
                         <constraint firstItem="aAI-jy-PGh" firstAttribute="centerX" secondItem="NQB-HM-Jiu" secondAttribute="centerX" id="RBH-DM-96k"/>
-                        <constraint firstAttribute="trailing" secondItem="gV9-Tc-ITh" secondAttribute="trailing" constant="40" id="XaX-UO-Kbp"/>
+                        <constraint firstAttribute="trailing" secondItem="gV9-Tc-ITh" secondAttribute="trailing" constant="80" id="XaX-UO-Kbp"/>
                         <constraint firstItem="gV9-Tc-ITh" firstAttribute="top" secondItem="ZT9-Jk-xak" secondAttribute="bottom" constant="10" id="aAy-bC-Ghd"/>
                         <constraint firstItem="ZT9-Jk-xak" firstAttribute="trailing" secondItem="hIV-uY-bzf" secondAttribute="trailing" id="cbr-RZ-45Z"/>
                         <constraint firstItem="ZT9-Jk-xak" firstAttribute="leading" secondItem="hIV-uY-bzf" secondAttribute="leading" id="ft5-Rl-a7U"/>
-                        <constraint firstItem="gV9-Tc-ITh" firstAttribute="leading" secondItem="NQB-HM-Jiu" secondAttribute="leading" constant="40" id="g9d-l9-Oar"/>
+                        <constraint firstItem="gV9-Tc-ITh" firstAttribute="leading" secondItem="NQB-HM-Jiu" secondAttribute="leading" constant="80" id="g9d-l9-Oar"/>
                         <constraint firstAttribute="bottom" secondItem="gV9-Tc-ITh" secondAttribute="bottom" constant="20" id="jR5-EB-rWp"/>
                     </constraints>
                 </view>

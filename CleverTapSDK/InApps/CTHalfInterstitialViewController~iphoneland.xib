@@ -62,7 +62,7 @@
                             <rect key="frame" x="40" y="251" width="329.5" height="40"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wpo-5T-Wxo">
-                                    <rect key="frame" x="0.0" y="0.0" width="156.5" height="40"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="149.5" height="40"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="40" id="fba-dO-T0p"/>
                                     </constraints>
@@ -70,10 +70,10 @@
                                     <state key="normal" title="Button"/>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ekX-v2-tp0">
-                                    <rect key="frame" x="156.5" y="0.0" width="173" height="40"/>
+                                    <rect key="frame" x="149.5" y="0.0" width="180" height="40"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2j3-ZZ-HfF">
-                                            <rect key="frame" x="16" y="0.0" width="157" height="40"/>
+                                            <rect key="frame" x="30" y="0.0" width="150" height="40"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                             <state key="normal" title="Button"/>
                                         </button>
@@ -83,7 +83,7 @@
                                         <constraint firstAttribute="trailing" secondItem="2j3-ZZ-HfF" secondAttribute="trailing" id="F8U-wx-NiQ"/>
                                         <constraint firstAttribute="bottom" secondItem="2j3-ZZ-HfF" secondAttribute="bottom" id="I4M-VG-om3"/>
                                         <constraint firstItem="2j3-ZZ-HfF" firstAttribute="top" secondItem="ekX-v2-tp0" secondAttribute="top" id="Len-5R-tyx"/>
-                                        <constraint firstItem="2j3-ZZ-HfF" firstAttribute="leading" relation="lessThanOrEqual" secondItem="ekX-v2-tp0" secondAttribute="leading" constant="16" id="bSD-uc-9Wj"/>
+                                        <constraint firstItem="2j3-ZZ-HfF" firstAttribute="leading" relation="lessThanOrEqual" secondItem="ekX-v2-tp0" secondAttribute="leading" constant="30" id="bSD-uc-9Wj"/>
                                     </constraints>
                                 </view>
                             </subviews>
