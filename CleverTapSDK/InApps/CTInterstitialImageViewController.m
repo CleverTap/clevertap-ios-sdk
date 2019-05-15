@@ -93,7 +93,7 @@
     UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
     [self.imageView addGestureRecognizer:imageTapGesture];
     
-    if (self.notification.image) {
+    if (self.notification.image && ![self deviceOrientationIsLandscape]) {
         self.imageView.image = [UIImage imageWithData:self.notification.image];
     }
     

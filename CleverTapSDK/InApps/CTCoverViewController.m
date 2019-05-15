@@ -60,7 +60,7 @@
     self.imageView.clipsToBounds = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
   
-    if (self.notification.image) {
+    if (self.notification.image && ![self deviceOrientationIsLandscape]) {
         self.imageView.image = [UIImage imageWithData:self.notification.image];
     }
     

@@ -2797,7 +2797,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
-    if (!guid) guid = [self profileGetCleverTapID];
+    if (!guid) guid = [self.deviceInfo getDeviceID];
     if (!guid || !key || !identifier) return;
     
     NSDictionary *cache = [self getCachedGUIDs];
