@@ -1310,7 +1310,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.lastUTMFields) {
         [event addEntriesFromDictionary:self.lastUTMFields];
     }
-    
+    [self pushErrorGuid:@"App Launched from erroneous profile."];
     [self queueEvent:event withType:CleverTapEventTypeRaised];
 }
 
@@ -1890,6 +1890,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // Won't reach here
     }
     return error;
+}
+
+- (void)pushErrorGuid:(NSString*)errorString {
+    if ([self.deviceInfo.deviceId hasPrefix:CLTAP_ERROR_PROFILE_PREFIX]) {
+        CTValidationResult *error = [[CTValidationResult alloc] init];
+        [error setErrorCode:514];
+        [error setErrorDesc:[NSString stringWithFormat:@"%@ : %@", errorString, self.deviceInfo.deviceId]];
+        [self pushValidationResult:error];
+    }
 }
 
 # pragma mark Additional Request Parameters(ARP) and I/J handling
@@ -2927,6 +2936,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
         NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
         event[@"profile"] = profile;
+        [self pushErrorGuid:@"Profile Push for erroneous profile."];
         [self queueEvent:event withType:CleverTapEventTypeProfile];
     }];
 }
