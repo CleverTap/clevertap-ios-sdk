@@ -7,7 +7,7 @@
 //
 
 #import "NotificationService.h"
-//@import CleverTapSDK;
+@import CleverTapSDK;
 
 @interface NotificationService ()
 
@@ -22,12 +22,8 @@
     
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
-    NSDictionary *userInfo = request.content.userInfo;
-//    [CleverTap setCredentialsWithAccountID:@"TEST-Z9R-486-4W5Z" andToken:@"TEST-6b4-2c1"];
-//
-//    [CleverTap setDebugLevel:CleverTapLogDebug+22];
-//    [[CleverTap sharedInstance] recordNotificationViewedEventWithData:userInfo];
-//    [[CleverTap sharedInstance] recordEvent:@"testEventFromAppex"];
+    // call to record the Notification viewed
+    [[CleverTap sharedInstance] recordNotificationViewedEventWithData:request.content.userInfo];
     [super didReceiveNotificationRequest:request withContentHandler:contentHandler];
     
 }

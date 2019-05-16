@@ -37,7 +37,7 @@
                       @"Record User Charged Event",
                       @"Record User event to an Additional instance",
                       @"Open App Inbox",
-                      @"Analytic in a Webview",nil];
+                      @"Analytics in a Webview",nil];
     [self. tblEvent reloadData];
 }
     
