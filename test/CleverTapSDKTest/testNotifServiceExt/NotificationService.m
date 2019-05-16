@@ -7,7 +7,7 @@
 //
 
 #import "NotificationService.h"
-@import CleverTapSDK;
+//@import CleverTapSDK;
 
 @interface NotificationService ()
 
@@ -23,14 +23,14 @@
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     NSDictionary *userInfo = request.content.userInfo;
-    [CleverTap setDebugLevel:CleverTapLogDebug+22];
-//    [CleverTap autoIntegrate];
-    [[CleverTap sharedInstance] recordNotificationViewedEventWithData:userInfo];
-    [[CleverTap sharedInstance] recordEvent:@"testEventFromAppex"];
+//    [CleverTap setCredentialsWithAccountID:@"TEST-Z9R-486-4W5Z" andToken:@"TEST-6b4-2c1"];
+//
+//    [CleverTap setDebugLevel:CleverTapLogDebug+22];
+//    [[CleverTap sharedInstance] recordNotificationViewedEventWithData:userInfo];
+//    [[CleverTap sharedInstance] recordEvent:@"testEventFromAppex"];
     [super didReceiveNotificationRequest:request withContentHandler:contentHandler];
     
 }
-
 
 - (void)serviceExtensionTimeWillExpire {
     // Called just before the extension will be terminated by the system.
