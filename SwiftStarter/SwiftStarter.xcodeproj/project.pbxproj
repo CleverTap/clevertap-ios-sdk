@@ -29,6 +29,8 @@
 		079F550320F34BB600343925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 079F550220F34BB600343925 /* Assets.xcassets */; };
 		079F550E20F34BB700343925 /* SwiftTvOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079F550D20F34BB700343925 /* SwiftTvOSTests.swift */; };
 		079F551920F34BB700343925 /* SwiftTvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079F551820F34BB700343925 /* SwiftTvOSUITests.swift */; };
+		07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C50073228D57AE003E1404 /* CTWebviewVC.swift */; };
+		07C50076228D5A45003E1404 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07C50075228D5A45003E1404 /* sampleHTMLCode.html */; };
 		42BD8650B27D568B5ECA9476 /* Pods_SwiftStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFA933D200073DD67DF3722 /* Pods_SwiftStarterTests.framework */; };
 		4901893D20E0C0900047E190 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4901893C20E0C0900047E190 /* AdSupport.framework */; };
 		49EA454820E36104005E0E54 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EA454720E36104005E0E54 /* NotificationService.swift */; };
@@ -169,6 +171,8 @@
 		079F551A20F34BB700343925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		07ACED594B8685EAEEB41030 /* Pods_SwiftStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		07B9702520C7D45E009D0D6C /* SwiftStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftStarter.entitlements; sourceTree = "<group>"; };
+		07C50073228D57AE003E1404 /* CTWebviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTWebviewVC.swift; sourceTree = "<group>"; };
+		07C50075228D5A45003E1404 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		210BAFB5D88679576DB6D7A3 /* Pods-SwiftTvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftTvOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		2BC8E979D4B066FA1913A27E /* Pods-SwiftStarter-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarter-NotificationService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SwiftStarter-NotificationService/Pods-SwiftStarter-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		32E941A0FCA2C84D409CBEF0 /* Pods_SwiftStarterUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarterUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -301,9 +305,11 @@
 		0740612720C1509E00D8F4C9 /* SwiftStarter */ = {
 			isa = PBXGroup;
 			children = (
+				07C50075228D5A45003E1404 /* sampleHTMLCode.html */,
 				07B9702520C7D45E009D0D6C /* SwiftStarter.entitlements */,
 				0740612820C1509E00D8F4C9 /* AppDelegate.swift */,
 				0740612A20C1509E00D8F4C9 /* ViewController.swift */,
+				07C50073228D57AE003E1404 /* CTWebviewVC.swift */,
 				0740612C20C1509E00D8F4C9 /* Main.storyboard */,
 				0740612F20C150A000D8F4C9 /* Assets.xcassets */,
 				0740613120C150A000D8F4C9 /* LaunchScreen.storyboard */,
@@ -681,6 +687,7 @@
 			files = (
 				0740613320C150A000D8F4C9 /* LaunchScreen.storyboard in Resources */,
 				0740613020C150A000D8F4C9 /* Assets.xcassets in Resources */,
+				07C50076228D5A45003E1404 /* sampleHTMLCode.html in Resources */,
 				0740612E20C1509E00D8F4C9 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -925,6 +932,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0740612B20C1509E00D8F4C9 /* ViewController.swift in Sources */,
+				07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */,
 				0740612920C1509E00D8F4C9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
