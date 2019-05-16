@@ -1,6 +1,6 @@
 # CHANGE LOG
 
-## Version 3.5.0 (March 17, 2019)
+## Version 3.5.0 (May 17, 2019)
 * Adds the ability to set custom CleverTap ID
 * Adds the ability to record Notification Viewed for the Push Notifications
 * Adds support to record events in a WebView
