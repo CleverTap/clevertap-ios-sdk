@@ -325,11 +325,11 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         NSString *existingFallbackDeviceID = [self getFallbackDeviceID];
         if (existingFallbackDeviceID) {
             self.fallbackDeviceId = existingFallbackDeviceID;
-            CleverTapLogStaticInfo("%@: Fallback device ID already exist, will not create a new fallback device ID :%@", self, self.fallbackDeviceId);
+            CleverTapLogInfo(self.config.logLevel, "%@: Fallback device ID already exist, will not create a new fallback device ID :%@", self, self.fallbackDeviceId);
             return;
         }
         [self forceUpdateFallbackDeviceID];
-        CleverTapLogStaticInfo("%@: CleverTap will create a fallback device ID :%@", self, self.fallbackDeviceId);
+        CleverTapLogInfo(self.config.logLevel, "%@: CleverTap will create a fallback device ID :%@", self, self.fallbackDeviceId);
     }
 }
 

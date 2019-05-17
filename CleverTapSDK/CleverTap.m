@@ -1271,7 +1271,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.lastUTMFields) {
         [event addEntriesFromDictionary:self.lastUTMFields];
     }
-    [self recordDeviceIDError:@"App Launched from erroneous profile."];
     [self queueEvent:event withType:CleverTapEventTypeRaised];
 }
 
@@ -1857,7 +1856,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if ([self.deviceInfo isErrorDeviceID]) {
         CTValidationResult *error = [[CTValidationResult alloc] init];
         [error setErrorCode:514];
-        [error setErrorDesc:[NSString stringWithFormat:@"%@ : %@", errorString, self.deviceInfo.deviceId]];
+        [error setErrorDesc:[NSString stringWithFormat:@"%@", errorString]];
         [self pushValidationResult:error];
     }
 }
@@ -2902,7 +2901,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
         NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
         event[@"profile"] = profile;
-        [self recordDeviceIDError:@"Profile Push for erroneous profile."];
+        [self recordDeviceIDError:[NSString stringWithFormat:@"Attempted to push profile for custom CleverTap ID: %@, %@", profile, [self profileGetCleverTapID]]];
         [self queueEvent:event withType:CleverTapEventTypeProfile];
     }];
 }
