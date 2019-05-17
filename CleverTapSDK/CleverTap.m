@@ -2768,7 +2768,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
     if (!guid) guid = [self profileGetCleverTapID];
-    if (!guid || !key || !identifier) return;
+    if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
     
     NSDictionary *cache = [self getCachedGUIDs];
     if (!cache) cache = @{};
@@ -2821,7 +2821,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self profilePush:properties];
         return;
     }
-    
+
     // if profile maps to current guid, push on current profile
     if (cachedGUID && [cachedGUID isEqualToString:currentGUID]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: profile %@ maps to current device id %@, using current user profile", self, properties, currentGUID);
@@ -2837,14 +2837,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
-    // reset profile, creating or restoring guid
-    
     // prevent dupes
     self.processingLoginUserIdentifier = profileToString;
     
     [self _asyncSwitchUser:properties withCachedGuid:cachedGUID andCleverTapID:cleverTapID forAction:kOnUserLoginAction];
-    
-    
 }
 
 - (void) _asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {

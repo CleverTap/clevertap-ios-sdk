@@ -110,6 +110,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (NSString*)description {
+    return [NSString stringWithFormat:@"CleverTap.DeviceInfo.%@", self.config.accountId];
+}
+
 - (NSString *)deviceId {
     return _deviceId ? _deviceId : _fallbackDeviceId;
 }
@@ -313,7 +317,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID {
     if ([CTValidator isValidCleverTapId:cleverTapID]) {
         [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
-        CleverTapLogStaticInfo("%@: Updating CleverTap ID to the given Custom CleverTap ID :%@", self, cleverTapID);
+        CleverTapLogInfo(self.config.logLevel, "%@: Updating CleverTap ID to the given Custom CleverTap ID :%@", self, cleverTapID);
     } else {
         CleverTapLogStaticInfo("%@: Since passed Custom CleverTap ID is not valid falling back to the error device ID.", self);
         // clear the guid for current user
