@@ -249,7 +249,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
-    // TODO: Logging (plist - YES + cleverTap = nil)
     CleverTapLogStaticDebug("%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [self swizzleAppDelegate];
@@ -517,6 +516,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (instance == nil) {
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;
+        [instance recordDeviceIDError:[NSString stringWithFormat:@"%@-%@: Attempted to set invalid custom CleverTap ID: %@, fallback back to default error CleverTap ID: %@", self, kInstanceWithCleverTapIDAction, cleverTapID, [instance profileGetCleverTapID]]];
     } else {
         if ([instance.deviceInfo isErrorDeviceID] && _plistInfo.useCustomCleverTapId && [CTValidator isValidCleverTapId:cleverTapID]) {
             [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
@@ -2815,12 +2815,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     // if no identifier provided or there are no identified users on the device; just push on the current profile
-    if (!haveIdentifier || [self isAnonymousDevice]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
-        [self profilePush:properties];
-        return;
+    if (![self.deviceInfo isErrorDeviceID]) {
+        if (!haveIdentifier || [self isAnonymousDevice]) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
+            [self profilePush:properties];
+            return;
+        }
     }
-
     // if profile maps to current guid, push on current profile
     if (cachedGUID && [cachedGUID isEqualToString:currentGUID]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: profile %@ maps to current device id %@, using current user profile", self, properties, currentGUID);
@@ -2848,7 +2849,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: async switching user with properties:  %@", action, properties);
         
         // set OptOut to false for the old user
-        // [self setOptOut:NO];  // TODO won't this persist a non-opted out state for the current user ??? this seems to be a problem
         self.currentUserOptedOut = NO;
         
         // unregister the push token on the current user
@@ -2874,9 +2874,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
         } else if (_plistInfo.useCustomCleverTapId){
             [self.deviceInfo forceUpdateCustomDeviceID:cleverTapID];
-            if ([self.deviceInfo isErrorDeviceID]) {
-                [self recordDeviceIDError:[NSString stringWithFormat:@"%@-%@: Attempted to set invalid custom CleverTap ID: %@, fallback back to default error CleverTap ID: %@", self, action, cleverTapID, [self profileGetCleverTapID]]];
-            }
+            [self recordDeviceIDError:[NSString stringWithFormat:@"%@-%@: Attempted to set invalid custom CleverTap ID: %@, fallback back to default error CleverTap ID: %@", self, action, cleverTapID, [self profileGetCleverTapID]]];
         } else {
             [self.deviceInfo forceNewDeviceID];
         }
@@ -2901,7 +2899,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
         NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
         event[@"profile"] = profile;
-        [self recordDeviceIDError:[NSString stringWithFormat:@"Attempted to push profile for custom CleverTap ID: %@, %@", profile, [self profileGetCleverTapID]]];
+        [self recordDeviceIDError:[NSString stringWithFormat:@"Attempted to push profile for invalid custom CleverTap ID: %@, %@", profile, [self profileGetCleverTapID]]];
         [self queueEvent:event withType:CleverTapEventTypeProfile];
     }];
 }

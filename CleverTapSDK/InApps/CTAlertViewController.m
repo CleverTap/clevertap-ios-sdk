@@ -18,6 +18,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [self dismissViewControllerAnimated:YES completion:nil];
     self.view.backgroundColor = [UIColor clearColor];
     [self setupDialogNotification];
 }
