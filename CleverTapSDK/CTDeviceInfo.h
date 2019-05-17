@@ -29,6 +29,6 @@
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
 - (void)forceNewDeviceID;
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID;
-- (NSString *)getDeviceID;
+- (BOOL)isErrorDeviceID;
 
 @end

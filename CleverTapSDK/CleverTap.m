@@ -88,6 +88,8 @@ NSString *const CleverTapProfileDidInitializeNotification = CLTAP_PROFILE_DID_IN
 NSString* const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
 
 NSString *const kCachedGUIDS = @"CachedGUIDS";
+NSString *const kOnUserLoginAction = @"onUserLogin";
+NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
@@ -516,49 +518,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;
     } else {
-        if ([[instance profileGetCleverTapID] hasPrefix:CLTAP_ERROR_PROFILE_PREFIX] && _plistInfo.useCustomCleverTapId && cleverTapID) {
-            
-            if ([CTValidator isValidCleverTapId:cleverTapID]) {
-                
-                CleverTapLogStaticDebug(@"Updating device ID after flushing events for the fallback device ID");
-                
-                [instance runSerialAsync:^{
-                    
-                    // set OptOut to false for the old user
-                    [instance setOptOut:NO];
-                    
-                    // unregister the push token on the current user
-                    [instance pushDeviceTokenWithAction:CleverTapPushTokenUnregister];
-                    
-                    // clear any events in the queue
-                    [instance clearQueue];
-                    
-                    // clear ARP and other context for the old user
-                    [instance clearUserContext];
-                    
-                    // clear old profile data
-                    [instance.localDataStore changeUser];
-                    
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-                    if (![[self class] runningInsideAppExtension]) {
-                        [instance.inAppFCManager changeUser];
-                    }
-#endif
-                    [instance resetSession];
-                    
-                    // if provided CleverTapId is valid update the guid
-                    [instance.deviceInfo forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
-                    
-                    [instance _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
-                    
-#if !CLEVERTAP_NO_INBOX_SUPPORT
-                    [instance _resetInbox];
-#endif
-                    // push data on reset profile
-                    [instance pushDeviceTokenWithAction:CleverTapPushTokenRegister];
-                    [instance notifyUserProfileInitialized];
-                }];
-            }
+        if ([instance.deviceInfo isErrorDeviceID] && _plistInfo.useCustomCleverTapId && [CTValidator isValidCleverTapId:cleverTapID]) {
+            [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
         }
     }
     return instance;
@@ -1310,7 +1271,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.lastUTMFields) {
         [event addEntriesFromDictionary:self.lastUTMFields];
     }
-    [self pushErrorGuid:@"App Launched from erroneous profile."];
+    [self recordDeviceIDError:@"App Launched from erroneous profile."];
     [self queueEvent:event withType:CleverTapEventTypeRaised];
 }
 
@@ -1892,8 +1853,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return error;
 }
 
-- (void)pushErrorGuid:(NSString*)errorString {
-    if ([self.deviceInfo.deviceId hasPrefix:CLTAP_ERROR_PROFILE_PREFIX]) {
+- (void)recordDeviceIDError:(NSString*)errorString {
+    if ([self.deviceInfo isErrorDeviceID]) {
         CTValidationResult *error = [[CTValidationResult alloc] init];
         [error setErrorCode:514];
         [error setErrorDesc:[NSString stringWithFormat:@"%@ : %@", errorString, self.deviceInfo.deviceId]];
@@ -2806,7 +2767,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
-    if (!guid) guid = [self.deviceInfo getDeviceID];
+    if (!guid) guid = [self profileGetCleverTapID];
     if (!guid || !key || !identifier) return;
     
     NSDictionary *cache = [self getCachedGUIDs];
@@ -2854,23 +2815,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     
-    // if device id present, then only do identifier and anonymous device id checks
-    if ([self.deviceInfo getDeviceID]) {
-        // if no identifier provided or there are no identified users on the device; just push on the current profile
-        if (!haveIdentifier || [self isAnonymousDevice]) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
-            [self profilePush:properties];
-            return;
-        }
-        
-        // if profile maps to current guid, push on current profile
-        if (cachedGUID && [cachedGUID isEqualToString:currentGUID]) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: profile %@ maps to current device id %@, using current user profile", self, properties, currentGUID);
-            [self profilePush:properties];
-            return;
-        }
+    // if no identifier provided or there are no identified users on the device; just push on the current profile
+    if (!haveIdentifier || [self isAnonymousDevice]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
+        [self profilePush:properties];
+        return;
     }
     
+    // if profile maps to current guid, push on current profile
+    if (cachedGUID && [cachedGUID isEqualToString:currentGUID]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: profile %@ maps to current device id %@, using current user profile", self, properties, currentGUID);
+        [self profilePush:properties];
+        return;
+    }
     // stringify the profile dict to use as a concurrent dupe key
     NSString *profileToString = [CTUtils dictionaryToJsonString:properties];
     
@@ -2885,11 +2842,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // prevent dupes
     self.processingLoginUserIdentifier = profileToString;
     
+    [self _asyncSwitchUser:properties withCachedGuid:cachedGUID andCleverTapID:cleverTapID forAction:kOnUserLoginAction];
+    
+    
+}
+
+- (void) _asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {
+    
     [self runSerialAsync:^{
-        CleverTapLogDebug(self.config.logLevel, @"onUserLogin: generating new user profile for:  %@", properties);
+        CleverTapLogDebug(self.config.logLevel, @"%@: async switching user with properties:  %@", action, properties);
         
         // set OptOut to false for the old user
-        [self setOptOut:NO];
+        // [self setOptOut:NO];  // TODO won't this persist a non-opted out state for the current user ??? this seems to be a problem
+        self.currentUserOptedOut = NO;
         
         // unregister the push token on the current user
         [self pushDeviceTokenWithAction:CleverTapPushTokenUnregister];
@@ -2914,7 +2879,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
         } else if (_plistInfo.useCustomCleverTapId){
             [self.deviceInfo forceUpdateCustomDeviceID:cleverTapID];
-        }else {
+        } else {
             [self.deviceInfo forceNewDeviceID];
         }
         
@@ -2924,8 +2889,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self _resetInbox];
 #endif
         // push data on reset profile
-        [self recordAppLaunched:@"onUserLogin"];
-        [self profilePush:properties];
+        [self recordAppLaunched:action];
+        if (properties) {
+            [self profilePush:properties];
+        }
         [self pushDeviceTokenWithAction:CleverTapPushTokenRegister];
         [self notifyUserProfileInitialized];
     }];
@@ -2936,7 +2903,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
         NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
         event[@"profile"] = profile;
-        [self pushErrorGuid:@"Profile Push for erroneous profile."];
+        [self recordDeviceIDError:@"Profile Push for erroneous profile."];
         [self queueEvent:event withType:CleverTapEventTypeProfile];
     }];
 }

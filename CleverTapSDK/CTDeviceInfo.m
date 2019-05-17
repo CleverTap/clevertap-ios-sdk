@@ -22,6 +22,8 @@
 NSString* const kCLTAP_DEVICE_ID_TAG = @"deviceId";
 NSString* const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
 
+NSString* const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
+
 static BOOL advertisingTrackingEnabled;
 static NSRecursiveLock *deviceIDLock;
 static NSString *_idfv;
@@ -116,6 +118,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     _deviceId = deviceId;
 }
 
+-(BOOL)isErrorDeviceID {
+    return [self.deviceId hasPrefix:kCLTAP_ERROR_PROFILE_PREFIX];
+}
+
 + (NSString *)getIDFV {
     NSString *identifier = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     if (identifier && ![identifier isEqualToString:@"00000000-0000-0000-0000-000000000000"]) {
@@ -180,6 +186,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         if (_idfv && [_idfv length] > 5) {
             self.vendorIdentifier = _idfv;
         }
+        
+        // set the fallbackdeviceId on launch, in the event this instance had a fallbackid on last close
+        self.fallbackDeviceId = [self getFallbackDeviceID];
         
         // Is the device ID already present?
         NSString *existingDeviceID = [self getDeviceID];
@@ -259,9 +268,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         && [[fallbackdeviceID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""]) {
         fallbackdeviceID = nil;
     }
-    
     return fallbackdeviceID;
 }
+
 - (void)forceNewDeviceID {
     [self forceUpdateDeviceID:[self generateGUID]];
 }
@@ -276,7 +285,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)generateFallbackGUID {
     NSString *guid = [[NSUUID UUID] UUIDString];
     guid = [guid stringByReplacingOccurrencesOfString:@"-" withString:@""];
-    guid = [NSString stringWithFormat:@"%@%@", CLTAP_ERROR_PROFILE_PREFIX ,guid];
+    guid = [NSString stringWithFormat:@"%@%@", kCLTAP_ERROR_PROFILE_PREFIX ,guid];
     return [guid lowercaseString];
 }
 

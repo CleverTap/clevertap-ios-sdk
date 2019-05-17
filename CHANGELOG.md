@@ -1,11 +1,12 @@
 # CHANGE LOG
 
 ## Version 3.5.0 (May 17, 2019)
-* Adds the ability to set custom CleverTap ID
-* Adds the ability to record Notification Viewed for the Push Notifications
+* Adds the ability to set a custom Device ID
+* Adds the ability to record Notification Viewed event for Push Notifications
 * Adds support to record events in a WebView
-* Enabled Javascript in Custom HTML In-apps
+* Enables Javascript in Custom HTML In-Apps
 * In-Apps and App Inbox Landscape layout improvements
+* Fixes inadvertent sending of Facebook user tokens as the referrer from a Facebook login deeplink
 
 ## Version 3.4.2 (March 3, 2019)
 * Fix OnUserLogin bug

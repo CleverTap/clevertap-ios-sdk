@@ -54,7 +54,6 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_NOTIFICATION_TAG_SECONDARY @"wzrk_"
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
 #define CLTAP_NOTIFICATION_TAG @"W$"
-#define CLTAP_ERROR_PROFILE_PREFIX @"-i"
 
 // Constants for persisting Facebook data
 #define CLTAP_FB_NAME @"fbName"
