@@ -2875,6 +2875,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
         } else if (_plistInfo.useCustomCleverTapId){
             [self.deviceInfo forceUpdateCustomDeviceID:cleverTapID];
+            if ([self.deviceInfo isErrorDeviceID]) {
+                [self recordDeviceIDError:[NSString stringWithFormat:@"%@-%@: Attempted to set invalid custom CleverTap ID: %@, fallback back to default error CleverTap ID: %@", self, action, cleverTapID, [self profileGetCleverTapID]]];
+            }
         } else {
             [self.deviceInfo forceNewDeviceID];
         }
