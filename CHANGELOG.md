@@ -6,7 +6,7 @@
 * Adds support to record events in a WebView
 * Enables Javascript in Custom HTML In-Apps
 * In-Apps and App Inbox Landscape layout improvements
-* Fixes inadvertent sending of Facebook user tokens as the referrer from a Facebook login deeplink
+* Fixes setting Facebook as the referrer from a Facebook login deeplink
 
 ## Version 3.4.2 (March 3, 2019)
 * Fix OnUserLogin bug
