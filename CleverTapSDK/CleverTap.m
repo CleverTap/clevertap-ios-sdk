@@ -518,7 +518,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _instances[config.accountId] = instance;
         [instance recordDeviceIDError:[NSString stringWithFormat:@"%@-%@: Attempted to set invalid custom CleverTap ID: %@, fallback back to default error CleverTap ID: %@", self, kInstanceWithCleverTapIDAction, cleverTapID, [instance profileGetCleverTapID]]];
     } else {
-        if ([instance.deviceInfo isErrorDeviceID] && _plistInfo.useCustomCleverTapId && [CTValidator isValidCleverTapId:cleverTapID]) {
+        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && [CTValidator isValidCleverTapId:cleverTapID]) {
             [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
         }
     }
@@ -2872,7 +2872,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
-        } else if (_plistInfo.useCustomCleverTapId){
+        } else if (self.config.useCustomCleverTapId){
             [self.deviceInfo forceUpdateCustomDeviceID:cleverTapID];
             [self recordDeviceIDError:[NSString stringWithFormat:@"%@-%@: Attempted to set invalid custom CleverTap ID: %@, fallback back to default error CleverTap ID: %@", self, action, cleverTapID, [self profileGetCleverTapID]]];
         } else {
