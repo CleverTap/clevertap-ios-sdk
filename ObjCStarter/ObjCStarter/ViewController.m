@@ -36,7 +36,8 @@
                       @"Record User Event with Properties",
                       @"Record User Charged Event",
                       @"Record User event to an Additional instance",
-                      @"Open App Inbox", nil];
+                      @"Open App Inbox",
+                      @"Analytics in a Webview",nil];
     [self. tblEvent reloadData];
 }
     
@@ -91,6 +92,9 @@
             break;
         case 6:
             [self showAppInbox];
+            break;
+        case 7:
+            [self navigateToWebview];
             break;
         default:
             break;
@@ -210,5 +214,9 @@
 - (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
     //  This is called when an inbox message is clicked(tapped or call to action)
 }
+- (void)navigateToWebview {
+    [self performSegueWithIdentifier:@"segue_webview" sender:nil];
+}
+
     
 @end

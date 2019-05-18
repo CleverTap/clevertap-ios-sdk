@@ -260,9 +260,13 @@ NSString *const kCHARGED_EVENT = @"Charged";
 }
 
 /**
- *  Raises the Notification Clicked Event for Push Notifications event
+ * Raises the Notification Clicked event for Push Notifications event, if clicked is true,
+ * otherwise the Notification Viewed event for Push Notifications event, if clicked is false.
+ *
  */
-+ (void)buildPushNotificationEventForNotification:(NSDictionary *)notification completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
++ (void)buildPushNotificationEvent:(BOOL)clicked
+                   forNotification:(NSDictionary *)notification
+                 completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
     if (!notification){
         completion(nil, nil);
         return;
@@ -279,7 +283,7 @@ NSString *const kCHARGED_EVENT = @"Charged";
             notif[key] = value;
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
-        event[@"evtName"] = CLTAP_NOTIFICATION_CLICKED_EVENT_NAME;
+        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
         event[@"evtData"] = notif;
         completion(event, nil);
     } @catch (NSException *e) {

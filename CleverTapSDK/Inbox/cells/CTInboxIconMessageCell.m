@@ -37,6 +37,17 @@
         self.imageViewPRatioConstraint.priority = 750;
         self.imageViewLRatioConstraint.priority = 999;
     }
+    
+    // handle landscape
+    if ([self deviceOrientationIsLandscape]) {
+        if ([self mediaIsEmpty]) {
+            self.imageViewWidthConstraint.priority = 999;
+            self.dividerCenterXConstraint.priority = 750;
+        } else {
+            self.imageViewWidthConstraint.priority = 750;
+            self.dividerCenterXConstraint.priority = 999;
+        }
+    }
     self.cellImageView.clipsToBounds = YES;
     self.cellIcon.clipsToBounds = YES;
     self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;
@@ -81,11 +92,13 @@
     }
     
     if (content.iconUrl) {
+        self.cellIconHeightContraint.constant = 75;
         [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
                          placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
     } else {
+        self.cellIconHeightContraint.constant = 28;
         self.cellIconRatioContraint.priority = 750;
         self.cellIconWidthContraint.priority = 999;
     }

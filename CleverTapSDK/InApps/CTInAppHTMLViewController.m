@@ -1,6 +1,7 @@
 #import <WebKit/WebKit.h>
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
+#import "CleverTapJSInterface.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
 
@@ -21,10 +22,11 @@ typedef enum {
 #define kMinimumPan       60.0
 #define kBOUNCE_DISTANCE  0.0
 
-@interface CTInAppHTMLViewController () <WKNavigationDelegate, UIGestureRecognizerDelegate> {
+@interface CTInAppHTMLViewController () <WKNavigationDelegate,  UIGestureRecognizerDelegate> {
     WKWebView *webView;
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
+    CleverTapJSInterface *_jsInterface;
 }
     
     @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
@@ -48,6 +50,12 @@ typedef enum {
     }
     return self;
 }
+
+- (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
+    self = [super initWithNotification:notification];
+    _jsInterface = jsInterface;
+    return self;
+}
     
 - (void)loadView {
     if (self.shouldPassThroughTouches) {
@@ -58,16 +66,11 @@ typedef enum {
         [super loadView];
     }
 }
-    
-    
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor clearColor];
     [self layoutNotification];
-}
-    
-- (BOOL)shouldAutorotate {
-    return YES;
 }
     
 - (void)layoutNotification {
@@ -78,6 +81,7 @@ typedef enum {
     WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
     WKUserContentController *wkController = [[WKUserContentController alloc] init];
     [wkController addUserScript:wkScript];
+    [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
@@ -100,9 +104,12 @@ typedef enum {
     
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
-    
-    [webView loadHTMLString:self.notification.html baseURL:nil];
-    
+    if (self.notification.url) {
+        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
+        webView.navigationDelegate = nil;
+    } else{
+        [webView loadHTMLString:self.notification.html baseURL:nil];
+    }
     boolean_t fixedWidth = false, fixedHeight = false;
     
     CGSize size = CGSizeZero;
@@ -242,7 +249,7 @@ typedef enum {
     decisionHandler(WKNavigationActionPolicyCancel);
     
 }
-    
+
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
     //begin pan...
     if (recognizer.state == UIGestureRecognizerStateBegan) {
@@ -504,5 +511,5 @@ typedef enum {
 -(void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
-    
-    @end
+
+@end

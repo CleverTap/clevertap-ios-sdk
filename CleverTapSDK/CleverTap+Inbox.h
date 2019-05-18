@@ -1,4 +1,4 @@
-@import Foundation;
+#import <Foundation/Foundation.h>
 #import "CleverTap.h"
 @class CleverTapInboxMessageContent;
 
@@ -55,12 +55,12 @@
 @property (nonatomic, readonly, assign) BOOL actionHasUrl;
 @property (nonatomic, readonly, assign) BOOL actionHasLinks;
 
-- (NSString*)urlForLinkAtIndex:(int)index;
+- (NSString *_Nullable)urlForLinkAtIndex:(int)index;
 
 @end
 
 @protocol CleverTapInboxViewControllerDelegate <NSObject>
-- (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex;
+- (void)messageDidSelect:(CleverTapInboxMessage *_Nonnull)message atIndex:(int)index withButtonIndex:(int)buttonIndex;
 @end
 
 /*!
@@ -71,16 +71,14 @@
 
 @interface CleverTapInboxStyleConfig : NSObject
 
-@property (nonatomic, strong) NSString *title;
-@property (nonatomic, strong) UIColor *backgroundColor;
-@property (nonatomic, strong) UIColor *cellBackgroundColor;
-@property (nonatomic, strong) NSArray *messageTags;
-@property (nonatomic, strong) UIColor *navigationBarTintColor;
-@property (nonatomic, strong) UIColor *navigationTintColor;
-@property (nonatomic, strong) UIColor *tabBackgroundColor;
-@property (nonatomic, strong) UIColor *tabSelectedBgColor;
-@property (nonatomic, strong) UIColor *tabSelectedTextColor;
-@property (nonatomic, strong) UIColor *tabUnSelectedTextColor;
+@property (nonatomic, strong, nonnull) NSString *title;
+@property (nonatomic, strong, nonnull) UIColor *backgroundColor;
+@property (nonatomic, strong, nonnull) NSArray *messageTags;
+@property (nonatomic, strong, nonnull) UIColor *navigationBarTintColor;
+@property (nonatomic, strong, nonnull) UIColor *navigationTintColor;
+@property (nonatomic, strong, nonnull) UIColor *tabSelectedBgColor;
+@property (nonatomic, strong, nonnull) UIColor *tabSelectedTextColor;
+@property (nonatomic, strong, nonnull) UIColor *tabUnSelectedTextColor;
 
 @end
 
@@ -151,7 +149,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  This method returns `CleverTapInboxMessage` object that belongs to the given messageId.
  */
 
-- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString *)messageId;
+- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString * _Nonnull)messageId;
 
 /*!
  @method

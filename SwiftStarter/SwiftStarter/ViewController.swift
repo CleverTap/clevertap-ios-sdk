@@ -41,6 +41,7 @@ extension ViewController {
         eventList.append("Record User Charged Event")
         eventList.append("Record User event to an Additional instance")
         eventList.append("Show App Inbox")
+        eventList.append("Analytics in a Webview")
         self.tblEvent.reloadData()
     }
     
@@ -98,6 +99,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             break;
         case 6:
             showAppInbox()
+            break;
+        case 7:
+            navigateToWebview()
             break;
         default:
             break;
@@ -213,6 +217,10 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             let navigationController = UINavigationController.init(rootViewController: inboxController)
             self.present(navigationController, animated: true, completion: nil)
         }
+    }
+    
+    func navigateToWebview() {
+        self.performSegue(withIdentifier: "segue_webview", sender: nil)
     }
 }
 

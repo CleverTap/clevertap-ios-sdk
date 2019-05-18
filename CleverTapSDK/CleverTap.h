@@ -71,6 +71,23 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @method
  
  @abstract
+ Initializes and returns a singleton instance of the API.
+ 
+ @discussion
+ This method will set up a singleton instance of the CleverTap class, when you want to make calls to CleverTap
+ elsewhere in your code, you can use this singleton or call sharedInstanceWithCleverTapId.
+ 
+ Returns nil if the CleverTap Account ID and Token are not provided in apps info.plist
+ 
+ CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
+ 
+ */
++ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString * _Nonnull)cleverTapID;
+
+/*!
+ @method
+ 
+ @abstract
  Auto integrates CleverTap and initializes and returns a singleton instance of the API.
  
  @discussion
@@ -82,6 +99,24 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  */
 + (nullable instancetype)autoIntegrate;
+
+/*!
+ @method
+ 
+ @abstract
+ Auto integrates with CleverTapID CleverTap and initializes and returns a singleton instance of the API.
+ 
+ @discussion
+ This method will auto integrate CleverTap to automatically handle device token registration and
+ push notification/url referrer tracking, and set up a singleton instance of the CleverTap class,
+ when you want to make calls to CleverTap elsewhere in your code, you can use this singleton or call sharedInstance.
+ 
+ Returns nil if the CleverTap Account ID and Token are not provided in apps info.plist
+ 
+ CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
+ 
+ */
++ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -100,10 +135,23 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @method
  
  @abstract
+ Returns the CleverTap instance corresponding to the config.accountId param. Use this for multiple instances of the SDK.
+ 
+ @discussion
+ Create an instance of CleverTapInstanceConfig with your CleverTap Account Id, Token, Region(if any) and other optional config properties.
+ Passing that into this method will create (if necessary, and on all subsequent calls return) a singleton instance mapped to the config.accountId property.
+ 
+ */
++ (instancetype _Nonnull)instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config andCleverTapID:(NSString * _Nonnull)cleverTapID;
+
+/*!
+ @method
+ 
+ @abstract
  Set the CleverTap AccountID and Token
  
  @discussion
- Sets the CleverTap account credentials.  Once the default shared instance is intialized subsequent calls will be ignored.
+ Sets the CleverTap account credentials.  Once thes default shared instance is intialized subsequent calls will be ignored.
  Only has effect on the default shared instance.
  
  @param accountID  the CleverTap account id
@@ -274,6 +322,43 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  */
 - (void)onUserLogin:(NSDictionary *_Nonnull)properties;
+
+/*!
+ @method
+ 
+ @abstract
+ Creates a separate and distinct user profile identified by one or more of Identity, Email, FBID or GPID values,
+ and populated with the key-values included in the properties dictionary.
+ 
+ @discussion
+ If your app is used by multiple users, you can use this method to assign them each a unique profile to track them separately.
+ 
+ If instead you wish to assign multiple Identity, Email, FBID and/or GPID values to the same user profile,
+ use profilePush rather than this method.
+ 
+ If none of Identity, Email, FBID or GPID is included in the properties dictionary,
+ all properties values will be associated with the current user profile.
+ 
+ When initially installed on this device, your app is assigned an "anonymous" profile.
+ The first time you identify a user on this device (whether via onUserLogin or profilePush),
+ the "anonymous" history on the device will be associated with the newly identified user.
+ 
+ Then, use this method to switch between subsequent separate identified users.
+ 
+ Please note that switching from one identified user to another is a costly operation
+ in that the current session for the previous user is automatically closed
+ and data relating to the old user removed, and a new session is started
+ for the new user and data for that user refreshed via a network call to CleverTap.
+ In addition, any global frequency caps are reset as part of the switch.
+ 
+ CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
+ 
+ @param properties       properties dictionary
+ @param cleverTapID        the CleverTap id
+
+ */
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString * _Nonnull)cleverTapID;
+
 
 /*!
  @method
@@ -585,6 +670,16 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param screenName           the screen name
  */
 - (void)recordScreenView:(NSString *_Nonnull)screenName;
+
+/*!
+ @method
+ 
+ @abstract
+ Record Notification Viewed for Push Notifications.
+ 
+ @param notificationData       notificationData id
+ */
+- (void)recordNotificationViewedEventWithData:(id _Nonnull)notificationData;
 
 /*!
  @method

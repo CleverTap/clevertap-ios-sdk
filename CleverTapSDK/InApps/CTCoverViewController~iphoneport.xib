@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -81,7 +81,7 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
                                         <constraint firstAttribute="bottom" secondItem="1kf-eD-I1f" secondAttribute="bottom" id="LWe-ZX-mhk"/>
-                                        <constraint firstItem="1kf-eD-I1f" firstAttribute="top" secondItem="NVa-kE-vtY" secondAttribute="top" constant="24" id="dHm-q8-qiU"/>
+                                        <constraint firstItem="1kf-eD-I1f" firstAttribute="top" secondItem="NVa-kE-vtY" secondAttribute="top" priority="750" constant="24" id="dHm-q8-qiU"/>
                                         <constraint firstAttribute="trailing" secondItem="1kf-eD-I1f" secondAttribute="trailing" id="ldW-5U-0rS"/>
                                         <constraint firstItem="1kf-eD-I1f" firstAttribute="leading" secondItem="NVa-kE-vtY" secondAttribute="leading" id="u3k-8W-aX3"/>
                                     </constraints>

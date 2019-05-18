@@ -8,6 +8,8 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTDeviceInfo.h"
+#import "CTValidator.h"
+#import "CTValidationResult.h"
 #import "CleverTapBuildInfo.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
@@ -19,6 +21,9 @@
 #endif
 
 NSString* const kCLTAP_DEVICE_ID_TAG = @"deviceId";
+NSString* const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
+
+NSString* const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
 
 static BOOL advertisingTrackingEnabled;
 static NSRecursiveLock *deviceIDLock;
@@ -48,14 +53,18 @@ SCNetworkReachabilityRef _reachability;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 
 @property (strong, readwrite) NSString *deviceId;
+@property (strong, readwrite) NSString *fallbackDeviceId;
 @property (strong, readwrite) NSString *advertisingIdentitier;
 @property (strong, readwrite) NSString *vendorIdentifier;
-
 @property (strong, readonly) NSObject *networkInfo;
+@property (strong, readwrite) NSMutableArray *validationErrors;
 
 @end
 
 @implementation CTDeviceInfo
+
+@synthesize deviceId=_deviceId;
+@synthesize validationErrors=_validationErrors;
 
 static dispatch_queue_t backgroundQueue;
 static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
@@ -92,16 +101,33 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 #endif
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID{
     if (self = [super init]) {
         _config = config;
-        [self initDeviceID];
+        _validationErrors = [NSMutableArray new];
+        [self initDeviceID:cleverTapID];
     }
     return self;
 }
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (NSString*)description {
+    return [NSString stringWithFormat:@"CleverTap.DeviceInfo.%@", self.config.accountId];
+}
+
+- (NSString *)deviceId {
+    return _deviceId ? _deviceId : self.fallbackDeviceId;
+}
+
+- (void)setDeviceId:(NSString *)deviceId {
+    _deviceId = deviceId;
+}
+
+-(BOOL)isErrorDeviceID {
+    return [self.deviceId hasPrefix:kCLTAP_ERROR_PROFILE_PREFIX];
 }
 
 + (NSString *)getIDFV {
@@ -156,7 +182,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return platform;
 }
 
-- (void)initDeviceID {
+- (void)initDeviceID:(NSString *)cleverTapID {
     @try {
         [deviceIDLock lock];
 
@@ -169,10 +195,29 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             self.vendorIdentifier = _idfv;
         }
         
+        // set the fallbackdeviceId on launch, in the event this instance had a fallbackid on last close
+        self.fallbackDeviceId = [self getStoredFallbackDeviceID];
+        
+        if (!self.config.useCustomCleverTapId && cleverTapID != nil) {
+            NSString *errorString = [NSString stringWithFormat:@"%@: CleverTapUseCustomId has not been specified in the Info.plist/instance configuration. Custom CleverTap ID: %@ will not be used.", self, cleverTapID];
+            CleverTapLogInfo(self.config.logLevel, @"%@", errorString);
+            [self recordDeviceError:errorString];
+        }
+        
         // Is the device ID already present?
         NSString *existingDeviceID = [self getDeviceID];
         if (existingDeviceID) {
+            if (self.config.useCustomCleverTapId && cleverTapID && ![[existingDeviceID substringFromIndex:2] isEqualToString:cleverTapID]) {
+                NSString *errorString = [NSString stringWithFormat:@"%@: CleverTap ID: %@ already exists. Unable to set custom CleverTap ID: %@", self,  existingDeviceID, cleverTapID];
+                CleverTapLogInfo(self.config.logLevel, @"%@", errorString);
+                [self recordDeviceError:errorString];
+            }
             self.deviceId = existingDeviceID;
+            return;
+        }
+        
+        if (self.config.useCustomCleverTapId) {
+            [self forceUpdateCustomDeviceID:cleverTapID];
             return;
         }
         
@@ -195,6 +240,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString*)deviceIdStorageKey {
     return [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_DEVICE_ID_TAG];
+}
+
+- (NSString*)fallbackDeviceIdStorageKey {
+    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_FALLBACK_DEVICE_ID_TAG];
 }
 
 - (NSString *)getDeviceID {
@@ -240,6 +289,13 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return [guid lowercaseString];
 }
 
+- (NSString *)generateFallbackGUID {
+    NSString *guid = [[NSUUID UUID] UUIDString];
+    guid = [guid stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    guid = [NSString stringWithFormat:@"%@%@", kCLTAP_ERROR_PROFILE_PREFIX ,guid];
+    return [guid lowercaseString];
+}
+
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID {
     @try {
         [deviceIDLock lock];
@@ -247,6 +303,67 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         [CTPreferences putString:newDeviceID forKey:[self deviceIdStorageKey]];
     } @finally {
         [deviceIDLock unlock];
+    }
+}
+
+- (NSString *)getStoredFallbackDeviceID {
+    NSString *fallbackdeviceID;
+    NSString *storageKey = [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_FALLBACK_DEVICE_ID_TAG];
+    fallbackdeviceID = [CTPreferences getStringForKey:storageKey withResetValue:nil];
+    if (fallbackdeviceID
+        && [[fallbackdeviceID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] isEqualToString:@""]) {
+        fallbackdeviceID = nil;
+    }
+    return fallbackdeviceID;
+}
+- (NSString*)findOrCreateFallbackDeviceID {
+    NSString *fallbackDeviceID = [self getStoredFallbackDeviceID];
+    if (!fallbackDeviceID) {
+        fallbackDeviceID = [self generateFallbackGUID];
+         [CTPreferences putString:fallbackDeviceID forKey:[self fallbackDeviceIdStorageKey]];
+    }
+    return fallbackDeviceID;
+}
+
+- (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID {
+    if ([CTValidator isValidCleverTapId:cleverTapID]) {
+        [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
+        CleverTapLogInfo(self.config.logLevel, "%@: Updating CleverTap ID to custom CleverTap ID: %@", self, cleverTapID);
+    } else {
+        // clear the guid for current user
+        [self forceRemoveDeviceID];
+        if (!self.fallbackDeviceId) {
+            self.fallbackDeviceId = [self findOrCreateFallbackDeviceID];
+        }
+        NSString *errorString = [NSString stringWithFormat:@"%@: Attempted to set invalid custom CleverTap ID: %@, falling back to default error CleverTap ID: %@", self, cleverTapID, self.fallbackDeviceId];
+        CleverTapLogInfo(self.config.logLevel, @"%@", errorString);
+        [self recordDeviceError:errorString];
+    }
+}
+
+- (void)forceRemoveDeviceID {
+    self.deviceId = nil;
+    [CTPreferences removeObjectForKey:[self deviceIdStorageKey]];
+}
+
+- (void)recordDeviceError: (NSString*)errorString {
+    CTValidationResult *error = [[CTValidationResult alloc] init];
+    [error setErrorCode:514];
+    [error setErrorDesc:[NSString stringWithFormat:@"%@", errorString]];
+    @synchronized (_validationErrors) {
+        [_validationErrors addObject:error];
+    }
+}
+
+- (void)setValidationErrors:(NSMutableArray *)validationErrors {
+    _validationErrors = validationErrors;
+}
+
+- (NSMutableArray*)validationErrors {
+    @synchronized (_validationErrors) {
+        NSMutableArray *errors = [NSMutableArray arrayWithArray:_validationErrors];
+        [_validationErrors removeAllObjects];
+        return errors;
     }
 }
 

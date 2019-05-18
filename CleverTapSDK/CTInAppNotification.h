@@ -12,6 +12,7 @@
 @property (nonatomic, readonly) CTInAppType inAppType;
 
 @property (nonatomic, copy, readonly) NSString *html;
+@property (nonatomic, copy, readonly) NSString *url;
 @property (nonatomic, readonly) BOOL excludeFromCaps;
 @property (nonatomic, readonly) BOOL showClose;
 @property (nonatomic, readonly) BOOL darkenScreen;
@@ -25,6 +26,7 @@
 @property (nonatomic, assign, readonly) float widthPercent;
 
 @property (nonatomic, readonly) NSData *image;
+@property (nonatomic, readonly) NSData *imageLandscape;
 @property (nonatomic, copy, readonly) NSString *contentType;
 @property (nonatomic, copy, readonly) NSString *mediaUrl;
 @property (nonatomic, readonly, assign) BOOL mediaIsVideo;
@@ -40,6 +42,8 @@
 
 @property (nonatomic, readonly, assign) BOOL showCloseButton;
 @property (nonatomic, readonly, assign) BOOL tablet;
+@property (nonatomic, readonly, assign) BOOL hasLandscape;
+@property (nonatomic, readonly, assign) BOOL hasPortrait;
 
 @property (nonatomic, readonly) NSArray<CTNotificationButton *> *buttons;
 

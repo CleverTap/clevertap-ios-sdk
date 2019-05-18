@@ -11,15 +11,10 @@
 
 @implementation CTHeaderViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification *)notification {
-    self = [super
-            initWithNibName:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTHeaderViewController class])]
-            bundle:[CTInAppUtils bundle]
-            notification:notification];
-    
-    return self;
+- (void)loadView {
+    [super loadView];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTHeaderViewController class])] owner:self options:nil];
 }
-
 
 #pragma mark - Setup Notification
 

@@ -1,5 +1,6 @@
 #import "CTInAppDisplayViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
+#import "CTInAppResources.h"
 
 @implementation CTInAppPassThroughWindow
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
@@ -31,16 +32,29 @@
     return self;
 }
 
-#if !(TARGET_OS_TV)
-- (BOOL)shouldAutorotate {
-    return NO;
+#if !TARGET_OS_TV
+- (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
+    self = [self initWithNotification:notification];
+    return self;
 }
 #endif
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
+         [self loadView];
+         [self viewDidLoad];
+     } completion:nil];
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
 #if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    if (_notification.inAppType == CTInAppTypeHTML) {
+    if (_notification.hasPortrait && _notification.hasLandscape) {
         return UIInterfaceOrientationMaskAll;
+    } else if (_notification.hasPortrait) {
+        return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
+    } else if (_notification.hasLandscape) {
+        return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
     } else {
         return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
     }
@@ -133,6 +147,15 @@
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [buttonView setTitle:button.text forState:UIControlStateNormal];
     return buttonView;
+}
+
+- (BOOL)deviceOrientationIsLandscape {
+#if (TARGET_OS_TV)
+    return nil;
+#else
+    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+#endif
 }
 
 #pragma mark - Actions

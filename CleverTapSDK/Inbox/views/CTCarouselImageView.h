@@ -4,6 +4,11 @@
 @interface CTCarouselImageView : UIView
 
 @property(nonatomic, strong, nullable, readonly) NSString *actionUrl;
+@property (strong, nonatomic) IBOutlet UIImageView * _Nullable cellImageView;
+@property (strong, nonatomic) IBOutlet UILabel * _Nullable titleLabel;
+@property (strong, nonatomic) IBOutlet UILabel *_Nullable bodyLabel;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint * _Nullable imageViewLandRatioConstraint;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint * _Nullable imageViewPortRatioConstraint;
 
 + (CGFloat)captionHeight;
 

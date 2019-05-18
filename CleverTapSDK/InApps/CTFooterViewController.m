@@ -10,12 +10,9 @@
 
 @implementation CTFooterViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification *)notification {
-    self = [super
-            initWithNibName:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTFooterViewController class])]
-            bundle:[CTInAppUtils bundle]
-            notification:notification];
-    return self;
+- (void)loadView {
+    [super loadView];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTFooterViewController class])] owner:self options:nil];
 }
 
 - (void)layoutNotification {

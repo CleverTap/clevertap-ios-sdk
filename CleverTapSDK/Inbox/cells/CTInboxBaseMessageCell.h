@@ -36,11 +36,14 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @property (strong, nonatomic) IBOutlet UIView *avPlayerControlsView;
 @property (strong, nonatomic) IBOutlet UIView *mediaContainerView;
 
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewWidthConstraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewHeightConstraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewLRatioConstraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *imageViewPRatioConstraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *actionViewHeightConstraint;
 @property (strong, nonatomic) IBOutlet NSLayoutConstraint *readViewWidthConstraint;
+
+@property (strong, nonatomic) IBOutlet NSLayoutConstraint *dividerCenterXConstraint;
 
 // video controls
 @property (nonatomic, strong) UIButton *volumeButton;
@@ -67,6 +70,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 - (void)configureActionView:(BOOL)hide;
 - (BOOL)mediaIsEmpty;
 - (BOOL)orientationIsPortrait;
+- (BOOL)deviceOrientationIsLandscape;
 - (UIImage *)getPortraitPlaceHolderImage;
 - (UIImage *)getLandscapePlaceHolderImage;
 

@@ -13,18 +13,18 @@
                  isDefaultInstance:NO];    
 }
 
-- (instancetype)initWithAccountId:(NSString*)accountId
-                     accountToken:(NSString*)accountToken
-                    accountRegion:(NSString*)accountRegion {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                    accountRegion:(NSString *)accountRegion {
     return [self initWithAccountId:accountId
                       accountToken:accountToken
                      accountRegion:accountRegion
                  isDefaultInstance:NO];
 }
 // SDK private
-- (instancetype)initWithAccountId:( NSString*)accountId
-                              accountToken:( NSString*)accountToken
-                             accountRegion:(NSString*)accountRegion
+- (instancetype)initWithAccountId:(NSString *)accountId
+                              accountToken:(NSString *)accountToken
+                             accountRegion:(NSString *)accountRegion
                          isDefaultInstance:(BOOL)isDefault {
     if (accountId.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountId is empty");
@@ -43,6 +43,7 @@
         CTPlistInfo *plist = [CTPlistInfo sharedInstance];
         _useIDFA = isDefault ? plist.useIDFA : NO;
         _disableAppLaunchedEvent = isDefault ? plist.disableAppLaunchedEvent : NO;
+        _useCustomCleverTapId = isDefault ? plist.useCustomCleverTapId : NO;
         _enablePersonalization = YES;
         _logLevel = 0;
         _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
@@ -57,6 +58,7 @@
     copy.enablePersonalization = self.enablePersonalization;
     copy.useIDFA = self.useIDFA;
     copy.logLevel = self.logLevel;
+    copy.useCustomCleverTapId = self.useCustomCleverTapId;
     return copy;
 }
 

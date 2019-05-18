@@ -14,8 +14,12 @@
 @property (nonatomic, readwrite) CTInAppType inAppType;
 
 @property (nonatomic, strong) NSURL *imageURL;
+@property (nonatomic, strong) NSURL *imageUrlLandscape;
+
 @property (nonatomic, readwrite, strong) NSData *image;
+@property (nonatomic, readwrite, strong) NSData *imageLandscape;
 @property (nonatomic, copy, readwrite) NSString *contentType;
+@property (nonatomic, copy, readwrite) NSString *landscapeContentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
 
 @property (nonatomic, readwrite) NSString *title;
@@ -28,8 +32,11 @@
 @property (nonatomic, readwrite, assign) BOOL hideMedia;
 @property (nonatomic, readwrite, assign) BOOL showCloseButton;
 @property (nonatomic, readwrite, assign) BOOL tablet;
+@property (nonatomic, readwrite, assign) BOOL hasLandscape;
+@property (nonatomic, readwrite, assign) BOOL hasPortrait;
 
 @property (nonatomic, copy, readwrite) NSString *html;
+@property (nonatomic, copy, readwrite) NSString *url;
 @property (nonatomic, readwrite) BOOL showClose;
 @property (nonatomic, readwrite) BOOL darkenScreen;
 @property (nonatomic, readwrite) BOOL excludeFromCaps;
@@ -98,12 +105,13 @@
     self.messageColor = (NSString*) jsonObject[@"message"][@"color"];
     self.showCloseButton = [jsonObject[@"close"] boolValue];
     self.tablet = [jsonObject[@"tablet"] boolValue];
-    
+    self.hasPortrait = jsonObject[@"hasPortrait"] ? [jsonObject[@"hasPortrait"] boolValue] : YES;
+    self.hasLandscape = jsonObject[@"hasLandscape"] ? [jsonObject[@"hasLandscape"] boolValue] : NO;
     NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
     if (_media) {
         self.contentType = _media[@"content_type"];
         NSString *_mediaUrl = _media[@"url"];
-        if (_mediaUrl) {
+        if (_mediaUrl && _mediaUrl.length > 0) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
                 if ([self.contentType isEqualToString:@"image/gif"] ) {
@@ -118,6 +126,20 @@
                 }
                 if ([self.contentType hasPrefix:@"audio"]) {
                     _mediaIsAudio = YES;
+                }
+            }
+        }
+    }
+    
+    NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[@"mediaLandscape"];
+    if (_mediaLandscape) {
+        self.landscapeContentType = _mediaLandscape[@"content_type"];
+        NSString *_mediaUrlLandscape = _mediaLandscape[@"url"];
+        if (_mediaUrlLandscape && _mediaUrlLandscape.length > 0) {
+            if ([self.landscapeContentType hasPrefix:@"image"]) {
+                self.imageUrlLandscape = [NSURL URLWithString:_mediaUrlLandscape];
+                if (![self.landscapeContentType isEqualToString:@"image/gif"] ) {
+                    _mediaIsImage = YES;
                 }
             }
         }
@@ -186,9 +208,21 @@
             self.html = html;
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         }
+        NSString *url = (NSString*) data[@"url"];
+        if (url && url.length > 5) {
+            self.url = url;
+            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+        } else {
+            if (url) {
+                self.error = [NSString stringWithFormat:@"Invalid url:,%@",url];
+                return;
+            }
+        }
         NSDictionary* customExtras = (NSDictionary *) data[@"kv"];
         if (!customExtras) customExtras = [NSDictionary new];
         self.customExtras = customExtras;
+        self.hasLandscape = YES;
+        self.hasPortrait = YES;
     }
     NSDictionary *displayParams = jsonObject[@"w"];
     if (displayParams) {
@@ -241,8 +275,22 @@
             self.image = self.error ? nil : imageData;
         }
     }
+    if (self.imageUrlLandscape && self.hasLandscape) {
+        NSError *error = nil;
+        NSData *imageData = [NSData dataWithContentsOfURL:self.imageUrlLandscape options:NSDataReadingMappedIfSafe error:&error];
+        if (error || !imageData) {
+            self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
+        } else {
+            if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
+                FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:imageData];
+                if (gif == nil) {
+                    self.error = [NSString stringWithFormat:@"unable to decode landscape gif for URL: %@", self.imageUrlLandscape];
+                }
+            }
+            self.imageLandscape = self.error ? nil : imageData;
+        }
+    }
 #endif
-
     completionHandler();
 }
 

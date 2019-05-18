@@ -7,13 +7,27 @@
 }
 
 + (NSString *)XibNameForControllerName:(NSString *)controllerName {
+#if (TARGET_OS_TV)
+    return nil;
+#else
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
+    UIApplication *sharedApplication = [self getSharedApplication];
+    BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        [xib appendString:@"~iphoneport"];
+        if (landscape) {
+            [xib appendString:@"~iphoneland"];
+        } else {
+            [xib appendString:@"~iphoneport"];
+        }
     } else {
-        [xib appendString:@"~ipad"];
+        if (landscape) {
+            [xib appendString:@"~ipadland"];
+        } else {
+            [xib appendString:@"~ipad"];
+        }
     }
     return [xib copy];
+#endif
 }
 
 + (UIImage *)imageForName:(NSString *)name type:(NSString *)type {

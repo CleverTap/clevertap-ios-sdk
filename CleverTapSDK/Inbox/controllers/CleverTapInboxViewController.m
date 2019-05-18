@@ -99,9 +99,7 @@ static const int kMaxTags = 3;
                                              selector:@selector(handleMediaMutedNotification:)
                                                  name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
     [self registerNibs];
-    
     self.muted = YES;
-    
     UIBarButtonItem *closeButton = [[UIBarButtonItem alloc]
                                    initWithTitle:@"✕"
                                    style:UIBarButtonItemStylePlain
@@ -110,9 +108,25 @@ static const int kMaxTags = 3;
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;
-    
+    [self setup];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self playVideoInVisibleCells];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self calculateTableViewVisibleFrame];
+}
+
+- (void)loadView {
+    [super loadView];
+}
+
+- (void)setup {
     if (_config && _config.backgroundColor) {
-        self.view.backgroundColor = _config.backgroundColor;
         self.tableView.backgroundColor = _config.backgroundColor;
         self.view.backgroundColor = _config.backgroundColor;
         self.navigationController.view.backgroundColor = _config.backgroundColor;
@@ -143,36 +157,14 @@ static const int kMaxTags = 3;
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
-        BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
-        CGRect screenBounds = [[UIScreen mainScreen] bounds];
-        CGRect currentFrame = self.tableView.frame;
-        if (landscape) {
-            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
-            [self calculateTableViewVisibleFrame];
-            [self.tableView reloadData];
-            [self playVideoInVisibleCells];
-        }
-    });
-   [self calculateTableViewVisibleFrame];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    [self playVideoInVisibleCells];
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self calculateTableViewVisibleFrame];
 }
 
 - (void)registerNibs {
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTInboxSimpleMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTCarouselMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTCarouselImageMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([CTInboxIconMessageCell class]) bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellIconMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselMessageCell.class]] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselImageMessageCell.class]] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxIconMessageCell.class]] forCellReuseIdentifier:kCellIconMessageIdentifier];
 }
 
 - (NSString*)getTitle {
@@ -189,23 +181,18 @@ static const int kMaxTags = 3;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> completion) {
-        UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
-        BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
-        CGRect screenBounds = [[UIScreen mainScreen] bounds];
-        CGRect currentFrame = self.tableView.frame;
-        if (landscape) {
-            self.tableView.frame = CGRectMake((screenBounds.size.width - screenBounds.size.height)/2, currentFrame.origin.y, screenBounds.size.height, currentFrame.size.height);
-        } else {
-            self.tableView.frame = CGRectMake(0, currentFrame.origin.y, self.view.frame.size.width, currentFrame.size.height);
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
+        [self loadView];
+        [self registerNibs];
+        [self setup];
+        if ([self.tags count] > 0) {
+            [self setupSegmentedControl];
         }
-       
-        [self calculateTableViewVisibleFrame];
         [self showListEmptyLabel];
         [self stopPlay];
         [self.tableView reloadData];
         [self playVideoInVisibleCells];
-    }];
+    } completion:nil];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
@@ -250,7 +237,6 @@ static const int kMaxTags = 3;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.tableView setContentOffset:CGPointMake(0, -(self->_topContentOffset)) animated:NO];
     });
-    
     
     [[NSLayoutConstraint constraintWithItem:self.segmentedControlContainer
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual

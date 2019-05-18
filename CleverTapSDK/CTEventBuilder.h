@@ -6,24 +6,25 @@
 
 @interface CTEventBuilder : NSObject
 
-+ (void)build:(NSString *)eventName completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
++ (void)build:(NSString * _Nonnull)eventName completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
-+ (void)build:(NSString *)eventName withEventActions:(NSDictionary *)eventActions completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
++ (void)build:(NSString * _Nonnull)eventName withEventActions:(NSDictionary * _Nullable)eventActions completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
-+ (void)buildChargedEventWithDetails:(NSDictionary *)chargeDetails
-                           andItems:(NSArray *)items completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*> *errors))completion;
++ (void)buildChargedEventWithDetails:(NSDictionary * _Nonnull)chargeDetails
+                           andItems:(NSArray * _Nullable)items completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 
-+ (void)buildPushNotificationEventForNotification:(NSDictionary*)notification
++ (void)buildPushNotificationEvent:(BOOL)clicked
+                                   forNotification:(NSDictionary * _Nonnull)notification
                                 completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
 + (void)buildInAppNotificationStateEvent:(BOOL)clicked
-                               forNotification:(CTInAppNotification *)notification
-                      andQueryParameters:(NSDictionary *)params
-                       completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
+                               forNotification:(CTInAppNotification * _Nonnull)notification
+                      andQueryParameters:(NSDictionary * _Nullable)params
+                       completionHandler:(void(^ _Nonnull)(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
 + (void)buildInboxMessageStateEvent:(BOOL)clicked
-                         forMessage:(CleverTapInboxMessage *)message
-                      andQueryParameters:(NSDictionary *)params
-                       completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion;
+                         forMessage:(CleverTapInboxMessage * _Nonnull)message
+                 andQueryParameters:(NSDictionary * _Nullable)params
+                       completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 
 @end

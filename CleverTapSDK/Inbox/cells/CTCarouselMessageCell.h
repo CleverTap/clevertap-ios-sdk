@@ -13,6 +13,10 @@
 @property (nonatomic, strong) CTSwipeView *swipeView;
 @property (nonatomic, strong) IBOutlet UIView *carouselView;
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselViewHeight;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselViewWidth;
+
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselLandRatioConstraint;
+@property (nonatomic, strong) IBOutlet NSLayoutConstraint *carouselPortRatioConstraint;
 
 - (CGFloat)heightForPageControl;
 - (float)getLandscapeMultiplier;

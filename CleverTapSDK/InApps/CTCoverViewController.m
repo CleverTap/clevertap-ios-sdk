@@ -24,12 +24,9 @@
 
 #pragma mark - UIViewController Lifecycle
 
-- (instancetype) initWithNotification:(CTInAppNotification *)notification {
-    self = [super initWithNibName:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTCoverViewController class])] bundle:[CTInAppUtils bundle]];
-    if (self) {
-        self.notification = notification;
-    }
-    return self;
+- (void)loadView {
+    [super loadView];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTCoverViewController class])] owner:self options:nil];
 }
 
 -(void)viewDidLoad {
@@ -60,10 +57,15 @@
     self.closeButton.hidden = !self.notification.showCloseButton;
 
     // set image
-    if (self.notification.image) {
-        self.imageView.clipsToBounds = YES;
-        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.clipsToBounds = YES;
+    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+  
+    if (self.notification.image && ![self deviceOrientationIsLandscape]) {
         self.imageView.image = [UIImage imageWithData:self.notification.image];
+    }
+    
+    if (self.notification.imageLandscape && [self deviceOrientationIsLandscape]) {
+        self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
     }
     
     if (self.notification.title) {
@@ -90,9 +92,18 @@
             self.secondButton = [self setupViewForButton:self.secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
             [self.secondButton setHidden:YES];
-            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
-                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                         multiplier:1 constant:0] setActive:YES];
+            if ([self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                              attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+                
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                              attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1 constant:0] setActive:YES];
+            }
         }
     }
 }
