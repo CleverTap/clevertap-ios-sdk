@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 
 @class CleverTapInstanceConfig;
+@class CTValidationResult;
 
 @interface CTDeviceInfo : NSObject
 
@@ -24,6 +25,7 @@
 @property (atomic, readonly) NSString *fallbackDeviceId;
 @property (assign, readonly) BOOL wifi;
 @property (assign, readonly) BOOL advertisingTrackingEnabled;
+@property (strong, readonly) NSMutableArray<CTValidationResult*>* validationErrors;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
