@@ -540,7 +540,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CleverTap-iOS-SDK-iOS/CleverTapSDK.framework",
 				"${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
@@ -553,7 +553,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ObjCStarter/Pods-ObjCStarter-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		75907684EA1FB3A91E298071 /* [CP] Check Pods Manifest.lock */ = {
@@ -580,7 +580,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CleverTap-iOS-SDK-tvOS/CleverTapSDK.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -589,7 +589,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ObjCTvOS/Pods-ObjCTvOS-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		BC0631ECDE413CA037DA7257 /* [CP] Check Pods Manifest.lock */ = {

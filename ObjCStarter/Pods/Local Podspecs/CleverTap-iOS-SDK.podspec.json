@@ -47,6 +47,7 @@
   },
   "tvos": {
     "source_files": "CleverTapSDK/*.{h,m}",
+    "exclude_files": "CleverTapSDK/CleverTapJSInterface.{h,m}",
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",
       "CleverTapSDK/CleverTap+SSLPinning.h",
