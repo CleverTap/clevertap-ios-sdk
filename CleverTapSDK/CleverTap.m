@@ -22,8 +22,8 @@
 #import "CTInAppFCManager.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
-#import "CleverTapJSInterface.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CleverTapJSInterface.h"
 #import "CTInAppHTMLViewController.h"
 #import "CTInterstitialViewController.h"
 #import "CTHalfInterstitialViewController.h"

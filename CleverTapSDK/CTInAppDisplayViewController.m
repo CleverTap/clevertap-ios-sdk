@@ -32,7 +32,7 @@
     return self;
 }
 
-#if !TARGET_OS_TV
+#if !(TARGET_OS_TV)
 - (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
     self = [self initWithNotification:notification];
     return self;

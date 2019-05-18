@@ -1,6 +1,8 @@
 #import <UIKit/UIKit.h>
 #import "CTInAppNotification.h"
+#if !(TARGET_OS_TV)
 #import "CleverTapJSInterface.h"
+#endif
 
 @class CTInAppDisplayViewController;
 
@@ -18,7 +20,7 @@
 
 - (instancetype)init __unavailable;
 - (instancetype)initWithNotification:(CTInAppNotification*)notification;
-#if !TARGET_OS_TV
+#if !(TARGET_OS_TV)
 - (instancetype)initWithNotification:(CTInAppNotification*)notification jsInterface:(CleverTapJSInterface *)jsInterface;
 #endif
 

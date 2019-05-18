@@ -1,4 +1,4 @@
-#if !TARGET_OS_TV
+#if !(TARGET_OS_TV)
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 @class CleverTapInstanceConfig;
