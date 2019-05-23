@@ -1,7 +1,7 @@
 
 #import "CTInboxBaseMessageCell.h"
 
-@class FLAnimatedImageView;
+@class SDAnimatedImageView;
 
 @interface CTInboxSimpleMessageCell : CTInboxBaseMessageCell
 

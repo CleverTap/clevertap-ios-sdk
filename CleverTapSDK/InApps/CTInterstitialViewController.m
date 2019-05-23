@@ -4,8 +4,8 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTAVPlayerViewController.h"
-#import <SDWebImage/FLAnimatedImageView+WebCache.h>
 #import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 #import "CTSlider.h"
 
 @import AVFoundation;
@@ -22,7 +22,7 @@ struct FrameRotation {
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
 @property (nonatomic, strong) IBOutlet UILabel *bodyLabel;
-@property (nonatomic, strong) IBOutlet FLAnimatedImageView *imageView;
+@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *avPlayerContainerView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
@@ -123,12 +123,11 @@ struct FrameRotation {
     
     self.closeButton.hidden = !self.notification.showCloseButton;
 
-    // use FLAnimatedImageView to support gif
     if (self.notification.image) {
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         if ([self.notification.contentType isEqualToString:@"image/gif"] ) {
-            FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:self.notification.image];
-            self.imageView.animatedImage = gif;
+            SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.image];
+            self.imageView.image = gif;
         } else {
             self.imageView.image = [UIImage imageWithData:self.notification.image];
         }

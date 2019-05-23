@@ -11,9 +11,8 @@
 
 - (void)prepareForReuse {
     [super prepareForReuse];
-    [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
-    [self.cellIcon sd_cancelCurrentAnimationImagesLoad];
-    self.cellImageView.animatedImage = nil;
+    [self.cellIcon sd_cancelCurrentImageLoad];
+    [self.imageView sd_cancelCurrentImageLoad];
     self.cellImageView.image = nil;
     self.cellIcon.image = nil;
 }
@@ -67,13 +66,11 @@
          self.bodyLabel.text = nil;
          self.dateLabel.text = nil;
          self.cellImageView.image = nil;
-         self.cellImageView.animatedImage = nil;
          self.cellIcon = nil;
          return;
      }
     CleverTapInboxMessageContent *content = message.content[0];
     self.cellImageView.image = nil;
-    self.cellImageView.animatedImage = nil;
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
     self.dateLabel.text = message.relativeDate;
@@ -86,7 +83,7 @@
         self.cellImageView.alpha = 1.0;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                                       options:self.sdWebImageOptions];
+                                       options:self.sdWebImageOptions context:self.sdWebImageContext];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
@@ -94,7 +91,7 @@
     if (content.iconUrl) {
         self.cellIconHeightContraint.constant = 75;
         [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
-                         placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions];
+                         placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions context:self.sdWebImageContext];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
     } else {

@@ -1,8 +1,8 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
 #if !(TARGET_OS_TV)
-#import <SDWebImage/FLAnimatedImageView+WebCache.h>
 #import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/SDAnimatedImageView.h>
 #endif
 
 @interface CTInAppNotification() {
@@ -267,7 +267,7 @@
             self.error = [NSString stringWithFormat:@"unable to load image from URL: %@", self.imageURL];
         } else {
             if ([self.contentType isEqualToString:@"image/gif"] ) {
-                FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:imageData];
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
                 if (gif == nil) {
                     self.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", self.imageURL];
                 }
@@ -282,7 +282,7 @@
             self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
         } else {
             if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
-                FLAnimatedImage *gif = [FLAnimatedImage animatedImageWithGIFData:imageData];
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
                 if (gif == nil) {
                     self.error = [NSString stringWithFormat:@"unable to decode landscape gif for URL: %@", self.imageUrlLandscape];
                 }

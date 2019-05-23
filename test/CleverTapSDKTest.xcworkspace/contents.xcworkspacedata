@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:../Vendors/SDWebImage/SDWebImage.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SDWebImage/../../CleverTapSDK.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:CTNotificationService/CTNotificationService.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:CleverTapSDKTest/CleverTapSDKTest.xcodeproj">
+   </FileRef>
+</Workspace>

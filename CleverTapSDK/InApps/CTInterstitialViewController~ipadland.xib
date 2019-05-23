@@ -92,7 +92,7 @@
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="N3m-ke-pF3">
                                     <rect key="frame" x="0.0" y="0.0" width="956" height="538"/>
                                 </view>
-                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6vX-2h-v4H" customClass="FLAnimatedImageView">
+                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6vX-2h-v4H" customClass="SDAnimatedImageView">
                                     <rect key="frame" x="0.0" y="0.0" width="956" height="538"/>
                                 </imageView>
                             </subviews>
