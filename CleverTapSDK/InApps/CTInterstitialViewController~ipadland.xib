@@ -143,10 +143,10 @@
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="G4r-Er-qMN" firstAttribute="top" secondItem="Zo0-us-Jzs" secondAttribute="top" constant="160" id="Njw-eh-LJU"/>
+                <constraint firstItem="G4r-Er-qMN" firstAttribute="top" secondItem="Zo0-us-Jzs" secondAttribute="top" priority="750" constant="160" id="Njw-eh-LJU"/>
                 <constraint firstItem="G4r-Er-qMN" firstAttribute="top" secondItem="PvN-5q-oNZ" secondAttribute="bottom" constant="-15" id="cJA-eT-GPC"/>
                 <constraint firstItem="PvN-5q-oNZ" firstAttribute="leading" secondItem="G4r-Er-qMN" secondAttribute="trailing" constant="-15" id="r20-rf-J54"/>
-                <constraint firstAttribute="bottom" secondItem="G4r-Er-qMN" secondAttribute="bottom" constant="160" id="uYC-d1-PVE"/>
+                <constraint firstAttribute="bottom" secondItem="G4r-Er-qMN" secondAttribute="bottom" priority="750" constant="160" id="uYC-d1-PVE"/>
                 <constraint firstItem="G4r-Er-qMN" firstAttribute="centerX" secondItem="Zo0-us-Jzs" secondAttribute="centerX" id="yZK-z7-oHM"/>
             </constraints>
             <point key="canvasLocation" x="30.134932533733135" y="85.599999999999994"/>

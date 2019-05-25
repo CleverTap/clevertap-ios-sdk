@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="ipad12_9rounded" orientation="landscape">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -25,8 +25,8 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B0Q-Ms-Gbo">
                     <rect key="frame" x="225.5" y="160" width="915" height="704"/>
                     <subviews>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="umW-fi-u0F">
-                            <rect key="frame" x="1" y="0.0" width="915" height="704"/>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="umW-fi-u0F">
+                            <rect key="frame" x="0.0" y="0.0" width="915" height="704"/>
                         </imageView>
                     </subviews>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -57,9 +57,9 @@
             <constraints>
                 <constraint firstItem="B0Q-Ms-Gbo" firstAttribute="top" secondItem="qOg-hY-zj0" secondAttribute="bottom" constant="-15" id="97G-8J-uyl"/>
                 <constraint firstItem="B0Q-Ms-Gbo" firstAttribute="centerX" secondItem="PUm-33-78N" secondAttribute="centerX" id="Z10-gb-0Fs"/>
-                <constraint firstAttribute="bottom" secondItem="B0Q-Ms-Gbo" secondAttribute="bottom" constant="160" id="aQh-dL-Oaz"/>
+                <constraint firstAttribute="bottom" secondItem="B0Q-Ms-Gbo" secondAttribute="bottom" priority="750" constant="160" id="aQh-dL-Oaz"/>
                 <constraint firstItem="qOg-hY-zj0" firstAttribute="leading" secondItem="B0Q-Ms-Gbo" secondAttribute="trailing" constant="-15" id="ibB-bf-fSl"/>
-                <constraint firstItem="B0Q-Ms-Gbo" firstAttribute="top" secondItem="PUm-33-78N" secondAttribute="top" constant="160" id="j7F-JS-1Ch"/>
+                <constraint firstItem="B0Q-Ms-Gbo" firstAttribute="top" secondItem="PUm-33-78N" secondAttribute="top" priority="750" constant="160" id="j7F-JS-1Ch"/>
             </constraints>
             <point key="canvasLocation" x="111.2" y="107.49625187406298"/>
         </view>

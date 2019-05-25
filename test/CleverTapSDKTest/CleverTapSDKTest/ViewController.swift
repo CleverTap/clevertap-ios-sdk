@@ -13,8 +13,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
-        CleverTap.sharedInstance()?.recordEvent("Alert")
+//        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
+        CleverTap.sharedInstance()?.recordEvent("CT Webview Event")
         CleverTap.setDebugLevel(3)
         inboxRegister()
         addWebview()
@@ -121,6 +121,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         CleverTap.sharedInstance()?.recordEvent("Interstitial video")
         CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+        CleverTap.sharedInstance()?.recordEvent("Tablet only Half Interstitial")
 //        CleverTap.sharedInstance()?.recordEvent("in-app")
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")

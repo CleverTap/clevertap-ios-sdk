@@ -138,11 +138,11 @@
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="W10-kK-OmP" firstAttribute="top" secondItem="L1w-6g-pWH" secondAttribute="top" constant="160" id="D0K-pi-vc5"/>
+                <constraint firstItem="W10-kK-OmP" firstAttribute="top" secondItem="L1w-6g-pWH" secondAttribute="top" priority="750" constant="160" id="D0K-pi-vc5"/>
                 <constraint firstItem="r1a-qE-O5F" firstAttribute="leading" secondItem="W10-kK-OmP" secondAttribute="trailing" constant="-15" id="NKK-yK-VuC"/>
                 <constraint firstItem="W10-kK-OmP" firstAttribute="top" secondItem="r1a-qE-O5F" secondAttribute="bottom" constant="-15" id="ebI-Xe-ecA"/>
                 <constraint firstItem="W10-kK-OmP" firstAttribute="centerX" secondItem="L1w-6g-pWH" secondAttribute="centerX" id="jgp-zc-A27"/>
-                <constraint firstAttribute="bottom" secondItem="W10-kK-OmP" secondAttribute="bottom" constant="160" id="yzy-eh-mmY"/>
+                <constraint firstAttribute="bottom" secondItem="W10-kK-OmP" secondAttribute="bottom" priority="750" constant="160" id="yzy-eh-mmY"/>
             </constraints>
             <point key="canvasLocation" x="50.073206442166907" y="53.3203125"/>
         </view>
