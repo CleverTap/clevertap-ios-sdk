@@ -1,8 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
-#import <SDWebImage/FLAnimatedImageView+WebCache.h>
 #import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/UIView+WebCache.h>
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 #import "CleverTap+Inbox.h"
 #import "CTInboxMessageActionView.h"
 #import "CTConstants.h"
@@ -11,7 +12,7 @@
 #import "CTInAppResources.h"
 #import "CTVideoThumbnailGenerator.h"
 
-@class FLAnimatedImageView;
+@class SDAnimatedImageView;
 
 typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
     CTMediaPlayerCellTypeNone,
@@ -26,7 +27,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @interface CTInboxBaseMessageCell : UITableViewCell <CTInboxActionViewDelegate>
 
 @property (strong, nonatomic) IBOutlet UIView *containerView;
-@property (strong, nonatomic) IBOutlet FLAnimatedImageView *cellImageView;
+@property (strong, nonatomic) IBOutlet SDAnimatedImageView *cellImageView;
 @property (strong, nonatomic) IBOutlet UILabel *titleLabel;
 @property (strong, nonatomic) IBOutlet UILabel *bodyLabel;
 @property (strong, nonatomic) IBOutlet UILabel *dateLabel;
@@ -63,6 +64,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 
 
 @property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
+@property (nonatomic, strong) SDWebImageContext *sdWebImageContext;
 
 - (void)volumeButtonTapped:(UIButton *)sender;
 

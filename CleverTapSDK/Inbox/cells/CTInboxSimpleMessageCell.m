@@ -1,4 +1,6 @@
 #import "CTInboxSimpleMessageCell.h"
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#import <SDWebImage/UIImageView+WebCache.h>
 
 @implementation CTInboxSimpleMessageCell
 
@@ -16,8 +18,7 @@
 
 - (void)prepareForReuse {
     [super prepareForReuse];
-    [self.cellImageView sd_cancelCurrentAnimationImagesLoad];
-    self.cellImageView.animatedImage = nil;
+    [self.cellImageView sd_cancelCurrentImageLoad];
     self.cellImageView.image = nil;
 }
 
@@ -68,7 +69,6 @@
 - (void)setupMessage:(CleverTapInboxMessage *)message {
     if (!message.content || message.content.count < 0) {
         self.cellImageView.image = nil;
-        self.cellImageView.animatedImage = nil;
         self.titleLabel.text = nil;
         self.bodyLabel.text = nil;
         self.dateLabel.text = nil;
@@ -77,7 +77,6 @@
     
     CleverTapInboxMessageContent *content = message.content[0];
     self.cellImageView.image = nil;
-    self.cellImageView.animatedImage = nil;
     self.cellImageView.clipsToBounds = YES;
     self.titleLabel.text = content.title;
     self.bodyLabel.text = content.message;
@@ -90,7 +89,8 @@
         self.cellImageView.hidden = NO;
         self.cellImageView.alpha = 1.0;
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage] options:self.sdWebImageOptions];
+                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                                       options:self.sdWebImageOptions context:self.sdWebImageContext];
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
     }
