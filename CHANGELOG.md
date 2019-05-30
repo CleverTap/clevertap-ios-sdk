@@ -1,5 +1,8 @@
 # CHANGE LOG
 
+## Version 3.6.0 (May 30, 2019)
+* Adds support for SDWebImage version 5.0 
+
 ## Version 3.5.0 (May 17, 2019)
 * Adds the ability to set a custom Device ID
 * Adds the ability to record Notification Viewed event for Push Notifications
