@@ -16,7 +16,6 @@
     [self registerPush];
     
     // Configure and init the default shared CleverTap instance, (add CleverTap Account ID and Account Token in your .plist file)
-    [CleverTap setCredentialsWithAccountID:@"TEST-Z9R-486-4W5Z" andToken:@"TEST-6b4-2c1"];
     #ifdef DEBUG
         [CleverTap setDebugLevel:CleverTapLogDebug];
     #endif
