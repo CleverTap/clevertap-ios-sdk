@@ -762,7 +762,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CleverTap-iOS-SDK-tvOS/CleverTapSDK.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -771,7 +771,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwiftTvOS/Pods-SwiftTvOS-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		2A96F8A7D22D4B0D2B1D78C6 /* [CP] Check Pods Manifest.lock */ = {
@@ -798,22 +798,20 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CleverTap-iOS-SDK-iOS/CleverTapSDK.framework",
-				"${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/CTNotificationService/CTNotificationService.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CleverTapSDK.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FLAnimatedImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CTNotificationService.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		5E4C9700149A43C49A414E50 /* [CP] Check Pods Manifest.lock */ = {
@@ -840,7 +838,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CleverTapWatchOS/CleverTapWatchOS.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -849,7 +847,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwiftWatchOS Extension/Pods-SwiftWatchOS Extension-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		AE2AF5F5F22BAB85527A024E /* [CP] Check Pods Manifest.lock */ = {
