@@ -286,7 +286,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @discussion
  Optional.  You can use location to pass it to CleverTap via the setLocation API
- for, among other things, more fine-grained geo-targeting and segmentation purposes.
+ for, among other things, more fine-grained geo-targeting and segmentation purposes.  To enable, build the SDK with the preprocesor macro CLEVERTAP_LOCATION.
  */
 + (void)getLocationWithSuccess:(void (^ _Nonnull)(CLLocationCoordinate2D location))success andError:(void (^_Nullable)(NSString * _Nullable reason))error;
 
@@ -358,7 +358,6 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
 
  */
 - (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString * _Nonnull)cleverTapID;
-
 
 /*!
  @method
