@@ -4,27 +4,26 @@
 #import "CTInAppResources.h"
 #endif
 
-
 static NSDictionary *_inAppTypeMap;
 
 @implementation CTInAppUtils
 
-+ (void)load {
-    _inAppTypeMap = @{
-                      @"custom-html": @(CTInAppTypeHTML),
-                      @"interstitial": @(CTInAppTypeInterstitial),
-                      @"cover": @(CTInAppTypeCover),
-                      @"header-template": @(CTInAppTypeHeader),
-                      @"footer-template": @(CTInAppTypeFooter),
-                      @"half-interstitial": @(CTInAppTypeHalfInterstitial),
-                      @"alert-template": @(CTInAppTypeAlert),
-                      @"interstitial-image": @(CTInAppTypeInterstitialImage),
-                      @"half-interstitial-image": @(CTInAppTypeHalfInterstitialImage),
-                      @"cover-image": @(CTInAppTypeCoverImage)
-                      };
-}
-
 + (CTInAppType)inAppTypeFromString:(NSString*)type {
+    if (_inAppTypeMap == nil) {
+        _inAppTypeMap = @{
+                          @"custom-html": @(CTInAppTypeHTML),
+                          @"interstitial": @(CTInAppTypeInterstitial),
+                          @"cover": @(CTInAppTypeCover),
+                          @"header-template": @(CTInAppTypeHeader),
+                          @"footer-template": @(CTInAppTypeFooter),
+                          @"half-interstitial": @(CTInAppTypeHalfInterstitial),
+                          @"alert-template": @(CTInAppTypeAlert),
+                          @"interstitial-image": @(CTInAppTypeInterstitialImage),
+                          @"half-interstitial-image": @(CTInAppTypeHalfInterstitialImage),
+                          @"cover-image": @(CTInAppTypeCoverImage)
+                          };
+    }
+    
     NSNumber *_type = type != nil ? _inAppTypeMap[type] : @(CTInAppTypeUnknown);
     if (!_type) {
         _type = @(CTInAppTypeUnknown);

@@ -214,16 +214,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark Lifecycle
 
+
 + (void)load {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidFinishLaunchingNotification:) name:UIApplicationDidFinishLaunchingNotification object:nil];
-    _instances = [NSMutableDictionary new];
-    _plistInfo = [CTPlistInfo sharedInstance];
-    pendingNotificationControllers = [NSMutableArray new];
-    
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidFinishLaunchingNotification:) name:UIApplicationDidFinishLaunchingNotification object:nil];
+}
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _instances = [NSMutableDictionary new];
+        _plistInfo = [CTPlistInfo sharedInstance];
+        pendingNotificationControllers = [NSMutableArray new];
 #if CLEVERTAP_SSL_PINNING
-    // Only pin anchor/CA certificates
-    sslCertNames = @[@"DigiCertGlobalRootCA", @"DigiCertSHA2SecureServerCA"];
+        // Only pin anchor/CA certificates
+        sslCertNames = @[@"DigiCertGlobalRootCA", @"DigiCertSHA2SecureServerCA"];
 #endif
+    });
 }
 
 + (void)onDidFinishLaunchingNotification:(NSNotification *)notification {

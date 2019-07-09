@@ -69,25 +69,25 @@ SCNetworkReachabilityRef _reachability;
 static dispatch_queue_t backgroundQueue;
 static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
 
-+ (void)load {
-    deviceIDLock = [NSRecursiveLock new];
-    _idfa = [self getIDFA];
-    _idfv = [self getIDFV];
-    
-    backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
-    
-#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-    // reachability callback
-    if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "wzrkt.com")) != NULL) {
-        SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
-        if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
-            if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
-                SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _idfa = [self getIDFA];
+        _idfv = [self getIDFV];
+        deviceIDLock = [NSRecursiveLock new];
+    #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+        backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
+        // reachability callback
+        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "wzrkt.com")) != NULL) {
+            SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
+            if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
+                if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
+                    SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
+                }
             }
         }
-    }
-#endif
-    [super load];
+    #endif
+    });
 }
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
