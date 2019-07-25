@@ -102,7 +102,6 @@ static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
 
 static BOOL isAutoIntegrated;
-static BOOL isABTestConnectionEnabledForOneInstance;
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypePage,
