@@ -58,6 +58,8 @@
     copy.enablePersonalization = self.enablePersonalization;
     copy.useIDFA = self.useIDFA;
     copy.logLevel = self.logLevel;
+    copy.enableABTesting = self.enableABTesting;
+    copy.enableUIEditor = self.enableUIEditor;
     copy.useCustomCleverTapId = self.useCustomCleverTapId;
     return copy;
 }

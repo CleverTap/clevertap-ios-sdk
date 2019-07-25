@@ -46,6 +46,12 @@
 static NSArray* sslCertNames;
 #endif
 
+#if !CLEVERTAP_NO_AB_SUPPORT
+#import "CTABTestController.h"
+#import "CleverTap+ABTesting.h"
+#import "CTABVariant.h"
+#endif
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -84,6 +90,7 @@ NSString *const kLastSessionTime = @"lastSessionTime";
 NSString *const kSessionId = @"sessionId";
 
 NSString *const kWR_KEY_PERSONALISATION_ENABLED = @"boolPersonalisationEnabled";
+NSString *const kWR_KEY_AB_TEST_EDITOR_ENABLED = @"boolABTestEditorEnabled";
 NSString *const CleverTapProfileDidInitializeNotification = CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION;
 NSString* const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
 
@@ -95,6 +102,7 @@ static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
 
 static BOOL isAutoIntegrated;
+static BOOL isABTestConnectionEnabledForOneInstance;
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypePage,
@@ -121,6 +129,14 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @interface CleverTap () <CTInboxDelegate, CleverTapInboxViewControllerAnalyticsDelegate> {}
 @property(atomic, strong) CTInboxController *inboxController;
 @property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
+@end
+#endif
+
+#if !CLEVERTAP_NO_AB_SUPPORT
+@interface CleverTap () <CTABTestingDelegate> {}
+@property (nonatomic, strong) CTABTestController *abTestController;
+@property (nonatomic, strong) NSMutableArray<CleverTapExperimentsUpdatedBlock> *experimentsUpdateBlocks;
+
 @end
 #endif
 
@@ -516,6 +532,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     __block CleverTap *instance = [_instances objectForKey:config.accountId];
     if (instance == nil) {
+#if !CLEVERTAP_NO_AB_SUPPORT
+        // Default or first non-default instance gets the ABTestController
+        config.enableABTesting =  (config.isDefaultInstance || [_instances count] <= 0);  // TODO TEST THIS
+#endif
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;
         [instance recordDeviceErrors];
@@ -570,6 +590,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             _config.isCreatedPostAppLaunched = YES;
         }
     }
+    
+#if !CLEVERTAP_NO_AB_SUPPORT
+    // Default (flag is set in the config init) or first non-default instance gets the ABTestController
+    if (!_config.enableABTesting) {
+        _config.enableABTesting = (!_instances || [_instances count] <= 0);
+    }
+    [self _initABTesting];
+#endif
+    
     [self notifyUserProfileInitialized];
 
     return self;
@@ -2884,6 +2913,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_INBOX_SUPPORT
         [self _resetInbox];
 #endif
+        
+#if !CLEVERTAP_NO_AB_SUPPORT
+        [self _resetABTesting];
+#endif
         // push data on reset profile
         [self recordAppLaunched:action];
         if (properties) {
@@ -3558,6 +3591,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return (BOOL) [CTPreferences getIntForKey:kWR_KEY_PERSONALISATION_ENABLED withResetValue:YES];
 }
 
++ (void)setABTestEditorEnabled:(BOOL)enabled {
+    [CTPreferences putInt:enabled forKey:kWR_KEY_AB_TEST_EDITOR_ENABLED];
+}
+
++ (BOOL)isABTestEditorEnabled {
+    return (BOOL) [CTPreferences getIntForKey:kWR_KEY_AB_TEST_EDITOR_ENABLED withResetValue:YES];
+}
+
 + (void)setLocation:(CLLocationCoordinate2D)location {
     [[self sharedInstance] setLocation:location];
 }
@@ -3747,7 +3788,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [_inboxUpdateBlocks addObject:block];
 }
 
-- (CleverTapInboxViewController * _Nullable)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
+- (CleverTapInboxViewController * _Nonnull)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
     if (![self _isInboxInitialized]) {
         return nil;
     }
@@ -3959,5 +4000,252 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #endif  //!CLEVERTAP_NO_INBOX_SUPPORT
+
+#pragma mark - AB Testing
+
+#if !CLEVERTAP_NO_AB_SUPPORT
+
+#pragma mark AB Testing public
+
+- (void)registerBoolVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerBoolVariableWithName:name];
+}
+
+
+- (void)registerDoubleVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerDoubleVariableWithName:name];
+}
+
+- (void)registerIntegerVariableWithName:(NSString*)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerIntegerVariableWithName:name];
+}
+
+- (void)registerStringVariableWithName:(NSString*)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerStringVariableWithName:name];
+}
+
+- (void)registerArrayOfBoolVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerArrayOfBoolVariableWithName:name];
+}
+
+- (void)registerArrayOfDoubleVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerArrayOfDoubleVariableWithName:name];
+}
+
+- (void)registerArrayOfIntegerVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerArrayOfIntegerVariableWithName:name];
+}
+
+- (void)registerArrayOfStringVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerArrayOfStringVariableWithName:name];
+}
+
+- (void)registerDictionaryOfBoolVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerDictionaryOfBoolVariableWithName:name];
+}
+
+- (void)registerDictionaryOfDoubleVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerDictionaryOfDoubleVariableWithName:name];
+}
+
+- (void)registerDictionaryOfIntegerVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerDictionaryOfIntegerVariableWithName:name];
+}
+
+- (void)registerDictionaryOfStringVariableWithName:(NSString* _Nonnull)name {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+        return;
+    }
+    [self.abTestController registerDictionaryOfStringVariableWithName:name];
+}
+
+- (BOOL)getBoolVariableWithName:(NSString* _Nonnull)name defaultValue:(BOOL)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getBoolVariableWithName:name defaultValue:defaultValue];
+}
+
+- (double)getDoubleVariableWithName:(NSString* _Nonnull)name defaultValue:(double)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getDoubleVariableWithName:name defaultValue:defaultValue];
+}
+
+- (int)getIntegerVariableWithName:(NSString*)name defaultValue:(int)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getIntegerVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSString*)getStringVariableWithName:(NSString*)name defaultValue:(NSString*)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getStringVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSArray<NSNumber*>* _Nonnull)getArrayOfBoolVariableWithName:(NSString* _Nonnull)name defaultValue:(NSArray<NSNumber*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getArrayOfBoolVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSArray<NSNumber*>* _Nonnull)getArrayOfDoubleVariableWithName:(NSString* _Nonnull)name defaultValue:(NSArray<NSNumber*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getArrayOfDoubleVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSArray<NSNumber*>* _Nonnull)getArrayOfIntegerVariableWithName:(NSString* _Nonnull)name defaultValue:(NSArray<NSNumber*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getArrayOfIntegerVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSArray<NSString*>* _Nonnull)getArrayOfStringVariableWithName:(NSString* _Nonnull)name defaultValue:(NSArray<NSString*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getArrayOfStringVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSDictionary<NSString*, NSNumber*>* _Nonnull)getDictionaryOfBoolVariableWithName:(NSString* _Nonnull)name defaultValue:(NSDictionary<NSString*, NSNumber*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getDictionaryOfBoolVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSDictionary<NSString*, NSNumber*>* _Nonnull)getDictionaryOfDoubleVariableWithName:(NSString* _Nonnull)name defaultValue:(NSDictionary<NSString*, NSNumber*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getDictionaryOfDoubleVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSDictionary<NSString*, NSNumber*>* _Nonnull)getDictionaryOfIntegerVariableWithName:(NSString* _Nonnull)name defaultValue:(NSDictionary<NSString*, NSNumber*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getDictionaryOfIntegerVariableWithName:name defaultValue:defaultValue];
+}
+
+- (NSDictionary<NSString*, NSString*>* _Nonnull)getDictionaryOfStringVariableWithName:(NSString* _Nonnull)name defaultValue:(NSDictionary<NSString*, NSString*>* _Nonnull)defaultValue {
+    if (!self.abTestController) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance, returning default value", self);
+        return defaultValue;
+    }
+    return [self.abTestController getDictionaryOfStringVariableWithName:name defaultValue:defaultValue];
+}
+
+#pragma mark ABTesting private
+- (void) _initABTesting {
+    if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
+        if (!self.config.enableABTesting) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+            return;
+        }
+        _config.enableUIEditor = [[self class] isABTestEditorEnabled];
+        if (!self.abTestController) {
+            self.abTestController = [[CTABTestController alloc] initWithConfig:self->_config guid:[self profileGetCleverTapID] delegate:self];
+        }
+    }
+}
+
+- (void) _resetABTesting {
+    if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
+        if (!self.config.enableABTesting) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
+            return;
+        }
+        if (self.abTestController) {
+            [self.abTestController resetWithGuid:[self profileGetCleverTapID]];
+        } else {
+            [self _initABTesting];
+        }
+    }
+}
+
+#pragma mark CTABTestingDelegate
+
+- (void)abExperimentsDidUpdate {
+    CleverTapLogInternal(self.config.logLevel, @"%@: AB Experiments did update", self);
+    for (CleverTapExperimentsUpdatedBlock block in self.experimentsUpdateBlocks) {
+        if (block) {
+            block();
+        }
+    }
+}
+
+- (void)registerExperimentsUpdatedBlock:(CleverTapExperimentsUpdatedBlock)block {
+    if (!_experimentsUpdateBlocks) {
+        _experimentsUpdateBlocks = [NSMutableArray new];
+    }
+    [_experimentsUpdateBlocks addObject:block];
+}
+
+#endif  //!CLEVERTAP_NO_AB_SUPPORT
 
 @end

@@ -5,6 +5,8 @@
 @property (nonatomic, assign, readonly) BOOL isDefaultInstance;
 @property (nonatomic, strong, readonly, nonnull) NSString *queueLabel;
 @property (nonatomic, assign) BOOL isCreatedPostAppLaunched;
+@property (nonatomic, assign) BOOL enableABTesting;
+@property (nonatomic, assign) BOOL enableUIEditor;
 
 - (instancetype _Nonnull)initWithAccountId:(NSString * _Nonnull)accountId
                               accountToken:(NSString * _Nonnull)accountToken

@@ -1,0 +1,29 @@
+{
+    "ab_exp": [        
+        {
+            "actions": [
+    
+                {
+                    "args": [[{"images": [
+                        { "url": "https://sample-videos.com/img/Sample-jpg-image-1mb.jpg",
+                            "mime_type": "image/png",
+                            "size": 224343,
+                            "scale": 1,
+                            "dimensions": {
+                                "Height": 778,
+                                "Width": 375
+                            }
+                        }
+                    ]}, "UIImage"]],
+                    "name": "c1810",
+                    "original": null,
+                    "path": "/CleverTapSDKTest.ScreenABTestVC/UIView/UIImageView[0]",
+                    "selector": "setImage:"
+                }
+            ],
+            "variant_version": 11,
+            "var_id": "95",
+            "exp_id": "1789"
+        }
+    ]
+}

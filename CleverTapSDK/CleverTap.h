@@ -14,6 +14,7 @@
 #define CLEVERTAP_NO_INAPP_SUPPORT 1
 #define CLEVERTAP_NO_REACHABILITY_SUPPORT 1
 #define CLEVERTAP_NO_INBOX_SUPPORT 1
+#define CLEVERTAP_NO_AB_SUPPORT 1
 #endif
 
 @protocol CleverTapSyncDelegate;
@@ -1074,6 +1075,31 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 + (CleverTapLogLevel)getDebugLevel;
 
+#if !CLEVERTAP_NO_AB_SUPPORT
+/*!
+ @method
+ 
+ @abstract
+ Set the enabled state of the ABTest Editor
+ 
+ @discussion
+ If enabled, the SDK will allow remote configuration of visual AB Tests
+ 
+ @param enabled  whether the editor is enabled
+ */
++ (void)setABTestEditorEnabled:(BOOL)enabled;
+
+/*!
+ @method
+ 
+ @abstract
+ Get whether the ABTest Editor is enabled
+ 
+ @discussion
+ Returns whether the ABTest Editor is enabled.
+ */
++ (BOOL)isABTestEditorEnabled;
+#endif
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
