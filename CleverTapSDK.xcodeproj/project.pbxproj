@@ -770,18 +770,18 @@
 		07B874E222E982F400328982 /* uieditor */ = {
 			isa = PBXGroup;
 			children = (
-				07B874E322E982F400328982 /* websocket */,
-				07B874E622E982F400328982 /* messages */,
-				07B874F722E982F400328982 /* CTSwizzler.h */,
-				07B874F822E982F400328982 /* CTEditorSession.h */,
-				07B874F922E982F400328982 /* NSInvocation+CTHelper.m */,
 				07B874FA22E982F400328982 /* CTEditorImageCache.h */,
+				07B8752522E982F400328982 /* CTEditorImageCache.m */,
+				07B874F822E982F400328982 /* CTEditorSession.h */,
+				07B8752222E982F400328982 /* CTEditorSession.m */,
+				07B874F722E982F400328982 /* CTSwizzler.h */,
+				07B8752322E982F400328982 /* CTSwizzler.m */,
+				07B874E622E982F400328982 /* messages */,
+				07B8752422E982F400328982 /* NSInvocation+CTHelper.h */,
+				07B874F922E982F400328982 /* NSInvocation+CTHelper.m */,
 				07B874FB22E982F400328982 /* serializers */,
 				07B8751222E982F400328982 /* transformers */,
-				07B8752222E982F400328982 /* CTEditorSession.m */,
-				07B8752322E982F400328982 /* CTSwizzler.m */,
-				07B8752422E982F400328982 /* NSInvocation+CTHelper.h */,
-				07B8752522E982F400328982 /* CTEditorImageCache.m */,
+				07B874E322E982F400328982 /* websocket */,
 			);
 			path = uieditor;
 			sourceTree = "<group>";
@@ -798,22 +798,22 @@
 		07B874E622E982F400328982 /* messages */ = {
 			isa = PBXGroup;
 			children = (
-				07B874E722E982F400328982 /* CTABTestEditorSnapshotMessageResponse.h */,
-				07B874E822E982F400328982 /* CTABTestEditorHandshakeMessage.h */,
-				07B874E922E982F400328982 /* CTABTestEditorDeviceInfoMessageRequest.m */,
-				07B874EA22E982F400328982 /* CTABTestEditorVarsMessageResponse.m */,
-				07B874EB22E982F400328982 /* CTABTestEditorDeviceInfoMessageResponse.h */,
-				07B874EC22E982F400328982 /* CTABTestEditorVarsMessageRequest.h */,
-				07B874ED22E982F400328982 /* CTABTestEditorSnapshotMessageRequest.h */,
-				07B874EE22E982F400328982 /* CTABTestEditorMessage.m */,
 				07B874EF22E982F400328982 /* CTABTestEditorDeviceInfoMessageRequest.h */,
-				07B874F022E982F400328982 /* CTABTestEditorHandshakeMessage.m */,
-				07B874F122E982F400328982 /* CTABTestEditorSnapshotMessageResponse.m */,
-				07B874F222E982F400328982 /* CTABTestEditorVarsMessageResponse.h */,
+				07B874E922E982F400328982 /* CTABTestEditorDeviceInfoMessageRequest.m */,
+				07B874EB22E982F400328982 /* CTABTestEditorDeviceInfoMessageResponse.h */,
 				07B874F322E982F400328982 /* CTABTestEditorDeviceInfoMessageResponse.m */,
-				07B874F422E982F400328982 /* CTABTestEditorVarsMessageRequest.m */,
+				07B874E822E982F400328982 /* CTABTestEditorHandshakeMessage.h */,
+				07B874F022E982F400328982 /* CTABTestEditorHandshakeMessage.m */,
 				07B874F522E982F400328982 /* CTABTestEditorMessage.h */,
+				07B874EE22E982F400328982 /* CTABTestEditorMessage.m */,
+				07B874ED22E982F400328982 /* CTABTestEditorSnapshotMessageRequest.h */,
 				07B874F622E982F400328982 /* CTABTestEditorSnapshotMessageRequest.m */,
+				07B874E722E982F400328982 /* CTABTestEditorSnapshotMessageResponse.h */,
+				07B874F122E982F400328982 /* CTABTestEditorSnapshotMessageResponse.m */,
+				07B874EC22E982F400328982 /* CTABTestEditorVarsMessageRequest.h */,
+				07B874F422E982F400328982 /* CTABTestEditorVarsMessageRequest.m */,
+				07B874F222E982F400328982 /* CTABTestEditorVarsMessageResponse.h */,
+				07B874EA22E982F400328982 /* CTABTestEditorVarsMessageResponse.m */,
 			);
 			path = messages;
 			sourceTree = "<group>";
@@ -821,28 +821,28 @@
 		07B874FB22E982F400328982 /* serializers */ = {
 			isa = PBXGroup;
 			children = (
-				07B874FC22E982F400328982 /* CTObjectSelector.m */,
-				07B874FD22E982F400328982 /* CTClassDescription.h */,
-				07B874FE22E982F400328982 /* CTObjectSequenceGenerator.m */,
-				07B874FF22E982F400328982 /* CTObjectIdentityProvider.h */,
-				07B8750022E982F400328982 /* CTEnumDescription.h */,
-				07B8750122E982F400328982 /* CTPropertyDescription.h */,
 				07B8750222E982F400328982 /* CTApplicationStateSerializer.h */,
-				07B8750322E982F400328982 /* CTObjectSerializerContext.m */,
-				07B8750422E982F400328982 /* CTObjectSerializerConfig.h */,
-				07B8750522E982F400328982 /* CTObjectSerializer.h */,
-				07B8750622E982F400328982 /* CTTypeDescription.h */,
-				07B8750722E982F400328982 /* CTObjectIdentityProvider.m */,
-				07B8750822E982F400328982 /* CTObjectSequenceGenerator.h */,
-				07B8750922E982F400328982 /* CTObjectSelector.h */,
+				07B8750F22E982F400328982 /* CTApplicationStateSerializer.m */,
+				07B874FD22E982F400328982 /* CTClassDescription.h */,
 				07B8750A22E982F400328982 /* CTClassDescription.m */,
-				07B8750B22E982F400328982 /* CTPropertyDescription.m */,
+				07B8750022E982F400328982 /* CTEnumDescription.h */,
 				07B8750C22E982F400328982 /* CTEnumDescription.m */,
+				07B874FF22E982F400328982 /* CTObjectIdentityProvider.h */,
+				07B8750722E982F400328982 /* CTObjectIdentityProvider.m */,
+				07B8750922E982F400328982 /* CTObjectSelector.h */,
+				07B874FC22E982F400328982 /* CTObjectSelector.m */,
+				07B8750822E982F400328982 /* CTObjectSequenceGenerator.h */,
+				07B874FE22E982F400328982 /* CTObjectSequenceGenerator.m */,
+				07B8750522E982F400328982 /* CTObjectSerializer.h */,
+				07B8751122E982F400328982 /* CTObjectSerializer.m */,
+				07B8750422E982F400328982 /* CTObjectSerializerConfig.h */,
 				07B8750D22E982F400328982 /* CTObjectSerializerConfig.m */,
 				07B8750E22E982F400328982 /* CTObjectSerializerContext.h */,
-				07B8750F22E982F400328982 /* CTApplicationStateSerializer.m */,
+				07B8750322E982F400328982 /* CTObjectSerializerContext.m */,
+				07B8750122E982F400328982 /* CTPropertyDescription.h */,
+				07B8750B22E982F400328982 /* CTPropertyDescription.m */,
+				07B8750622E982F400328982 /* CTTypeDescription.h */,
 				07B8751022E982F400328982 /* CTTypeDescription.m */,
-				07B8751122E982F400328982 /* CTObjectSerializer.m */,
 			);
 			path = serializers;
 			sourceTree = "<group>";
@@ -850,21 +850,21 @@
 		07B8751222E982F400328982 /* transformers */ = {
 			isa = PBXGroup;
 			children = (
-				07B8751322E982F400328982 /* CTNSDictionaryFromUIFontValueTransformer.m */,
-				07B8751422E982F400328982 /* CTNSStringFromUIColorValueTransformer.m */,
-				07B8751522E982F400328982 /* CTValueTransformers.h */,
-				07B8751622E982F400328982 /* CTNSDictionaryFromUIImageValueTransformer.m */,
-				07B8751722E982F400328982 /* CTNSDictionaryFromCGSizeValueTransformer.m */,
-				07B8751822E982F400328982 /* CTPassThroughValueTransformer.m */,
-				07B8751922E982F400328982 /* CTNSDictionaryFromNSAttributedStringValueTransformer.m */,
-				07B8751A22E982F400328982 /* CTNSStringFromCGColorRefValueTransformer.m */,
 				07B8751B22E982F400328982 /* CTCGFloatFromNSNumberValueTransformer.m */,
 				07B8751C22E982F400328982 /* CTNSDictionaryFromCATransform3DValueTransformer.m */,
 				07B8751D22E982F400328982 /* CTNSDictionaryFromCGAffineTransformValueTransformer.m */,
-				07B8751E22E982F400328982 /* CTNSDictionaryFromUIEdgeInsetsValueTransformer.m */,
-				07B8751F22E982F400328982 /* CTNSNumberFromBOOLValueTransformer.m */,
-				07B8752022E982F400328982 /* CTNSDictionaryFromCGRectValueTransformer.m */,
 				07B8752122E982F400328982 /* CTNSDictionaryFromCGPointValueTransformer.m */,
+				07B8752022E982F400328982 /* CTNSDictionaryFromCGRectValueTransformer.m */,
+				07B8751722E982F400328982 /* CTNSDictionaryFromCGSizeValueTransformer.m */,
+				07B8751922E982F400328982 /* CTNSDictionaryFromNSAttributedStringValueTransformer.m */,
+				07B8751E22E982F400328982 /* CTNSDictionaryFromUIEdgeInsetsValueTransformer.m */,
+				07B8751322E982F400328982 /* CTNSDictionaryFromUIFontValueTransformer.m */,
+				07B8751622E982F400328982 /* CTNSDictionaryFromUIImageValueTransformer.m */,
+				07B8751F22E982F400328982 /* CTNSNumberFromBOOLValueTransformer.m */,
+				07B8751A22E982F400328982 /* CTNSStringFromCGColorRefValueTransformer.m */,
+				07B8751422E982F400328982 /* CTNSStringFromUIColorValueTransformer.m */,
+				07B8751822E982F400328982 /* CTPassThroughValueTransformer.m */,
+				07B8751522E982F400328982 /* CTValueTransformers.h */,
 			);
 			path = transformers;
 			sourceTree = "<group>";
@@ -882,10 +882,10 @@
 			isa = PBXGroup;
 			children = (
 				07B8752A22E982F400328982 /* CTABVariant.h */,
-				07B8752B22E982F400328982 /* CTVar.h */,
-				07B8752C22E982F400328982 /* CTVarCache.h */,
-				07B8752D22E982F400328982 /* CTVar.m */,
 				07B8752E22E982F400328982 /* CTABVariant.m */,
+				07B8752B22E982F400328982 /* CTVar.h */,
+				07B8752D22E982F400328982 /* CTVar.m */,
+				07B8752C22E982F400328982 /* CTVarCache.h */,
 				07B8752F22E982F400328982 /* CTVarCache.m */,
 			);
 			path = models;

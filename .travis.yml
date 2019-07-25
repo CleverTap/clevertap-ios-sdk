@@ -7,7 +7,7 @@ cache: cocoapods
 podfile: ObjCStarter/Podfile
 osx_image: xcode9.3
 before_install:
- - gem install cocoapods  -v '1.0.1' # Since Travis is not always on latest version
+ - gem install cocoapods  -v '1.7.5' # Since Travis is not always on latest version
  - pod update --project-directory=ObjCStarter
 install:
 - gem install xcpretty --no-rdoc --no-ri --no-document --quiet
