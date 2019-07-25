@@ -2,10 +2,6 @@
 # * http://www.objc.io/issue-6/travis-ci.html
 # * https://github.com/supermarin/xcpretty#usage
 
-# safelist
-branches:
-  only:
-  - master
 language: objective-c
 cache: cocoapods
 podfile: ObjCStarter/Podfile
