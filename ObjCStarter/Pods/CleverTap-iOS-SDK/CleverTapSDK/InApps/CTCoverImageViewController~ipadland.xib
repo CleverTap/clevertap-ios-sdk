@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad12_9rounded" orientation="landscape">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CTCoverImageViewController">
+            <connections>
+                <outlet property="closeButton" destination="WGU-qP-Piy" id="vbd-ef-Lnz"/>
+                <outlet property="containerView" destination="rV7-Hf-PVT" id="Kih-yJ-BMJ"/>
+                <outlet property="imageView" destination="PAE-sh-zgY" id="yQJ-Kg-KAo"/>
+                <outlet property="view" destination="4sT-6c-dHx" id="MD9-SY-pm4"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="4sT-6c-dHx">
+            <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DlF-Gs-aeo">
+                    <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rV7-Hf-PVT">
+                            <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+                            <subviews>
+                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="PAE-sh-zgY">
+                                    <rect key="frame" x="0.0" y="0.0" width="1366" height="1024"/>
+                                </imageView>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="bottom" secondItem="PAE-sh-zgY" secondAttribute="bottom" id="1vP-e3-3Kd"/>
+                                <constraint firstAttribute="trailing" secondItem="PAE-sh-zgY" secondAttribute="trailing" id="En2-Zh-g7d"/>
+                                <constraint firstItem="PAE-sh-zgY" firstAttribute="leading" secondItem="rV7-Hf-PVT" secondAttribute="leading" id="ew8-au-cz1"/>
+                                <constraint firstItem="PAE-sh-zgY" firstAttribute="top" secondItem="rV7-Hf-PVT" secondAttribute="top" id="gf6-O9-9kU"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WGU-qP-Piy" customClass="CTDismissButton">
+                            <rect key="frame" x="1321" y="15" width="30" height="30"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <accessibility key="accessibilityConfiguration">
+                                <accessibilityTraits key="traits" button="YES"/>
+                            </accessibility>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="30" id="I0B-JX-BcN"/>
+                                <constraint firstAttribute="height" constant="30" id="Ipr-5Q-azZ"/>
+                            </constraints>
+                            <connections>
+                                <action selector="closeButtonTapped:" destination="-1" eventType="touchUpInside" id="RH9-Dq-cpn"/>
+                            </connections>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="WGU-qP-Piy" secondAttribute="trailing" constant="15" id="54X-Xd-wXQ"/>
+                        <constraint firstItem="rV7-Hf-PVT" firstAttribute="top" secondItem="DlF-Gs-aeo" secondAttribute="top" id="FXe-hc-b69"/>
+                        <constraint firstAttribute="bottom" secondItem="rV7-Hf-PVT" secondAttribute="bottom" id="Odu-q6-54K"/>
+                        <constraint firstItem="WGU-qP-Piy" firstAttribute="top" secondItem="DlF-Gs-aeo" secondAttribute="top" priority="250" constant="15" id="W4M-ou-onj"/>
+                        <constraint firstItem="rV7-Hf-PVT" firstAttribute="leading" secondItem="DlF-Gs-aeo" secondAttribute="leading" id="k2K-HZ-IlP"/>
+                        <constraint firstAttribute="trailing" secondItem="rV7-Hf-PVT" secondAttribute="trailing" id="sA8-ij-V1l"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="DlF-Gs-aeo" secondAttribute="bottom" id="Ml9-vC-4pe"/>
+                <constraint firstAttribute="trailing" secondItem="DlF-Gs-aeo" secondAttribute="trailing" id="Wvg-3b-yT5"/>
+                <constraint firstItem="DlF-Gs-aeo" firstAttribute="top" secondItem="4sT-6c-dHx" secondAttribute="top" id="jvS-vu-gRY"/>
+                <constraint firstItem="DlF-Gs-aeo" firstAttribute="leading" secondItem="4sT-6c-dHx" secondAttribute="leading" id="oKb-gJ-ADv"/>
+            </constraints>
+            <point key="canvasLocation" x="100" y="77.811094452773617"/>
+        </view>
+    </objects>
+</document>

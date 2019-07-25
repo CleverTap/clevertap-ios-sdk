@@ -6,7 +6,7 @@ target 'ObjCStarter' do
   use_frameworks!
 
   # Pods for ObjCStarter
-  pod 'CleverTap-iOS-SDK', :path =>'../'
+  pod 'CleverTap-iOS-SDK'
 
   target 'ObjCStarterTests' do
     inherit! :search_paths
@@ -20,7 +20,7 @@ target 'ObjCStarter' do
   
   target 'ObjCTvOS' do
       platform :tvos, '9.0'
-      pod 'CleverTap-iOS-SDK', :path =>'../'
+      pod 'CleverTap-iOS-SDK'
   end
   
 end
