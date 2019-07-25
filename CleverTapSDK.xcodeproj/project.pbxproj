@@ -345,6 +345,7 @@
 		D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = D0CACF9820B8A78600A02327 /* CTConstants.m */; };
 		D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */; };
 		D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */; };
+		D0CB456522EA550C000762B2 /* libicucore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D0CB456422EA550C000762B2 /* libicucore.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -625,6 +626,7 @@
 		D0CACF9820B8A78600A02327 /* CTConstants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTConstants.m; sourceTree = "<group>"; };
 		D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertGlobalRootCA.crt; sourceTree = "<group>"; };
 		D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertSHA2SecureServerCA.crt; sourceTree = "<group>"; };
+		D0CB456422EA550C000762B2 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -639,6 +641,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0CB456522EA550C000762B2 /* libicucore.tbd in Frameworks */,
 				0781852B229FBD5100A72B07 /* SDWebImage.framework in Frameworks */,
 				07B94553219EA44100D4C542 /* libsqlite3.tbd in Frameworks */,
 			);
@@ -996,6 +999,7 @@
 		07B94551219EA44100D4C542 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D0CB456422EA550C000762B2 /* libicucore.tbd */,
 				D09A5E0221EA33C50032DDDF /* SDWebImage.framework */,
 				07B94552219EA44100D4C542 /* libsqlite3.tbd */,
 			);
