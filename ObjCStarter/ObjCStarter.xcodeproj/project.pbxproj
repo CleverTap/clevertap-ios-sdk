@@ -28,7 +28,6 @@
 		107D751FABE6D5ACC611DA29 /* Pods_ObjCStarterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8305EF4E81974FAEB2DC25D /* Pods_ObjCStarterUITests.framework */; };
 		A06033F9C8B1F8DC7D19FAD4 /* Pods_ObjCStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCFF12C6B7DD9F4C0EE459ED /* Pods_ObjCStarterTests.framework */; };
 		CBD52D22FB0AE37C1E4A5194 /* Pods_ObjCTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F23762765F6B76841D12A96D /* Pods_ObjCTvOS.framework */; };
-		D0CB456722EA59FE000762B2 /* libicucore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D0CB456622EA59FE000762B2 /* libicucore.tbd */; };
 		D3D2E04DE5DA0DAEBDCF01B9 /* Pods_ObjCStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 997C676BD55E3DF0A0EC04CB /* Pods_ObjCStarter.framework */; };
 /* End PBXBuildFile section */
 
@@ -134,7 +133,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0CB456722EA59FE000762B2 /* libicucore.tbd in Frameworks */,
 				07E16EBF2130088A00429BDF /* AdSupport.framework in Frameworks */,
 				D3D2E04DE5DA0DAEBDCF01B9 /* Pods_ObjCStarter.framework in Frameworks */,
 			);
