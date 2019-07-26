@@ -5,7 +5,7 @@
     
                 {
                     "args": [[{"images": [
-                        { "url": "https://sample-videos.com/img/Sample-jpg-image-1mb.jpg",
+                        { "url": "https://sample-videos.com/img/Sample-jpg-image-30mb.jpg",
                             "mime_type": "image/png",
                             "size": 224343,
                             "scale": 1,
@@ -21,7 +21,7 @@
                     "selector": "setImage:"
                 }
             ],
-            "variant_version": 11,
+            "version": 12,
             "var_id": "95",
             "exp_id": "1789"
         }

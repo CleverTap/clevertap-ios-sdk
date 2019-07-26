@@ -66,7 +66,7 @@
         CleverTapLogStaticDebug(@"%@: Failed to construct variant, not valid experiment id: %@", self, experimentId);
         return nil;
     }
-    NSNumber *variantVersion = variantData[@"variant_version"];
+    NSNumber *variantVersion = variantData[@"version"];
 
     NSArray *actions = variantData[@"actions"];
     if (![actions isKindOfClass:[NSArray class]]) {
