@@ -21,7 +21,7 @@ static NSString * const kStartLoadingKey = @"CTConnectLoadingAnimation";
 static NSString * const kFinishLoadingKey = @"CTConnectFinishLoadingAnimation";
 //static NSString* const kDASHBOARD_DOMAIN = @"dashboard.clevertap.com";
 static NSString* const kDASHBOARD_DOMAIN = @"eu1-dashboard-staging-2.dashboard.clevertap.com";  // TODO
-// static NSString* const kDASHBOARD_DOMAIN = @"clevertaptech.ngrok.io";  // TODO
+//static NSString* const kDASHBOARD_DOMAIN = @"clevertaptech.ngrok.io";  // TODO
 
 typedef void (^CTABTestingOperationBlock)(void);
 

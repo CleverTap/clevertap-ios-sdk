@@ -9,26 +9,26 @@ typedef void (^CleverTapExperimentsUpdatedBlock)(void);
  @method
  
  @abstract
- Set the enabled state of the ABTest Editor
+ Set the enabled state of the UIEditor connection
  
  @discussion
- If enabled, the SDK will allow remote configuration of visual AB Tests
- The Editor is Disabled by default
+ If enabled, the SDK will allow remote configuration of visual UI Edits
+ The Editor connection is Disabled by default
  
  @param enabled  whether the editor is enabled
  */
-+ (void)setABTestEditorEnabled:(BOOL)enabled;
++ (void)setUIEditorConnectionEnabled:(BOOL)enabled;
 
 /*!
  @method
  
  @abstract
- Get whether the ABTest Editor is enabled
+ Get whether the UIEditor connection to the CleverTap dashboard is enabled
  
  @discussion
- Returns whether the ABTest Editor is enabled.
+ Returns whether the UIEditor connection is enabled.
  */
-+ (BOOL)isABTestEditorEnabled;
++ (BOOL)isUIEditorConnectionEnabled;
 
 // TODO nice doc comments for the rest
 

@@ -4024,11 +4024,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark AB Testing public
 
 
-+ (void)setABTestEditorEnabled:(BOOL)enabled {
++ (void)setUIEditorConnectionEnabled:(BOOL)enabled {
     [CTPreferences putInt:enabled forKey:kWR_KEY_AB_TEST_EDITOR_ENABLED];
 }
 
-+ (BOOL)isABTestEditorEnabled {
++ (BOOL)isUIEditorConnectionEnabled {
     return (BOOL) [CTPreferences getIntForKey:kWR_KEY_AB_TEST_EDITOR_ENABLED withResetValue:NO];
 }
 
@@ -4232,7 +4232,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogDebug(self.config.logLevel, @"%@: ABTesting is not enabled for this instance", self);
             return;
         }
-        _config.enableUIEditor = [[self class] isABTestEditorEnabled];
+        _config.enableUIEditor = [[self class] isUIEditorConnectionEnabled];
         if (!self.abTestController) {
             self.abTestController = [[CTABTestController alloc] initWithConfig:self->_config guid:[self profileGetCleverTapID] delegate:self];
         }
