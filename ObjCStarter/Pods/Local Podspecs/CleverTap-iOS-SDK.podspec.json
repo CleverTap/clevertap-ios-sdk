@@ -38,7 +38,8 @@
       "CleverTapSDK/CleverTapSyncDelegate.h",
       "CleverTapSDK/CleverTapTrackedViewController.h",
       "CleverTapSDK/CleverTapUTMDetail.h",
-      "CleverTapSDK/CleverTapJSInterface.h"
+      "CleverTapSDK/CleverTapJSInterface.h",
+      "CleverTapSDK/CleverTap+ABTesting.h"
     ]
   },
   "platforms": {
