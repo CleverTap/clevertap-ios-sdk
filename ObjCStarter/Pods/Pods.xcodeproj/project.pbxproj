@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -19,6 +19,7 @@
 		07C81E1DD3D885B67CA4E5688E54D6B7 /* SDImageAssetManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2798DA660478BF00C4DCE860E5D23B4D /* SDImageAssetManager.m */; };
 		07D433EF2C4DE5D596FC12197B02BC29 /* CleverTapInboxStyleConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BAA76E6A23005BA9741D2AA508A1964 /* CleverTapInboxStyleConfig.m */; };
 		08EFA50CF63238E95C48D98217CBC1C7 /* SDmetamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = AC2B849BEE15C696A988AC6D41E28CFE /* SDmetamacros.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		097B20CB1B732B0C2FE425FA5A11CF53 /* CleverTap+ABTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = C5AD9B0AC151626278C2928F6A8E1490 /* CleverTap+ABTesting.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		0999DA6DE67BE9ED322609F340E6D5D0 /* NSBezierPath+RoundedCorners.m in Sources */ = {isa = PBXBuildFile; fileRef = 7101C4ABE38A3D9A0EB7BDB9CCBBB53F /* NSBezierPath+RoundedCorners.m */; };
 		09C339431300626601B29026382D89C4 /* UIImage+Transform.h in Headers */ = {isa = PBXBuildFile; fileRef = FB5CFAA4A543EF4DAE47DE783F3F4AAA /* UIImage+Transform.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		09ED28A9811B93522B00458718816A46 /* CTMessageMO+CoreDataProperties.h in Headers */ = {isa = PBXBuildFile; fileRef = B6CFF3235B773EFFA65ED9CDC69263BA /* CTMessageMO+CoreDataProperties.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -370,7 +371,6 @@
 		BA442D6A2B14CE47342933FDA6D46CF8 /* SDAnimatedImageView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 83355B765EDDCD63B87F3EA6E4550BE2 /* SDAnimatedImageView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BA717D7ACA3CD5DEC9FCC7137482E660 /* UIImage+MultiFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F81B426E3B11D7948E6BDCC786F1A65 /* UIImage+MultiFormat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BBE61B34DBFA7A4D0F00BD778D950537 /* SDWebImageCacheKeyFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CAA88B1D229480E51F8407F964E32E5 /* SDWebImageCacheKeyFilter.m */; };
-		BBFA24C037002A5207DA6642925B55B5 /* CleverTap+ABTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = C5AD9B0AC151626278C2928F6A8E1490 /* CleverTap+ABTesting.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE711CB348D441A4D17ADE58B005E6B1 /* CTABTestUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ABDAA13141852AF9349F9FA2FA038B4 /* CTABTestUtils.m */; };
 		BED8A699EDF9C450F54C423D7688BD74 /* SDImageLoadersManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EC4C5E49CCCCF00E05CC42253CCB1CDE /* SDImageLoadersManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF41E1DE132C56460820CAAB98E8090F /* CTHalfInterstitialViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 45216742E51C74BB9C7402F8D00CF587 /* CTHalfInterstitialViewController~ipadland.xib */; };
@@ -2032,7 +2032,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BBFA24C037002A5207DA6642925B55B5 /* CleverTap+ABTesting.h in Headers */,
+				097B20CB1B732B0C2FE425FA5A11CF53 /* CleverTap+ABTesting.h in Headers */,
 				73A412C519F8927B7D2E9990EC49D878 /* CleverTap+Inbox.h in Headers */,
 				CE9C254E6ABEEFD0B66258596B15FCE1 /* CleverTap+SSLPinning.h in Headers */,
 				694D06D5092645D47821D593633511AC /* CleverTap-iOS-SDK-iOS-umbrella.h in Headers */,
@@ -2281,7 +2281,7 @@
 				LastUpgradeCheck = 1100;
 			};
 			buildConfigurationList = 4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
