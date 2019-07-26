@@ -3615,14 +3615,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return (BOOL) [CTPreferences getIntForKey:kWR_KEY_PERSONALISATION_ENABLED withResetValue:YES];
 }
 
-+ (void)setABTestEditorEnabled:(BOOL)enabled {
-    [CTPreferences putInt:enabled forKey:kWR_KEY_AB_TEST_EDITOR_ENABLED];
-}
-
-+ (BOOL)isABTestEditorEnabled {
-    return (BOOL) [CTPreferences getIntForKey:kWR_KEY_AB_TEST_EDITOR_ENABLED withResetValue:YES];
-}
-
 + (void)setLocation:(CLLocationCoordinate2D)location {
     [[self sharedInstance] setLocation:location];
 }
@@ -4030,6 +4022,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_AB_SUPPORT
 
 #pragma mark AB Testing public
+
+
++ (void)setABTestEditorEnabled:(BOOL)enabled {
+    [CTPreferences putInt:enabled forKey:kWR_KEY_AB_TEST_EDITOR_ENABLED];
+}
+
++ (BOOL)isABTestEditorEnabled {
+    return (BOOL) [CTPreferences getIntForKey:kWR_KEY_AB_TEST_EDITOR_ENABLED withResetValue:YES]; //  TODO might flip the default to off
+}
 
 - (void)registerBoolVariableWithName:(NSString* _Nonnull)name {
     if (!self.abTestController) {

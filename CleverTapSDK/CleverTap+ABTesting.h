@@ -5,6 +5,9 @@ typedef void (^CleverTapExperimentsUpdatedBlock)(void);
 
 @interface CleverTap (ABTesting)
 
++ (void)setABTestEditorEnabled:(BOOL)enabled;
++ (BOOL)isABTestEditorEnabled;
+
 - (void)registerExperimentsUpdatedBlock:(CleverTapExperimentsUpdatedBlock _Nonnull)block;
 
 - (void)registerBoolVariableWithName:(NSString* _Nonnull)name;
