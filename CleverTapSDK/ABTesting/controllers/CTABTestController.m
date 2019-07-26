@@ -70,9 +70,7 @@ typedef void (^CTABTestingOperationBlock)(void);
         _commandQueue.suspended = YES;
         _varCache = [[CTVarCache alloc] init];
         _variants = [NSSet set];
-        if (_config.enableUIEditor) {
-            [self addGestureRecognizer];
-        }
+        [self addGestureRecognizer];
         [self _unarchiveVariantsSync:NO];
     }
     return self;
@@ -101,7 +99,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 }
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"CleverTap.%@", _config.accountId];
+    return [NSString stringWithFormat:@"CleverTap.%@.CTABTestController", _config.accountId];
 }
 
 #pragma Vars
@@ -535,19 +533,23 @@ typedef void (^CTABTestingOperationBlock)(void);
 }
 
 - (void)addGestureRecognizer {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.testConnectGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleTestConnectGesture:)];
-            self.testConnectGestureRecognizer.minimumPressDuration = 3;
-            self.testConnectGestureRecognizer.cancelsTouchesInView = NO;
+    if (!_config.enableUIEditor) {
+        CleverTapLogDebug(_config.logLevel, @"%@: UIEditor Connection is disabled", self);
+        return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.testConnectGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleTestConnectGesture:)];
+        self.testConnectGestureRecognizer.minimumPressDuration = 3;
+        self.testConnectGestureRecognizer.cancelsTouchesInView = NO;
 #if TARGET_IPHONE_SIMULATOR
-            self.testConnectGestureRecognizer.numberOfTouchesRequired = 2;
+        self.testConnectGestureRecognizer.numberOfTouchesRequired = 2;
 #else
-            self.testConnectGestureRecognizer.numberOfTouchesRequired = 3;
+        self.testConnectGestureRecognizer.numberOfTouchesRequired = 3;
 #endif
-            self->_testConnectGestureRecognizer.enabled = self->_config.enableUIEditor;
-            [[CTInAppResources getSharedApplication].keyWindow addGestureRecognizer:self.testConnectGestureRecognizer];
-            CleverTapLogDebug(self->_config.logLevel, @"%@: Added ABTest Editor connection gesture recognizer, enabled state is %@", self, self->_testConnectGestureRecognizer.enabled ? @"YES": @"NO");
-        });
+        self->_testConnectGestureRecognizer.enabled = self->_config.enableUIEditor;
+        [[CTInAppResources getSharedApplication].keyWindow addGestureRecognizer:self.testConnectGestureRecognizer];
+        CleverTapLogDebug(self->_config.logLevel, @"%@: Added ABTest Editor connection gesture recognizer, enabled state is %@", self, self->_testConnectGestureRecognizer.enabled ? @"YES": @"NO");
+    });
 }
 
 - (void)handleTestConnectGesture:(id)sender {

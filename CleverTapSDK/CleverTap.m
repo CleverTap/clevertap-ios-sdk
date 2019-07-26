@@ -4029,7 +4029,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (BOOL)isABTestEditorEnabled {
-    return (BOOL) [CTPreferences getIntForKey:kWR_KEY_AB_TEST_EDITOR_ENABLED withResetValue:YES]; //  TODO might flip the default to off
+    return (BOOL) [CTPreferences getIntForKey:kWR_KEY_AB_TEST_EDITOR_ENABLED withResetValue:NO];
 }
 
 - (void)registerBoolVariableWithName:(NSString* _Nonnull)name {

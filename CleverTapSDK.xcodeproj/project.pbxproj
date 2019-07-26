@@ -762,10 +762,10 @@
 		07B874E122E982F400328982 /* ABTesting */ = {
 			isa = PBXGroup;
 			children = (
+				07B8753022E982F400328982 /* controllers */,
+				07B8752922E982F400328982 /* models */,
 				07B874E222E982F400328982 /* uieditor */,
 				07B8752622E982F400328982 /* utils */,
-				07B8752922E982F400328982 /* models */,
-				07B8753022E982F400328982 /* controllers */,
 			);
 			path = ABTesting;
 			sourceTree = "<group>";
@@ -779,9 +779,9 @@
 				07B8752222E982F400328982 /* CTEditorSession.m */,
 				07B874F722E982F400328982 /* CTSwizzler.h */,
 				07B8752322E982F400328982 /* CTSwizzler.m */,
-				07B874E622E982F400328982 /* messages */,
 				07B8752422E982F400328982 /* NSInvocation+CTHelper.h */,
 				07B874F922E982F400328982 /* NSInvocation+CTHelper.m */,
+				07B874E622E982F400328982 /* messages */,
 				07B874FB22E982F400328982 /* serializers */,
 				07B8751222E982F400328982 /* transformers */,
 				07B874E322E982F400328982 /* websocket */,

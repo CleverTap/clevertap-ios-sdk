@@ -13,6 +13,7 @@ typedef void (^CleverTapExperimentsUpdatedBlock)(void);
  
  @discussion
  If enabled, the SDK will allow remote configuration of visual AB Tests
+ The Editor is Disabled by default
  
  @param enabled  whether the editor is enabled
  */
