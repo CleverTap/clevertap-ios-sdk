@@ -5,8 +5,31 @@ typedef void (^CleverTapExperimentsUpdatedBlock)(void);
 
 @interface CleverTap (ABTesting)
 
+/*!
+ @method
+ 
+ @abstract
+ Set the enabled state of the ABTest Editor
+ 
+ @discussion
+ If enabled, the SDK will allow remote configuration of visual AB Tests
+ 
+ @param enabled  whether the editor is enabled
+ */
 + (void)setABTestEditorEnabled:(BOOL)enabled;
+
+/*!
+ @method
+ 
+ @abstract
+ Get whether the ABTest Editor is enabled
+ 
+ @discussion
+ Returns whether the ABTest Editor is enabled.
+ */
 + (BOOL)isABTestEditorEnabled;
+
+// TODO nice doc comments for the rest
 
 - (void)registerExperimentsUpdatedBlock:(CleverTapExperimentsUpdatedBlock _Nonnull)block;
 
