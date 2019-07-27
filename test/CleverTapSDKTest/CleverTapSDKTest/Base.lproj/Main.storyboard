@@ -25,7 +25,7 @@
                                     <action selector="testButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XAL-Vy-t37"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RK4-zQ-uy9">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RK4-zQ-uy9" customClass="CustomButton" customModule="CleverTapSDKTest" customModuleProvider="target">
                                 <rect key="frame" x="172.5" y="50" width="69" height="30"/>
                                 <state key="normal" title="App Inbox"/>
                                 <connections>
@@ -84,6 +84,22 @@
             </objects>
             <point key="canvasLocation" x="-926" y="27"/>
         </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="eld-QP-BiT">
+            <objects>
+                <navigationController id="4Bk-Ls-f6e" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="BpR-f4-FLC">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="RGU-PZ-xAc" kind="relationship" relationship="rootViewController" id="4LG-pn-imS"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NQE-Jt-wj0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2546" y="838"/>
+        </scene>
         <!--View Controller-->
         <scene sceneID="NPA-mk-cZF">
             <objects>
@@ -103,14 +119,46 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9T3-2C-gny">
+                                <rect key="frame" x="109" y="330" width="218" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <segue destination="SVC-NL-dmq" kind="show" id="Ter-Va-98z"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="Uch-xB-2FU"/>
                     </view>
+                    <navigationItem key="navigationItem" id="6WZ-Tp-TnR"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VGB-fH-LYv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1171.0144927536232" y="718.52678571428567"/>
+        </scene>
+        <!--ModalVC-->
+        <scene sceneID="z42-u0-rth">
+            <objects>
+                <viewController id="SVC-NL-dmq" customClass="ModalVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="b11-1c-vxu">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ui5-BV-VGX">
+                                <rect key="frame" x="87" y="302" width="240" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="Ngk-e1-iCi"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="qhN-wW-Thb"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Xpf-Dm-H0n" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-332" y="707"/>
         </scene>
         <!--Screen AB-->
         <scene sceneID="zb9-Y7-pNp">

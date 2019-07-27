@@ -6,7 +6,7 @@ import WebKit
 class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate {
     
     @IBOutlet var testButton: UIButton!
-    @IBOutlet var inboxButton: UIButton!
+    @IBOutlet var inboxButton: CustomButton!
     var webView: WKWebView!
     var imageArray = [UIImage]()
     @IBOutlet var scrollView: UIScrollView!
@@ -22,7 +22,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             print("Experiments updated.")
       }
     
-//        inboxRegister()
+        inboxRegister()
         // addWebview()
         profilePush()
         guard let foo = CleverTap.sharedInstance()?.getStringVariable(withName: "foo", defaultValue: "defaultFooValue") else {return}

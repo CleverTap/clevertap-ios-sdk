@@ -10,6 +10,8 @@
 		0702338122C9F8F900D39F42 /* experiment.json in Resources */ = {isa = PBXBuildFile; fileRef = 0702338022C9F8F900D39F42 /* experiment.json */; };
 		0718D66622D33919008E9AE2 /* ImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0718D66522D33919008E9AE2 /* ImageVC.swift */; };
 		072F74A922BB94DC00E4D2E1 /* change_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 072F74A822BB94DC00E4D2E1 /* change_request.json */; };
+		0737582D22EC21E6006E4BBF /* ModalVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0737582C22EC21E6006E4BBF /* ModalVC.swift */; };
+		0737589A22ECB699006E4BBF /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0737589922ECB699006E4BBF /* CustomButton.swift */; };
 		0762655222B7833B00AC2CAC /* device_info_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 0762655122B7833B00AC2CAC /* device_info_request.json */; };
 		0790386322DF0295003AEC0A /* TestTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0790386222DF0295003AEC0A /* TestTableView.swift */; };
 		07B8758022E9906000328982 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D0494121E9819000B34B17 /* SDWebImage.framework */; };
@@ -111,6 +113,8 @@
 		0702338022C9F8F900D39F42 /* experiment.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = experiment.json; sourceTree = "<group>"; };
 		0718D66522D33919008E9AE2 /* ImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageVC.swift; sourceTree = "<group>"; };
 		072F74A822BB94DC00E4D2E1 /* change_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = change_request.json; sourceTree = "<group>"; };
+		0737582C22EC21E6006E4BBF /* ModalVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalVC.swift; sourceTree = "<group>"; };
+		0737589922ECB699006E4BBF /* CustomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
 		0762655122B7833B00AC2CAC /* device_info_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = device_info_request.json; sourceTree = "<group>"; };
 		0790386222DF0295003AEC0A /* TestTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestTableView.swift; sourceTree = "<group>"; };
 		07BD0FDA22B7A75000378DBB /* snapshot_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = snapshot_request.json; sourceTree = "<group>"; };
@@ -270,8 +274,10 @@
 				07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */,
 				D0596EFC208BDC6800A80753 /* CleverTapSDKTest.entitlements */,
 				D0A66246207EE4FF00B403F3 /* AppDelegate.swift */,
+				0737589922ECB699006E4BBF /* CustomButton.swift */,
 				D0A66248207EE4FF00B403F3 /* ViewController.swift */,
 				07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */,
+				0737582C22EC21E6006E4BBF /* ModalVC.swift */,
 				07DB229E22CC8D0E00E6492D /* Meal.swift */,
 				07DB22A022CC8EB100E6492D /* TableViewCell.swift */,
 				07DB229C22CC8CC800E6492D /* TableView.swift */,
@@ -560,9 +566,11 @@
 				0790386322DF0295003AEC0A /* TestTableView.swift in Sources */,
 				D0A66249207EE4FF00B403F3 /* ViewController.swift in Sources */,
 				0718D66622D33919008E9AE2 /* ImageVC.swift in Sources */,
+				0737589A22ECB699006E4BBF /* CustomButton.swift in Sources */,
 				07DB229D22CC8CC800E6492D /* TableView.swift in Sources */,
 				07DB22A122CC8EB100E6492D /* TableViewCell.swift in Sources */,
 				07EE53D222C0EA62009EBC12 /* ScreenABTestVC.swift in Sources */,
+				0737582D22EC21E6006E4BBF /* ModalVC.swift in Sources */,
 				D0A66247207EE4FF00B403F3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
