@@ -2665,7 +2665,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                                                                options:(NSJSONReadingOptions)0 error:nil]; // TODO remove
                     
                     NSArray *experimentsJSON = jsonResp[CLTAP_AB_EXP_JSON_RESPONSE_KEY];
-//                    experimentsJSON = jsonObject[CLTAP_AB_EXP_JSON_RESPONSE_KEY];// TODO remove this
+                    experimentsJSON = jsonObject[CLTAP_AB_EXP_JSON_RESPONSE_KEY];// TODO remove this
                     if (experimentsJSON) {
                         NSMutableArray *experiments;
                         @try {

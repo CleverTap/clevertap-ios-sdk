@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import "CTInAppResources.h"
 #import "CleverTapBuildInfo.h"
 #import "CTABTestEditorDeviceInfoMessageRequest.h"
 #import "CTABTestEditorDeviceInfoMessageResponse.h"
@@ -22,8 +23,19 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
         deviceInfoMessageResponse.systemName = currentDevice.systemName;
         deviceInfoMessageResponse.deviceName = currentDevice.name;
         deviceInfoMessageResponse.deviceModel = currentDevice.model;
-        deviceInfoMessageResponse.deviceWidth = [self deviceWidth];
-        deviceInfoMessageResponse.deviceHeight = [self deviceHeight];
+    
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+            BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+            if  (landscape) {
+                deviceInfoMessageResponse.deviceWidth = [self deviceHeight];
+                deviceInfoMessageResponse.deviceHeight = [self deviceWidth];
+            } else {
+                deviceInfoMessageResponse.deviceWidth = [self deviceWidth];
+                deviceInfoMessageResponse.deviceHeight = [self deviceHeight];
+            }
+        });
+    
         deviceInfoMessageResponse.availableFontFamilies = [self availableFontFamilies];
         return deviceInfoMessageResponse;
 }

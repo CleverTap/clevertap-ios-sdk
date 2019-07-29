@@ -10,20 +10,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         // Override point for customization after application launch.
-//        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue+1)
-//        CleverTap.enablePersonalization()
-        
-        //CleverTap.sharedInstance()?.setOffline(true)
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().delegate = self
         } else {
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
-
+//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
 //        [CleverTap setCredentialsWithAccountID:@"ZWW-WWW-WWRZ"
 //            andToken:@"000-001"];
         
@@ -100,19 +95,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         let token = tokenParts.joined()
         print("Device Token: \(token)")
-        
         NSLog("%@: registered for remote notifications: %@", self.description, deviceToken.description)
     }
     
-    @available(iOS 10.0, *)
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
         completionHandler()
     }
     
-    @available(iOS 10.0, *)
-    @available(iOS 10.0, *)
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         NSLog("%@: will present notification: %@", self.description, notification.request.content.userInfo)
@@ -124,23 +115,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler(UIBackgroundFetchResult.noData)
     }
     
-//    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-//        NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
-//        return true
-//    }
-//
-//    func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
-//        print("%@: open  url: %@", self, url)
-//        return true
-//    }
-    
     private func application(application: UIApplication, openURL url: NSURL,
                      sourceApplication: String?, annotation: AnyObject) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url as URL, sourceApplication: sourceApplication)
         return true
     }
     
-    // Swift 3
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
         return true
@@ -156,7 +136,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         return true
     }
   
-    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.

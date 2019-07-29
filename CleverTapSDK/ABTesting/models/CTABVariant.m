@@ -94,9 +94,9 @@
     return [self initWithId:0 experimentId:0 variantVersion:0 actions:nil vars:@[]];
 }
 
-- (instancetype)initWithId:(NSString *)Id experimentId:(NSString *)experimentId  variantVersion:(NSUInteger)variantVersion actions:(NSArray *)actions vars:(NSArray *)vars {
+- (instancetype)initWithId:(NSString *)variantId experimentId:(NSString *)experimentId  variantVersion:(NSUInteger)variantVersion actions:(NSArray *)actions vars:(NSArray *)vars {
     if (self = [super init]) {
-        self.variantId = Id;
+        self.variantId = variantId;
         self.experimentId = experimentId;
         self._id = [NSString stringWithFormat:@"%@:%@", self.experimentId, self.variantId];
         self.variantVersion = variantVersion;
@@ -148,9 +148,10 @@
 #pragma mark NSCoding
 
 - (void)encodeWithCoder:(nonnull NSCoder *)aCoder {
-    [aCoder encodeObject:_variantId forKey:@"id"];
+    [aCoder encodeObject:_variantId forKey:@"variantId"];
+    [aCoder encodeObject:__id forKey:@"id"];
     [aCoder encodeObject:_experimentId forKey:@"experimentId"];
-    [aCoder encodeObject:@(_variantVersion) forKey:@"variantVersion"];
+    [aCoder encodeObject:@(_variantVersion) forKey:@"version"];
     [aCoder encodeObject:_actions forKey:@"actions"];
     [aCoder encodeObject:self.vars forKey:@"vars"];
     [aCoder encodeObject:@(_finished) forKey:@"finished"];
@@ -158,9 +159,10 @@
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)aDecoder {
     if (self = [super init]) {
-        self.variantId = [aDecoder decodeObjectForKey:@"id"];
+        self.variantId = [aDecoder decodeObjectForKey:@"variantId"];
+        self._id = [aDecoder decodeObjectForKey:@"id"];
         self.experimentId = [aDecoder decodeObjectForKey:@"experimentId"];
-        self.variantVersion = [(NSNumber *)[aDecoder decodeObjectForKey:@"variantVersion"] unsignedLongValue];
+        self.variantVersion = [(NSNumber *)[aDecoder decodeObjectForKey:@"version"] unsignedLongValue];
         self.actions = [aDecoder decodeObjectForKey:@"actions"];
         self.vars = [aDecoder decodeObjectForKey:@"vars"];
         _finished = [(NSNumber *)[aDecoder decodeObjectForKey:@"finished"] boolValue];
