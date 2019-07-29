@@ -2665,7 +2665,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                                                                options:(NSJSONReadingOptions)0 error:nil]; // TODO remove
                     
                     NSArray *experimentsJSON = jsonResp[CLTAP_AB_EXP_JSON_RESPONSE_KEY];
-                    experimentsJSON = jsonObject[CLTAP_AB_EXP_JSON_RESPONSE_KEY];// TODO remove this
+//                    experimentsJSON = jsonObject[CLTAP_AB_EXP_JSON_RESPONSE_KEY];// TODO remove this
                     if (experimentsJSON) {
                         NSMutableArray *experiments;
                         @try {
@@ -3710,6 +3710,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     if (_config.analyticsOnly) {
         CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Inbox unavailable", self);
+        self.inboxController = nil;
+        return;
+    }
+    if (sizeof(void*) == 4) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Inbox is not available on 32-bit Architecture", self);
         self.inboxController = nil;
         return;
     }

@@ -18,6 +18,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         self.setupImages()
         self.recordUserChargedEvent()
+        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             print("Experiments updated.")
       }

@@ -20,11 +20,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-      //  CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
 
-        
 //        [CleverTap setCredentialsWithAccountID:@"ZWW-WWW-WWRZ"
 //            andToken:@"000-001"];
         
@@ -33,6 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)
+        CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
         
         //CleverTap.sharedInstance(withCleverTapID: "Aditi09")
@@ -124,10 +124,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler(UIBackgroundFetchResult.noData)
     }
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
+//    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+//        NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
+//        return true
+//    }
+//
+//    func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
+//        print("%@: open  url: %@", self, url)
+//        return true
+//    }
+    
+    private func application(application: UIApplication, openURL url: NSURL,
+                     sourceApplication: String?, annotation: AnyObject) -> Bool {
+        CleverTap.sharedInstance()?.handleOpen(url as URL, sourceApplication: sourceApplication)
         return true
     }
+    
+    // Swift 3
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
+        return true
+    }
+    
+    func open(_ url: URL, options: [String : Any] = [:],
+              completionHandler completion: ((Bool) -> Swift.Void)? = nil) {
+        CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
+        completion?(false)
+    }
+    
+    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        return true
+    }
+  
     
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -150,7 +178,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-
 
 }
 
