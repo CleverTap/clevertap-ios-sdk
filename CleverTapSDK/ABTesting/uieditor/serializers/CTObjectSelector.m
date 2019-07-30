@@ -325,7 +325,7 @@
     } else if ([obj isKindOfClass:[UIView class]]) {
         NSArray *subviews = [[(UIView *)obj subviews] copy];
         for (NSObject *child in subviews) {
-            if (!class || [child isKindOfClass:class]) {
+            if (!class || [child isMemberOfClass:class]) {
                 [children addObject:child];
             }
         }
