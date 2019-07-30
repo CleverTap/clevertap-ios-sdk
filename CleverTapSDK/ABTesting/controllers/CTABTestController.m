@@ -21,7 +21,7 @@ static NSString * const kStartLoadingKey = @"CTConnectLoadingAnimation";
 static NSString * const kFinishLoadingKey = @"CTConnectFinishLoadingAnimation";
 //static NSString* const kDASHBOARD_DOMAIN = @"dashboard.clevertap.com";
 static NSString* const kDASHBOARD_DOMAIN = @"eu1-dashboard-staging-2.dashboard.clevertap.com";  // TODO
-//static NSString* const kDASHBOARD_DOMAIN = @"clevertaptech.ngrok.io";  // TODO
+// static NSString* const kDASHBOARD_DOMAIN = @"clevertaptech.ngrok.io";  // TODO
 
 typedef void (^CTABTestingOperationBlock)(void);
 
@@ -33,6 +33,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 @property (atomic, assign) BOOL sessionEnded;
 @property (atomic, strong) CTVarCache *varCache;
 @property (nonatomic, strong) NSSet *variants;
+@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 
 @end
 
@@ -70,6 +71,7 @@ typedef void (^CTABTestingOperationBlock)(void);
         _commandQueue.suspended = YES;
         _varCache = [[CTVarCache alloc] init];
         _variants = [NSSet set];
+        _deviceInfo = [delegate getDeviceInfo];
         [self addGestureRecognizer];
         [self _unarchiveVariantsSync:NO];
     }
@@ -335,7 +337,11 @@ typedef void (^CTABTestingOperationBlock)(void);
 #pragma mark - Handle Editor Messages
 
 - (void)sendHandshake {
-    NSDictionary *options = @{@"data": @{@"id":self.guid, @"name": [[UIDevice currentDevice] name], @"os": @"iOS"}};
+    NSMutableDictionary *_ops = [NSMutableDictionary dictionaryWithDictionary:@{@"id":self.guid, @"name": self.deviceInfo.deviceName, @"os": self.deviceInfo.osName}];
+    if (self.deviceInfo.library) {
+        _ops[@"library"] = self.deviceInfo.library;
+    }
+    NSDictionary *options = @{@"data": _ops};
     CTABTestEditorHandshakeMessage *editorMessage = [CTABTestEditorHandshakeMessage messageWithOptions:options];
     CTABTestingOperationBlock opBlock = ^{
         CTABTestEditorMessage *response = [editorMessage response];
@@ -471,7 +477,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     }
 
     if ([type isEqualToString:CTABTestEditorDeviceInfoMessageRequestType]) {
-        options[@"deviceInfo"] = [self.delegate getDeviceInfo];
+        options[@"deviceInfo"] = self.deviceInfo;
     }
     editorMessage = [_typeToMessagesMap[type] messageWithOptions:options];
     return editorMessage;
