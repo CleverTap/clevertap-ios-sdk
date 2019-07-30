@@ -1083,6 +1083,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (cc != nil && ![cc isEqualToString:@""]) {
         evtData[@"cc"] = cc;
     }
+
+    if (self.deviceInfo.library) {
+        evtData[@"lib"] = self.deviceInfo.library;
+    }
     return evtData;
 }
 
