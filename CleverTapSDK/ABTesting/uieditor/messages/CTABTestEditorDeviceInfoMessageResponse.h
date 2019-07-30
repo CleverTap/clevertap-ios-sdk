@@ -12,6 +12,7 @@
 @property (nonatomic, copy) NSString *deviceHeight;
 @property (nonatomic, copy) NSString *deviceWidth;
 @property (nonatomic, copy) NSString *bundleId;
+@property (nonatomic, copy) NSString *library;
 @property (nonatomic, copy) NSArray *availableFontFamilies;
 
 @end

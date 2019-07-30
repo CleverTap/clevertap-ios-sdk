@@ -3541,6 +3541,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark Admin
 
+- (void)setLibrary:(NSString *)name {
+    self.deviceInfo.library = name;
+}
+
 + (void)setDebugLevel:(int)level {
     [CTLogger setDebugLevel:level];
     if (_defaultInstanceConfig) {
@@ -4259,6 +4263,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #pragma mark CTABTestingDelegate
+
+- (CTDeviceInfo* _Nonnull)getDeviceInfo {
+    return self.deviceInfo;
+}
 
 - (void)abExperimentsDidUpdate {
     CleverTapLogInternal(self.config.logLevel, @"%@: AB Experiments did update", self);

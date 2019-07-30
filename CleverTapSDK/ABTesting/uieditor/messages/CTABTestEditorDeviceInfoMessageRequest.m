@@ -1,10 +1,16 @@
 #import <UIKit/UIKit.h>
 #import "CTInAppResources.h"
-#import "CleverTapBuildInfo.h"
+#import "CTDeviceInfo.h"
 #import "CTABTestEditorDeviceInfoMessageRequest.h"
 #import "CTABTestEditorDeviceInfoMessageResponse.h"
 
 NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_request";
+
+@interface CTABTestEditorDeviceInfoMessageRequest ()
+
+@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+
+@end
 
 @implementation CTABTestEditorDeviceInfoMessageRequest
 
@@ -12,32 +18,42 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
     return [[[self class] alloc] initWithType:CTABTestEditorDeviceInfoMessageRequestType];
 }
 
++ (instancetype)messageWithOptions:(NSDictionary *)options {
+    CTABTestEditorDeviceInfoMessageRequest *message = [CTABTestEditorDeviceInfoMessageRequest message];
+    message.deviceInfo = options[@"deviceInfo"];
+    return message;
+}
+
 - (CTABTestEditorMessage *)response {
     CTABTestEditorDeviceInfoMessageResponse *deviceInfoMessageResponse = [CTABTestEditorDeviceInfoMessageResponse messageWithOptions:nil];
-        UIDevice *currentDevice = [UIDevice currentDevice];
-        deviceInfoMessageResponse.sdkVersion = WR_SDK_REVISION;
-        deviceInfoMessageResponse.appBuild = [[NSBundle mainBundle] infoDictionary][@"CFBundleVersion"];
-        deviceInfoMessageResponse.appVersion = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
-        deviceInfoMessageResponse.bundleId = [NSBundle mainBundle].infoDictionary[@"CFBundleIdentifier"];
-        deviceInfoMessageResponse.systemVersion = currentDevice.systemVersion;
-        deviceInfoMessageResponse.systemName = currentDevice.systemName;
-        deviceInfoMessageResponse.deviceName = currentDevice.name;
-        deviceInfoMessageResponse.deviceModel = currentDevice.model;
-    
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
-            BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
-            if  (landscape) {
-                deviceInfoMessageResponse.deviceWidth = [self deviceHeight];
-                deviceInfoMessageResponse.deviceHeight = [self deviceWidth];
-            } else {
-                deviceInfoMessageResponse.deviceWidth = [self deviceWidth];
-                deviceInfoMessageResponse.deviceHeight = [self deviceHeight];
-            }
-        });
-    
-        deviceInfoMessageResponse.availableFontFamilies = [self availableFontFamilies];
-        return deviceInfoMessageResponse;
+
+    deviceInfoMessageResponse.sdkVersion = self.deviceInfo.sdkVersion;
+    deviceInfoMessageResponse.appBuild = self.deviceInfo.appBuild;
+    deviceInfoMessageResponse.appVersion = self.deviceInfo.appVersion;
+    deviceInfoMessageResponse.bundleId = self.deviceInfo.bundleId;
+    deviceInfoMessageResponse.systemVersion = self.deviceInfo.osVersion;
+    deviceInfoMessageResponse.systemName = self.deviceInfo.osName;
+    deviceInfoMessageResponse.deviceName = self.deviceInfo.deviceName;
+    deviceInfoMessageResponse.deviceModel = self.deviceInfo.model;
+
+    if (self.deviceInfo.library) {
+        deviceInfoMessageResponse.library = self.deviceInfo.library;
+    }
+
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+        BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+        if  (landscape) {
+            deviceInfoMessageResponse.deviceWidth = [self deviceHeight];
+            deviceInfoMessageResponse.deviceHeight = [self deviceWidth];
+        } else {
+            deviceInfoMessageResponse.deviceWidth = [self deviceWidth];
+            deviceInfoMessageResponse.deviceHeight = [self deviceHeight];
+        }
+    });
+
+    deviceInfoMessageResponse.availableFontFamilies = [self availableFontFamilies];
+    return deviceInfoMessageResponse;
 }
 
 - (NSArray *)availableFontFamilies {

@@ -88,6 +88,14 @@ NSString *const CTABTestEditorDeviceInfoMessageResponseType = @"device_info_resp
     [self setDataObject:bundleId forKey:@"bundle_id"];
 }
 
+- (NSString *)library {
+    return [self dataObjectForKey:@"library"];
+}
+
+- (void)setLibrary:(NSString *)library {
+    [self setDataObject:library forKey:@"library"];
+}
+
 - (NSArray *)availableFontFamilies {
     return [self dataObjectForKey:@"available_font_families"];
 }

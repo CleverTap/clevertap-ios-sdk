@@ -42,6 +42,7 @@ static NSString *_timeZone;
 static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
+static NSString *_deviceName;
 static BOOL _wifi;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
@@ -442,6 +443,13 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         _deviceHeight = [NSString stringWithFormat:@"%.2f", [CTUtils toTwoPlaces:rHeight]];
     }
     return _deviceHeight;
+}
+
+- (NSString*)deviceName {
+    if (!_deviceName) {
+        _deviceName = [UIDevice currentDevice].name;
+    }
+    return _deviceName;
 }
 
 - (NSString*)carrier {

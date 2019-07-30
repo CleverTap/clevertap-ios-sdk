@@ -1075,6 +1075,8 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 + (CleverTapLogLevel)getDebugLevel;
 
+- (void)setLibrary:(NSString * _Nonnull)name;
+
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
  */

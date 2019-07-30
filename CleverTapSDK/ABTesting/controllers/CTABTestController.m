@@ -469,6 +469,10 @@ typedef void (^CTABTestingOperationBlock)(void);
     if ([type isEqualToString:CTABTestEditorVarsMessageRequestType]) {
         options[@"vars"] = [self.varCache serializeVars];
     }
+
+    if ([type isEqualToString:CTABTestEditorDeviceInfoMessageRequestType]) {
+        options[@"deviceInfo"] = [self.delegate getDeviceInfo];
+    }
     editorMessage = [_typeToMessagesMap[type] messageWithOptions:options];
     return editorMessage;
 }

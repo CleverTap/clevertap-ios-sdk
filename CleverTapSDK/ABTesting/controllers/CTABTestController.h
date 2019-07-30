@@ -1,10 +1,12 @@
 
 #import <Foundation/Foundation.h>
 #import "CTABVariant.h"
+#import "CTDeviceInfo.h"
 
 @protocol CTABTestingDelegate <NSObject>
 @required
 - (void)abExperimentsDidUpdate;
+- (CTDeviceInfo* _Nonnull)getDeviceInfo;
 
 @end
 
