@@ -9,21 +9,20 @@
 /* Begin PBXBuildFile section */
 		0702338122C9F8F900D39F42 /* experiment.json in Resources */ = {isa = PBXBuildFile; fileRef = 0702338022C9F8F900D39F42 /* experiment.json */; };
 		0718D66622D33919008E9AE2 /* ImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0718D66522D33919008E9AE2 /* ImageVC.swift */; };
-		072F74A922BB94DC00E4D2E1 /* change_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 072F74A822BB94DC00E4D2E1 /* change_request.json */; };
 		0737582D22EC21E6006E4BBF /* ModalVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0737582C22EC21E6006E4BBF /* ModalVC.swift */; };
 		0737589A22ECB699006E4BBF /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0737589922ECB699006E4BBF /* CustomButton.swift */; };
-		0762655222B7833B00AC2CAC /* device_info_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 0762655122B7833B00AC2CAC /* device_info_request.json */; };
+		075F670722F2C63D00B040E6 /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670622F2C63D00B040E6 /* ProfileVC.swift */; };
+		075F670922F2C65A00B040E6 /* BookVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670822F2C65A00B040E6 /* BookVC.swift */; };
+		075F670B22F2CEDC00B040E6 /* WareHouseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670A22F2CEDC00B040E6 /* WareHouseVC.swift */; };
+		075F670D22F2FA7F00B040E6 /* CustomLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670C22F2FA7F00B040E6 /* CustomLabel.swift */; };
 		0790386322DF0295003AEC0A /* TestTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0790386222DF0295003AEC0A /* TestTableView.swift */; };
 		07B8758022E9906000328982 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D0494121E9819000B34B17 /* SDWebImage.framework */; };
 		07B8758122E9906000328982 /* SDWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D0D0494121E9819000B34B17 /* SDWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		07BD0FDB22B7A75000378DBB /* snapshot_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 07BD0FDA22B7A75000378DBB /* snapshot_request.json */; };
 		07DB229D22CC8CC800E6492D /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07DB229C22CC8CC800E6492D /* TableView.swift */; };
 		07DB229F22CC8D0E00E6492D /* Meal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07DB229E22CC8D0E00E6492D /* Meal.swift */; };
 		07DB22A122CC8EB100E6492D /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07DB22A022CC8EB100E6492D /* TableViewCell.swift */; };
 		07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */; };
-		07EE53CE22BEE1C9009EBC12 /* vars_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 07EE53CD22BEE1C9009EBC12 /* vars_request.json */; };
 		07EE53D222C0EA62009EBC12 /* ScreenABTestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */; };
-		07F5A3E622C6079300C719BE /* clear_request.json in Resources */ = {isa = PBXBuildFile; fileRef = 07F5A3E522C6079300C719BE /* clear_request.json */; };
 		D014B8A320E2F20B001E0780 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D014B8A220E2F20B001E0780 /* NotificationService.m */; };
 		D014B8A720E2F20B001E0780 /* testNotifServiceExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D014B8AC20E2F216001E0780 /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; };
@@ -112,19 +111,18 @@
 /* Begin PBXFileReference section */
 		0702338022C9F8F900D39F42 /* experiment.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = experiment.json; sourceTree = "<group>"; };
 		0718D66522D33919008E9AE2 /* ImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageVC.swift; sourceTree = "<group>"; };
-		072F74A822BB94DC00E4D2E1 /* change_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = change_request.json; sourceTree = "<group>"; };
 		0737582C22EC21E6006E4BBF /* ModalVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalVC.swift; sourceTree = "<group>"; };
 		0737589922ECB699006E4BBF /* CustomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
-		0762655122B7833B00AC2CAC /* device_info_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = device_info_request.json; sourceTree = "<group>"; };
+		075F670622F2C63D00B040E6 /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
+		075F670822F2C65A00B040E6 /* BookVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookVC.swift; sourceTree = "<group>"; };
+		075F670A22F2CEDC00B040E6 /* WareHouseVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WareHouseVC.swift; sourceTree = "<group>"; };
+		075F670C22F2FA7F00B040E6 /* CustomLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomLabel.swift; sourceTree = "<group>"; };
 		0790386222DF0295003AEC0A /* TestTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestTableView.swift; sourceTree = "<group>"; };
-		07BD0FDA22B7A75000378DBB /* snapshot_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = snapshot_request.json; sourceTree = "<group>"; };
 		07DB229C22CC8CC800E6492D /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		07DB229E22CC8D0E00E6492D /* Meal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meal.swift; sourceTree = "<group>"; };
 		07DB22A022CC8EB100E6492D /* TableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 		07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
-		07EE53CD22BEE1C9009EBC12 /* vars_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vars_request.json; sourceTree = "<group>"; };
 		07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenABTestVC.swift; sourceTree = "<group>"; };
-		07F5A3E522C6079300C719BE /* clear_request.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = clear_request.json; sourceTree = "<group>"; };
 		D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = testNotifServiceExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D014B8A120E2F20B001E0780 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		D014B8A220E2F20B001E0780 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
@@ -275,6 +273,7 @@
 				D0596EFC208BDC6800A80753 /* CleverTapSDKTest.entitlements */,
 				D0A66246207EE4FF00B403F3 /* AppDelegate.swift */,
 				0737589922ECB699006E4BBF /* CustomButton.swift */,
+				075F670C22F2FA7F00B040E6 /* CustomLabel.swift */,
 				D0A66248207EE4FF00B403F3 /* ViewController.swift */,
 				07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */,
 				0737582C22EC21E6006E4BBF /* ModalVC.swift */,
@@ -283,14 +282,12 @@
 				07DB229C22CC8CC800E6492D /* TableView.swift */,
 				0718D66522D33919008E9AE2 /* ImageVC.swift */,
 				0790386222DF0295003AEC0A /* TestTableView.swift */,
+				075F670622F2C63D00B040E6 /* ProfileVC.swift */,
+				075F670822F2C65A00B040E6 /* BookVC.swift */,
+				075F670A22F2CEDC00B040E6 /* WareHouseVC.swift */,
 				D0A6624A207EE4FF00B403F3 /* Main.storyboard */,
 				D0A6624D207EE50000B403F3 /* Assets.xcassets */,
 				D0A66252207EE50000B403F3 /* Info.plist */,
-				07BD0FDA22B7A75000378DBB /* snapshot_request.json */,
-				0762655122B7833B00AC2CAC /* device_info_request.json */,
-				072F74A822BB94DC00E4D2E1 /* change_request.json */,
-				07EE53CD22BEE1C9009EBC12 /* vars_request.json */,
-				07F5A3E522C6079300C719BE /* clear_request.json */,
 				0702338022C9F8F900D39F42 /* experiment.json */,
 			);
 			path = CleverTapSDKTest;
@@ -511,14 +508,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				0702338122C9F8F900D39F42 /* experiment.json in Resources */,
-				072F74A922BB94DC00E4D2E1 /* change_request.json in Resources */,
-				07F5A3E622C6079300C719BE /* clear_request.json in Resources */,
-				07BD0FDB22B7A75000378DBB /* snapshot_request.json in Resources */,
 				D0A6624E207EE50000B403F3 /* Assets.xcassets in Resources */,
-				07EE53CE22BEE1C9009EBC12 /* vars_request.json in Resources */,
 				D0A6624C207EE4FF00B403F3 /* Main.storyboard in Resources */,
 				07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */,
-				0762655222B7833B00AC2CAC /* device_info_request.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -565,12 +557,16 @@
 				07DB229F22CC8D0E00E6492D /* Meal.swift in Sources */,
 				0790386322DF0295003AEC0A /* TestTableView.swift in Sources */,
 				D0A66249207EE4FF00B403F3 /* ViewController.swift in Sources */,
+				075F670D22F2FA7F00B040E6 /* CustomLabel.swift in Sources */,
 				0718D66622D33919008E9AE2 /* ImageVC.swift in Sources */,
 				0737589A22ECB699006E4BBF /* CustomButton.swift in Sources */,
 				07DB229D22CC8CC800E6492D /* TableView.swift in Sources */,
 				07DB22A122CC8EB100E6492D /* TableViewCell.swift in Sources */,
+				075F670B22F2CEDC00B040E6 /* WareHouseVC.swift in Sources */,
+				075F670922F2C65A00B040E6 /* BookVC.swift in Sources */,
 				07EE53D222C0EA62009EBC12 /* ScreenABTestVC.swift in Sources */,
 				0737582D22EC21E6006E4BBF /* ModalVC.swift in Sources */,
+				075F670722F2C63D00B040E6 /* ProfileVC.swift in Sources */,
 				D0A66247207EE4FF00B403F3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

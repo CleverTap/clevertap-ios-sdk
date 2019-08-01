@@ -16,9 +16,9 @@ import CleverTapSDK
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
 //        [CleverTap setCredentialsWithAccountID:@"ZWW-WWW-WWRZ"
 //            andToken:@"000-001"];
         
@@ -28,7 +28,6 @@ import CleverTapSDK
         CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
-        
         
         //CleverTap.sharedInstance(withCleverTapID: "Aditi09")
         //CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])

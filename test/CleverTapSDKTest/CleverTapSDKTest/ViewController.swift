@@ -7,6 +7,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: CustomButton!
+    @IBOutlet var customButton: CustomButton!
+
     var webView: WKWebView!
     var imageArray = [UIImage]()
     @IBOutlet var scrollView: UIScrollView!
