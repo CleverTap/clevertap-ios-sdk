@@ -29,9 +29,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         // addWebview()
         profilePush()
         guard let foo = CleverTap.sharedInstance()?.getStringVariable(withName: "foo", defaultValue: "defaultFooValue") else {return}
-        guard let inttt = CleverTap.sharedInstance()?.getIntegerVariable(withName: "intFoo", defaultValue: 12) else {return}
+        guard let int = CleverTap.sharedInstance()?.getIntegerVariable(withName: "intFoo", defaultValue: 12) else {return}
         print(foo)
-        print(inttt)
+        print(int)
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)

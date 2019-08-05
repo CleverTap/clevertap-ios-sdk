@@ -632,6 +632,9 @@
                                     <constraint firstAttribute="height" constant="44" id="DNu-d5-3Nl"/>
                                 </constraints>
                                 <state key="normal" title="App Inbox"/>
+                                <connections>
+                                    <action selector="appInboxTapped" destination="G3O-G6-Yp0" eventType="touchUpInside" id="S75-OF-PgX"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="d4M-RR-r2R">
                                 <rect key="frame" x="44" y="198" width="287" height="44"/>

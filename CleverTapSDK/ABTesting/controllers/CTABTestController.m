@@ -298,7 +298,9 @@ typedef void (^CTABTestingOperationBlock)(void);
     
     for (id variantData in experiments) {
         CTABVariant *parseVariant = [CTABVariant variantWithData:variantData];
-        [parsed addObject:parseVariant];
+        if (parseVariant) {
+           [parsed addObject:parseVariant];
+        }
     }
     
     // TODO test all this variant updating logic

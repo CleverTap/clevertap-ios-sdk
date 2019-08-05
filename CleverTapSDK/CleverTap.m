@@ -2661,15 +2661,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 
 #if !CLEVERTAP_NO_AB_SUPPORT
                 if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
-                    // TODO: remove this
-                    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"experiment" ofType:@"json"];  // TODO remove
-                    NSData *jsonDataTest = [NSData dataWithContentsOfFile:filePath
-                                                                  options:NSDataReadingMappedIfSafe error:nil]; // TODO remove
-                    NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:jsonDataTest
-                                                                               options:(NSJSONReadingOptions)0 error:nil]; // TODO remove
-                    
                     NSArray *experimentsJSON = jsonResp[CLTAP_AB_EXP_JSON_RESPONSE_KEY];
-                    experimentsJSON = jsonObject[CLTAP_AB_EXP_JSON_RESPONSE_KEY];// TODO remove this
                     if (experimentsJSON) {
                         NSMutableArray *experiments;
                         @try {
