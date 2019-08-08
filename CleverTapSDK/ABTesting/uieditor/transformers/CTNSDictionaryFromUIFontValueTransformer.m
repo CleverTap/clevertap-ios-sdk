@@ -24,7 +24,12 @@
 
 - (id)reverseTransformedValue:(id)value {
     if ([value isKindOfClass:[NSDictionary class]]) {
-        NSNumber *pointSize = value[@"pointSize"];
+        NSNumber *pointSize;
+        if (![value[@"pointSize"] isKindOfClass:[NSNull class]]) {
+            pointSize = value[@"pointSize"];
+        } else {
+            pointSize = [NSNumber numberWithInteger:1];
+        }
         NSString *fontName = value[@"fontName"];
         float fontSize = [pointSize floatValue];
         

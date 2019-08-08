@@ -3463,6 +3463,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (BOOL)isCleverTapNotification:(NSDictionary *)payload {
+    // TODO: Testing after removing App Extension
     if ([[self class] runningInsideAppExtension]){
         CleverTapLogDebug(self.config.logLevel, @"%@: isCleverTapNotification is a no-op in an app extension.", self);
         return NO;
