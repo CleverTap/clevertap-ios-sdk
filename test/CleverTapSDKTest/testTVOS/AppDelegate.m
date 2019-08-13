@@ -20,9 +20,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    [CleverTap setDebugLevel:CleverTapLogDebug+1];
+    [CleverTap setDebugLevel:CleverTapLogDebug+2];
     [CleverTap autoIntegrate];
-//    [[CleverTap sharedInstance] recordEvent:@"testEventFromTVOS"];
+    [[CleverTap sharedInstance] recordEvent:@"testEventFromTVOS"];
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge)
                           completionHandler:^(BOOL granted, NSError * _Nullable error) {

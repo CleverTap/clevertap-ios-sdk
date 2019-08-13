@@ -10,8 +10,8 @@ class CustomView: UIView {
     }
     */
     
-    override func didMoveToWindow() {
-         super.didMoveToWindow()
-    }
+//    override func didMoveToWindow() {
+//         super.didMoveToWindow()
+//    }
 
 }
