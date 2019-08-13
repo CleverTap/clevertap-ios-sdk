@@ -307,28 +307,28 @@ static NSMapTable *originalCache;
         }
         self.name = name;
         
-        if (!swizzleClass) {
-            swizzleClass = [path selectedClass];
-        }
+        swizzleClass = swizzleClass != nil ? swizzleClass : [path selectedClass];
+        
         if (!swizzleClass) {
             swizzleClass = [UIView class];
+            CleverTapLogStaticDebug(@"%@: Unable to determine swizzleClass setting to UIView as the default", self);
         }
         self.swizzleClass = swizzleClass;
         
         if (!swizzleSelector) {
-            BOOL shouldUseLayoutSubviews = NO;
-            NSArray *classesToUseLayoutSubviews = @[[UITableViewCell class], [UINavigationBar class]];
-            for (Class klass in classesToUseLayoutSubviews) {
-                if ([self.swizzleClass isSubclassOfClass:klass] ||
-                    [self.objPath pathContainsObjectOfClass:klass]) {
-                    shouldUseLayoutSubviews = YES;
-                    break;
-                }
-            }
-            if (shouldUseLayoutSubviews) {
-                swizzleSelector = NSSelectorFromString(@"layoutSubviews");
+            if ([self.swizzleClass isSubclassOfClass:[UIViewController class]]) {
+                 swizzleSelector = NSSelectorFromString(@"viewDidLoad");
             } else {
-                swizzleSelector = NSSelectorFromString(@"didMoveToWindow");
+                BOOL shouldUseLayoutSubviews = NO;
+                NSArray *classesToUseLayoutSubviews = @[[UITableViewCell class], [UINavigationBar class]];
+                for (Class klass in classesToUseLayoutSubviews) {
+                    if ([self.swizzleClass isSubclassOfClass:klass] ||
+                        [self.objPath pathContainsObjectOfClass:klass]) {
+                        shouldUseLayoutSubviews = YES;
+                        break;
+                    }
+                }
+                swizzleSelector = NSSelectorFromString((shouldUseLayoutSubviews) ? @"layoutSubviews" : @"didMoveToWindow");
             }
         }
         self.swizzleSelector = swizzleSelector;
@@ -523,7 +523,10 @@ static NSMapTable *originalCache;
 
 + (NSArray *)executeSelector:(SEL)selector withArgs:(NSArray *)args onObjects:(NSArray *)objects {
     NSMutableArray *invocations = [NSMutableArray array];
-    for (NSObject *o in objects) {
+    for (__strong NSObject *o in objects) {
+        if ([o isKindOfClass:[UIViewController class]]) {
+            o = ((UIViewController*)o).view;
+        }
         NSMethodSignature *signature = [o methodSignatureForSelector:selector];
         if (signature != nil) {
             NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];

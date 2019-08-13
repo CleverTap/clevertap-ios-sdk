@@ -97,7 +97,12 @@
 
 - (BOOL)isLeafSelected:(id)leaf fromRoot:(id)root evaluatingFinalPredicate:(BOOL)finalPredicate {
     BOOL isSelected = YES;
-    NSArray *views = @[leaf];
+    
+    id view = leaf;
+    if ([leaf isKindOfClass:[UIViewController class]]) {
+        view = ((UIViewController*)leaf).view;
+    }
+    NSArray *views = @[view];
     NSUInteger n = _filters.count, i = n;
     while (i--) {
         CTObjectFilter *filter = _filters[i];
@@ -165,6 +170,11 @@
 - (Class)selectedClass {
     CTObjectFilter *filter = _filters.lastObject;
     if (filter) {
+        // TODO remove this once we start sending the viewController as the swizzleClass if we are editing its view directly from the Dashboard
+        if (_filters.count == 2 && [filter.name isEqualToString:@"UIView"]) {
+            filter = _filters.firstObject;
+        }
+        // END remove
         return NSClassFromString(filter.name);
     }
     return nil;
