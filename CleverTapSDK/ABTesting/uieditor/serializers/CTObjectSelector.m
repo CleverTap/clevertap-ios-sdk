@@ -167,14 +167,17 @@
     return filter;
 }
 
+- (Class)getRootViewControllerClass {
+    CTObjectFilter *filter = _filters.firstObject;
+    if (filter && [NSClassFromString(filter.name) isSubclassOfClass:[UIViewController class]]) {
+        return NSClassFromString(filter.name);
+    }
+    return nil;
+}
+
 - (Class)selectedClass {
     CTObjectFilter *filter = _filters.lastObject;
     if (filter) {
-        // TODO remove this once we start sending the viewController as the swizzleClass if we are editing its view directly from the Dashboard
-        if (_filters.count == 2 && [filter.name isEqualToString:@"UIView"]) {
-            filter = _filters.firstObject;
-        }
-        // END remove
         return NSClassFromString(filter.name);
     }
     return nil;
@@ -258,7 +261,7 @@
 }
 
 - (BOOL)appliesTo:(NSObject *)view {
-    return (([self.name isEqualToString:@"*"] || [view isKindOfClass:NSClassFromString(self.name)])
+   return (([self.name isEqualToString:@"*"] || [view isKindOfClass:NSClassFromString(self.name)])
             && (self.nameOnly || (
                                   (!self.predicate || [_predicate evaluateWithObject:view])
                                   && (!self.index || [self isView:view siblingNumber:_index.integerValue])

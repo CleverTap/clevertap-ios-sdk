@@ -14,6 +14,7 @@
 - (BOOL)fuzzyIsLeafSelected:(id)leaf fromRoot:(id)root;
 
 - (Class)selectedClass;
+- (Class)getRootViewControllerClass;
 - (BOOL)pathContainsObjectOfClass:(Class)klass;
 - (NSString *)description;
 
