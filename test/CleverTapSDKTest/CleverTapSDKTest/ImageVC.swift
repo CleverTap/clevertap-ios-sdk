@@ -1,11 +1,3 @@
-//
-//  ImageVC.swift
-//  CleverTapSDKTest
-//
-//  Created by Aditi Agrawal on 08/07/19.
-//  Copyright © 2019 Peter Wilkniss. All rights reserved.
-//
-
 import UIKit
 
 class ImageVC: UIViewController {

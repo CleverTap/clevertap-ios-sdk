@@ -6,10 +6,8 @@ class TestTableView: UIViewController, UITableViewDelegate, UITableViewDataSourc
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         tableData = ["Egg Benedict", "Mushroom Risotto", "Full Breakfast", "Hamburger", "Ham and Egg Sandwich", "Creme Brelee", "White Chocolate Donut", "Starbucks Coffee", "Vegetable Curry", "Instant Noodle with Egg", "Noodle with BBQ Pork"]
 
-        // Do any additional setup after loading the view.
     }
 
     

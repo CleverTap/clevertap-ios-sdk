@@ -308,14 +308,15 @@ static NSMapTable *originalCache;
         self.name = name;
         
         swizzleClass = swizzleClass != nil ? swizzleClass : [path getRootViewControllerClass];
-        
+                
         if ([NSStringFromClass(swizzleClass) isEqualToString:@"UIViewController"]) {
             swizzleClass = nil;
-            CleverTapLogStaticDebug(@"%@: Failed to set UIViewController as swizzle class, currently not supported", self);
+            CleverTapLogStaticDebug(@"%@: Failed to set UIViewController as swizzle class for object path: %@, currently not supported", self, self.objPath);
+            return nil;
         }
         if (!swizzleClass) {
-            CleverTapLogStaticDebug(@"%@: Unable to determine swizzleClass for object path :%@ therefore not initialing the variant action", self, self.objPath);
-            return nil;
+            swizzleClass = [UIView class];
+            CleverTapLogStaticDebug(@"%@: Unable to determine swizzleClass setting to UIView as the default", self);
         }
         self.swizzleClass = swizzleClass;
         
