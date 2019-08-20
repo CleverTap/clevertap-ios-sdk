@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ZvB-QJ-r07">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="O1A-LH-5Ur">
     <device id="retina5_9" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -963,7 +963,7 @@
                                     <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
                                 </state>
                                 <connections>
-                                    <segue destination="34v-j0-E2B" kind="show" id="NCI-Q4-CHQ"/>
+                                    <segue destination="34v-j0-E2B" kind="showDetail" id="NCI-Q4-CHQ"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -1249,12 +1249,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GlR-ur-l0x" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="878" y="766"/>
+            <point key="canvasLocation" x="932" y="770"/>
         </scene>
-        <!--View Controller-->
+        <!--ViewsVC-->
         <scene sceneID="s4w-So-E4X">
             <objects>
-                <viewController id="hz2-dZ-1TA" sceneMemberID="viewController">
+                <viewController id="hz2-dZ-1TA" customClass="ViewsVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="0AP-MH-nhq">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1360,12 +1360,12 @@
             </objects>
             <point key="canvasLocation" x="-847" y="1750"/>
         </scene>
-        <!--View Controller-->
+        <!--Image DetailVC-->
         <scene sceneID="ls8-Z4-iQ5">
             <objects>
-                <viewController id="34v-j0-E2B" sceneMemberID="viewController">
+                <viewController id="34v-j0-E2B" customClass="ImageDetailVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="2od-8s-m3b">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="meal1" translatesAutoresizingMaskIntoConstraints="NO" id="MqW-7V-kJ2">
@@ -1376,6 +1376,14 @@
                                 <rect key="frame" x="68" y="428" width="240" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jyw-N1-MYd">
+                                <rect key="frame" x="106" y="91" width="202" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="dissmissController" destination="34v-j0-E2B" eventType="touchUpInside" id="vUz-4k-h53"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="m9p-20-sS2"/>
@@ -1383,7 +1391,45 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="T7A-9F-nA4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2974" y="797"/>
+            <point key="canvasLocation" x="2973.5999999999999" y="796.55172413793105"/>
+        </scene>
+        <!--ModalVC-->
+        <scene sceneID="skQ-Xd-HEA">
+            <objects>
+                <viewController id="F7x-qF-xFF" customClass="ModalVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8kj-iy-nUK">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9gT-Qj-8zr">
+                                <rect key="frame" x="79" y="126" width="73" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qeB-Q7-vFF">
+                                <rect key="frame" x="67" y="486" width="240" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eqd-PT-WAC">
+                                <rect key="frame" x="68" y="304" width="240" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sA0-yn-dUX">
+                                <rect key="frame" x="214" y="126" width="83" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="TTz-tB-CYE"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Rc2-m0-tz5"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="rpM-4F-lmp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="932" y="-682"/>
         </scene>
     </scenes>
     <resources>

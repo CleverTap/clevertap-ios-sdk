@@ -314,6 +314,7 @@ static NSMapTable *originalCache;
             CleverTapLogStaticDebug(@"%@: Failed to set UIViewController as swizzle class for object path: %@, currently not supported", self, self.objPath);
             return nil;
         }
+        // TODO: should fallback to UIView or not
         if (!swizzleClass) {
             swizzleClass = [UIView class];
             CleverTapLogStaticDebug(@"%@: Unable to determine swizzleClass setting to UIView as the default", self);
@@ -322,7 +323,7 @@ static NSMapTable *originalCache;
         
         if (!swizzleSelector) {
             if ([self.swizzleClass isSubclassOfClass:[UIViewController class]]) {
-                 swizzleSelector = NSSelectorFromString(@"viewDidLoad");
+                 swizzleSelector = NSSelectorFromString(@"viewDidLayoutSubviews");
             } else {
                 BOOL shouldUseLayoutSubviews = NO;
                 NSArray *classesToUseLayoutSubviews = @[[UITableViewCell class], [UINavigationBar class]];
