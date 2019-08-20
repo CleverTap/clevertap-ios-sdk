@@ -312,12 +312,10 @@ static NSMapTable *originalCache;
         if ([NSStringFromClass(swizzleClass) isEqualToString:@"UIViewController"]) {
             swizzleClass = nil;
             CleverTapLogStaticDebug(@"%@: Failed to set UIViewController as swizzle class for object path: %@, currently not supported", self, self.objPath);
-            return nil;
         }
-        // TODO: should fallback to UIView or not
         if (!swizzleClass) {
-            swizzleClass = [UIView class];
-            CleverTapLogStaticDebug(@"%@: Unable to determine swizzleClass setting to UIView as the default", self);
+            CleverTapLogStaticDebug(@"%@: Unable to determine swizzleClass for object path: %@ therefore not initialing the variant action", self, self.objPath);
+            return nil;
         }
         self.swizzleClass = swizzleClass;
         
@@ -411,7 +409,6 @@ static NSMapTable *originalCache;
     void (^executeBlock)(id, SEL) = ^(id view, SEL command) {
         [[self class] runSyncMainQueue:^{
             if (self.cacheOriginal || self.swizzle) {
-                id obj = [[[self.objPath selectedClass] alloc] init];
                 [self cacheOriginalImage:nil];
             }
             NSArray *invocations = [[self class] executeSelector:self.selector

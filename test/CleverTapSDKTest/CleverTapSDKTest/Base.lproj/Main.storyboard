@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="O1A-LH-5Ur">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="7Zk-KZ-v5m">
     <device id="retina5_9" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -1251,10 +1251,10 @@
             </objects>
             <point key="canvasLocation" x="932" y="770"/>
         </scene>
-        <!--ViewsVC-->
+        <!--View Controller-->
         <scene sceneID="s4w-So-E4X">
             <objects>
-                <viewController id="hz2-dZ-1TA" customClass="ViewsVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="hz2-dZ-1TA" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="0AP-MH-nhq">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
