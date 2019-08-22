@@ -64,13 +64,13 @@
         
         switch (self.type) {
             case CTVarTypeBool:
-                _numberValue = [NSNumber numberWithDouble:[_stringValue doubleValue]];
+                _numberValue = [NSNumber numberWithBool:[_stringValue boolValue]];
                 break;
             case CTVarTypeDouble:
                 _numberValue = [NSNumber numberWithDouble:[_stringValue doubleValue]];
                 break;
             case CTVarTypeInteger:
-                _numberValue = [NSNumber numberWithDouble:[_stringValue doubleValue]];
+                _numberValue = [NSNumber numberWithInteger:[_stringValue integerValue]];
                 break;
             case CTVarTypeString:
                 // no-op already have stringValue set
@@ -143,7 +143,7 @@
         id response = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
         if (response && [response isKindOfClass:[NSDictionary class]]) {
             tempDict = [response copy];
-            for (id value in tempDict) {
+            for (id value in tempDict.allValues) {
                 if (self.type == CTVarTypeDictionaryOfString) {
                     if (![value isKindOfClass:[NSString class]]){
                         CleverTapLogStaticInternal(@"%@: Failed to parse the dictionary value, invalid value provided: %@", self, stringValue);

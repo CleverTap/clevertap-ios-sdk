@@ -10,13 +10,13 @@ class WareHouseVC: UIViewController {
     
     func registerCTInbox() {
         CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+//            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+//            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
         }))
         
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+//            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+//            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
         }))
     }
     

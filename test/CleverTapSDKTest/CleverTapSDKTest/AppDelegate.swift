@@ -6,6 +6,7 @@ import CleverTapSDK
     class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, CleverTapInAppNotificationDelegate, CleverTapSyncDelegate {
 
     var window: UIWindow?
+    var orientationLock = UIInterfaceOrientationMask.portrait
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
@@ -16,13 +17,12 @@ import CleverTapSDK
             // Fallback on earlier versions
         };
         
-         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-//        CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
+//         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
 //        [CleverTap setCredentialsWithAccountID:@"ZWW-WWW-WWRZ"
 //            andToken:@"000-001"];
-//
 //        CleverTap.setCredentialsWithAccountID("WWW-WWW-WWRZ", andToken: "000-000")
         CleverTap.setUIEditorConnectionEnabled(true)
 
@@ -157,6 +157,22 @@ import CleverTapSDK
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-
+    
+//    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+//        return self.orientationLock
+//    }
+//    
+//    struct AppUtility {
+//        static func lockOrientation(_ orientation: UIInterfaceOrientationMask) {
+//            if let delegate = UIApplication.shared.delegate as? AppDelegate {
+//                delegate.orientationLock = orientation
+//            }
+//        }
+//        
+//        static func lockOrientation(_ orientation: UIInterfaceOrientationMask, andRotateTo rotateOrientation:UIInterfaceOrientation) {
+//            self.lockOrientation(orientation)
+//            UIDevice.current.setValue(rotateOrientation.rawValue, forKey: "orientation")
+//        }
+//    }
 }
 

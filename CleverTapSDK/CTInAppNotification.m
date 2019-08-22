@@ -180,10 +180,10 @@
         case CTInAppTypeCoverImage:
         case CTInAppTypeInterstitialImage:
         case CTInAppTypeHalfInterstitialImage:
-              if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
-                  self.error = [NSString stringWithFormat:@"wrong media type for template"];
-              }
-           break;
+            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
+                self.error = [NSString stringWithFormat:@"wrong media type for template"];
+            }
+            break;
         case CTInAppTypeCover:
         case CTInAppTypeHalfInterstitial:
             if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){

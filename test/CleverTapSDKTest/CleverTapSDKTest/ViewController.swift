@@ -129,41 +129,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     }
     
     func profilePush() {
-        
-        // each of the below mentioned fields are optional
-        // if set, these populate demographic information in the Dashboard
   
         let profile: Dictionary<String, AnyObject> = [
-            "Name": "Jack Montana" as AnyObject,                 // String
-            "Identity": 61026032 as AnyObject,                   // String or number
-            "Email": "jack@gmail.com" as AnyObject,              // Email address of the user
-            "Phone": "+14155551234" as AnyObject,                // Phone (with the country code, starting with +)
-            "Gender": "M" as AnyObject,                          // Can be either M or F
-            "Employed": "Y" as AnyObject,                        // Can be either Y or N
-            "Education": "Graduate" as AnyObject,                // Can be either School, College or Graduate
-            "Married": "Y" as AnyObject,                         // Can be either Y or N
-            "DOB": "10/09" as AnyObject,                              // Date of Birth. An NSDate object
-            "Age": 28 as AnyObject,                              // Not required if DOB is set
-            "Tz":"Asia/Kolkata" as AnyObject,                    //an abbreviation such as "PST", a full name such as "America/Los_Angeles",
-            //or a custom ID such as "GMT-8:00"
-            "Photo": "www.foobar.com/image.jpeg" as AnyObject,   // URL to the Image
-            
-            // optional fields. controls whether the user will be sent email, push etc.
-            "MSG-email": false as AnyObject,                     // Disable email notifications
-            "MSG-push": true as AnyObject,                       // Enable push notifications
-            "MSG-sms": false as AnyObject                      // Disable SMS notifications
+            "Name": "iPhone 7" as AnyObject,
+            "Email": "agrawaladiti@clevertap.com" as AnyObject
         ]
         
         CleverTap.sharedInstance()?.profilePush(profile)
-        
-        // To set a multi-value property
-        CleverTap.sharedInstance()?.profileSetMultiValues(["bag", "shoes"], forKey: "myStuff")
-        
-        // To add an additional value(s) to a multi-value property
-        CleverTap.sharedInstance()?.profileAddMultiValue("coat", forKey: "myStuff")
-        // or
-        CleverTap.sharedInstance()?.profileAddMultiValues(["socks", "scarf"], forKey: "myStuff")
-        
     }
     
     // MARK: - Action Button
