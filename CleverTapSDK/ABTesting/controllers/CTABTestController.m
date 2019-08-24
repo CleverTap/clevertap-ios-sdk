@@ -61,6 +61,7 @@ typedef void (^CTABTestingOperationBlock)(void);
         _guid = guid;
         NSString *protocol = @"wss"; 
         NSString *domain = _config.accountRegion ? [NSString stringWithFormat:@"%@.%@", _config.accountRegion, kDASHBOARD_DOMAIN] : kDASHBOARD_DOMAIN;
+        domain = _config.beta ? [NSString stringWithFormat:@"%@.%@", @"beta", domain] : domain;
         NSString *urlString = [NSString stringWithFormat:@"%@://%@/%@/websocket/screenab/sdk?tk=%@", protocol, domain, _config.accountId, _config.accountToken];
         _url = [NSURL URLWithString:urlString];
         _open = NO;

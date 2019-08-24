@@ -47,6 +47,7 @@
         _enablePersonalization = YES;
         _logLevel = 0;
         _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
+        _beta = plist.beta;
     }
     return self;
 }
@@ -61,6 +62,7 @@
     copy.enableABTesting = self.enableABTesting;
     copy.enableUIEditor = self.enableUIEditor;
     copy.useCustomCleverTapId = self.useCustomCleverTapId;
+    copy.beta = self.beta;
     return copy;
 }
 

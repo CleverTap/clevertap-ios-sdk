@@ -17,6 +17,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_DISABLE_APP_LAUNCH_LABEL @"CleverTapDisableAppLaunched"
 #define CLTAP_USE_IFA_LABEL @"CleverTapUseIFA"
 #define CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapUseCustomId"
+#define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"
 #define CLTAP_FB_DOB_DATE_FORMAT @"MM/dd/yyyy"

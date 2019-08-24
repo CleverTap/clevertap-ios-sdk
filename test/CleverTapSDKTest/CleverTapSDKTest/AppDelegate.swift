@@ -24,6 +24,11 @@ import CleverTapSDK
 //        [CleverTap setCredentialsWithAccountID:@"ZWW-WWW-WWRZ"
 //            andToken:@"000-001"];
 //        CleverTap.setCredentialsWithAccountID("WWW-WWW-WWRZ", andToken: "000-000")
+ //       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+//        [CleverTap setCredentialsWithAccountID:@"ZWW-WWW-WWRZ"
+//            andToken:@"000-001"];
+//
+//        CleverTap.setCredentialsWithAccountID("WWW-WWW-WWRZ", andToken: "000-000")
         CleverTap.setUIEditorConnectionEnabled(true)
 
         CleverTap.autoIntegrate()
