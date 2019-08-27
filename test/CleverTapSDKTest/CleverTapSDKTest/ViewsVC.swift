@@ -17,12 +17,12 @@ class ViewsVC: UIViewController, UIScrollViewDelegate {
         print("y offset: %@", scrollView.contentOffset.y)
     }
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.landscapeRight, andRotateTo: UIInterfaceOrientation.landscapeRight)
-//    }
-//    
-//    override func viewWillDisappear(_ animated : Bool) {
-//        super.viewWillDisappear(animated)
-//        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.landscapeRight, andRotateTo: UIInterfaceOrientation.landscapeRight)
+    }
+    
+    override func viewWillDisappear(_ animated : Bool) {
+        super.viewWillDisappear(animated)
+        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
+    }
 }

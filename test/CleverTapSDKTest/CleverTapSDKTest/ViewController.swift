@@ -25,7 +25,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             print("Experiments updated.")
       }
     
-        inboxRegister()
+//        inboxRegister()
         // addWebview()
         profilePush()
         guard let foo = CleverTap.sharedInstance()?.getStringVariable(withName: "foo", defaultValue: "defaultFooValue") else {return}
@@ -110,22 +110,15 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     func inboxRegister() {
         
-        CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
-            
-            DispatchQueue.main.async {
-                self.inboxButton.isHidden = false;
-                self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
-            }
-        }))
-        
-        CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
-            self.inboxButton.isHidden = false;
-            self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
-        }))
+//        CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
+//            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+//            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+//            DispatchQueue.main.async {
+//                self.inboxButton.isHidden = false;
+//                self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
+//            }
+//        }))
+       
     }
     
     func profilePush() {
@@ -141,15 +134,19 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     // MARK: - Action Button
     
     @IBAction func inboxButtonTapped(_ sender: Any) {
-        let style = CleverTapInboxStyleConfig.init()
-        style.title = "AppInbox"
-        style.backgroundColor = UIColor.yellow
-        style.messageTags = ["Promotions", "Offers"];
-        
-        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
-            let navigationController = UINavigationController.init(rootViewController: inboxController)
-            self.present(navigationController, animated: true, completion: nil)
-        }
+        CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
+            if (success) {
+                let style = CleverTapInboxStyleConfig.init()
+                style.title = "AppInbox"
+                style.backgroundColor = UIColor.yellow
+                style.messageTags = ["Promotions", "Offers"];
+                
+                if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
+                    let navigationController = UINavigationController.init(rootViewController: inboxController)
+                    self.present(navigationController, animated: true, completion: nil)
+                }
+            }
+        }))
     }
     
     @IBAction func testButtonTapped(_ sender: Any) {

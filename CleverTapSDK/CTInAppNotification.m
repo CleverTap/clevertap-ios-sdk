@@ -214,7 +214,7 @@
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         } else {
             if (url) {
-                self.error = [NSString stringWithFormat:@"Invalid url:,%@",url];
+                self.error = [NSString stringWithFormat:@"Invalid url: %@",url];
                 return;
             }
         }

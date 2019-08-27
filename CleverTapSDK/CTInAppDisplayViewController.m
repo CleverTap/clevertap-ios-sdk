@@ -51,14 +51,15 @@
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     if (_notification.hasPortrait && _notification.hasLandscape) {
         return UIInterfaceOrientationMaskAll;
-    } else if (_notification.hasPortrait) {
-        return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
-    } else if (_notification.hasLandscape) {
+    } else if (_notification.hasPortrait && ![self deviceOrientationIsLandscape]) {
+        return (UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown);
+    } else if (_notification.hasLandscape && [self deviceOrientationIsLandscape]) {
         return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
     } else {
-        return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
+        return UIInterfaceOrientationMaskAll;
     }
 }
+
 #endif
 
 -(void)show:(BOOL)animated {
