@@ -140,6 +140,14 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 style.title = "AppInbox"
                 style.backgroundColor = UIColor.yellow
                 style.messageTags = ["Promotions", "Offers"];
+              
+                let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
+                let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+                
+                DispatchQueue.main.async {
+                    self.inboxButton.isHidden = false;
+                    self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
+                }
                 
                 if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
                     let navigationController = UINavigationController.init(rootViewController: inboxController)
