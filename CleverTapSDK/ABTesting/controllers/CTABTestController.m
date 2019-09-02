@@ -291,6 +291,13 @@ typedef void (^CTABTestingOperationBlock)(void);
         return;
     }
     
+    if (experiments.count == 0){
+        [self.varCache reset];
+        for (CTABVariant *variant in self.variants) {
+            [variant revertActions];
+        }
+    }
+    
     NSMutableSet *parsed = [NSMutableSet set];
     NSMutableSet *newVariants = [NSMutableSet set];
     

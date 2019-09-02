@@ -51,9 +51,9 @@
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     if (_notification.hasPortrait && _notification.hasLandscape) {
         return UIInterfaceOrientationMaskAll;
-    } else if (_notification.hasPortrait && ![self deviceOrientationIsLandscape]) {
+    } else if (_notification.hasPortrait) {
         return (UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown);
-    } else if (_notification.hasLandscape && [self deviceOrientationIsLandscape]) {
+    } else if (_notification.hasLandscape) {
         return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
     } else {
         return UIInterfaceOrientationMaskAll;

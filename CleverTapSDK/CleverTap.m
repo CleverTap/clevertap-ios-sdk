@@ -2669,7 +2669,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         } @catch (NSException *e) {
                             CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing AB Experiments JSON: %@", self, e.debugDescription);
                         }
-                        if (experiments && [experiments count] > 0 && self.abTestController) {
+                        if (experiments && self.abTestController) {
                             [self.abTestController updateExperiments:experiments];
                         }
                     }

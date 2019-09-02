@@ -42,18 +42,13 @@ typedef enum {
     @end
 
 @implementation CTInAppHTMLViewController
-    
-- (instancetype)initWithNotification:(CTInAppNotification *)notification {
-    self = [super initWithNotification:notification];
-    if (self) {
-        self.shouldPassThroughTouches = (self.notification.position == CLTAP_INAPP_POSITION_TOP || self.notification.position == CLTAP_INAPP_POSITION_BOTTOM);
-    }
-    return self;
-}
 
 - (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
     self = [super initWithNotification:notification];
     _jsInterface = jsInterface;
+    if (self) {
+        self.shouldPassThroughTouches = (self.notification.position == CLTAP_INAPP_POSITION_TOP || self.notification.position == CLTAP_INAPP_POSITION_BOTTOM);
+    }
     return self;
 }
     

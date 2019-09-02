@@ -3,6 +3,7 @@
 #if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView.h>
+#import "CTInAppResources.h"
 #endif
 
 @interface CTInAppNotification() {
@@ -169,6 +170,16 @@
     }
     self.buttons = _buttons;
     
+    if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
+        if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
+            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
+        }
+        
+        if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
+            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
+        }
+    }
+    
     switch (self.inAppType) {
         case CTInAppTypeHeader:
         case CTInAppTypeFooter:
@@ -250,6 +261,15 @@
 
 - (BOOL)mediaIsVideo {
     return _mediaIsVideo;
+}
+
+- (BOOL)deviceOrientationIsLandscape {
+    #if (TARGET_OS_TV)
+        return nil;
+    #else
+        UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+        return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+    #endif
 }
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler {
