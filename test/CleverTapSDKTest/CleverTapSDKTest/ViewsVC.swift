@@ -12,11 +12,6 @@ class ViewsVC: UIViewController, UIScrollViewDelegate {
         super.viewDidLoad()
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print("x offset: %@", scrollView.contentOffset.x)
-        print("y offset: %@", scrollView.contentOffset.y)
-    }
-    
 //    override func viewWillAppear(_ animated: Bool) {
 //        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.landscapeRight, andRotateTo: UIInterfaceOrientation.landscapeRight)
 //    }

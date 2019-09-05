@@ -1,9 +1,9 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
+#import "CTInAppResources.h"
 #if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView.h>
-#import "CTInAppResources.h"
 #endif
 
 @interface CTInAppNotification() {
@@ -170,15 +170,19 @@
     }
     self.buttons = _buttons;
     
-    if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
-        if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
-            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
+            if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
+                self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
+                return;
+            }
+            
+            if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
+                self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
+                return;
+            }
         }
-        
-        if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
-            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
-        }
-    }
+    });
     
     switch (self.inAppType) {
         case CTInAppTypeHeader:
