@@ -19,9 +19,8 @@
 
 static NSString * const kStartLoadingKey = @"CTConnectLoadingAnimation";
 static NSString * const kFinishLoadingKey = @"CTConnectFinishLoadingAnimation";
-//static NSString* const kDASHBOARD_DOMAIN = @"dashboard.clevertap.com";
-static NSString* const kDASHBOARD_DOMAIN = @"eu1-dashboard-staging-2.dashboard.clevertap.com";  // TODO
-// static NSString* const kDASHBOARD_DOMAIN = @"clevertaptech.ngrok.io";  // TODO
+static NSString * const kDASHBOARD_DOMAIN = @"dashboard.clevertap.com";
+static NSString * const kDEFAULT_REGION = @"eu1";
 
 typedef void (^CTABTestingOperationBlock)(void);
 
@@ -59,9 +58,10 @@ typedef void (^CTABTestingOperationBlock)(void);
         _delegate = delegate;
         _config = config;
         _guid = guid;
-        NSString *protocol = @"wss"; 
-        NSString *domain = _config.accountRegion ? [NSString stringWithFormat:@"%@.%@", _config.accountRegion, kDASHBOARD_DOMAIN] : kDASHBOARD_DOMAIN;
-        domain = _config.beta ? [NSString stringWithFormat:@"%@.%@", @"beta", domain] : domain;
+        NSString *protocol = @"wss";
+        NSString *region = _config.accountRegion ? _config.accountRegion : kDEFAULT_REGION;
+        region = _config.beta ? [NSString stringWithFormat:@"%@-dashboard-beta", region] : region;
+        NSString *domain =  [NSString stringWithFormat:@"%@.%@", region, kDASHBOARD_DOMAIN];
         NSString *urlString = [NSString stringWithFormat:@"%@://%@/%@/websocket/screenab/sdk?tk=%@", protocol, domain, _config.accountId, _config.accountToken];
         _url = [NSURL URLWithString:urlString];
         _open = NO;

@@ -29,6 +29,8 @@
 	<string>1</string>
 	<key>CleverTapAccountID</key>
 	<string></string>
+	<key>CleverTapBeta</key>
+	<false/>
 	<key>CleverTapDisableAppLaunched</key>
 	<string>0</string>
 	<key>CleverTapEnableCustomId</key>
