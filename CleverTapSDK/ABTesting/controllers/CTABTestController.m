@@ -561,11 +561,7 @@ typedef void (^CTABTestingOperationBlock)(void);
         self.testConnectGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleTestConnectGesture:)];
         self.testConnectGestureRecognizer.minimumPressDuration = 3;
         self.testConnectGestureRecognizer.cancelsTouchesInView = NO;
-#if TARGET_IPHONE_SIMULATOR
         self.testConnectGestureRecognizer.numberOfTouchesRequired = 2;
-#else
-        self.testConnectGestureRecognizer.numberOfTouchesRequired = 3;
-#endif
         self->_testConnectGestureRecognizer.enabled = self->_config.enableUIEditor;
         [[CTInAppResources getSharedApplication].keyWindow addGestureRecognizer:self.testConnectGestureRecognizer];
         CleverTapLogDebug(self->_config.logLevel, @"%@: Added ABTest Editor connection gesture recognizer, enabled state is %@", self, self->_testConnectGestureRecognizer.enabled ? @"YES": @"NO");
