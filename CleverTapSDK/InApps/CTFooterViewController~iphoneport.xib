@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -44,7 +42,7 @@
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="bottom" secondItem="1Ya-fy-qdt" secondAttribute="bottom" constant="20" id="BaJ-bB-F8y"/>
-                                <constraint firstAttribute="width" constant="124" id="Fw3-qb-8SG"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="Fw3-qb-8SG"/>
                                 <constraint firstItem="1Ya-fy-qdt" firstAttribute="centerX" secondItem="ivV-DI-PIR" secondAttribute="centerX" id="HVB-Za-zmH"/>
                                 <constraint firstAttribute="height" constant="124" id="IYm-mU-eb1"/>
                                 <constraint firstItem="1Ya-fy-qdt" firstAttribute="top" secondItem="ivV-DI-PIR" secondAttribute="top" constant="20" id="kZd-XT-LmL"/>
@@ -115,7 +113,7 @@
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
-                                        <constraint firstItem="yQd-ts-dDS" firstAttribute="leading" secondItem="Kra-gn-vkg" secondAttribute="leading" id="CR9-A1-6io"/>
+                                        <constraint firstItem="yQd-ts-dDS" firstAttribute="leading" secondItem="Kra-gn-vkg" secondAttribute="leading" priority="750" id="CR9-A1-6io"/>
                                         <constraint firstItem="yQd-ts-dDS" firstAttribute="centerY" secondItem="Kra-gn-vkg" secondAttribute="centerY" id="IBq-Df-RaR"/>
                                         <constraint firstAttribute="trailing" secondItem="yQd-ts-dDS" secondAttribute="trailing" id="jcj-wU-2jf"/>
                                     </constraints>
@@ -158,6 +156,7 @@
                 <constraint firstAttribute="bottom" secondItem="0RL-FU-1Km" secondAttribute="bottom" priority="250" id="mxQ-Np-Zod"/>
                 <constraint firstAttribute="trailing" secondItem="0RL-FU-1Km" secondAttribute="trailing" id="vrL-vr-87s"/>
             </constraints>
+            <point key="canvasLocation" x="138" y="119"/>
         </view>
     </objects>
 </document>

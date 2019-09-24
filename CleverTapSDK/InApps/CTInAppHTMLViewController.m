@@ -476,7 +476,6 @@ typedef enum {
     
 -(void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
-        [self.window setHidden:YES];
         [self.window removeFromSuperview];
         self.window = nil;
         if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {

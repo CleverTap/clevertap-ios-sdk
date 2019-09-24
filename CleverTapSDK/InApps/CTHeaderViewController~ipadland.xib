@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad12_9rounded" orientation="landscape">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad12_9rounded" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -46,7 +44,7 @@
                                 <constraint firstItem="7wu-9n-6Ez" firstAttribute="top" secondItem="JsS-XO-B0C" secondAttribute="top" constant="20" id="EQt-86-j8c"/>
                                 <constraint firstAttribute="bottom" secondItem="7wu-9n-6Ez" secondAttribute="bottom" constant="20" id="QbC-h3-iLx"/>
                                 <constraint firstAttribute="height" constant="124" id="R4v-O9-xgr"/>
-                                <constraint firstAttribute="width" constant="124" id="hFH-05-YCM"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="hFH-05-YCM"/>
                                 <constraint firstItem="7wu-9n-6Ez" firstAttribute="centerX" secondItem="JsS-XO-B0C" secondAttribute="centerX" id="uht-YK-LXv"/>
                             </constraints>
                         </view>
