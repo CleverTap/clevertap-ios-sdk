@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad9_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -43,7 +41,7 @@
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="124" id="0Lj-k2-CdK"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="0Lj-k2-CdK"/>
                                 <constraint firstItem="ECn-8K-u0R" firstAttribute="top" secondItem="tra-rB-Fwa" secondAttribute="top" constant="20" id="6Kk-M1-NjI"/>
                                 <constraint firstAttribute="height" constant="124" id="IHF-jJ-Oha"/>
                                 <constraint firstItem="ECn-8K-u0R" firstAttribute="centerX" secondItem="tra-rB-Fwa" secondAttribute="centerX" id="a1g-fC-Saf"/>
@@ -158,6 +156,7 @@
                 <constraint firstItem="jfu-ME-xkj" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="pzm-rV-jTM"/>
                 <constraint firstAttribute="trailing" secondItem="jfu-ME-xkj" secondAttribute="trailing" id="u2K-WG-3ql"/>
             </constraints>
+            <point key="canvasLocation" x="130" y="81"/>
         </view>
     </objects>
 </document>

@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -47,7 +45,7 @@
                                 <constraint firstAttribute="bottom" secondItem="6Tg-05-z7C" secondAttribute="bottom" constant="20" id="CPR-jY-kvz"/>
                                 <constraint firstItem="6Tg-05-z7C" firstAttribute="top" secondItem="e5o-jU-wgA" secondAttribute="top" constant="20" id="ECL-PK-xlv"/>
                                 <constraint firstItem="6Tg-05-z7C" firstAttribute="centerX" secondItem="e5o-jU-wgA" secondAttribute="centerX" id="lvt-w5-3Kz"/>
-                                <constraint firstAttribute="width" constant="124" id="smS-pJ-ic1"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="smS-pJ-ic1"/>
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ENz-u4-vEY">
@@ -117,7 +115,7 @@
                                     <constraints>
                                         <constraint firstAttribute="trailing" secondItem="3uJ-iU-dID" secondAttribute="trailing" id="2jH-pa-Jkx"/>
                                         <constraint firstItem="3uJ-iU-dID" firstAttribute="centerY" secondItem="ug2-74-npc" secondAttribute="centerY" id="Kwx-9y-8sI"/>
-                                        <constraint firstItem="3uJ-iU-dID" firstAttribute="leading" secondItem="ug2-74-npc" secondAttribute="leading" id="lmZ-2R-zFp"/>
+                                        <constraint firstItem="3uJ-iU-dID" firstAttribute="leading" secondItem="ug2-74-npc" secondAttribute="leading" priority="750" id="lmZ-2R-zFp"/>
                                     </constraints>
                                 </view>
                             </subviews>

@@ -52,13 +52,14 @@
     if (_notification.hasPortrait && _notification.hasLandscape) {
         return UIInterfaceOrientationMaskAll;
     } else if (_notification.hasPortrait) {
-        return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
+        return (UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown);
     } else if (_notification.hasLandscape) {
         return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
     } else {
-        return (UIInterfaceOrientationPortrait |  UIInterfaceOrientationPortraitUpsideDown);
+        return UIInterfaceOrientationMaskAll;
     }
 }
+
 #endif
 
 -(void)show:(BOOL)animated {
@@ -105,7 +106,6 @@
 
 -(void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
-        [self.window setHidden:YES];
         [self.window removeFromSuperview];
         self.window = nil;
         if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {

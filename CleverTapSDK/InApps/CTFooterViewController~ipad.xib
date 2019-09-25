@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad9_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -43,7 +41,7 @@
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="124" id="06L-44-VDN"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="06L-44-VDN"/>
                                 <constraint firstAttribute="height" constant="124" id="1jP-6O-62g"/>
                                 <constraint firstItem="mhc-RD-9Er" firstAttribute="top" secondItem="xK1-Ja-Ql0" secondAttribute="top" constant="20" id="CYl-pW-Hhq"/>
                                 <constraint firstAttribute="bottom" secondItem="mhc-RD-9Er" secondAttribute="bottom" constant="20" id="Tjd-dQ-ayX"/>
@@ -158,6 +156,7 @@
                 <constraint firstAttribute="bottom" secondItem="GSI-VN-jYC" secondAttribute="bottom" priority="250" id="evj-5h-kNY"/>
                 <constraint firstItem="GSI-VN-jYC" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="hcB-kr-HZP"/>
             </constraints>
+            <point key="canvasLocation" x="79" y="77"/>
         </view>
     </objects>
 </document>

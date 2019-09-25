@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -47,7 +45,7 @@
                                 <constraint firstItem="rlG-x9-OpN" firstAttribute="top" secondItem="e2C-sc-99L" secondAttribute="top" constant="20" id="T4K-BG-AE2"/>
                                 <constraint firstAttribute="height" constant="124" id="YJd-YE-Q5o"/>
                                 <constraint firstItem="rlG-x9-OpN" firstAttribute="centerX" secondItem="e2C-sc-99L" secondAttribute="centerX" id="uFp-xh-8OD"/>
-                                <constraint firstAttribute="width" constant="124" id="v7j-tW-VTq"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="v7j-tW-VTq"/>
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nWP-B3-agn">

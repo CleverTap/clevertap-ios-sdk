@@ -84,6 +84,9 @@ static NSArray *registeredURLSchemes;
     
         NSString *shouldDisableAppLaunchReporting = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_APP_LAUNCH_LABEL];
         _disableAppLaunchedEvent = (shouldDisableAppLaunchReporting && [shouldDisableAppLaunchReporting isEqualToString:@"1"]);
+        
+        NSString *enableBeta = [CTPlistInfo getMetaDataForAttribute:CLTAP_BETA_LABEL];
+        _beta = (enableBeta && [enableBeta isEqualToString:@"1"]);
     }
     return self;
 }

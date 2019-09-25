@@ -1,5 +1,11 @@
 # CHANGE LOG
 
+## Version 3.7.0 (September 25, 2019)
+* Adds support for AB Tests. (in closed Beta)
+* Adds support for SDWebImage version 5.1
+* Disable Location API calls unless CLEVERTAP_LOCATION macro is set
+* Bug fixes and performance improvements
+
 ## Version 3.6.0 (May 30, 2019)
 * Adds support for SDWebImage version 5.0 
 

@@ -42,6 +42,7 @@ static NSString *_timeZone;
 static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
+static NSString *_deviceName;
 static BOOL _wifi;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
@@ -67,27 +68,29 @@ SCNetworkReachabilityRef _reachability;
 @synthesize validationErrors=_validationErrors;
 
 static dispatch_queue_t backgroundQueue;
-static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
-
-+ (void)load {
-    deviceIDLock = [NSRecursiveLock new];
-    _idfa = [self getIDFA];
-    _idfv = [self getIDFV];
-    
-    backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
-    
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-    // reachability callback
-    if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "wzrkt.com")) != NULL) {
-        SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
-        if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
-            if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
-                SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
+static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
+#endif
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _idfa = [self getIDFA];
+        _idfv = [self getIDFV];
+        deviceIDLock = [NSRecursiveLock new];
+    #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+        backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
+        // reachability callback
+        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "wzrkt.com")) != NULL) {
+            SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
+            if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
+                if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
+                    SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
+                }
             }
         }
-    }
-#endif
-    [super load];
+    #endif
+    });
 }
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
@@ -442,6 +445,13 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         _deviceHeight = [NSString stringWithFormat:@"%.2f", [CTUtils toTwoPlaces:rHeight]];
     }
     return _deviceHeight;
+}
+
+- (NSString*)deviceName {
+    if (!_deviceName) {
+        _deviceName = [UIDevice currentDevice].name;
+    }
+    return _deviceName;
 }
 
 - (NSString*)carrier {

@@ -1,5 +1,6 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
+#import "CTInAppResources.h"
 #if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView.h>
@@ -169,6 +170,20 @@
     }
     self.buttons = _buttons;
     
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
+            if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
+                self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
+                return;
+            }
+            
+            if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
+                self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
+                return;
+            }
+        }
+    });
+    
     switch (self.inAppType) {
         case CTInAppTypeHeader:
         case CTInAppTypeFooter:
@@ -180,10 +195,10 @@
         case CTInAppTypeCoverImage:
         case CTInAppTypeInterstitialImage:
         case CTInAppTypeHalfInterstitialImage:
-              if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
-                  self.error = [NSString stringWithFormat:@"wrong media type for template"];
-              }
-           break;
+            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
+                self.error = [NSString stringWithFormat:@"wrong media type for template"];
+            }
+            break;
         case CTInAppTypeCover:
         case CTInAppTypeHalfInterstitial:
             if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
@@ -214,7 +229,7 @@
             self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
         } else {
             if (url) {
-                self.error = [NSString stringWithFormat:@"Invalid url:,%@",url];
+                self.error = [NSString stringWithFormat:@"Invalid url: %@",url];
                 return;
             }
         }
@@ -250,6 +265,15 @@
 
 - (BOOL)mediaIsVideo {
     return _mediaIsVideo;
+}
+
+- (BOOL)deviceOrientationIsLandscape {
+    #if (TARGET_OS_TV)
+        return nil;
+    #else
+        UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+        return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+    #endif
 }
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler {

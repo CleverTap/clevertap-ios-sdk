@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="landscape">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="landscape" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -46,7 +44,7 @@
                                 <constraint firstAttribute="height" constant="124" id="3lT-18-MNI"/>
                                 <constraint firstItem="ufZ-G8-Rxv" firstAttribute="centerX" secondItem="GYg-ds-tEp" secondAttribute="centerX" id="8wA-C8-cG7"/>
                                 <constraint firstAttribute="bottom" secondItem="ufZ-G8-Rxv" secondAttribute="bottom" constant="20" id="I5H-FF-Z7i"/>
-                                <constraint firstAttribute="width" constant="124" id="ryO-1b-K5W"/>
+                                <constraint firstAttribute="width" priority="750" constant="124" id="ryO-1b-K5W"/>
                                 <constraint firstItem="ufZ-G8-Rxv" firstAttribute="top" secondItem="GYg-ds-tEp" secondAttribute="top" constant="20" id="uMX-7k-Uf6"/>
                             </constraints>
                         </view>
@@ -158,6 +156,7 @@
                 <constraint firstAttribute="bottom" secondItem="1Yg-l8-siL" secondAttribute="bottom" priority="250" id="4ch-HX-fRo"/>
                 <constraint firstItem="1Yg-l8-siL" firstAttribute="leading" secondItem="UJl-Hb-snR" secondAttribute="leading" id="Dht-Vn-4c3"/>
             </constraints>
+            <point key="canvasLocation" x="90" y="154"/>
         </view>
     </objects>
 </document>
