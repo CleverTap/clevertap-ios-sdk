@@ -68,7 +68,9 @@ SCNetworkReachabilityRef _reachability;
 @synthesize validationErrors=_validationErrors;
 
 static dispatch_queue_t backgroundQueue;
+#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQueue";
+#endif
 
 + (void)initialize {
     static dispatch_once_t onceToken;

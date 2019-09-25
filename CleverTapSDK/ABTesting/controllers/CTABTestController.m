@@ -91,7 +91,6 @@ typedef void (^CTABTestingOperationBlock)(void);
 
 // be sure to call off the main thread
 - (void)resetWithGuid:(NSString*)guid {
-    // TODO test onUserLogin reset, what else do we need to do here ??
     _commandQueue.suspended = YES;
     [_commandQueue cancelAllOperations];
     [self close];
@@ -291,11 +290,13 @@ typedef void (^CTABTestingOperationBlock)(void);
         return;
     }
     
-    if (experiments.count == 0){
+    // if the experiment come as an empty array, mark all experiments as finished.
+    if (experiments.count <= 0){
         [self.varCache reset];
         for (CTABVariant *variant in self.variants) {
-            [variant revertActions];
+            [variant finish];
         }
+        return;
     }
     
     NSMutableSet *parsed = [NSMutableSet set];
@@ -311,7 +312,6 @@ typedef void (^CTABTestingOperationBlock)(void);
         }
     }
     
-    // TODO test all this variant updating logic
     NSMutableSet *toMarkFinished = [NSMutableSet setWithSet:running];
     [toMarkFinished minusSet:parsed];
     [newVariants unionSet:parsed];

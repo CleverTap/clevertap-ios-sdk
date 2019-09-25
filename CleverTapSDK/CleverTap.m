@@ -533,7 +533,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (instance == nil) {
 #if !CLEVERTAP_NO_AB_SUPPORT
         // Default or first non-default instance gets the ABTestController
-        config.enableABTesting =  (config.isDefaultInstance || [_instances count] <= 0);  // TODO TEST THIS
+        config.enableABTesting =  (config.isDefaultInstance || [_instances count] <= 0);
 #endif
         instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
         _instances[config.accountId] = instance;

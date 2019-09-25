@@ -72,7 +72,7 @@
         
         NSDictionary *get = dictionary[@"get"];
         if (get == nil) {
-            if (!dictionary[@"type"]) return nil;// TODO: not sure
+            if (!dictionary[@"type"]) return nil;
             get = @{
                     @"selector": _name,
                     @"result": @{
@@ -85,7 +85,7 @@
         
         NSDictionary *set = dictionary[@"set"];
         if (set == nil && _readonly == NO) {
-            if (!dictionary[@"type"]) return nil; // TODO: not sure
+            if (!dictionary[@"type"]) return nil; 
             set = @{
                     @"selector": [NSString stringWithFormat:@"set%@:", _name.capitalizedString],
                     @"parameters": @[
