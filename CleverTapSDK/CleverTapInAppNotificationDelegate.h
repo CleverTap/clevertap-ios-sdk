@@ -28,4 +28,15 @@
  */
 @optional
 - (void)inAppNotificationDismissedWithExtras:(NSDictionary *)extras andActionExtras:(NSDictionary *)actionExtras;
+
+/*!
+ @discussion
+ When an in-app notification is dismissed by a call to action with custom extras,
+ this method will be called.
+
+ @param extras The extra key/value pairs set in the CleverTap dashboard for this notification
+ */
+@optional
+- (void)inAppNotificationButtonTappedWithCustomExtras:(NSDictionary *)customExtras;
+
 @end

@@ -1813,13 +1813,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.inAppFCManager didShow:notification];
 }
 
--(void)handleNotificationCTA:(NSURL *)ctaURL forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras {
-    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp cta: %@ with options:%@", self, ctaURL.absoluteString, extras);
+- (void)notifyNotificationButtonTappedWithCustomExtras:(NSDictionary *)customExtras {
+    if (self.inAppNotificationDelegate && [self.inAppNotificationDelegate respondsToSelector:@selector(inAppNotificationButtonTappedWithCustomExtras:)]) {
+        [self.inAppNotificationDelegate inAppNotificationButtonTappedWithCustomExtras:customExtras];
+    }
+}
+
+- (void)handleNotificationCTA:(NSURL *)ctaURL buttonCustomExtras:(NSDictionary *)buttonCustomExtras forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras {
+    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp cta: %@ button custom extras: %@ with options:%@", self, ctaURL.absoluteString, buttonCustomExtras, extras);
     [self recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
     if (extras) {
         notification.actionExtras = extras;
     }
-    if (ctaURL) {
+    if (buttonCustomExtras) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
+        [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
+    } else if (ctaURL) {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         [[self class] runSyncMainQueue:^{
             UIApplication *sharedApplication = [[self class] getSharedApplication];
