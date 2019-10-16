@@ -1814,7 +1814,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)notifyNotificationButtonTappedWithCustomExtras:(NSDictionary *)customExtras {
-    //TODO: Add a Logger
     if (self.inAppNotificationDelegate && [self.inAppNotificationDelegate respondsToSelector:@selector(inAppNotificationButtonTappedWithCustomExtras:)]) {
         [self.inAppNotificationDelegate inAppNotificationButtonTappedWithCustomExtras:customExtras];
     }
