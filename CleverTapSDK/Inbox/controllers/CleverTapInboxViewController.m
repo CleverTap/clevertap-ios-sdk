@@ -115,6 +115,15 @@ static const int kMaxTags = 3;
     [self playVideoInVisibleCells];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    if ([self.tags count] > 0) {
+       [self setupSegmentedControl];
+    }
+    [self showListEmptyLabel];
+    [self calculateTableViewVisibleFrame];
+}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self calculateTableViewVisibleFrame];
