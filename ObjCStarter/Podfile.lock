@@ -1,5 +1,5 @@
 PODS:
-  - CleverTap-iOS-SDK (3.7.0):
+  - CleverTap-iOS-SDK (3.7.1):
     - SDWebImage (~> 5.1)
   - SDWebImage (5.1.1):
     - SDWebImage/Core (= 5.1.1)
@@ -17,7 +17,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CleverTap-iOS-SDK: e1caf10acf26be3f5b8e04690dfc65d2ac36388a
+  CleverTap-iOS-SDK: 2a039aba891dd7eee0e1e33e786cefcdb77079a5
   SDWebImage: 96d7f03415ccb28d299d765f93557ff8a617abd8
 
 PODFILE CHECKSUM: b4f3542daf2ced0c2c6faa368b426728b78fa179
