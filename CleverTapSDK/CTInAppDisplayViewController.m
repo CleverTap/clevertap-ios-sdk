@@ -175,8 +175,6 @@
     NSString *buttonText = button.text;
     NSString *campaignId = self.notification.campaignId;
     NSDictionary *buttonCustomExtras = button.customExtras;
-    // TODO: Remove - Added to test button custom extras
-    buttonCustomExtras = @{@"Key1": @"value1", @"Key2": @"value2"};
     
     if (campaignId == nil) {
         campaignId = @"";

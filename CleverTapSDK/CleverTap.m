@@ -1814,6 +1814,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)notifyNotificationButtonTappedWithCustomExtras:(NSDictionary *)customExtras {
+    //TODO: Add a Logger
     if (self.inAppNotificationDelegate && [self.inAppNotificationDelegate respondsToSelector:@selector(inAppNotificationButtonTappedWithCustomExtras:)]) {
         [self.inAppNotificationDelegate inAppNotificationButtonTappedWithCustomExtras:customExtras];
     }
@@ -1825,7 +1826,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (extras) {
         notification.actionExtras = extras;
     }
-    if (buttonCustomExtras) {
+    if (buttonCustomExtras && buttonCustomExtras.count > 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
         [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
     } else if (ctaURL) {
@@ -3886,7 +3887,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     // button index so find the corresponding action link if any
     else {
-        if (content.actionHasLinks){
+        if (content.actionHasLinks) {
+            NSDictionary *customExtras = [content customDataForLinkAtIndex:buttonIndex];
+            if (customExtras && customExtras.count > 0) return;
             NSString *linkUrl = [content urlForLinkAtIndex:buttonIndex];
             if (linkUrl && linkUrl.length > 0) {
                 ctaURL = [NSURL URLWithString:linkUrl];

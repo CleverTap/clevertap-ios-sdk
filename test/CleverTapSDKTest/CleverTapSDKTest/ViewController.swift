@@ -136,7 +136,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     }
     
     func profilePush() {
-        let profile: Dictionary<String, AnyObject> = [
+        let _: Dictionary<String, AnyObject> = [
             "Email": "agrawaladiti@clevertap.com" as AnyObject
         ]
 //        CleverTap.sharedInstance()?.profilePush(profile)
@@ -162,6 +162,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 
                 if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
                     let navigationController = UINavigationController.init(rootViewController: inboxController)
+                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
                     self.present(navigationController, animated: true, completion: nil)
                 }
             }
@@ -170,15 +171,16 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
-        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
+//        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
         CleverTap.sharedInstance()?.recordEvent("test ios")
+        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
         CleverTap.sharedInstance()?.recordEvent("Cover")
         CleverTap.sharedInstance()?.recordEvent("Interstitial")
         CleverTap.sharedInstance()?.recordEvent("Header")
         CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
         CleverTap.sharedInstance()?.recordEvent("Footer")
-        CleverTap.sharedInstance()?.recordEvent("Cover Image")
+        CleverTap.sharedInstance()?.recordEvent("Cover")
         CleverTap.sharedInstance()?.recordEvent("Footer iOS")
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
         CleverTap.sharedInstance()?.recordEvent("Header")
@@ -195,10 +197,14 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 
     }
     
-    func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
-        
-        print("message selected")
-        CleverTap.sharedInstance()?.markRead(message)
+//    func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
+//
+//        print("message selected")
+//        CleverTap.sharedInstance()?.markRead(message)
+//    }
+//
+    func messageButtonTapped(withCustomExtras customExtras: [AnyHashable : Any]?) {
+        print("App Inbox custom extras: %@", customExtras ?? "");
     }
         
     func setupImages(){

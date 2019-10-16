@@ -406,6 +406,16 @@ static const int kMaxTags = 3;
         [self.delegate messageDidSelect:message atIndex:index withButtonIndex:buttonIndex];
     }
     
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageButtonTappedWithCustomExtras:)]) {
+        if (!(buttonIndex < 0)) {
+          CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
+          NSDictionary *customExtras = [content customDataForLinkAtIndex:buttonIndex];
+          if (customExtras && customExtras.count > 0) {
+              [self.delegate messageButtonTappedWithCustomExtras:customExtras];
+          }
+      }
+    }
+    
     if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:atIndex:withButtonIndex:)]) {
         [self.analyticsDelegate messageDidSelect:message atIndex:index withButtonIndex:buttonIndex];
     }

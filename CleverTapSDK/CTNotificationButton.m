@@ -33,7 +33,7 @@
             
             NSDictionary *actions = jsonObject[@"actions"];
             if (actions) {
-                self.customExtras = actions[@"kv"];
+                self.customExtras = (NSDictionary *) actions[@"kv"];
                 NSString *action = actions[@"ios"];
                 if (action && action.length > 0) {
                     @try {
