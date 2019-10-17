@@ -236,8 +236,8 @@ typedef enum {
             }
         }
     }
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:dl forNotification:self.notification fromViewController:self withExtras:mutableParams];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
+        [self.delegate handleNotificationCTA:dl buttonCustomExtras:nil forNotification:self.notification fromViewController:self withExtras:mutableParams];
     } else {
         [self hide:YES];
     }

@@ -7,6 +7,7 @@
 @property (nonatomic, copy, readonly) NSString *textColor;
 @property (nonatomic, copy, readonly) NSString *borderRadius;
 @property (nonatomic, copy, readonly) NSString *borderColor;
+@property (nonatomic, copy, readonly) NSDictionary *customExtras;
 
 @property (nonatomic, copy, readonly) NSString *backgroundColor;
 @property (nonatomic, readonly) NSURL *actionURL;

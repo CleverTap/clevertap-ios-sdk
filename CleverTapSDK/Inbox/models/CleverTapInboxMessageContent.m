@@ -76,4 +76,18 @@
     return url;
 }
 
+- (NSDictionary *_Nullable)customDataForLinkAtIndex:(int)index {
+    NSDictionary *customData;
+    @try {
+        NSDictionary *link = self.links[index];
+        NSString *actionType = link[@"type"];
+        if ([actionType caseInsensitiveCompare:@"kv"] == NSOrderedSame) {
+            customData = (NSDictionary *) link[@"kv"];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error getting customData for link: %@", e.reason);
+    }
+    return customData;
+}
+
 @end

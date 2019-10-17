@@ -115,6 +115,15 @@ static const int kMaxTags = 3;
     [self playVideoInVisibleCells];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    if ([self.tags count] > 0) {
+       [self setupSegmentedControl];
+    }
+    [self showListEmptyLabel];
+    [self calculateTableViewVisibleFrame];
+}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self calculateTableViewVisibleFrame];
@@ -404,6 +413,16 @@ static const int kMaxTags = 3;
 - (void)_notifyMessageSelected:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
     if (self.delegate && [self.delegate respondsToSelector:@selector(messageDidSelect:atIndex:withButtonIndex:)]) {
         [self.delegate messageDidSelect:message atIndex:index withButtonIndex:buttonIndex];
+    }
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageButtonTappedWithCustomExtras:)]) {
+        if (!(buttonIndex < 0)) {
+          CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
+          NSDictionary *customExtras = [content customDataForLinkAtIndex:buttonIndex];
+          if (customExtras && customExtras.count > 0) {
+              [self.delegate messageButtonTappedWithCustomExtras:customExtras];
+          }
+      }
     }
     
     if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:atIndex:withButtonIndex:)]) {

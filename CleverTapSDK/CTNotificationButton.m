@@ -10,6 +10,7 @@
 @property (nonatomic, copy, readwrite) NSString *borderRadius;
 @property (nonatomic, copy, readwrite) NSString *borderColor;
 @property (nonatomic, copy, readwrite) NSString *backgroundColor;
+@property (nonatomic, copy, readwrite) NSDictionary *customExtras;
 @property (nonatomic, readwrite) NSURL *actionURL;
 
 @property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
@@ -32,6 +33,7 @@
             
             NSDictionary *actions = jsonObject[@"actions"];
             if (actions) {
+                self.customExtras = (NSDictionary *) actions[@"kv"];
                 NSString *action = actions[@"ios"];
                 if (action && action.length > 0) {
                     @try {

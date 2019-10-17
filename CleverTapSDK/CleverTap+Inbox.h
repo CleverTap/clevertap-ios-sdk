@@ -56,11 +56,15 @@
 @property (nonatomic, readonly, assign) BOOL actionHasLinks;
 
 - (NSString *_Nullable)urlForLinkAtIndex:(int)index;
+- (NSDictionary *_Nullable)customDataForLinkAtIndex:(int)index;
 
 @end
 
 @protocol CleverTapInboxViewControllerDelegate <NSObject>
+@optional
 - (void)messageDidSelect:(CleverTapInboxMessage *_Nonnull)message atIndex:(int)index withButtonIndex:(int)buttonIndex;
+- (void)messageButtonTappedWithCustomExtras:(NSDictionary *_Nullable)customExtras;
+
 @end
 
 /*!

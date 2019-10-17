@@ -7,7 +7,7 @@
 @class CTInAppDisplayViewController;
 
 @protocol CTInAppNotificationDisplayDelegate <NSObject>
-- (void)handleNotificationCTA:(NSURL*)ctaURL forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras;
+- (void)handleNotificationCTA:(NSURL*)ctaURL buttonCustomExtras:(NSDictionary *)buttonCustomExtras forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras;
 - (void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller;
 @optional
 - (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller;

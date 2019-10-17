@@ -174,13 +174,14 @@
     NSURL *buttonCTA = button.actionURL;
     NSString *buttonText = button.text;
     NSString *campaignId = self.notification.campaignId;
+    NSDictionary *buttonCustomExtras = button.customExtras;
     
     if (campaignId == nil) {
         campaignId = @"";
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:buttonCTA forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
+        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
     }
 }
 
@@ -189,13 +190,14 @@
     NSURL *buttonCTA = button.actionURL;
     NSString *buttonText = @"image";
     NSString *campaignId = self.notification.campaignId;
+    NSDictionary *buttonCustomExtras = button.customExtras;
     
     if (campaignId == nil) {
         campaignId = @"";
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:buttonCTA forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
+        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
     }
 }
 
