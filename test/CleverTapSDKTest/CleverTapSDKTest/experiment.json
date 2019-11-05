@@ -1,0 +1,17 @@
+{
+    "ab_exps": [
+        {
+            "actions": [
+                {
+                    "args": [["rgba(255, 40, 60, 1.00)", "UIColor"]],
+                    "name": "c7015",
+                    "original": [["rgba(255, 255, 255, 1.00)", "UIColor"]],
+                    "path": "/UITabBarController/UIViewController/UIView/UIView[0]/UIButton",
+                    "selector": "setBackgroundColor:"
+                }],
+            "version": 20,
+            "var_id": "3",
+            "exp_id": "3"
+        }
+    ]
+}
