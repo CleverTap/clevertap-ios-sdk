@@ -171,11 +171,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
-        
 //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
-          CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
-            CleverTap.sharedInstance()?.recordEvent("in-app")
-        
+          CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
+//          CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+          CleverTap.sharedInstance()?.recordEvent("Alert ios")
+//        CleverTap.sharedInstance()?.recordEvent("in-app")
 //        CleverTap.sharedInstance()?.recordEvent("test ios")
 //        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
 //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
