@@ -17,16 +17,19 @@ import CleverTapSDK
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
+//          CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", andToken: "000-002")
+
+//        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-5")
         
-//       CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+       CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //       CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
-       CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+//       CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //       CleverTap.setCredentialsWithAccountID("", token: "", region: "")
 //       CleverTap.setCredentialsWithAccountID("WWW-WWW-WWRZ", andToken: "000-000")
-//       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+//       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WW4Z", andToken: "000-001")
         
         CleverTap.setUIEditorConnectionEnabled(true)
+        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
 
         CleverTap.autoIntegrate()
         CleverTap.setDebugLevel(2)
@@ -154,9 +157,7 @@ import CleverTapSDK
     
     func inAppNotificationButtonTapped(withCustomExtras customExtras: [AnyHashable : Any]!) {
         print("In-App Button Tapped with custom extras:%@", customExtras ?? "");
-        
         let dict: NSDictionary = customExtras as NSDictionary
-        
         print("In-App Button Tapped with custom extras:", dict.description);
     }
     

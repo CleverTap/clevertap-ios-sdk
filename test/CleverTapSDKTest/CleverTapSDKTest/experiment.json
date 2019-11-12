@@ -1,17 +1,20 @@
 {
-    "ab_exps": [
-        {
-            "actions": [
-                {
-                    "args": [["rgba(255, 40, 60, 1.00)", "UIColor"]],
-                    "name": "c7015",
-                    "original": [["rgba(255, 255, 255, 1.00)", "UIColor"]],
-                    "path": "/UITabBarController/UIViewController/UIView/UIView[0]/UIButton",
-                    "selector": "setBackgroundColor:"
-                }],
-            "version": 20,
-            "var_id": "3",
-            "exp_id": "3"
-        }
-    ]
+   "adUnit_notifs": [
+       {"3333_124": {
+           "wzrk_id": "3333_124",
+           "wzrk_pivot": "default",
+           "ct_type": "",
+           "ct_bgcolor": "",
+           "ct_media": {},
+           "kv": {"k1":"v1", "k3":"v3"}
+       }},
+       {"3353_154": {
+          "wzrk_id": "3353_154",
+          "wzrk_pivot": "default",
+          "ct_type": "",
+          "ct_bgcolor": "",
+          "ct_media": {},
+          "kv": {"k":"v", "k2": "v2"}
+       }}
+   ]
 }

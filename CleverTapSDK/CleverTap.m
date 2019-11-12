@@ -52,6 +52,11 @@ static NSArray* sslCertNames;
 #import "CTABVariant.h"
 #endif
 
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+#import "CTAdUnitController.h"
+#import "CleverTap+AdUnit.h"
+#endif
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -145,6 +150,13 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 #endif
 @end
 
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+@interface CleverTap () <CTAdUnitDelegate> {}
+@property (nonatomic, strong) CTAdUnitController *adUnitController;
+@property (atomic, weak) id <CleverTapAdUnitDelegate> adUnitDelegate;
+@end
+#endif
+
 #import <UserNotifications/UserNotifications.h>
 
 @interface CleverTap () <UIApplicationDelegate> {
@@ -216,6 +228,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
+@synthesize adUnitDelegate=_adUnitDelegate;
 
 static CTPlistInfo* _plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
@@ -2684,7 +2697,34 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
 #endif
-
+                
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+                NSString *filePath = [[NSBundle mainBundle] pathForResource:@"experiment" ofType:@"json"];  // TODO: remove
+                NSData *jsonDataTest = [NSData dataWithContentsOfFile:filePath
+                                                             options:NSDataReadingMappedIfSafe error:nil]; // TODO: remove
+                NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:jsonDataTest
+                                                               options:(NSJSONReadingOptions)0 error:nil]; //TODO: remove
+                NSArray *adUnitJSON = jsonResp[CLTAP_AD_UNIT_JSON_RESPONSE_KEY];
+//                adUnitJSON = jsonObject[CLTAP_AD_UNIT_JSON_RESPONSE_KEY]; // TODO: remove
+                if (adUnitJSON) {
+                    NSMutableArray *adUnitNotifs;
+                    @try {
+                        adUnitNotifs = [[NSMutableArray alloc] initWithArray:adUnitJSON];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Ad Unit JSON: %@", self, e.debugDescription);
+                    }
+                    if (adUnitNotifs && [adUnitNotifs count] > 0) {
+                        [self runSerialAsync:^{
+                            NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
+                            [self initializeAdUnitWithCallback:^(BOOL success) {
+                                if (success) {
+                                    [self.adUnitController updateAdUnit:adUnits];
+                                }
+                            }];
+                        }];
+                    }
+                }
+#endif
                 // Handle events/profiles sync data
                 @try {
                     NSDictionary *evpr = jsonResp[@"evpr"];
@@ -4288,5 +4328,123 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #endif  //!CLEVERTAP_NO_AB_SUPPORT
+
+
+#pragma mark - Ad View
+
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+
+- (void)initializeAdUnitWithCallback:(CleverTapAdUnitSuccessBlock)callback {
+    [self runSerialAsync:^{
+        if (self.adUnitController) {
+           [[self class] runSyncMainQueue: ^{
+               callback(self.adUnitController.isInitialized);
+           }];
+           return;
+        }
+        if (self.deviceInfo.deviceId) {
+           self.adUnitController = [[CTAdUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+            self.adUnitController.delegate = self;
+            [[self class] runSyncMainQueue: ^{
+              callback(self.adUnitController.isInitialized);
+           }];
+        }
+    }];
+}
+
+- (void)setAdUnitDelegate:(id<CleverTapAdUnitDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setAdUnitDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapAdUnitDelegate)]) {
+         _adUnitDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Ad Unit Delegate does not conform to the CleverTapAdUnitDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapAdUnitDelegate>)adUnitDelegate {
+    return _adUnitDelegate;
+}
+
+- (void)adUnitsDidUpdate {
+    if (self.adUnitDelegate && [self.adUnitDelegate respondsToSelector:@selector(adUnitIDList:)]) {
+        [self.adUnitDelegate adUnitIDList:self.adUnitController.adUnitIDs];
+    }
+    
+    if (self.adUnitDelegate && [self.adUnitDelegate respondsToSelector:@selector(adUnits)]) {
+           [self.adUnitDelegate adUnits:self.adUnitController.adUnits];
+       }
+}
+
+#pragma mark Ad View Public
+
+- (NSDictionary *_Nullable)getAdUnitCustomExtrasForID:(NSString *)adID {
+    NSDictionary *adView = [NSDictionary new];
+    for (NSDictionary *m in self.adUnitController.adUnits) {
+       if ([m.allKeys[0] isEqualToString:adID]) {
+           @try {
+               CleverTapAdUnit *adViewContent = [[CleverTapAdUnit alloc] initWithJSON:m.allValues[0]];
+               adView = adViewContent.customExtras;
+             } @catch (NSException *e) {
+                 CleverTapLogDebug(_config.logLevel, @"Error getting ad unit custom extras: %@", e.debugDescription);
+             }
+        }
+    };
+    return adView;
+}
+
+- (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *)adID {
+    CleverTapAdUnit *adView;
+    for (NSDictionary *m in self.adUnitController.adUnits) {
+       if ([m.allKeys[0] isEqualToString:adID]) {
+           @try {
+                adView = [[CleverTapAdUnit alloc] initWithJSON:m.allValues[0]];
+             } @catch (NSException *e) {
+                 CleverTapLogDebug(_config.logLevel, @"Error getting ad unit: %@", e.debugDescription);
+             }
+        }
+    };
+    return adView;
+}
+
+- (void)recordAdUnitViewedEventForID:(NSString *)adID {
+      // get the adView data
+    CleverTapAdUnit *adUnit = [self getAdUnitForID:adID];
+    #if !defined(CLEVERTAP_TVOS)
+        [self runSerialAsync:^{
+            [CTEventBuilder buildAdViewStateEvent:NO forAdUnit:adUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+                if (event) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                    [self queueEvent:event withType:CleverTapEventTypeRaised];
+                };
+                if (errors) {
+                    [self pushValidationResults:errors];
+                }
+            }];
+        }];
+    #endif
+}
+
+- (void)recordAdUnitClickedEventForID:(NSString *)adID {
+      // get the adView data
+    CleverTapAdUnit *adUnit = [self getAdUnitForID:adID];
+    #if !defined(CLEVERTAP_TVOS)
+        [self runSerialAsync:^{
+            [CTEventBuilder buildAdViewStateEvent:YES forAdUnit:adUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+                if (event) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                    [self queueEvent:event withType:CleverTapEventTypeRaised];
+                };
+                if (errors) {
+                    [self pushValidationResults:errors];
+                }
+            }];
+        }];
+    #endif
+}
+
+#endif
 
 @end

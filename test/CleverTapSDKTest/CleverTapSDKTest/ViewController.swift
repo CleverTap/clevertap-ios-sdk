@@ -3,7 +3,7 @@ import CoreLocation
 import CleverTapSDK
 import WebKit
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate {
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate, CleverTapAdUnitDelegate {
     
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: CustomButton!
@@ -17,6 +17,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     override func viewDidLoad() {
         super.viewDidLoad()
+       
+        CleverTap.sharedInstance()?.setAdUnitDelegate(self)
         
         self.setupImages()
         self.recordUserChargedEvent()
@@ -136,10 +138,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     }
     
     func profilePush() {
-        let _: Dictionary<String, AnyObject> = [
-            "Email": "agrawaladiti@clevertap.com" as AnyObject
+        let profile: Dictionary<String, AnyObject> = [
+            "Email": "agrawaladiti@clevertap.com" as AnyObject,
+            "Prefered Language": "English" as AnyObject
         ]
-//        CleverTap.sharedInstance()?.profilePush(profile)
+        CleverTap.sharedInstance()?.profilePush(profile)
     }
     
     // MARK: - Action Button
@@ -173,8 +176,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         NSLog("test button tapped")
 //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
           CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
-//          CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+          CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
           CleverTap.sharedInstance()?.recordEvent("Alert ios")
+        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+
 //        CleverTap.sharedInstance()?.recordEvent("in-app")
 //        CleverTap.sharedInstance()?.recordEvent("test ios")
 //        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
@@ -198,17 +203,23 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
 //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
-
     }
     
 //    func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
-//
 //        print("message selected")
 //        CleverTap.sharedInstance()?.markRead(message)
 //    }
-//
+
     func messageButtonTapped(withCustomExtras customExtras: [AnyHashable : Any]?) {
         print("App Inbox Button Tapped with custom extras: %@", customExtras ?? "");
+    }
+    
+    func adUnitIDList(_ ids: [Any]?) {
+        print("yes, I'm getting ad ids:", ids ?? "")
+        let customExtras: [AnyHashable : Any] = CleverTap.sharedInstance()!.getAdUnitCustomExtras(forID: ids?[0] as? String ?? "") ?? ["":""]
+        let dict: NSDictionary = customExtras as NSDictionary
+        print("Hello Ad View:", dict)
+        CleverTap.sharedInstance()?.recordAdUnitViewedEvent(forID:ids?[0]  as? String ?? "")
     }
         
     func setupImages(){
