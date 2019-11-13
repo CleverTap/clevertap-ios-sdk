@@ -35,7 +35,7 @@
     
     NSMutableArray *tempArray = [adUnits mutableCopy];
     for (NSDictionary *obj in tempArray) {
-        CleverTapAdUnit *adUnit = [[CleverTapAdUnit alloc] initWithJSON:obj];
+        CleverTapAdUnit *adUnit = [[CleverTapAdUnit alloc] initWithJSON:obj.allValues[0]];
         [ids addObject:obj.allKeys[0]];
         [units addObject:adUnit];
     }

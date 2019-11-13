@@ -19,9 +19,9 @@ import CleverTapSDK
         
 //          CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", andToken: "000-002")
 
-//        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-5")
+        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-5")
         
-       CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+//       CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //       CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
 //       CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //       CleverTap.setCredentialsWithAccountID("", token: "", region: "")

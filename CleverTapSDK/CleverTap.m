@@ -55,6 +55,7 @@ static NSArray* sslCertNames;
 #if !CLEVERTAP_NO_AD_UNIT_SUPPORT
 #import "CTAdUnitController.h"
 #import "CleverTap+AdUnit.h"
+#import "CTAdUnitUtils.h"
 #endif
 
 #import <objc/runtime.h>
@@ -2705,7 +2706,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:jsonDataTest
                                                                options:(NSJSONReadingOptions)0 error:nil]; //TODO: remove
                 NSArray *adUnitJSON = jsonResp[CLTAP_AD_UNIT_JSON_RESPONSE_KEY];
-//                adUnitJSON = jsonObject[CLTAP_AD_UNIT_JSON_RESPONSE_KEY]; // TODO: remove
+                adUnitJSON = jsonObject[CLTAP_AD_UNIT_JSON_RESPONSE_KEY]; // TODO: remove
                 if (adUnitJSON) {
                     NSMutableArray *adUnitNotifs;
                     @try {
@@ -4381,26 +4382,25 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark Ad View Public
 
 - (NSDictionary *_Nullable)getAdUnitCustomExtrasForID:(NSString *)adID {
-    NSDictionary *adView = [NSDictionary new];
-    for (NSDictionary *m in self.adUnitController.adUnits) {
-       if ([m.allKeys[0] isEqualToString:adID]) {
+    NSDictionary *adUnitCustomExtras = [NSDictionary new];
+    for (CleverTapAdUnit *adUnit in self.adUnitController.adUnits) {
+       if ([adUnit.adID isEqualToString:adID]) {
            @try {
-               CleverTapAdUnit *adViewContent = [[CleverTapAdUnit alloc] initWithJSON:m.allValues[0]];
-               adView = adViewContent.customExtras;
+               adUnitCustomExtras = adUnit.customExtras;
              } @catch (NSException *e) {
                  CleverTapLogDebug(_config.logLevel, @"Error getting ad unit custom extras: %@", e.debugDescription);
              }
         }
     };
-    return adView;
+    return adUnitCustomExtras;
 }
 
 - (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *)adID {
     CleverTapAdUnit *adView;
-    for (NSDictionary *m in self.adUnitController.adUnits) {
-       if ([m.allKeys[0] isEqualToString:adID]) {
+    for (CleverTapAdUnit *adUnit in self.adUnitController.adUnits) {
+       if ([adUnit.adID isEqualToString:adID]) {
            @try {
-                adView = [[CleverTapAdUnit alloc] initWithJSON:m.allValues[0]];
+               adView = adUnit;
              } @catch (NSException *e) {
                  CleverTapLogDebug(_config.logLevel, @"Error getting ad unit: %@", e.debugDescription);
              }

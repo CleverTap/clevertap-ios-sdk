@@ -18,7 +18,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     override func viewDidLoad() {
         super.viewDidLoad()
        
-        CleverTap.sharedInstance()?.setAdUnitDelegate(self)
+//        CleverTap.sharedInstance()?.setAdUnitDelegate(self)
         
         self.setupImages()
         self.recordUserChargedEvent()
