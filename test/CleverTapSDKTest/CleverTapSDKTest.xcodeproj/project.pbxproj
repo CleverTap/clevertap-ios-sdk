@@ -12,6 +12,7 @@
 		0737582D22EC21E6006E4BBF /* ModalVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0737582C22EC21E6006E4BBF /* ModalVC.swift */; };
 		0737589A22ECB699006E4BBF /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0737589922ECB699006E4BBF /* CustomButton.swift */; };
 		074CD0C7230AC1D5000C9D2B /* ImageDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074CD0C6230AC1D5000C9D2B /* ImageDetailVC.swift */; };
+		075E0FF5237EB8BB0067130F /* images.png in Resources */ = {isa = PBXBuildFile; fileRef = 075E0FF4237EB8BA0067130F /* images.png */; };
 		075F670722F2C63D00B040E6 /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670622F2C63D00B040E6 /* ProfileVC.swift */; };
 		075F670922F2C65A00B040E6 /* BookVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670822F2C65A00B040E6 /* BookVC.swift */; };
 		075F670B22F2CEDC00B040E6 /* WareHouseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F670A22F2CEDC00B040E6 /* WareHouseVC.swift */; };
@@ -117,6 +118,7 @@
 		0737582C22EC21E6006E4BBF /* ModalVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalVC.swift; sourceTree = "<group>"; };
 		0737589922ECB699006E4BBF /* CustomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
 		074CD0C6230AC1D5000C9D2B /* ImageDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailVC.swift; sourceTree = "<group>"; };
+		075E0FF4237EB8BA0067130F /* images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = images.png; sourceTree = "<group>"; };
 		075F670622F2C63D00B040E6 /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
 		075F670822F2C65A00B040E6 /* BookVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookVC.swift; sourceTree = "<group>"; };
 		075F670A22F2CEDC00B040E6 /* WareHouseVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WareHouseVC.swift; sourceTree = "<group>"; };
@@ -276,6 +278,7 @@
 			isa = PBXGroup;
 			children = (
 				07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */,
+				075E0FF4237EB8BA0067130F /* images.png */,
 				D0596EFC208BDC6800A80753 /* CleverTapSDKTest.entitlements */,
 				07FBD71522FC2F610088C37B /* CustomView.swift */,
 				D0A66246207EE4FF00B403F3 /* AppDelegate.swift */,
@@ -517,6 +520,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0702338122C9F8F900D39F42 /* experiment.json in Resources */,
+				075E0FF5237EB8BB0067130F /* images.png in Resources */,
 				D0A6624E207EE50000B403F3 /* Assets.xcassets in Resources */,
 				D0A6624C207EE4FF00B403F3 /* Main.storyboard in Resources */,
 				07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */,

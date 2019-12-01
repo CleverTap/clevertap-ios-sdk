@@ -8,6 +8,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: CustomButton!
     @IBOutlet var customButton: CustomButton!
+    
+    @IBOutlet var customView: UIView!
+
 
     var webView: WKWebView!
     var imageArray = [UIImage]()
@@ -18,17 +21,20 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     override func viewDidLoad() {
         super.viewDidLoad()
        
-//        CleverTap.sharedInstance()?.setAdUnitDelegate(self)
+        CleverTap.sharedInstance()?.setAdUnitDelegate(self)
         
         self.setupImages()
         self.recordUserChargedEvent()
-//        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+
+        CleverTap.sharedInstance()?.recordEvent("Alert")
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             print("Experiments updated.")
       }
     
 //        inboxRegister()
-        // addWebview()
+//        addWebview()
+//        addAdUnit()
         
         CleverTap.sharedInstance()?.getBoolVariable(withName: "boolVar", defaultValue: true)
         CleverTap.sharedInstance()?.getDoubleVariable(withName: "doubleVar", defaultValue: 0.0)
@@ -55,6 +61,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         super.viewDidAppear(animated)
     }
     
+//    func addAdUnit() {
+//        var view: UIView = CleverTap.sharedInstance()!.adUnitView(forID: "")
+////        self.view.addSubview(view)
+//    }
+    
     func recordUserChargedEvent() {
         //charged event
         let chargeDetails = [
@@ -62,7 +73,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             "Payment mode": "Credit Card",
             "Charged ID": 24052013
             ] as [String : Any]
-        
+         
         let item1 = [
             "Category": "books",
             "Book name": "The Millionaire next door",
@@ -177,7 +188,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
           CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
           CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
-          CleverTap.sharedInstance()?.recordEvent("Alert ios")
+          CleverTap.sharedInstance()?.recordEvent("Cover ios")
         CleverTap.sharedInstance()?.recordEvent("Added To Cart")
 
 //        CleverTap.sharedInstance()?.recordEvent("in-app")
@@ -214,12 +225,28 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         print("App Inbox Button Tapped with custom extras: %@", customExtras ?? "");
     }
     
-    func adUnitIDList(_ ids: [Any]?) {
-        print("yes, I'm getting ad ids:", ids ?? "")
-        let customExtras: [AnyHashable : Any] = CleverTap.sharedInstance()!.getAdUnitCustomExtras(forID: ids?[0] as? String ?? "") ?? ["":""]
-        let dict: NSDictionary = customExtras as NSDictionary
-        print("Hello Ad View:", dict)
-        CleverTap.sharedInstance()?.recordAdUnitViewedEvent(forID:ids?[0]  as? String ?? "")
+    func adUnitsDidReceive(_ adUnits: [CleverTapAdUnit]) {
+        
+        var units:[CleverTapAdUnit] = adUnits;
+        print("yes, I'm getting ad ids:", adUnits)
+
+    }
+    
+    func adUnitIDList(_ ids: [Any]) {
+        print("yes, I'm getting ad ids:", ids )
+//        let customExtras: [AnyHashable : Any] = CleverTap.sharedInstance()!.getAdUnitCustomExtras(forID: ids[0] as? String ?? "") ?? ["":""]
+//        let dict: NSDictionary = customExtras as NSDictionary
+//        print("Hello Ad View:", dict)
+        CleverTap.sharedInstance()?.recordAdUnitViewedEvent(forID:ids[0]  as? String ?? "")
+    }
+    
+    func adUnits(_ adUnits: [CleverTapAdUnit]) {
+        print("I'm getting ad units:", adUnits);
+        
+        for units in adUnits {
+            let dict: NSDictionary = units.customExtras! as NSDictionary
+            print("Hello Ad View:", dict)
+        }
     }
         
     func setupImages(){

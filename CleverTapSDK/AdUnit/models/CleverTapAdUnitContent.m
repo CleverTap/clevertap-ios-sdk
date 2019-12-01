@@ -7,9 +7,16 @@
     if (self = [super init]) {
         @try {
            _title = jsonObject[@"title"][@"text"];
+           _titleColor = jsonObject[@"title"][@"color"];
            _message = jsonObject[@"message"][@"text"];
+           _messageColor = jsonObject[@"message"][@"color"];
            _iconUrl = jsonObject[@"icon"][@"url"];
            _mediaUrl = jsonObject[@"media"][@"url"];
+           _videoPosterUrl = jsonObject[@"media"][@"poster"];
+            
+           if ([jsonObject[@"action"][@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
+                _actionUrl = jsonObject[@"action"][@"url"][@"ios"][@"text"];
+           }
            NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
            if (_media) {
                NSString *contentType = _media[@"content_type"];

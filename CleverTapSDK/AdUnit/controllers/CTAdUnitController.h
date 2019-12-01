@@ -9,7 +9,6 @@
 @interface CTAdUnitController : NSObject
 
 @property (nonatomic, assign, readonly) BOOL isInitialized;
-@property (nonatomic, copy, readonly) NSArray * _Nullable adUnitIDs;
 @property (nonatomic, copy, readonly) NSArray <CleverTapAdUnit *> * _Nullable adUnits;
 
 @property (nonatomic, weak) id<CTAdUnitDelegate> _Nullable delegate;

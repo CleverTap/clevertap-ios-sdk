@@ -10,7 +10,7 @@
 @property (nullable, nonatomic, copy, readonly) NSDictionary *json;
 @property (nullable, nonatomic, copy, readonly) NSString *adID;
 @property (nullable, nonatomic, copy, readonly) NSString *type;
-@property (nullable, nonatomic, copy, readonly) NSArray *links;
+@property (nullable, nonatomic, copy, readonly) NSString *orientation;
 @property (nullable, nonatomic, copy, readonly) NSDictionary *customExtras;
 @property (nullable, nonatomic, copy, readonly) NSArray<CleverTapAdUnitContent *> *content;
 
@@ -19,7 +19,12 @@
 @interface CleverTapAdUnitContent : NSObject
 
 @property (nullable, nonatomic, copy, readonly) NSString *title;
+@property (nullable, nonatomic, copy, readonly) NSString *titleColor;
 @property (nullable, nonatomic, copy, readonly) NSString *message;
+@property (nullable, nonatomic, copy, readonly) NSString *messageColor;
+@property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
+@property (nullable, nonatomic, copy, readonly) NSString *videoPosterUrl;
+@property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *mediaUrl;
 @property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
 @property (nonatomic, readonly, assign) BOOL mediaIsAudio;
@@ -33,15 +38,13 @@
 
 @protocol CleverTapAdUnitDelegate <NSObject>
 @optional
-- (void)adUnitIDList:(NSArray *_Nonnull)ids;
-- (void)adUnits:(NSArray<CleverTapAdUnit *>*_Nonnull)adUnits;
+- (void)adUnitsDidReceive:(NSArray<CleverTapAdUnit *>*_Nonnull)adUnits;
 @end
 
 typedef void (^CleverTapAdUnitSuccessBlock)(BOOL success);
 
 @interface CleverTap (AdUnit)
  
-- (NSDictionary *_Nullable)getAdUnitCustomExtrasForID:(NSString *_Nonnull)adID;
 - (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *_Nonnull)adID;
 
 - (void)setAdUnitDelegate:(id <CleverTapAdUnitDelegate>_Nonnull)delegate;

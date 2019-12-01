@@ -7,7 +7,6 @@
 @property (nonatomic, copy, readonly) NSString *accountId;
 @property (atomic, copy) NSString *guid;
 
-@property (nonatomic, copy, readwrite) NSArray *adUnitIDs;
 @property (nonatomic, copy, readwrite) NSArray *adUnits;
 
 @end
@@ -35,11 +34,10 @@
     
     NSMutableArray *tempArray = [adUnits mutableCopy];
     for (NSDictionary *obj in tempArray) {
-        CleverTapAdUnit *adUnit = [[CleverTapAdUnit alloc] initWithJSON:obj.allValues[0]];
-        [ids addObject:obj.allKeys[0]];
+        CleverTapAdUnit *adUnit = [[CleverTapAdUnit alloc] initWithJSON:obj];
+        [ids addObject:obj[@"wzrk_id"]];
         [units addObject:adUnit];
     }
-    _adUnitIDs = ids;
     _adUnits = units;
     [self notifyUpdate];
 }
@@ -47,11 +45,6 @@
 - (NSArray *)adUnits {
     if (!self.isInitialized) return nil;
     return _adUnits;
-}
-
-- (NSArray <CleverTapAdUnit *> *)adUnitIDs {
-    if (!self.isInitialized) return nil;
-    return _adUnitIDs;
 }
 
 - (void)notifyUpdate {

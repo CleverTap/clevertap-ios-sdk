@@ -30,7 +30,7 @@
 	<key>CleverTapAccountID</key>
 	<string></string>
 	<key>CleverTapBeta</key>
-	<true/>
+	<false/>
 	<key>CleverTapDisableAppLaunched</key>
 	<string>0</string>
 	<key>CleverTapEnableCustomId</key>

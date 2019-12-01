@@ -1,6 +1,6 @@
 #import "CTABTestUtils.h"
 
-NSString * const kSessionVariantKey = @"session_variant";
+NSString * const kCTSessionVariantKey = @"session_variant";
 NSString * const kSnapshotSerializerConfigKey = @"snapshot_class_descriptions";
 
 NSString * const CTABTestEditorSessionStartRequestType = @"matched";

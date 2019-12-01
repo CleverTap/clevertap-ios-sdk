@@ -17,26 +17,21 @@ import CleverTapSDK
             // Fallback on earlier versions
         };
         
-//          CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", andToken: "000-002")
-
-        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-5")
-        
-//       CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-//       CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
-//       CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-//       CleverTap.setCredentialsWithAccountID("", token: "", region: "")
-//       CleverTap.setCredentialsWithAccountID("WWW-WWW-WWRZ", andToken: "000-000")
-//       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WW4Z", andToken: "000-001")
+//     CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", andToken: "000-002")
+//     CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-5")
+//     CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+//     CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
+//     CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+     CleverTap.setCredentialsWithAccountID("W6W-797-865Z", token: "aca-060", region: "sk1-staging-6 ")
+//       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
         
         CleverTap.setUIEditorConnectionEnabled(true)
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
 
         CleverTap.autoIntegrate()
-        CleverTap.setDebugLevel(2)
+        CleverTap.setDebugLevel(3)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
-        //CleverTap.sharedInstance(withCleverTapID: "Aditi09")
-        //CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: ["Notification key":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")
         CleverTap.sharedInstance()?.registerBoolVariable(withName: "boolVar")
@@ -78,25 +73,24 @@ import CleverTapSDK
         print(CleverTapID ?? "unknown")
         print(accountId ?? "unknown")
     }
-    
    
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         NSLog("%@: failed to register for remote notifications: %@", self.description, error.localizedDescription)
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        
         let tokenParts = deviceToken.map { data -> String in
             return String(format: "%02.2hhx", data)
         }
-        
         let token = tokenParts.joined()
         print("Device Token: \(token)")
+        CleverTap.sharedInstance()?.setPushToken(deviceToken)
         NSLog("%@: registered for remote notifications: %@", self.description, deviceToken.description)
     }
     
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+//        CleverTap.sharedInstance()?.handleNotification(withData: response.notification.request.content.userInfo)
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
         completionHandler()
     }

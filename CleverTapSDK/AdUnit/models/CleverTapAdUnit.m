@@ -18,14 +18,14 @@
             _type = type;
         }
         
-        NSDictionary *customExtras = (NSDictionary *) json[@"kv"];
+        NSString *orientation = json[@"orientation"];
+        if (type) {
+           _orientation = orientation;
+        }
+        
+        NSDictionary *customExtras = (NSDictionary *) json[@"custom_kv"];
         if (!customExtras) customExtras = [NSDictionary new];
         _customExtras = customExtras;
-        
-        NSArray *links = json[@"links"];
-        if (links) {
-           _links = links;
-        }
         
         NSMutableArray<CleverTapAdUnitContent *> *contentList = [NSMutableArray new];
         
@@ -36,6 +36,7 @@
                 [contentList addObject:content];
             }
         }
+        _content = adUnitContent;
                
     } @catch (NSException *e) {
           CleverTapLogStaticDebug(@"Error intitializing CleverTapAdUnit: %@", e.reason);

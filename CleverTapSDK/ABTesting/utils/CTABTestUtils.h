@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString * _Nullable const kSessionVariantKey;
+extern NSString * _Nullable const kCTSessionVariantKey;
 extern NSString * _Nullable const kSnapshotSerializerConfigKey;
 
 extern NSString * _Nullable const CTABTestEditorChangeMessageRequestType;

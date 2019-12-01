@@ -103,7 +103,7 @@ static inline int32_t validate_dispatch_data_partial_string(NSData *data);
 @end
 
 
-@interface _MPRunLoopThread : NSThread
+@interface _CTRunLoopThread : NSThread
 
 @property (nonatomic, readonly) NSRunLoop *runLoop;
 
@@ -1634,7 +1634,7 @@ static inline int32_t validate_dispatch_data_partial_string(NSData *data) {
 
 #endif
 
-static _MPRunLoopThread *networkThread = nil;
+static _CTRunLoopThread *networkThread = nil;
 static NSRunLoop *networkRunLoop = nil;
 
 @implementation NSRunLoop (CTWebSocket)
@@ -1642,7 +1642,7 @@ static NSRunLoop *networkRunLoop = nil;
 + (NSRunLoop *)CT_networkRunLoop {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        networkThread = [[_MPRunLoopThread alloc] init];
+        networkThread = [[_CTRunLoopThread alloc] init];
         networkThread.name = @"com.clevertap.WebSocket.NetworkThread";
         [networkThread start];
         networkRunLoop = networkThread.runLoop;
@@ -1654,7 +1654,7 @@ static NSRunLoop *networkRunLoop = nil;
 @end
 
 
-@implementation _MPRunLoopThread {
+@implementation _CTRunLoopThread {
     dispatch_group_t _waitGroup;
 }
 
