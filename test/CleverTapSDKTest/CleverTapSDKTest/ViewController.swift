@@ -237,7 +237,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 //        let customExtras: [AnyHashable : Any] = CleverTap.sharedInstance()!.getAdUnitCustomExtras(forID: ids[0] as? String ?? "") ?? ["":""]
 //        let dict: NSDictionary = customExtras as NSDictionary
 //        print("Hello Ad View:", dict)
+        let adUnit: CleverTapAdUnit = CleverTapAdUnit()
         CleverTap.sharedInstance()?.recordAdUnitViewedEvent(forID:ids[0]  as? String ?? "")
+//        CleverTap.sharedInstance()?.recordAdUnitViewedEvent(forID: adUnit.adID ?? "")
+//        CleverTap.sharedInstance()?.recordAdUnitViewedEvent(forID: adUnit.adID ?? "")
+
     }
     
     func adUnits(_ adUnits: [CleverTapAdUnit]) {
