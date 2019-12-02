@@ -25,9 +25,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         self.setupImages()
         self.recordUserChargedEvent()
-        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+//        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
 
-        CleverTap.sharedInstance()?.recordEvent("Charged")
+//        CleverTap.sharedInstance()?.recordEvent("Charged")
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             print("Experiments updated.")
       }
@@ -189,7 +189,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
           CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
           CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
           CleverTap.sharedInstance()?.recordEvent("Cover ios")
-        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+          CleverTap.sharedInstance()?.recordEvent("Added To Cart")
 
 //        CleverTap.sharedInstance()?.recordEvent("in-app")
 //        CleverTap.sharedInstance()?.recordEvent("test ios")

@@ -2,6 +2,7 @@
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CleverTapJSInterface.h"
+#import "CTInAppResources.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
 
@@ -141,7 +142,9 @@ typedef enum {
     
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     char pos = self.notification.position;
-    int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ?  (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
+    CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
+
+    int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
     switch (pos) {
         case CLTAP_INAPP_POSITION_TOP:
         frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
@@ -187,7 +190,7 @@ typedef enum {
     if (self.notification.showClose) {
         _closeButton = [CTDismissButton new];
         [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
-        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? extra : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
+        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarFrame : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
         _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:_closeButton];
     }

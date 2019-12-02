@@ -4374,6 +4374,56 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (BOOL)didHandleAdUnitTestFromPushNotificaton:(NSDictionary*)notification {
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+    if ([[self class] runningInsideAppExtension]) {
+        return NO;
+    }
+    
+    if (!notification || [notification count] <= 0 || !notification[@"wzrk_adunit"]) return NO;
+    
+    @try {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Received ad unit from push payload: %@", self, notification);
+        
+        NSString *jsonString = notification[@"wzrk_adunit"];
+        
+        NSDictionary *adUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                                                              options:0
+                                                                error:nil];
+        
+        NSMutableArray<NSDictionary*> *adUnits = [NSMutableArray new];
+        [adUnits addObject:adUnitDict];
+        
+        if (adUnits && adUnits.count > 0) {
+            float delay = self.isAppForeground ? 0.5 : 2.0;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+             @try {
+                 [self initializeAdUnitWithCallback:^(BOOL success) {
+                         if (success) {
+                             [self runSerialAsync:^{
+                                 [self.adUnitController updateAdUnit:adUnits];
+                             }];
+                         }
+                    }];
+                } @catch (NSException *e) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
+                }
+            });
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the ad unit as JSON", self);
+            return YES;
+        }
+        
+    } @catch (NSException *e) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
+        return YES;
+    }
+    
+#endif
+    return YES;
+}
+
+
 #pragma mark Ad View Public
 
 - (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *)adID {
@@ -4424,55 +4474,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }];
         }];
     #endif
-}
-
-- (BOOL)didHandleAdUnitTestFromPushNotificaton:(NSDictionary*)notification {
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
-    if ([[self class] runningInsideAppExtension]) {
-        return NO;
-    }
-    
-    if (!notification || [notification count] <= 0 || !notification[@"wzrk_adunit"]) return NO;
-    
-    @try {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Received ad unit from push payload: %@", self, notification);
-        
-        NSString *jsonString = notification[@"wzrk_adunit"];
-        
-        NSDictionary *adUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
-                                                              options:0
-                                                                error:nil];
-        
-        NSMutableArray<NSDictionary*> *adUnits = [NSMutableArray new];
-        [adUnits addObject:adUnitDict];
-        
-        if (adUnits && adUnits.count > 0) {
-            float delay = self.isAppForeground ? 0.5 : 2.0;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-             @try {
-                 [self initializeAdUnitWithCallback:^(BOOL success) {
-                         if (success) {
-                             [self runSerialAsync:^{
-                                 [self.adUnitController updateAdUnit:adUnits];
-                             }];
-                         }
-                    }];
-                } @catch (NSException *e) {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
-                }
-            });
-        } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the ad unit as JSON", self);
-            return YES;
-        }
-        
-    } @catch (NSException *e) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
-        return YES;
-    }
-    
-#endif
-    return YES;
 }
 
 #endif

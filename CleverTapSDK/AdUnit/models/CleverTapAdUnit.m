@@ -11,6 +11,8 @@
         NSString *wzrkId = json[@"wzrk_id"];
         if (wzrkId) {
             _adID = wzrkId;
+        } else {
+            _adID = @"0_0";
         }
        
         NSString *type = json[@"type"];

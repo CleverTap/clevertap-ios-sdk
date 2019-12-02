@@ -29,13 +29,10 @@
 
 // be sure to call off the main thread
 - (void)_updateAdUnit:(NSArray<NSDictionary*> *)adUnits {
-    NSMutableArray *ids = [NSMutableArray new];
     NSMutableArray *units = [NSMutableArray new];
-    
     NSMutableArray *tempArray = [adUnits mutableCopy];
     for (NSDictionary *obj in tempArray) {
         CleverTapAdUnit *adUnit = [[CleverTapAdUnit alloc] initWithJSON:obj];
-        [ids addObject:obj[@"wzrk_id"]];
         [units addObject:adUnit];
     }
     _adUnits = units;

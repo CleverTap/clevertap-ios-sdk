@@ -22,8 +22,8 @@ import CleverTapSDK
 //     CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //     CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
 //     CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-//     CleverTap.setCredentialsWithAccountID("W6W-797-865Z", token: "aca-060", region: "sk1-staging-6")
-       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+      CleverTap.setCredentialsWithAccountID("W6W-797-865Z", token: "aca-060", region: "sk1-staging-6")
+//       CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
         
         CleverTap.setUIEditorConnectionEnabled(true)
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)

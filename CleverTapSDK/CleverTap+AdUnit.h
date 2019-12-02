@@ -94,7 +94,7 @@ This sets the CleverTapAdUnitDelegate.
 @abstract
 Record Notification Viewed for Ad Unit.
 
-@param adID       ad unit identifier
+@param adID      unique id of the Ad Unit
 */
 - (void)recordAdUnitViewedEventForID:(NSString *_Nonnull)adID;
 /*!
@@ -103,7 +103,7 @@ Record Notification Viewed for Ad Unit.
 @abstract
 Record Notification Clicked for Ad Unit.
 
-@param adID       ad unit identifier
+@param adID       unique id of the Ad Unit
 */
 - (void)recordAdUnitClickedEventForID:(NSString *_Nonnull)adID;
 
