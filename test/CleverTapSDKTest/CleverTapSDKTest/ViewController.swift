@@ -27,7 +27,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         self.recordUserChargedEvent()
         CleverTap.sharedInstance()?.recordEvent("Added To Cart")
 
-        CleverTap.sharedInstance()?.recordEvent("Alert")
+        CleverTap.sharedInstance()?.recordEvent("Charged")
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             print("Experiments updated.")
       }
@@ -227,9 +227,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     func adUnitsDidReceive(_ adUnits: [CleverTapAdUnit]) {
         
-        var units:[CleverTapAdUnit] = adUnits;
+        let units:[CleverTapAdUnit] = adUnits;
         print("yes, I'm getting ad ids:", adUnits)
-
+        print("yes, I'm getting ad id:", units[0].adID ?? "")
+        print("yes, I'm getting ad json:", units[0].json ?? "")
+        print("yes, I'm getting ad custom Extras:", units[0].customExtras ?? "")
     }
     
     func adUnitIDList(_ ids: [Any]) {

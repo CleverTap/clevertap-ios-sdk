@@ -1454,6 +1454,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // check to see whether the push includes a test inbox message, if so don't process further
     if ([self didHandleInboxMessageTestFromPushNotificaton:notification]) return;
     
+    // check to see whether the push includes a test ad unit, if so don't process further
+    if ([self didHandleAdUnitTestFromPushNotificaton:notification]) return;
+        
     // determine application state
     UIApplication *application = [[self class] getSharedApplication];
     if (application != nil) {
@@ -2711,13 +2714,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Ad Unit JSON: %@", self, e.debugDescription);
                     }
                     if (adUnitNotifs && [adUnitNotifs count] > 0) {
-                        [self runSerialAsync:^{
-                            NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
-                            [self initializeAdUnitWithCallback:^(BOOL success) {
-                                if (success) {
-                                    [self.adUnitController updateAdUnit:adUnits];
-                                }
-                            }];
+                        [self initializeAdUnitWithCallback:^(BOOL success) {
+                            if (success) {
+                                 [self runSerialAsync:^{
+                                     NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
+                                     [self.adUnitController updateAdUnit:adUnits];
+                                 }];
+                             }
                         }];
                     }
                 }
@@ -4421,6 +4424,55 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }];
         }];
     #endif
+}
+
+- (BOOL)didHandleAdUnitTestFromPushNotificaton:(NSDictionary*)notification {
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+    if ([[self class] runningInsideAppExtension]) {
+        return NO;
+    }
+    
+    if (!notification || [notification count] <= 0 || !notification[@"wzrk_adunit"]) return NO;
+    
+    @try {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Received ad unit from push payload: %@", self, notification);
+        
+        NSString *jsonString = notification[@"wzrk_adunit"];
+        
+        NSDictionary *adUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                                                              options:0
+                                                                error:nil];
+        
+        NSMutableArray<NSDictionary*> *adUnits = [NSMutableArray new];
+        [adUnits addObject:adUnitDict];
+        
+        if (adUnits && adUnits.count > 0) {
+            float delay = self.isAppForeground ? 0.5 : 2.0;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+             @try {
+                 [self initializeAdUnitWithCallback:^(BOOL success) {
+                         if (success) {
+                             [self runSerialAsync:^{
+                                 [self.adUnitController updateAdUnit:adUnits];
+                             }];
+                         }
+                    }];
+                } @catch (NSException *e) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
+                }
+            });
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the ad unit as JSON", self);
+            return YES;
+        }
+        
+    } @catch (NSException *e) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
+        return YES;
+    }
+    
+#endif
+    return YES;
 }
 
 #endif
