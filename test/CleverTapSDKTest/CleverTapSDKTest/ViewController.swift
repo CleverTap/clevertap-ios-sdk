@@ -225,19 +225,18 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         print("App Inbox Button Tapped with custom extras: %@", customExtras ?? "");
     }
     
-    func adUnitsDidReceive(_ adUnits: [CleverTapAdUnit]) {
-        
-        let units:[CleverTapAdUnit] = adUnits;
-        print("yes, I'm getting ad ids:", adUnits)
-        print("yes, I'm getting ad id:", units[0].adID ?? "")
-        print("yes, I'm getting ad json:", units[0].json ?? "")
-        print("yes, I'm getting ad custom Extras:", units[0].customExtras ?? "")
-        
-        let unitsTest:[CleverTapAdUnit] = CleverTap.sharedInstance()?.getAllAdUnits() ?? [CleverTapAdUnit]()
-        
-        let unit:CleverTapAdUnit = CleverTap.sharedInstance()?.getAdUnit(forID: units[0].adID ?? "") ?? CleverTapAdUnit()
-        print("Getting ad unit", unit.customExtras ?? "")
-
+    func adUnitsUpdated(_ adUnits: [CleverTapAdUnit]) {
+          let units:[CleverTapAdUnit] = adUnits;
+          print("yes, I'm getting ad ids:", adUnits)
+          print("yes, I'm getting ad id:", units[0].adID ?? "")
+          print("yes, I'm getting ad json:", units[0].json ?? "")
+          print("yes, I'm getting ad custom Extras:", units[0].customExtras ?? "")
+          
+          let unitsTest:[CleverTapAdUnit] = CleverTap.sharedInstance()?.getAllAdUnits() ?? [CleverTapAdUnit]()
+          print("Getting all ad units", unitsTest)
+          
+          let unit:CleverTapAdUnit = CleverTap.sharedInstance()?.getAdUnit(forID: units[0].adID ?? "") ?? CleverTapAdUnit()
+          print("Getting ad unit", unit.customExtras ?? "")
     }
     
     func adUnitIDList(_ ids: [Any]) {
@@ -254,7 +253,6 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     func adUnits(_ adUnits: [CleverTapAdUnit]) {
         print("I'm getting ad units:", adUnits);
-        
         for units in adUnits {
             let dict: NSDictionary = units.customExtras! as NSDictionary
             print("Hello Ad View:", dict)

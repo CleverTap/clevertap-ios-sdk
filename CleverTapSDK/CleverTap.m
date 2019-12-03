@@ -2718,7 +2718,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             if (success) {
                                  [self runSerialAsync:^{
                                      NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
-                                     [self.adUnitController updateAdUnit:adUnits];
+                                     [self.adUnitController updateAdUnits:adUnits];
                                  }];
                              }
                         }];
@@ -2985,6 +2985,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
 #if !CLEVERTAP_NO_AB_SUPPORT
         [self _resetABTesting];
+#endif
+        
+#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+        [self _resetAdUnit];
 #endif
         // push data on reset profile
         [self recordAppLaunched:action];
@@ -4343,13 +4347,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
            return;
         }
         if (self.deviceInfo.deviceId) {
-           self.adUnitController = [[CTAdUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+            self.adUnitController = [[CTAdUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
             self.adUnitController.delegate = self;
             [[self class] runSyncMainQueue: ^{
               callback(self.adUnitController.isInitialized);
            }];
         }
     }];
+}
+
+- (void)_resetAdUnit {
+    if (self.adUnitController && self.adUnitController.isInitialized && self.deviceInfo.deviceId) {
+        self.adUnitController = [[CTAdUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.adUnitController.delegate = self;
+    }
 }
 
 - (void)setAdUnitDelegate:(id<CleverTapAdUnitDelegate>)delegate {
@@ -4369,8 +4380,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)adUnitsDidUpdate {
-    if (self.adUnitDelegate && [self.adUnitDelegate respondsToSelector:@selector(adUnitsDidReceive:)]) {
-        [self.adUnitDelegate adUnitsDidReceive:self.adUnitController.adUnits];
+    if (self.adUnitDelegate && [self.adUnitDelegate respondsToSelector:@selector(adUnitsUpdated:)]) {
+        [self.adUnitDelegate adUnitsUpdated:self.adUnitController.adUnits];
     }
 }
 
@@ -4401,7 +4412,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                  [self initializeAdUnitWithCallback:^(BOOL success) {
                          if (success) {
                              [self runSerialAsync:^{
-                                 [self.adUnitController updateAdUnit:adUnits];
+                                 [self.adUnitController updateAdUnits:adUnits];
                              }];
                          }
                     }];
@@ -4431,17 +4442,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *)adID {
-    CleverTapAdUnit *adView;
     for (CleverTapAdUnit *adUnit in self.adUnitController.adUnits) {
        if ([adUnit.adID isEqualToString:adID]) {
            @try {
-               adView = adUnit;
+                return adUnit;
              } @catch (NSException *e) {
-                 CleverTapLogDebug(_config.logLevel, @"Error getting ad unit: %@", e.debugDescription);
+                CleverTapLogDebug(_config.logLevel, @"Error getting ad unit: %@", e.debugDescription);
              }
         }
     };
-    return adView;
+    return nil;
 }
 
 - (void)recordAdUnitViewedEventForID:(NSString *)adID {

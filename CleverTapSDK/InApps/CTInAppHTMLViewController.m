@@ -142,7 +142,7 @@ typedef enum {
     
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     char pos = self.notification.position;
-    CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
+    CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? [[CTInAppResources getSharedApplication] statusBarFrame].size.height : 0.0;
 
     int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
     switch (pos) {
@@ -190,7 +190,7 @@ typedef enum {
     if (self.notification.showClose) {
         _closeButton = [CTDismissButton new];
         [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
-        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarFrame : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
+        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarHeight : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
         _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:_closeButton];
     }

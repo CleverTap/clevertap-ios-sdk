@@ -23,12 +23,12 @@
     return self;
 }
 
-- (void)updateAdUnit:(NSArray<NSDictionary *> *)adUnits {
-    [self _updateAdUnit:adUnits];
+- (void)updateAdUnits:(NSArray<NSDictionary *> *)adUnits {
+    [self _updateAdUnits:adUnits];
 }
 
 // be sure to call off the main thread
-- (void)_updateAdUnit:(NSArray<NSDictionary*> *)adUnits {
+- (void)_updateAdUnits:(NSArray<NSDictionary*> *)adUnits {
     NSMutableArray *units = [NSMutableArray new];
     NSMutableArray *tempArray = [adUnits mutableCopy];
     for (NSDictionary *obj in tempArray) {

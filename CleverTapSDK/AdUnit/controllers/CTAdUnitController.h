@@ -19,7 +19,7 @@
 - (instancetype _Nullable)initWithAccountId:(NSString *_Nullable)accountId
                                        guid:(NSString *_Nullable)guid;
 
-- (void)updateAdUnit:(NSArray<NSDictionary*> *_Nullable)adUnits;
+- (void)updateAdUnits:(NSArray<NSDictionary*> *_Nullable)adUnits;
 
 @end
 

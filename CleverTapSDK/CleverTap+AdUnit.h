@@ -26,9 +26,9 @@ The `CleverTapAdUnit` represents the Ad Unit object.
 */
 @property (nullable, nonatomic, copy, readonly) NSString *type;
 /*!
-* orientation defines the orientation of the ad unit.
+* bgColor defines the backgroundColor of the ad unit.
 */
-@property (nullable, nonatomic, copy, readonly) NSString *orientation;
+@property (nullable, nonatomic, copy, readonly) NSString *bgColor;
 /*!
 * customExtras defines the extra data in the form of an NSDictionary. The extra key/value pairs set in the CleverTap dashboard.
 */
@@ -67,7 +67,7 @@ The `CleverTapAdUnit` represents the Ad Unit object.
 
 @protocol CleverTapAdUnitDelegate <NSObject>
 @optional
-- (void)adUnitsDidReceive:(NSArray<CleverTapAdUnit *>*_Nonnull)adUnits;
+- (void)adUnitsUpdated:(NSArray<CleverTapAdUnit *>*_Nonnull)adUnits;
 @end
 
 typedef void (^CleverTapAdUnitSuccessBlock)(BOOL success);

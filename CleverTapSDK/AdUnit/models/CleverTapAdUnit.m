@@ -20,9 +20,9 @@
             _type = type;
         }
         
-        NSString *orientation = json[@"orientation"];
-        if (type) {
-           _orientation = orientation;
+        NSString *bgColor = json[@"bg"];
+        if (bgColor) {
+            _bgColor = bgColor;
         }
         
         NSDictionary *customExtras = (NSDictionary *) json[@"custom_kv"];
