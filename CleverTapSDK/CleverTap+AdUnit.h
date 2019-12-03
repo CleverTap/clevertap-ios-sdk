@@ -75,7 +75,22 @@ typedef void (^CleverTapAdUnitSuccessBlock)(BOOL success);
 @interface CleverTap (AdUnit)
 
 /*!
+@method
 
+@abstract
+This method returns all the ad units.
+*/
+- (NSArray<CleverTapAdUnit *>*_Nonnull)getAllAdUnits;
+ 
+ /*!
+ @method
+
+ @abstract
+ This method return  ad unit for the provided adID
+ */
+- (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *_Nonnull)adID;
+
+ /*!
 @method
 
 @abstract
@@ -88,22 +103,24 @@ This sets the CleverTapAdUnitDelegate.
 @param delegate     an object conforming to the CleverTapAdUnitDelegate Protocol
 */
 - (void)setAdUnitDelegate:(id <CleverTapAdUnitDelegate>_Nonnull)delegate;
+
 /*!
 @method
 
 @abstract
 Record Notification Viewed for Ad Unit.
 
-@param adID      unique id of the Ad Unit
+@param adID      unique id of the ad unit
 */
 - (void)recordAdUnitViewedEventForID:(NSString *_Nonnull)adID;
+
 /*!
 @method
 
 @abstract
 Record Notification Clicked for Ad Unit.
 
-@param adID       unique id of the Ad Unit
+@param adID       unique id of the ad unit
 */
 - (void)recordAdUnitClickedEventForID:(NSString *_Nonnull)adID;
 

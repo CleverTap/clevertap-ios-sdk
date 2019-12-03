@@ -4426,6 +4426,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark Ad View Public
 
+- (NSArray<CleverTapAdUnit *>*)getAllAdUnits {
+    return self.adUnitController.adUnits;
+}
+
 - (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *)adID {
     CleverTapAdUnit *adView;
     for (CleverTapAdUnit *adUnit in self.adUnitController.adUnits) {
