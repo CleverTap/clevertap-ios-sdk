@@ -2716,10 +2716,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (adUnitNotifs && [adUnitNotifs count] > 0) {
                         [self initializeAdUnitWithCallback:^(BOOL success) {
                             if (success) {
-                                 [self runSerialAsync:^{
-                                     NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
-                                     [self.adUnitController updateAdUnits:adUnits];
-                                 }];
+                                  NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
+                                  [self.adUnitController updateAdUnits:adUnits];
                              }
                         }];
                     }
@@ -4411,9 +4409,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
              @try {
                  [self initializeAdUnitWithCallback:^(BOOL success) {
                          if (success) {
-                             [self runSerialAsync:^{
-                                 [self.adUnitController updateAdUnits:adUnits];
-                             }];
+                              [self.adUnitController updateAdUnits:adUnits];
                          }
                     }];
                 } @catch (NSException *e) {

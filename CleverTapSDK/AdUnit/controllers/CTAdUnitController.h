@@ -16,8 +16,8 @@
 - (instancetype _Nullable ) init __unavailable;
 
 // blocking, call off main thread
-- (instancetype _Nullable)initWithAccountId:(NSString *_Nullable)accountId
-                                       guid:(NSString *_Nullable)guid;
+- (instancetype _Nullable)initWithAccountId:(NSString *_Nonnull)accountId
+                                       guid:(NSString *_Nonnull)guid;
 
 - (void)updateAdUnits:(NSArray<NSDictionary*> *_Nullable)adUnits;
 

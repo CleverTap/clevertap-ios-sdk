@@ -8,11 +8,9 @@
 @abstract
 The `CleverTapAdUnit` represents the Ad Unit object.
 */
-
 @interface CleverTapAdUnit : NSObject
 
 - (instancetype _Nullable )initWithJSON:(NSDictionary *_Nullable)json;
-
 /*!
 * json defines the ad unit data in the form of NSDictionary.
 */
@@ -46,19 +44,53 @@ The `CleverTapAdUnit` represents the Ad Unit object.
  The `CleverTapAdUnitContent` represents the Ad Unit content.
 */
 @interface CleverTapAdUnitContent : NSObject
-
+/*!
+* title  defines the title section of the ad unit content.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *title;
+/*!
+* titleColor defines hex-code value of the title color as String.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *titleColor;
+/*!
+* message  defines the message section of the ad unit content.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *message;
+/*!
+* messageColor defines hex-code value of the message color as String.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *messageColor;
-@property (nullable, nonatomic, copy, readonly) NSString *backgroundColor;
+/*!
+* videoPosterUrl defines video URL of the ad unit as String.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *videoPosterUrl;
+/*!
+* actionUrl defines action URL of the ad unit as String.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *actionUrl;
+/*!
+* mediaUrl defines media URL of the ad unit as String.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *mediaUrl;
+/*!
+* iconUrl defines icon URL of the ad unit as String.
+*/
 @property (nullable, nonatomic, copy, readonly) NSString *iconUrl;
+/*!
+* mediaIsAudio check whether mediaUrl is an audio.
+*/
 @property (nonatomic, readonly, assign) BOOL mediaIsAudio;
+/*!
+* mediaIsVideo check whether mediaUrl is a video.
+*/
 @property (nonatomic, readonly, assign) BOOL mediaIsVideo;
+/*!
+* mediaIsImage check whether mediaUrl is an image.
+*/
 @property (nonatomic, readonly, assign) BOOL mediaIsImage;
+/*!
+* mediaIsGif check whether mediaUrl is a gif.
+*/
 @property (nonatomic, readonly, assign) BOOL mediaIsGif;
 
 - (instancetype _Nullable )initWithJSON:(NSDictionary *_Nullable)jsonObject;
@@ -86,7 +118,7 @@ This method returns all the ad units.
  @method
 
  @abstract
- This method return  ad unit for the provided adID
+ This method return ad unit for the provided adID
  */
 - (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *_Nonnull)adID;
 

@@ -25,7 +25,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         self.setupImages()
         self.recordUserChargedEvent()
-        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+        CleverTap.sharedInstance()?.recordEvent("Product Rated")
+//        CleverTap.sharedInstance()?.recordEvent("Alert ios")
+
 
 //        CleverTap.sharedInstance()?.recordEvent("Charged")
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
@@ -186,10 +188,12 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
 //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
-          CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
-          CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
-          CleverTap.sharedInstance()?.recordEvent("Cover ios")
-          CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+//          CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
+//          CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+//          CleverTap.sharedInstance()?.recordEvent("Cover ios")
+//          CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+          CleverTap.sharedInstance()?.recordEvent("Alert ios")
+
 
 //        CleverTap.sharedInstance()?.recordEvent("in-app")
 //        CleverTap.sharedInstance()?.recordEvent("test ios")
