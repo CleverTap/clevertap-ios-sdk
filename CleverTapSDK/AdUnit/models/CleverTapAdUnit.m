@@ -30,7 +30,6 @@
         _customExtras = customExtras;
         
         NSMutableArray<CleverTapAdUnitContent *> *contentList = [NSMutableArray new];
-        
         NSArray *adUnitContent = json[@"content"];
         if (adUnitContent) {
             for (NSDictionary *obj in adUnitContent) {
@@ -38,7 +37,7 @@
                 [contentList addObject:content];
             }
         }
-        _content = adUnitContent;
+        _content = contentList;
                
     } @catch (NSException *e) {
           CleverTapLogStaticDebug(@"Error intitializing CleverTapAdUnit: %@", e.reason);
