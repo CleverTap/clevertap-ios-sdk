@@ -25,7 +25,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         self.setupImages()
         self.recordUserChargedEvent()
-        CleverTap.sharedInstance()?.recordEvent("Product Rated")
+        CleverTap.sharedInstance()?.recordEvent("Product rated")
 //        CleverTap.sharedInstance()?.recordEvent("Alert ios")
 
 
@@ -187,12 +187,14 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
+        
 //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
 //          CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
 //          CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
 //          CleverTap.sharedInstance()?.recordEvent("Cover ios")
 //          CleverTap.sharedInstance()?.recordEvent("Added To Cart")
-          CleverTap.sharedInstance()?.recordEvent("Alert ios")
+//          CleverTap.sharedInstance()?.recordEvent("Alert ios")
+         CleverTap.sharedInstance()?.recordEvent("Hello")
 
 
 //        CleverTap.sharedInstance()?.recordEvent("in-app")
@@ -235,6 +237,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
           print("yes, I'm getting ad id:", units[0].adID ?? "")
           print("yes, I'm getting ad json:", units[0].json ?? "")
           print("yes, I'm getting ad custom Extras:", units[0].customExtras ?? "")
+        
+         var content: [CleverTapAdUnitContent]  = units[0].content ?? [CleverTapAdUnitContent]();
           
           let unitsTest:[CleverTapAdUnit] = CleverTap.sharedInstance()?.getAllAdUnits() ?? [CleverTapAdUnit]()
           print("Getting all ad units", unitsTest)
