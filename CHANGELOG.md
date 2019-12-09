@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+## Version 3.7.2 (December 10, 2019)
+* Adds support for Native Display
+* Bug fixes and performance improvements
+
 ## Version 3.7.1 (October 17, 2019)
 * Bug fixes and performance improvements
 
