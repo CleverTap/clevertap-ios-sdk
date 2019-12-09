@@ -80,6 +80,7 @@ typedef enum {
     [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
+    wkConfig.allowsInlineMediaPlayback = YES;
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
@@ -209,7 +210,7 @@ typedef enum {
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     CleverTapLogStaticInternal(@"%@: Navigation request: %@", [self class], navigationAction.request.URL);
     
-    if (navigationAction.request.URL == nil || [[navigationAction.request.URL absoluteString] isEqualToString:@"about:blank"]) {
+    if (navigationAction.request.URL == nil || [[navigationAction.request.URL absoluteString] isEqualToString:@"about:blank"] || [self isInlineMedia:navigationAction.request.URL]) {
         decisionHandler(WKNavigationActionPolicyAllow);
         return;
     }
@@ -246,6 +247,17 @@ typedef enum {
     }
     decisionHandler(WKNavigationActionPolicyCancel);
     
+}
+
+- (BOOL)isInlineMedia:(NSURL *)url {
+   NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+   NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", @"playsinline"];
+   NSArray *queryItems = urlComponents.queryItems;
+   if ([queryItems count] == 0) return NO;
+   NSURLQueryItem *queryItem = [[queryItems filteredArrayUsingPredicate:predicate] firstObject];
+   NSString *value = queryItem.value;
+   if ([value isEqualToString:@"1"]) return YES;
+   return NO;
 }
 
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
