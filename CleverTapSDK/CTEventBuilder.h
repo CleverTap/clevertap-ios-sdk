@@ -3,7 +3,7 @@
 @class CTValidationResult;
 @class CTInAppNotification;
 @class CleverTapInboxMessage;
-@class CleverTapAdUnit;
+@class CleverTapDisplayUnit;
 
 @interface CTEventBuilder : NSObject
 
@@ -28,8 +28,8 @@
                  andQueryParameters:(NSDictionary * _Nullable)params
                        completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 
-+ (void)buildAdViewStateEvent:(BOOL)clicked
-        forAdUnit:(CleverTapAdUnit * _Nonnull)adUnit
++ (void)buildDisplayViewStateEvent:(BOOL)clicked
+        forDisplayUnit:(CleverTapDisplayUnit * _Nonnull)displayUnit
 andQueryParameters:(NSDictionary * _Nullable)params
       completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 

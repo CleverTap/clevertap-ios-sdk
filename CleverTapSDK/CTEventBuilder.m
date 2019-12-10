@@ -7,7 +7,7 @@
 #import "CTUtils.h"
 #import "CTInAppNotification.h"
 #import "CleverTap+Inbox.h"
-#import "CleverTap+AdUnit.h"
+#import "CleverTap+DisplayUnit.h"
 
 NSString *const kCHARGED_EVENT = @"Charged";
 
@@ -359,14 +359,14 @@ NSString *const kCHARGED_EVENT = @"Charged";
     }
 }
 
-+ (void)buildAdViewStateEvent:(BOOL)clicked
-                                forAdUnit:(CleverTapAdUnit *)adUnit
++ (void)buildDisplayViewStateEvent:(BOOL)clicked
+                                forDisplayUnit:(CleverTapDisplayUnit *)displayUnit
                       andQueryParameters:(NSDictionary *)params
                        completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
     @try {
           NSMutableDictionary *event = [NSMutableDictionary new];
              NSMutableDictionary *notif = [NSMutableDictionary new];
-             NSDictionary *data = adUnit.json;
+             NSDictionary *data = displayUnit.json;
              for (NSString *x in [data allKeys]) {
                  if (!([CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]))
                      continue;

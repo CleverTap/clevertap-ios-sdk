@@ -1,7 +1,7 @@
-#import "CleverTap+AdUnit.h"
+#import "CleverTap+DisplayUnit.h"
 #import "CTConstants.h"
 
-@implementation CleverTapAdUnit
+@implementation CleverTapDisplayUnit
 
 - (instancetype)initWithJSON:(NSDictionary *)json {
     if (self = [super init]) {
@@ -10,9 +10,9 @@
         
         NSString *wzrkId = json[@"wzrk_id"];
         if (wzrkId) {
-            _adID = wzrkId;
+            _unitID = wzrkId;
         } else {
-            _adID = @"0_0";
+            _unitID= @"0_0";
         }
        
         NSString *type = json[@"type"];
@@ -29,18 +29,18 @@
         if (!customExtras) customExtras = [NSDictionary new];
         _customExtras = customExtras;
         
-        NSMutableArray<CleverTapAdUnitContent *> *contentList = [NSMutableArray new];
-        NSArray *adUnitContent = json[@"content"];
-        if (adUnitContent) {
-            for (NSDictionary *obj in adUnitContent) {
-                CleverTapAdUnitContent *content = [[CleverTapAdUnitContent alloc] initWithJSON:obj];
+        NSMutableArray<CleverTapDisplayUnitContent *> *contentList = [NSMutableArray new];
+        NSArray *displayUnitContent = json[@"content"];
+        if (displayUnitContent) {
+            for (NSDictionary *obj in displayUnitContent) {
+                CleverTapDisplayUnitContent *content = [[CleverTapDisplayUnitContent alloc] initWithJSON:obj];
                 [contentList addObject:content];
             }
         }
         _content = contentList;
                
     } @catch (NSException *e) {
-          CleverTapLogStaticDebug(@"Error intitializing CleverTapAdUnit: %@", e.reason);
+          CleverTapLogStaticDebug(@"Error intitializing CleverTapDisplayUnit: %@", e.reason);
           return nil;
        }
     }

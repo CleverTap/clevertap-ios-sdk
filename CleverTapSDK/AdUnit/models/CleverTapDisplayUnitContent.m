@@ -1,7 +1,7 @@
-#import "CleverTap+AdUnit.h"
+#import "CleverTap+DisplayUnit.h"
 #import "CTConstants.h"
 
-@implementation CleverTapAdUnitContent
+@implementation CleverTapDisplayUnitContent
 
 - (instancetype)initWithJSON:(NSDictionary *)jsonObject {
     if (self = [super init]) {
@@ -39,7 +39,7 @@
                }
            }
         } @catch (NSException *e) {
-            CleverTapLogStaticDebug(@"Error intitializing CleverTapAdUnitContent: %@", e.reason);
+            CleverTapLogStaticDebug(@"Error intitializing CleverTapDisplayUnitContent: %@", e.reason);
             return nil;
         }
     }

@@ -256,7 +256,7 @@ typedef enum {
    if ([queryItems count] == 0) return NO;
    NSURLQueryItem *queryItem = [[queryItems filteredArrayUsingPredicate:predicate] firstObject];
    NSString *value = queryItem.value;
-   if ([value isEqualToString:@"1"]) return YES;
+   return value.boolValue;
    return NO;
 }
 

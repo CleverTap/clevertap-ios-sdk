@@ -52,9 +52,9 @@ static NSArray* sslCertNames;
 #import "CTABVariant.h"
 #endif
 
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
-#import "CTAdUnitController.h"
-#import "CleverTap+AdUnit.h"
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+#import "CTDisplayUnitController.h"
+#import "CleverTap+DisplayUnit.h"
 #endif
 
 #import <objc/runtime.h>
@@ -150,10 +150,10 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 #endif
 @end
 
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
-@interface CleverTap () <CTAdUnitDelegate> {}
-@property (nonatomic, strong) CTAdUnitController *adUnitController;
-@property (atomic, weak) id <CleverTapAdUnitDelegate> adUnitDelegate;
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+@interface CleverTap () <CTDisplayUnitDelegate> {}
+@property (nonatomic, strong) CTDisplayUnitController *displayUnitController;
+@property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
 @end
 #endif
 
@@ -229,8 +229,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
 
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
-@synthesize adUnitDelegate=_adUnitDelegate;
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+@synthesize displayUnitDelegate=_displayUnitDelegate;
 #endif
 
 static CTPlistInfo* _plistInfo;
@@ -1454,8 +1454,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // check to see whether the push includes a test inbox message, if so don't process further
     if ([self didHandleInboxMessageTestFromPushNotificaton:notification]) return;
     
-    // check to see whether the push includes a test ad unit, if so don't process further
-    if ([self didHandleAdUnitTestFromPushNotificaton:notification]) return;
+    // check to see whether the push includes a test display unit, if so don't process further
+    if ([self didHandleDisplayUnitTestFromPushNotificaton:notification]) return;
         
     // determine application state
     UIApplication *application = [[self class] getSharedApplication];
@@ -2704,20 +2704,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 }
 #endif
                 
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
-                NSArray *adUnitJSON = jsonResp[CLTAP_AD_UNIT_JSON_RESPONSE_KEY];
-                if (adUnitJSON) {
-                    NSMutableArray *adUnitNotifs;
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+                NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
+                if (displayUnitJSON) {
+                    NSMutableArray *displayUnitNotifs;
                     @try {
-                        adUnitNotifs = [[NSMutableArray alloc] initWithArray:adUnitJSON];
+                        displayUnitNotifs = [[NSMutableArray alloc] initWithArray:displayUnitJSON];
                     } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Ad Unit JSON: %@", self, e.debugDescription);
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Display Unit JSON: %@", self, e.debugDescription);
                     }
-                    if (adUnitNotifs && [adUnitNotifs count] > 0) {
-                        [self initializeAdUnitWithCallback:^(BOOL success) {
+                    if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
+                        [self initializeDisplayUnitWithCallback:^(BOOL success) {
                             if (success) {
-                                  NSArray <NSDictionary*> *adUnits =  [adUnitNotifs mutableCopy];
-                                  [self.adUnitController updateAdUnits:adUnits];
+                                  NSArray <NSDictionary*> *displayUnits =  [displayUnitNotifs mutableCopy];
+                                  [self.displayUnitController updateDisplayUnits:displayUnits];
                              }
                         }];
                     }
@@ -2985,8 +2985,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self _resetABTesting];
 #endif
         
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
-        [self _resetAdUnit];
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+        [self _resetDisplayUnit];
 #endif
         // push data on reset profile
         [self recordAppLaunched:action];
@@ -4332,59 +4332,59 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif  //!CLEVERTAP_NO_AB_SUPPORT
 
 
-#pragma mark - Ad View
+#pragma mark - Display View
 
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 
-- (void)initializeAdUnitWithCallback:(CleverTapAdUnitSuccessBlock)callback {
+- (void)initializeDisplayUnitWithCallback:(CleverTapDisplayUnitSuccessBlock)callback {
     [self runSerialAsync:^{
-        if (self.adUnitController) {
+        if (self.displayUnitController) {
            [[self class] runSyncMainQueue: ^{
-               callback(self.adUnitController.isInitialized);
+               callback(self.displayUnitController.isInitialized);
            }];
            return;
         }
         if (self.deviceInfo.deviceId) {
-            self.adUnitController = [[CTAdUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-            self.adUnitController.delegate = self;
+            self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+            self.displayUnitController.delegate = self;
             [[self class] runSyncMainQueue: ^{
-              callback(self.adUnitController.isInitialized);
+              callback(self.displayUnitController.isInitialized);
            }];
         }
     }];
 }
 
-- (void)_resetAdUnit {
-    if (self.adUnitController && self.adUnitController.isInitialized && self.deviceInfo.deviceId) {
-        self.adUnitController = [[CTAdUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-        self.adUnitController.delegate = self;
+- (void)_resetDisplayUnit {
+    if (self.displayUnitController && self.displayUnitController.isInitialized && self.deviceInfo.deviceId) {
+        self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.displayUnitController.delegate = self;
     }
 }
 
-- (void)setAdUnitDelegate:(id<CleverTapAdUnitDelegate>)delegate {
+- (void)setDisplayUnitDelegate:(id<CleverTapDisplayUnitDelegate>)delegate {
     if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: setAdUnitDelegate is a no-op in an app extension.", self);
+        CleverTapLogDebug(self.config.logLevel, @"%@: setDisplayUnitDelegate is a no-op in an app extension.", self);
         return;
     }
-    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapAdUnitDelegate)]) {
-         _adUnitDelegate = delegate;
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapDisplayUnitDelegate)]) {
+         _displayUnitDelegate = delegate;
     } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Ad Unit Delegate does not conform to the CleverTapAdUnitDelegate protocol", self);
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Display Unit Delegate does not conform to the CleverTapDisplayUnitDelegate protocol", self);
     }
 }
 
-- (id<CleverTapAdUnitDelegate>)adUnitDelegate {
-    return _adUnitDelegate;
+- (id<CleverTapDisplayUnitDelegate>)displayUnitDelegate {
+    return _displayUnitDelegate;
 }
 
-- (void)adUnitsDidUpdate {
-    if (self.adUnitDelegate && [self.adUnitDelegate respondsToSelector:@selector(adUnitsUpdated:)]) {
-        [self.adUnitDelegate adUnitsUpdated:self.adUnitController.adUnits];
+- (void)displayUnitsDidUpdate {
+    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
+        [self.displayUnitDelegate displayUnitsUpdated:self.displayUnitController.displayUnits];
     }
 }
 
-- (BOOL)didHandleAdUnitTestFromPushNotificaton:(NSDictionary*)notification {
-#if !CLEVERTAP_NO_AD_UNIT_SUPPORT
+- (BOOL)didHandleDisplayUnitTestFromPushNotificaton:(NSDictionary*)notification {
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
     if ([[self class] runningInsideAppExtension]) {
         return NO;
     }
@@ -4392,37 +4392,37 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!notification || [notification count] <= 0 || !notification[@"wzrk_adunit"]) return NO;
     
     @try {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Received ad unit from push payload: %@", self, notification);
+        CleverTapLogDebug(self.config.logLevel, @"%@: Received display unit from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_adunit"];
         
-        NSDictionary *adUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+        NSDictionary *displayUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
                                                               options:0
                                                                 error:nil];
         
-        NSMutableArray<NSDictionary*> *adUnits = [NSMutableArray new];
-        [adUnits addObject:adUnitDict];
+        NSMutableArray<NSDictionary*> *displayUnits = [NSMutableArray new];
+        [displayUnits addObject:displayUnitDict];
         
-        if (adUnits && adUnits.count > 0) {
+        if (displayUnits && displayUnits.count > 0) {
             float delay = self.isAppForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
              @try {
-                 [self initializeAdUnitWithCallback:^(BOOL success) {
+                 [self initializeDisplayUnitWithCallback:^(BOOL success) {
                          if (success) {
-                              [self.adUnitController updateAdUnits:adUnits];
+                              [self.displayUnitController updateDisplayUnits:displayUnits];
                          }
                     }];
                 } @catch (NSException *e) {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to initialize the display unit from payload: %@", self, e.debugDescription);
                 }
             });
         } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the ad unit as JSON", self);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the display unit as JSON", self);
             return YES;
         }
         
     } @catch (NSException *e) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to iniialize the ad unit from payload: %@", self, e.debugDescription);
+        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to initialize the display unit from payload: %@", self, e.debugDescription);
         return YES;
     }
     
@@ -4433,29 +4433,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark Ad View Public
 
-- (NSArray<CleverTapAdUnit *>*)getAllAdUnits {
-    return self.adUnitController.adUnits;
+- (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
+    return self.displayUnitController.displayUnits;
 }
 
-- (CleverTapAdUnit *_Nullable)getAdUnitForID:(NSString *)adID {
-    for (CleverTapAdUnit *adUnit in self.adUnitController.adUnits) {
-       if ([adUnit.adID isEqualToString:adID]) {
+- (CleverTapDisplayUnit *_Nullable)getDisplayUnitForID:(NSString *)unitID {
+    for (CleverTapDisplayUnit *displayUnit in self.displayUnitController.displayUnits) {
+       if ([displayUnit.unitID isEqualToString:unitID]) {
            @try {
-                return adUnit;
+                return displayUnit;
              } @catch (NSException *e) {
-                CleverTapLogDebug(_config.logLevel, @"Error getting ad unit: %@", e.debugDescription);
+                CleverTapLogDebug(_config.logLevel, @"Error getting display unit: %@", e.debugDescription);
              }
         }
     };
     return nil;
 }
 
-- (void)recordAdUnitViewedEventForID:(NSString *)adID {
-      // get the adView data
-    CleverTapAdUnit *adUnit = [self getAdUnitForID:adID];
+- (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
+      // get the display unit data
+    CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
     #if !defined(CLEVERTAP_TVOS)
         [self runSerialAsync:^{
-            [CTEventBuilder buildAdViewStateEvent:NO forAdUnit:adUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            [CTEventBuilder buildDisplayViewStateEvent:NO forDisplayUnit:displayUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                 if (event) {
                     self.wzrkParams = [event[@"evtData"] copy];
                     [self queueEvent:event withType:CleverTapEventTypeRaised];
@@ -4468,12 +4468,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     #endif
 }
 
-- (void)recordAdUnitClickedEventForID:(NSString *)adID {
-      // get the adView data
-    CleverTapAdUnit *adUnit = [self getAdUnitForID:adID];
+- (void)recordDisplayUnitClickedEventForID:(NSString *)unitID {
+      // get the display unit data
+    CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
     #if !defined(CLEVERTAP_TVOS)
         [self runSerialAsync:^{
-            [CTEventBuilder buildAdViewStateEvent:YES forAdUnit:adUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            [CTEventBuilder buildDisplayViewStateEvent:YES forDisplayUnit:displayUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                 if (event) {
                     self.wzrkParams = [event[@"evtData"] copy];
                     [self queueEvent:event withType:CleverTapEventTypeRaised];
