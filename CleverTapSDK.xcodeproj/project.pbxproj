@@ -660,13 +660,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0701E9572372AD550034AAC2 /* AdUnit */ = {
+		0701E9572372AD550034AAC2 /* DisplayUnit */ = {
 			isa = PBXGroup;
 			children = (
 				0701E95F2372C0970034AAC2 /* models */,
 				0701E95E2372BC550034AAC2 /* controllers */,
 			);
-			path = AdUnit;
+			path = DisplayUnit;
 			sourceTree = "<group>";
 		};
 		0701E95E2372BC550034AAC2 /* controllers */ = {
@@ -1064,7 +1064,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
-				0701E9572372AD550034AAC2 /* AdUnit */,
+				0701E9572372AD550034AAC2 /* DisplayUnit */,
 				07B874E122E982F400328982 /* ABTesting */,
 				07B94520219EA33800D4C542 /* Inbox */,
 				071EB476217F6427008F0FAB /* InApps */,

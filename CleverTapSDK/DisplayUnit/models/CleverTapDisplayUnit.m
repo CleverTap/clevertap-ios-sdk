@@ -37,7 +37,7 @@
                 [contentList addObject:content];
             }
         }
-        _content = contentList;
+        _contents = contentList;
                
     } @catch (NSException *e) {
           CleverTapLogStaticDebug(@"Error intitializing CleverTapDisplayUnit: %@", e.reason);

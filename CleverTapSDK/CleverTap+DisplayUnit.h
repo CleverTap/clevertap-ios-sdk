@@ -33,7 +33,7 @@ The `CleverTapDisplayUnit` represents the display unit object.
 /*!
 * content defines the content of the display unit.
 */
-@property (nullable, nonatomic, copy, readonly) NSArray<CleverTapDisplayUnitContent *> *content;
+@property (nullable, nonatomic, copy, readonly) NSArray<CleverTapDisplayUnitContent *> *contents;
 
 @end
 

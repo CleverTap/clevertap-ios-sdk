@@ -4431,7 +4431,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-#pragma mark Ad View Public
+#pragma mark Display Unit Public
 
 - (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
     return self.displayUnitController.displayUnits;
