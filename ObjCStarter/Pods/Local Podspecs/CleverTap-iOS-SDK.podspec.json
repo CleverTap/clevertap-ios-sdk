@@ -40,7 +40,7 @@
       "CleverTapSDK/CleverTapUTMDetail.h",
       "CleverTapSDK/CleverTapJSInterface.h",
       "CleverTapSDK/CleverTap+ABTesting.h",
-      "CleverTapSDK/CleverTap+AdUnit.h"
+      "CleverTapSDK/CleverTap+DisplayUnit.h"
     ]
   },
   "platforms": {
