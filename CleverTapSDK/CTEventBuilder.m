@@ -7,6 +7,7 @@
 #import "CTUtils.h"
 #import "CTInAppNotification.h"
 #import "CleverTap+Inbox.h"
+#import "CleverTap+DisplayUnit.h"
 
 NSString *const kCHARGED_EVENT = @"Charged";
 
@@ -353,6 +354,30 @@ NSString *const kCHARGED_EVENT = @"Charged";
         event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
         event[@"evtData"] = notif;
         completion(event, nil);
+    } @catch (NSException *e) {
+        completion(nil, nil);
+    }
+}
+
++ (void)buildDisplayViewStateEvent:(BOOL)clicked
+                                forDisplayUnit:(CleverTapDisplayUnit *)displayUnit
+                      andQueryParameters:(NSDictionary *)params
+                       completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
+    @try {
+          NSMutableDictionary *event = [NSMutableDictionary new];
+             NSMutableDictionary *notif = [NSMutableDictionary new];
+             NSDictionary *data = displayUnit.json;
+             for (NSString *x in [data allKeys]) {
+                 if (!([CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]))
+                     continue;
+                 NSString *key = [x stringByReplacingOccurrencesOfString:CLTAP_NOTIFICATION_TAG withString:CLTAP_WZRK_PREFIX];
+                 id value = data[x];
+                 notif[key] = value;
+             }
+             notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
+             event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+             event[@"evtData"] = notif;
+             completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
     }

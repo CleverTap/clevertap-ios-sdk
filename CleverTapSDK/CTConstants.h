@@ -48,6 +48,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_INAPP_NOTIF_SHOW_CLOSE @"sc"
 #define CLTAP_INAPP_JSON_RESPONSE_KEY @"inapp_notifs"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
+#define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_AB_EXP_JSON_RESPONSE_KEY @"ab_exps"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40

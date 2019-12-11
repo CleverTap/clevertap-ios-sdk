@@ -387,7 +387,7 @@ typedef void (^CTABTestingOperationBlock)(void);
         [[CTInAppResources getSharedApplication] setIdleTimerDisabled:NO];
     });
     self.sessionEnded = YES;
-    CTABVariant *variant = [_session sessionObjectForKey:kSessionVariantKey];
+    CTABVariant *variant = [_session sessionObjectForKey:kCTSessionVariantKey];
     if (variant) {
         [variant revertActions];
         [variant cleanup];
@@ -493,10 +493,10 @@ typedef void (^CTABTestingOperationBlock)(void);
 }
 
 - (void)handleTestEditorChangeRequestWithData:(NSDictionary *)data {
-    CTABVariant *variant = [_session sessionObjectForKey:kSessionVariantKey];
+    CTABVariant *variant = [_session sessionObjectForKey:kCTSessionVariantKey];
     if (!variant) {
         variant = [[CTABVariant alloc] init];
-        [_session setSessionObject:variant forKey:kSessionVariantKey];
+        [_session setSessionObject:variant forKey:kCTSessionVariantKey];
     }
     id actions = data[@"actions"];
     if ([actions isKindOfClass:[NSArray class]]) {
@@ -505,7 +505,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 }
 
 - (void)handleTestEditorClearRequestWithData:(NSDictionary *)data {
-    CTABVariant *variant = [_session sessionObjectForKey:kSessionVariantKey];
+    CTABVariant *variant = [_session sessionObjectForKey:kCTSessionVariantKey];
     if (variant) {
         NSArray *actions = data[@"actions"];
         if (actions && actions.count == 0) {

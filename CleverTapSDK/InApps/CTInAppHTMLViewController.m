@@ -2,6 +2,7 @@
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CleverTapJSInterface.h"
+#import "CTInAppResources.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
 
@@ -79,6 +80,7 @@ typedef enum {
     [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
+    wkConfig.allowsInlineMediaPlayback = YES;
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
@@ -141,7 +143,9 @@ typedef enum {
     
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     char pos = self.notification.position;
-    int extra = (int) (self.notification.showClose ? (CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
+    CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? [[CTInAppResources getSharedApplication] statusBarFrame].size.height : 0.0;
+
+    int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
     switch (pos) {
         case CLTAP_INAPP_POSITION_TOP:
         frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
@@ -187,7 +191,7 @@ typedef enum {
     if (self.notification.showClose) {
         _closeButton = [CTDismissButton new];
         [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
-        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, frame.origin.y - extra, CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
+        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarHeight : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
         _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:_closeButton];
     }
@@ -206,7 +210,7 @@ typedef enum {
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     CleverTapLogStaticInternal(@"%@: Navigation request: %@", [self class], navigationAction.request.URL);
     
-    if (navigationAction.request.URL == nil || [[navigationAction.request.URL absoluteString] isEqualToString:@"about:blank"]) {
+    if (navigationAction.request.URL == nil || [[navigationAction.request.URL absoluteString] isEqualToString:@"about:blank"] || [self isInlineMedia:navigationAction.request.URL]) {
         decisionHandler(WKNavigationActionPolicyAllow);
         return;
     }
@@ -243,6 +247,17 @@ typedef enum {
     }
     decisionHandler(WKNavigationActionPolicyCancel);
     
+}
+
+- (BOOL)isInlineMedia:(NSURL *)url {
+   NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+   NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", @"playsinline"];
+   NSArray *queryItems = urlComponents.queryItems;
+   if ([queryItems count] == 0) return NO;
+   NSURLQueryItem *queryItem = [[queryItems filteredArrayUsingPredicate:predicate] firstObject];
+   NSString *value = queryItem.value;
+   return value.boolValue;
+   return NO;
 }
 
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
