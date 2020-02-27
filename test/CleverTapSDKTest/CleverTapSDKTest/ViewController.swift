@@ -29,7 +29,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //        inboxRegister()
         //        addWebview()
         //        addAdUnit()
-        
+                
         CleverTap.sharedInstance()?.getBoolVariable(withName: "boolVar", defaultValue: true)
         CleverTap.sharedInstance()?.getDoubleVariable(withName: "doubleVar", defaultValue: 0.0)
         CleverTap.sharedInstance()?.getIntegerVariable(withName: "intVar", defaultValue: 0)
@@ -145,6 +145,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     }
     
     // MARK: - Action Button
+    
+    func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
+        
+        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(withData: message)
+        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(withData: message)
+        print(message, index, buttonIndex)
+    }
     
     @IBAction func inboxButtonTapped(_ sender: Any) {
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in

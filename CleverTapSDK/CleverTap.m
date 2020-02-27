@@ -3993,6 +3993,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+- (void)recordInboxNotificationViewedEventWithData:(CleverTapInboxMessage * _Nonnull)message {
+    [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
+}
+
+- (void)recordInboxNotificationClickedEventWithData:(CleverTapInboxMessage * _Nonnull)message {
+    [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
+}
+
 #pragma mark Inbox Message private
 
 - (BOOL)didHandleInboxMessageTestFromPushNotificaton:(NSDictionary*)notification {

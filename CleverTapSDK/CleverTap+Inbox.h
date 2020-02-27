@@ -196,5 +196,22 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
 
 - (CleverTapInboxViewController * _Nonnull)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate;
 
+/*!
+ @method
+ 
+ @abstract
+ Record Notification Viewed for App Inbox.
+ */
+- (void)recordInboxNotificationViewedEventWithData:(CleverTapInboxMessage * _Nonnull)message;
+
+/*!
+@method
+
+@abstract
+Record Notification Clicked for App Inbox.
+*/
+- (void)recordInboxNotificationClickedEventWithData:(CleverTapInboxMessage * _Nonnull)message;
+
+
 
 @end
