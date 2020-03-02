@@ -202,7 +202,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  @abstract
  Record Notification Viewed for App Inbox.
  */
-- (void)recordInboxNotificationViewedEventWithData:(CleverTapInboxMessage * _Nonnull)message;
+- (void)recordInboxNotificationViewedEventForID:(NSString * _Nonnull)messageId;
 
 /*!
 @method
@@ -210,7 +210,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
 @abstract
 Record Notification Clicked for App Inbox.
 */
-- (void)recordInboxNotificationClickedEventWithData:(CleverTapInboxMessage * _Nonnull)message;
+- (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId;
 
 
 

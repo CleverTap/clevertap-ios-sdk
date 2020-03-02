@@ -3993,11 +3993,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-- (void)recordInboxNotificationViewedEventWithData:(CleverTapInboxMessage * _Nonnull)message {
+- (void)recordInboxNotificationViewedEventForID:(NSString * _Nonnull)messageId {
+    CleverTapInboxMessage *message = [self getInboxMessageForId:messageId];
     [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
 }
 
-- (void)recordInboxNotificationClickedEventWithData:(CleverTapInboxMessage * _Nonnull)message {
+- (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId {
+    CleverTapInboxMessage *message = [self getInboxMessageForId:messageId];
     [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
 }
 

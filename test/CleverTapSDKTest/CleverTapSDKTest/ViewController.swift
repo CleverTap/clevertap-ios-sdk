@@ -20,8 +20,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         self.setupImages()
         self.recordUserChargedEvent()
         CleverTap.sharedInstance()?.recordEvent("Product rated")
-        //      CleverTap.sharedInstance()?.recordEvent("Alert ios")
-        //      CleverTap.sharedInstance()?.recordEvent("Charged")
+   
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
         }
@@ -29,7 +28,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //        inboxRegister()
         //        addWebview()
         //        addAdUnit()
-                
+        
+//        self.navigationController?.navigationItem.leftBarButtonItem = nil
+        self.navigationItem.hidesBackButton = true
+        UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffset(horizontal: -1000.0, vertical: 0.0), for: .default)
+        
         CleverTap.sharedInstance()?.getBoolVariable(withName: "boolVar", defaultValue: true)
         CleverTap.sharedInstance()?.getDoubleVariable(withName: "doubleVar", defaultValue: 0.0)
         CleverTap.sharedInstance()?.getIntegerVariable(withName: "intVar", defaultValue: 0)
@@ -147,9 +150,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     // MARK: - Action Button
     
     func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
-        
-        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(withData: message)
-        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(withData: message)
+        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: message.messageId ?? "")
+        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
         print(message, index, buttonIndex)
     }
     
@@ -157,9 +159,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
             if (success) {
                 let style = CleverTapInboxStyleConfig.init()
-                style.title = "AppInbox"
+                style.title = "App Notif                                         "
                 style.backgroundColor = UIColor.yellow
-                style.messageTags = ["Promotions", "Offers"];
+                style.navigationBarTintColor = UIColor.groupTableViewBackground
+                //                style.messageTags = ["Promotions", "Offers"];
+                
                 
                 let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
                 let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
@@ -171,8 +175,12 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 
                 if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
                     let navigationController = UINavigationController.init(rootViewController: inboxController)
-                    //                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
-                    self.present(navigationController, animated: true, completion: nil)
+                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+                    navigationController.navigationItem.leftBarButtonItem = nil;
+                    navigationController.navigationItem.hidesBackButton = true;
+                   
+//                    self.navigationController?.present(navigationController, animated: true, completion: nil)
+                    self.navigationController?.pushViewController(inboxController, animated: true)
                 }
             }
         }))

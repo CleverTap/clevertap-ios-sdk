@@ -8,12 +8,12 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Hey There!!!-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="690"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRd-pI-6F2">
@@ -48,12 +48,12 @@
                                 </connections>
                             </button>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="z3E-Gx-kjU">
-                                <rect key="frame" x="64" y="340" width="247" height="128"/>
+                                <rect key="frame" x="64" y="340" width="247" height="116"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" name="keyboardFocusIndicatorColor" catalog="System" colorSpace="catalog"/>
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rmO-UY-bFI">
-                                <rect key="frame" x="135" y="630" width="105" height="30"/>
+                                <rect key="frame" x="135" y="596" width="105" height="30"/>
                                 <state key="normal" title="Screen AB Test"/>
                             </button>
                             <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6ob-4C-2eO">
@@ -64,7 +64,7 @@
                                 </constraints>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="rmO-UY-bFI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="5ex-Eu-2QY"/>
                             <constraint firstItem="QXu-8C-eVJ" firstAttribute="bottom" secondItem="6ob-4C-2eO" secondAttribute="bottom" constant="22" id="6Ph-bo-cS3"/>
@@ -83,7 +83,9 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="QXu-8C-eVJ"/>
                     </view>
-                    <navigationItem key="navigationItem" id="G2N-eA-Fe4"/>
+                    <navigationItem key="navigationItem" title="Hey There!!!" prompt="  " leftItemsSupplementBackButton="YES" id="G2N-eA-Fe4">
+                        <barButtonItem key="backBarButtonItem" title=" " id="lyh-at-rOT"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="customButton" destination="9Ei-aK-OCn" id="JLf-wa-gnf"/>
                         <outlet property="customView" destination="6ob-4C-2eO" id="Ia5-tz-jSX"/>
@@ -100,9 +102,14 @@
         <scene sceneID="huX-OR-mGD">
             <objects>
                 <navigationController id="7Zk-KZ-v5m" sceneMemberID="viewController">
+                    <extendedEdge key="edgesForExtendedLayout" top="YES"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translucent="NO" id="gyS-Hm-3bb">
                         <rect key="frame" x="0.0" y="44" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="barTintColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <textAttributes key="largeTitleTextAttributes">
+                            <offsetWrapper key="textShadowOffset" horizontal="-20" vertical="0.0"/>
+                        </textAttributes>
                     </navigationBar>
                     <connections>
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="Gok-AT-DDE"/>
