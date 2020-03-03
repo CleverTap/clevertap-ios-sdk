@@ -177,12 +177,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 
                 if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
                     let navigationController = UINavigationController.init(rootViewController: inboxController)
-                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
-                    navigationController.navigationItem.leftBarButtonItem = nil;
-                    navigationController.navigationItem.hidesBackButton = true;
-                   
-//                    self.navigationController?.present(navigationController, animated: true, completion: nil)
-                    self.navigationController?.pushViewController(inboxController, animated: true)
+//                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+//                    navigationController.navigationItem.leftBarButtonItem = nil;
+//                    navigationController.navigationItem.hidesBackButton = true;
+                    self.navigationController?.present(navigationController, animated: true, completion: nil)
+//                    self.navigationController?.pushViewController(inboxController, animated: true)
                 }
             }
         }))
@@ -190,12 +189,12 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
-        
-        //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
-        //        CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
-        //        CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
-        //        CleverTap.sharedInstance()?.recordEvent("Cover ios")
-        //        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+                
+                CleverTap.sharedInstance()?.recordScreenView("recordScreen")
+                CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
+                CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+                CleverTap.sharedInstance()?.recordEvent("Cover ios")
+                CleverTap.sharedInstance()?.recordEvent("Added To Cart")
         //        CleverTap.sharedInstance()?.recordEvent("Alert ios")
         //        CleverTap.sharedInstance()?.recordEvent("test ios")
         //        CleverTap.sharedInstance()?.recordEvent("Battery Alert")

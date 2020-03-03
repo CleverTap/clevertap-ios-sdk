@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+## Version 3.7.3 (March 5, 2020)
+* Adds support to track clicks and views for the Custom App Inbox
+* Bug fixes and performance improvements
+
 ## Version 3.7.2 (December 11, 2019)
 * Adds support for Native Display
 * Bug fixes and performance improvements
