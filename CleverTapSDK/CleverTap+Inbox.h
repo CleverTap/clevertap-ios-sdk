@@ -177,6 +177,24 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  @method
  
  @abstract
+ This method deletes `CleverTapInboxMessage` object for the given `Message Id` as String.
+ */
+
+- (void)deleteInboxMessageForID:(NSString * _Nonnull)messageId;
+
+/*!
+ @method
+ 
+ @abstract
+ This method marks the `CleverTapInboxMessage` object as read for given 'Message Id` as String.
+ */
+
+- (void)markReadInboxMessageForID:(NSString * _Nonnull)messageId;
+
+/*!
+ @method
+ 
+ @abstract
  Register a callback block when inbox messages are updated.
  */
 
@@ -211,7 +229,6 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
 Record Notification Clicked for App Inbox.
 */
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId;
-
 
 
 @end

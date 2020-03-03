@@ -152,6 +152,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
         CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: message.messageId ?? "")
         CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
+        CleverTap.sharedInstance()?.markReadInboxMessage(forID: message.messageId ?? "")
+        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
         print(message, index, buttonIndex)
     }
     
@@ -159,7 +161,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
             if (success) {
                 let style = CleverTapInboxStyleConfig.init()
-                style.title = "App Notif                                         "
+                style.title = "Notifications"
                 style.backgroundColor = UIColor.yellow
                 style.navigationBarTintColor = UIColor.groupTableViewBackground
                 //                style.messageTags = ["Promotions", "Offers"];
