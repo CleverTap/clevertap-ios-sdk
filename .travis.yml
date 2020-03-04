@@ -12,5 +12,5 @@ before_install:
 install:
 - gem install xcpretty --no-document --quiet
 script:
-- set -o pipefail && xcodebuild -workspace "ObjCStarter/ObjCStarter.xcworkspace" -scheme "ObjCStarter" -sdk iphonesimulator -destination 'name=iPhone X' build 
+- set -o pipefail && xcodebuild -workspace "ObjCStarter/ObjCStarter.xcworkspace" -scheme "ObjCStarter" -sdk iphonesimulator -destination 'name=iPhone 11' build 
 - pod lib lint --quick
