@@ -74,7 +74,7 @@
     
     if (!self.notification) return;
     
-    if (@available(iOS 13, *)) {
+    if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
