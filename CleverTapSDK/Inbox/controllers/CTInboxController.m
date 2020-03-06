@@ -97,6 +97,7 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)markReadMessageWithId:(NSString *)messageId {
+    // TODO: What if the messageId is nil
     [privateContext performBlock:^{
         CTMessageMO *message = [self _messageForId:messageId];
         if (message) {

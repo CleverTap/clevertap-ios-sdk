@@ -478,7 +478,7 @@ typedef enum {
         }
     } else {
         self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
-        
+    //TODO: remove space
     }
     
     self.window.alpha = 0;
