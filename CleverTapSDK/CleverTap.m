@@ -3863,18 +3863,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![self _isInboxInitialized]) {
         return;
     }
-    // TODO: remove message fetching, not needed
-    CleverTapInboxMessage *message = [self getInboxMessageForId:messageId];
-    [self.inboxController deleteMessageWithId:message.messageId];
+    [self.inboxController deleteMessageWithId:messageId];
 }
 
 - (void)markReadInboxMessageForID:(NSString *)messageId{
     if (![self _isInboxInitialized]) {
         return;
     }
-    // TODO: remove message fetching, not needed
-    CleverTapInboxMessage *message = [self getInboxMessageForId:messageId];
-    [self.inboxController markReadMessageWithId:message.messageId];
+    [self.inboxController markReadMessageWithId:messageId];
 }
 
 - (void)registerInboxUpdatedBlock:(CleverTapInboxUpdatedBlock)block {

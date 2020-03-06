@@ -153,7 +153,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
 //        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: message.messageId ?? "")
 //        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
 //        CleverTap.sharedInstance()?.markReadInboxMessage(forID: message.messageId ?? "")
-        CleverTap.sharedInstance()?.deleteInboxMessage(forID: "foo")
+        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
         print(message, index, buttonIndex)
     }
     

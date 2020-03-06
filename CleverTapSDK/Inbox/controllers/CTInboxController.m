@@ -93,11 +93,11 @@ static NSManagedObjectContext *privateContext;
 
 - (void)deleteMessageWithId:(NSString *)messageId {
     CTMessageMO *message = [self _messageForId:messageId];
+    if (!message) return;
     [self _deleteMessages:@[message]];
 }
 
 - (void)markReadMessageWithId:(NSString *)messageId {
-    // TODO: What if the messageId is nil
     [privateContext performBlock:^{
         CTMessageMO *message = [self _messageForId:messageId];
         if (message) {
