@@ -25,9 +25,9 @@
 
 #import <UIKit/UIKit.h>
 
-extern const NSString * CSToastPositionTop;
-extern const NSString * CSToastPositionCenter;
-extern const NSString * CSToastPositionBottom;
+extern const NSString * CTToastPositionTop;
+extern const NSString * CTToastPositionCenter;
+extern const NSString * CTToastPositionBottom;
 
 @class CTToastStyle;
 
@@ -428,7 +428,7 @@ extern const NSString * CSToastPositionBottom;
 /**
  Sets the default position. Used for the `makeToast:` and
  `showToast:` methods that don't require an explicit position.
- Default is `CSToastPositionBottom`.
+ Default is `CTToastPositionBottom`.
  
  @param position The default center point. Can be one of the predefined
  CSToastPosition constants or a `CGPoint` wrapped in an `NSValue` object.
@@ -436,7 +436,7 @@ extern const NSString * CSToastPositionBottom;
 + (void)setDefaultPosition:(id)position;
 
 /**
- Returns the default toast position. Default is `CSToastPositionBottom`.
+ Returns the default toast position. Default is `CTToastPositionBottom`.
  
  @return position The default center point. Will be one of the predefined
  CSToastPosition constants or a `CGPoint` wrapped in an `NSValue` object.

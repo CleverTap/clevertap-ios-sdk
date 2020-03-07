@@ -28,9 +28,9 @@
 #import <objc/runtime.h>
 
 // Positions
-NSString * CSToastPositionTop                       = @"CSToastPositionTop";
-NSString * CSToastPositionCenter                    = @"CSToastPositionCenter";
-NSString * CSToastPositionBottom                    = @"CSToastPositionBottom";
+NSString * CTToastPositionTop                       = @"CTToastPositionTop";
+NSString * CTToastPositionCenter                    = @"CTToastPositionCenter";
+NSString * CTToastPositionBottom                    = @"CTToastPositionBottom";
 
 // Keys for values associated with toast views
 static const NSString * CSToastTimerKey             = @"CSToastTimerKey";
@@ -442,9 +442,9 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
     CGFloat bottomPadding = style.verticalPadding + safeInsets.bottom;
     
     if([point isKindOfClass:[NSString class]]) {
-        if([point caseInsensitiveCompare:CSToastPositionTop] == NSOrderedSame) {
+        if([point caseInsensitiveCompare:CTToastPositionTop] == NSOrderedSame) {
             return CGPointMake(self.bounds.size.width / 2.0, (toast.frame.size.height / 2.0) + topPadding);
-        } else if([point caseInsensitiveCompare:CSToastPositionCenter] == NSOrderedSame) {
+        } else if([point caseInsensitiveCompare:CTToastPositionCenter] == NSOrderedSame) {
             return CGPointMake(self.bounds.size.width / 2.0, self.bounds.size.height / 2.0);
         }
     } else if ([point isKindOfClass:[NSValue class]]) {
@@ -534,7 +534,7 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         self.tapToDismissEnabled = YES;
         self.queueEnabled = NO;
         self.defaultDuration = 3.0;
-        self.defaultPosition = CSToastPositionBottom;
+        self.defaultPosition = CTToastPositionBottom;
     }
     return self;
 }

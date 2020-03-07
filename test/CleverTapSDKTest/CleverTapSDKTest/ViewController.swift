@@ -150,10 +150,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     // MARK: - Action Button
     
     func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
-//        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: message.messageId ?? "")
-//        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
-//        CleverTap.sharedInstance()?.markReadInboxMessage(forID: message.messageId ?? "")
-        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
+        //        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: message.messageId ?? "")
+        //        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
+        CleverTap.sharedInstance()?.markReadInboxMessage(forID: message.messageId ?? "")
+        //        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
         print(message, index, buttonIndex)
     }
     
