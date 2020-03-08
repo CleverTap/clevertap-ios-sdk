@@ -166,8 +166,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, strong) CTFeatureFlagsController *featureFlagsController;
 @property (atomic, strong, readwrite, nonnull) CleverTapFeatureFlags *featureFlags;
 
-typedef void (^CleverTapFeatureFlagsSuccessBlock)(BOOL success);
-
 @end
 
 #import <UserNotifications/UserNotifications.h>
