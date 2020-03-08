@@ -57,6 +57,10 @@ static NSArray* sslCertNames;
 #import "CleverTap+DisplayUnit.h"
 #endif
 
+#import "CleverTap+FeatureFlags.h"
+#import "CleverTapFeatureFlagsPrivate.h"
+#import "CTFeatureFlagsController.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -115,6 +119,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeRaised,
     CleverTapEventTypeData,
     CleverTapEventTypeNotificationViewed,
+    CleverTapEventTypeFetch,
 };
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
@@ -156,6 +161,14 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
 @end
 #endif
+
+@interface CleverTap () <CTFeatureFlagsDelegate, CleverTapPrivateFeatureFlagsDelegate> {}
+@property (atomic, strong) CTFeatureFlagsController *featureFlagsController;
+@property (atomic, strong, readwrite, nonnull) CleverTapFeatureFlags *featureFlags;
+
+typedef void (^CleverTapFeatureFlagsSuccessBlock)(BOOL success);
+
+@end
 
 #import <UserNotifications/UserNotifications.h>
 
@@ -232,6 +245,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
 #endif
+
+@synthesize featureFlagsDelegate=_featureFlagsDelegate;
 
 static CTPlistInfo* _plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
@@ -613,6 +628,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     [self _initABTesting];
 #endif
+    [self _initFeatureFlags];
     
     [self notifyUserProfileInitialized];
 
@@ -2188,19 +2204,35 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark - Queues/Persistence/Dispatch Handling
 
 - (BOOL)shouldDeferProcessingEvent: (NSDictionary *)event withType:(CleverTapEventType)type {
+    
     if (self.config.isCreatedPostAppLaunched){
         return NO;
     }
+    
     return (type == CleverTapEventTypeRaised && !self.appLaunchProcessed);
 }
 
-- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+- (BOOL)_shouldDropEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+    
+    if (type == CleverTapEventTypeFetch) {
+        return NO;
+    }
+    
     if (self.currentUserOptedOut) {
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
-        return;
+        return YES;
     }
+    
     if ([self isMuted]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: is muted, dropping event: %@", self, event);
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+    if ([self _shouldDropEvent:event withType:type]) {
         return;
     }
     
@@ -2216,12 +2248,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
-    [self createSessionIfNeeded];
-    [self pushInitialEventsIfNeeded];
-    [self runSerialAsync:^{
-        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-        [self processEvent:event withType:type];
-    }];
+    if (type == CleverTapEventTypeFetch) {
+        [self runSerialAsync:^{
+            [self processEvent:event withType:type];
+        }];
+    } else {
+        [self createSessionIfNeeded];
+        [self pushInitialEventsIfNeeded];
+        [self runSerialAsync:^{
+            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+            [self processEvent:event withType:type];
+        }];
+    }
 }
 
 - (void)processEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
@@ -2239,11 +2277,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         // ignore pings if queue is not draining
-        if ([self.eventsQueue count] >= 50 && eventType == CleverTapEventTypePing) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Events queue not draining, ignoring ping event", self);
+        if ([self.eventsQueue count] >= 50 && (eventType == CleverTapEventTypePing || eventType == CleverTapEventTypeFetch)) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Events queue not draining, ignoring ping and fetch events", self);
             return;
         }
         
+        // TODO don't understand this line of code @Aditi
         if (eventType != CleverTapEventTypeRaised || eventType != CleverTapEventTypeNotificationViewed) {
             event = [self convertDataToPrimitive:event];
         }
@@ -2253,7 +2292,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             type = @"page";
         } else if (eventType == CleverTapEventTypePing) {
             type = @"ping";
-        } else if (eventType == CleverTapEventTypeProfile){
+        } else if (eventType == CleverTapEventTypeProfile) {
             type = @"profile";
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
@@ -2312,7 +2351,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [self jsonObjectToString:mutableEvent]);
         
-        [self scheduleQueueFlush];
+        if (eventType == CleverTapEventTypeFetch) {
+            [self flushQueue];
+        } else {
+            [self scheduleQueueFlush];
+        }
         
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Processing event failed with a exception: %@", self, e.debugDescription);
@@ -2716,13 +2759,28 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
                         [self initializeDisplayUnitWithCallback:^(BOOL success) {
                             if (success) {
-                                  NSArray <NSDictionary*> *displayUnits =  [displayUnitNotifs mutableCopy];
+                                  NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
                                   [self.displayUnitController updateDisplayUnits:displayUnits];
                              }
                         }];
                     }
                 }
 #endif
+                // NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
+                NSDictionary *featureFlagsJSON = @{@"ff_notifs": @{@"kv": @[@{@"n": @"discount", @"v": @true, @"t":@1}, @{@"n": @"customer-type", @"v": @true, @"t":@(0)}], @"ts": @1245}}[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];  // TODO remove
+                if (featureFlagsJSON) {
+                    NSMutableArray *featureFlagsNotifs;
+                    @try {
+                        featureFlagsNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Feature Flags JSON: %@", self, e.debugDescription);
+                    }
+                    if (featureFlagsNotifs && self.featureFlagsController) {
+                        NSArray <NSDictionary*> *featureFlags =  [featureFlagsNotifs mutableCopy];
+                        [self.featureFlagsController updateFeatureFlags:featureFlags];
+                    }
+                }
+                
                 // Handle events/profiles sync data
                 @try {
                     NSDictionary *evpr = jsonResp[@"evpr"];
@@ -2988,6 +3046,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
         [self _resetDisplayUnit];
 #endif
+        
+        [self _resetFeatureFlags];
+        
         // push data on reset profile
         [self recordAppLaunched:action];
         if (properties) {
@@ -4487,5 +4548,63 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #endif
+
+#pragma mark Feature Flags
+
+// run off main
+- (void) _initFeatureFlags {
+   if (self.featureFlagsController) {
+       return;
+   }
+   if (self.deviceInfo.deviceId) {
+       self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+       self.featureFlagsController.delegate = self;
+   }
+   if (!self.featureFlags) {
+       self.featureFlags = [[CleverTapFeatureFlags alloc] initWithPrivateDelegate:self];
+       [self fetchFeatureFlags];
+   }
+}
+
+- (void)_resetFeatureFlags {
+    if (self.featureFlagsController && self.featureFlagsController.isInitialized && self.deviceInfo.deviceId) {
+        self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.featureFlagsController.delegate = self;
+        [self fetchFeatureFlags];
+    }
+}
+
+- (void)setFeatureFlagsDelegate:(id<CleverTapFeatureFlagsDelegate>)delegate {
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapFeatureFlagsDelegate)]) {
+         _featureFlagsDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags Delegate does not conform to the CleverTapFeatureFlagsDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapFeatureFlagsDelegate>)featureFlagsDelegate {
+    return _featureFlagsDelegate;
+}
+
+- (void)featureFlagsDidUpdate {
+    if (self.featureFlagsDelegate && [self.featureFlagsDelegate respondsToSelector:@selector(featureFlagsUpdated)]) {
+        [self.featureFlagsDelegate featureFlagsUpdated];
+    }
+}
+
+- (void)fetchFeatureFlags {
+    // TODO make more robust
+    [self queueEvent:@{@"evtName": @"wzrk_fetch", @"evtData" : @{@"type": @"ff"}} withType:CleverTapEventTypeFetch];
+}
+
+- (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
+    if (self.featureFlagsController && self.featureFlagsController.isInitialized) {
+        return [self.featureFlagsController get:key withDefaultValue: defaultValue];
+    }
+    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags not initialized", self);
+    return defaultValue;
+}
+
+#pragma mark Feature Flags Public
 
 @end

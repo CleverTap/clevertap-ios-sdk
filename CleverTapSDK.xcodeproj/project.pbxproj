@@ -351,6 +351,11 @@
 		D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */; };
 		D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */; };
 		D0CB456522EA550C000762B2 /* libicucore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D0CB456422EA550C000762B2 /* libicucore.tbd */; };
+		D0D4C9EB2414D1C50029477E /* CTFeatureFlagsController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9E92414D1C50029477E /* CTFeatureFlagsController.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		D0D4C9EC2414D1C50029477E /* CTFeatureFlagsController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D4C9EA2414D1C50029477E /* CTFeatureFlagsController.m */; };
+		D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */; };
+		D0D4C9F52414EE770029477E /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -637,6 +642,11 @@
 		D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertGlobalRootCA.crt; sourceTree = "<group>"; };
 		D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertSHA2SecureServerCA.crt; sourceTree = "<group>"; };
 		D0CB456422EA550C000762B2 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
+		D0D4C9E92414D1C50029477E /* CTFeatureFlagsController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTFeatureFlagsController.h; sourceTree = "<group>"; };
+		D0D4C9EA2414D1C50029477E /* CTFeatureFlagsController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFeatureFlagsController.m; sourceTree = "<group>"; };
+		D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+FeatureFlags.h"; sourceTree = "<group>"; };
+		D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CleverTapFeatureFlags.m; sourceTree = "<group>"; };
+		D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapFeatureFlagsPrivate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1064,6 +1074,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				D0D4C9E62414CBA30029477E /* FeatureFlags */,
 				0701E9572372AD550034AAC2 /* DisplayUnit */,
 				07B874E122E982F400328982 /* ABTesting */,
 				07B94520219EA33800D4C542 /* Inbox */,
@@ -1074,6 +1085,7 @@
 				07B9454F219EA38F00D4C542 /* CleverTap+Inbox.h */,
 				07B8757C22E983A200328982 /* CleverTap+ABTesting.h */,
 				0701E95A2372BA250034AAC2 /* CleverTap+DisplayUnit.h */,
+				D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */,
 				D01DBF25207FCEFB00E8F1B0 /* CleverTapInstanceConfigPrivate.h */,
 				D01A0892207EC2D400423D6F /* CleverTapInstanceConfig.h */,
 				D01A0893207EC2D400423D6F /* CleverTapInstanceConfig.m */,
@@ -1139,6 +1151,33 @@
 				D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */,
 			);
 			path = CleverTapSDK;
+			sourceTree = "<group>";
+		};
+		D0D4C9E62414CBA30029477E /* FeatureFlags */ = {
+			isa = PBXGroup;
+			children = (
+				D0D4C9E72414CC7A0029477E /* controllers */,
+				D0D4C9E82414CC7A0029477E /* models */,
+			);
+			path = FeatureFlags;
+			sourceTree = "<group>";
+		};
+		D0D4C9E72414CC7A0029477E /* controllers */ = {
+			isa = PBXGroup;
+			children = (
+				D0D4C9E92414D1C50029477E /* CTFeatureFlagsController.h */,
+				D0D4C9EA2414D1C50029477E /* CTFeatureFlagsController.m */,
+			);
+			path = controllers;
+			sourceTree = "<group>";
+		};
+		D0D4C9E82414CC7A0029477E /* models */ = {
+			isa = PBXGroup;
+			children = (
+				D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */,
+				D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */,
+			);
+			path = models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1231,6 +1270,7 @@
 				071EB515217F6427008F0FAB /* CTInterstitialViewController.h in Headers */,
 				0701E9622372C1950034AAC2 /* CTDisplayUnitController.h in Headers */,
 				0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */,
+				D0D4C9EB2414D1C50029477E /* CTFeatureFlagsController.h in Headers */,
 				07B8757022E982F400328982 /* NSInvocation+CTHelper.h in Headers */,
 				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
 				07B8757222E982F400328982 /* CTABTestUtils.h in Headers */,
@@ -1260,11 +1300,13 @@
 				071EB508217F6427008F0FAB /* CTBaseHeaderFooterViewController.h in Headers */,
 				D0A84AD8209135D400191B1F /* CTPreferences.h in Headers */,
 				0701E95C2372BA250034AAC2 /* CleverTap+DisplayUnit.h in Headers */,
+				D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */,
 				071EB4FB217F6427008F0FAB /* CTInAppDisplayViewController.h in Headers */,
 				07B8753922E982F400328982 /* CTABTestEditorDeviceInfoMessageResponse.h in Headers */,
 				D0A6626D20801E7F00B403F3 /* CTDeviceInfo.h in Headers */,
 				07B8757E22E983A200328982 /* CleverTap+ABTesting.h in Headers */,
 				D0A6626A207EE6F500B403F3 /* CleverTapBuildInfo.h in Headers */,
+				D0D4C9F52414EE770029477E /* CleverTapFeatureFlagsPrivate.h in Headers */,
 				07B8754A22E982F400328982 /* CTClassDescription.h in Headers */,
 				D0213D50207D905800FE5740 /* CleverTapEventDetail.h in Headers */,
 				07B94550219EA39000D4C542 /* CleverTap+Inbox.h in Headers */,
@@ -1505,6 +1547,7 @@
 				07B9454C219EA34300D4C542 /* CTMessageMO.m in Sources */,
 				07B8756022E982F400328982 /* CTNSStringFromUIColorValueTransformer.m in Sources */,
 				07B8756222E982F400328982 /* CTNSDictionaryFromUIImageValueTransformer.m in Sources */,
+				D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */,
 				07B8756F22E982F400328982 /* CTSwizzler.m in Sources */,
 				D01A0898207ED98300423D6F /* CTPlistInfo.m in Sources */,
 				071EB4D2217F6427008F0FAB /* CTInterstitialImageViewController.m in Sources */,
@@ -1517,6 +1560,7 @@
 				071EB4CD217F6427008F0FAB /* CTInAppUtils.m in Sources */,
 				D0CACF9120B8A44C00A02327 /* CTCertificatePinning.m in Sources */,
 				D033FB84208FE51200B4390F /* CTUtils.m in Sources */,
+				D0D4C9EC2414D1C50029477E /* CTFeatureFlagsController.m in Sources */,
 				0701E975237A9A760034AAC2 /* CleverTapDisplayUnitContent.m in Sources */,
 				07B8757B22E982F400328982 /* CTABTestController.m in Sources */,
 				D0405B4722050C5200D64EC3 /* CTInboxUtils.m in Sources */,

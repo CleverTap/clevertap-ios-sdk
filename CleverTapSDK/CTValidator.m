@@ -227,7 +227,7 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
  */
 + (BOOL)isRestrictedEventName:(NSString *)name {
     NSArray *restrictedNames = @[@"Notification Sent", @"Notification Viewed", @"Notification Clicked",
-                                 @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d"];
+                                 @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d", @"wzrk_fetch"];
     for (NSString *x in restrictedNames)
         if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
             // The event name is restricted

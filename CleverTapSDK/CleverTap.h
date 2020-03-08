@@ -26,6 +26,7 @@
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
 @class CleverTapInstanceConfig;
+@class CleverTapFeatureFlags;
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMethodInspection"
@@ -49,6 +50,8 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  */
 
 @property (nonatomic, strong, readonly, nonnull) CleverTapInstanceConfig *config;
+
+@property (atomic, strong, readonly, nonnull) CleverTapFeatureFlags *featureFlags;
 
 /* ------------------------------------------------------------------------------------------------------
  * Initialization
