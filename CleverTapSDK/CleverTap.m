@@ -61,6 +61,10 @@ static NSArray* sslCertNames;
 #import "CleverTapFeatureFlagsPrivate.h"
 #import "CTFeatureFlagsController.h"
 
+#import "CleverTap+ProductConfig.h"
+#import "CleverTapProductConfigPrivate.h"
+#import "CTProductConfigController.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -168,6 +172,12 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @end
 
+@interface CleverTap () <CTProductConfigDelegate, CleverTapPrivateProductConfigDelegate> {}
+@property (atomic, strong) CTProductConfigController *productConfigController;
+@property (atomic, strong, readwrite, nonnull) CleverTapProductConfig *productConfig;
+
+@end
+
 #import <UserNotifications/UserNotifications.h>
 
 @interface CleverTap () <UIApplicationDelegate> {
@@ -245,6 +255,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 #endif
 
 @synthesize featureFlagsDelegate=_featureFlagsDelegate;
+
+@synthesize productConfigDelegate=_productConfigDelegate;
 
 static CTPlistInfo* _plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
@@ -627,6 +639,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _initABTesting];
 #endif
     [self _initFeatureFlags];
+    
+    [self _initProductConfig];
     
     [self notifyUserProfileInitialized];
 
@@ -2778,6 +2792,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
                 
+                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
+                if (productConfigJSON) {
+                    NSMutableArray *productConfigNotifs;
+                    @try {
+                        productConfigNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
+                    }
+                    if (productConfigNotifs && self.productConfigController) {
+                        NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
+                        [self.productConfigController updateProductConfig:productConfig];
+                    }
+                }
+                
                 // Handle events/profiles sync data
                 @try {
                     NSDictionary *evpr = jsonResp[@"evpr"];
@@ -3045,6 +3073,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
         
         [self _resetFeatureFlags];
+        
+        [self _resetProductConfig];
         
         // push data on reset profile
         [self recordAppLaunched:action];
@@ -4583,8 +4613,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)featureFlagsDidUpdate {
-    if (self.featureFlagsDelegate && [self.featureFlagsDelegate respondsToSelector:@selector(featureFlagsUpdated)]) {
-        [self.featureFlagsDelegate featureFlagsUpdated];
+    if (self.featureFlagsDelegate && [self.featureFlagsDelegate respondsToSelector:@selector(ctFeatureFlagsUpdated)]) {
+        [self.featureFlagsDelegate ctFeatureFlagsUpdated];
     }
 }
 
@@ -4601,6 +4631,61 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return defaultValue;
 }
 
-#pragma mark Feature Flags Public
+#pragma mark Product Config
+
+// run off main
+- (void) _initProductConfig {
+    self.productConfig = [[CleverTapProductConfig alloc] initWithPrivateDelegate:self];
+    [self runSerialAsync:^{
+        if (self.productConfigController) {
+            return;
+        }
+        if (self.deviceInfo.deviceId) {
+            self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+        }
+    }];
+}
+
+// run off main
+- (void)_resetProductConfig {
+    if (self.productConfigController && self.productConfigController.isInitialized && self.deviceInfo.deviceId) {
+        self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+    }
+}
+
+- (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate {
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapProductConfigDelegate)]) {
+         _productConfigDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config Delegate does not conform to the CleverTapProductConfigDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapProductConfigDelegate>)productConfigDelegate {
+    return _productConfigDelegate;
+}
+
+- (void)productConfigDidUpdate {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigUpdated)]) {
+        [self.productConfigDelegate ctProductConfigUpdated];
+    }
+}
+
+- (void)fetchProductConfig {
+    // TODO make more robust with throttling etc
+    [self queueEvent:@{@"evtName": @"wzrk_fetch", @"evtData" : @{@"type": @"pc"}} withType:CleverTapEventTypeFetch];
+}
+
+// TODO handle Getters etc
+
+/*
+- (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
+    if (self.featureFlagsController && self.featureFlagsController.isInitialized) {
+        return [self.featureFlagsController get:key withDefaultValue: defaultValue];
+    }
+    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags not initialized", self);
+    return defaultValue;
+}
+*/
 
 @end

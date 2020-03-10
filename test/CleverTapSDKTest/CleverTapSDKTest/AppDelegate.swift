@@ -3,7 +3,7 @@ import UserNotifications
 import CleverTapSDK
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, CleverTapInAppNotificationDelegate, CleverTapSyncDelegate, CleverTapFeatureFlagsDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, CleverTapInAppNotificationDelegate, CleverTapSyncDelegate, CleverTapFeatureFlagsDelegate, CleverTapProductConfigDelegate {
     
     var window: UIWindow?
     var orientationLock = UIInterfaceOrientationMask.portrait
@@ -33,6 +33,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
+        
+        CleverTap.sharedInstance()?.productConfig.delegate = self;
+        CleverTap.sharedInstance()?.productConfig.fetch();
+        
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")
         CleverTap.sharedInstance()?.registerBoolVariable(withName: "boolVar")
@@ -74,12 +78,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         print(CleverTapID ?? "unknown")
         print(accountId ?? "unknown")
     }
-    func featureFlagsUpdated() {
+    
+    func ctFeatureFlagsUpdated() {
         NSLog("CleverTap feature flags updated")
         let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("foo", withDefaultValue:false)
         print(ffFoo!)
         let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("discount", withDefaultValue:false)
         print(ffDiscount!)
+    }
+    
+    func ctProductConfigUpdated() {
+        NSLog("CleverTap Product Config updated")
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

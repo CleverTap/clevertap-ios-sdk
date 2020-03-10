@@ -3,7 +3,11 @@
 
 @protocol CleverTapFeatureFlagsDelegate <NSObject>
 @optional
-- (void)featureFlagsUpdated;
+- (void)ctFeatureFlagsUpdated;
+@end
+
+@interface CleverTap (FeatureFlags)
+@property (atomic, strong, readonly, nonnull) CleverTapFeatureFlags *featureFlags;
 @end
 
 @interface CleverTapFeatureFlags : NSObject

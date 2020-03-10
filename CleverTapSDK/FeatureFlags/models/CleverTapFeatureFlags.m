@@ -16,12 +16,6 @@
     [self.privateDelegate setFeatureFlagsDelegate:delegate];
 }
 
-- (void)fetch {
-    if (self.privateDelegate) {
-        [self.privateDelegate fetchFeatureFlags];
-    }
-}
-
 - (BOOL)get:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
     if (self.privateDelegate) {
         return [self.privateDelegate getFeatureFlag:key withDefaultValue:defaultValue];

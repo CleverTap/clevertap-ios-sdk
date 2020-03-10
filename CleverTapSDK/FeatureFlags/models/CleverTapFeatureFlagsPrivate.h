@@ -6,7 +6,6 @@
 
 @property (atomic, weak) id<CleverTapFeatureFlagsDelegate> _Nullable featureFlagsDelegate;
 
-- (void)fetchFeatureFlags;
 - (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue;
 
 @end
