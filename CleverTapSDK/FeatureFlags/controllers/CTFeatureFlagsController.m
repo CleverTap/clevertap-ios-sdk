@@ -2,13 +2,17 @@
 #import "CTFeatureFlagsController.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
+#import "CleverTapInstanceConfig.h"
 
 @interface CTFeatureFlagsController() {
     NSOperationQueue *_commandQueue;
 }
 
-@property (nonatomic, copy, readonly) NSString *accountId;
 @property (atomic, copy) NSString *guid;
+@property (atomic, strong) CleverTapInstanceConfig *config;
+@property (atomic) NSMutableDictionary<NSString *, NSNumber *> *store;
+
+@property (nonatomic, weak) id<CTFeatureFlagsDelegate> _Nullable delegate;
 
 @end
 
@@ -16,12 +20,15 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 
 @implementation CTFeatureFlagsController
 
-- (instancetype)initWithAccountId:(NSString *)accountId guid:(NSString *)guid {
+- (instancetype _Nullable)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config
+                                    guid:(NSString *_Nonnull)guid
+                                delegate:(id<CTFeatureFlagsDelegate>_Nonnull)delegate {
     self = [super init];
     if (self) {
         _isInitialized = YES;
-        _accountId = accountId;
+        _config = config;
         _guid = guid;
+        _delegate = delegate;
         _commandQueue = [[NSOperationQueue alloc] init];
         _commandQueue.maxConcurrentOperationCount = 1;
         [self _unarchiveDataSync:YES];
@@ -35,19 +42,23 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 
 // be sure to call off the main thread
 - (void)_updateFeatureFlags:(NSArray<NSDictionary*> *)featureFlags isNew:(BOOL)isNew {
-    // TODO
-    CleverTapLogStaticInternal(@"updating Feature Flags: %@", featureFlags);
-    // NSMutableArray *units = [NSMutableArray new];
-    // NSMutableArray *tempArray = [displayUnits mutableCopy];
-    //for (NSDictionary *obj in tempArray) {
-        // do something
-    //}
+    CleverTapLogInternal(_config.logLevel, @"%@: updating feature flags: %@", self, featureFlags);
+    NSMutableDictionary *store = [NSMutableDictionary new];
+    for (NSDictionary *flag in featureFlags) {
+        @try {
+            store[flag[@"n"]] = [NSNumber numberWithBool: [flag[@"v"] boolValue]];
+        } @catch (NSException *e) {
+            CleverTapLogDebug(_config.logLevel, @"%@: error parsing feature flag: %@, %@", self, flag, e.debugDescription);
+            continue;
+        }
+    }
+    self.store = store;
+
     if (isNew) {
         [self _archiveData:featureFlags sync:NO];
         [self notifyUpdate];
     }
 }
-
 
 - (void)notifyUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(featureFlagsDidUpdate)]) {
@@ -56,13 +67,23 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 }
 
 - (BOOL)get:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
-    // TODO
-    CleverTapLogStaticInternal(@"get Feature Flags: %@ with default: %i", key, defaultValue);
-    return defaultValue;
+    CleverTapLogInternal(_config.logLevel, @"%@: get feature flag: %@ with default: %i", self, key, defaultValue);
+    @try {
+        NSNumber *value = self.store[key];
+        if (value) {
+            return [value boolValue];
+        } else {
+            CleverTapLogDebug(_config.logLevel, @"%@: feature flag %@ not found, returning default value", self, key);
+            return defaultValue;
+        }
+    } @catch (NSException *e) {
+        CleverTapLogDebug(_config.logLevel, @"%@: error parsing feature flag: %@ not found, returning default value", self, key);
+        return defaultValue;
+    }
 }
 
 - (NSString*)dataArchiveFileName {
-    return [NSString stringWithFormat:@"clevertap-%@-%@-feature-flags.plist", _accountId, _guid];
+    return [NSString stringWithFormat:@"clevertap-%@-%@-feature-flags.plist", _config.accountId, _guid];
 }
 
 - (void)_unarchiveDataSync:(BOOL)sync {
@@ -95,6 +116,10 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
         _commandQueue.suspended = NO;
         [_commandQueue addOperation:operation];
     }
+}
+
+- (NSString*)description {
+    return [NSString stringWithFormat:@"CleverTap.%@.CTFeatureFlagsController", _config.accountId];
 }
 
 @end

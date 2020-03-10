@@ -5,17 +5,18 @@
 - (void)featureFlagsDidUpdate;
 @end
 
+@class CleverTapInstanceConfig;
+
 @interface CTFeatureFlagsController : NSObject
 
 @property (nonatomic, assign, readonly) BOOL isInitialized;
 
-@property (nonatomic, weak) id<CTFeatureFlagsDelegate> _Nullable delegate;
-
 - (instancetype _Nullable ) init __unavailable;
 
 // blocking, call off main thread
-- (instancetype _Nullable)initWithAccountId:(NSString *_Nonnull)accountId
-                                       guid:(NSString *_Nonnull)guid;
+- (instancetype _Nullable)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config
+                                    guid:(NSString *_Nonnull)guid
+                                delegate:(id<CTFeatureFlagsDelegate>_Nonnull)delegate;
 
 - (void)updateFeatureFlags:(NSArray<NSDictionary*> *_Nullable)featureFlags;
 

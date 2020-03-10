@@ -2764,8 +2764,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
 #endif
-                // NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
-                NSDictionary *featureFlagsJSON = @{@"ff_notifs": @{@"kv": @[@{@"n": @"discount", @"v": @true, @"t":@1}, @{@"n": @"customer-type", @"v": @true, @"t":@(0)}], @"ts": @1245}}[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];  // TODO remove
+                NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
                 if (featureFlagsJSON) {
                     NSMutableArray *featureFlagsNotifs;
                     @try {
@@ -4551,23 +4550,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 // run off main
 - (void) _initFeatureFlags {
-   if (self.featureFlagsController) {
-       return;
-   }
-   if (self.deviceInfo.deviceId) {
-       self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-       self.featureFlagsController.delegate = self;
-   }
-   if (!self.featureFlags) {
-       self.featureFlags = [[CleverTapFeatureFlags alloc] initWithPrivateDelegate:self];
-       [self fetchFeatureFlags];
-   }
+    self.featureFlags = [[CleverTapFeatureFlags alloc] initWithPrivateDelegate:self];
+    [self runSerialAsync:^{
+        if (self.featureFlagsController) {
+            return;
+        }
+        if (self.deviceInfo.deviceId) {
+            self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+        }
+        [self fetchFeatureFlags];
+    }];
 }
 
+// run off main
 - (void)_resetFeatureFlags {
     if (self.featureFlagsController && self.featureFlagsController.isInitialized && self.deviceInfo.deviceId) {
-        self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-        self.featureFlagsController.delegate = self;
+        self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
         [self fetchFeatureFlags];
     }
 }

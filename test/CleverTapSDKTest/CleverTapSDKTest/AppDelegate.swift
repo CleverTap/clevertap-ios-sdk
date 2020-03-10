@@ -78,6 +78,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         NSLog("CleverTap feature flags updated")
         let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("foo", withDefaultValue:false)
         print(ffFoo!)
+        let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("discount", withDefaultValue:false)
+        print(ffDiscount!)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

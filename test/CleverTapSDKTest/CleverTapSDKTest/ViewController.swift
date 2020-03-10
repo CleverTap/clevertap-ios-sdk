@@ -19,6 +19,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         super.viewDidLoad()
         let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("foo", withDefaultValue:false)
         print(ffFoo!)
+        let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("discount", withDefaultValue:false)
+        print(ffDiscount!)
         self.setupImages()
         self.recordUserChargedEvent()
         CleverTap.sharedInstance()?.recordEvent("Product rated")
