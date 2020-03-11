@@ -5,12 +5,12 @@
 language: objective-c
 cache: cocoapods
 podfile: ObjCStarter/Podfile
-osx_image: xcode10.2
+osx_image: xcode11.1
 before_install:
  - gem install cocoapods  -v '1.7.5' # Since Travis is not always on latest version
  - pod update --project-directory=ObjCStarter
 install:
 - gem install xcpretty --no-document --quiet
 script:
-- set -o pipefail && xcodebuild -workspace "ObjCStarter/ObjCStarter.xcworkspace" -scheme "ObjCStarter" -sdk iphonesimulator -destination 'name=iPhone X' build 
+- set -o pipefail && xcodebuild -workspace "ObjCStarter/ObjCStarter.xcworkspace" -scheme "ObjCStarter" -sdk iphonesimulator -destination 'name=iPhone 11' build 
 - pod lib lint --quick

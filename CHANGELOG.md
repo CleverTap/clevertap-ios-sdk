@@ -1,5 +1,10 @@
 # CHANGE LOG
 
+## Version 3.7.3 (March 11, 2020)
+* Adds public APIs for raising Notification Clicked and Viewed events for App Inbox
+* Adds public APIS for marking inbox message as read and deleting inbox message per message ID
+* Bug fixes and performance improvements
+
 ## Version 3.7.2 (December 11, 2019)
 * Adds support for Native Display
 * Bug fixes and performance improvements

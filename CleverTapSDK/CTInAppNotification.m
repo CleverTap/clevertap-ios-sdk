@@ -171,16 +171,14 @@
     self.buttons = _buttons;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
-            if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
-                self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
-                return;
-            }
-            
-            if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
-                self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
-                return;
-            }
+        if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
+            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
+            return;
+        }
+        
+        if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
+            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
+            return;
         }
     });
     
@@ -268,12 +266,12 @@
 }
 
 - (BOOL)deviceOrientationIsLandscape {
-    #if (TARGET_OS_TV)
-        return nil;
-    #else
-        UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
-        return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
-    #endif
+#if (TARGET_OS_TV)
+    return nil;
+#else
+    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+#endif
 }
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler {

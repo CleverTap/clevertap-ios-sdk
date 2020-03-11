@@ -25,11 +25,11 @@
 
 #import <UIKit/UIKit.h>
 
-extern const NSString * CSToastPositionTop;
-extern const NSString * CSToastPositionCenter;
-extern const NSString * CSToastPositionBottom;
+extern const NSString * CTToastPositionTop;
+extern const NSString * CTToastPositionCenter;
+extern const NSString * CTToastPositionBottom;
 
-@class CSToastStyle;
+@class CTToastStyle;
 
 /**
  Toast is an Objective-C category that adds toast notifications to the UIView
@@ -77,7 +77,7 @@ extern const NSString * CSToastPositionBottom;
 - (void)makeToast:(NSString *)message
          duration:(NSTimeInterval)duration
          position:(id)position
-            style:(CSToastStyle *)style;
+            style:(CTToastStyle *)style;
 
 /**
  Creates and presents a new toast view with a message, title, and image. Duration,
@@ -100,7 +100,7 @@ extern const NSString * CSToastPositionBottom;
          position:(id)position
             title:(NSString *)title
             image:(UIImage *)image
-            style:(CSToastStyle *)style
+            style:(CTToastStyle *)style
        completion:(void(^)(BOOL didTap))completion;
 
 /**
@@ -120,7 +120,7 @@ extern const NSString * CSToastPositionBottom;
 - (UIView *)toastViewForMessage:(NSString *)message
                           title:(NSString *)title
                           image:(UIImage *)image
-                          style:(CSToastStyle *)style;
+                          style:(CTToastStyle *)style;
 
 /**
  Hides the active toast. If there are multiple toasts active in a view, this method
@@ -209,16 +209,16 @@ extern const NSString * CSToastPositionBottom;
 @end
 
 /**
- `CSToastStyle` instances define the look and feel for toast views created via the 
+ `CTToastStyle` instances define the look and feel for toast views created via the
  `makeToast:` methods as well for toast views created directly with
  `toastViewForMessage:title:image:style:`.
  
- @warning `CSToastStyle` offers relatively simple styling options for the default
+ @warning `CTToastStyle` offers relatively simple styling options for the default
  toast view. If you require a toast view with more complex UI, it probably makes more
  sense to create your own custom UIView subclass and present it with the `showToast:`
  methods.
  */
-@interface CSToastStyle : NSObject
+@interface CTToastStyle : NSObject
 
 /**
  The background color. Default is `[UIColor blackColor]` at 80% opacity.
@@ -339,41 +339,41 @@ extern const NSString * CSToastPositionBottom;
 @property (assign, nonatomic) NSTimeInterval fadeDuration;
 
 /**
- Creates a new instance of `CSToastStyle` with all the default values set.
+ Creates a new instance of `CTToastStyle` with all the default values set.
  */
 - (instancetype)initWithDefaultStyle NS_DESIGNATED_INITIALIZER;
 
 /**
  @warning Only the designated initializer should be used to create
- an instance of `CSToastStyle`.
+ an instance of `CTToastStyle`.
  */
 - (instancetype)init NS_UNAVAILABLE;
 
 @end
 
 /**
- `CSToastManager` provides general configuration options for all toast
+ `CTToastManager` provides general configuration options for all toast
  notifications. Backed by a singleton instance.
  */
-@interface CSToastManager : NSObject
+@interface CTToastManager : NSObject
 
 /**
  Sets the shared style on the singleton. The shared style is used whenever
  a `makeToast:` method (or `toastViewForMessage:title:image:style:`) is called
- with with a nil style. By default, this is set to `CSToastStyle`'s default
+ with with a nil style. By default, this is set to `CTToastStyle`'s default
  style.
  
  @param sharedStyle the shared style
  */
-+ (void)setSharedStyle:(CSToastStyle *)sharedStyle;
++ (void)setSharedStyle:(CTToastStyle *)sharedStyle;
 
 /**
  Gets the shared style from the singlton. By default, this is
- `CSToastStyle`'s default style.
+ `CTToastStyle`'s default style.
  
  @return the shared style
  */
-+ (CSToastStyle *)sharedStyle;
++ (CTToastStyle *)sharedStyle;
 
 /**
  Enables or disables tap to dismiss on toast views. Default is `YES`.
@@ -428,7 +428,7 @@ extern const NSString * CSToastPositionBottom;
 /**
  Sets the default position. Used for the `makeToast:` and
  `showToast:` methods that don't require an explicit position.
- Default is `CSToastPositionBottom`.
+ Default is `CTToastPositionBottom`.
  
  @param position The default center point. Can be one of the predefined
  CSToastPosition constants or a `CGPoint` wrapped in an `NSValue` object.
@@ -436,7 +436,7 @@ extern const NSString * CSToastPositionBottom;
 + (void)setDefaultPosition:(id)position;
 
 /**
- Returns the default toast position. Default is `CSToastPositionBottom`.
+ Returns the default toast position. Default is `CTToastPositionBottom`.
  
  @return position The default center point. Will be one of the predefined
  CSToastPosition constants or a `CGPoint` wrapped in an `NSValue` object.
