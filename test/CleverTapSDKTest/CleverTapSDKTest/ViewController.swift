@@ -24,7 +24,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         self.setupImages()
         self.recordUserChargedEvent()
         CleverTap.sharedInstance()?.recordEvent("Product rated")
-        
+                
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
         }

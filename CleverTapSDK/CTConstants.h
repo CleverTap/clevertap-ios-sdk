@@ -29,6 +29,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_ERROR_KEY @"wzrk_error"
+#define CLTAP_WZRK_FETCH_EVENT @"wzrk_fetch"
 #define CLTAP_PUSH_DELAY_SECONDS 1
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10

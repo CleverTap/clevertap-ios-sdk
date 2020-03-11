@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "CleverTap+ProductConfig.h"
 
 @protocol CTProductConfigDelegate <NSObject>
 @required
@@ -19,5 +20,15 @@
                                 delegate:(id<CTProductConfigDelegate>_Nonnull)delegate;
 
 - (void)updateProductConfig:(NSArray<NSDictionary*> *_Nullable)productConfig;
+
+- (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval;
+
+- (void)activate;
+
+- (void)fetchAndActivate;
+
+- (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval;
+
+- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key withDefaultValue:(CleverTapConfigValue *_Nullable)defaultValue;
 
 @end

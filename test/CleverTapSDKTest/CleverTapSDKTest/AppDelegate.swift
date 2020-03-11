@@ -51,6 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.registerDictionaryOfDoubleVariable(withName: "dictOfdoubleVar")
         CleverTap.sharedInstance()?.registerDictionaryOfIntegerVariable(withName: "dictOfintVar")
         CleverTap.sharedInstance()?.registerDictionaryOfStringVariable(withName: "dictOfstringVar")
+
         return true
     }
     
@@ -89,6 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     func ctProductConfigUpdated() {
         NSLog("CleverTap Product Config updated")
+        CleverTap.sharedInstance()?.productConfig.fetch()
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

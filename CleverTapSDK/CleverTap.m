@@ -2792,6 +2792,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
                 
+                [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
+
                 NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
                 if (productConfigJSON) {
                     NSMutableArray *productConfigNotifs;
@@ -2803,6 +2805,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (productConfigNotifs && self.productConfigController) {
                         NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
                         [self.productConfigController updateProductConfig:productConfig];
+                        [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
                     }
                 }
                 
@@ -4620,7 +4623,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)fetchFeatureFlags {
     // TODO make more robust
-    [self queueEvent:@{@"evtName": @"wzrk_fetch", @"evtData" : @{@"type": @"ff"}} withType:CleverTapEventTypeFetch];
+    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @1}} withType:CleverTapEventTypeFetch];
 }
 
 - (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
@@ -4652,6 +4655,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
     }
 }
+    
+- (NSDictionary *)_setConfigOptions {
+    NSDictionary *arp = [self getARP];
+    if (arp) {
+        NSMutableDictionary *configOptions = [NSMutableDictionary new];
+        configOptions[@"rc_n"] = [arp[@"rc_n"] numberValue];
+        configOptions[@"rc_w"] = [arp[@"rc_w"] numberValue];
+        return [configOptions mutableCopy];
+    }
+    return nil;
+}
 
 - (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapProductConfigDelegate)]) {
@@ -4673,19 +4687,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)fetchProductConfig {
     // TODO make more robust with throttling etc
-    [self queueEvent:@{@"evtName": @"wzrk_fetch", @"evtData" : @{@"type": @"pc"}} withType:CleverTapEventTypeFetch];
+    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
 }
 
-// TODO handle Getters etc
-
-/*
-- (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
-    if (self.featureFlagsController && self.featureFlagsController.isInitialized) {
-        return [self.featureFlagsController get:key withDefaultValue: defaultValue];
+- (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key withDefaultValue:(CleverTapConfigValue *_Nullable)defaultValue {
+    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+        return [self.productConfigController get:key withDefaultValue:defaultValue];
     }
-    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags not initialized", self);
+    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Flags not initialized", self);
     return defaultValue;
 }
-*/
 
 @end
