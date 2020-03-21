@@ -72,11 +72,13 @@
     // TODO: Throttling logic
 }
 
-- (CleverTapConfigValue *)get:(NSString *)key withDefaultValue:(CleverTapConfigValue *)defaultValue {    
+- (CleverTapConfigValue *)get:(NSString *)key {
     if (self.privateDelegate) {
-        return [self.privateDelegate getProductConfig:key withDefaultValue:defaultValue];
+        return [self.privateDelegate getProductConfig:key];
     }
-    return defaultValue;
+    // TODO: Handle the config value
+    CleverTapConfigValue *value;
+    return value;
 }
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval {

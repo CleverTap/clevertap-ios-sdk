@@ -243,6 +243,7 @@
 		07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */; };
 		07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */; };
+		49C1898E2423CF010003E4D4 /* CTProductConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0BD759C241760C60006EE55 /* CTProductConfigController.m */; };
 		49E2B18324178E7400AD704B /* CleverTapConfigValue.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E2B18124178E7400AD704B /* CleverTapConfigValue.m */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -349,7 +350,6 @@
 		D0BD75A7241769440006EE55 /* CleverTapProductConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = D0BD75A3241769440006EE55 /* CleverTapProductConfig.m */; };
 		D0BD75A82417694F0006EE55 /* CTFeatureFlagsController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9E92414D1C50029477E /* CTFeatureFlagsController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0BD75A9241769560006EE55 /* CTFeatureFlagsController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D4C9EA2414D1C50029477E /* CTFeatureFlagsController.m */; };
-		D0BD75AA2417695A0006EE55 /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0BD75AB241769620006EE55 /* CleverTapFeatureFlags.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */; };
 		D0BD75AC241769710006EE55 /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D0BD75AE241769E40006EE55 /* CleverTap+ProductConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = D0BD75AD241769E40006EE55 /* CleverTap+ProductConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1264,9 +1264,9 @@
 				D014B8DF20E2F9DE001E0780 /* CleverTap.h in Headers */,
 				D014B8FA20E2FB09001E0780 /* CTUriHelper.h in Headers */,
 				D014B8F620E2FAD5001E0780 /* CTConstants.h in Headers */,
+				49E2B18824237DCB00AD704B /* CleverTapFeatureFlagsPrivate.h in Headers */,
 				071EB525217F6C8F008F0FAB /* CTInAppResources.h in Headers */,
 				D014B8FE20E2FB3B001E0780 /* CTLogger.h in Headers */,
-				D0BD75AA2417695A0006EE55 /* CleverTapFeatureFlagsPrivate.h in Headers */,
 				D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */,
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
 				D014B90420E2FB59001E0780 /* CTValidator.h in Headers */,
@@ -1567,6 +1567,7 @@
 				07BF4661217F80C1002E166D /* CTInAppResources.m in Sources */,
 				07BF465C217F7C4B002E166D /* CTInAppDisplayViewController.m in Sources */,
 				071EB51B217F6568008F0FAB /* CTInAppNotification.m in Sources */,
+				49C1898E2423CF010003E4D4 /* CTProductConfigController.m in Sources */,
 				D0A9E9CE20EEA8770004BC6F /* CTLocationManager.m in Sources */,
 				D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */,
 				D014B90120E2FB4C001E0780 /* CTValidationResult.m in Sources */,

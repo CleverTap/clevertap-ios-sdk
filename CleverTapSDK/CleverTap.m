@@ -2792,8 +2792,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
                 
-                [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
-
                 NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
                 if (productConfigJSON) {
                     NSMutableArray *productConfigNotifs;
@@ -4690,12 +4688,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
 }
 
-- (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key withDefaultValue:(CleverTapConfigValue *_Nullable)defaultValue {
+- (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key {
     if (self.productConfigDelegate && self.productConfigController.isInitialized) {
-        return [self.productConfigController get:key withDefaultValue:defaultValue];
+        return [self.productConfigController get:key];
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Flags not initialized", self);
-    return defaultValue;
+    return nil;
 }
 
 @end

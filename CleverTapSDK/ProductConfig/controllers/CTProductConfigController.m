@@ -49,7 +49,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     for (NSDictionary *kv in productConfig) {
         @try {
             // store[kv[@"n"]] = [NSNumber numberWithBool: [flag[@"v"] boolValue]]; // TODO
-            self.store[kv[@"n"]] = [[CleverTapConfigValue alloc] initWithData:kv[@"v"]];
+//            self.store[kv[@"n"]] = [[CleverTapConfigValue alloc] initWithData:kv[@"v"]];
         } @catch (NSException *e) {
             CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config key-value: %@, %@", self, kv, e.debugDescription);
             continue;
@@ -59,8 +59,8 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
     if (isNew) {
         [self _archiveData:productConfig sync:NO];
-        [self notifyUpdate];
     }
+    [self notifyUpdate];
 }
 
 - (void)notifyUpdate {
@@ -109,10 +109,9 @@ typedef void (^CTProductConfigOperationBlock)(void);
     return [NSString stringWithFormat:@"CleverTap.%@.CTProductConfigController", _config.accountId];
 }
 
-
 #pragma mark - Product Config APIs
 
-- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key withDefaultValue:(CleverTapConfigValue *_Nullable)defaultValue {
+- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key {
     // TODO: implement
     CleverTapConfigValue *value;
     return value;

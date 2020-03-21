@@ -35,7 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
         
         CleverTap.sharedInstance()?.productConfig.delegate = self;
-        CleverTap.sharedInstance()?.productConfig.fetch();
+//        CleverTap.sharedInstance()?.productConfig.get(<#T##key: String##String#>, withDefaultValue: <#T##CleverTapConfigValue?#>)
         
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")

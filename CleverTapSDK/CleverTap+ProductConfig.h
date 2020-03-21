@@ -3,7 +3,7 @@
 
 @protocol CleverTapProductConfigDelegate <NSObject>
 @optional
-- (void)ctProductConfigUpdated;
+- (void)ctProductConfigUpdated; // TODO: working on naming 
 @end
 
 @interface CleverTap(ProductConfig)
@@ -13,7 +13,7 @@
 #pragma mark - CleverTapConfigValue
 
 @interface CleverTapConfigValue : NSObject <NSCopying>
-
+// TODO: private
 - (instancetype _Nullable )initWithData:(NSDictionary *_Nullable)data;
 /// Gets the value as a string.
 @property(nonatomic, readonly, nullable) NSString *stringValue;
@@ -34,7 +34,7 @@
 
 @property (nonatomic, weak) id<CleverTapProductConfigDelegate> _Nullable delegate;
 
-// TODO public methods
+// TODO: set default values
 
 - (void)fetch;
 
@@ -44,7 +44,7 @@
 
 - (void)fetchAndActivate;
 
-- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key withDefaultValue:(CleverTapConfigValue *_Nullable)defaultValue;
+- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval;
 

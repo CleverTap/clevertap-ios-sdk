@@ -56,8 +56,8 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 
     if (isNew) {
         [self _archiveData:featureFlags sync:NO];
-        [self notifyUpdate];
     }
+    [self notifyUpdate];
 }
 
 - (void)notifyUpdate {

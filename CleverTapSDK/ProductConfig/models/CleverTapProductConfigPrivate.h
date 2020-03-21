@@ -8,7 +8,7 @@
 
 - (void)fetchProductConfig;  // TODO
 
-- (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key withDefaultValue:(CleverTapConfigValue *_Nullable)defaultValue;
+- (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key;
 
 // Getters TODO
 
