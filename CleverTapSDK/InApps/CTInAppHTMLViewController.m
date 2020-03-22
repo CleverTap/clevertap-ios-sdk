@@ -29,18 +29,18 @@ typedef enum {
     kWRSlideStatus _currentStatus;
     CleverTapJSInterface *_jsInterface;
 }
-    
-    @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
-    @property(nonatomic, retain) UIPanGestureRecognizer *panGesture;
-    @property(nonatomic, assign) CGFloat initialHorizontalCenter;
-    @property(nonatomic, assign) CGFloat initialTouchPositionX;
-    
-    @property(nonatomic, assign) WRSlideCellDirection lastDirection;
-    @property(nonatomic, assign) CGFloat originalCenter;
-    
-    @property(nonatomic, assign) BOOL revealing;
-    
-    @end
+
+@property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
+@property(nonatomic, retain) UIPanGestureRecognizer *panGesture;
+@property(nonatomic, assign) CGFloat initialHorizontalCenter;
+@property(nonatomic, assign) CGFloat initialTouchPositionX;
+
+@property(nonatomic, assign) WRSlideCellDirection lastDirection;
+@property(nonatomic, assign) CGFloat originalCenter;
+
+@property(nonatomic, assign) BOOL revealing;
+
+@end
 
 @implementation CTInAppHTMLViewController
 
@@ -52,7 +52,7 @@ typedef enum {
     }
     return self;
 }
-    
+
 - (void)loadView {
     if (self.shouldPassThroughTouches) {
         self.view = [[CTInAppPassThroughView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
@@ -68,7 +68,7 @@ typedef enum {
     self.view.backgroundColor = [UIColor clearColor];
     [self layoutNotification];
 }
-    
+
 - (void)layoutNotification {
     _currentStatus = kWRSlideStatusNormal;
     
@@ -98,7 +98,7 @@ typedef enum {
         [webView addGestureRecognizer:_panGesture];
     }
 }
-    
+
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     if (self.notification.url) {
@@ -144,36 +144,36 @@ typedef enum {
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     char pos = self.notification.position;
     CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? [[CTInAppResources getSharedApplication] statusBarFrame].size.height : 0.0;
-
+    
     int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
     switch (pos) {
         case CLTAP_INAPP_POSITION_TOP:
-        frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-        frame.origin.y = 0.0f + extra + 20.0f;
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
-        break;
+            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+            frame.origin.y = 0.0f + extra + 20.0f;
+            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
+            break;
         case CLTAP_INAPP_POSITION_LEFT:
-        frame.origin.x = 0.0f;
-        frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleRightMargin;
-        break;
+            frame.origin.x = 0.0f;
+            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleRightMargin;
+            break;
         case CLTAP_INAPP_POSITION_BOTTOM:
-        frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-        frame.origin.y = screenSize.height - size.height;
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleTopMargin;
-        break;
+            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+            frame.origin.y = screenSize.height - size.height;
+            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleTopMargin;
+            break;
         case CLTAP_INAPP_POSITION_RIGHT:
-        frame.origin.x = screenSize.width - size.width - extra;
-        frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
-        break;
+            frame.origin.x = screenSize.width - size.width - extra;
+            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
+            break;
         case CLTAP_INAPP_POSITION_CENTER:
-        frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-        frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
-        break;
+            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+            break;
         default:
-        CleverTapLogStaticInternal(@"Unknown position %c", pos);
-        return;
+            CleverTapLogStaticInternal(@"Unknown position %c", pos);
+            return;
     }
     frame.origin.x = frame.origin.x < 0.0f ? 0.0f : frame.origin.x;
     frame.origin.y = frame.origin.y < 0.0f ? 0.0f : frame.origin.y;
@@ -202,11 +202,11 @@ typedef enum {
         webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleHeight;
     }
 }
-    
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES;
 }
-    
+
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     CleverTapLogStaticInternal(@"%@: Navigation request: %@", [self class], navigationAction.request.URL);
     
@@ -250,14 +250,14 @@ typedef enum {
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {
-   NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-   NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", @"playsinline"];
-   NSArray *queryItems = urlComponents.queryItems;
-   if ([queryItems count] == 0) return NO;
-   NSURLQueryItem *queryItem = [[queryItems filteredArrayUsingPredicate:predicate] firstObject];
-   NSString *value = queryItem.value;
-   return value.boolValue;
-   return NO;
+    NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name=%@", @"playsinline"];
+    NSArray *queryItems = urlComponents.queryItems;
+    if ([queryItems count] == 0) return NO;
+    NSURLQueryItem *queryItem = [[queryItems filteredArrayUsingPredicate:predicate] firstObject];
+    NSString *value = queryItem.value;
+    return value.boolValue;
+    return NO;
 }
 
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
@@ -335,15 +335,15 @@ typedef enum {
             // Figure out which side we've dragged on.
             WRSlideCellDirection finalDir = WRSlideCellDirectionRight;
             if (translation.x < 0)
-            finalDir = WRSlideCellDirectionLeft;
+                finalDir = WRSlideCellDirectionLeft;
             [self _slideInContentViewFromDirection:finalDir];
             [self _setRevealing:NO];
         }
     }
 }
-    
+
 #pragma mark - revealing setter
-    
+
 - (void)setRevealing:(BOOL)revealing {
     if (_revealing == revealing) {
         return;
@@ -356,55 +356,55 @@ typedef enum {
         [self _slideInContentViewFromDirection:_lastDirection];
     }
 }
-    
+
 - (void)_setRevealing:(BOOL)revealing {
     _revealing = revealing;
 }
-    
+
 #pragma mark - ContentView Sliding
-    
+
 - (void)_slideInContentViewFromDirection:(WRSlideCellDirection)direction {
     CGFloat bounceDistance;
     
     if (webView.center.x == _originalCenter)
-    return;
+        return;
     
     switch (direction) {
         case WRSlideCellDirectionRight:
-        bounceDistance = kBOUNCE_DISTANCE;
-        break;
+            bounceDistance = kBOUNCE_DISTANCE;
+            break;
         case WRSlideCellDirectionLeft:
-        bounceDistance = (CGFloat) -kBOUNCE_DISTANCE;
-        break;
+            bounceDistance = (CGFloat) -kBOUNCE_DISTANCE;
+            break;
         default:
-        break;
+            break;
     }
     
     [UIView animateWithDuration:0.1
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction
                      animations:^{
-                         self->webView.center = CGPointMake(self->_originalCenter, self->webView.center.y);
-                     }
+        self->webView.center = CGPointMake(self->_originalCenter, self->webView.center.y);
+    }
                      completion:^(BOOL f) {
-                         [UIView animateWithDuration:0.1 delay:0
-                                             options:UIViewAnimationOptionCurveEaseOut
-                                          animations:^{
-                                              self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
-                                          }
-                                          completion:^(BOOL f2) {
-                                              [UIView animateWithDuration:0.1 delay:0
-                                                                  options:UIViewAnimationOptionCurveEaseIn
-                                                               animations:^{
-                                                                   self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
-                                                               }
-                                                               completion:^(BOOL f1) {
-                                                                   self->_currentStatus = kWRSlideStatusNormal;
-                                                               }];
-                                          }];
-                     }];
+        [UIView animateWithDuration:0.1 delay:0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^{
+            self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
+        }
+                         completion:^(BOOL f2) {
+            [UIView animateWithDuration:0.1 delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
+            }
+                             completion:^(BOOL f1) {
+                self->_currentStatus = kWRSlideStatusNormal;
+            }];
+        }];
+    }];
 }
-    
+
 - (void)_slideOutContentViewInDirection:(WRSlideCellDirection)direction; {
     CGFloat newCenterX;
     CGFloat bounceDistance;
@@ -414,44 +414,44 @@ typedef enum {
             bounceDistance = (CGFloat) -kBOUNCE_DISTANCE;
             _currentStatus = kWRSlideStatusLeftExpanded;
         }
-        break;
+            break;
         case WRSlideCellDirectionRight: {
             newCenterX = self.view.bounds.size.width + webView.bounds.size.width;
             bounceDistance = kBOUNCE_DISTANCE;
             _currentStatus = kWRSlideStatusRightExpanded;
         }
-        break;
+            break;
         default:
-        break;
+            break;
     }
     
     [UIView animateWithDuration:0.1
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
-                         self->webView.center = CGPointMake(newCenterX, self->webView.center.y);
-                     }
+        self->webView.center = CGPointMake(newCenterX, self->webView.center.y);
+    }
                      completion:^(BOOL f) {
-                         [UIView animateWithDuration:0.1 delay:0
-                                             options:UIViewAnimationOptionCurveEaseIn
-                                          animations:^{
-                                              self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
-                                          }
-                                          completion:^(BOOL f1) {
-                                              [UIView animateWithDuration:0.1 delay:0
-                                                                  options:UIViewAnimationOptionCurveEaseIn
-                                                               animations:^{
-                                                                   self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
-                                                               }
-                                                               completion:^(BOOL finished) {
-                                                                   [self hide:NO];
-                                                               }];
-                                          }];
-                     }];
+        [UIView animateWithDuration:0.1 delay:0
+                            options:UIViewAnimationOptionCurveEaseIn
+                         animations:^{
+            self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
+        }
+                         completion:^(BOOL f1) {
+            [UIView animateWithDuration:0.1 delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
+            }
+                             completion:^(BOOL finished) {
+                [self hide:NO];
+            }];
+        }];
+    }];
 }
-    
+
 #pragma mark - UIGestureRecognizerDelegate
-    
+
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     if (gestureRecognizer == _panGesture) {
         UIScrollView *superview = (UIScrollView *) self.view.superview;
@@ -461,11 +461,25 @@ typedef enum {
     }
     return YES;
 }
-    
+
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     Class windowClass = self.shouldPassThroughTouches ? CTInAppPassThroughWindow.class : UIWindow.class;
-    self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    
+    if (@available(iOS 13, *)) {
+        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        for (UIScene *scene in connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *windowScene = (UIWindowScene *)scene;
+                self.window = [[windowClass alloc] initWithFrame:
+                               windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
+            }
+        }
+    } else {
+        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    }
+    
     self.window.alpha = 0;
     self.window.backgroundColor = [UIColor clearColor];
     self.window.windowLevel = UIWindowLevelNormal;
@@ -488,7 +502,7 @@ typedef enum {
         completionBlock();
     }
 }
-    
+
 -(void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
         [self.window removeFromSuperview];
@@ -509,14 +523,14 @@ typedef enum {
         completionBlock();
     }
 }
-    
+
 #pragma mark - Public
-    
+
 -(void)show:(BOOL)animated {
     if (!self.notification.html) return;
     [self showFromWindow:animated];
 }
-    
+
 -(void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }

@@ -41,9 +41,9 @@
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
-         [self loadView];
-         [self viewDidLoad];
-     } completion:nil];
+        [self loadView];
+        [self viewDidLoad];
+    } completion:nil];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
@@ -74,7 +74,20 @@
     
     if (!self.notification) return;
     
-    self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        for (UIScene *scene in connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *windowScene = (UIWindowScene *)scene;
+                self.window = [[UIWindow alloc] initWithFrame:
+                               windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
+            }
+        }
+    } else {
+        self.window = [[UIWindow alloc] initWithFrame:
+                       CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    }
     self.window.alpha = 0;
     self.window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     self.window.windowLevel = UIWindowLevelNormal;

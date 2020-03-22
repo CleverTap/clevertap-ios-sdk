@@ -2,6 +2,7 @@
 #import "CTBaseHeaderFooterViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
+#import "CTInAppResources.h"
 
 typedef enum {
     kWRSlideStatusNormal = 0,
@@ -332,7 +333,19 @@ typedef enum {
 
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
-    self.window = [[CTInAppPassThroughWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    if (@available(iOS 13, *)) {
+        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        for (UIScene *scene in connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *windowScene = (UIWindowScene *)scene;
+                self.window = [[CTInAppPassThroughWindow alloc] initWithFrame:
+                               windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
+            }
+        }
+    } else {
+        self.window = [[CTInAppPassThroughWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    }
     self.window.alpha = 0;
     self.window.backgroundColor = [UIColor clearColor];
     self.window.windowLevel = UIWindowLevelNormal;

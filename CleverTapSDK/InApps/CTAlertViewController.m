@@ -10,7 +10,7 @@
 
 - (instancetype)initWithNotification:(CTInAppNotification *)notification {
     if (self) {
-       self.notification = notification;
+        self.notification = notification;
     }
     return self;
 }
@@ -33,49 +33,49 @@
 - (void)setupDialogNotification {
     
     UIAlertController *dialogBox = [UIAlertController
-                                 alertControllerWithTitle: self.notification.title
-                                 message: self.notification.message
-                                 preferredStyle:UIAlertControllerStyleAlert];
+                                    alertControllerWithTitle: self.notification.title
+                                    message: self.notification.message
+                                    preferredStyle:UIAlertControllerStyleAlert];
     
     if (self.notification.buttons && self.notification.buttons.count > 0) {
-    
+        
         //Add Buttons
         UIAlertAction *firstButton = [UIAlertAction
                                       actionWithTitle:self.notification.buttons[0].text
                                       style:UIAlertActionStyleDefault
                                       handler:^(UIAlertAction * action) {
-                                         [self handleAlertButtonClickFromIndex:0];
-                                      }];
+            [self handleAlertButtonClickFromIndex:0];
+        }];
         
         [dialogBox addAction:firstButton];
-       
+        
         if (self.notification.buttons.count == 2) {
             
             UIAlertAction *secondButton = [UIAlertAction
                                            actionWithTitle:self.notification.buttons[1].text
                                            style:UIAlertActionStyleDefault
                                            handler:^(UIAlertAction * action) {
-                                               [self handleAlertButtonClickFromIndex:1];
-                                           }];
+                [self handleAlertButtonClickFromIndex:1];
+            }];
             
             [dialogBox addAction:secondButton];
         } else if (self.notification.buttons.count == 3) {
-           
+            
             UIAlertAction *secondButton = [UIAlertAction
                                            actionWithTitle:self.notification.buttons[1].text
                                            style:UIAlertActionStyleDefault
                                            handler:^(UIAlertAction * action) {
-                                               [self handleAlertButtonClickFromIndex:1];
-                                           }];
+                [self handleAlertButtonClickFromIndex:1];
+            }];
             
             [dialogBox addAction:secondButton];
             
             UIAlertAction *thirdButton = [UIAlertAction
-                                           actionWithTitle:self.notification.buttons[2].text
-                                           style:UIAlertActionStyleDefault
-                                           handler:^(UIAlertAction * action) {
-                                               [self handleAlertButtonClickFromIndex:2];
-                                           }];
+                                          actionWithTitle:self.notification.buttons[2].text
+                                          style:UIAlertActionStyleDefault
+                                          handler:^(UIAlertAction * action) {
+                [self handleAlertButtonClickFromIndex:2];
+            }];
             
             [dialogBox addAction:thirdButton];
         }
@@ -95,7 +95,19 @@
     
     if (!self.notification) return;
     
-    self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    if (@available(iOS 13, *)) {
+        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        for (UIScene *scene in connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *windowScene = (UIWindowScene *)scene;
+                self.window = [[UIWindow alloc] initWithFrame:
+                               windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
+            }
+        }
+    } else {
+        self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    }
     self.window.alpha = 0;
     self.window.backgroundColor = [UIColor clearColor];
     self.window.windowLevel = UIWindowLevelNormal;
@@ -108,7 +120,7 @@
             [self.delegate notificationDidShow:self.notification fromViewController:self];
         }
     };
-
+    
     self.window.alpha = 1.0;
     completionBlock();
 }
