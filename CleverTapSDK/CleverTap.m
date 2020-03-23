@@ -2771,9 +2771,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
                         [self initializeDisplayUnitWithCallback:^(BOOL success) {
                             if (success) {
-                                  NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
-                                  [self.displayUnitController updateDisplayUnits:displayUnits];
-                             }
+                                NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
+                                [self.displayUnitController updateDisplayUnits:displayUnits];
+                            }
                         }];
                     }
                 }
@@ -4601,7 +4601,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #endif
 
-#pragma mark Feature Flags
+#pragma mark - Feature Flags
 
 // run off main
 - (void) _initFeatureFlags {
@@ -4627,7 +4627,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)setFeatureFlagsDelegate:(id<CleverTapFeatureFlagsDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapFeatureFlagsDelegate)]) {
-         _featureFlagsDelegate = delegate;
+        _featureFlagsDelegate = delegate;
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags Delegate does not conform to the CleverTapFeatureFlagsDelegate protocol", self);
     }
@@ -4677,7 +4677,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
     }
 }
-    
+
 - (NSDictionary *)_setConfigOptions {
     NSDictionary *arp = [self getARP];
     if (arp) {
@@ -4691,7 +4691,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapProductConfigDelegate)]) {
-         _productConfigDelegate = delegate;
+        _productConfigDelegate = delegate;
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config Delegate does not conform to the CleverTapProductConfigDelegate protocol", self);
     }
@@ -4710,6 +4710,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)fetchProductConfig {
     // TODO make more robust with throttling etc
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
+}
+
+- (void)setDefaultsProductConfig:(NSDictionary<NSString *,NSObject *> *)defaults {
+    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+        [self.productConfigController setDefaults:defaults];
+    }
+}
+
+- (void)setDefaultsFromPlistFileNameProductConfig:(NSString *)fileName {
+    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+        [self.productConfigController setDefaultsFromPlistFileName:fileName];
+    }
 }
 
 - (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key {

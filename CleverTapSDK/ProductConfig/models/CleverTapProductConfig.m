@@ -72,6 +72,18 @@
     // TODO: Throttling logic
 }
 
+- (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults {
+    if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(setDefaultsProductConfig:)]) {
+        [self.privateDelegate setDefaultsProductConfig:defaults];
+    }
+}
+
+- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName {
+    if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(setDefaultsFromPlistFileNameProductConfig:)]) {
+        [self.privateDelegate setDefaultsFromPlistFileNameProductConfig:fileName];
+    }
+}
+
 - (CleverTapConfigValue *)get:(NSString *)key {
     if (self.privateDelegate) {
         return [self.privateDelegate getProductConfig:key];

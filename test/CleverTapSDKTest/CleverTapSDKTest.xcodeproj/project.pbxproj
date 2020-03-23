@@ -27,6 +27,7 @@
 		07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */; };
 		07EE53D222C0EA62009EBC12 /* ScreenABTestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */; };
 		07FBD71622FC2F610088C37B /* CustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FBD71522FC2F610088C37B /* CustomView.swift */; };
+		49C189942428C7C40003E4D4 /* RemoteConfigDefaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49C189932428C7C40003E4D4 /* RemoteConfigDefaults.plist */; };
 		D014B8A320E2F20B001E0780 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D014B8A220E2F20B001E0780 /* NotificationService.m */; };
 		D014B8A720E2F20B001E0780 /* testNotifServiceExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D014B8AC20E2F216001E0780 /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; };
@@ -131,6 +132,7 @@
 		07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenABTestVC.swift; sourceTree = "<group>"; };
 		07FBD71522FC2F610088C37B /* CustomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomView.swift; sourceTree = "<group>"; };
+		49C189932428C7C40003E4D4 /* RemoteConfigDefaults.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteConfigDefaults.plist; sourceTree = "<group>"; };
 		D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = testNotifServiceExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D014B8A120E2F20B001E0780 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		D014B8A220E2F20B001E0780 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 			isa = PBXGroup;
 			children = (
 				07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */,
+				49C189932428C7C40003E4D4 /* RemoteConfigDefaults.plist */,
 				075E0FF4237EB8BA0067130F /* images.png */,
 				D0596EFC208BDC6800A80753 /* CleverTapSDKTest.entitlements */,
 				07FBD71522FC2F610088C37B /* CustomView.swift */,
@@ -519,6 +522,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49C189942428C7C40003E4D4 /* RemoteConfigDefaults.plist in Resources */,
 				0702338122C9F8F900D39F42 /* experiment.json in Resources */,
 				075E0FF5237EB8BB0067130F /* images.png in Resources */,
 				D0A6624E207EE50000B403F3 /* Assets.xcassets in Resources */,

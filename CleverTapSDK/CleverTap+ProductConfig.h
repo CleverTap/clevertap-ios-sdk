@@ -13,8 +13,6 @@
 #pragma mark - CleverTapConfigValue
 
 @interface CleverTapConfigValue : NSObject <NSCopying>
-// TODO: private
-- (instancetype _Nullable )initWithData:(NSDictionary *_Nullable)data;
 /// Gets the value as a string.
 @property(nonatomic, readonly, nullable) NSString *stringValue;
 /// Gets the value as a number value.
@@ -25,7 +23,7 @@
 @property(nonatomic, readonly) BOOL boolValue;
 /// Gets a foundation object (NSDictionary / NSArray) by parsing the value as JSON. This method uses
 /// NSJSONSerialization's JSONObjectWithData method with an options value of 0.
-@property(nonatomic, readonly, nullable) id JSONValue NS_SWIFT_NAME(jsonValue);
+@property(nonatomic, readonly, nullable) id jsonValue;
 
 @end
 
@@ -34,19 +32,20 @@
 
 @property (nonatomic, weak) id<CleverTapProductConfigDelegate> _Nullable delegate;
 
-// TODO: set default values
-
 - (void)fetch;
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval;
+
+- (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval;
 
 - (void)activate;
 
 - (void)fetchAndActivate;
 
+- (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
+
+- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName;
+
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
-
-- (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval;
-
 
 @end

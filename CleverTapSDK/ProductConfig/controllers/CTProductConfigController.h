@@ -23,4 +23,8 @@
 
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
 
+- (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
+
+- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName;
+
 @end

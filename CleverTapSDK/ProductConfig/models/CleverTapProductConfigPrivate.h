@@ -8,9 +8,17 @@
 
 - (void)fetchProductConfig;  // TODO
 
+- (void)setDefaultsProductConfig:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
+
+- (void)setDefaultsFromPlistFileNameProductConfig:(NSString *_Nullable)fileName;
+
 - (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key;
 
-// Getters TODO
+@end
+
+@interface CleverTapConfigValue() {}
+
+- (instancetype _Nullable )initWithData:(NSDictionary *_Nullable)data;
 
 @end
 

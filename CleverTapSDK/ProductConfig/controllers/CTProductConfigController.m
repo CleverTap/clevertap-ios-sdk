@@ -12,6 +12,8 @@
 @property (atomic, copy) NSString *guid;
 @property (atomic, strong) CleverTapInstanceConfig *config;
 @property (atomic) NSMutableDictionary *store;  // TODO
+@property (nonatomic, strong) NSDictionary<NSString *, NSObject *> *defaultConfig;
+@property (nonatomic, strong) NSDictionary<NSString *, NSObject *> *activatedConfig;
 
 @property (nonatomic, weak) id<CTProductConfigDelegate> _Nullable delegate;
 
@@ -111,11 +113,29 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
 #pragma mark - Product Config APIs
 
+- (void)setDefaults:(NSDictionary<NSString *,NSObject *> *)defaults {
+    _defaultConfig = [defaults copy];
+}
+
+- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName {
+    NSArray *bundles = @[ [NSBundle mainBundle], [NSBundle bundleForClass:[self class]] ];
+    for (NSBundle *bundle in bundles) {
+        NSString *plistFile = [bundle pathForResource:fileName ofType:@"plist"];
+        if (plistFile) {
+            NSDictionary *defaultConfig = [[NSDictionary alloc] initWithContentsOfFile:plistFile];
+            if (defaultConfig) {
+                [self setDefaults:defaultConfig];
+            }
+            return;
+        }
+    }
+    CleverTapLogDebug(_config.logLevel, @"%@: The plist file %@ could not be found ", self, fileName);
+}
+
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key {
     // TODO: implement
     CleverTapConfigValue *value;
     return value;
 }
-
 
 @end
