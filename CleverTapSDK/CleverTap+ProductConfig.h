@@ -3,7 +3,7 @@
 
 @protocol CleverTapProductConfigDelegate <NSObject>
 @optional
-- (void)ctProductConfigUpdated; // TODO: working on naming 
+- (void)ctProductConfigUpdated; // TODO: working on naming
 @end
 
 @interface CleverTap(ProductConfig)

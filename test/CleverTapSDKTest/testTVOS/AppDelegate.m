@@ -21,7 +21,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     [CleverTap setDebugLevel:CleverTapLogDebug+2];
-    [CleverTap setCredentialsWithAccountID:@"R99-655-K75Z" token:@"556-cc2" region:@"sk1-staging-7"];
+//    [CleverTap setCredentialsWithAccountID:@"R99-655-K75Z" token:@"556-cc2" region:@"sk1-staging-7"];
     [CleverTap autoIntegrate];
     [[CleverTap sharedInstance] recordEvent:@"testEventFromTVOS"];
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];

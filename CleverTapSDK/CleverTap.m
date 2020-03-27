@@ -2792,11 +2792,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
                 
-                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
+                NSDictionary *mockJsonResp = @{@"pc_notifs": @{@"kv": @[@{@"n": @"discount", @"v": @"6000", @"t":@1}, @{@"n": @"customer-type", @"v": @"Gold", @"t":@(0)}], @"ts": @1245}};
+                NSDictionary *productConfigJSON = mockJsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];// TODO: remove
+//                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
                 if (productConfigJSON) {
                     NSMutableArray *productConfigNotifs;
                     @try {
-                        productConfigNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
+                        productConfigNotifs = [[NSMutableArray alloc] initWithArray:productConfigJSON[@"kv"]];
                     } @catch (NSException *e) {
                         CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
                     }
@@ -4710,6 +4712,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)fetchProductConfig {
     // TODO make more robust with throttling etc
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
+}
+
+- (void)activateProductConfig {
+    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+        [self.productConfigController activate];
+    }
 }
 
 - (void)setDefaultsProductConfig:(NSDictionary<NSString *,NSObject *> *)defaults {

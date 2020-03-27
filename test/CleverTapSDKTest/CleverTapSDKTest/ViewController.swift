@@ -23,7 +23,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         print(ffDiscount!)
         self.setupImages()
         self.recordUserChargedEvent()
-        CleverTap.sharedInstance()?.recordEvent("Product rated")
+//        CleverTap.sharedInstance()?.recordEvent("Product rated")
                 
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
@@ -61,10 +61,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     func remoteConfig () {
         let defaults = NSMutableDictionary()
-        defaults.setValue("bar", forKey: "foo")
-        defaults.setValue(false, forKey: "foo1")
+        defaults.setValue("aditi", forKey: "foo")
+        defaults.setValue("agrawal", forKey: "foo1")
         CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
-        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
+//        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -203,6 +203,21 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
         remoteConfig()
+        
+        let deadlineTime = DispatchTime.now() + .seconds(3)
+        DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
+            let ctValue = CleverTap.sharedInstance()?.productConfig.get("foo") as? CleverTapConfigValue
+            let strValue = ctValue?.stringValue
+            print("Remote Config:", strValue ?? "")
+        }
+        
+        let deadlineTime1 = DispatchTime.now() + .seconds(4)
+        DispatchQueue.main.asyncAfter(deadline: deadlineTime1) {
+            CleverTap.sharedInstance()?.productConfig.activate()
+            let ctValue = CleverTap.sharedInstance()?.productConfig.get("customer-type") as? CleverTapConfigValue
+            let strValue = ctValue?.stringValue
+            print("Remote Config after activate:", strValue ?? "")
+        }
 
 //        CleverTap.sharedInstance()?.recordEvent("Footer iOS")
 //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")

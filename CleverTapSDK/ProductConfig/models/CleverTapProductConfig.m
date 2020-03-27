@@ -65,11 +65,15 @@
 }
 
 - (void)activate {
-    // TODO:
+    if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(activateProductConfig)]) {
+        [self.privateDelegate activateProductConfig];
+    }
 }
 
 - (void)fetchAndActivate {
     // TODO: Throttling logic
+    [self fetch];
+    [self activate];
 }
 
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults {
@@ -85,12 +89,10 @@
 }
 
 - (CleverTapConfigValue *)get:(NSString *)key {
-    if (self.privateDelegate) {
+    if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(getProductConfig:)]) {
         return [self.privateDelegate getProductConfig:key];
     }
-    // TODO: Handle the config value
-    CleverTapConfigValue *value;
-    return value;
+    return nil;
 }
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval {
