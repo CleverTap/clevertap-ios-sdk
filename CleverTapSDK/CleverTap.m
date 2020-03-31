@@ -2025,6 +2025,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self saveARP:update];
+    [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
 }
 
 - (long)getI {
@@ -2792,9 +2793,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
                 
-                NSDictionary *mockJsonResp = @{@"pc_notifs": @{@"kv": @[@{@"n": @"discount", @"v": @"6000", @"t":@1}, @{@"n": @"customer-type", @"v": @"Gold", @"t":@(0)}], @"ts": @1245}};
-                NSDictionary *productConfigJSON = mockJsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];// TODO: remove
-//                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
+                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
                 if (productConfigJSON) {
                     NSMutableArray *productConfigNotifs;
                     @try {
@@ -2805,7 +2804,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (productConfigNotifs && self.productConfigController) {
                         NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
                         [self.productConfigController updateProductConfig:productConfig];
-                        [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
+                        NSString *lastFetchTs = productConfigJSON[@"ts"];
+                        [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
                     }
                 }
                 
@@ -4684,8 +4684,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSDictionary *arp = [self getARP];
     if (arp) {
         NSMutableDictionary *configOptions = [NSMutableDictionary new];
-        configOptions[@"rc_n"] = [arp[@"rc_n"] numberValue];
-        configOptions[@"rc_w"] = [arp[@"rc_w"] numberValue];
+        configOptions[@"rc_n"] = arp[@"rc_n"];
+        configOptions[@"rc_w"] = arp[@"rc_w"];
         return [configOptions mutableCopy];
     }
     return nil;
@@ -4710,13 +4710,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)fetchProductConfig {
-    // TODO make more robust with throttling etc
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
 }
 
 - (void)activateProductConfig {
     if (self.productConfigDelegate && self.productConfigController.isInitialized) {
         [self.productConfigController activate];
+    }
+}
+
+- (void)fetchAndActivateProductConfig {
+    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+        [self.productConfigController fetchAndActivate];
     }
 }
 

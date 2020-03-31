@@ -27,7 +27,6 @@
 
 @end
 
-
 @interface CleverTapProductConfig : NSObject
 
 @property (nonatomic, weak) id<CleverTapProductConfigDelegate> _Nullable delegate;
@@ -36,7 +35,7 @@
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval;
 
-- (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval;
+- (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval;
 
 - (void)activate;
 

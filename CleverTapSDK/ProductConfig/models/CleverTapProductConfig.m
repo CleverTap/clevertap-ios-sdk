@@ -1,14 +1,14 @@
 #import "CleverTapProductConfigPrivate.h"
+#import "CTConstants.h"
 
-#define CLTAP_DEFAULT_MIN_CONFIG_INTERVAL 1
-#define CLTAP_DEFAULT_MIN_CONFIG_RATE 5
+#define CLTAP_DEFAULT_FETCH_RATE 5
+#define CLTAP_DEFAULT_FETCH_TIME_INTERVAL 60
 
 @implementation CleverTapProductConfig
 
 @synthesize delegate=_delegate;
-@synthesize minConfigRate=_minConfigRate;
-@synthesize minConfigInterval=_minConfigInterval;
-
+@synthesize minFetchConfigRate=_minFetchConfigRate;
+@synthesize minFetchConfigInterval=_minFetchConfigInterval;
 
 - (instancetype _Nonnull)initWithPrivateDelegate:(id<CleverTapPrivateProductConfigDelegate>)delegate {
     self = [super init];
@@ -19,49 +19,62 @@
 }
 
 - (void)updateProductConfigWithOptions:(NSDictionary *)options {
-    self.minConfigRate = [options[@"rc_n"] doubleValue];
-    self.minConfigInterval = [options[@"rc_w"] doubleValue];
+    self.minFetchConfigRate = [options[@"rc_n"] doubleValue];
+    self.minFetchConfigInterval = [options[@"rc_w"] doubleValue];
 }
 
-- (void)setMinConfigInterval:(NSTimeInterval)minConfigInterval {
-    if (minConfigInterval <= 0) {
-        _minConfigInterval = CLTAP_DEFAULT_MIN_CONFIG_INTERVAL;
+- (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
+    self.lastFetchTimeInterval = lastFetchTs;
+}
+
+- (void)setMinFetchConfigRate:(NSTimeInterval)minFetchConfigRate {
+    if (minFetchConfigRate <= 0) {
+        _minFetchConfigRate = CLTAP_DEFAULT_FETCH_RATE;
     } else {
-        _minConfigInterval = minConfigInterval;
+        _minFetchConfigRate = minFetchConfigRate;
     }
 }
 
-- (void)setMinConfigRate:(NSTimeInterval)minConfigRate {
-    if (minConfigRate <= 0) {
-        _minConfigRate = CLTAP_DEFAULT_MIN_CONFIG_RATE;
+- (NSTimeInterval)minFetchConfigRate {
+    return _minFetchConfigRate;
+}
+
+- (void)setMinFetchConfigInterval:(NSTimeInterval)minFetchConfigInterval {
+    if (minFetchConfigInterval <= 0) {
+        _minFetchConfigInterval = CLTAP_DEFAULT_FETCH_TIME_INTERVAL;
     } else {
-        _minConfigRate = minConfigRate;
+        _minFetchConfigInterval = minFetchConfigInterval;
     }
 }
 
-- (NSTimeInterval)minConfigInterval {
-    return _minConfigInterval;
-}
-
-- (NSTimeInterval)minConfigRate {
-    return _minConfigRate;
+- (NSTimeInterval)minFetchConfigInterval {
+    return _minFetchConfigInterval;
 }
 
 - (void)setDelegate:(id<CleverTapProductConfigDelegate>)delegate {
     [self.privateDelegate setProductConfigDelegate:delegate];
 }
 
-// TODO
-
 - (void)fetch {
-    // TODO: Throttling logic
-    if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
-        [self.privateDelegate fetchProductConfig];
+    if ([self shouldThrottle])  {
+        if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
+            [self.privateDelegate fetchProductConfig];
+        }
+    } else {
+        CleverTapLogStaticDebug(@"FetchError: Product Config is throttled.");
     }
 }
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval {
-    // TODO:
+    // TODO: 
+}
+
+- (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval {
+    if (minimumFetchInterval > self.minFetchConfigInterval) {
+        self.minFetchConfigInterval = minimumFetchInterval;
+    } else {
+        CleverTapLogStaticDebug(@"Minimum Fetch Interval Error: Unable to set provided minimum fetch interval %f:", minimumFetchInterval);
+    }
 }
 
 - (void)activate {
@@ -71,9 +84,11 @@
 }
 
 - (void)fetchAndActivate {
-    // TODO: Throttling logic
     [self fetch];
-    [self activate];
+    if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchAndActivateProductConfig)]) {
+        [self.privateDelegate fetchAndActivateProductConfig];
+    }
+    
 }
 
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults {
@@ -95,10 +110,14 @@
     return nil;
 }
 
-- (void)setMinimumFetchInterval:(NSTimeInterval)fetchInterval {
-    self.minConfigInterval = fetchInterval;
-}
+#pragma mark - Throttling
 
-// Getters TODO
+- (BOOL)shouldThrottle {
+    if ((_minFetchConfigRate > 0) && (_minFetchConfigInterval > 0)) {
+        NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTimeInterval;
+        return timeSinceLastRequest > (self.minFetchConfigInterval / self.minFetchConfigRate);
+    }
+    return NO;
+}
 
 @end

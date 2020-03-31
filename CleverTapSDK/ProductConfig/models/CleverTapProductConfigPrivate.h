@@ -6,9 +6,11 @@
 
 @property (atomic, weak) id<CleverTapProductConfigDelegate> _Nullable productConfigDelegate;
 
-- (void)fetchProductConfig;  // TODO
+- (void)fetchProductConfig;
 
-- (void)activateProductConfig;  // TODO
+- (void)activateProductConfig;
+
+- (void)fetchAndActivateProductConfig;
 
 - (void)setDefaultsProductConfig:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
 
@@ -24,10 +26,13 @@
 
 @end
 
+
 @interface CleverTapProductConfig () {}
 
-@property(nonatomic, assign) NSTimeInterval minConfigRate;
-@property(nonatomic, assign) NSTimeInterval minConfigInterval;
+// TODO: name can be minFetchConfigRate or minFetchRate
+@property(nonatomic, assign) NSTimeInterval minFetchConfigRate;
+@property(nonatomic, assign) NSTimeInterval minFetchConfigInterval;
+@property(nonatomic, assign) NSTimeInterval lastFetchTimeInterval;
 
 @property (nonatomic, weak) id<CleverTapPrivateProductConfigDelegate> _Nullable privateDelegate;
 
@@ -37,4 +42,5 @@
 
 - (void)updateProductConfigWithOptions:(NSDictionary *_Nullable)options;
 
+- (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs;
 @end

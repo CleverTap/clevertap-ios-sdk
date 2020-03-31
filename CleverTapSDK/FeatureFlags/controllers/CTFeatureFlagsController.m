@@ -57,6 +57,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
     if (isNew) {
         [self _archiveData:featureFlags sync:NO];
     }
+    // TODO: fetch crash
     [self notifyUpdate];
 }
 

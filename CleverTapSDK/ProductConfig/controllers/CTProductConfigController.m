@@ -1,6 +1,7 @@
 #import "CTProductConfigController.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
+#import "CTPreferences.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapProductConfigPrivate.h"
 
@@ -12,10 +13,10 @@
 
 @property (atomic, copy) NSString *guid;
 @property (atomic, strong) CleverTapInstanceConfig *config;
-@property (atomic) NSMutableDictionary *store;  // TODO
 @property (nonatomic, strong) NSMutableDictionary *defaultConfig;
 @property (nonatomic, strong) NSMutableDictionary *activeConfig;
 @property (nonatomic, strong) NSMutableDictionary *fetchedConfig;
+@property (atomic, assign) BOOL activateFetchedConfig;
 
 @property (nonatomic, weak) id<CTProductConfigDelegate> _Nullable delegate;
 
@@ -58,42 +59,44 @@ typedef void (^CTProductConfigOperationBlock)(void);
             continue;
         }
     }
-    self.store = store;
+    
+    self.fetchedConfig = [store mutableCopy];
+    
     if (isNew) {
         [self _archiveData:productConfig sync:NO];
     }
-//    [self notifyUpdate];
+    if (self.activateFetchedConfig) {
+        [self activate];
+    }
+    self.activateFetchedConfig = NO;
+    [self notifyUpdate];
 }
 
-- (void)_asyncProductConfig:(BOOL)activated {
+- (void)notifyUpdate {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidUpdate)]) {
+        [self.delegate productConfigDidUpdate];
+    }
+}
+
+- (void)_updateActiveProductConfig:(BOOL)activated {
     self.activeConfig = [NSMutableDictionary new];
     NSMutableDictionary *store = [NSMutableDictionary new];
-    NSMutableDictionary *productConfig = [NSMutableDictionary new];
+    NSMutableDictionary *activeConfig = [NSMutableDictionary new];
     
-    // default config
+    // handle default config
     if (self.defaultConfig && self.defaultConfig != nil) {
-        [productConfig addEntriesFromDictionary:self.defaultConfig];
+        [activeConfig addEntriesFromDictionary:self.defaultConfig];
     }
     
-    // add fetch config if activated
-    if (activated) {
-        NSString *filePath = [self dataArchiveFileName];
-        NSArray *data = [CTPreferences unarchiveFromFile:filePath removeFile:NO];
-        for (NSDictionary *kv in data) {
-            @try {
-                store[kv[@"n"]] = kv[@"v"];
-            } @catch (NSException *e) {
-                CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config key-value: %@, %@", self, kv, e.debugDescription);
-                continue;
-            }
-        }
-        [productConfig addEntriesFromDictionary:store];
+    // handle fetched config if activated
+    if (activated && self.fetchedConfig && self.fetchedConfig != nil) {
+        [activeConfig addEntriesFromDictionary:self.fetchedConfig];
     }
     
-    // set active config
-    for (NSString *key in productConfig) {
+    // handle active config
+    for (NSString *key in activeConfig) {
         @try {
-            NSObject *value = productConfig[key];
+            NSObject *value = activeConfig[key];
             NSData *valueData;
             if ([value isKindOfClass:[NSData class]]) {
                 valueData = (NSData *)value;
@@ -108,22 +111,17 @@ typedef void (^CTProductConfigOperationBlock)(void);
                 NSString *strValue = [dateFormatter stringFromDate:(NSDate *)value];
                 valueData = [(NSString *)strValue dataUsingEncoding:NSUTF8StringEncoding];
             } else {
+                CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config value: %@", self, value);
                 continue;
             }
             store[key] = [[CleverTapConfigValue alloc] initWithData:valueData];
             
         } @catch (NSException *e) {
-            CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config key-value: %@, %@", self, self.defaultConfig, e.debugDescription);
+            CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config key-value: %@, %@", self, activeConfig, e.debugDescription);
             continue;
         }
     }
-    self.activeConfig = store;
-}
-
-- (void)notifyUpdate {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidUpdate)]) {
-        [self.delegate productConfigDidUpdate];
-    }
+    self.activeConfig = [store mutableCopy];
 }
 
 - (NSString*)dataArchiveFileName {
@@ -169,12 +167,16 @@ typedef void (^CTProductConfigOperationBlock)(void);
 #pragma mark - Product Config APIs
 
 - (void)activate {
-    [self _asyncProductConfig:YES];
+    [self _updateActiveProductConfig:YES];
+}
+
+- (void)fetchAndActivate {
+    self.activateFetchedConfig = YES;
 }
 
 - (void)setDefaults:(NSDictionary<NSString *,NSObject *> *)defaults {
     _defaultConfig = [defaults copy];
-    [self _asyncProductConfig:NO];
+    [self _updateActiveProductConfig:NO];
 }
 
 - (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName {
@@ -193,6 +195,9 @@ typedef void (^CTProductConfigOperationBlock)(void);
 }
 
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key {
+    if (!key ) {
+        return [[CleverTapConfigValue alloc] initWithData:[NSData data]];
+    }
     CleverTapConfigValue *value;
     if (self.activeConfig[key]) {
         value = self.activeConfig[key];

@@ -23,6 +23,8 @@
 
 - (void)activate;
 
+- (void)fetchAndActivate;
+
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
 
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
