@@ -13,6 +13,7 @@
 
 @property (atomic, copy) NSString *guid;
 @property (atomic, strong) CleverTapInstanceConfig *config;
+@property (nonatomic, assign) CleverTapProductConfigStatus status;
 @property (nonatomic, strong) NSMutableDictionary *defaultConfig;
 @property (nonatomic, strong) NSMutableDictionary *activeConfig;
 @property (nonatomic, strong) NSMutableDictionary *fetchedConfig;
@@ -37,6 +38,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
         _delegate = delegate;
         _commandQueue = [[NSOperationQueue alloc] init];
         _commandQueue.maxConcurrentOperationCount = 1;
+        _status = CleverTapProductConfigFetchStatusNoFetchYet;
         [self _unarchiveDataSync:YES];
     }
     return self;
@@ -50,7 +52,9 @@ typedef void (^CTProductConfigOperationBlock)(void);
 // be sure to call off the main thread
 - (void)_updateProductConfig:(NSArray<NSDictionary*> *)productConfig isNew:(BOOL)isNew {
     CleverTapLogInternal(_config.logLevel, @"%@: updating product config: %@", self, productConfig);
+    _status = CleverTapProductConfigFetchStatusSuccess;
     NSMutableDictionary *store = [NSMutableDictionary new];
+    
     for (NSDictionary *kv in productConfig) {
         @try {
             store[kv[@"n"]] = kv[@"v"];
@@ -59,26 +63,21 @@ typedef void (^CTProductConfigOperationBlock)(void);
             continue;
         }
     }
-    
-    self.fetchedConfig = [store mutableCopy];
-    
+
+    self.fetchedConfig = [store copy];
+
     if (isNew) {
         [self _archiveData:productConfig sync:NO];
     }
-    if (self.activateFetchedConfig) {
+    
+    if (self.activateFetchedConfig && _status == CleverTapProductConfigActivateStatusSuccess) {
         [self activate];
     }
-    self.activateFetchedConfig = NO;
-    [self notifyUpdate];
-}
-
-- (void)notifyUpdate {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidUpdate)]) {
-        [self.delegate productConfigDidUpdate];
-    }
+    [self notifyUpdate:_status];
 }
 
 - (void)_updateActiveProductConfig:(BOOL)activated {
+    CleverTapLogInternal(_config.logLevel, @"%@: activating product config", self);
     self.activeConfig = [NSMutableDictionary new];
     NSMutableDictionary *store = [NSMutableDictionary new];
     NSMutableDictionary *activeConfig = [NSMutableDictionary new];
@@ -90,6 +89,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     
     // handle fetched config if activated
     if (activated && self.fetchedConfig && self.fetchedConfig != nil) {
+        _status = CleverTapProductConfigActivateStatusSuccess;
         [activeConfig addEntriesFromDictionary:self.fetchedConfig];
     }
     
@@ -111,17 +111,26 @@ typedef void (^CTProductConfigOperationBlock)(void);
                 NSString *strValue = [dateFormatter stringFromDate:(NSDate *)value];
                 valueData = [(NSString *)strValue dataUsingEncoding:NSUTF8StringEncoding];
             } else {
-                CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config value: %@", self, value);
+                CleverTapLogDebug(_config.logLevel, @"%@: error setting product config value: %@", self, value);
                 continue;
             }
             store[key] = [[CleverTapConfigValue alloc] initWithData:valueData];
             
         } @catch (NSException *e) {
+            _status = CleverTapProductConfigFetchStatusFailure; // TODO: this is just skipping the current value not failure
             CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config key-value: %@, %@", self, activeConfig, e.debugDescription);
             continue;
         }
     }
-    self.activeConfig = [store mutableCopy];
+    self.activeConfig = [store copy];
+    self.activateFetchedConfig = NO;
+    [self notifyUpdate:_status];
+}
+
+- (void)notifyUpdate:(CleverTapProductConfigStatus)status {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidUpdate:)]) {
+        [self.delegate productConfigDidUpdate:status];
+    }
 }
 
 - (NSString*)dataArchiveFileName {
@@ -191,22 +200,14 @@ typedef void (^CTProductConfigOperationBlock)(void);
             return;
         }
     }
-    CleverTapLogDebug(_config.logLevel, @"%@: The plist file %@ could not be found ", self, fileName);
+    CleverTapLogDebug(_config.logLevel, @"%@: The plist file %@ could not be found", fileName, self);
 }
 
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key {
     if (!key ) {
         return [[CleverTapConfigValue alloc] initWithData:[NSData data]];
     }
-    CleverTapConfigValue *value;
-    if (self.activeConfig[key]) {
-        value = self.activeConfig[key];
-    } else if (self.defaultConfig[key]) {
-        value = self.defaultConfig[key];
-    } else {
-        value = [[CleverTapConfigValue alloc] initWithData:[NSData data]];
-    }
-    return value;
+    return self.activeConfig[key];
 }
 
 @end

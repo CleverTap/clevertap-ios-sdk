@@ -24,7 +24,7 @@
 }
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
-    self.lastFetchTimeInterval = lastFetchTs;
+    self.lastFetchTs = lastFetchTs;
 }
 
 - (void)setMinFetchConfigRate:(NSTimeInterval)minFetchConfigRate {
@@ -55,6 +55,8 @@
     [self.privateDelegate setProductConfigDelegate:delegate];
 }
 
+#pragma mark - Public Apis
+
 - (void)fetch {
     if ([self shouldThrottle])  {
         if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
@@ -66,7 +68,8 @@
 }
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval {
-    // TODO: 
+    self.minFetchConfigInterval = minimumInterval;
+    [self fetch];
 }
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval {
@@ -114,10 +117,15 @@
 
 - (BOOL)shouldThrottle {
     if ((_minFetchConfigRate > 0) && (_minFetchConfigInterval > 0)) {
-        NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTimeInterval;
-        return timeSinceLastRequest > (self.minFetchConfigInterval / self.minFetchConfigRate);
+        return [self timeSinceLastRequest] > (self.minFetchConfigInterval / self.minFetchConfigRate);
     }
     return NO;
+}
+
+- (int)timeSinceLastRequest {
+    NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
+    long seconds = lroundf(timeSinceLastRequest);
+    return (seconds % 3600) / 60;
 }
 
 @end

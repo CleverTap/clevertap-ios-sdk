@@ -1,9 +1,22 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 
+typedef NS_ENUM(NSInteger, CleverTapProductConfigStatus) {
+    /// Config not yet fetch.
+    CleverTapProductConfigFetchStatusNoFetchYet,
+    /// Config fetch succeeded.
+    CleverTapProductConfigFetchStatusSuccess,
+    /// Config fetch failed.
+    CleverTapProductConfigFetchStatusFailure,
+    /// Config Activate succeeded.
+    CleverTapProductConfigActivateStatusSuccess,
+    /// Config Activate failed.
+    CleverTapProductConfigActivateStatusFailure,
+};
+
 @protocol CleverTapProductConfigDelegate <NSObject>
 @optional
-- (void)ctProductConfigUpdated; // TODO: working on naming
+- (void)ctProductConfigUpdated:(CleverTapProductConfigStatus)status;
 @end
 
 @interface CleverTap(ProductConfig)

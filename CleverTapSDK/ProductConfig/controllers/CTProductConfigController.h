@@ -3,7 +3,7 @@
 
 @protocol CTProductConfigDelegate <NSObject>
 @required
-- (void)productConfigDidUpdate;
+- (void)productConfigDidUpdate:(CleverTapProductConfigStatus)status;
 @end
 
 @class CleverTapInstanceConfig;

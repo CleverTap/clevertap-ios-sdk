@@ -32,7 +32,7 @@
 // TODO: name can be minFetchConfigRate or minFetchRate
 @property(nonatomic, assign) NSTimeInterval minFetchConfigRate;
 @property(nonatomic, assign) NSTimeInterval minFetchConfigInterval;
-@property(nonatomic, assign) NSTimeInterval lastFetchTimeInterval;
+@property(nonatomic, assign) NSTimeInterval lastFetchTs;
 
 @property (nonatomic, weak) id<CleverTapPrivateProductConfigDelegate> _Nullable privateDelegate;
 

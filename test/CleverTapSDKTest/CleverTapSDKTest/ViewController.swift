@@ -3,7 +3,7 @@ import CoreLocation
 import CleverTapSDK
 import WebKit
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate {
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, CleverTapProductConfigDelegate, UIScrollViewDelegate {
     
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: CustomButton!
@@ -23,8 +23,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         print(ffDiscount!)
         self.setupImages()
         self.recordUserChargedEvent()
-//        CleverTap.sharedInstance()?.recordEvent("Product rated")
-                
+        CleverTap.sharedInstance()?.productConfig.delegate = self;
+
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
         }
@@ -60,7 +60,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     }
     
     func fetchProductConfig() {
-        CleverTap.sharedInstance()?.productConfig.fetchAndActivate()
+        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 1)
     }
     
     func setProductConfigDefaults() {
@@ -68,14 +68,14 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         defaults.setValue("aditi", forKey: "foo")
         defaults.setValue("agrawal", forKey: "customer_type")
         CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
-//        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
+        //        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
     
     func recordUserChargedEvent() {
-
+        
         //charged event
         let chargeDetails = [
             "Amount": 300,
@@ -219,41 +219,47 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         let deadlineTime1 = DispatchTime.now() + .seconds(4)
         DispatchQueue.main.asyncAfter(deadline: deadlineTime1) {
-//            CleverTap.sharedInstance()?.productConfig.activate()
-//            let ctValue = CleverTap.sharedInstance()?.productConfig.get("customer-type") as? CleverTapConfigValue
-//            let strValue = ctValue?.stringValue
-//            print("Remote Config after activate:", strValue ?? "")
+            CleverTap.sharedInstance()?.productConfig.activate()
         }
-
-//        CleverTap.sharedInstance()?.recordEvent("Footer iOS")
-//        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
-//        CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
-//        CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
-//        CleverTap.sharedInstance()?.recordEvent("Cover ios")
-//        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
-//        CleverTap.sharedInstance()?.recordEvent("Flutter Event")
-//        CleverTap.sharedInstance()?.recordEvent("Alert ios")
-//        CleverTap.sharedInstance()?.recordEvent("test ios")
-//        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
-//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-//        CleverTap.sharedInstance()?.recordEvent("Cover")
-//        CleverTap.sharedInstance()?.recordEvent("Interstitial")
-//        CleverTap.sharedInstance()?.recordEvent("Header")
-//        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
-//        CleverTap.sharedInstance()?.recordEvent("Footer")
-//        CleverTap.sharedInstance()?.recordEvent("Cover")
-//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-//        CleverTap.sharedInstance()?.recordEvent("Header")
-//        CleverTap.sharedInstance()?.recordEvent("Cover Image")
-//        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
-//        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
-//        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
-//        CleverTap.sharedInstance()?.recordEvent("Charged")
-//        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
-//        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
-//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+        
+        //        CleverTap.sharedInstance()?.recordEvent("Footer iOS")
+        //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
+        //        CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+        //        CleverTap.sharedInstance()?.recordEvent("Flutter Event")
+        //        CleverTap.sharedInstance()?.recordEvent("Alert ios")
+        //        CleverTap.sharedInstance()?.recordEvent("test ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial")
+        //        CleverTap.sharedInstance()?.recordEvent("Header")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
+        //        CleverTap.sharedInstance()?.recordEvent("Footer")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+        //        CleverTap.sharedInstance()?.recordEvent("Header")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Charged")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
+    }
+    
+    func ctProductConfigUpdated(_ status: CleverTapProductConfigStatus) {
+        
+        if (status == CleverTapProductConfigStatus.activateStatusSuccess) {
+            let ctValue = CleverTap.sharedInstance()?.productConfig.get("customer_type")
+            let strValue = ctValue?.stringValue
+            print("Remote Config after activate:", strValue ?? "")
+        }
     }
     
     func setupImages(){
