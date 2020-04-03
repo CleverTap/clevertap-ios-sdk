@@ -38,7 +38,8 @@
 
 - (instancetype _Nullable)init __unavailable;
 
-- (instancetype _Nonnull)initWithPrivateDelegate:(id<CleverTapPrivateProductConfigDelegate> _Nonnull)delegate;
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config
+                         privateDelegate:(id<CleverTapPrivateProductConfigDelegate>_Nonnull)delegate;
 
 - (void)updateProductConfigWithOptions:(NSDictionary *_Nullable)options;
 

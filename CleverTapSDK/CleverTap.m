@@ -4662,7 +4662,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 // run off main
 - (void) _initProductConfig {
-    self.productConfig = [[CleverTapProductConfig alloc] initWithPrivateDelegate:self];
+    self.productConfig = [[CleverTapProductConfig alloc]  initWithConfig: self.config privateDelegate:self];
     [self runSerialAsync:^{
         if (self.productConfigController) {
             return;

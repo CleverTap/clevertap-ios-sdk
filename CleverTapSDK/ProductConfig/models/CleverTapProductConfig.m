@@ -1,8 +1,21 @@
 #import "CleverTapProductConfigPrivate.h"
+#import "CleverTapInstanceConfig.h"
+#import "CTPreferences.h"
 #import "CTConstants.h"
 
 #define CLTAP_DEFAULT_FETCH_RATE 5
 #define CLTAP_DEFAULT_FETCH_TIME_INTERVAL 60
+
+NSString* const kMIN_FETCH_INTERVAL_KEY = @"CLTAP_MIN_FETCH_INTERVAL_KEY";
+NSString* const kMIN_FETCH_RATE_KEY = @"CLTAP_MIN_FETCH_RATE_KEY";
+NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
+
+@interface CleverTapProductConfig() {
+}
+
+@property (atomic, strong) CleverTapInstanceConfig *config;
+
+@end
 
 @implementation CleverTapProductConfig
 
@@ -10,10 +23,14 @@
 @synthesize minFetchConfigRate=_minFetchConfigRate;
 @synthesize minFetchConfigInterval=_minFetchConfigInterval;
 
-- (instancetype _Nonnull)initWithPrivateDelegate:(id<CleverTapPrivateProductConfigDelegate>)delegate {
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config privateDelegate:(id<CleverTapPrivateProductConfigDelegate>_Nonnull)delegate {
     self = [super init];
     if (self) {
-        self.privateDelegate = delegate;
+        _config = config;
+        _privateDelegate = delegate;
+        _minFetchConfigRate = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_RATE_KEY] withResetValue:0];
+        _minFetchConfigInterval = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_INTERVAL_KEY] withResetValue:0];
+        _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
     }
     return self;
 }
@@ -25,6 +42,7 @@
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
     self.lastFetchTs = lastFetchTs;
+    [self persistLastFetchTs];
 }
 
 - (void)setMinFetchConfigRate:(NSTimeInterval)minFetchConfigRate {
@@ -33,6 +51,7 @@
     } else {
         _minFetchConfigRate = minFetchConfigRate;
     }
+    [self persistMinFetchConfigRate];
 }
 
 - (NSTimeInterval)minFetchConfigRate {
@@ -45,6 +64,7 @@
     } else {
         _minFetchConfigInterval = minFetchConfigInterval;
     }
+    [self persistMinFetchConfigInterval];
 }
 
 - (NSTimeInterval)minFetchConfigInterval {
@@ -53,6 +73,24 @@
 
 - (void)setDelegate:(id<CleverTapProductConfigDelegate>)delegate {
     [self.privateDelegate setProductConfigDelegate:delegate];
+}
+
+#pragma mark - Persist Product Config Settings
+
+- (void)persistMinFetchConfigInterval {
+    [CTPreferences putInt:self.minFetchConfigInterval forKey:[self storageKeyWithSuffix:kMIN_FETCH_INTERVAL_KEY]];
+}
+
+- (void)persistMinFetchConfigRate {
+    [CTPreferences putInt:self.minFetchConfigRate forKey:[self storageKeyWithSuffix:kMIN_FETCH_RATE_KEY]];
+}
+
+- (void)persistLastFetchTs {
+    [CTPreferences putInt:self.lastFetchTs forKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
+}
+
+- (NSString *)storageKeyWithSuffix: (NSString *)suffix {
+    return [NSString stringWithFormat:@"%@:%@",  _config.accountId, suffix];
 }
 
 #pragma mark - Public Apis
