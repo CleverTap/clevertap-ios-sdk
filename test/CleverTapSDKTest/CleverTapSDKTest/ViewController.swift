@@ -215,6 +215,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             let ctValue = CleverTap.sharedInstance()?.productConfig.get("customer_type")
             let strValue = ctValue?.stringValue
             print("Remote Config:", strValue ?? "")
+            
+            CleverTap.sharedInstance()?.productConfig.setMinimumFetchInterval(15)
         }
         
         let deadlineTime1 = DispatchTime.now() + .seconds(4)

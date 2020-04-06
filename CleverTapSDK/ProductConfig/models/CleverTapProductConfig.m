@@ -28,11 +28,15 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     if (self) {
         _config = config;
         _privateDelegate = delegate;
-        _minFetchConfigRate = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_RATE_KEY] withResetValue:0];
-        _minFetchConfigInterval = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_INTERVAL_KEY] withResetValue:0];
-        _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
+        [self initConfigSetting];
     }
     return self;
+}
+
+- (void)initConfigSetting {
+    _minFetchConfigRate = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_RATE_KEY] withResetValue:CLTAP_DEFAULT_FETCH_RATE];
+    _minFetchConfigInterval = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_INTERVAL_KEY] withResetValue:CLTAP_DEFAULT_FETCH_TIME_INTERVAL];
+    _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
 }
 
 - (void)updateProductConfigWithOptions:(NSDictionary *)options {
@@ -106,11 +110,14 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval {
+    // TODO: if zero always call fetch
     self.minFetchConfigInterval = minimumInterval;
     [self fetch];
 }
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval {
+    // TODO: @peter minimum Fetch Interval measure unit
+    // TODO: over write always with arp values fix
     if (minimumFetchInterval > self.minFetchConfigInterval) {
         self.minFetchConfigInterval = minimumFetchInterval;
     } else {
