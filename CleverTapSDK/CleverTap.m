@@ -4703,9 +4703,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _productConfigDelegate;
 }
 
-- (void)productConfigDidUpdate:(CleverTapProductConfigStatus)status {
-    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigUpdated:)]) {
-        [self.productConfigDelegate ctProductConfigUpdated:status];
+- (void)productConfigDidUpdate {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigUpdated)]) {
+        [self.productConfigDelegate ctProductConfigUpdated];
     }
 }
 

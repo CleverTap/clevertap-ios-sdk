@@ -3,12 +3,14 @@
 #import "CTPreferences.h"
 #import "CTConstants.h"
 
-#define CLTAP_DEFAULT_FETCH_RATE 5
-#define CLTAP_DEFAULT_FETCH_TIME_INTERVAL 60
+#define CLTAP_DEFAULT_FETCH_CALLS 5
+#define CLTAP_DEFAULT_FETCH_WINDOW_LENGTH 60
 
-NSString* const kMIN_FETCH_INTERVAL_KEY = @"CLTAP_MIN_FETCH_INTERVAL_KEY";
-NSString* const kMIN_FETCH_RATE_KEY = @"CLTAP_MIN_FETCH_RATE_KEY";
+NSString* const kFETCH_CONFIG_WINDOW_LENGTH_KEY = @"CLTAP_FETCH_CONFIG_WINDOW_LENGTH_KEY";
+NSString* const kFETCH_CONFIG_CALLS_KEY = @"CLTAP_FETCH_CONFIG_CALLS_KEY";
+NSString* const kMINIMUM_FETCH_CONFIG_INTERVAL_KEY = @"CLTAP_MINIMUM_FETCH_CONFIG_INTERVAL_KEY";
 NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
+
 
 @interface CleverTapProductConfig() {
 }
@@ -20,8 +22,9 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 @implementation CleverTapProductConfig
 
 @synthesize delegate=_delegate;
-@synthesize minFetchConfigRate=_minFetchConfigRate;
-@synthesize minFetchConfigInterval=_minFetchConfigInterval;
+@synthesize fetchConfigCalls=_fetchConfigCalls;
+@synthesize fetchConfigWindowLength=_fetchConfigWindowLength;
+@synthesize minimumFetchConfigInterval=_minimumFetchConfigInterval;
 
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config privateDelegate:(id<CleverTapPrivateProductConfigDelegate>_Nonnull)delegate {
     self = [super init];
@@ -34,14 +37,14 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)initConfigSetting {
-    _minFetchConfigRate = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_RATE_KEY] withResetValue:CLTAP_DEFAULT_FETCH_RATE];
-    _minFetchConfigInterval = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kMIN_FETCH_INTERVAL_KEY] withResetValue:CLTAP_DEFAULT_FETCH_TIME_INTERVAL];
+    _fetchConfigCalls = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kFETCH_CONFIG_CALLS_KEY] withResetValue:CLTAP_DEFAULT_FETCH_CALLS];
+    _fetchConfigWindowLength = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kFETCH_CONFIG_WINDOW_LENGTH_KEY] withResetValue:CLTAP_DEFAULT_FETCH_WINDOW_LENGTH];
     _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
 }
 
 - (void)updateProductConfigWithOptions:(NSDictionary *)options {
-    self.minFetchConfigRate = [options[@"rc_n"] doubleValue];
-    self.minFetchConfigInterval = [options[@"rc_w"] doubleValue];
+    self.fetchConfigCalls = [options[@"rc_n"] doubleValue];
+    self.fetchConfigWindowLength = [options[@"rc_w"] doubleValue];
 }
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
@@ -49,30 +52,39 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     [self persistLastFetchTs];
 }
 
-- (void)setMinFetchConfigRate:(NSTimeInterval)minFetchConfigRate {
-    if (minFetchConfigRate <= 0) {
-        _minFetchConfigRate = CLTAP_DEFAULT_FETCH_RATE;
+- (void)setFetchConfigCalls:(NSTimeInterval)fetchConfigCalls {
+    if (fetchConfigCalls <= 0) {
+        _fetchConfigCalls = CLTAP_DEFAULT_FETCH_CALLS;
     } else {
-        _minFetchConfigRate = minFetchConfigRate;
+        _fetchConfigCalls = fetchConfigCalls;
     }
-    [self persistMinFetchConfigRate];
+    [self persistFetchConfigCalls];
 }
 
-- (NSTimeInterval)minFetchConfigRate {
-    return _minFetchConfigRate;
+- (NSTimeInterval)fetchConfigCalls {
+    return _fetchConfigCalls;
 }
 
-- (void)setMinFetchConfigInterval:(NSTimeInterval)minFetchConfigInterval {
-    if (minFetchConfigInterval <= 0) {
-        _minFetchConfigInterval = CLTAP_DEFAULT_FETCH_TIME_INTERVAL;
+- (void)setFetchConfigWindowLength:(NSTimeInterval)fetchConfigWindowLength {
+    if (fetchConfigWindowLength <= 0) {
+        _fetchConfigWindowLength = CLTAP_DEFAULT_FETCH_WINDOW_LENGTH;
     } else {
-        _minFetchConfigInterval = minFetchConfigInterval;
+        _fetchConfigWindowLength = fetchConfigWindowLength;
     }
-    [self persistMinFetchConfigInterval];
+    [self persistFetchConfigWindowLength];
 }
 
-- (NSTimeInterval)minFetchConfigInterval {
-    return _minFetchConfigInterval;
+- (NSTimeInterval)fetchConfigWindowLength {
+    return _fetchConfigWindowLength;
+}
+
+- (void)setMinimumFetchConfigInterval:(NSTimeInterval)minimumFetchConfigInterval {
+    _minimumFetchConfigInterval = minimumFetchConfigInterval;
+    [self persistMinimumFetchInterval];
+}
+
+- (NSTimeInterval)minimumFetchConfigInterval{
+    return _minimumFetchConfigInterval;
 }
 
 - (void)setDelegate:(id<CleverTapProductConfigDelegate>)delegate {
@@ -81,12 +93,16 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 #pragma mark - Persist Product Config Settings
 
-- (void)persistMinFetchConfigInterval {
-    [CTPreferences putInt:self.minFetchConfigInterval forKey:[self storageKeyWithSuffix:kMIN_FETCH_INTERVAL_KEY]];
+- (void)persistFetchConfigWindowLength {
+    [CTPreferences putInt:self.fetchConfigWindowLength forKey:[self storageKeyWithSuffix:kFETCH_CONFIG_WINDOW_LENGTH_KEY]];
 }
 
-- (void)persistMinFetchConfigRate {
-    [CTPreferences putInt:self.minFetchConfigRate forKey:[self storageKeyWithSuffix:kMIN_FETCH_RATE_KEY]];
+- (void)persistFetchConfigCalls {
+    [CTPreferences putInt:self.fetchConfigCalls forKey:[self storageKeyWithSuffix:kFETCH_CONFIG_CALLS_KEY]];
+}
+
+- (void)persistMinimumFetchInterval {
+    [CTPreferences putInt:self.minimumFetchConfigInterval forKey:[self storageKeyWithSuffix:kMINIMUM_FETCH_CONFIG_INTERVAL_KEY]];
 }
 
 - (void)persistLastFetchTs {
@@ -100,29 +116,27 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 #pragma mark - Public Apis
 
 - (void)fetch {
-    if ([self shouldThrottle])  {
+    [self fetchWithMinimumInterval:[self getMinimumFetchInterval]];
+}
+
+- (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval {
+    if (minimumInterval == 0) {
         if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
             [self.privateDelegate fetchProductConfig];
         }
     } else {
-        CleverTapLogStaticDebug(@"FetchError: Product Config is throttled.");
+        if ([self shouldThrottleWithMinimumFetchInterval:minimumInterval])  {
+            if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
+                [self.privateDelegate fetchProductConfig];
+            }
+        } else {
+            CleverTapLogStaticDebug(@"FetchError: Product Config is throttled.");
+        }
     }
-}
-
-- (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval {
-    // TODO: if zero always call fetch
-    self.minFetchConfigInterval = minimumInterval;
-    [self fetch];
 }
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval {
-    // TODO: @peter minimum Fetch Interval measure unit
-    // TODO: over write always with arp values fix
-    if (minimumFetchInterval > self.minFetchConfigInterval) {
-        self.minFetchConfigInterval = minimumFetchInterval;
-    } else {
-        CleverTapLogStaticDebug(@"Minimum Fetch Interval Error: Unable to set provided minimum fetch interval %f:", minimumFetchInterval);
-    }
+    self.minimumFetchConfigInterval = minimumFetchInterval;
 }
 
 - (void)activate {
@@ -136,7 +150,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchAndActivateProductConfig)]) {
         [self.privateDelegate fetchAndActivateProductConfig];
     }
-    
 }
 
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults {
@@ -160,17 +173,24 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 #pragma mark - Throttling
 
-- (BOOL)shouldThrottle {
-    if ((_minFetchConfigRate > 0) && (_minFetchConfigInterval > 0)) {
-        return [self timeSinceLastRequest] > (self.minFetchConfigInterval / self.minFetchConfigRate);
-    }
-    return NO;
+- (BOOL)shouldThrottleWithMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval {
+// TODO: remove this
+//    NSTimeInterval fi = minimumFetchInterval;
+//    NSTimeInterval ts = [self timeSinceLastRequest];
+    return [self timeSinceLastRequest] > minimumFetchInterval;
 }
 
-- (int)timeSinceLastRequest {
-    NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
-    long seconds = lroundf(timeSinceLastRequest);
-    return (seconds % 3600) / 60;
+- (NSTimeInterval)getMinimumFetchInterval {
+    NSTimeInterval sdkMinimumFetchInterval = (self.fetchConfigWindowLength/self.fetchConfigCalls)*60;
+    NSTimeInterval userMinimumFetchInterval = (self.minimumFetchConfigInterval);
+    return MAX(sdkMinimumFetchInterval, userMinimumFetchInterval);
+}
+
+- (NSTimeInterval)timeSinceLastRequest {
+    // TODO: remove this
+//    NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
+//    NSInteger ts = round(timeSinceLastRequest);
+    return [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
 }
 
 @end

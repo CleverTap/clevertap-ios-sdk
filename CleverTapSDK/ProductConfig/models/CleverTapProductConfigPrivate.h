@@ -29,8 +29,9 @@
 
 @interface CleverTapProductConfig () {}
 
-@property(nonatomic, assign) NSTimeInterval minFetchConfigRate;
-@property(nonatomic, assign) NSTimeInterval minFetchConfigInterval;
+@property(nonatomic, assign) NSTimeInterval fetchConfigCalls;
+@property(nonatomic, assign) NSTimeInterval fetchConfigWindowLength;
+@property(nonatomic, assign) NSTimeInterval minimumFetchConfigInterval;
 @property(nonatomic, assign) NSTimeInterval lastFetchTs;
 
 @property (nonatomic, weak) id<CleverTapPrivateProductConfigDelegate> _Nullable privateDelegate;
