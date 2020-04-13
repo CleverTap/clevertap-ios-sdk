@@ -3971,7 +3971,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [_inboxUpdateBlocks addObject:block];
 }
 
-- (CleverTapInboxViewController * _Nonnull)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
+- (CleverTapInboxViewController * _Nullable)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
     if (![self _isInboxInitialized]) {
         return nil;
     }

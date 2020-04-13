@@ -507,12 +507,6 @@ static NSString * const kOrientationPortrait = @"p";
     self.actionView.thirdButton.hidden = YES;
     self.actionView.secondButtonWidthConstraint.priority = 750;
     self.actionView.thirdButtonWidthConstraint.priority = 750;
-    
-    CGFloat leftMargin = 0;
-    if (@available(iOS 11.0, *)) {
-        UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
-        leftMargin = window.safeAreaInsets.left;
-    }
         
     if (content.links.count == 1) {
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];

@@ -307,7 +307,7 @@ static const int kMaxTags = 3;
         CGRect frame = self.view.frame;
         if (!self.listEmptyLabel) {
             self.listEmptyLabel = [[UILabel alloc] init];
-             self.listEmptyLabel.text = @"No message(s) to show";
+             self.listEmptyLabel.text = [NSString stringWithFormat:@"%@", @"No message(s) to show"];
              self.listEmptyLabel.textAlignment = NSTextAlignmentCenter;
         }
         if ([self.listEmptyLabel isDescendantOfView:self.view]) {

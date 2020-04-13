@@ -8,7 +8,6 @@
 
 NSString* const kFETCH_CONFIG_WINDOW_LENGTH_KEY = @"CLTAP_FETCH_CONFIG_WINDOW_LENGTH_KEY";
 NSString* const kFETCH_CONFIG_CALLS_KEY = @"CLTAP_FETCH_CONFIG_CALLS_KEY";
-NSString* const kMINIMUM_FETCH_CONFIG_INTERVAL_KEY = @"CLTAP_MINIMUM_FETCH_CONFIG_INTERVAL_KEY";
 NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 
@@ -80,7 +79,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 - (void)setMinimumFetchConfigInterval:(NSTimeInterval)minimumFetchConfigInterval {
     _minimumFetchConfigInterval = minimumFetchConfigInterval;
-    [self persistMinimumFetchInterval];
 }
 
 - (NSTimeInterval)minimumFetchConfigInterval{
@@ -101,10 +99,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     [CTPreferences putInt:self.fetchConfigCalls forKey:[self storageKeyWithSuffix:kFETCH_CONFIG_CALLS_KEY]];
 }
 
-- (void)persistMinimumFetchInterval {
-    [CTPreferences putInt:self.minimumFetchConfigInterval forKey:[self storageKeyWithSuffix:kMINIMUM_FETCH_CONFIG_INTERVAL_KEY]];
-}
-
 - (void)persistLastFetchTs {
     [CTPreferences putInt:self.lastFetchTs forKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
 }
@@ -120,18 +114,12 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval {
-    if (minimumInterval == 0) {
+    if ([self shouldThrottleWithMinimumFetchInterval:minimumInterval])  {
         if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
             [self.privateDelegate fetchProductConfig];
         }
     } else {
-        if ([self shouldThrottleWithMinimumFetchInterval:minimumInterval])  {
-            if (self.privateDelegate && [self.privateDelegate respondsToSelector:@selector(fetchProductConfig)]) {
-                [self.privateDelegate fetchProductConfig];
-            }
-        } else {
-            CleverTapLogStaticDebug(@"FetchError: Product Config is throttled.");
-        }
+        CleverTapLogStaticDebug(@"FetchError: Product Config is throttled.");
     }
 }
 
@@ -174,23 +162,19 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 #pragma mark - Throttling
 
 - (BOOL)shouldThrottleWithMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval {
-// TODO: remove this
-//    NSTimeInterval fi = minimumFetchInterval;
-//    NSTimeInterval ts = [self timeSinceLastRequest];
     return [self timeSinceLastRequest] > minimumFetchInterval;
 }
 
-- (NSTimeInterval)getMinimumFetchInterval {
-    NSTimeInterval sdkMinimumFetchInterval = (self.fetchConfigWindowLength/self.fetchConfigCalls)*60;
-    NSTimeInterval userMinimumFetchInterval = (self.minimumFetchConfigInterval);
+- (NSInteger)getMinimumFetchInterval {
+    NSInteger sdkMinimumFetchInterval = round((self.fetchConfigWindowLength/self.fetchConfigCalls)*60);
+    NSInteger userMinimumFetchInterval = round(self.minimumFetchConfigInterval);
     return MAX(sdkMinimumFetchInterval, userMinimumFetchInterval);
 }
 
-- (NSTimeInterval)timeSinceLastRequest {
+- (NSInteger)timeSinceLastRequest {
     // TODO: remove this
-//    NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
-//    NSInteger ts = round(timeSinceLastRequest);
-    return [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
+    NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
+    return round(timeSinceLastRequest);
 }
 
 @end
