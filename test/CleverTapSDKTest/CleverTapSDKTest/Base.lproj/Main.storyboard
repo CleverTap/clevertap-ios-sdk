@@ -13,7 +13,7 @@
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="690"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRd-pI-6F2">
@@ -48,12 +48,12 @@
                                 </connections>
                             </button>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="z3E-Gx-kjU">
-                                <rect key="frame" x="64" y="340" width="247" height="116"/>
+                                <rect key="frame" x="64" y="340" width="247" height="127"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" name="keyboardFocusIndicatorColor" catalog="System" colorSpace="catalog"/>
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rmO-UY-bFI">
-                                <rect key="frame" x="135" y="596" width="105" height="30"/>
+                                <rect key="frame" x="135" y="630" width="105" height="30"/>
                                 <state key="normal" title="Screen AB Test"/>
                             </button>
                             <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6ob-4C-2eO">
@@ -83,7 +83,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="QXu-8C-eVJ"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Hey There!!!" prompt="  " leftItemsSupplementBackButton="YES" id="G2N-eA-Fe4">
+                    <navigationItem key="navigationItem" title="Hey There!!!" leftItemsSupplementBackButton="YES" id="G2N-eA-Fe4">
                         <barButtonItem key="backBarButtonItem" title=" " id="lyh-at-rOT"/>
                     </navigationItem>
                     <connections>
@@ -112,7 +112,7 @@
                         </textAttributes>
                     </navigationBar>
                     <connections>
-                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="Gok-AT-DDE"/>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="d87-KW-tHV"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rP2-O9-rD6" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1012,6 +1012,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="1Ab-Xi-zqE"/>
                     </view>
+                    <navigationItem key="navigationItem" id="3RR-f3-mSx"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JnZ-R4-rLA" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1083,6 +1084,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="JNC-vU-Tbb"/>
                     </view>
+                    <navigationItem key="navigationItem" id="njW-dD-rHU"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iXM-NQ-bLZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1127,6 +1129,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="NRO-i8-cBI"/>
                     </view>
+                    <navigationItem key="navigationItem" id="ezQ-LF-wbp"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0fM-BY-1Ab" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1263,6 +1266,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="GvD-QD-8km"/>
                     </view>
+                    <navigationItem key="navigationItem" id="JgK-1Y-jqs"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GlR-ur-l0x" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1292,6 +1296,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="mNr-Bz-eDF"/>
                     </view>
+                    <navigationItem key="navigationItem" id="k4s-Db-Lld"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c2V-0e-bl2" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

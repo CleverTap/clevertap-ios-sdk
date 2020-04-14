@@ -181,7 +181,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 style.title = "Notifications"
                 style.backgroundColor = UIColor.yellow
                 style.navigationBarTintColor = UIColor.groupTableViewBackground
-                //                style.messageTags = ["Promotions", "Offers"];
+                style.messageTags = ["Promotions", "Offers"];
                 
                 
                 let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
@@ -197,8 +197,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                     //                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
                     //                    navigationController.navigationItem.leftBarButtonItem = nil;
                     //                    navigationController.navigationItem.hidesBackButton = true;
-                    self.navigationController?.present(navigationController, animated: true, completion: nil)
-                    //                    self.navigationController?.pushViewController(inboxController, animated: true)
+//                    self.navigationController?.present(navigationController, animated: true, completion: nil)
+                      self.navigationController?.pushViewController(inboxController, animated: true)
                 }
             }
         }))
@@ -258,7 +258,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     func ctProductConfigUpdated() {
         
 //        if (status == CleverTapProductConfigStatus.activateStatusSuccess) {
-            let ctValue = CleverTap.sharedInstance()?.productConfig.get("customer_type")
+//            let ctValue = CleverTap.sharedInstance()?.productConfig.get("customer_type")
+            let ctValue = CleverTap.sharedInstance()?.productConfig.get("aditi")
             let strValue = ctValue?.stringValue
             print("Remote Config after activate:", strValue ?? "")
 //        }

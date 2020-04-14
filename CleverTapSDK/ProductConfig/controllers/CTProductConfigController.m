@@ -60,9 +60,9 @@ typedef void (^CTProductConfigOperationBlock)(void);
             continue;
         }
     }
-
+    
     self.fetchedConfig = [NSDictionary dictionaryWithDictionary:store];
-
+    
     if (isNew) {
         [self _archiveData:productConfig sync:NO];
     }
@@ -199,10 +199,25 @@ typedef void (^CTProductConfigOperationBlock)(void);
 }
 
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key {
-    if (!key ) {
-        return [[CleverTapConfigValue alloc] initWithData:[NSData data]];
+    CleverTapLogInternal(_config.logLevel, @"%@: get product config for key: %@", self, key);
+    @try {
+        if (!key ) {
+            CleverTapLogDebug(_config.logLevel, @"%@: product config key not found", self);
+            return [[CleverTapConfigValue alloc] initWithData:[NSData data]];
+        }
+        
+        CleverTapConfigValue *value = self.activeConfig[key];
+        if (value) {
+            return value;
+        } else {
+            CleverTapLogDebug(_config.logLevel, @"%@: product config for key %@ not found", self, key);
+            return [[CleverTapConfigValue alloc] initWithData:[NSData data]];
+        }
+        
+    } @catch (NSException *e) {
+        CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config for key: %@ not found", self, key);
+        return nil;
     }
-    return self.activeConfig[key];
 }
 
 @end
