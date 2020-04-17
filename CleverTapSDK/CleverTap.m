@@ -311,7 +311,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
-    CleverTapLogStaticDebug("%@: Auto Integration enabled", self);
+    CleverTapLogStaticInfo("%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [self swizzleAppDelegate];
     CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
@@ -2025,6 +2025,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self saveARP:update];
+    // TODO: where to update product config @peter
     [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
 }
 

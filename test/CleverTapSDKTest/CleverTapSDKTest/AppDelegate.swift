@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
         
         CleverTap.autoIntegrate()
-        CleverTap.setDebugLevel(3)
+        CleverTap.setDebugLevel(4)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
@@ -51,7 +51,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.registerDictionaryOfDoubleVariable(withName: "dictOfdoubleVar")
         CleverTap.sharedInstance()?.registerDictionaryOfIntegerVariable(withName: "dictOfintVar")
         CleverTap.sharedInstance()?.registerDictionaryOfStringVariable(withName: "dictOfstringVar")
-
         return true
     }
     

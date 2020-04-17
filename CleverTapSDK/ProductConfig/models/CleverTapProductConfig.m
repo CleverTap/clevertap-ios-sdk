@@ -172,7 +172,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (NSInteger)timeSinceLastRequest {
-    // TODO: remove this
     NSTimeInterval timeSinceLastRequest = [NSDate new].timeIntervalSince1970 - self.lastFetchTs;
     return round(timeSinceLastRequest);
 }

@@ -3,6 +3,7 @@
 
 @protocol CleverTapProductConfigDelegate <NSObject>
 @optional
+// TODO: fetch and activate
 - (void)ctProductConfigUpdated;
 @end
 
