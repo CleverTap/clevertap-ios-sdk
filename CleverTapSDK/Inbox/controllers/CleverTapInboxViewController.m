@@ -100,10 +100,10 @@ static const int kMaxTags = 3;
     [self registerNibs];
     self.muted = YES;
     UIBarButtonItem *closeButton = [[UIBarButtonItem alloc]
-                                   initWithTitle:@"✕"
-                                   style:UIBarButtonItemStylePlain
-                                   target:self
-                                   action:@selector(dismissTapped)];
+                                    initWithTitle:@"✕"
+                                    style:UIBarButtonItemStylePlain
+                                    target:self
+                                    action:@selector(dismissTapped)];
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;
@@ -118,10 +118,17 @@ static const int kMaxTags = 3;
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     if ([self.tags count] > 0) {
-       [self setupSegmentedControl];
+        [self setupSegmentedControl];
     }
     [self showListEmptyLabel];
     [self calculateTableViewVisibleFrame];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:YES];
+    if (self.segmentedControlContainer) {
+        [self.segmentedControlContainer removeFromSuperview];
+    }
 }
 
 - (void)dealloc {
@@ -307,8 +314,8 @@ static const int kMaxTags = 3;
         CGRect frame = self.view.frame;
         if (!self.listEmptyLabel) {
             self.listEmptyLabel = [[UILabel alloc] init];
-             self.listEmptyLabel.text = [NSString stringWithFormat:@"%@", @"No message(s) to show"];
-             self.listEmptyLabel.textAlignment = NSTextAlignmentCenter;
+            self.listEmptyLabel.text = [NSString stringWithFormat:@"%@", @"No message(s) to show"];
+            self.listEmptyLabel.textAlignment = NSTextAlignmentCenter;
         }
         if ([self.listEmptyLabel isDescendantOfView:self.view]) {
             [self.listEmptyLabel removeFromSuperview];
@@ -354,7 +361,7 @@ static const int kMaxTags = 3;
             identifier = kCellCarouselImgMessageIdentifier;
             break;
         case CTInboxMessageTypeMessageIcon:
-           identifier = kCellIconMessageIdentifier;
+            identifier = kCellIconMessageIdentifier;
             break;
         default:
             CleverTapLogStaticDebug(@"unknown Inbox Message Type, defaulting to Simple message");
@@ -417,12 +424,12 @@ static const int kMaxTags = 3;
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(messageButtonTappedWithCustomExtras:)]) {
         if (!(buttonIndex < 0)) {
-          CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
-          NSDictionary *customExtras = [content customDataForLinkAtIndex:buttonIndex];
-          if (customExtras && customExtras.count > 0) {
-              [self.delegate messageButtonTappedWithCustomExtras:customExtras];
-          }
-      }
+            CleverTapInboxMessageContent *content = (CleverTapInboxMessageContent*)message.content[index];
+            NSDictionary *customExtras = [content customDataForLinkAtIndex:buttonIndex];
+            if (customExtras && customExtras.count > 0) {
+                [self.delegate messageButtonTappedWithCustomExtras:customExtras];
+            }
+        }
     }
     
     if (self.analyticsDelegate && [self.analyticsDelegate respondsToSelector:@selector(messageDidSelect:atIndex:withButtonIndex:)]) {
