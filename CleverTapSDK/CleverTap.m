@@ -4704,9 +4704,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _productConfigDelegate;
 }
 
-- (void)productConfigDidUpdate {
-    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigUpdated)]) {
-        [self.productConfigDelegate ctProductConfigUpdated];
+- (void)fetchProductConfigDidUpdate {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigFetched)]) {
+        [self.productConfigDelegate ctProductConfigFetched];
+    }
+}
+
+- (void)activateProductConfigDidUpdate {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigActivated)]) {
+        [self.productConfigDelegate ctProductConfigActivated];
     }
 }
 

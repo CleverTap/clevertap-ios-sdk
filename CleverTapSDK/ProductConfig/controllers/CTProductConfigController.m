@@ -70,7 +70,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     if (self.activateFetchedConfig) {
         [self activate];
     }
-    [self notifyUpdate];
+    [self notifyFetchUpdate];
 }
 
 - (void)_updateActiveProductConfig:(BOOL)activated {
@@ -111,7 +111,6 @@ typedef void (^CTProductConfigOperationBlock)(void);
                 continue;
             }
             store[key] = [[CleverTapConfigValue alloc] initWithData:valueData];
-            
         } @catch (NSException *e) {
             CleverTapLogDebug(_config.logLevel, @"%@: error parsing product config key-value: %@, %@", self, activeConfig, e.debugDescription);
             continue;
@@ -119,12 +118,22 @@ typedef void (^CTProductConfigOperationBlock)(void);
     }
     self.activeConfig = [NSDictionary dictionaryWithDictionary:store];
     self.activateFetchedConfig = NO;
-    [self notifyUpdate];
+    if (activated) {
+        [self notifyActivateUpdate];
+    } else {
+        [self notifyFetchUpdate];
+    }
 }
 
-- (void)notifyUpdate {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidUpdate)]) {
-        [self.delegate productConfigDidUpdate];
+- (void)notifyFetchUpdate {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(fetchProductConfigDidUpdate)]) {
+        [self.delegate fetchProductConfigDidUpdate];
+    }
+}
+
+- (void)notifyActivateUpdate {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(activateProductConfigDidUpdate)]) {
+        [self.delegate activateProductConfigDidUpdate];
     }
 }
 
