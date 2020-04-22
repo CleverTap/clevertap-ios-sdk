@@ -42,8 +42,8 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)updateProductConfigWithOptions:(NSDictionary *)options {
-    self.fetchConfigCalls = [options[@"rc_n"] doubleValue];
-    self.fetchConfigWindowLength = [options[@"rc_w"] doubleValue];
+    self.fetchConfigCalls = [options[@"rc_n"] integerValue];
+    self.fetchConfigWindowLength = [options[@"rc_w"] integerValue];
 }
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
@@ -51,7 +51,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     [self persistLastFetchTs];
 }
 
-- (void)setFetchConfigCalls:(NSTimeInterval)fetchConfigCalls {
+- (void)setFetchConfigCalls:(NSInteger)fetchConfigCalls {
     if (fetchConfigCalls <= 0) {
         _fetchConfigCalls = CLTAP_DEFAULT_FETCH_CALLS;
     } else {
@@ -60,11 +60,11 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     [self persistFetchConfigCalls];
 }
 
-- (NSTimeInterval)fetchConfigCalls {
+- (NSInteger)fetchConfigCalls {
     return _fetchConfigCalls;
 }
 
-- (void)setFetchConfigWindowLength:(NSTimeInterval)fetchConfigWindowLength {
+- (void)setFetchConfigWindowLength:(NSInteger)fetchConfigWindowLength {
     if (fetchConfigWindowLength <= 0) {
         _fetchConfigWindowLength = CLTAP_DEFAULT_FETCH_WINDOW_LENGTH;
     } else {
@@ -73,7 +73,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     [self persistFetchConfigWindowLength];
 }
 
-- (NSTimeInterval)fetchConfigWindowLength {
+- (NSInteger)fetchConfigWindowLength {
     return _fetchConfigWindowLength;
 }
 
