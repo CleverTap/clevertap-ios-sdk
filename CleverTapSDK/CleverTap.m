@@ -216,6 +216,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, assign) long sessionId;
 @property (atomic, assign) int screenCount;
 @property (atomic, assign) BOOL firstSession;
+@property (atomic, assign) BOOL firstRequestInSession;
 @property (atomic, assign) int lastSessionLengthSeconds;
 
 @property (atomic, retain) NSString *source;
@@ -249,6 +250,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
+@synthesize firstRequestInSession=_firstRequestInSession;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
@@ -1004,6 +1006,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     header[@"id"] = self.config.accountId;
     
     header[@"ddnd"] = @([self getStoredDeviceToken].length <= 0);
+    
+    header[@"frs"] = @(_firstRequestInSession);
+    _firstRequestInSession = NO;
     
     int lastTS = [self getLastRequestTimeStamp];
     header[@"l_ts"] = @(lastTS);
@@ -1956,6 +1961,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
  *
  * only used in [self endpoint]
  */
+
 - (void)processAdditionalRequestParameters:(NSDictionary *)response {
     if (!response) return;
     
@@ -1973,6 +1979,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!arp || [arp count] < 1) return;
     
     [self updateARP:arp];
+}
+
+- (void)processDiscardedEventsRequest:(NSDictionary *)response {
+    if (!response) return;
+    
+    if (!response[CLTAP_DISCARDED_EVENT_JSON_KEY]) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: ARP doesn't contain the Discarded Events key.", self);
+        return;
+    }
+    
+    if (![response isKindOfClass:[NSArray class]]) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, response);
+        return;
+    }
+    
+    NSArray *discardedEvents = response[CLTAP_DISCARDED_EVENT_JSON_KEY];
+    if (discardedEvents && discardedEvents.count > 0) {
+        @try {
+            [CTValidator setDiscardedEvents:discardedEvents];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
+        }
+    }
 }
 
 - (NSString *)arpKey {
@@ -2013,6 +2042,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else {
         update = [[NSMutableDictionary alloc] init];
     }
+    // TODO: @peter only add entries not remove
     [update addEntriesFromDictionary:arp];
     
     // Remove any keys that have the value -1
@@ -2026,6 +2056,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     [self saveARP:update];
     // TODO: where to update product config @peter
+    [self processDiscardedEventsRequest:arp];
     [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
 }
 
@@ -2075,6 +2106,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![self inCurrentSession]) {
         [self resetSession];
         [self createSession];
+        [self resetFirstRequestInSession];
         return;
     }
     CleverTapLogInternal(self.config.logLevel, @"%@: have current session: %lu", self, self.sessionId);
@@ -2105,6 +2137,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![self inCurrentSession]) return;
     CleverTapLogInternal(self.config.logLevel, @"%@: updating session time: %lu", self, ts);
     [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:kLastSessionTime]];
+}
+
+- (void)resetFirstRequestInSession {
+    self.firstRequestInSession = YES;
+    [CTValidator setDiscardedEvents:nil];
 }
 
 - (void)resetSession {
@@ -2161,6 +2198,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self clearInApps];
     }
 #endif
+}
+
+- (void)setFirstRequestInSession:(BOOL)firstRequestInSession {
+    _firstRequestInSession = firstRequestInSession;
+}
+
+- (BOOL)firstRequestInSession {
+    return _firstRequestInSession;
 }
 
 - (NSString*)source {

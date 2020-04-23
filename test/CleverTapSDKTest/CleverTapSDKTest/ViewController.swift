@@ -32,7 +32,6 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //        inboxRegister()
         //        addWebview()
         //        addAdUnit()
-        
         //        self.navigationController?.navigationItem.leftBarButtonItem = nil
         self.navigationItem.hidesBackButton = true
         UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffset(horizontal: -1000.0, vertical: 0.0), for: .default)
@@ -219,12 +218,12 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         NSLog("test button tapped")
         
         setProductConfigDefaults()
-        fetchProductConfig()
-        //        inAppEvents()
+        //        fetchProductConfig()
+        inAppEvents()
     }
     
     func inAppEvents() {
-        CleverTap.sharedInstance()?.recordEvent("Footer iOS")
+        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
         CleverTap.sharedInstance()?.recordScreenView("recordScreen")
         CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
         CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")

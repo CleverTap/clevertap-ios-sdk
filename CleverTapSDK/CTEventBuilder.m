@@ -51,6 +51,15 @@ NSString *const kCHARGED_EVENT = @"Charged";
         completion(nil, errors);
         return;
     }
+    
+    // Check for a discarded event name
+    if ([CTValidator isDiscaredEventName:eventName]) {
+        [errors addObject:[CTValidationResult resultWithErrorCode:512 andMessage:[NSString stringWithFormat:@"Discarded event name - %@", eventName]]];
+        CleverTapLogStaticDebug(@"Discarded event name: %@", eventName);
+        completion(nil, errors);
+        return;
+    }
+    
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     @try {
         // Validate
