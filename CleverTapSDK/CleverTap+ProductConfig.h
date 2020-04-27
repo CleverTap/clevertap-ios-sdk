@@ -3,11 +3,8 @@
 
 @protocol CleverTapProductConfigDelegate <NSObject>
 @optional
-// TODO: @peter
 - (void)ctProductConfigFetched;
 - (void)ctProductConfigActivated;
-//ctProductConfigUpdated
-
 @end
 
 @interface CleverTap(ProductConfig)

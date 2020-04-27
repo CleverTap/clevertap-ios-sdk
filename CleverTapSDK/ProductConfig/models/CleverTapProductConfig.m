@@ -23,6 +23,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 @synthesize delegate=_delegate;
 @synthesize fetchConfigCalls=_fetchConfigCalls;
 @synthesize fetchConfigWindowLength=_fetchConfigWindowLength;
+@synthesize lastFetchTs=_lastFetchTs;
 @synthesize minimumFetchConfigInterval=_minimumFetchConfigInterval;
 
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config privateDelegate:(id<CleverTapPrivateProductConfigDelegate>_Nonnull)delegate {
@@ -48,7 +49,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
     self.lastFetchTs = lastFetchTs;
-    [self persistLastFetchTs];
 }
 
 - (void)setFetchConfigCalls:(NSInteger)fetchConfigCalls {
@@ -83,6 +83,15 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 - (NSTimeInterval)minimumFetchConfigInterval{
     return _minimumFetchConfigInterval;
+}
+
+- (void)setLastFetchTs:(NSTimeInterval)lastFetchTs {
+    _lastFetchTs = lastFetchTs;
+    [self persistLastFetchTs];
+}
+
+- (NSTimeInterval)lastFetchTs {
+    return _lastFetchTs;
 }
 
 - (void)setDelegate:(id<CleverTapProductConfigDelegate>)delegate {

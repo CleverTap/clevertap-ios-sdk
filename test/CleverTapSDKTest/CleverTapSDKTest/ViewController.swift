@@ -3,7 +3,7 @@ import CoreLocation
 import CleverTapSDK
 import WebKit
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, CleverTapProductConfigDelegate, UIScrollViewDelegate {
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate {
     
     @IBOutlet var testButton: UIButton!
     @IBOutlet var inboxButton: CustomButton!
@@ -23,7 +23,6 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         print(ffDiscount!)
         self.setupImages()
         self.recordUserChargedEvent()
-        CleverTap.sharedInstance()?.productConfig.delegate = self;
         
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
@@ -56,6 +55,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         guard let int = CleverTap.sharedInstance()?.getIntegerVariable(withName: "intFoo", defaultValue: 12) else {return}
         print(foo)
         print(int)
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -217,8 +217,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
         
-        setProductConfigDefaults()
-        //        fetchProductConfig()
+        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
         inAppEvents()
     }
     
@@ -252,64 +251,6 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
-    }
-    
-    // MARK: - Product Config
-    
-    func fetchProductConfig() {
-        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 0)
-    }
-    
-    func setProductConfigDefaults() {
-        let defaults = NSMutableDictionary()
-        defaults.setValue("aditi", forKey: "foo")
-        defaults.setValue("agrawal", forKey: "customer_type")
-        CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
-        //        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
-    }
-    
-    func ctProductConfigFetched() {
-        
-        CleverTap.sharedInstance()?.productConfig.activate()
-        
-        let ctValue = CleverTap.sharedInstance()?.productConfig.get("int-key")
-        let strValue1 = ctValue?.numberValue
-        print("Remote Config after fetch 1:", strValue1 ?? "")
-        
-        let ctValue2 = CleverTap.sharedInstance()?.productConfig.get("str-key")
-        let strValue2 = ctValue2?.stringValue
-        print("Remote Config after fetch 2:", strValue2 ?? "")
-        
-        let ctValue3 = CleverTap.sharedInstance()?.productConfig.get("bool-key")
-        let strValue3 = ctValue3?.numberValue
-        print("Remote Config after fetch 3:", strValue3 ?? "")
-        
-        let ctValue4 = CleverTap.sharedInstance()?.productConfig.get("str-key-2")
-        let strValue4 = ctValue4?.stringValue
-        print("Remote Config after fetch 4:", strValue4 ?? "")
-    }
-    
-    func ctProductConfigActivated() {
-        
-        let ctValue = CleverTap.sharedInstance()?.productConfig.get("int-key")
-        let strValue1 = ctValue?.numberValue
-        print("Remote Config after activate 1:", strValue1 ?? "")
-        
-        let ctValue2 = CleverTap.sharedInstance()?.productConfig.get("str-key")
-        let strValue2 = ctValue2?.stringValue
-        print("Remote Config after activate 2:", strValue2 ?? "")
-        
-        let ctValue3 = CleverTap.sharedInstance()?.productConfig.get("bool-key")
-        let strValue3 = ctValue3?.numberValue
-        print("Remote Config after activate 3:", strValue3 ?? "")
-        
-        let ctValue4 = CleverTap.sharedInstance()?.productConfig.get("str-key-2")
-        let strValue4 = ctValue4?.stringValue
-        print("Remote Config after activate 4:", strValue4 ?? "")
-        
-        let ctValue5 = CleverTap.sharedInstance()?.productConfig.get("JSONP")
-        let strValue5 = ctValue5?.jsonValue
-        print("Remote Config after activate 5:", strValue5.debugDescription)
     }
 }
 

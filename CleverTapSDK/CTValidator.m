@@ -245,10 +245,10 @@ static NSArray *discardedEvents;
 + (BOOL)isDiscaredEventName:(NSString *)name {
     for (NSString *x in discardedEvents)
         if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
-            // The event name is restricted
+            // The event name is discarded
             CTValidationResult *error = [[CTValidationResult alloc] init];
             [error setErrorCode:513];
-            NSString *errStr = [NSString stringWithFormat:@"%@%@", name, @" is a discarded event name. Last event aborted."];
+            NSString *errStr = [NSString stringWithFormat:@"%@%@%@", name, @" is a discarded event, dropping event: ", name];
             [error setErrorDesc:errStr];
             return true;
         }

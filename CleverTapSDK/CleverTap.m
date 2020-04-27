@@ -1981,20 +1981,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self updateARP:arp];
 }
 
-- (void)processDiscardedEventsRequest:(NSDictionary *)response {
-    if (!response) return;
+- (void)processDiscardedEventsRequest:(NSDictionary *)arp {
+    if (!arp) return;
     
-    if (!response[CLTAP_DISCARDED_EVENT_JSON_KEY]) {
+    if (!arp[CLTAP_DISCARDED_EVENT_JSON_KEY]) {
         CleverTapLogInternal(self.config.logLevel, @"%@: ARP doesn't contain the Discarded Events key.", self);
         return;
     }
     
-    if (![response isKindOfClass:[NSArray class]]) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, response);
+    if (![arp[CLTAP_DISCARDED_EVENT_JSON_KEY] isKindOfClass:[NSArray class]]) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events: %@", self, arp);
         return;
     }
     
-    NSArray *discardedEvents = response[CLTAP_DISCARDED_EVENT_JSON_KEY];
+    NSArray *discardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
     if (discardedEvents && discardedEvents.count > 0) {
         @try {
             [CTValidator setDiscardedEvents:discardedEvents];
@@ -2042,7 +2042,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else {
         update = [[NSMutableDictionary alloc] init];
     }
-    // TODO: @peter only add entries not remove
     [update addEntriesFromDictionary:arp];
     
     // Remove any keys that have the value -1
@@ -2057,7 +2056,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self saveARP:update];
     // TODO: where to update product config @peter
     [self processDiscardedEventsRequest:arp];
-    [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions]];
+    [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions:arp]];
 }
 
 - (long)getI {
@@ -2106,7 +2105,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![self inCurrentSession]) {
         [self resetSession];
         [self createSession];
-        [self resetFirstRequestInSession];
         return;
     }
     CleverTapLogInternal(self.config.logLevel, @"%@: have current session: %lu", self, self.sessionId);
@@ -2139,7 +2137,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:kLastSessionTime]];
 }
 
-- (void)resetFirstRequestInSession {
+- (void)createFirstRequestInSession {
     self.firstRequestInSession = YES;
     [CTValidator setDiscardedEvents:nil];
 }
@@ -2185,6 +2183,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)createSession {
     self.sessionId = (long) [[NSDate date] timeIntervalSince1970];
     [self updateSessionTime:self.sessionId];
+    [self createFirstRequestInSession];
     if (self.config.isDefaultInstance) {
         self.firstSession = [CTPreferences getIntForKey:[self storageKeyWithSuffix:@"firstTime"] withResetValue:[CTPreferences getIntForKey:@"firstTime" withResetValue:0]] == 0;
     } else {
@@ -4653,6 +4652,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 // run off main
 - (void) _initFeatureFlags {
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Feature Flag unavailable", self);
+        return;
+    }
     self.featureFlags = [[CleverTapFeatureFlags alloc] initWithPrivateDelegate:self];
     [self runSerialAsync:^{
         if (self.featureFlagsController) {
@@ -4692,7 +4695,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)fetchFeatureFlags {
-    // TODO make more robust
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @1}} withType:CleverTapEventTypeFetch];
 }
 
@@ -4708,6 +4710,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 // run off main
 - (void) _initProductConfig {
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Product Config unavailable", self);
+        return;
+    }
     self.productConfig = [[CleverTapProductConfig alloc]  initWithConfig: self.config privateDelegate:self];
     [self runSerialAsync:^{
         if (self.productConfigController) {
@@ -4726,8 +4732,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (NSDictionary *)_setConfigOptions {
-    NSDictionary *arp = [self getARP];
+- (NSDictionary *)_setConfigOptions:(NSDictionary *)arp {
+    // TODO: arp[rc_n] arp[rc_w] = nil
     if (arp) {
         NSMutableDictionary *configOptions = [NSMutableDictionary new];
         configOptions[@"rc_n"] = arp[@"rc_n"];
@@ -4749,13 +4755,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _productConfigDelegate;
 }
 
-- (void)fetchProductConfigDidUpdate {
+- (void)productConfigDidFetch {
     if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigFetched)]) {
         [self.productConfigDelegate ctProductConfigFetched];
     }
 }
 
-- (void)activateProductConfigDidUpdate {
+- (void)productConfigDidActivate {
     if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigActivated)]) {
         [self.productConfigDelegate ctProductConfigActivated];
     }
@@ -4793,7 +4799,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.productConfigDelegate && self.productConfigController.isInitialized) {
         return [self.productConfigController get:key];
     }
-    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Flags not initialized", self);
+    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config not initialized", self);
     return nil;
 }
 

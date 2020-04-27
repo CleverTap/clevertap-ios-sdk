@@ -65,12 +65,12 @@ typedef void (^CTProductConfigOperationBlock)(void);
     
     if (isNew) {
         [self _archiveData:productConfig sync:NO];
+        [self notifyFetchUpdate];
     }
     
     if (self.activateFetchedConfig) {
         [self activate];
     }
-    [self notifyFetchUpdate];
 }
 
 - (void)_updateActiveProductConfig:(BOOL)activated {
@@ -126,14 +126,14 @@ typedef void (^CTProductConfigOperationBlock)(void);
 }
 
 - (void)notifyFetchUpdate {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(fetchProductConfigDidUpdate)]) {
-        [self.delegate fetchProductConfigDidUpdate];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidFetch)]) {
+        [self.delegate productConfigDidFetch];
     }
 }
 
 - (void)notifyActivateUpdate {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(activateProductConfigDidUpdate)]) {
-        [self.delegate activateProductConfigDidUpdate];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidActivate)]) {
+        [self.delegate productConfigDidActivate];
     }
 }
 
@@ -145,7 +145,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     NSString *filePath = [self dataArchiveFileName];
     __weak CTProductConfigController *weakSelf = self;
     CTProductConfigOperationBlock opBlock = ^{
-        NSArray *data = [CTPreferences unarchiveFromFile:filePath removeFile:NO];
+        NSArray *data = [CTPreferences unarchiveFromFile:filePath removeFile:YES];
         if (data) {
             [weakSelf _updateProductConfig:data isNew:NO];
         }
@@ -188,7 +188,6 @@ typedef void (^CTProductConfigOperationBlock)(void);
 }
 
 - (void)setDefaults:(NSDictionary<NSString *,NSObject *> *)defaults {
-    // TODO: background thread
     _defaultConfig = defaults;
     [self _updateActiveProductConfig:NO];
 }

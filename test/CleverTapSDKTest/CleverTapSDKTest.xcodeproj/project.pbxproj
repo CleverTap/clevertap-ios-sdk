@@ -27,6 +27,7 @@
 		07ED5FCF2228085C005DE5A8 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */; };
 		07EE53D222C0EA62009EBC12 /* ScreenABTestVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */; };
 		07FBD71622FC2F610088C37B /* CustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FBD71522FC2F610088C37B /* CustomView.swift */; };
+		490C764224536154009E5D66 /* ProductConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 490C764124536154009E5D66 /* ProductConfigVC.swift */; };
 		49C189942428C7C40003E4D4 /* RemoteConfigDefaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49C189932428C7C40003E4D4 /* RemoteConfigDefaults.plist */; };
 		D014B8A320E2F20B001E0780 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D014B8A220E2F20B001E0780 /* NotificationService.m */; };
 		D014B8A720E2F20B001E0780 /* testNotifServiceExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -132,6 +133,7 @@
 		07ED5FCE2228085C005DE5A8 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		07EE53D122C0EA62009EBC12 /* ScreenABTestVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenABTestVC.swift; sourceTree = "<group>"; };
 		07FBD71522FC2F610088C37B /* CustomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomView.swift; sourceTree = "<group>"; };
+		490C764124536154009E5D66 /* ProductConfigVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductConfigVC.swift; sourceTree = "<group>"; };
 		49C189932428C7C40003E4D4 /* RemoteConfigDefaults.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteConfigDefaults.plist; sourceTree = "<group>"; };
 		D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = testNotifServiceExt.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D014B8A120E2F20B001E0780 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
@@ -300,6 +302,7 @@
 				075F670A22F2CEDC00B040E6 /* WareHouseVC.swift */,
 				074CD0C6230AC1D5000C9D2B /* ImageDetailVC.swift */,
 				07792B7023033B61000A4BA9 /* ViewsVC.swift */,
+				490C764124536154009E5D66 /* ProductConfigVC.swift */,
 				D0A6624A207EE4FF00B403F3 /* Main.storyboard */,
 				D0A6624D207EE50000B403F3 /* Assets.xcassets */,
 				D0A66252207EE50000B403F3 /* Info.plist */,
@@ -573,6 +576,7 @@
 			files = (
 				07FBD71622FC2F610088C37B /* CustomView.swift in Sources */,
 				07DB229F22CC8D0E00E6492D /* Meal.swift in Sources */,
+				490C764224536154009E5D66 /* ProductConfigVC.swift in Sources */,
 				0790386322DF0295003AEC0A /* TestTableView.swift in Sources */,
 				D0A66249207EE4FF00B403F3 /* ViewController.swift in Sources */,
 				075F670D22F2FA7F00B040E6 /* CustomLabel.swift in Sources */,
