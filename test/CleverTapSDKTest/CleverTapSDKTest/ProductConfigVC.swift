@@ -7,6 +7,10 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         CleverTap.sharedInstance()?.productConfig.delegate = self;
+        let lastFetchTS = CleverTap.sharedInstance()?.productConfig.getLastFetchTimeStamp()
+        print("Last Fetch Time Stamp:", lastFetchTS ?? "")
+        
+        CleverTap.sharedInstance()?.productConfig.reset()
     }
     
     @IBAction func setDefaultsTapped(_ sender: Any) {
@@ -36,6 +40,10 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         defaults.setValue("agrawal", forKey: "str-key-2")
         CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
         //        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
+    }
+    
+    func ctProductConfigInitialized() {
+         
     }
     
     func ctProductConfigFetched() {

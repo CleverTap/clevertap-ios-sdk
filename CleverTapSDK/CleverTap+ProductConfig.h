@@ -5,6 +5,7 @@
 @optional
 - (void)ctProductConfigFetched;
 - (void)ctProductConfigActivated;
+- (void)ctProductConfigInitialized;
 @end
 
 @interface CleverTap(ProductConfig)
@@ -42,10 +43,14 @@
 
 - (void)fetchAndActivate;
 
+- (void)reset;
+
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
 
 - (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName;
 
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
+
+- (NSDate *_Nullable)getLastFetchTimeStamp;
 
 @end

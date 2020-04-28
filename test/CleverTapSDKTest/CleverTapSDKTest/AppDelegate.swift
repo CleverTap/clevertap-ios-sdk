@@ -89,7 +89,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         print(ffDiscount!)
     }
     
-    func ctProductConfigUpdated() {
+    func ctProductConfigInitialized() {
         NSLog("CleverTap Product Config updated")
     }
     

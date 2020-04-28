@@ -5,6 +5,7 @@
 @required
 - (void)productConfigDidFetch;
 - (void)productConfigDidActivate;
+- (void)productConfigDidInitialize;
 @end
 
 @class CleverTapInstanceConfig;
@@ -26,10 +27,12 @@
 
 - (void)fetchAndActivate;
 
-- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
+- (void)reset;
 
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
 
 - (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName;
+
+- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
 
 @end

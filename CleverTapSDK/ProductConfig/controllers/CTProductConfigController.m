@@ -38,6 +38,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
         _commandQueue = [[NSOperationQueue alloc] init];
         _commandQueue.maxConcurrentOperationCount = 1;
         [self _unarchiveDataSync:YES];
+        [self notifyInitUpdate];
     }
     return self;
 }
@@ -125,6 +126,14 @@ typedef void (^CTProductConfigOperationBlock)(void);
     }
 }
 
+#pragma mark - Delegates
+
+- (void)notifyInitUpdate {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidInitialize)]) {
+        [self.delegate productConfigDidInitialize];
+    }
+}
+
 - (void)notifyFetchUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidFetch)]) {
         [self.delegate productConfigDidFetch];
@@ -136,6 +145,8 @@ typedef void (^CTProductConfigOperationBlock)(void);
         [self.delegate productConfigDidActivate];
     }
 }
+
+#pragma mark - Storage operations
 
 - (NSString*)dataArchiveFileName {
     return [NSString stringWithFormat:@"clevertap-%@-%@-product-config.plist", _config.accountId, _guid];
@@ -185,6 +196,12 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
 - (void)fetchAndActivate {
     self.activateFetchedConfig = YES;
+}
+
+- (void)reset {
+    self.defaultConfig = [NSDictionary new];
+    self.activeConfig = [NSDictionary new];
+    self.fetchedConfig = [NSDictionary new];
 }
 
 - (void)setDefaults:(NSDictionary<NSString *,NSObject *> *)defaults {

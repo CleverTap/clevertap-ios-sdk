@@ -12,6 +12,8 @@
 
 - (void)fetchAndActivateProductConfig;
 
+- (void)resetProductConfig;
+
 - (void)setDefaultsProductConfig:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
 
 - (void)setDefaultsFromPlistFileNameProductConfig:(NSString *_Nullable)fileName;

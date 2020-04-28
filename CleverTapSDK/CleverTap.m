@@ -2054,9 +2054,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self saveARP:update];
-    // TODO: where to update product config @peter
     [self processDiscardedEventsRequest:arp];
-    [self.productConfig updateProductConfigWithOptions:[self _setConfigOptions:arp]];
+    [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
 }
 
 - (long)getI {
@@ -2695,7 +2694,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-#pragma mark - Response handling
+#pragma mark - Response Handling
 
 - (void)parseResponse:(NSData *)responseData {
     if (responseData) {
@@ -3879,7 +3878,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 #endif
 
-#pragma mark - Inbox
+#pragma mark - App Inbox
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 
@@ -4732,7 +4731,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (NSDictionary *)_setConfigOptions:(NSDictionary *)arp {
+- (NSDictionary *)_setProductConfig:(NSDictionary *)arp {
     // TODO: arp[rc_n] arp[rc_w] = nil
     if (arp) {
         NSMutableDictionary *configOptions = [NSMutableDictionary new];
@@ -4767,36 +4766,48 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (void)productConfigDidInitialize {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigInitialized)]) {
+        [self.productConfigDelegate ctProductConfigInitialized];
+    }
+}
+
 - (void)fetchProductConfig {
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
 }
 
 - (void)activateProductConfig {
-    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
         [self.productConfigController activate];
     }
 }
 
 - (void)fetchAndActivateProductConfig {
-    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
         [self.productConfigController fetchAndActivate];
     }
 }
 
+- (void)resetProductConfig {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        [self.productConfigController reset];
+    }
+}
+
 - (void)setDefaultsProductConfig:(NSDictionary<NSString *,NSObject *> *)defaults {
-    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
         [self.productConfigController setDefaults:defaults];
     }
 }
 
 - (void)setDefaultsFromPlistFileNameProductConfig:(NSString *)fileName {
-    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
         [self.productConfigController setDefaultsFromPlistFileName:fileName];
     }
 }
 
 - (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key {
-    if (self.productConfigDelegate && self.productConfigController.isInitialized) {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
         return [self.productConfigController get:key];
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config not initialized", self);
