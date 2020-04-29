@@ -202,6 +202,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     self.defaultConfig = [NSDictionary new];
     self.activeConfig = [NSDictionary new];
     self.fetchedConfig = [NSDictionary new];
+    [self _archiveData:[NSArray new] sync:NO];
 }
 
 - (void)setDefaults:(NSDictionary<NSString *,NSObject *> *)defaults {

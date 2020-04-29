@@ -1569,6 +1569,16 @@
                                     <action selector="fetchAndActivateTapped:" destination="Ua9-Yn-hXq" eventType="touchUpInside" id="rQT-nl-7wb"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v03-1d-wpX">
+                                <rect key="frame" x="44" y="360" width="287" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="NNP-Ys-5LA"/>
+                                </constraints>
+                                <state key="normal" title="Reset"/>
+                                <connections>
+                                    <action selector="fetchAndActivateTapped:" destination="Ua9-Yn-hXq" eventType="touchUpInside" id="vF9-Xt-r9H"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
@@ -1576,12 +1586,15 @@
                             <constraint firstItem="SDA-rN-hnY" firstAttribute="top" secondItem="vmW-6i-Jfc" secondAttribute="top" constant="64" id="E6K-xz-o1b"/>
                             <constraint firstItem="cVY-Pm-fe2" firstAttribute="leading" secondItem="vmW-6i-Jfc" secondAttribute="leading" constant="44" id="EUJ-Xs-aBw"/>
                             <constraint firstItem="vmW-6i-Jfc" firstAttribute="trailing" secondItem="cVY-Pm-fe2" secondAttribute="trailing" constant="44" id="H4r-8Z-G4G"/>
+                            <constraint firstItem="vmW-6i-Jfc" firstAttribute="trailing" secondItem="v03-1d-wpX" secondAttribute="trailing" constant="44" id="SVX-6z-L8p"/>
                             <constraint firstItem="vmW-6i-Jfc" firstAttribute="trailing" secondItem="SDA-rN-hnY" secondAttribute="trailing" constant="64" id="Ub5-kW-3qF"/>
                             <constraint firstItem="vmW-6i-Jfc" firstAttribute="trailing" secondItem="RlW-js-g2P" secondAttribute="trailing" constant="44" id="Y0t-Xd-VFV"/>
                             <constraint firstItem="gKa-8r-gvH" firstAttribute="top" secondItem="SDA-rN-hnY" secondAttribute="bottom" constant="44" id="dTT-yh-YJS"/>
                             <constraint firstItem="RlW-js-g2P" firstAttribute="top" secondItem="gKa-8r-gvH" secondAttribute="bottom" constant="44" id="dn8-QT-0Y0"/>
+                            <constraint firstItem="v03-1d-wpX" firstAttribute="top" secondItem="cVY-Pm-fe2" secondAttribute="bottom" constant="44" id="eI3-ap-b5G"/>
                             <constraint firstItem="gKa-8r-gvH" firstAttribute="trailing" secondItem="SDA-rN-hnY" secondAttribute="trailing" id="hll-yh-ejv"/>
                             <constraint firstItem="RlW-js-g2P" firstAttribute="leading" secondItem="vmW-6i-Jfc" secondAttribute="leading" constant="44" id="qEE-tg-qGs"/>
+                            <constraint firstItem="v03-1d-wpX" firstAttribute="leading" secondItem="vmW-6i-Jfc" secondAttribute="leading" constant="44" id="qUu-US-6Ha"/>
                             <constraint firstItem="SDA-rN-hnY" firstAttribute="leading" secondItem="vmW-6i-Jfc" secondAttribute="leading" constant="64" id="xsk-EW-rT9"/>
                             <constraint firstItem="gKa-8r-gvH" firstAttribute="leading" secondItem="SDA-rN-hnY" secondAttribute="leading" id="yW8-ZL-0In"/>
                         </constraints>

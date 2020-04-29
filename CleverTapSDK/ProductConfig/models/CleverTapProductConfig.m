@@ -6,8 +6,6 @@
 #define CLTAP_DEFAULT_FETCH_CALLS 5
 #define CLTAP_DEFAULT_FETCH_WINDOW_LENGTH 60
 
-NSString* const kFETCH_CONFIG_WINDOW_LENGTH_KEY = @"CLTAP_FETCH_CONFIG_WINDOW_LENGTH_KEY";
-NSString* const kFETCH_CONFIG_CALLS_KEY = @"CLTAP_FETCH_CONFIG_CALLS_KEY";
 NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 @interface CleverTapProductConfig() {
@@ -36,8 +34,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)initProductConfigSetting {
-    _fetchConfigCalls = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kFETCH_CONFIG_CALLS_KEY] withResetValue:CLTAP_DEFAULT_FETCH_CALLS];
-    _fetchConfigWindowLength = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kFETCH_CONFIG_WINDOW_LENGTH_KEY] withResetValue:CLTAP_DEFAULT_FETCH_WINDOW_LENGTH];
     _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
 }
 
@@ -47,10 +43,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)resetProductConfigSettings {
-    [CTPreferences removeObjectForKey:kFETCH_CONFIG_WINDOW_LENGTH_KEY];
-    [CTPreferences removeObjectForKey:kFETCH_CONFIG_CALLS_KEY];
     [CTPreferences removeObjectForKey:kLAST_FETCH_TS_KEY];
-    [self initProductConfigSetting];
 }
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
@@ -63,7 +56,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     } else {
         _fetchConfigCalls = fetchConfigCalls;
     }
-    [self persistFetchConfigCalls];
 }
 
 - (NSInteger)fetchConfigCalls {
@@ -76,7 +68,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     } else {
         _fetchConfigWindowLength = fetchConfigWindowLength;
     }
-    [self persistFetchConfigWindowLength];
 }
 
 - (NSInteger)fetchConfigWindowLength {
@@ -105,14 +96,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 #pragma mark - Persist Product Config Settings
-
-- (void)persistFetchConfigWindowLength {
-    [CTPreferences putInt:self.fetchConfigWindowLength forKey:[self storageKeyWithSuffix:kFETCH_CONFIG_WINDOW_LENGTH_KEY]];
-}
-
-- (void)persistFetchConfigCalls {
-    [CTPreferences putInt:self.fetchConfigCalls forKey:[self storageKeyWithSuffix:kFETCH_CONFIG_CALLS_KEY]];
-}
 
 - (void)persistLastFetchTs {
     [CTPreferences putInt:self.lastFetchTs forKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
@@ -183,7 +166,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 
 - (NSDate *)getLastFetchTimeStamp {
     NSTimeInterval lastFetchTime = self.lastFetchTs;
-    NSDate *ts = [NSDate dateWithTimeIntervalSince1970:lastFetchTime];
     return [NSDate dateWithTimeIntervalSince1970:lastFetchTime];
 }
 

@@ -9,8 +9,8 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         CleverTap.sharedInstance()?.productConfig.delegate = self;
         let lastFetchTS = CleverTap.sharedInstance()?.productConfig.getLastFetchTimeStamp()
         print("Last Fetch Time Stamp:", lastFetchTS ?? "")
+        CleverTap.sharedInstance()?.productConfig.setMinimumFetchInterval(100)
         
-        CleverTap.sharedInstance()?.productConfig.reset()
     }
     
     @IBAction func setDefaultsTapped(_ sender: Any) {
@@ -20,7 +20,8 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     
     @IBAction func fetchTapped(_ sender: Any) {
         NSLog("fetch button tapped")
-        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 0)
+//        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 0)
+        CleverTap.sharedInstance()?.productConfig.fetch()
     }
     
     @IBAction func activateTapped(_ sender: Any) {
@@ -30,6 +31,10 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     
     @IBAction func fetchAndActivateTapped(_ sender: Any) {
         CleverTap.sharedInstance()?.productConfig.fetchAndActivate()
+    }
+    
+    @IBAction func reset(_ sender: Any) {
+        CleverTap.sharedInstance()?.productConfig.reset()
     }
     
     // MARK: - Product Config
@@ -43,12 +48,12 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     }
     
     func ctProductConfigInitialized() {
-         
+        
     }
     
     func ctProductConfigFetched() {
         
-//        CleverTap.sharedInstance()?.productConfig.activate() // test case 
+        //        CleverTap.sharedInstance()?.productConfig.activate() // test case 
         
         let ctValue = CleverTap.sharedInstance()?.productConfig.get("int-key")
         let strValue1 = ctValue?.numberValue
