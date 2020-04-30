@@ -1576,7 +1576,7 @@
                                 </constraints>
                                 <state key="normal" title="Reset"/>
                                 <connections>
-                                    <action selector="fetchAndActivateTapped:" destination="Ua9-Yn-hXq" eventType="touchUpInside" id="vF9-Xt-r9H"/>
+                                    <action selector="reset:" destination="Ua9-Yn-hXq" eventType="touchUpInside" id="yAn-No-uI9"/>
                                 </connections>
                             </button>
                         </subviews>

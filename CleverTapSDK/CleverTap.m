@@ -4732,7 +4732,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (NSDictionary *)_setProductConfig:(NSDictionary *)arp {
-    // TODO: arp[rc_n] arp[rc_w] = nil
     if (arp) {
         NSMutableDictionary *configOptions = [NSMutableDictionary new];
         configOptions[@"rc_n"] = arp[@"rc_n"];

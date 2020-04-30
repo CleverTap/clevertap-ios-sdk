@@ -21,7 +21,7 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     @IBAction func fetchTapped(_ sender: Any) {
         NSLog("fetch button tapped")
 //        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 0)
-        CleverTap.sharedInstance()?.productConfig.fetch()
+                CleverTap.sharedInstance()?.productConfig.fetch()
     }
     
     @IBAction func activateTapped(_ sender: Any) {
@@ -43,6 +43,7 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         let defaults = NSMutableDictionary()
         defaults.setValue("aditi", forKey: "foo")
         defaults.setValue("agrawal", forKey: "str-key-2")
+        defaults.setValue(true, forKey: "bool-test")
         CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
         //        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
     }
@@ -52,47 +53,52 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     }
     
     func ctProductConfigFetched() {
-        
-        //        CleverTap.sharedInstance()?.productConfig.activate() // test case 
-        
+                
         let ctValue = CleverTap.sharedInstance()?.productConfig.get("int-key")
         let strValue1 = ctValue?.numberValue
-        print("Remote Config after fetch 1:", strValue1 ?? "")
+        print("Remote Config for int-key:", strValue1 ?? "")
         
         let ctValue2 = CleverTap.sharedInstance()?.productConfig.get("str-key")
         let strValue2 = ctValue2?.stringValue
-        print("Remote Config after fetch 2:", strValue2 ?? "")
+        print("Remote Config for str-key:", strValue2 ?? "")
         
         let ctValue3 = CleverTap.sharedInstance()?.productConfig.get("bool-key")
         let strValue3 = ctValue3?.numberValue
-        print("Remote Config after fetch 3:", strValue3 ?? "")
+        print("Remote Config for bool-key:", strValue3 ?? "")
         
         let ctValue4 = CleverTap.sharedInstance()?.productConfig.get("str-key-2")
         let strValue4 = ctValue4?.stringValue
-        print("Remote Config after fetch 4:", strValue4 ?? "")
+        print("Remote Config for str-key-2:", strValue4 ?? "")
+        
+        let ctValue5 = CleverTap.sharedInstance()?.productConfig.get("bool-test")
+        let strValue5 = ctValue5?.boolValue
+        print("Remote Config for bool-test:", strValue5?.description ?? "")
     }
     
     func ctProductConfigActivated() {
         
         let ctValue = CleverTap.sharedInstance()?.productConfig.get("int-key")
         let strValue1 = ctValue?.numberValue
-        print("Remote Config after activate 1:", strValue1 ?? "")
+        print("Remote Config for int-key:", strValue1 ?? "")
         
         let ctValue2 = CleverTap.sharedInstance()?.productConfig.get("str-key")
         let strValue2 = ctValue2?.stringValue
-        print("Remote Config after activate 2:", strValue2 ?? "")
+        print("Remote Config for str-key :", strValue2 ?? "")
         
         let ctValue3 = CleverTap.sharedInstance()?.productConfig.get("bool-key")
         let strValue3 = ctValue3?.numberValue
-        print("Remote Config after activate 3:", strValue3 ?? "")
+        print("Remote Config for bool-key:", strValue3 ?? "")
         
         let ctValue4 = CleverTap.sharedInstance()?.productConfig.get("str-key-2")
         let strValue4 = ctValue4?.stringValue
-        print("Remote Config after activate 4:", strValue4 ?? "")
+        print("Remote Config for str-key-2:", strValue4 ?? "")
         
         let ctValue5 = CleverTap.sharedInstance()?.productConfig.get("json-key")
         let strValue5 = ctValue5?.jsonValue
-        print("Remote Config after activate 5:", strValue5.debugDescription)
+        print("Remote Config for json-key:", strValue5.debugDescription)
+        
+        let ctValue6 = CleverTap.sharedInstance()?.productConfig.get("bool-test")
+        let strValue6 = ctValue6?.boolValue
+        print("Remote Config for bool-test:", strValue6?.description ?? "")
     }
-    
 }

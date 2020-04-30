@@ -16,17 +16,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         } else {
             // Fallback on earlier versions
         };
-                
-        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-6")
-                
-//             CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        
+        //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-6")
+        
+        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
         //     CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-6")
         //     CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-5")
         //     CleverTap.setCredentialsWithAccountID("65R-44Z-R65Z", andToken: "144-256")
         //     CleverTap.setCredentialsWithAccountID("W6W-797-865Z", token: "aca-060", region: "sk1-staging-6")
-//             CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+        //             CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
         
-//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        //        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         CleverTap.setUIEditorConnectionEnabled(true)
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
         
@@ -38,7 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.productConfig.delegate = self;
         
         CleverTap.sharedInstance()?.recordEvent("Content Started")
-                
+        
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")
         CleverTap.sharedInstance()?.registerBoolVariable(withName: "boolVar")
@@ -83,9 +83,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     func ctFeatureFlagsUpdated() {
         NSLog("CleverTap feature flags updated")
-        let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("foo", withDefaultValue:false)
+        let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("test_atul_bool", withDefaultValue:false)
         print(ffFoo!)
-        let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("discount", withDefaultValue:false)
+        let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("is_veg", withDefaultValue:false)
         print(ffDiscount!)
     }
     

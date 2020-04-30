@@ -43,7 +43,8 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)resetProductConfigSettings {
-    [CTPreferences removeObjectForKey:kLAST_FETCH_TS_KEY];
+    [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
+    [self initProductConfigSetting];
 }
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs {
@@ -117,7 +118,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
             [self.privateDelegate fetchProductConfig];
         }
     } else {
-        CleverTapLogStaticDebug(@"FetchError: Product Config is throttled.");
+        CleverTapLogStaticDebug(@"Fetch Error: Product Config is throttled, try again in %ds", (int)(minimumInterval - [self timeSinceLastRequest]));
     }
 }
 

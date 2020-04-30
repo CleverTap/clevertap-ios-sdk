@@ -228,7 +228,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key {
     CleverTapLogInternal(_config.logLevel, @"%@: get product config for key: %@", self, key);
     @try {
-        if (!key ) {
+        if (!key) {
             CleverTapLogDebug(_config.logLevel, @"%@: product config key not found", self);
             return [[CleverTapConfigValue alloc] initWithData:[NSData data]];
         }
