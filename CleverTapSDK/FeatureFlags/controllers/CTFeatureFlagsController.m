@@ -53,7 +53,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
         }
     }
     self.store = store;
-
+    
     if (isNew) {
         [self _archiveData:featureFlags sync:NO];
     }
@@ -88,7 +88,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 
 - (void)_unarchiveDataSync:(BOOL)sync {
     NSString *filePath = [self dataArchiveFileName];
-     __weak CTFeatureFlagsController *weakSelf = self;
+    __weak CTFeatureFlagsController *weakSelf = self;
     CTFeatureFlagsOperationBlock opBlock = ^{
         NSArray *featureFlags = [CTPreferences unarchiveFromFile:filePath removeFile:NO];
         if (featureFlags) {
@@ -107,7 +107,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 - (void)_archiveData:(NSArray*)data sync:(BOOL)sync {
     NSString *filePath = [self dataArchiveFileName];
     CTFeatureFlagsOperationBlock opBlock = ^{
-         [CTPreferences archiveObject:data forFileName:filePath];
+        [CTPreferences archiveObject:data forFileName:filePath];
     };
     if (sync) {
         opBlock();

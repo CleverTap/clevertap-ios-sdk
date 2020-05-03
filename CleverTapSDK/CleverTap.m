@@ -4727,6 +4727,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 // run off main
 - (void)_resetProductConfig {
     if (self.productConfigController && self.productConfigController.isInitialized && self.deviceInfo.deviceId) {
+        [self.productConfig resetProductConfigSettings];
         self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
     }
 }

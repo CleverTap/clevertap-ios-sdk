@@ -46,4 +46,6 @@
 - (void)updateProductConfigWithOptions:(NSDictionary *_Nullable)options;
 
 - (void)updateProductConfigWithLastFetchTs:(NSTimeInterval)lastFetchTs;
+
+- (void)resetProductConfigSettings;
 @end
