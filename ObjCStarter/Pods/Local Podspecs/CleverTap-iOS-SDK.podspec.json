@@ -50,7 +50,11 @@
     "tvos": "9.0"
   },
   "tvos": {
-    "source_files": "CleverTapSDK/*.{h,m}",
+    "source_files": [
+      "CleverTapSDK/*.{h,m}",
+      "CleverTapSDK/ProductConfig/**/*.{h,m}",
+      "CleverTapSDK/FeatureFlags/**/*.{h,m}"
+    ],
     "exclude_files": "CleverTapSDK/CleverTapJSInterface.{h,m}",
     "public_header_files": [
       "CleverTapSDK/CleverTap.h",

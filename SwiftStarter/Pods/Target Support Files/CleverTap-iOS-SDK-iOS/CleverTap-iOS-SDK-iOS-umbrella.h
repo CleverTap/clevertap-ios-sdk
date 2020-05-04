@@ -23,6 +23,8 @@
 #import "CleverTapJSInterface.h"
 #import "CleverTap+ABTesting.h"
 #import "CleverTap+DisplayUnit.h"
+#import "CleverTap+FeatureFlags.h"
+#import "CleverTap+ProductConfig.h"
 
 FOUNDATION_EXPORT double CleverTapSDKVersionNumber;
 FOUNDATION_EXPORT const unsigned char CleverTapSDKVersionString[];
