@@ -2339,7 +2339,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return;
         }
         
-        // TODO don't understand this line of code @Aditi
         if (eventType != CleverTapEventTypeRaised || eventType != CleverTapEventTypeNotificationViewed) {
             event = [self convertDataToPrimitive:event];
         }
@@ -4728,6 +4727,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_resetProductConfig {
     if (self.productConfigController && self.productConfigController.isInitialized && self.deviceInfo.deviceId) {
         [self.productConfig resetProductConfigSettings];
+        self.productConfig = [[CleverTapProductConfig alloc]  initWithConfig: self.config privateDelegate:self];
         self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
     }
 }

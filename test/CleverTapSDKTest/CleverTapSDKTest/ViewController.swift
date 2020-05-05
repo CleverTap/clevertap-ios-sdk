@@ -62,6 +62,22 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         super.viewDidAppear(animated)
     }
     
+    @IBAction func user1Tapped(_ sender: Any) {
+        let profile: Dictionary<String, AnyObject> = [
+            "Email": "pc2@pc.com" as AnyObject,
+            "Name": "User 1" as AnyObject
+        ]
+        CleverTap.sharedInstance()?.onUserLogin(profile)
+    }
+    
+    @IBAction func user2Tapped(_ sender: Any) {
+        let profile: Dictionary<String, AnyObject> = [
+            "Email": "pc3@pc.com" as AnyObject,
+            "Name": "User 2" as AnyObject
+        ]
+        CleverTap.sharedInstance()?.onUserLogin(profile)
+    }
+    
     func recordUserChargedEvent() {
         
         //charged event

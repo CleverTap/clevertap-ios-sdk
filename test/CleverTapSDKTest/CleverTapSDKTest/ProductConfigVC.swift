@@ -20,7 +20,7 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     
     @IBAction func fetchTapped(_ sender: Any) {
         NSLog("fetch button tapped")
-        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 0)
+        CleverTap.sharedInstance()?.productConfig.fetch(withMinimumInterval: 60*10)
 //                CleverTap.sharedInstance()?.productConfig.fetch()
     }
     
@@ -44,8 +44,8 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         defaults.setValue("aditi", forKey: "foo")
         defaults.setValue("agrawal", forKey: "str-key-2")
         defaults.setValue(true, forKey: "bool-test")
-        CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
-        //        CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
+//        CleverTap.sharedInstance()?.productConfig.setDefaults(defaults as? [String : NSObject])
+                CleverTap.sharedInstance()?.productConfig.setDefaultsFromPlistFileName("RemoteConfigDefaults")
     }
     
     func ctProductConfigInitialized() {
