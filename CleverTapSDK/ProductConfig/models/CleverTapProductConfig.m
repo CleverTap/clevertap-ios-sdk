@@ -34,6 +34,8 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)initProductConfigSetting {
+    self.fetchConfigCalls = CLTAP_DEFAULT_FETCH_CALLS;
+    self.fetchConfigWindowLength = CLTAP_DEFAULT_FETCH_WINDOW_LENGTH;
     _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
 }
 
@@ -43,8 +45,6 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)resetProductConfigSettings {
-    self.fetchConfigCalls = CLTAP_DEFAULT_FETCH_CALLS;
-    self.fetchConfigWindowLength = CLTAP_DEFAULT_FETCH_WINDOW_LENGTH;
     [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
     [self initProductConfigSetting];
 }
