@@ -1,8 +1,8 @@
 # CHANGE LOG
 
-## Version 3.8.0 (May 8, 2020)
+## Version 3.8.0 (May 11, 2020)
 * Adds support for Product Config and Feature Flag as a part of Product Experiences feature
-* Bug fixes and performance improvements
+* Performance improvements
 
 ## Version 3.7.3 (March 11, 2020)
 * Adds public APIs for raising Notification Clicked and Viewed events for App Inbox
