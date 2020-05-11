@@ -8,6 +8,8 @@ static const int kMaxValueChars = 1024;
 static const int kMaxMultiValuePropertyArrayCount = 100;
 static const int kMaxMultiValuePropertyValueChars = 1024;
 
+static NSArray *discardedEvents;
+
 @implementation CTValidator
 
 /**
@@ -227,7 +229,7 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
  */
 + (BOOL)isRestrictedEventName:(NSString *)name {
     NSArray *restrictedNames = @[@"Notification Sent", @"Notification Viewed", @"Notification Clicked",
-                                 @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d"];
+                                 @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d", @"wzrk_fetch"];
     for (NSString *x in restrictedNames)
         if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
             // The event name is restricted
@@ -238,6 +240,23 @@ static const int kMaxMultiValuePropertyValueChars = 1024;
             return true;
         }
     return false;
+}
+
++ (BOOL)isDiscaredEventName:(NSString *)name {
+    for (NSString *x in discardedEvents)
+        if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
+            // The event name is discarded
+            CTValidationResult *error = [[CTValidationResult alloc] init];
+            [error setErrorCode:513];
+            NSString *errStr = [NSString stringWithFormat:@"%@%@%@", name, @" is a discarded event, dropping event: ", name];
+            [error setErrorDesc:errStr];
+            return true;
+        }
+    return false;
+}
+
++ (void)setDiscardedEvents:(NSArray *)events {
+    discardedEvents = events;
 }
 
 + (BOOL)isValidCleverTapId:(NSString *)cleverTapID {

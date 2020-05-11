@@ -57,6 +57,14 @@ static NSArray* sslCertNames;
 #import "CleverTap+DisplayUnit.h"
 #endif
 
+#import "CleverTap+FeatureFlags.h"
+#import "CleverTapFeatureFlagsPrivate.h"
+#import "CTFeatureFlagsController.h"
+
+#import "CleverTap+ProductConfig.h"
+#import "CleverTapProductConfigPrivate.h"
+#import "CTProductConfigController.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -115,6 +123,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeRaised,
     CleverTapEventTypeData,
     CleverTapEventTypeNotificationViewed,
+    CleverTapEventTypeFetch,
 };
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
@@ -157,6 +166,18 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @end
 #endif
 
+@interface CleverTap () <CTFeatureFlagsDelegate, CleverTapPrivateFeatureFlagsDelegate> {}
+@property (atomic, strong) CTFeatureFlagsController *featureFlagsController;
+@property (atomic, strong, readwrite, nonnull) CleverTapFeatureFlags *featureFlags;
+
+@end
+
+@interface CleverTap () <CTProductConfigDelegate, CleverTapPrivateProductConfigDelegate> {}
+@property (atomic, strong) CTProductConfigController *productConfigController;
+@property (atomic, strong, readwrite, nonnull) CleverTapProductConfig *productConfig;
+
+@end
+
 #import <UserNotifications/UserNotifications.h>
 
 @interface CleverTap () <UIApplicationDelegate> {
@@ -195,6 +216,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, assign) long sessionId;
 @property (atomic, assign) int screenCount;
 @property (atomic, assign) BOOL firstSession;
+@property (atomic, assign) BOOL firstRequestInSession;
 @property (atomic, assign) int lastSessionLengthSeconds;
 
 @property (atomic, retain) NSString *source;
@@ -228,10 +250,15 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
+@synthesize firstRequestInSession=_firstRequestInSession;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
 #endif
+
+@synthesize featureFlagsDelegate=_featureFlagsDelegate;
+
+@synthesize productConfigDelegate=_productConfigDelegate;
 
 static CTPlistInfo* _plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
@@ -286,7 +313,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
-    CleverTapLogStaticDebug("%@: Auto Integration enabled", self);
+    CleverTapLogStaticInfo("%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [self swizzleAppDelegate];
     CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
@@ -613,6 +640,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     [self _initABTesting];
 #endif
+    [self _initFeatureFlags];
+    
+    [self _initProductConfig];
     
     [self notifyUserProfileInitialized];
     
@@ -976,6 +1006,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     header[@"id"] = self.config.accountId;
     
     header[@"ddnd"] = @([self getStoredDeviceToken].length <= 0);
+    
+    header[@"frs"] = @(_firstRequestInSession);
+    _firstRequestInSession = NO;
     
     int lastTS = [self getLastRequestTimeStamp];
     header[@"l_ts"] = @(lastTS);
@@ -1928,6 +1961,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
  *
  * only used in [self endpoint]
  */
+
 - (void)processAdditionalRequestParameters:(NSDictionary *)response {
     if (!response) return;
     
@@ -1945,6 +1979,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!arp || [arp count] < 1) return;
     
     [self updateARP:arp];
+}
+
+- (void)processDiscardedEventsRequest:(NSDictionary *)arp {
+    if (!arp) return;
+    
+    if (!arp[CLTAP_DISCARDED_EVENT_JSON_KEY]) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: ARP doesn't contain the Discarded Events key.", self);
+        return;
+    }
+    
+    if (![arp[CLTAP_DISCARDED_EVENT_JSON_KEY] isKindOfClass:[NSArray class]]) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events: %@", self, arp);
+        return;
+    }
+    
+    NSArray *discardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
+    if (discardedEvents && discardedEvents.count > 0) {
+        @try {
+            [CTValidator setDiscardedEvents:discardedEvents];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
+        }
+    }
 }
 
 - (NSString *)arpKey {
@@ -1997,6 +2054,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self saveARP:update];
+    [self processDiscardedEventsRequest:arp];
+    [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
 }
 
 - (long)getI {
@@ -2077,6 +2136,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:kLastSessionTime]];
 }
 
+- (void)createFirstRequestInSession {
+    self.firstRequestInSession = YES;
+    [CTValidator setDiscardedEvents:nil];
+}
+
 - (void)resetSession {
     if ([[self class] runningInsideAppExtension]) return;
     self.appLaunchProcessed = NO;
@@ -2118,6 +2182,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)createSession {
     self.sessionId = (long) [[NSDate date] timeIntervalSince1970];
     [self updateSessionTime:self.sessionId];
+    [self createFirstRequestInSession];
     if (self.config.isDefaultInstance) {
         self.firstSession = [CTPreferences getIntForKey:[self storageKeyWithSuffix:@"firstTime"] withResetValue:[CTPreferences getIntForKey:@"firstTime" withResetValue:0]] == 0;
     } else {
@@ -2131,6 +2196,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self clearInApps];
     }
 #endif
+}
+
+- (void)setFirstRequestInSession:(BOOL)firstRequestInSession {
+    _firstRequestInSession = firstRequestInSession;
+}
+
+- (BOOL)firstRequestInSession {
+    return _firstRequestInSession;
 }
 
 - (NSString*)source {
@@ -2188,19 +2261,35 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark - Queues/Persistence/Dispatch Handling
 
 - (BOOL)shouldDeferProcessingEvent: (NSDictionary *)event withType:(CleverTapEventType)type {
+    
     if (self.config.isCreatedPostAppLaunched){
         return NO;
     }
+    
     return (type == CleverTapEventTypeRaised && !self.appLaunchProcessed);
 }
 
-- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+- (BOOL)_shouldDropEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+    
+    if (type == CleverTapEventTypeFetch) {
+        return NO;
+    }
+    
     if (self.currentUserOptedOut) {
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
-        return;
+        return YES;
     }
+    
     if ([self isMuted]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: is muted, dropping event: %@", self, event);
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+    if ([self _shouldDropEvent:event withType:type]) {
         return;
     }
     
@@ -2216,12 +2305,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
-    [self createSessionIfNeeded];
-    [self pushInitialEventsIfNeeded];
-    [self runSerialAsync:^{
-        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-        [self processEvent:event withType:type];
-    }];
+    if (type == CleverTapEventTypeFetch) {
+        [self runSerialAsync:^{
+            [self processEvent:event withType:type];
+        }];
+    } else {
+        [self createSessionIfNeeded];
+        [self pushInitialEventsIfNeeded];
+        [self runSerialAsync:^{
+            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+            [self processEvent:event withType:type];
+        }];
+    }
 }
 
 - (void)processEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
@@ -2239,8 +2334,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         // ignore pings if queue is not draining
-        if ([self.eventsQueue count] >= 50 && eventType == CleverTapEventTypePing) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Events queue not draining, ignoring ping event", self);
+        if ([self.eventsQueue count] >= 50 && (eventType == CleverTapEventTypePing || eventType == CleverTapEventTypeFetch)) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Events queue not draining, ignoring ping and fetch events", self);
             return;
         }
         
@@ -2253,7 +2348,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             type = @"page";
         } else if (eventType == CleverTapEventTypePing) {
             type = @"ping";
-        } else if (eventType == CleverTapEventTypeProfile){
+        } else if (eventType == CleverTapEventTypeProfile) {
             type = @"profile";
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
@@ -2312,7 +2407,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [self jsonObjectToString:mutableEvent]);
         
-        [self scheduleQueueFlush];
+        if (eventType == CleverTapEventTypeFetch) {
+            [self flushQueue];
+        } else {
+            [self scheduleQueueFlush];
+        }
         
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Processing event failed with a exception: %@", self, e.debugDescription);
@@ -2594,7 +2693,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-#pragma mark - Response handling
+#pragma mark - Response Handling
 
 - (void)parseResponse:(NSData *)responseData {
     if (responseData) {
@@ -2716,13 +2815,43 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
                         [self initializeDisplayUnitWithCallback:^(BOOL success) {
                             if (success) {
-                                NSArray <NSDictionary*> *displayUnits =  [displayUnitNotifs mutableCopy];
+                                NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
                                 [self.displayUnitController updateDisplayUnits:displayUnits];
                             }
                         }];
                     }
                 }
 #endif
+                NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
+                if (featureFlagsJSON) {
+                    NSMutableArray *featureFlagsNotifs;
+                    @try {
+                        featureFlagsNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Feature Flags JSON: %@", self, e.debugDescription);
+                    }
+                    if (featureFlagsNotifs && self.featureFlagsController) {
+                        NSArray <NSDictionary*> *featureFlags =  [featureFlagsNotifs mutableCopy];
+                        [self.featureFlagsController updateFeatureFlags:featureFlags];
+                    }
+                }
+                
+                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
+                if (productConfigJSON) {
+                    NSMutableArray *productConfigNotifs;
+                    @try {
+                        productConfigNotifs = [[NSMutableArray alloc] initWithArray:productConfigJSON[@"kv"]];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
+                    }
+                    if (productConfigNotifs && self.productConfigController) {
+                        NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
+                        [self.productConfigController updateProductConfig:productConfig];
+                        NSString *lastFetchTs = productConfigJSON[@"ts"];
+                        [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
+                    }
+                }
+                
                 // Handle events/profiles sync data
                 @try {
                     NSDictionary *evpr = jsonResp[@"evpr"];
@@ -2988,6 +3117,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
         [self _resetDisplayUnit];
 #endif
+        
+        [self _resetFeatureFlags];
+        
+        [self _resetProductConfig];
+        
         // push data on reset profile
         [self recordAppLaunched:action];
         if (properties) {
@@ -3743,7 +3877,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 #endif
 
-#pragma mark - Inbox
+#pragma mark - App Inbox
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 
@@ -3880,7 +4014,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [_inboxUpdateBlocks addObject:block];
 }
 
-- (CleverTapInboxViewController * _Nonnull)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
+- (CleverTapInboxViewController * _Nullable)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate {
     if (![self _isInboxInitialized]) {
         return nil;
     }
@@ -4511,5 +4645,173 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #endif
+
+#pragma mark - Feature Flags
+
+// run off main
+- (void) _initFeatureFlags {
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Feature Flag unavailable", self);
+        return;
+    }
+    self.featureFlags = [[CleverTapFeatureFlags alloc] initWithPrivateDelegate:self];
+    [self runSerialAsync:^{
+        if (self.featureFlagsController) {
+            return;
+        }
+        if (self.deviceInfo.deviceId) {
+            self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+        }
+        [self fetchFeatureFlags];
+    }];
+}
+
+// run off main
+- (void)_resetFeatureFlags {
+    if (self.featureFlagsController && self.featureFlagsController.isInitialized && self.deviceInfo.deviceId) {
+        self.featureFlagsController = [[CTFeatureFlagsController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+        [self fetchFeatureFlags];
+    }
+}
+
+- (void)setFeatureFlagsDelegate:(id<CleverTapFeatureFlagsDelegate>)delegate {
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapFeatureFlagsDelegate)]) {
+        _featureFlagsDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags Delegate does not conform to the CleverTapFeatureFlagsDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapFeatureFlagsDelegate>)featureFlagsDelegate {
+    return _featureFlagsDelegate;
+}
+
+- (void)featureFlagsDidUpdate {
+    if (self.featureFlagsDelegate && [self.featureFlagsDelegate respondsToSelector:@selector(ctFeatureFlagsUpdated)]) {
+        [self.featureFlagsDelegate ctFeatureFlagsUpdated];
+    }
+}
+
+- (void)fetchFeatureFlags {
+    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @1}} withType:CleverTapEventTypeFetch];
+}
+
+- (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
+    if (self.featureFlagsController && self.featureFlagsController.isInitialized) {
+        return [self.featureFlagsController get:key withDefaultValue: defaultValue];
+    }
+    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Feature Flags not initialized", self);
+    return defaultValue;
+}
+
+#pragma mark Product Config
+
+// run off main
+- (void) _initProductConfig {
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel, @"%@ is configured as analytics only, Product Config unavailable", self);
+        return;
+    }
+    self.productConfig = [[CleverTapProductConfig alloc]  initWithConfig: self.config privateDelegate:self];
+    [self runSerialAsync:^{
+        if (self.productConfigController) {
+            return;
+        }
+        if (self.deviceInfo.deviceId) {
+            self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+        }
+    }];
+}
+
+// run off main
+- (void)_resetProductConfig {
+    if (self.productConfigController && self.productConfigController.isInitialized && self.deviceInfo.deviceId) {
+        [self.productConfig resetProductConfigSettings];
+        self.productConfig = [[CleverTapProductConfig alloc]  initWithConfig: self.config privateDelegate:self];
+        self.productConfigController = [[CTProductConfigController alloc] initWithConfig: self.config guid:[self.deviceInfo.deviceId copy] delegate:self];
+    }
+}
+
+- (NSDictionary *)_setProductConfig:(NSDictionary *)arp {
+    if (arp) {
+        NSMutableDictionary *configOptions = [NSMutableDictionary new];
+        configOptions[@"rc_n"] = arp[@"rc_n"];
+        configOptions[@"rc_w"] = arp[@"rc_w"];
+        return [configOptions mutableCopy];
+    }
+    return nil;
+}
+
+- (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate {
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapProductConfigDelegate)]) {
+        _productConfigDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config Delegate does not conform to the CleverTapProductConfigDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapProductConfigDelegate>)productConfigDelegate {
+    return _productConfigDelegate;
+}
+
+- (void)productConfigDidFetch {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigFetched)]) {
+        [self.productConfigDelegate ctProductConfigFetched];
+    }
+}
+
+- (void)productConfigDidActivate {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigActivated)]) {
+        [self.productConfigDelegate ctProductConfigActivated];
+    }
+}
+
+- (void)productConfigDidInitialize {
+    if (self.productConfigDelegate && [self.productConfigDelegate respondsToSelector:@selector(ctProductConfigInitialized)]) {
+        [self.productConfigDelegate ctProductConfigInitialized];
+    }
+}
+
+- (void)fetchProductConfig {
+    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
+}
+
+- (void)activateProductConfig {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        [self.productConfigController activate];
+    }
+}
+
+- (void)fetchAndActivateProductConfig {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        [self.productConfigController fetchAndActivate];
+    }
+}
+
+- (void)resetProductConfig {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        [self.productConfigController reset];
+    }
+}
+
+- (void)setDefaultsProductConfig:(NSDictionary<NSString *,NSObject *> *)defaults {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        [self.productConfigController setDefaults:defaults];
+    }
+}
+
+- (void)setDefaultsFromPlistFileNameProductConfig:(NSString *)fileName {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        [self.productConfigController setDefaultsFromPlistFileName:fileName];
+    }
+}
+
+- (CleverTapConfigValue *_Nullable)getProductConfig:(NSString* _Nonnull)key {
+    if (self.productConfigController && self.productConfigController.isInitialized) {
+        return [self.productConfigController get:key];
+    }
+    CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config not initialized", self);
+    return nil;
+}
 
 @end

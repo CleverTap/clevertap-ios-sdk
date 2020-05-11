@@ -26,6 +26,8 @@
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
 @class CleverTapInstanceConfig;
+@class CleverTapFeatureFlags;
+@class CleverTapProductConfig;
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMethodInspection"

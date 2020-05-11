@@ -51,6 +51,15 @@ NSString *const kCHARGED_EVENT = @"Charged";
         completion(nil, errors);
         return;
     }
+    
+    // Check for a discarded event name
+    if ([CTValidator isDiscaredEventName:eventName]) {
+        [errors addObject:[CTValidationResult resultWithErrorCode:512 andMessage:[NSString stringWithFormat:@"Discarded event name - %@", eventName]]];
+        CleverTapLogStaticDebug(@"%@%@%@", eventName, @" is a discarded event, dropping event: ", eventName);
+        completion(nil, errors);
+        return;
+    }
+    
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     @try {
         // Validate
@@ -299,7 +308,7 @@ NSString *const kCHARGED_EVENT = @"Charged";
  *
  */
 + (void)buildInAppNotificationStateEvent:(BOOL)clicked
-                                forNotification:(CTInAppNotification *)notification
+                         forNotification:(CTInAppNotification *)notification
                       andQueryParameters:(NSDictionary *)params
                        completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
@@ -333,8 +342,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
  */
 + (void)buildInboxMessageStateEvent:(BOOL)clicked
                          forMessage:(CleverTapInboxMessage *)message
-                      andQueryParameters:(NSDictionary *)params
-                       completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
+                 andQueryParameters:(NSDictionary *)params
+                  completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     NSMutableDictionary *notif = [[NSMutableDictionary alloc] init];
     @try {
@@ -360,24 +369,24 @@ NSString *const kCHARGED_EVENT = @"Charged";
 }
 
 + (void)buildDisplayViewStateEvent:(BOOL)clicked
-                                forDisplayUnit:(CleverTapDisplayUnit *)displayUnit
-                      andQueryParameters:(NSDictionary *)params
-                       completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
+                    forDisplayUnit:(CleverTapDisplayUnit *)displayUnit
+                andQueryParameters:(NSDictionary *)params
+                 completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
     @try {
-          NSMutableDictionary *event = [NSMutableDictionary new];
-             NSMutableDictionary *notif = [NSMutableDictionary new];
-             NSDictionary *data = displayUnit.json;
-             for (NSString *x in [data allKeys]) {
-                 if (!([CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]))
-                     continue;
-                 NSString *key = [x stringByReplacingOccurrencesOfString:CLTAP_NOTIFICATION_TAG withString:CLTAP_WZRK_PREFIX];
-                 id value = data[x];
-                 notif[key] = value;
-             }
-             notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
-             event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-             event[@"evtData"] = notif;
-             completion(event, nil);
+        NSMutableDictionary *event = [NSMutableDictionary new];
+        NSMutableDictionary *notif = [NSMutableDictionary new];
+        NSDictionary *data = displayUnit.json;
+        for (NSString *x in [data allKeys]) {
+            if (!([CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]))
+                continue;
+            NSString *key = [x stringByReplacingOccurrencesOfString:CLTAP_NOTIFICATION_TAG withString:CLTAP_WZRK_PREFIX];
+            id value = data[x];
+            notif[key] = value;
+        }
+        notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
+        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[@"evtData"] = notif;
+        completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
     }

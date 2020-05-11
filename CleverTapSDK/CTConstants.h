@@ -29,6 +29,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_ERROR_KEY @"wzrk_error"
+#define CLTAP_WZRK_FETCH_EVENT @"wzrk_fetch"
 #define CLTAP_PUSH_DELAY_SECONDS 1
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
@@ -49,8 +50,11 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_INAPP_JSON_RESPONSE_KEY @"inapp_notifs"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
+#define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
+#define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_AB_EXP_JSON_RESPONSE_KEY @"ab_exps"
+#define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
 #define CLTAP_WZRK_PREFIX @"wzrk_"

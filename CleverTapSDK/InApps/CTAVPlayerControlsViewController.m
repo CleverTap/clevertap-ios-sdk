@@ -72,8 +72,8 @@ static const float kAVSliderHeight = 18;
                                  multiplier:1 constant:kAVSliderHeight] setActive:YES];
 
     // setup time-labels
-    self.currentTimeLabel.text = @"00:00";
-    self.remainingTimeLabel.text = @"00:00";
+    self.currentTimeLabel.text = [NSString stringWithFormat:@"%@", @"00:00"];
+    self.remainingTimeLabel.text = [NSString stringWithFormat:@"%@", @"00:00"];
     
 
     // setup play button

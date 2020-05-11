@@ -212,7 +212,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  The `CleverTapInboxStyleConfig` has all the parameters required to configure the styling of your Inbox ViewController
  */
 
-- (CleverTapInboxViewController * _Nonnull)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable )config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate;
+- (CleverTapInboxViewController * _Nullable)newInboxViewControllerWithConfig:(CleverTapInboxStyleConfig * _Nullable)config andDelegate:(id<CleverTapInboxViewControllerDelegate> _Nullable )delegate;
 
 /*!
  @method

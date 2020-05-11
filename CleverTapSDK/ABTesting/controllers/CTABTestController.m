@@ -247,6 +247,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     }
     return defaultValue;
 }
+
 - (NSString*)variantsArchiveFileName {
     return [NSString stringWithFormat:@"clevertap-%@-%@-variants.plist", _config.accountId, _guid];
 }
