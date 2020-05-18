@@ -24,3 +24,5 @@ DerivedData
 
 Carthage
 */build/
+Cartfile
+Cartfile.resolved
