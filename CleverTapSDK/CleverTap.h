@@ -38,6 +38,8 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
     CleverTapLogDebug = 1
 };
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface CleverTap : NSObject
 
 #pragma mark - Properties
@@ -50,7 +52,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  CleverTap Configuration (e.g. the CleverTap accountId, token, region, other configuration properties...) for this instance.
  */
 
-@property (nonatomic, strong, readonly, nonnull) CleverTapInstanceConfig *config;
+@property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 
 /* ------------------------------------------------------------------------------------------------------
  * Initialization
@@ -86,7 +88,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
  
  */
-+ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString * _Nonnull)cleverTapID;
++ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString *)cleverTapID;
 
 /*!
  @method
@@ -120,7 +122,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
  
  */
-+ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString * _Nonnull)cleverTapID;
++ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString *)cleverTapID;
 
 /*!
  @method
@@ -133,7 +135,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  Passing that into this method will create (if necessary, and on all subsequent calls return) a singleton instance mapped to the config.accountId property.
  
  */
-+ (instancetype _Nonnull )instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config;
++ (instancetype)instanceWithConfig:(CleverTapInstanceConfig *)config;
 
 /*!
  @method
@@ -146,7 +148,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  Passing that into this method will create (if necessary, and on all subsequent calls return) a singleton instance mapped to the config.accountId property.
  
  */
-+ (instancetype _Nonnull)instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config andCleverTapID:(NSString * _Nonnull)cleverTapID;
++ (instancetype)instanceWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 
 /*!
  @method
@@ -162,7 +164,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param token      the CleverTap account token
  
  */
-+ (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID andToken:(NSString * _Nonnull)token __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:andToken instead")));
++ (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:andToken instead")));
 
 /*!
  @method
@@ -179,7 +181,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param region     the dedicated CleverTap region
  
  */
-+ (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nonnull)region __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:token:region instead")));
++ (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:token:region instead")));
 
 /*!
  @method
@@ -195,7 +197,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param token      the CleverTap account token
  
  */
-+ (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID andToken:(NSString * _Nonnull)token;
++ (void)setCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token;
 
 /*!
  @method
@@ -212,7 +214,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param region     the dedicated CleverTap region
  
  */
-+ (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nonnull)region;
++ (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region;
 
 /*!
  @method
@@ -325,7 +327,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param properties       properties dictionary
  
  */
-- (void)onUserLogin:(NSDictionary *_Nonnull)properties;
+- (void)onUserLogin:(NSDictionary *)properties;
 
 /*!
  @method
@@ -361,7 +363,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param cleverTapID        the CleverTap id
  
  */
-- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString * _Nonnull)cleverTapID;
+- (void)onUserLogin:(NSDictionary *)properties withCleverTapID:(NSString *)cleverTapID;
 
 /*!
  @method
@@ -420,7 +422,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param properties       properties dictionary
  */
-- (void)profilePush:(NSDictionary *_Nonnull)properties;
+- (void)profilePush:(NSDictionary *)properties;
 
 /*!
  @method
@@ -431,7 +433,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param key       key string
  
  */
-- (void)profileRemoveValueForKey:(NSString *_Nonnull)key;
+- (void)profileRemoveValueForKey:(NSString *)key;
 
 /*!
  @method
@@ -451,7 +453,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param values    values NSArray<NSString *>
  
  */
-- (void)profileSetMultiValues:(NSArray<NSString *> *_Nonnull)values forKey:(NSString *_Nonnull)key;
+- (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
 
 /*!
  @method
@@ -471,7 +473,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param key       key string
  @param value     value string
  */
-- (void)profileAddMultiValue:(NSString * _Nonnull)value forKey:(NSString *_Nonnull)key;
+- (void)profileAddMultiValue:(NSString *)value forKey:(NSString *)key;
 
 /*!
  @method
@@ -491,7 +493,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param key       key string
  @param values    values NSArray<NSString *>
  */
-- (void)profileAddMultiValues:(NSArray<NSString *> *_Nonnull)values forKey:(NSString *_Nonnull)key;
+- (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
 
 /*!
  @method
@@ -506,7 +508,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param key       key string
  @param value     value string
  */
-- (void)profileRemoveMultiValue:(NSString *_Nonnull)value forKey:(NSString *_Nonnull)key;
+- (void)profileRemoveMultiValue:(NSString *)value forKey:(NSString *)key;
 
 /*!
  @method
@@ -521,7 +523,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param key       key string
  @param values    values NSArray<NSString *>
  */
-- (void)profileRemoveMultiValues:(NSArray<NSString *> * _Nonnull)values forKey:(NSString * _Nonnull)key;
+- (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
 
 /*!
  @method
@@ -537,7 +539,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param fbGraphUser       fbGraphUser Facebook Graph User object
  
  */
-- (void)profilePushGraphUser:(id _Nonnull)fbGraphUser;
+- (void)profilePushGraphUser:(id)fbGraphUser;
 
 /*!
  @method
@@ -552,7 +554,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param googleUser       GTLPlusPerson object
  
  */
-- (void)profilePushGooglePlusUser:(id _Nonnull )googleUser;
+- (void)profilePushGooglePlusUser:(id)googleUser;
 
 /*!
  @method
@@ -570,7 +572,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  returns NSArray in the case of a multi-value property
  
  */
-- (id _Nullable )profileGet:(NSString *_Nonnull)propertyName;
+- (id _Nullable)profileGet:(NSString *)propertyName;
 
 /*!
  @method
@@ -607,7 +609,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param event           event name
  */
-- (void)recordEvent:(NSString *_Nonnull)event;
+- (void)recordEvent:(NSString *)event;
 
 /*!
  @method
@@ -626,7 +628,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param event           event name
  @param properties      properties dictionary
  */
-- (void)recordEvent:(NSString *_Nonnull)event withProps:(NSDictionary *_Nonnull)properties;
+- (void)recordEvent:(NSString *)event withProps:(NSDictionary *)properties;
 
 /*!
  @method
@@ -650,7 +652,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param chargeDetails   charge transaction details dictionary
  @param items           charged items array
  */
-- (void)recordChargedEventWithDetails:(NSDictionary *_Nonnull)chargeDetails andItems:(NSArray *_Nonnull)items;
+- (void)recordChargedEventWithDetails:(NSDictionary *)chargeDetails andItems:(NSArray *)items;
 
 /*!
  @method
@@ -662,7 +664,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param code              int error code
  */
 
-- (void)recordErrorWithMessage:(NSString *_Nonnull)message andErrorCode:(int)code;
+- (void)recordErrorWithMessage:(NSString *)message andErrorCode:(int)code;
 
 /*!
  @method
@@ -672,7 +674,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param screenName           the screen name
  */
-- (void)recordScreenView:(NSString *_Nonnull)screenName;
+- (void)recordScreenView:(NSString *)screenName;
 
 /*!
  @method
@@ -682,7 +684,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param notificationData       notificationData id
  */
-- (void)recordNotificationViewedEventWithData:(id _Nonnull)notificationData;
+- (void)recordNotificationViewedEventWithData:(id)notificationData;
 
 /*!
  @method
@@ -694,7 +696,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param event           event name
  */
-- (NSTimeInterval)eventGetFirstTime:(NSString *_Nonnull)event;
+- (NSTimeInterval)eventGetFirstTime:(NSString *)event;
 
 /*!
  @method
@@ -706,7 +708,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param event           event name
  */
 
-- (NSTimeInterval)eventGetLastTime:(NSString *_Nonnull)event;
+- (NSTimeInterval)eventGetLastTime:(NSString *)event;
 
 /*!
  @method
@@ -717,7 +719,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param event           event name
  */
-- (int)eventGetOccurrences:(NSString *_Nonnull)event;
+- (int)eventGetOccurrences:(NSString *)event;
 
 /*!
  @method
@@ -837,7 +839,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  }
  
  */
-extern NSString * _Nonnull const CleverTapProfileDidChangeNotification;
+extern NSString * const CleverTapProfileDidChangeNotification;
 
 /*!
  
@@ -852,7 +854,7 @@ extern NSString * _Nonnull const CleverTapProfileDidChangeNotification;
  The CleverTap ID and cooresponding CleverTapAccountID will be returned in the userInfo property of the NSNotifcation in the form: {@"CleverTapID":CleverTapID, @"CleverTapAccountID":CleverTapAccountID}.
  
  */
-extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
+extern NSString * const CleverTapProfileDidInitializeNotification;
 
 
 /*!
@@ -908,7 +910,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param pushToken     device token as returned from application:didRegisterForRemoteNotificationsWithDeviceToken:
  */
-- (void)setPushToken:(NSData *_Nonnull)pushToken;
+- (void)setPushToken:(NSData *)pushToken;
 
 /*!
  @method
@@ -921,7 +923,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param pushTokenString     device token as returned from application:didRegisterForRemoteNotificationsWithDeviceToken: converted to an NSString.
  */
-- (void)setPushTokenAsString:(NSString *_Nonnull)pushTokenString;
+- (void)setPushTokenAsString:(NSString *)pushTokenString;
 
 /*!
  @method
@@ -935,7 +937,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param data         notification payload
  */
-- (void)handleNotificationWithData:(id _Nonnull )data;
+- (void)handleNotificationWithData:(id)data;
 
 /*!
  @method
@@ -950,7 +952,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param data                     notification payload
  @param openInForeground         Boolean as to whether the SDK should open any deep link attached to the notification while the application is in the foreground.
  */
-- (void)handleNotificationWithData:(id _Nonnull )data openDeepLinksInForeground:(BOOL)openInForeground;
+- (void)handleNotificationWithData:(id)data openDeepLinksInForeground:(BOOL)openInForeground;
 
 /*!
  @method
@@ -966,7 +968,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param notification             notification payload
  @param openInForeground         Boolean as to whether the SDK should open any deep link attached to the notification while the application is in the foreground.
  */
-+ (void)handlePushNotification:(NSDictionary*_Nonnull)notification openDeepLinksInForeground:(BOOL)openInForeground;
++ (void)handlePushNotification:(NSDictionary *)notification openDeepLinksInForeground:(BOOL)openInForeground;
 
 /*!
  @method
@@ -976,7 +978,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param payload  notification payload
  */
-- (BOOL)isCleverTapNotification:(NSDictionary *_Nonnull)payload;
+- (BOOL)isCleverTapNotification:(NSDictionary *)payload;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 /*!
@@ -1008,7 +1010,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param url                     the incoming NSURL
  @param sourceApplication       the source application
  */
-- (void)handleOpenURL:(NSURL *_Nonnull)url sourceApplication:(NSString *_Nullable)sourceApplication;
+- (void)handleOpenURL:(NSURL *)url sourceApplication:(NSString *_Nullable)sourceApplication;
 
 /*!
  @method
@@ -1022,7 +1024,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param url                     the incoming NSURL
  */
-+ (void)handleOpenURL:(NSURL*_Nonnull)url;
++ (void)handleOpenURL:(NSURL*)url;
 
 
 /*!
@@ -1078,7 +1080,9 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 + (CleverTapLogLevel)getDebugLevel;
 
-- (void)setLibrary:(NSString * _Nonnull)name;
+
+- (void)setLibrary:(NSString *)name;
+
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
@@ -1087,5 +1091,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 #endif
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #pragma clang diagnostic pop
