@@ -459,7 +459,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             // UIApplication caches whether or not the delegate responds to certain selectors. Clearing out the delegate and resetting it gaurantees that gets updated
             [sharedApplication setDelegate:nil];
             // UIApplication won't assume ownership of AppDelegate for setDelegate calls add a retain here
-            [sharedApplication setDelegate:(__bridge id)CFRetain((__bridge CFTypeRef)appDelegate)];
+            CFTypeRef delegate = (__bridge CFTypeRef)appDelegate;
+            [sharedApplication setDelegate:(__bridge id)CFRetain(delegate)];
+            CFRelease(delegate);
         }
     });
 }
