@@ -24,7 +24,7 @@
     NSDictionary *imageDictionary = imagesArray[0];
     
     NSNumber *scale = imageDictionary[@"scale"];
-    if (scale <= 0) {
+    if (scale.floatValue <= 0) {
         scale = @(1);
     }
     if (imageDictionary[@"url"]) {
