@@ -400,6 +400,7 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
         [errors addObject:[self _generateEmptyMultiValueErrorForKey:key]];
         completion(nil, nil, errors);
+        return;
     }
     [self buildRemoveMultiValues:@[value] forKey:key localDataStore:dataStore completionHandler:completion];
 }
