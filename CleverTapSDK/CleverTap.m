@@ -2726,11 +2726,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_INAPP_SUPPORT
                 if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
                     NSNumber *perSession = jsonResp[@"imc"];
-                    if (!perSession) {
+                    if (perSession == nil) {
                         perSession = @10;
                     }
                     NSNumber *perDay = jsonResp[@"imp"];
-                    if (!perDay) {
+                    if (perDay == nil) {
                         perDay = @10;
                     }
                     [self.inAppFCManager updateLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];

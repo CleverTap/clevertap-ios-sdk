@@ -25,7 +25,7 @@ static NSDictionary *_inAppTypeMap;
     }
     
     NSNumber *_type = type != nil ? _inAppTypeMap[type] : @(CTInAppTypeUnknown);
-    if (!_type) {
+    if (_type == nil) {
         _type = @(CTInAppTypeUnknown);
     }
     return [_type integerValue];

@@ -47,7 +47,7 @@ NSString* const kDictionaryOfString = @"dictionaryofstring";
 
 + (CTVarType)CTVarTypeFromString:(NSString*_Nonnull)type {
     NSNumber *_type = type != nil ? _varTypeMap[type] : @(CTVarTypeUnknown);
-    if (!_type) {
+    if (_type == nil) {
         _type = @(CTVarTypeUnknown);
     }
     return [_type integerValue];

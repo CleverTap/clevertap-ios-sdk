@@ -388,7 +388,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
         int now = @([[[NSDate alloc] init] timeIntervalSince1970]).intValue;
         [self setLastDataSyncTime:now];
         NSNumber *expiry = responseData[@"expires_in"];
-        if (expiry) {
+        if (expiry != nil) {
             [self setLocalCacheExpiryInterval:expiry.intValue];
         }
         if (somethingGotUpdated) {
