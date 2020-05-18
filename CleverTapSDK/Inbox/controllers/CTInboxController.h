@@ -12,8 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) BOOL isInitialized;
 @property (nonatomic, assign, readonly) NSUInteger count;
 @property (nonatomic, assign, readonly) NSUInteger unreadCount;
-@property (nonatomic, assign, readonly) NSArray<NSDictionary *> *messages;
-@property (nonatomic, assign, readonly) NSArray<NSDictionary *> *unreadMessages;
+@property (nonatomic, assign, readonly, nullable) NSArray<NSDictionary *> *messages;
+@property (nonatomic, assign, readonly, nullable) NSArray<NSDictionary *> *unreadMessages;
 
 @property (nonatomic, weak) id<CTInboxDelegate> delegate;
 
