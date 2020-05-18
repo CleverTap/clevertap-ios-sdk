@@ -7,6 +7,7 @@
 #endif
 
 @interface CTInAppNotification() {
+    
 }
 
 @property (nonatomic, readwrite) NSString *Id;
@@ -386,6 +387,5 @@
     }
     return FALSE;
 }
-
 
 @end

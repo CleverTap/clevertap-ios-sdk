@@ -23,17 +23,17 @@
 }
 // SDK private
 - (instancetype)initWithAccountId:(NSString *)accountId
-                              accountToken:(NSString *)accountToken
-                             accountRegion:(NSString *)accountRegion
-                         isDefaultInstance:(BOOL)isDefault {
+                     accountToken:(NSString *)accountToken
+                    accountRegion:(NSString *)accountRegion
+                isDefaultInstance:(BOOL)isDefault {
     if (accountId.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountId is empty");
     }
-
+    
     if (accountToken.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountToken is empty");
     }
-
+    
     if (self = [super init]) {
         _accountId = accountId;
         _accountToken = accountToken;

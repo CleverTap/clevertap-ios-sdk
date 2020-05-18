@@ -2,6 +2,7 @@
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 
 @interface CTFooterViewController () {
+    
 }
 
 @property (nonatomic, strong) IBOutlet UIView *containerView;

@@ -595,7 +595,8 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     completion(fields, updatedMultiValue, errors);
 }
 
-# pragma mark end multi-value handling
+
+# pragma mark - End Multi-Value Handling
 
 + (id)getJSONKey:(id)jsonObject
           forKey:(NSString *)key

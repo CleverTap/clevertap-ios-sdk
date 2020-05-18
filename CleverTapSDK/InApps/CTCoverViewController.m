@@ -22,6 +22,7 @@
 
 @synthesize delegate;
 
+
 #pragma mark - UIViewController Lifecycle
 
 - (void)loadView {
@@ -34,12 +35,13 @@
     [self layoutNotification];
 }
 
+
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
     
     self.view.backgroundColor = [UIColor clearColor];
-
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         if (@available(iOS 11.0, *)) {
             CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
@@ -51,15 +53,15 @@
         }
     }
     
-   // UIView container which holds all other subviews
+    // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
     
     self.closeButton.hidden = !self.notification.showCloseButton;
-
+    
     // set image
     self.imageView.clipsToBounds = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-  
+    
     if (self.notification.image && ![self deviceOrientationIsLandscape]) {
         self.imageView.image = [UIImage imageWithData:self.notification.image];
     }
@@ -108,6 +110,7 @@
     }
 }
 
+
 #pragma mark - Actions
 
 - (IBAction)closeButtonTapped:(id)sender {
@@ -116,11 +119,12 @@
 
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
+
 @end

@@ -30,19 +30,19 @@ NSString* const kDictionaryOfString = @"dictionaryofstring";
 
 + (void)load {
     _varTypeMap = @{
-                    kBool: @(CTVarTypeBool),
-                    kDouble: @(CTVarTypeDouble),
-                    kInteger: @(CTVarTypeInteger),
-                    kString: @(CTVarTypeString),
-                    kArrayOfBool: @(CTVarTypeArrayOfBool),
-                    kArrayOfDouble: @(CTVarTypeArrayOfDouble),
-                    kArrayOfInteger: @(CTVarTypeArrayOfInteger),
-                    kArrayOfString: @(CTVarTypeArrayOfString),
-                    kDictionaryOfBool: @(CTVarTypeDictionaryOfBool),
-                    kDictionaryOfDouble: @(CTVarTypeDictionaryOfDouble),
-                    kDictionaryOfInteger: @(CTVarTypeDictionaryOfInteger),
-                    kDictionaryOfString: @(CTVarTypeDictionaryOfString)
-                    };
+        kBool: @(CTVarTypeBool),
+        kDouble: @(CTVarTypeDouble),
+        kInteger: @(CTVarTypeInteger),
+        kString: @(CTVarTypeString),
+        kArrayOfBool: @(CTVarTypeArrayOfBool),
+        kArrayOfDouble: @(CTVarTypeArrayOfDouble),
+        kArrayOfInteger: @(CTVarTypeArrayOfInteger),
+        kArrayOfString: @(CTVarTypeArrayOfString),
+        kDictionaryOfBool: @(CTVarTypeDictionaryOfBool),
+        kDictionaryOfDouble: @(CTVarTypeDictionaryOfDouble),
+        kDictionaryOfInteger: @(CTVarTypeDictionaryOfInteger),
+        kDictionaryOfString: @(CTVarTypeDictionaryOfString)
+    };
 }
 
 + (CTVarType)CTVarTypeFromString:(NSString*_Nonnull)type {

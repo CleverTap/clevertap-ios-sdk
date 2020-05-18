@@ -86,24 +86,24 @@
         }
         
         transformedValue = @{
-                             @"imageOrientation": @(image.imageOrientation),
-                             @"size": [sizeTransformer transformedValue:size],
-                             @"renderingMode": @(image.renderingMode),
-                             @"resizingMode": @(image.resizingMode),
-                             @"duration": @(image.duration),
-                             @"capInsets": [insetsTransformer transformedValue:capInsets],
-                             @"alignmentRectInsets": [insetsTransformer transformedValue:alignmentRectInsets],
-                             @"images": [imageDictionaries copy],
-                             };
+            @"imageOrientation": @(image.imageOrientation),
+            @"size": [sizeTransformer transformedValue:size],
+            @"renderingMode": @(image.renderingMode),
+            @"resizingMode": @(image.resizingMode),
+            @"duration": @(image.duration),
+            @"capInsets": [insetsTransformer transformedValue:capInsets],
+            @"alignmentRectInsets": [insetsTransformer transformedValue:alignmentRectInsets],
+            @"images": [imageDictionaries copy],
+        };
     }
     
     return transformedValue;
 }
 
 - (id)reverseTransformedValue:(id)value {
-     if (![value isKindOfClass:[NSDictionary class]]) {
-          return nil;
-     }
+    if (![value isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
     NSDictionary *dictionary = value;
     return [[self class] imageFromDictionary:dictionary];
 }

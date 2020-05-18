@@ -1,4 +1,3 @@
-
 #import "CTNotificationButton.h"
 
 @interface CTNotificationButton () {

@@ -38,7 +38,7 @@
     
     return @{@"objects": [context allSerializedObjects],
              @"rootObject": [_objectIdentityProvider identifierForObject:rootObject]
-             };
+    };
 }
 
 - (void)visitObject:(NSObject *)object withContext:(CTObjectSerializerContext *)context {
@@ -69,14 +69,14 @@
     }
     
     NSDictionary *serializedObject = @{
-                                       @"id": [_objectIdentityProvider identifierForObject:object],
-                                       @"class": [self classHierarchyArrayForObject:object],
-                                       @"properties": propertyValues,
-                                       @"delegate": @{
-                                               @"class": delegate ? NSStringFromClass([delegate class]) : @"",
-                                               @"selectors": delegateMethods
-                                               }
-                                       };
+        @"id": [_objectIdentityProvider identifierForObject:object],
+        @"class": [self classHierarchyArrayForObject:object],
+        @"properties": propertyValues,
+        @"delegate": @{
+                @"class": delegate ? NSStringFromClass([delegate class]) : @"",
+                @"selectors": delegateMethods
+        }
+    };
     
     [context addSerializedObject:serializedObject];
 }
@@ -236,9 +236,9 @@
                            propertyDescription:propertyDescription
                                        context:context];
                 NSDictionary *valueDictionary = @{
-                                                  @"where": @{ @"parameters": parameters },
-                                                  @"value": (value ?: [NSNull null])
-                                                  };
+                    @"where": @{ @"parameters": parameters },
+                    @"value": (value ?: [NSNull null])
+                };
                 [values addObject:valueDictionary];
             }
         }

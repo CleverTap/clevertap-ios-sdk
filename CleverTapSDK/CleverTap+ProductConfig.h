@@ -12,6 +12,7 @@
 @property (atomic, strong, readonly, nonnull) CleverTapProductConfig *productConfig;
 @end
 
+
 #pragma mark - CleverTapConfigValue
 
 @interface CleverTapConfigValue : NSObject <NSCopying>
@@ -34,92 +35,92 @@
 @property (nonatomic, weak) id<CleverTapProductConfigDelegate> _Nullable delegate;
 
 /*!
-@method
-
-@abstract
-Fetches product configs, adhering to the default minimum fetch interval.
-*/
+ @method
+ 
+ @abstract
+ Fetches product configs, adhering to the default minimum fetch interval.
+ */
 
 - (void)fetch;
 
 /*!
-@method
-
-@abstract
-Fetches product configs, adhering to the specified minimum fetch interval in seconds.
-*/
+ @method
+ 
+ @abstract
+ Fetches product configs, adhering to the specified minimum fetch interval in seconds.
+ */
 
 - (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval;
 
 /*!
-@method
-
-@abstract
-Sets the minimum interval between successive fetch calls.
-*/
+ @method
+ 
+ @abstract
+ Sets the minimum interval between successive fetch calls.
+ */
 
 - (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval;
 
 /*!
-@method
-
-@abstract
-Activates Fetched Config data to the Active Config, so that the fetched key value pairs take effect.
-*/
+ @method
+ 
+ @abstract
+ Activates Fetched Config data to the Active Config, so that the fetched key value pairs take effect.
+ */
 
 - (void)activate;
 
 /*!
-@method
-
-@abstract
-Fetches and then activates the fetched product configs.
-*/
+ @method
+ 
+ @abstract
+ Fetches and then activates the fetched product configs.
+ */
 
 - (void)fetchAndActivate;
 
 /*!
-@method
-
-@abstract
-Sets default configs using the given Dictionary
-*/
+ @method
+ 
+ @abstract
+ Sets default configs using the given Dictionary
+ */
 
 - (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
 
 /*!
-@method
-
-@abstract
-Sets default configs using the given plist
-*/
+ @method
+ 
+ @abstract
+ Sets default configs using the given plist
+ */
 
 - (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName;
 
 /*!
-@method
-
-@abstract
-Returns the config value of the given key
-*/
+ @method
+ 
+ @abstract
+ Returns the config value of the given key
+ */
 
 - (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
 
 /*!
-@method
-
-@abstract
-Returns the last fetch timestamp
-*/
+ @method
+ 
+ @abstract
+ Returns the last fetch timestamp
+ */
 
 - (NSDate *_Nullable)getLastFetchTimeStamp;
 
 /*!
-@method
-
-@abstract
-Deletes all activated, fetched and defaults configs and resets all Product Config settings.
-*/
+ @method
+ 
+ @abstract
+ Deletes all activated, fetched and defaults configs and resets all Product Config settings.
+ */
 
 - (void)reset;
 

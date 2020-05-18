@@ -167,18 +167,18 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
                           delay:0.0
                         options:(UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction)
                      animations:^{
-                         toast.alpha = 1.0;
-                     } completion:^(BOOL finished) {
-                         NSTimer *timer = [NSTimer timerWithTimeInterval:duration target:self selector:@selector(cs_toastTimerDidFinish:) userInfo:toast repeats:NO];
-                         [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
-                         objc_setAssociatedObject(toast, &CSToastTimerKey, timer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-                     }];
+        toast.alpha = 1.0;
+    } completion:^(BOOL finished) {
+        NSTimer *timer = [NSTimer timerWithTimeInterval:duration target:self selector:@selector(cs_toastTimerDidFinish:) userInfo:toast repeats:NO];
+        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+        objc_setAssociatedObject(toast, &CSToastTimerKey, timer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }];
 }
 
 - (void)cs_hideToast:(UIView *)toast {
     [self cs_hideToast:toast fromTap:NO];
 }
-    
+
 - (void)cs_hideToast:(UIView *)toast fromTap:(BOOL)fromTap {
     NSTimer *timer = (NSTimer *)objc_getAssociatedObject(toast, &CSToastTimerKey);
     [timer invalidate];
@@ -187,30 +187,30 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
                           delay:0.0
                         options:(UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionBeginFromCurrentState)
                      animations:^{
-                         toast.alpha = 0.0;
-                     } completion:^(BOOL finished) {
-                         [toast removeFromSuperview];
-                         
-                         // remove
-                         [[self cs_activeToasts] removeObject:toast];
-                         
-                         // execute the completion block, if necessary
-                         void (^completion)(BOOL didTap) = objc_getAssociatedObject(toast, &CSToastCompletionKey);
-                         if (completion) {
-                             completion(fromTap);
-                         }
-                         
-                         if ([self.cs_toastQueue count] > 0) {
-                             // dequeue
-                             UIView *nextToast = [[self cs_toastQueue] firstObject];
-                             [[self cs_toastQueue] removeObjectAtIndex:0];
-                             
-                             // present the next toast
-                             NSTimeInterval duration = [objc_getAssociatedObject(nextToast, &CSToastDurationKey) doubleValue];
-                             id position = objc_getAssociatedObject(nextToast, &CSToastPositionKey);
-                             [self cs_showToast:nextToast duration:duration position:position];
-                         }
-                     }];
+        toast.alpha = 0.0;
+    } completion:^(BOOL finished) {
+        [toast removeFromSuperview];
+        
+        // remove
+        [[self cs_activeToasts] removeObject:toast];
+        
+        // execute the completion block, if necessary
+        void (^completion)(BOOL didTap) = objc_getAssociatedObject(toast, &CSToastCompletionKey);
+        if (completion) {
+            completion(fromTap);
+        }
+        
+        if ([self.cs_toastQueue count] > 0) {
+            // dequeue
+            UIView *nextToast = [[self cs_toastQueue] firstObject];
+            [[self cs_toastQueue] removeObjectAtIndex:0];
+            
+            // present the next toast
+            NSTimeInterval duration = [objc_getAssociatedObject(nextToast, &CSToastDurationKey) doubleValue];
+            id position = objc_getAssociatedObject(nextToast, &CSToastPositionKey);
+            [self cs_showToast:nextToast duration:duration position:position];
+        }
+    }];
 }
 
 #pragma mark - View Construction
@@ -409,8 +409,8 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
                           delay:0.0
                         options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
-                         activityView.alpha = 1.0;
-                     } completion:nil];
+        activityView.alpha = 1.0;
+    } completion:nil];
 }
 
 - (void)hideToastActivity {
@@ -420,11 +420,11 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
                               delay:0.0
                             options:(UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionBeginFromCurrentState)
                          animations:^{
-                             existingActivityView.alpha = 0.0;
-                         } completion:^(BOOL finished) {
-                             [existingActivityView removeFromSuperview];
-                             objc_setAssociatedObject (self, &CSToastActivityViewKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-                         }];
+            existingActivityView.alpha = 0.0;
+        } completion:^(BOOL finished) {
+            [existingActivityView removeFromSuperview];
+            objc_setAssociatedObject (self, &CSToastActivityViewKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }];
     }
 }
 
@@ -515,6 +515,7 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
 
 @implementation CTToastManager
 
+
 #pragma mark - Constructors
 
 + (instancetype)sharedManager {
@@ -538,6 +539,7 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
     }
     return self;
 }
+
 
 #pragma mark - Singleton Methods
 

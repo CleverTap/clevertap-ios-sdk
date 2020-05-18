@@ -66,7 +66,7 @@ struct FrameRotation {
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
-   
+    
     self.originalOrientation = [CTInAppResources getSharedApplication].statusBarOrientation;
     self.view.backgroundColor = [UIColor clearColor];
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
@@ -121,38 +121,38 @@ struct FrameRotation {
                                              multiplier:0.85 constant:0] setActive:YES];
             }
         } else {
-          if (![self deviceOrientationIsLandscape]) {
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeLeading
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeLeading
-                                         multiplier:1 constant:160] setActive:YES];
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeTrailing
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeTrailing
-                                         multiplier:1 constant:-160] setActive:YES];
-          } else {
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeTop
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view attribute:NSLayoutAttributeTop
-                                           multiplier:1 constant:160] setActive:YES];
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeBottom
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view attribute:NSLayoutAttributeBottom
-                                           multiplier:1 constant:-160] setActive:YES];
-           }
+            if (![self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeLeading
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeLeading
+                                             multiplier:1 constant:160] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTrailing
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTrailing
+                                             multiplier:1 constant:-160] setActive:YES];
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTop
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTop
+                                             multiplier:1 constant:160] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeBottom
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeBottom
+                                             multiplier:1 constant:-160] setActive:YES];
+            }
         }
     }
-  
+    
     if (self.notification.darkenScreen) {
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     }
     
     self.closeButton.hidden = !self.notification.showCloseButton;
-
+    
     if (self.notification.image) {
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         if ([self.notification.contentType isEqualToString:@"image/gif"] ) {
@@ -200,13 +200,13 @@ struct FrameRotation {
                                               attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                                  toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                              multiplier:1 constant:0] setActive:YES];
-
+                
             } else {
                 [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
                                               attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                                  toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                              multiplier:1 constant:0] setActive:YES];
-
+                
             }
         }
     }
@@ -236,6 +236,7 @@ struct FrameRotation {
     [self.playerController didMoveToParentViewController:self];
     
 }
+
 
 #pragma mark - AV Delegates
 
@@ -286,16 +287,16 @@ struct FrameRotation {
         [UIView animateKeyframesWithDuration:0.3
                                        delay:0 options:UIViewKeyframeAnimationOptionLayoutSubviews
                                   animations:^{
-                                      self->_avPlayerWindow.transform = CGAffineTransformRotate(self->_avPlayerWindow.transform, frameRotation.angle);
-                                      self->_avPlayerWindow.frame = frameRotation.frame;
-                                  } completion:^(BOOL finished) {
-                                      [self->_playerController removeFromParentViewController];
-                                      [self->_playerController.view removeFromSuperview];
-                                      [self configureAvPlayerController];
-                                      [self->_avPlayerWindow removeFromSuperview];
-                                      self->_avPlayerWindow.rootViewController = nil;
-                                      self->_avPlayerWindow = nil;
-                                  }];
+            self->_avPlayerWindow.transform = CGAffineTransformRotate(self->_avPlayerWindow.transform, frameRotation.angle);
+            self->_avPlayerWindow.frame = frameRotation.frame;
+        } completion:^(BOOL finished) {
+            [self->_playerController removeFromParentViewController];
+            [self->_playerController.view removeFromSuperview];
+            [self configureAvPlayerController];
+            [self->_avPlayerWindow removeFromSuperview];
+            self->_avPlayerWindow.rootViewController = nil;
+            self->_avPlayerWindow = nil;
+        }];
     }
     else {
         self.cachedAVPlayerFrame = [[self.playerController.view superview] convertRect:self.playerController.view.frame toView:self.window];
@@ -318,22 +319,23 @@ struct FrameRotation {
         [UIView animateKeyframesWithDuration:0.3
                                        delay:0 options:UIViewKeyframeAnimationOptionLayoutSubviews
                                   animations:^{
-                                      self->_avPlayerWindow.transform = CGAffineTransformRotate(self->_avPlayerWindow.transform, -frameRotation.angle);
-                                      self->_avPlayerWindow.frame = self->_mainWindow.bounds;
-                                  } completion:^(BOOL finished) {
-                                      // no-op
-                                  }];
+            self->_avPlayerWindow.transform = CGAffineTransformRotate(self->_avPlayerWindow.transform, -frameRotation.angle);
+            self->_avPlayerWindow.frame = self->_mainWindow.bounds;
+        } completion:^(BOOL finished) {
+            // no-op
+        }];
     }
     self.avPlayerIsFullScreen = !self.avPlayerIsFullScreen;
 }
 
+
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
 

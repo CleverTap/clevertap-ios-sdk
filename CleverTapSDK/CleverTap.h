@@ -359,7 +359,7 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  
  @param properties       properties dictionary
  @param cleverTapID        the CleverTap id
-
+ 
  */
 - (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString * _Nonnull)cleverTapID;
 

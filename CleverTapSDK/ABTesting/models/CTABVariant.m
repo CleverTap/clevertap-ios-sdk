@@ -53,7 +53,8 @@
 
 @implementation CTABVariant
 
-#pragma mark Constructing Variants
+
+#pragma mark - Constructing Variants
 
 + (CTABVariant *)variantWithData:(NSDictionary *)variantData {
     NSString *variantId = variantData[@"var_id"];
@@ -67,7 +68,7 @@
         return nil;
     }
     NSNumber *variantVersion = variantData[@"version"];
-
+    
     NSArray *actions = variantData[@"actions"];
     if (![actions isKindOfClass:[NSArray class]]) {
         actions = [NSArray new];
@@ -84,7 +85,7 @@
     }
     
     return [[CTABVariant alloc] initWithId:variantId
-                            experimentId:experimentId
+                              experimentId:experimentId
                             variantVersion:variantVersion.unsignedIntegerValue
                                    actions:actions
                                       vars:vars];
@@ -115,7 +116,8 @@
     }
 }
 
-#pragma mark Actions
+
+#pragma mark - Actions
 
 - (void)addActions:(NSArray *)actions andApply:(BOOL)apply {
     for (NSDictionary *actionObject in actions) {
@@ -145,7 +147,8 @@
     }
 }
 
-#pragma mark NSCoding
+
+#pragma mark - NSCoding
 
 - (void)encodeWithCoder:(nonnull NSCoder *)aCoder {
     [aCoder encodeObject:_variantId forKey:@"variantId"];
@@ -170,7 +173,8 @@
     return self;
 }
 
-#pragma mark Execution
+
+#pragma mark - Execution
 
 - (void)applyActions {
     if (!self.running && !self.finished) {
@@ -185,7 +189,7 @@
     for (CTABVariantAction *action in self.actions) {
         [action revert];
     }
-
+    
     _running = NO;
 }
 
@@ -199,7 +203,8 @@
     _finished = NO;
 }
 
-#pragma mark Equality
+
+#pragma mark - Equality
 
 - (BOOL)isEqualToVariant:(CTABVariant *)variant {
     return ([self._id isEqualToString:variant._id]  && self.variantVersion == variant.variantVersion);
@@ -275,14 +280,14 @@ static NSMapTable *originalCache;
     SEL swizzleSelector = NSSelectorFromString(actionObject[@"swizzleSelector"]);
     
     return [[CTABVariantAction alloc] initWithName:name
-                                            path:path
-                                        selector:selector
-                                            args:args
-                                   cacheOriginal:cacheOriginal
-                                        original:original
-                                         swizzle:swizzle
-                                    swizzleClass:swizzleClass
-                                 swizzleSelector:swizzleSelector];
+                                              path:path
+                                          selector:selector
+                                              args:args
+                                     cacheOriginal:cacheOriginal
+                                          original:original
+                                           swizzle:swizzle
+                                      swizzleClass:swizzleClass
+                                   swizzleSelector:swizzleSelector];
 }
 
 - (instancetype)init {
@@ -308,7 +313,7 @@ static NSMapTable *originalCache;
         self.name = name;
         
         swizzleClass = swizzleClass != nil ? swizzleClass : [path getRootViewControllerClass];
-                
+        
         if ([NSStringFromClass(swizzleClass) isEqualToString:@"UIViewController"]) {
             swizzleClass = nil;
             CleverTapLogStaticDebug(@"%@: Failed to set UIViewController as swizzle class for object path: %@, currently not supported", self, self.objPath);
@@ -321,7 +326,7 @@ static NSMapTable *originalCache;
         
         if (!swizzleSelector) {
             if ([self.swizzleClass isSubclassOfClass:[UIViewController class]]) {
-                 swizzleSelector = NSSelectorFromString(@"viewDidLayoutSubviews");
+                swizzleSelector = NSSelectorFromString(@"viewDidLayoutSubviews");
             } else {
                 BOOL shouldUseLayoutSubviews = NO;
                 NSArray *classesToUseLayoutSubviews = @[[UITableViewCell class], [UINavigationBar class]];
@@ -341,7 +346,8 @@ static NSMapTable *originalCache;
     return self;
 }
 
-#pragma mark NSCoding
+
+#pragma mark - NSCoding
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     if (self = [super init]) {
@@ -390,7 +396,8 @@ static NSMapTable *originalCache;
     return image;
 }
 
-#pragma mark Executing Actions
+
+#pragma mark - Executing Actions
 
 - (void)apply {
     NSMutableArray *originalArgs = [self.args mutableCopy];
@@ -429,17 +436,17 @@ static NSMapTable *originalCache;
     if (self.swizzle && self.swizzleClass != nil) {
         // Swizzle the method needed to check for this object coming onscreen
         [CTSwizzler ct_swizzleSelector:self.swizzleSelector
-                            onClass:self.swizzleClass
-                          withBlock:executeBlock
-                              named:self.name];
+                               onClass:self.swizzleClass
+                             withBlock:executeBlock
+                                 named:self.name];
     }
 }
 
 - (void)revert {
     if (self.swizzle && self.swizzleClass != nil) {
         [CTSwizzler ct_unswizzleSelector:self.swizzleSelector
-                              onClass:self.swizzleClass
-                                named:self.name];
+                                 onClass:self.swizzleClass
+                                   named:self.name];
     }
     
     [[self class] runSyncMainQueue:^{
@@ -543,7 +550,7 @@ static NSMapTable *originalCache;
                     if (![argTuple[1] isKindOfClass:[NSString class]]) continue;
                     
                     id arg = transformValue(argTuple[0], argTuple[1]);
-
+                    
                     if ([arg isKindOfClass:[NSValue class]]) {
                         const char *ctype = [(NSValue *)arg objCType];
                         NSUInteger size;
@@ -576,7 +583,8 @@ static NSMapTable *originalCache;
     return [invocations copy];
 }
 
-#pragma mark Equality
+
+#pragma mark - Equality
 
 - (BOOL)isEqualToAction:(CTABVariantAction *)action {
     return [self.name isEqualToString:action.name];

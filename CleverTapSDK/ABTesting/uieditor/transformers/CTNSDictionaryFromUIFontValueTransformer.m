@@ -14,10 +14,10 @@
     if ([value isKindOfClass:[UIFont class]]) {
         UIFont *font = value;
         return @{
-                 @"familyName": font.familyName,
-                 @"fontName": font.fontName,
-                 @"pointSize": @(font.pointSize),
-                 };
+            @"familyName": font.familyName,
+            @"fontName": font.fontName,
+            @"pointSize": @(font.pointSize),
+        };
     }
     return nil;
 }

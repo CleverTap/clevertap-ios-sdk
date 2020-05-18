@@ -58,7 +58,7 @@ extern const NSString * CTToastPositionBottom;
  @param message The message to be displayed
  @param duration The toast duration
  @param position The toast's center point. Can be one of the predefined CSToastPosition
-                 constants or a `CGPoint` wrapped in an `NSValue` object.
+ constants or a `CGPoint` wrapped in an `NSValue` object.
  */
 - (void)makeToast:(NSString *)message
          duration:(NSTimeInterval)duration
@@ -88,12 +88,12 @@ extern const NSString * CTToastPositionBottom;
  @param message The message to be displayed
  @param duration The toast duration
  @param position The toast's center point. Can be one of the predefined CSToastPosition
-                 constants or a `CGPoint` wrapped in an `NSValue` object.
+ constants or a `CGPoint` wrapped in an `NSValue` object.
  @param title The title
  @param image The image
  @param style The style. The shared style will be used when nil
  @param completion The completion block, executed after the toast view disappears.
-                   didTap will be `YES` if the toast view was dismissed from a tap.
+ didTap will be `YES` if the toast view was dismissed from a tap.
  */
 - (void)makeToast:(NSString *)message
          duration:(NSTimeInterval)duration
@@ -173,7 +173,7 @@ extern const NSString * CTToastPositionBottom;
  has no effect on the queueing behavior of the showToast: methods.
  
  @param position The toast's center point. Can be one of the predefined CSToastPosition
-                 constants or a `CGPoint` wrapped in an `NSValue` object.
+ constants or a `CGPoint` wrapped in an `NSValue` object.
  */
 - (void)makeToastActivity:(id)position;
 
@@ -197,9 +197,9 @@ extern const NSString * CTToastPositionBottom;
  @param toast The view to be displayed as toast
  @param duration The notification duration
  @param position The toast's center point. Can be one of the predefined CSToastPosition
-                 constants or a `CGPoint` wrapped in an `NSValue` object.
+ constants or a `CGPoint` wrapped in an `NSValue` object.
  @param completion The completion block, executed after the toast view disappears.
-                   didTap will be `YES` if the toast view was dismissed from a tap.
+ didTap will be `YES` if the toast view was dismissed from a tap.
  */
 - (void)showToast:(UIView *)toast
          duration:(NSTimeInterval)duration
@@ -422,7 +422,7 @@ extern const NSString * CTToastPositionBottom;
  Returns the default duration. Default is 3.0.
  
  @return duration The toast duration
-*/
+ */
 + (NSTimeInterval)defaultDuration;
 
 /**

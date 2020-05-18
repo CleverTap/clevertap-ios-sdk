@@ -13,7 +13,7 @@
             _iconUrl = jsonObject[@"icon"][@"url"];
             _mediaUrl = jsonObject[@"media"][@"url"];
             _videoPosterUrl = jsonObject[@"media"][@"poster"];
-        
+            
             if ([jsonObject[@"action"][@"url"][@"ios"] isKindOfClass:[NSDictionary class]]) {
                 _actionUrl = jsonObject[@"action"][@"url"][@"ios"][@"text"];
             }

@@ -59,6 +59,4 @@ NSString *const CTABTestEditorSnapshotMessageResponseType = @"snapshot_response"
     [self setDataObject:orientation forKey:@"orientation"];
 }
 
-
-
 @end

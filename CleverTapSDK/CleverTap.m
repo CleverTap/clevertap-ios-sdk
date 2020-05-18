@@ -270,8 +270,8 @@ static CLLocationCoordinate2D emptyLocation = {-1000.0, -1000.0}; // custom empt
 static CTInAppDisplayViewController *currentDisplayController;
 static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControllers;
 
-#pragma mark Lifecycle
 
+#pragma mark - Lifecycle
 
 + (void)load {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidFinishLaunchingNotification:) name:UIApplicationDidFinishLaunchingNotification object:nil];
@@ -487,7 +487,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-#pragma mark AppDelegate Swizzles and Related
+#pragma mark - AppDelegate Swizzles and Related
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
 #if !defined(CLEVERTAP_TVOS)
@@ -528,7 +528,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma clang diagnostic pop
 
-#pragma mark instance lifecycle
+#pragma mark - Instance Lifecycle
 
 + (nullable instancetype)sharedInstance {
     return [self _sharedInstanceWithCleverTapID:nil];
@@ -673,7 +673,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self removeObservers];
 }
 
-#pragma mark Private
+#pragma mark - Private
 + (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
     if (_defaultInstanceConfig) {
         CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
@@ -787,7 +787,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _userSetLocation;
 }
 
-# pragma mark Handshake handling
+
+# pragma mark - Handshake Handling
 
 - (void)clearRedirectDomain {
     self.redirectDomain = nil;
@@ -966,7 +967,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.sendQueueFails = 0;
     }
 }
-#pragma mark Queue/Dispatch helpers
+
+
+#pragma mark - Queue/Dispatch helpers
 
 - (NSMutableURLRequest *)createURLRequestFromURL:(NSURL *)url {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
@@ -1212,9 +1215,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return nil;
 }
 
-#pragma mark timestamp bookkeeping helpers
 
--(void)setLastRequestTimestamp:(double)ts {
+#pragma mark - Timestamp bookkeeping helpers
+
+- (void)setLastRequestTimestamp:(double)ts {
     [CTPreferences putInt:ts forKey:kLAST_TS_KEY];
 }
 
@@ -1226,11 +1230,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
--(void)clearLastRequestTimestamp {
+- (void)clearLastRequestTimestamp {
     [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kLAST_TS_KEY]];
 }
 
--(void)setFirstRequestTimestampIfNeeded:(double)ts {
+- (void)setFirstRequestTimestampIfNeeded:(double)ts {
     NSTimeInterval firstRequestTS = [self getFirstRequestTimestamp];
     if (firstRequestTS > 0) return;
     [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:kFIRST_TS_KEY]];
@@ -1252,7 +1256,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [NSDate new].timeIntervalSince1970 - _lastMutedTs < 24 * 60 * 60;
 }
 
-#pragma mark Lifecycle handling
+
+#pragma mark - Lifecycle Handling
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     [self _appEnteredForeground];
@@ -1402,7 +1407,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [CTPreferences putInt:[[dateFormatter stringFromDate:d] intValue] forKey:[self storageKeyWithSuffix:CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE]];
 }
 
-#pragma mark Notifications Private
+
+#pragma mark - Notifications Private
 
 - (void)pushDeviceTokenWithAction:(CleverTapPushTokenRegistrationAction)action {
     if ([[self class] runningInsideAppExtension]) return;
@@ -1597,7 +1603,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return isOurs;
 }
 
-#pragma mark InApp Notifications private
+
+#pragma mark - InApp Notifications Private
 
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary*)notification {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -1850,7 +1857,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-#pragma mark CTInAppNotificationDisplayDelegate
+
+#pragma mark - CTInAppNotificationDisplayDelegate
 
 -(void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller  {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did dismiss: %@", self, notification.campaignId);
@@ -1919,7 +1927,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [controller hide:true];
 }
 
-#pragma mark Serial Queue Operations
+
+#pragma mark - Serial Queue Operations
 
 - (void)runSerialAsync:(void (^)(void))taskBlock {
     if ([self inSerialQueue]) {
@@ -1934,7 +1943,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return currentQueue == self;
 }
 
-# pragma mark event helpers
+
+# pragma mark - Event Helpers
 
 - (NSMutableDictionary *)getErrorObject:(CTValidationResult *)vr {
     NSMutableDictionary *error = [[NSMutableDictionary alloc] init];
@@ -1953,7 +1963,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-# pragma mark Additional Request Parameters(ARP) and I/J handling
+
+# pragma mark - Additional Request Parameters(ARP) and I/J handling
 
 /**
  * Process additional request parameters (if available) in the response.
@@ -2090,7 +2101,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self clearFirstRequestTimestamp];
 }
 
-#pragma mark Session and Related Handling
+
+#pragma mark - Session and Related Handling
 
 - (void)createSessionIfNeeded {
     if ([[self class] runningInsideAppExtension] || [self inCurrentSession]) {
@@ -2558,7 +2570,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [self fileNameForQueue:kQUEUE_NAME_NOTIFICATIONS];
 }
 
-#pragma mark Validation Error Handling
+
+#pragma mark - Validation Error Handling
 
 - (void)pushValidationResults:(NSArray<CTValidationResult *> * _Nonnull )results {
     for (CTValidationResult *vr in results) {
@@ -2582,7 +2595,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return vr;
 }
 
-# pragma mark Request/Response handling
+
+# pragma mark - Request/Response handling
 
 - (void)sendQueue:(NSMutableArray *)queue {
     if (queue == nil || ((int) [queue count]) <= 0) {
@@ -2693,7 +2707,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-#pragma mark - Response Handling
+#pragma mark Response Handling
 
 - (void)parseResponse:(NSData *)responseData {
     if (responseData) {
@@ -3141,9 +3155,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-#pragma mark Public
 
-#pragma mark public API's for multi instance implementations
+#pragma mark - Public
+
+#pragma mark Public API's For Multi Instance Implementations
 
 + (void)handlePushNotification:(NSDictionary*)notification openDeepLinksInForeground:(BOOL)openInForeground {
     CleverTapLogStaticDebug(@"Handling notification: %@", notification);
@@ -3160,6 +3175,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
 }
+
 + (void)handleOpenURL:(NSURL*)url {
     if ([[self class] runningInsideAppExtension]){
         CleverTapLogStaticDebug(@"handleOpenUrl is a no-op in an app extension.");
@@ -3181,7 +3197,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-#pragma mark Profile/Event/Session APIs
+
+#pragma mark - Profile/Event/Session APIs
 
 - (void)notifyApplicationLaunchedWithOptions:launchOptions {
     if ([[self class] runningInsideAppExtension]) {
@@ -3192,7 +3209,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _appEnteredForegroundWithLaunchingOptions:launchOptions];
 }
 
-#pragma mark Device Network Info reporting handling
+
+#pragma mark - Device Network Info Reporting Handling
 // public
 - (void)enableDeviceNetworkInfoReporting:(BOOL)enabled {
     self.enableNetworkInfoReporting = enabled;
@@ -3211,7 +3229,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self enableDeviceNetworkInfoReporting:enabled];
 }
 
-#pragma mark Profile API
+
+#pragma mark - Profile API
 
 - (void)setOptOut:(BOOL)enabled {
     [self runSerialAsync:^ {
@@ -3439,7 +3458,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return self.deviceInfo.deviceId;
 }
 
-#pragma mark User Action Events API
+
+#pragma mark - User Action Events API
 
 - (void)recordEvent:(NSString *)event {
     [self runSerialAsync:^{
@@ -3579,7 +3599,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-#pragma mark Session API
+#pragma mark - Session API
 
 - (NSTimeInterval)sessionGetTimeElapsed {
     long current = self.sessionId;
@@ -3606,7 +3626,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return self.lastAppLaunchedTime;
 }
 
-# pragma mark Notifications
+
+# pragma mark - Notifications
 
 - (void)setPushToken:(NSData *)pushToken {
     if ([[self class] runningInsideAppExtension]){
@@ -3663,7 +3684,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-# pragma mark Referrer Tracking
+
+# pragma mark - Referrer Tracking
 
 - (void)handleOpenURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication {
     if ([[self class] runningInsideAppExtension]){
@@ -3716,7 +3738,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-#pragma mark Admin
+
+#pragma mark - Admin
 
 - (void)setLibrary:(NSString *)name {
     self.deviceInfo.library = name;
@@ -3814,7 +3837,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma clang diagnostic pop
 
-#pragma mark Event API
+
+#pragma mark - Event API
 
 - (NSTimeInterval)getFirstTime:(NSString *)event {
     return [self eventGetFirstTime:event];
@@ -3836,13 +3860,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [self eventGetDetail:event];
 }
 
-#pragma mark Profile API
+
+#pragma mark - Profile API
 
 - (id)getProperty:(NSString *)propertyName {
     return [self profileGet:propertyName];
 }
 
-#pragma mark Session API
+
+#pragma mark - Session API
 
 - (NSTimeInterval)getTimeElapsed {
     return [self sessionGetTimeElapsed];
@@ -3877,11 +3903,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 #endif
 
+
 #pragma mark - App Inbox
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 
-#pragma mark public
+#pragma mark Public
 
 - (void)initializeInboxWithCallback:(CleverTapInboxSuccessBlock)callback {
     if ([[self class] runningInsideAppExtension]) {
@@ -4025,7 +4052,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [[CleverTapInboxViewController alloc] initWithMessages:messages config:config delegate:delegate analyticsDelegate:self];
 }
 
-#pragma mark private
+
+#pragma mark Private
 
 - (void)_resetInbox {
     if (self.inboxController && self.inboxController.isInitialized && self.deviceInfo.deviceId) {
@@ -4490,7 +4518,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif  //!CLEVERTAP_NO_AB_SUPPORT
 
 
-#pragma mark - Display View
+#pragma mark - Display Units
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 
@@ -4646,6 +4674,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #endif
 
+
 #pragma mark - Feature Flags
 
 // run off main
@@ -4704,7 +4733,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return defaultValue;
 }
 
-#pragma mark Product Config
+
+#pragma mark - Product Config
 
 // run off main
 - (void) _initProductConfig {

@@ -11,7 +11,7 @@ static const float kPageControlViewHeight = 30.f;
     [self onAwake];
 }
 
--(void)onAwake {
+- (void)onAwake {
     self.containerView.layer.masksToBounds = YES;
 }
 
@@ -37,10 +37,10 @@ static const float kPageControlViewHeight = 30.f;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
-          carouselItemView  = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
+            carouselItemView  = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
             carouselItemView.backgroundColor = [UIColor clearColor];
             [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                                          placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                                        options:self.sdWebImageOptions context:self.sdWebImageContext];
             carouselItemView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
             carouselItemView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
@@ -59,7 +59,7 @@ static const float kPageControlViewHeight = 30.f;
     }
 }
 
--(void)populateItemViews {
+- (void)populateItemViews {
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
@@ -78,7 +78,7 @@ static const float kPageControlViewHeight = 30.f;
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height;
             itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
-                     caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait]];
+                                                          caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait]];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -89,6 +89,7 @@ static const float kPageControlViewHeight = 30.f;
         index++;
     }
 }
+
 - (void)setupMessage:(CleverTapInboxMessage *)message {
     self.dateLabel.text = message.relativeDate;
     self.readView.hidden = message.isRead;
@@ -162,6 +163,7 @@ static const float kPageControlViewHeight = 30.f;
     [self.containerView addSubview:self.pageControl];
 }
 
+
 #pragma mark - Swipe View Delegates
 
 - (NSInteger)numberOfItemsInSwipeView:(CTSwipeView *)swipeView{
@@ -179,6 +181,7 @@ static const float kPageControlViewHeight = 30.f;
 - (CGSize)swipeViewItemSize:(CTSwipeView *)swipeView{
     return self.swipeView.bounds.size;
 }
+
 
 #pragma mark - Actions
 

@@ -98,7 +98,6 @@
         }
         CFRelease(anchorCertificate);
     }
-    
     // If we get here, we didn't find any matching certificate in the chain
     return NO;
 }

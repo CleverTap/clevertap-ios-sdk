@@ -27,5 +27,4 @@
     return identifier;
 }
 
-
 @end

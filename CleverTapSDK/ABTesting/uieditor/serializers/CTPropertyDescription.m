@@ -17,9 +17,9 @@
 @implementation CTPropertySelectorDescription
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary {
-
+    
     if (dictionary[@"selector"] == nil || dictionary[@"parameters"] == nil) return nil;
-
+    
     self = [super init];
     if (self) {
         _selectorName = [dictionary[@"selector"] copy];
@@ -74,27 +74,27 @@
         if (get == nil) {
             if (!dictionary[@"type"]) return nil;
             get = @{
-                    @"selector": _name,
-                    @"result": @{
-                            @"type": dictionary[@"type"],
-                            @"name": @"value"
-                            },
-                    @"parameters": @[]
-                    };
+                @"selector": _name,
+                @"result": @{
+                        @"type": dictionary[@"type"],
+                        @"name": @"value"
+                },
+                @"parameters": @[]
+            };
         }
         
         NSDictionary *set = dictionary[@"set"];
         if (set == nil && _readonly == NO) {
             if (!dictionary[@"type"]) return nil; 
             set = @{
-                    @"selector": [NSString stringWithFormat:@"set%@:", _name.capitalizedString],
-                    @"parameters": @[
-                            @{
-                                @"name": @"value",
-                                @"type": dictionary[@"type"]
-                                }
-                            ]
-                    };
+                @"selector": [NSString stringWithFormat:@"set%@:", _name.capitalizedString],
+                @"parameters": @[
+                        @{
+                            @"name": @"value",
+                            @"type": dictionary[@"type"]
+                        }
+                ]
+            };
         }
         
         _getSelectorDescription = [[CTPropertySelectorDescription alloc] initWithDictionary:get];
@@ -113,7 +113,7 @@
     return self;
 }
 
-- (NSString *)type{
+- (NSString *)type {
     return _getSelectorDescription.returnType;
 }
 

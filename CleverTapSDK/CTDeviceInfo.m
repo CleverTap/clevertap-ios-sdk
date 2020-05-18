@@ -78,7 +78,7 @@ static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQu
         _idfa = [self getIDFA];
         _idfv = [self getIDFV];
         deviceIDLock = [NSRecursiveLock new];
-    #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
         backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
         // reachability callback
         if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "wzrkt.com")) != NULL) {
@@ -89,7 +89,7 @@ static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQu
                 }
             }
         }
-    #endif
+#endif
     });
 }
 
@@ -188,7 +188,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (void)initDeviceID:(NSString *)cleverTapID {
     @try {
         [deviceIDLock lock];
-
+        
         _idfa = _idfa ? _idfa : [[self class] getIDFA];
         if (self.config.useIDFA && _idfa && [_idfa length] > 5) {
             self.advertisingIdentitier = _idfa;
@@ -323,7 +323,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     NSString *fallbackDeviceID = [self getStoredFallbackDeviceID];
     if (!fallbackDeviceID) {
         fallbackDeviceID = [self generateFallbackGUID];
-         [CTPreferences putString:fallbackDeviceID forKey:[self fallbackDeviceIdStorageKey]];
+        [CTPreferences putString:fallbackDeviceID forKey:[self fallbackDeviceIdStorageKey]];
     }
     return fallbackDeviceID;
 }
@@ -401,9 +401,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString*)osName {
 #if TARGET_OS_TV
-     return @"tvOS";
+    return @"tvOS";
 #else
-     return @"iOS";
+    return @"iOS";
 #endif
 }
 

@@ -70,12 +70,12 @@ static const float kAVSliderHeight = 18;
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                  multiplier:1 constant:kAVSliderHeight] setActive:YES];
-
+    
     // setup time-labels
     self.currentTimeLabel.text = [NSString stringWithFormat:@"%@", @"00:00"];
     self.remainingTimeLabel.text = [NSString stringWithFormat:@"%@", @"00:00"];
     
-
+    
     // setup play button
     UIImage *imagePlay = [UIImage imageNamed:@"ic_play.png" inBundle:bundle compatibleWithTraitCollection:nil];
     UIImage *imagePause = [UIImage imageNamed:@"ic_pause.png" inBundle:bundle compatibleWithTraitCollection:nil];
@@ -100,6 +100,7 @@ static const float kAVSliderHeight = 18;
     [self.player removeTimeObserver:_periodicTimeObserver];
     _periodicTimeObserver = nil;
 }
+
 
 #pragma mark - Actions
 

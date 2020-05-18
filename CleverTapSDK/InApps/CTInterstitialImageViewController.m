@@ -30,6 +30,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
@@ -53,68 +54,68 @@
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         if (self.notification.tablet) {
-          if (![self deviceOrientationIsLandscape]) {
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeLeading
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeLeading
-                                         multiplier:1 constant:40] setActive:YES];
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeTrailing
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeTrailing
-                                         multiplier:1 constant:-40] setActive:YES];
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeHeight
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view
-                                          attribute:NSLayoutAttributeHeight
-                                         multiplier:0.85 constant:0] setActive:YES];
-          } else {
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeTop
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view attribute:NSLayoutAttributeTop
-                                           multiplier:1 constant:40] setActive:YES];
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeBottom
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view attribute:NSLayoutAttributeBottom
-                                           multiplier:1 constant:-40] setActive:YES];
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeWidth
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view
-                                            attribute:NSLayoutAttributeWidth
-                                           multiplier:0.85 constant:0] setActive:YES];
-          }
+            if (![self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeLeading
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeLeading
+                                             multiplier:1 constant:40] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTrailing
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTrailing
+                                             multiplier:1 constant:-40] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeHeight
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view
+                                              attribute:NSLayoutAttributeHeight
+                                             multiplier:0.85 constant:0] setActive:YES];
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTop
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTop
+                                             multiplier:1 constant:40] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeBottom
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeBottom
+                                             multiplier:1 constant:-40] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeWidth
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view
+                                              attribute:NSLayoutAttributeWidth
+                                             multiplier:0.85 constant:0] setActive:YES];
+            }
         }else {
-          if (![self deviceOrientationIsLandscape]) {
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeLeading
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeLeading
-                                         multiplier:1 constant:160] setActive:YES];
-            [[NSLayoutConstraint constraintWithItem:self.containerView
-                                          attribute:NSLayoutAttributeTrailing
-                                          relatedBy:NSLayoutRelationEqual
-                                             toItem:self.view attribute:NSLayoutAttributeTrailing
-                                         multiplier:1 constant:-160] setActive:YES];
-          } else {
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeTop
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view attribute:NSLayoutAttributeTop
-                                           multiplier:1 constant:160] setActive:YES];
-              [[NSLayoutConstraint constraintWithItem:self.containerView
-                                            attribute:NSLayoutAttributeBottom
-                                            relatedBy:NSLayoutRelationEqual
-                                               toItem:self.view attribute:NSLayoutAttributeBottom
-                                           multiplier:1 constant:-160] setActive:YES];
-           }
+            if (![self deviceOrientationIsLandscape]) {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeLeading
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeLeading
+                                             multiplier:1 constant:160] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTrailing
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTrailing
+                                             multiplier:1 constant:-160] setActive:YES];
+            } else {
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeTop
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeTop
+                                             multiplier:1 constant:160] setActive:YES];
+                [[NSLayoutConstraint constraintWithItem:self.containerView
+                                              attribute:NSLayoutAttributeBottom
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:self.view attribute:NSLayoutAttributeBottom
+                                             multiplier:1 constant:-160] setActive:YES];
+            }
         }
     }
-
+    
     // set image
     self.imageView.clipsToBounds = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
@@ -131,6 +132,7 @@
     }
 }
 
+
 #pragma mark - Actions
 
 - (IBAction)closeButtonTapped:(id)sender {
@@ -142,13 +144,14 @@
     [self hide:true];
 }
 
+
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
 

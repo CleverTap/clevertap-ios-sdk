@@ -163,7 +163,7 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)orientationIsPortrait {
-     return [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString];
+    return [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString];
 }
 
 - (BOOL)mediaIsEmpty {
@@ -175,6 +175,7 @@ static NSString * const kOrientationPortrait = @"p";
     UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 }
+
 
 #pragma mark - Player Controls
 
@@ -276,7 +277,7 @@ static NSString * const kOrientationPortrait = @"p";
     
     [self.avPlayer.currentItem addObserver:self forKeyPath:@"status" options:0 context:NULL];
     [self.avPlayerLayer addObserver:self forKeyPath:@"readyForDisplay" options:0 context:NULL];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avPlayer.currentItem];
     
     if (self.isAVMuted) {
@@ -302,8 +303,8 @@ static NSString * const kOrientationPortrait = @"p";
         self.hasVideoPoster = YES;
         if (content.videoPosterUrl != nil && content.videoPosterUrl.length > 0) {
             [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
-                                   placeholderImage: [self getVideoPlaceHolderImage]
-                                            options:self.sdWebImageOptions context:self.sdWebImageContext];
+                                  placeholderImage: [self getVideoPlaceHolderImage]
+                                           options:self.sdWebImageOptions context:self.sdWebImageContext];
         } else {
             self.cellImageView.image = [self getVideoPlaceHolderImage];
             if (!self.thumbnailGenerator) {
@@ -507,7 +508,7 @@ static NSString * const kOrientationPortrait = @"p";
     self.actionView.thirdButton.hidden = YES;
     self.actionView.secondButtonWidthConstraint.priority = 750;
     self.actionView.thirdButtonWidthConstraint.priority = 750;
-        
+    
     if (content.links.count == 1) {
         self.actionView.firstButton = [self.actionView setupViewForButton:self.actionView.firstButton forText:content.links[0] withIndex:0];
         self.actionView.secondButtonWidthConstraint.priority = 999;
@@ -523,7 +524,8 @@ static NSString * const kOrientationPortrait = @"p";
     }
 }
 
-#pragma mark CTInboxActionViewDelegate
+
+#pragma mark - CTInboxActionViewDelegate
 
 - (void)handleInboxMessageTappedAtIndex:(int)index {
     int i = index;

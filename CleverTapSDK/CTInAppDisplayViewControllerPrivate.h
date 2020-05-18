@@ -16,18 +16,17 @@
 @interface CTInAppDisplayViewController () <CTInAppPassThroughViewDelegate> {
 }
 
-
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong, readwrite) CTInAppNotification *notification;
 @property (nonatomic, assign) BOOL shouldPassThroughTouches;
 
--(void)showFromWindow:(BOOL)animated;
--(void)hideFromWindow:(BOOL)animated;
+- (void)showFromWindow:(BOOL)animated;
+- (void)hideFromWindow:(BOOL)animated;
 
--(void)tappedDismiss;
--(void)buttonTapped:(UIButton*)button;
--(void)handleButtonClickFromIndex:(int)index;
--(void)handleImageTapGesture;
--(UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;
+- (void)tappedDismiss;
+- (void)buttonTapped:(UIButton*)button;
+- (void)handleButtonClickFromIndex:(int)index;
+- (void)handleImageTapGesture;
+- (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;
 
 @end

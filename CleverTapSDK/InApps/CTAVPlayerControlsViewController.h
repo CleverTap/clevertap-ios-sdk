@@ -1,7 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <AVKit/AVKit.h>
 
-
 @protocol CTAVPlayerControlsDelegate <NSObject>
 - (void)toggleFullscreen;
 @end

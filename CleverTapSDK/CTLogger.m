@@ -1,4 +1,3 @@
-
 #import "CTLogger.h"
 
 @implementation CTLogger

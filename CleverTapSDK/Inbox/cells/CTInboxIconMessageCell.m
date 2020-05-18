@@ -61,14 +61,14 @@
 }
 
 - (void)setupMessage:(CleverTapInboxMessage *)message {
-     if (!message.content || message.content.count < 0) {
-         self.titleLabel.text = nil;
-         self.bodyLabel.text = nil;
-         self.dateLabel.text = nil;
-         self.cellImageView.image = nil;
-         self.cellIcon = nil;
-         return;
-     }
+    if (!message.content || message.content.count < 0) {
+        self.titleLabel.text = nil;
+        self.bodyLabel.text = nil;
+        self.dateLabel.text = nil;
+        self.cellImageView.image = nil;
+        self.cellIcon = nil;
+        return;
+    }
     CleverTapInboxMessageContent *content = message.content[0];
     self.cellImageView.image = nil;
     self.titleLabel.text = content.title;
@@ -100,4 +100,5 @@
         self.cellIconWidthContraint.priority = 999;
     }
 }
+
 @end

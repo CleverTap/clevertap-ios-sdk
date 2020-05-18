@@ -179,7 +179,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     }
     int maxPerDayCount = 1;
     if (self.config.isDefaultInstance) {
-         maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:[CTPreferences getIntForKey:kKEY_MAX_PER_DAY withResetValue:1]];
+        maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:[CTPreferences getIntForKey:kKEY_MAX_PER_DAY withResetValue:1]];
     } else {
         maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:1];
     }

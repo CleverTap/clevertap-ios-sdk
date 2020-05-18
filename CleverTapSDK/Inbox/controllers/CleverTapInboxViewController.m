@@ -329,7 +329,8 @@ static const int kMaxTags = 3;
     }
 }
 
-#pragma mark - Table view data source
+
+#pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     if (!self.filterMessages) {
@@ -383,11 +384,14 @@ static const int kMaxTags = 3;
         [message setRead:YES];
     }
 }
+
+
 #pragma mark - Actions
 
 - (void)dismissTapped {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+
 
 #pragma mark - Inbox Message Handling
 
@@ -437,9 +441,10 @@ static const int kMaxTags = 3;
     }
 }
 
+
 #pragma mark - Video Player Handling
 
-#pragma mark - UIScrollViewDelegate
+#pragma mark UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     [self handleScroll];

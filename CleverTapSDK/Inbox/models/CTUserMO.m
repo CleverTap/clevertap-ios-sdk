@@ -2,7 +2,7 @@
 
 @implementation CTUserMO
 
--(NSString*)description {
+- (NSString*)description {
     return [NSString stringWithFormat:@"CTUserMO: %@ messages count=%lu", self.identifier, (long)[self.messages count]];
 }
 
