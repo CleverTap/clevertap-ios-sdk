@@ -38,8 +38,6 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
     CleverTapLogDebug = 1
 };
 
-NS_ASSUME_NONNULL_BEGIN
-
 @interface CleverTap : NSObject
 
 #pragma mark - Properties
@@ -52,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  CleverTap Configuration (e.g. the CleverTap accountId, token, region, other configuration properties...) for this instance.
  */
 
-@property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
+@property (nonatomic, strong, readonly, nonnull) CleverTapInstanceConfig *config;
 
 /* ------------------------------------------------------------------------------------------------------
  * Initialization
@@ -88,7 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
  CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
  
  */
-+ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString *)cleverTapID;
++ (nullable instancetype)sharedInstanceWithCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -122,7 +120,7 @@ NS_ASSUME_NONNULL_BEGIN
  CleverTapUseCustomId key should be set to YES in apps info.plist to enable support for setting custom cleverTapID.
  
  */
-+ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString *)cleverTapID;
++ (nullable instancetype)autoIntegrateWithCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -135,7 +133,7 @@ NS_ASSUME_NONNULL_BEGIN
  Passing that into this method will create (if necessary, and on all subsequent calls return) a singleton instance mapped to the config.accountId property.
  
  */
-+ (instancetype)instanceWithConfig:(CleverTapInstanceConfig *)config;
++ (instancetype _Nonnull )instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config;
 
 /*!
  @method
@@ -148,7 +146,7 @@ NS_ASSUME_NONNULL_BEGIN
  Passing that into this method will create (if necessary, and on all subsequent calls return) a singleton instance mapped to the config.accountId property.
  
  */
-+ (instancetype)instanceWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
++ (instancetype _Nonnull)instanceWithConfig:(CleverTapInstanceConfig * _Nonnull)config andCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -164,7 +162,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param token      the CleverTap account token
  
  */
-+ (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:andToken instead")));
++ (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID andToken:(NSString * _Nonnull)token __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:andToken instead")));
 
 /*!
  @method
@@ -181,7 +179,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param region     the dedicated CleverTap region
  
  */
-+ (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:token:region instead")));
++ (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nonnull)region __attribute__((deprecated("Deprecated as of version 3.1.7, use setCredentialsWithAccountID:token:region instead")));
 
 /*!
  @method
@@ -197,7 +195,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param token      the CleverTap account token
  
  */
-+ (void)setCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token;
++ (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID andToken:(NSString * _Nonnull)token;
 
 /*!
  @method
@@ -214,7 +212,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param region     the dedicated CleverTap region
  
  */
-+ (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region;
++ (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nonnull)region;
 
 /*!
  @method
@@ -327,7 +325,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param properties       properties dictionary
  
  */
-- (void)onUserLogin:(NSDictionary *)properties;
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties;
 
 /*!
  @method
@@ -363,7 +361,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param cleverTapID        the CleverTap id
  
  */
-- (void)onUserLogin:(NSDictionary *)properties withCleverTapID:(NSString *)cleverTapID;
+- (void)onUserLogin:(NSDictionary *_Nonnull)properties withCleverTapID:(NSString * _Nonnull)cleverTapID;
 
 /*!
  @method
@@ -422,7 +420,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param properties       properties dictionary
  */
-- (void)profilePush:(NSDictionary *)properties;
+- (void)profilePush:(NSDictionary *_Nonnull)properties;
 
 /*!
  @method
@@ -433,7 +431,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param key       key string
  
  */
-- (void)profileRemoveValueForKey:(NSString *)key;
+- (void)profileRemoveValueForKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -453,7 +451,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param values    values NSArray<NSString *>
  
  */
-- (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
+- (void)profileSetMultiValues:(NSArray<NSString *> *_Nonnull)values forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -473,7 +471,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param key       key string
  @param value     value string
  */
-- (void)profileAddMultiValue:(NSString *)value forKey:(NSString *)key;
+- (void)profileAddMultiValue:(NSString * _Nonnull)value forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -493,7 +491,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param key       key string
  @param values    values NSArray<NSString *>
  */
-- (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
+- (void)profileAddMultiValues:(NSArray<NSString *> *_Nonnull)values forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -508,7 +506,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param key       key string
  @param value     value string
  */
-- (void)profileRemoveMultiValue:(NSString *)value forKey:(NSString *)key;
+- (void)profileRemoveMultiValue:(NSString *_Nonnull)value forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -523,7 +521,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param key       key string
  @param values    values NSArray<NSString *>
  */
-- (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key;
+- (void)profileRemoveMultiValues:(NSArray<NSString *> * _Nonnull)values forKey:(NSString * _Nonnull)key;
 
 /*!
  @method
@@ -539,7 +537,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param fbGraphUser       fbGraphUser Facebook Graph User object
  
  */
-- (void)profilePushGraphUser:(id)fbGraphUser;
+- (void)profilePushGraphUser:(id _Nonnull)fbGraphUser;
 
 /*!
  @method
@@ -554,7 +552,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param googleUser       GTLPlusPerson object
  
  */
-- (void)profilePushGooglePlusUser:(id)googleUser;
+- (void)profilePushGooglePlusUser:(id _Nonnull )googleUser;
 
 /*!
  @method
@@ -572,7 +570,7 @@ NS_ASSUME_NONNULL_BEGIN
  returns NSArray in the case of a multi-value property
  
  */
-- (id _Nullable)profileGet:(NSString *)propertyName;
+- (id _Nullable )profileGet:(NSString *_Nonnull)propertyName;
 
 /*!
  @method
@@ -609,7 +607,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param event           event name
  */
-- (void)recordEvent:(NSString *)event;
+- (void)recordEvent:(NSString *_Nonnull)event;
 
 /*!
  @method
@@ -628,7 +626,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param event           event name
  @param properties      properties dictionary
  */
-- (void)recordEvent:(NSString *)event withProps:(NSDictionary *)properties;
+- (void)recordEvent:(NSString *_Nonnull)event withProps:(NSDictionary *_Nonnull)properties;
 
 /*!
  @method
@@ -652,7 +650,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param chargeDetails   charge transaction details dictionary
  @param items           charged items array
  */
-- (void)recordChargedEventWithDetails:(NSDictionary *)chargeDetails andItems:(NSArray *)items;
+- (void)recordChargedEventWithDetails:(NSDictionary *_Nonnull)chargeDetails andItems:(NSArray *_Nonnull)items;
 
 /*!
  @method
@@ -664,7 +662,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param code              int error code
  */
 
-- (void)recordErrorWithMessage:(NSString *)message andErrorCode:(int)code;
+- (void)recordErrorWithMessage:(NSString *_Nonnull)message andErrorCode:(int)code;
 
 /*!
  @method
@@ -674,7 +672,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param screenName           the screen name
  */
-- (void)recordScreenView:(NSString *)screenName;
+- (void)recordScreenView:(NSString *_Nonnull)screenName;
 
 /*!
  @method
@@ -684,7 +682,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param notificationData       notificationData id
  */
-- (void)recordNotificationViewedEventWithData:(id)notificationData;
+- (void)recordNotificationViewedEventWithData:(id _Nonnull)notificationData;
 
 /*!
  @method
@@ -696,7 +694,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param event           event name
  */
-- (NSTimeInterval)eventGetFirstTime:(NSString *)event;
+- (NSTimeInterval)eventGetFirstTime:(NSString *_Nonnull)event;
 
 /*!
  @method
@@ -708,7 +706,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param event           event name
  */
 
-- (NSTimeInterval)eventGetLastTime:(NSString *)event;
+- (NSTimeInterval)eventGetLastTime:(NSString *_Nonnull)event;
 
 /*!
  @method
@@ -719,7 +717,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param event           event name
  */
-- (int)eventGetOccurrences:(NSString *)event;
+- (int)eventGetOccurrences:(NSString *_Nonnull)event;
 
 /*!
  @method
@@ -839,7 +837,7 @@ NS_ASSUME_NONNULL_BEGIN
  }
  
  */
-extern NSString * const CleverTapProfileDidChangeNotification;
+extern NSString * _Nonnull const CleverTapProfileDidChangeNotification;
 
 /*!
  
@@ -854,7 +852,7 @@ extern NSString * const CleverTapProfileDidChangeNotification;
  The CleverTap ID and cooresponding CleverTapAccountID will be returned in the userInfo property of the NSNotifcation in the form: {@"CleverTapID":CleverTapID, @"CleverTapAccountID":CleverTapAccountID}.
  
  */
-extern NSString * const CleverTapProfileDidInitializeNotification;
+extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 
 /*!
@@ -910,7 +908,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  
  @param pushToken     device token as returned from application:didRegisterForRemoteNotificationsWithDeviceToken:
  */
-- (void)setPushToken:(NSData *)pushToken;
+- (void)setPushToken:(NSData *_Nonnull)pushToken;
 
 /*!
  @method
@@ -923,7 +921,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  
  @param pushTokenString     device token as returned from application:didRegisterForRemoteNotificationsWithDeviceToken: converted to an NSString.
  */
-- (void)setPushTokenAsString:(NSString *)pushTokenString;
+- (void)setPushTokenAsString:(NSString *_Nonnull)pushTokenString;
 
 /*!
  @method
@@ -937,7 +935,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  
  @param data         notification payload
  */
-- (void)handleNotificationWithData:(id)data;
+- (void)handleNotificationWithData:(id _Nonnull )data;
 
 /*!
  @method
@@ -952,7 +950,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  @param data                     notification payload
  @param openInForeground         Boolean as to whether the SDK should open any deep link attached to the notification while the application is in the foreground.
  */
-- (void)handleNotificationWithData:(id)data openDeepLinksInForeground:(BOOL)openInForeground;
+- (void)handleNotificationWithData:(id _Nonnull )data openDeepLinksInForeground:(BOOL)openInForeground;
 
 /*!
  @method
@@ -968,7 +966,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  @param notification             notification payload
  @param openInForeground         Boolean as to whether the SDK should open any deep link attached to the notification while the application is in the foreground.
  */
-+ (void)handlePushNotification:(NSDictionary *)notification openDeepLinksInForeground:(BOOL)openInForeground;
++ (void)handlePushNotification:(NSDictionary*_Nonnull)notification openDeepLinksInForeground:(BOOL)openInForeground;
 
 /*!
  @method
@@ -978,7 +976,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  
  @param payload  notification payload
  */
-- (BOOL)isCleverTapNotification:(NSDictionary *)payload;
+- (BOOL)isCleverTapNotification:(NSDictionary *_Nonnull)payload;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 /*!
@@ -1010,7 +1008,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  @param url                     the incoming NSURL
  @param sourceApplication       the source application
  */
-- (void)handleOpenURL:(NSURL *)url sourceApplication:(NSString *_Nullable)sourceApplication;
+- (void)handleOpenURL:(NSURL *_Nonnull)url sourceApplication:(NSString *_Nullable)sourceApplication;
 
 /*!
  @method
@@ -1024,7 +1022,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  
  @param url                     the incoming NSURL
  */
-+ (void)handleOpenURL:(NSURL*)url;
++ (void)handleOpenURL:(NSURL*_Nonnull)url;
 
 
 /*!
@@ -1080,9 +1078,7 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
  */
 + (CleverTapLogLevel)getDebugLevel;
 
-
-- (void)setLibrary:(NSString *)name;
-
+- (void)setLibrary:(NSString * _Nonnull)name;
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
@@ -1091,7 +1087,5 @@ extern NSString * const CleverTapProfileDidInitializeNotification;
 #endif
 
 @end
-
-NS_ASSUME_NONNULL_END
 
 #pragma clang diagnostic pop
