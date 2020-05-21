@@ -590,7 +590,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig*)config andCleverTapID:(NSString *)cleverTapID {
-    if ((self = [super init])) {
+    self = [super init];
+    if (self) {
         _config = [config copy];
         if (_config.analyticsOnly) {
             CleverTapLogDebug(_config.logLevel, @"%@ is configured as analytics only!", self);
@@ -631,20 +632,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (now - initialAppEnteredForegroundTime > 5) {
             _config.isCreatedPostAppLaunched = YES;
         }
-    }
-    
+        
 #if !CLEVERTAP_NO_AB_SUPPORT
-    // Default (flag is set in the config init) or first non-default instance gets the ABTestController
-    if (!_config.enableABTesting) {
-        _config.enableABTesting = (!_instances || [_instances count] <= 0);
-    }
-    [self _initABTesting];
+        // Default (flag is set in the config init) or first non-default instance gets the ABTestController
+        if (!_config.enableABTesting) {
+            _config.enableABTesting = (!_instances || [_instances count] <= 0);
+        }
+        [self _initABTesting];
 #endif
-    [self _initFeatureFlags];
-    
-    [self _initProductConfig];
-    
-    [self notifyUserProfileInitialized];
+        [self _initFeatureFlags];
+        
+        [self _initProductConfig];
+        
+        [self notifyUserProfileInitialized];
+    }
     
     return self;
 }
@@ -2726,11 +2727,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_INAPP_SUPPORT
                 if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
                     NSNumber *perSession = jsonResp[@"imc"];
-                    if (!perSession) {
+                    if (perSession == nil) {
                         perSession = @10;
                     }
                     NSNumber *perDay = jsonResp[@"imp"];
-                    if (!perDay) {
+                    if (perDay == nil) {
                         perDay = @10;
                     }
                     [self.inAppFCManager updateLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];

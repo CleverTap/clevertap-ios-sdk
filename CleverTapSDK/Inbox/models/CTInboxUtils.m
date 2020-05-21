@@ -18,7 +18,7 @@ static NSDictionary *_inboxMessageTypeMap;
     }
     
     NSNumber *_type = type != nil ? _inboxMessageTypeMap[type] : @(CTInboxMessageTypeUnknown);
-    if (!_type) {
+    if (_type == nil) {
         _type = @(CTInboxMessageTypeUnknown);
     }
     return [_type integerValue];
