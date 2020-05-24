@@ -31,7 +31,7 @@ class CleverTapSpec: QuickSpec {
                 }
             }
             
-//            fit("records app launched event when notified") {
+//            it("records app launched event when notified") {
 //
 //                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
 //
@@ -43,6 +43,44 @@ class CleverTapSpec: QuickSpec {
 //
 //                mock.verify()
 //            }
+            
+//            it("verifies user is logged in") {
+//
+//                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
+//
+//                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
+//
+//                mock.expect()._asyncSwitchUser([:], withCachedGuid: "", andCleverTapID: "", forAction: "")
+//
+//                let profile = [
+//                    "Name": "Jack Montana",
+//                    "Identity": 61026032,
+//                    "Email": "jack@gmail.com",
+//                    "Phone": "+14155551234",
+//                    "Gender": "M",
+//                    "MSG-email": false,
+//                    "MSG-push": true,
+//                    "MSG-sms": false,
+//                    "MSG-whatsapp": true,
+//                    ] as [String : Any]
+//
+//                mock.object.onUserLogin(profile)
+//
+//                mock.verify()
+//            }
+            
+            it("verifies user's location is updated") {
+                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
+
+                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
+                mock.object.setIsAppForeground(true)
+                mock.expect().queueEvent([:], with: .ping)
+                
+                
+                mock.object.setLocation(CLLocationCoordinate2DMake(19.1, 72.9))
+                
+                mock.verify()
+            }
         }
         
         describe("a CleverTap class object") {
