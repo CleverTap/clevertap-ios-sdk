@@ -1,3 +1,12 @@
 [submodule "Vendors/SDWebImage"]
 	path = Vendors/SDWebImage
 	url = https://github.com/SDWebImage/SDWebImage.git 
+[submodule "Vendors/Quick"]
+	path = Vendors/Quick
+	url = git@github.com:Quick/Quick.git
+[submodule "Vendors/Nimble"]
+	path = Vendors/Nimble
+	url = git@github.com:Quick/Nimble.git
+[submodule "Vendors/ocmock"]
+	path = Vendors/ocmock
+	url = git@github.com:erikdoe/ocmock.git
