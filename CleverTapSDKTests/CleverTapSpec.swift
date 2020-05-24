@@ -30,6 +30,19 @@ class CleverTapSpec: QuickSpec {
                     expect(instance).toNot(beNil())
                 }
             }
+            
+//            fit("records app launched event when notified") {
+//
+//                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
+//
+//                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
+//
+//                mock.expect().recordAppLaunched("appEnteredForeground")
+//
+//                mock.object.notifyApplicationLaunched(withOptions: [:])
+//
+//                mock.verify()
+//            }
         }
         
         describe("a CleverTap class object") {
