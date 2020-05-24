@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (MockType)andReturn:(id)value;
 
 - (MockType)expect;
+- (MockType)reject;
+
 - (MockType)verify;
 
 @end

@@ -7,3 +7,5 @@
 #import "CTPreferences.h"
 #import "CleverTap+Tests.h"
 #import "CTInAppResources.h"
+#import "CTCertificatePinning.h"
+#import "CTFeatureFlagsController.h"

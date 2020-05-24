@@ -1,8 +1,6 @@
 
 import Quick
 import Nimble
-import OCMock
-import CleverTapSDK
 
 class CleverTapSpec: QuickSpec {
 
@@ -21,7 +19,16 @@ class CleverTapSpec: QuickSpec {
                     expect(instance).toNot(beNil())
                 }
                 
-                it("when Config object is set") {
+                it("when a Config object is set") {
+                    
+                    let config = CleverTapInstanceConfig(accountId: "AccountID", accountToken: "Token")
+                    
+                    let instance = CleverTap.instance(with: config)
+                    
+                    expect(instance).toNot(beNil())
+                }
+                
+                it("when a Config object with Region is set") {
                     
                     let config = CleverTapInstanceConfig(accountId: "AccountID", accountToken: "Token", accountRegion: "Region")
                     
@@ -31,45 +38,46 @@ class CleverTapSpec: QuickSpec {
                 }
             }
             
-//            it("records app launched event when notified") {
-//
-//                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
-//
-//                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
-//
-//                mock.expect().recordAppLaunched("appEnteredForeground")
-//
-//                mock.object.notifyApplicationLaunched(withOptions: [:])
-//
-//                mock.verify()
-//            }
+            it("rejects app launched event when notified from non-app targets") {
+
+                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
+
+                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
+
+                mock.reject().recordAppLaunched("appEnteredForeground") // expect
+
+                mock.object.notifyApplicationLaunched(withOptions: [:])
+
+                mock.verify()
+            }
             
-//            it("verifies user is logged in") {
-//
-//                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
-//
-//                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
-//
-//                mock.expect()._asyncSwitchUser([:], withCachedGuid: "", andCleverTapID: "", forAction: "")
-//
-//                let profile = [
-//                    "Name": "Jack Montana",
-//                    "Identity": 61026032,
-//                    "Email": "jack@gmail.com",
-//                    "Phone": "+14155551234",
-//                    "Gender": "M",
-//                    "MSG-email": false,
-//                    "MSG-push": true,
-//                    "MSG-sms": false,
-//                    "MSG-whatsapp": true,
-//                    ] as [String : Any]
-//
-//                mock.object.onUserLogin(profile)
-//
-//                mock.verify()
-//            }
+            it("rejects user login event before correct setup") {
+
+                CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
+
+                let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)
+
+                mock.reject()._asyncSwitchUser([:], withCachedGuid: "", andCleverTapID: "", forAction: "") // expect
+
+                let profile = [
+                    "Name": "Jack Montana",
+                    "Identity": 61026032,
+                    "Email": "jack@gmail.com",
+                    "Phone": "+14155551234",
+                    "Gender": "M",
+                    "MSG-email": false,
+                    "MSG-push": true,
+                    "MSG-sms": false,
+                    "MSG-whatsapp": true,
+                    ] as [String : Any]
+
+                mock.object.onUserLogin(profile)
+
+                mock.verify()
+            }
             
-            it("verifies user's location is updated") {
+            it("verifies user location is updated") {
+                
                 CleverTap.setCredentialsWithAccountID("AccountID", andToken: "Token")
 
                 let mock = OCSwiftMock<CleverTap>(partialObject: CleverTap.sharedInstance()!)

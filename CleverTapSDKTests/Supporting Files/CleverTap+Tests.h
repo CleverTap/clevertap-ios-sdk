@@ -5,10 +5,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CleverTap (Tests)
 
-//- (void)_asyncSwitchUser:(NSDictionary *)properties
-//          withCachedGuid:(NSString *)cachedGUID
-//          andCleverTapID:(NSString *)cleverTapID
-//               forAction:(NSString*)action;
+- (void)recordAppLaunched:(NSString *)caller;
+
+- (void)_asyncSwitchUser:(NSDictionary *)properties
+          withCachedGuid:(NSString *)cachedGUID
+          andCleverTapID:(NSString *)cleverTapID
+               forAction:(NSString*)action;
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypePage,

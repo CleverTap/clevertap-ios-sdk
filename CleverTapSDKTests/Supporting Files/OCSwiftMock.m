@@ -36,6 +36,10 @@
     return [self.object expect];
 }
 
+- (id)reject {
+    return [self.object reject];
+}
+
 - (id)verify {
     return [self.object verify];
 }
