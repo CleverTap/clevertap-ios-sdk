@@ -696,6 +696,7 @@
 		F961CD79247AB44400887438 /* OCSwiftMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OCSwiftMock.h; sourceTree = "<group>"; };
 		F961CD7A247AB44400887438 /* OCSwiftMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OCSwiftMock.m; sourceTree = "<group>"; };
 		F989E4BA247AA3B400A0B4B5 /* CleverTapSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleverTapSpec.swift; sourceTree = "<group>"; };
+		F9AA1D94247ECF1D006ABE62 /* CleverTapSDK.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CleverTapSDK.xctestplan; sourceTree = "<group>"; };
 		F9BD312D247A983000C82E91 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9BD312F247A990C00C82E91 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9BD3131247A991200C82E91 /* libOCMock.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libOCMock.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1288,6 +1289,7 @@
 		F9448DCD247AE6C3007C1590 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				F9AA1D94247ECF1D006ABE62 /* CleverTapSDK.xctestplan */,
 				F94B4F8F247A93F900656137 /* Info.plist */,
 				F9BD3139247A9E9200C82E91 /* CleverTapSDKTests-Bridging-Header.h */,
 				F961CD76247AB12F00887438 /* CleverTap+Tests.h */,
