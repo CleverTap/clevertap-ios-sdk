@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 53;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -1537,7 +1537,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1150;
 				LastUpgradeCheck = 1000;
-				ORGANIZATIONNAME = "Peter Wilkniss";
+				ORGANIZATIONNAME = CleverTap;
 				TargetAttributes = {
 					D014B8D620E2F963001E0780 = {
 						CreatedOnToolsVersion = 10.0;
@@ -1552,7 +1552,7 @@
 				};
 			};
 			buildConfigurationList = D0C7BBB7207D82C0001345EF /* Build configuration list for PBXProject "CleverTapSDK" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 11.4";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
