@@ -2018,13 +2018,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSString *)arpKey {
     NSString *accountId = self.config.accountId;
-    if (accountId == nil) {
+    NSString *guid = [self.deviceInfo.deviceId copy];
+    if (accountId == nil || guid == nil) {
         return nil;
     }
-    return [NSString stringWithFormat:@"arp:%@", accountId];
+    return [NSString stringWithFormat:@"arp:%@:%@", accountId, guid];
 }
 
 - (NSDictionary *)getARP {
+    [self migrateARPKeysForLocalStorage];
     NSString *key = [self arpKey];
     if (!key) return nil;
     NSDictionary *arp = [CTPreferences getObjectForKey:key];
@@ -2037,13 +2039,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!key) return;
     CleverTapLogInternal(self.config.logLevel, @"%@: Saving ARP: %@ for key: %@", self, arp, key);
     [CTPreferences putObject:arp forKey:key];
-}
-
-- (void)clearARP {
-    NSString *key = [self arpKey];
-    if (!key) return;
-    CleverTapLogInternal(self.config.logLevel, @"%@: Clearing ARP for key: %@", self, key);
-    [CTPreferences removeObjectForKey:key];
 }
 
 - (void)updateARP:(NSDictionary *)arp {
@@ -2068,6 +2063,24 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self saveARP:update];
     [self processDiscardedEventsRequest:arp];
     [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
+}
+
+-(void)migrateARPKeysForLocalStorage {
+    
+    //As Code to fetch latest key is Updated in the new method we are using the old key structure below
+    NSString *accountId = self.config.accountId;
+    if (accountId == nil) {
+        return;
+    }
+    NSString *key = [NSString stringWithFormat:@"arp:%@", accountId];
+    NSDictionary *arp = [CTPreferences getObjectForKey:key];
+    
+    //Set ARP value in new key and delete the value for old key
+    if (arp != nil) {
+        [self saveARP:arp];
+        CleverTapLogInternal(self.config.logLevel, @"%@: Clearing ARP for key: %@", self, key);
+        [CTPreferences removeObjectForKey:key];
+    }
 }
 
 - (long)getI {
@@ -2095,7 +2108,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)clearUserContext {
-    [self clearARP];
     [self clearI];
     [self clearJ];
     [self clearLastRequestTimestamp];
