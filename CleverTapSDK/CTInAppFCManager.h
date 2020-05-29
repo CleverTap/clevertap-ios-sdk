@@ -5,7 +5,7 @@
 
 @interface CTInAppFCManager : NSObject
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config withDeviceId:(NSString*) deviceId;
 
 - (void)checkUpdateDailyLimits;
 

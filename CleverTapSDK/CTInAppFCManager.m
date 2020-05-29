@@ -51,7 +51,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 }
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, deviceId];
+    return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, _deviceId];
 }
 
 - (NSString*)description {
