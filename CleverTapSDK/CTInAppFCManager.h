@@ -15,7 +15,7 @@
 
 - (void)resetSession;
 
-- (void)changeUser;
+- (void)changeUserWithDeviceId:(NSString *)deviceId;
 
 - (void)didShow:(CTInAppNotification *)inapp;
 

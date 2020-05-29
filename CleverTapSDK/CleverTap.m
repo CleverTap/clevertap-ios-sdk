@@ -625,7 +625,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (!_config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
             _notificationQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.notificationQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
             dispatch_queue_set_specific(_notificationQueue, kNotificationQueueKey, (__bridge void *)self, NULL);
-            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config];
+            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config withDeviceId: [self.deviceInfo.deviceId copy]];
         }
 #endif
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -3114,11 +3114,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // clear old profile data
         [self.localDataStore changeUser];
         
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-        if (![[self class] runningInsideAppExtension]) {
-            [self.inAppFCManager changeUser];
-        }
-#endif
         [self resetSession];
         
         if (cachedGUID) {
@@ -3131,6 +3126,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         [self recordDeviceErrors];
         
+        #if !CLEVERTAP_NO_INAPP_SUPPORT
+                if (![[self class] runningInsideAppExtension]) {
+                    [self.inAppFCManager changeUserWithDeviceId: self.deviceInfo.deviceId];
+                }
+        #endif
+    
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
         
 #if !CLEVERTAP_NO_INBOX_SUPPORT
