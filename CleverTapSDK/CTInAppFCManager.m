@@ -110,17 +110,25 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     
     // Last Update Key Changes
     NSString *localLastUpdateKey = [self oldStorageKeyWithSuffix:@"ict_date"];
-    NSString *localLastUpdateTime = [CTPreferences getStringForKey: localLastUpdateKey withResetValue:@"20140428"] ;
+    NSString *localLastUpdateTime = [CTPreferences getStringForKey: localLastUpdateKey withResetValue:nil] ;
     
-    //Store value in New key and delete Old key. No nil check because reset value creates an object with passed value
-    [CTPreferences putString:localLastUpdateTime forKey:[self storageKeyWithSuffix:@"ict_date"]];
-    [CTPreferences removeObjectForKey: localLastUpdateKey];
+    //Store value in New key and delete Old key.
+    if (localLastUpdateTime != nil) {
+        [CTPreferences putString:localLastUpdateTime forKey:[self storageKeyWithSuffix:@"ict_date"]];
+        [CTPreferences removeObjectForKey: localLastUpdateKey];
+    }
+   
 }
 
 - (void)countShownTodayKeyChanges {
     
-    // Count Shown Today Key Changes
     NSString *localCountShownKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY];
+    
+    //As the CTPreference Class supports a reset value and this being a value type check for existence before migration
+    if ([[NSUserDefaults standardUserDefaults]objectForKey:localCountShownKey] == nil || ![[[NSUserDefaults standardUserDefaults]objectForKey:localCountShownKey] isKindOfClass:[NSNumber class]]) {
+        return;
+    }
+   
     int localCountShown = [CTPreferences getIntForKey: localCountShownKey withResetValue:0] ;
     
     //Store value in New key and delete Old key
