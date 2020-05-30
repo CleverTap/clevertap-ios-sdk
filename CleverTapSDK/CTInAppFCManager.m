@@ -124,11 +124,11 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     
     NSString *localCountShownKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY];
     
-    //As the CTPreference Class supports a reset value and this being a value type check for existence before migration
-    if ([[NSUserDefaults standardUserDefaults]objectForKey:localCountShownKey] == nil || ![[[NSUserDefaults standardUserDefaults]objectForKey:localCountShownKey] isKindOfClass:[NSNumber class]]) {
+    //Check value exist otherwise fetch call will reset it reset value
+    if ([CTPreferences getObjectForKey:localCountShownKey] == nil || ![[CTPreferences getObjectForKey:localCountShownKey] isKindOfClass:[NSNumber class]]) {
         return;
     }
-   
+    
     int localCountShown = [CTPreferences getIntForKey: localCountShownKey withResetValue:0] ;
     
     //Store value in New key and delete Old key
