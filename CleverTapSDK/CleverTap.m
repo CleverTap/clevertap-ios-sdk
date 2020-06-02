@@ -625,7 +625,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (!_config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
             _notificationQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.notificationQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
             dispatch_queue_set_specific(_notificationQueue, kNotificationQueueKey, (__bridge void *)self, NULL);
-            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config withDeviceId: [self.deviceInfo.deviceId copy]];
+            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config guid: [self.deviceInfo.deviceId copy]];
         }
 #endif
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -2078,7 +2078,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     //Set ARP value in new key and delete the value for old key
     if (arp != nil) {
         [self saveARP:arp];
-        CleverTapLogInternal(self.config.logLevel, @"%@: Clearing ARP for key: %@", self, key);
         [CTPreferences removeObjectForKey:key];
     }
 }
