@@ -38,7 +38,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 
 @implementation CTInAppFCManager
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config guid:(NSString *)guid; {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config guid:(NSString *)guid {
     if (self = [super init]) {
         _config = config;
         _dismissedThisSession = [NSMutableDictionary new];
@@ -96,8 +96,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 }
 
 - (void)migratePreferenceKeys {
-    
-    //Move Old Key Value Pair data to New Keys and delete Old Keys
+    //Move old key value pair data to new keys and delete old keys
     [self lastUpdateKeyChanges];
     [self countShownTodayKeyChanges];
     [self countPerInAppKeyChanges];
@@ -114,32 +113,28 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     NSString *localLastUpdateKey = [self oldStorageKeyWithSuffix:@"ict_date"];
     NSString *localLastUpdateTime = [CTPreferences getStringForKey: localLastUpdateKey withResetValue:nil] ;
     
-    //Store value in New key and delete Old key.
+    //Store value in new key and delete old key
     if (localLastUpdateTime != nil) {
         [CTPreferences putString:localLastUpdateTime forKey:[self storageKeyWithSuffix:@"ict_date"]];
         [CTPreferences removeObjectForKey: localLastUpdateKey];
     }
-   
+    
 }
 
 - (void)countShownTodayKeyChanges {
-    
     NSString *localCountShownKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY];
-    
     //Check value exist otherwise fetch call will reset it reset value
     if ([CTPreferences getObjectForKey:localCountShownKey] == nil || ![[CTPreferences getObjectForKey:localCountShownKey] isKindOfClass:[NSNumber class]]) {
         return;
     }
     
-    int localCountShown = [CTPreferences getIntForKey: localCountShownKey withResetValue:0] ;
-    
-    //Store value in New key and delete Old key
+    int localCountShown = (int) [CTPreferences getIntForKey:localCountShownKey withResetValue:0] ;
+    //Store value in new key and delete old key
     [CTPreferences putInt:localCountShown forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
     [CTPreferences removeObjectForKey: localCountShownKey];
 }
 
 - (void)countPerInAppKeyChanges {
-    
     // Count For InApp Key Changes
     NSString *localInAppKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_PER_INAPP];
     NSDictionary *localInApp = [CTPreferences getObjectForKey: localInAppKey];
@@ -152,7 +147,6 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 }
 
 - (void)countPerInAppKeyChangesForDefaultConfig {
-    
     // Count For InApp Key Changes
     NSDictionary *defaultDictionary = [CTPreferences getObjectForKey:kKEY_COUNTS_PER_INAPP];
     
@@ -161,7 +155,6 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
         [CTPreferences putObject:defaultDictionary forKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, _guid]];
         [CTPreferences removeObjectForKey:kKEY_COUNTS_PER_INAPP];
     }
-
 }
 
 - (void)changeUserWithDeviceId:(NSString *)deviceId {
@@ -356,5 +349,6 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to purge out stale in-app counts - %@", self, e.debugDescription);
     }
 }
+
 
 @end

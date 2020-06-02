@@ -2066,8 +2066,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 -(void)migrateARPKeysForLocalStorage {
-    
-    //As Code to fetch latest key is Updated in the new method we are using the old key structure below
+    //Fetch latest key which is updated in the new method we are using the old key structure below
     NSString *accountId = self.config.accountId;
     if (accountId == nil) {
         return;
@@ -3125,12 +3124,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         [self recordDeviceErrors];
         
-        #if !CLEVERTAP_NO_INAPP_SUPPORT
-                if (![[self class] runningInsideAppExtension]) {
-                    [self.inAppFCManager changeUserWithDeviceId: self.deviceInfo.deviceId];
-                }
-        #endif
-    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (![[self class] runningInsideAppExtension]) {
+            [self.inAppFCManager changeUserWithDeviceId: self.deviceInfo.deviceId];
+        }
+#endif
+        
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
         
 #if !CLEVERTAP_NO_INBOX_SUPPORT
