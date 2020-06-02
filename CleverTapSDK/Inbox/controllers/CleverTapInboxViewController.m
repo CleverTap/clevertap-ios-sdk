@@ -235,7 +235,11 @@ static const int kMaxTags = 3;
     segmentedControl.selectedSegmentIndex = _selectedSegmentIndex;
     segmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
     if (_config && _config.tabSelectedBgColor) {
-        segmentedControl.tintColor = _config.tabSelectedBgColor;
+        if (@available(iOS 13.0, *)) {
+            segmentedControl.selectedSegmentTintColor = _config.tabSelectedBgColor;
+        } else {
+            segmentedControl.tintColor = _config.tabSelectedBgColor;
+        }
     }
     if (_config && _config.tabSelectedTextColor) {
         [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
