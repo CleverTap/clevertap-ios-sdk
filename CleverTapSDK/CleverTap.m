@@ -123,6 +123,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeRaised,
     CleverTapEventTypeData,
     CleverTapEventTypeNotificationViewed,
+    CleverTapEventTypeNotificationClicked,
     CleverTapEventTypeFetch,
 };
 
@@ -2352,7 +2353,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return;
         }
         
-        if (eventType != CleverTapEventTypeRaised || eventType != CleverTapEventTypeNotificationViewed) {
+        if (eventType != CleverTapEventTypeRaised ||
+            eventType != CleverTapEventTypeNotificationViewed ||
+            eventType != CleverTapEventTypeNotificationClicked) {
+            
             event = [self convertDataToPrimitive:event];
         }
         
@@ -2365,7 +2369,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             type = @"profile";
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
-        } else if (eventType == CleverTapEventTypeNotificationViewed) {
+        } else if (eventType == CleverTapEventTypeNotificationViewed || eventType == CleverTapEventTypeNotificationClicked) {
             type = @"event";
             NSString *bundleIdentifier = _deviceInfo.bundleId;
             if (bundleIdentifier) {
@@ -2397,7 +2401,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.localDataStore addDataSyncFlag:mutableEvent];
         }
         
-        if (eventType == CleverTapEventTypeRaised || eventType == CleverTapEventTypeNotificationViewed) {
+        if (eventType == CleverTapEventTypeRaised ||
+            eventType == CleverTapEventTypeNotificationViewed ||
+            eventType == CleverTapEventTypeNotificationClicked) {
+            
             [self.localDataStore persistEvent:mutableEvent];
         }
         
@@ -2406,7 +2413,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if ([self.profileQueue count] > 500) {
                 [self.profileQueue removeObjectAtIndex:0];
             }
-        } else if (eventType == CleverTapEventTypeNotificationViewed) {
+        } else if (eventType == CleverTapEventTypeNotificationViewed || eventType == CleverTapEventTypeNotificationClicked) {
             [self.notificationsQueue addObject:mutableEvent];
             if ([self.notificationsQueue count] > 100) {
                 [self.notificationsQueue removeObjectAtIndex:0];
@@ -3559,6 +3566,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 #endif
 }
+
+- (void)recordClickedNotificationEventWithData:(id)notificationData {
+#if !defined(CLEVERTAP_TVOS)
+    NSDictionary *notification;
+    if ([notificationData isKindOfClass:[UILocalNotification class]]) {
+        notification = [((UILocalNotification *) notificationData) userInfo];
+    } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
+        notification = notificationData;
+    }
+    [self runSerialAsync:^{
+        [CTEventBuilder buildPushNotificationEvent:NO forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                self.wzrkParams = [event[@"evtData"] copy];
+                [self queueEvent:event withType:CleverTapEventTypeNotificationClicked];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
 - (NSTimeInterval)eventGetFirstTime:(NSString *)event {
     
     if (!self.config.enablePersonalization) {
