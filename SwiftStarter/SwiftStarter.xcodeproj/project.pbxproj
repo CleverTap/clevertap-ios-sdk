@@ -340,15 +340,10 @@
 		0740612720C1509E00D8F4C9 /* SwiftStarter */ = {
 			isa = PBXGroup;
 			children = (
-				07C50075228D5A45003E1404 /* sampleHTMLCode.html */,
-				07B9702520C7D45E009D0D6C /* SwiftStarter.entitlements */,
 				0740612820C1509E00D8F4C9 /* AppDelegate.swift */,
 				0740612A20C1509E00D8F4C9 /* ViewController.swift */,
 				07C50073228D57AE003E1404 /* CTWebviewVC.swift */,
-				0740612C20C1509E00D8F4C9 /* Main.storyboard */,
-				0740612F20C150A000D8F4C9 /* Assets.xcassets */,
-				0740613120C150A000D8F4C9 /* LaunchScreen.storyboard */,
-				0740613420C150A000D8F4C9 /* Info.plist */,
+				F98E7CCC2487E68000610431 /* Supporting Files */,
 			);
 			path = SwiftStarter;
 			sourceTree = "<group>";
@@ -480,6 +475,19 @@
 				F974657C2487D2DC00C6E2EC /* Info.plist */,
 			);
 			path = NotificationContent;
+			sourceTree = "<group>";
+		};
+		F98E7CCC2487E68000610431 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				07C50075228D5A45003E1404 /* sampleHTMLCode.html */,
+				07B9702520C7D45E009D0D6C /* SwiftStarter.entitlements */,
+				0740612C20C1509E00D8F4C9 /* Main.storyboard */,
+				0740612F20C150A000D8F4C9 /* Assets.xcassets */,
+				0740613120C150A000D8F4C9 /* LaunchScreen.storyboard */,
+				0740613420C150A000D8F4C9 /* Info.plist */,
+			);
+			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -687,6 +695,7 @@
 				TargetAttributes = {
 					0740612420C1509E00D8F4C9 = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 1150;
 						SystemCapabilities = {
 							com.apple.Push = {
 								enabled = 1;
@@ -695,10 +704,12 @@
 					};
 					0740613820C150A000D8F4C9 = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 1150;
 						TestTargetID = 0740612420C1509E00D8F4C9;
 					};
 					0740614320C150A000D8F4C9 = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 1150;
 						TestTargetID = 0740612420C1509E00D8F4C9;
 					};
 					0772937220F601FF0032DC42 = {
@@ -706,6 +717,7 @@
 					};
 					0772937E20F602020032DC42 = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 1150;
 					};
 					079F54F820F34BB500343925 = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -720,6 +732,7 @@
 					};
 					49EA454420E36103005E0E54 = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 1150;
 					};
 					F97465702487D2DB00C6E2EC = {
 						CreatedOnToolsVersion = 11.5;
@@ -1310,23 +1323,25 @@
 				CODE_SIGN_ENTITLEMENTS = SwiftStarter/SwiftStarter.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
 					"CLEVERTAP_HOST_WATCHOS=1",
 				);
-				INFOPLIST_FILE = SwiftStarter/Info.plist;
+				INFOPLIST_FILE = "SwiftStarter/Supporting Files/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1340,18 +1355,20 @@
 				CODE_SIGN_ENTITLEMENTS = SwiftStarter/SwiftStarter.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = A5J34NR598;
-				INFOPLIST_FILE = SwiftStarter/Info.plist;
+				INFOPLIST_FILE = "SwiftStarter/Supporting Files/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1371,7 +1388,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.swiftstarter.SwiftStarterTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwiftStarter.app/SwiftStarter";
 			};
@@ -1392,7 +1409,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.swiftstarter.SwiftStarterTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwiftStarter.app/SwiftStarter";
 			};
@@ -1412,7 +1429,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.swiftstarter.SwiftStarterUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = SwiftStarter;
 			};
@@ -1432,7 +1449,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.swiftstarter.SwiftStarterUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = SwiftStarter;
 			};
@@ -1495,7 +1512,7 @@
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 4.3;
 			};
@@ -1518,7 +1535,7 @@
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 4.3;
 			};
@@ -1669,7 +1686,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.demo.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1691,7 +1708,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.demo.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
