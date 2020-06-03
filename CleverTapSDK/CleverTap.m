@@ -2018,7 +2018,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSString *)arpKey {
     NSString *accountId = self.config.accountId;
-    NSString *guid = [self.deviceInfo.deviceId copy];
+    NSString *guid = self.deviceInfo.deviceId;
     if (accountId == nil || guid == nil) {
         return nil;
     }
@@ -3126,7 +3126,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (![[self class] runningInsideAppExtension]) {
-            [self.inAppFCManager changeUserWithDeviceId: self.deviceInfo.deviceId];
+            [self.inAppFCManager changeUserWithGUID: self.deviceInfo.deviceId];
         }
 #endif
         

@@ -157,11 +157,11 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     }
 }
 
-- (void)changeUserWithDeviceId:(NSString *)deviceId {
+- (void)changeUserWithGUID:(NSString *)guid {
     self.dismissedThisSession = [NSMutableDictionary new];
     self.shownThisSession = [NSMutableDictionary new];
     self.shownThisSessionCount = @0;
-    _guid = deviceId;
+    _guid = guid;
 }
 
 - (NSArray *)getInAppCountsFromPersistentStore:(NSObject *)inappID {
