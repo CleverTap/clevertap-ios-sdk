@@ -19,6 +19,7 @@
 #endif
 
 @protocol CleverTapSyncDelegate;
+@protocol CleverTapPushNotificationDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
 #endif
@@ -885,6 +886,25 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)setSyncDelegate:(id <CleverTapSyncDelegate> _Nullable)delegate;
 
+
+/*!
+
+@method
+
+@abstract
+The `CleverTapPushNotificationDelegate` protocol provides methods for notifying
+your application (the adopting delegate) about push notifications.
+
+@see CleverTapPushNotificationDelegate.h
+
+@discussion
+This sets the CleverTapPushNotificationDelegate.
+
+@param delegate     an object conforming to the CleverTapPushNotificationDelegate Protocol
+*/
+
+- (void)setPushNotificationDelegate:(id <CleverTapPushNotificationDelegate> _Nullable)delegate;
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 /*!
  
@@ -901,7 +921,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param delegate     an object conforming to the CleverTapInAppNotificationDelegate Protocol
  */
-- (void)setInAppNotificationDelegate:(id  <CleverTapInAppNotificationDelegate> _Nullable)delegate;
+- (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
 #endif
 
 /* ------------------------------------------------------------------------------------------------------
