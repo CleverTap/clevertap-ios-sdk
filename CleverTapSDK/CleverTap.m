@@ -1513,6 +1513,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         } else {
             [self _checkAndFireDeepLinkForNotification:notification];
         }
+        
+        // TODO: how to get custom extras from notification dictionary?
+        if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
+            [self.pushNotificationDelegate pushNotificationTappedWithCustomExtras:notification];
+        }
+        
         [self runSerialAsync:^{
             [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                 if (event) {
