@@ -3,7 +3,7 @@
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
 #import <UserNotifications/UserNotifications.h>
 
-@interface AppDelegate ()
+@interface AppDelegate () <UNUserNotificationCenterDelegate>
 
 @end
 
