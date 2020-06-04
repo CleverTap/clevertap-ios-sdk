@@ -740,7 +740,7 @@
 				};
 			};
 			buildConfigurationList = 0740612020C1509E00D8F4C9 /* Build configuration list for PBXProject "SwiftStarter" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
