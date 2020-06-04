@@ -1,11 +1,3 @@
-//
-//  testTVOSUITests.m
-//  testTVOSUITests
-//
-//  Created by Peter Wilkniss on 6/26/18.
-//  Copyright © 2018 Peter Wilkniss. All rights reserved.
-//
-
 #import <XCTest/XCTest.h>
 
 @interface testTVOSUITests : XCTestCase
