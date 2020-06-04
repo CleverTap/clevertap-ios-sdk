@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -464,7 +464,7 @@
 				};
 			};
 			buildConfigurationList = 07E16E80212FF6E700429BDF /* Build configuration list for PBXProject "ObjCStarter" */;
-			compatibilityVersion = "Xcode 11.4";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
