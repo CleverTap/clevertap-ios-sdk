@@ -1514,9 +1514,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self _checkAndFireDeepLinkForNotification:notification];
         }
         
-        // TODO: how to get custom extras from notification dictionary?
+        
         if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
-            [self.pushNotificationDelegate pushNotificationTappedWithCustomExtras:notification];
+            NSMutableDictionary *mutableNotification = [NSMutableDictionary dictionaryWithDictionary:notification];
+            [mutableNotification removeObjectForKey:@"aps"];
+            [self.pushNotificationDelegate pushNotificationTappedWithCustomExtras:mutableNotification];
         }
         
         [self runSerialAsync:^{
