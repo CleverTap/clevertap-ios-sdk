@@ -4,7 +4,7 @@ import CleverTapSDK
 import WatchConnectivity
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate, CleverTapPushNotificationDelegate {
 
     var window: UIWindow?
 
@@ -22,6 +22,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         ctConfig.logLevel = .debug
         let cleverTapAdditionalInstance = CleverTap.instance(with: ctConfig)
         NSLog("additional CleverTap instance created for accountID: %@", cleverTapAdditionalInstance.config.accountId)
+        
+        cleverTapAdditionalInstance.setPushNotificationDelegate(self)
         
         // watchOS session
         checkSession()
@@ -88,6 +90,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         NSLog("%@: did receive remote notification completionhandler: %@", self.description, userInfo)
         completionHandler(UIBackgroundFetchResult.noData)
+    }
+    
+    func pushNotificationTapped(withCustomExtras customExtras: [AnyHashable : Any]!) {
+        NSLog("pushNotificationTapped: customExtras: ", customExtras)
     }
     
     // MARK: - Handle URL
