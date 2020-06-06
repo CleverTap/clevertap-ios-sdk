@@ -26,7 +26,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CleverTap-iOS-SDK: f530e70f247160995cff5ffaf069be903db6c75d
+  CleverTap-iOS-SDK: 55c1becace89a08f408b3ed6fbe71e9c437f0abe
   CleverTapWatchOS: f2755605455b7740abe7ae4475d3f5f808dc7904
   CTNotificationContent: ee7aa963934713b756d8287c7e8cac8e16270fb4
   CTNotificationService: 6f60b2d2c966eb4627b691900f09eba3a0ffce63
