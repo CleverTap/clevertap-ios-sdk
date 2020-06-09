@@ -3567,7 +3567,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (void)recordClickedNotificationEventWithData:(id)notificationData {
+- (void)recordNotificationClickedEventWithData:(id)notificationData {
+    // normalize the notification data
 #if !defined(CLEVERTAP_TVOS)
     NSDictionary *notification;
     if ([notificationData isKindOfClass:[UILocalNotification class]]) {
@@ -3576,7 +3577,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         notification = notificationData;
     }
     [self runSerialAsync:^{
-        [CTEventBuilder buildPushNotificationEvent:NO forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+        [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 self.wzrkParams = [event[@"evtData"] copy];
                 [self queueEvent:event withType:CleverTapEventTypeNotificationClicked];
