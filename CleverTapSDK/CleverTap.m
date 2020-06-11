@@ -9,6 +9,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CleverTapSyncDelegate.h"
+#import "CleverTapPushNotificationDelegate.h"
 #import "CleverTapInAppNotificationDelegate.h"
 #import "CTSwizzle.h"
 #import "CTUtils.h"
@@ -226,10 +227,11 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, retain) NSDictionary *lastUTMFields;
 @property (atomic, strong) NSString *currentViewControllerName;
 
-@property(atomic, strong) NSMutableArray<CTValidationResult *> *pendingValidationResults;
+@property (atomic, strong) NSMutableArray<CTValidationResult *> *pendingValidationResults;
 
-@property(atomic, weak) id <CleverTapSyncDelegate> syncDelegate;
-@property(atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
+@property (atomic, weak) id <CleverTapSyncDelegate> syncDelegate;
+@property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
+@property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -247,6 +249,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize campaign=_campaign;
 @synthesize wzrkParams=_wzrkParams;
 @synthesize syncDelegate=_syncDelegate;
+@synthesize pushNotificationDelegate=_pushNotificationDelegate;
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
@@ -1497,6 +1500,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // check to see whether the push includes a test display unit, if so don't process further
     if ([self didHandleDisplayUnitTestFromPushNotificaton:notification]) return;
     
+    // notify application with push notification custom extras
+    [self _notifyPushNotificationTapped:notification];
+    
     // determine application state
     UIApplication *application = [[self class] getSharedApplication];
     if (application != nil) {
@@ -1509,6 +1515,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         } else {
             [self _checkAndFireDeepLinkForNotification:notification];
         }
+        
         [self runSerialAsync:^{
             [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                 if (event) {
@@ -1522,6 +1529,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }
 #endif
+}
+
+- (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
+    if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
+        NSMutableDictionary *mutableNotification = [NSMutableDictionary dictionaryWithDictionary:notification];
+        [mutableNotification removeObjectForKey:@"aps"];
+        [self.pushNotificationDelegate pushNotificationTappedWithCustomExtras:mutableNotification];
+    }
 }
 
 - (void)_checkAndFireDeepLinkForNotification:(NSDictionary *)notification {
@@ -3821,6 +3836,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (id<CleverTapSyncDelegate>)syncDelegate {
     return _syncDelegate;
+}
+
+- (void)setPushNotificationDelegate:(id<CleverTapPushNotificationDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setPushNotificationDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapPushNotificationDelegate)]) {
+        _pushNotificationDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap PushNotification Delegate does not conform to the CleverTapPushNotificationDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapPushNotificationDelegate>)pushNotificationDelegate {
+    return _pushNotificationDelegate;
 }
 
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate>)delegate {
