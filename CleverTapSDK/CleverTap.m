@@ -124,7 +124,6 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeRaised,
     CleverTapEventTypeData,
     CleverTapEventTypeNotificationViewed,
-    CleverTapEventTypeNotificationClicked,
     CleverTapEventTypeFetch,
 };
 
@@ -629,7 +628,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (!_config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
             _notificationQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.notificationQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
             dispatch_queue_set_specific(_notificationQueue, kNotificationQueueKey, (__bridge void *)self, NULL);
-            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config];
+            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config guid: [self.deviceInfo.deviceId copy]];
         }
 #endif
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -2030,13 +2029,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSString *)arpKey {
     NSString *accountId = self.config.accountId;
-    if (accountId == nil) {
+    NSString *guid = self.deviceInfo.deviceId;
+    if (accountId == nil || guid == nil) {
         return nil;
     }
-    return [NSString stringWithFormat:@"arp:%@", accountId];
+    return [NSString stringWithFormat:@"arp:%@:%@", accountId, guid];
 }
 
 - (NSDictionary *)getARP {
+    [self migrateARPKeysForLocalStorage];
     NSString *key = [self arpKey];
     if (!key) return nil;
     NSDictionary *arp = [CTPreferences getObjectForKey:key];
@@ -2049,13 +2050,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!key) return;
     CleverTapLogInternal(self.config.logLevel, @"%@: Saving ARP: %@ for key: %@", self, arp, key);
     [CTPreferences putObject:arp forKey:key];
-}
-
-- (void)clearARP {
-    NSString *key = [self arpKey];
-    if (!key) return;
-    CleverTapLogInternal(self.config.logLevel, @"%@: Clearing ARP for key: %@", self, key);
-    [CTPreferences removeObjectForKey:key];
 }
 
 - (void)updateARP:(NSDictionary *)arp {
@@ -2080,6 +2074,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self saveARP:update];
     [self processDiscardedEventsRequest:arp];
     [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
+}
+
+- (void)migrateARPKeysForLocalStorage {
+    //Fetch latest key which is updated in the new method we are using the old key structure below
+    NSString *accountId = self.config.accountId;
+    if (accountId == nil) {
+        return;
+    }
+    NSString *key = [NSString stringWithFormat:@"arp:%@", accountId];
+    NSDictionary *arp = [CTPreferences getObjectForKey:key];
+    
+    //Set ARP value in new key and delete the value for old key
+    if (arp != nil) {
+        [self saveARP:arp];
+        [CTPreferences removeObjectForKey:key];
+    }
 }
 
 - (long)getI {
@@ -2107,7 +2117,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)clearUserContext {
-    [self clearARP];
     [self clearI];
     [self clearJ];
     [self clearLastRequestTimestamp];
@@ -2364,10 +2373,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return;
         }
         
-        if (eventType != CleverTapEventTypeRaised ||
-            eventType != CleverTapEventTypeNotificationViewed ||
-            eventType != CleverTapEventTypeNotificationClicked) {
-            
+        if (eventType != CleverTapEventTypeRaised || eventType != CleverTapEventTypeNotificationViewed) {
             event = [self convertDataToPrimitive:event];
         }
         
@@ -2380,7 +2386,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             type = @"profile";
         } else if (eventType == CleverTapEventTypeData) {
             type = @"data";
-        } else if (eventType == CleverTapEventTypeNotificationViewed || eventType == CleverTapEventTypeNotificationClicked) {
+        } else if (eventType == CleverTapEventTypeNotificationViewed) {
             type = @"event";
             NSString *bundleIdentifier = _deviceInfo.bundleId;
             if (bundleIdentifier) {
@@ -2412,10 +2418,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.localDataStore addDataSyncFlag:mutableEvent];
         }
         
-        if (eventType == CleverTapEventTypeRaised ||
-            eventType == CleverTapEventTypeNotificationViewed ||
-            eventType == CleverTapEventTypeNotificationClicked) {
-            
+        if (eventType == CleverTapEventTypeRaised || eventType == CleverTapEventTypeNotificationViewed) {
             [self.localDataStore persistEvent:mutableEvent];
         }
         
@@ -2424,7 +2427,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if ([self.profileQueue count] > 500) {
                 [self.profileQueue removeObjectAtIndex:0];
             }
-        } else if (eventType == CleverTapEventTypeNotificationViewed || eventType == CleverTapEventTypeNotificationClicked) {
+        } else if (eventType == CleverTapEventTypeNotificationViewed) {
             [self.notificationsQueue addObject:mutableEvent];
             if ([self.notificationsQueue count] > 100) {
                 [self.notificationsQueue removeObjectAtIndex:0];
@@ -3120,11 +3123,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // clear old profile data
         [self.localDataStore changeUser];
         
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-        if (![[self class] runningInsideAppExtension]) {
-            [self.inAppFCManager changeUser];
-        }
-#endif
         [self resetSession];
         
         if (cachedGUID) {
@@ -3136,6 +3134,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         [self recordDeviceErrors];
+        
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (![[self class] runningInsideAppExtension]) {
+            [self.inAppFCManager changeUserWithGuid: self.deviceInfo.deviceId];
+        }
+#endif
         
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
         
@@ -3578,7 +3582,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (void)recordClickedNotificationEventWithData:(id)notificationData {
+- (void)recordNotificationClickedEventWithData:(id)notificationData {
+    // normalize the notification data
 #if !defined(CLEVERTAP_TVOS)
     NSDictionary *notification;
     if ([notificationData isKindOfClass:[UILocalNotification class]]) {
@@ -3587,10 +3592,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         notification = notificationData;
     }
     [self runSerialAsync:^{
-        [CTEventBuilder buildPushNotificationEvent:NO forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+        [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 self.wzrkParams = [event[@"evtData"] copy];
-                [self queueEvent:event withType:CleverTapEventTypeNotificationClicked];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
                 [self pushValidationResults:errors];

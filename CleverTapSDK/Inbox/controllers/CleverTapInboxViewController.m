@@ -413,7 +413,7 @@ static const int kMaxTags = 3;
             NSString *copy = link[@"copyText"][@"text"];
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
-            [self.parentViewController.view makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
+            [self.parentViewController.view ct_makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
         }
     }
     [self _notifyMessageSelected:message atIndex:index withButtonIndex:buttonIndex];
