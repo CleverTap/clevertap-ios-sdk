@@ -1500,6 +1500,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // check to see whether the push includes a test display unit, if so don't process further
     if ([self didHandleDisplayUnitTestFromPushNotificaton:notification]) return;
     
+    // notify application with push notification custom extras
+    [self _notifyPushNotificationTapped:notification];
+    
     // determine application state
     UIApplication *application = [[self class] getSharedApplication];
     if (application != nil) {
@@ -1511,13 +1514,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogDebug(self.config.logLevel, @"%@: app in foreground and openInForeground flag is FALSE, will not process any deep link for notification: %@", self, notification);
         } else {
             [self _checkAndFireDeepLinkForNotification:notification];
-        }
-        
-        
-        if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
-            NSMutableDictionary *mutableNotification = [NSMutableDictionary dictionaryWithDictionary:notification];
-            [mutableNotification removeObjectForKey:@"aps"];
-            [self.pushNotificationDelegate pushNotificationTappedWithCustomExtras:mutableNotification];
         }
         
         [self runSerialAsync:^{
@@ -1533,6 +1529,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }
 #endif
+}
+
+- (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
+    if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
+        NSMutableDictionary *mutableNotification = [NSMutableDictionary dictionaryWithDictionary:notification];
+        [mutableNotification removeObjectForKey:@"aps"];
+        [self.pushNotificationDelegate pushNotificationTappedWithCustomExtras:mutableNotification];
+    }
 }
 
 - (void)_checkAndFireDeepLinkForNotification:(NSDictionary *)notification {
