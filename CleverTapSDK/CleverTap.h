@@ -684,6 +684,17 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  */
 - (void)recordNotificationViewedEventWithData:(id _Nonnull)notificationData;
 
+
+/*!
+ @method
+ 
+ @abstract
+ Record Notification Clicked for Push Notifications.
+ 
+ @param notificationData       notificationData id
+ */
+- (void)recordNotificationClickedEventWithData:(id _Nonnull)notificationData;
+
 /*!
  @method
  

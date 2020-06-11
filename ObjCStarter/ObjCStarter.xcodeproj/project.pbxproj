@@ -125,6 +125,8 @@
 		B6FA511B3951FFDBB8038512 /* Pods-ObjCStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarterTests.debug.xcconfig"; path = "Target Support Files/Pods-ObjCStarterTests/Pods-ObjCStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D0CB456622EA59FE000762B2 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
 		EBF467178C453A84094DE4BD /* Pods-ObjCStarterUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarterUITests.debug.xcconfig"; path = "Target Support Files/Pods-ObjCStarterUITests/Pods-ObjCStarterUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		F95B75942487B89A00286CE0 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		F95B75962487B89A00286CE0 /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -286,6 +288,8 @@
 				B2F4F891DECD03ED6DEE86B7 /* Pods_ObjCStarterTests.framework */,
 				ABF6EB7DB2D81D08BD3A91F2 /* Pods_ObjCStarterUITests.framework */,
 				46BE84A18710A6AC42402255 /* Pods_ObjCTvOS.framework */,
+				F95B75942487B89A00286CE0 /* UserNotifications.framework */,
+				F95B75962487B89A00286CE0 /* UserNotificationsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -302,7 +306,6 @@
 				8E3E584C2986BBB679321309 /* Pods-ObjCTvOS.debug.xcconfig */,
 				52B09433FA5683BF589F1E6F /* Pods-ObjCTvOS.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -429,7 +432,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0940;
-				ORGANIZATIONNAME = "Aditi Agrawal";
+				ORGANIZATIONNAME = CleverTap;
 				TargetAttributes = {
 					07E16E84212FF6E700429BDF = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -461,7 +464,7 @@
 				};
 			};
 			buildConfigurationList = 07E16E80212FF6E700429BDF /* Build configuration list for PBXProject "ObjCStarter" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
