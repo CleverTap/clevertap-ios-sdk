@@ -221,6 +221,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     }
     
     func inAppEvents() {
+        
         CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
         CleverTap.sharedInstance()?.recordScreenView("recordScreen")
         CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
