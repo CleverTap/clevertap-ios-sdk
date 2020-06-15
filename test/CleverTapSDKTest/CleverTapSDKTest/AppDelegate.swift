@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
         
         CleverTap.autoIntegrate()
-        CleverTap.setDebugLevel(4)
+        CleverTap.setDebugLevel(0)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
         CleverTap.sharedInstance()?.featureFlags.delegate = self;

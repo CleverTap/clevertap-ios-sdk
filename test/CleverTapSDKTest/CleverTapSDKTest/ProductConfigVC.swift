@@ -3,6 +3,8 @@ import CleverTapSDK
 
 class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
     
+    @IBOutlet var lblChangeValue: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -83,10 +85,12 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         let strValue1 = ctValue?.numberValue
         print("Remote Config after activate 1:", strValue1 ?? "")
         
-        let ctValue2 = CleverTap.sharedInstance()?.productConfig.get("str-key")
+        let ctValue2 = CleverTap.sharedInstance()?.productConfig.get("test")
         let strValue2 = ctValue2?.stringValue
         print("Remote Config after activate 2:", strValue2 ?? "")
         
+        self.lblChangeValue.text = strValue2
+
         let ctValue3 = CleverTap.sharedInstance()?.productConfig.get("bool-key")
         let strValue3 = ctValue3?.numberValue
         print("Remote Config after activate 3:", strValue3 ?? "")
@@ -103,5 +107,4 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         let strValue6 = ctValue6?.boolValue
         print("Remote Config after fetch 5:", strValue6?.description ?? "")
     }
-    
 }
