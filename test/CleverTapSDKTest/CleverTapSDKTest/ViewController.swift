@@ -217,7 +217,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
         CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
-        inAppEvents()
+//        inAppEvents()
     }
     
     func inAppEvents() {

@@ -1,5 +1,10 @@
 # CHANGE LOG
 
+## Version 3.8.1 (June 18, 2020)
+* Adds public API to raise Notification Clicked event for Push Notifications
+* Adds callback to provide Push Notitifcations custom key value pairs
+* Performance improvements
+
 ## Version 3.8.0 (May 11, 2020)
 * Adds support for Product Config and Feature Flag as a part of Product Experiences feature
 * Performance improvements
