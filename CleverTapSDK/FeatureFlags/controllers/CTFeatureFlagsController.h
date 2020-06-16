@@ -11,7 +11,7 @@
 
 @property (nonatomic, assign, readonly) BOOL isInitialized;
 
-- (instancetype _Nullable ) init __unavailable;
+- (instancetype _Nonnull) init __unavailable;
 
 // blocking, call off main thread
 - (instancetype _Nullable)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config
