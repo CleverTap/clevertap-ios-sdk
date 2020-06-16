@@ -42,7 +42,8 @@
       "CleverTapSDK/CleverTap+ABTesting.h",
       "CleverTapSDK/CleverTap+DisplayUnit.h",
       "CleverTapSDK/CleverTap+FeatureFlags.h",
-      "CleverTapSDK/CleverTap+ProductConfig.h"
+      "CleverTapSDK/CleverTap+ProductConfig.h",
+      "CleverTapSDK/CleverTapPushNotificationDelegate.h"
     ]
   },
   "platforms": {
