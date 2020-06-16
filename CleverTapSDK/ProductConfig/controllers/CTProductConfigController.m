@@ -160,6 +160,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     }
 }
 
+
 #pragma mark - Storage operations
 
 - (NSString*)dataArchiveFileName {
@@ -170,7 +171,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
     NSString *filePath = [self dataArchiveFileName];
     __weak CTProductConfigController *weakSelf = self;
     CTProductConfigOperationBlock opBlock = ^{
-        NSArray *data = [CTPreferences unarchiveFromFile:filePath removeFile:NO];
+        NSArray *data = [CTPreferences unarchiveFromFile:filePath removeFile:YES];
         if (data) {
             [weakSelf _updateProductConfig:data isNew:NO];
         }
@@ -201,6 +202,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
 - (NSString*)description {
     return [NSString stringWithFormat:@"CleverTap.%@.CTProductConfigController", _config.accountId];
 }
+
 
 #pragma mark - Product Config APIs
 
