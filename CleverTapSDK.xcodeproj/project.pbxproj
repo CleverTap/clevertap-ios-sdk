@@ -374,7 +374,19 @@
 		D0D4C9F52414EE770029477E /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9356ED42487FE4600B4F507 /* CleverTapPushNotificationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F9BA41372498D4D300BDD868 /* CleverTapSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9BA41362498D4D300BDD868 /* CleverTapSDKTests.swift */; };
+		F9BA41392498D4D300BDD868 /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7BBBD207D82C0001345EF /* CleverTapSDK.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F9BA413A2498D4D300BDD868 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0C7BBB4207D82C0001345EF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0C7BBBC207D82C0001345EF;
+			remoteInfo = CleverTapSDK;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0701E95A2372BA250034AAC2 /* CleverTap+DisplayUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+DisplayUnit.h"; sourceTree = "<group>"; };
@@ -672,6 +684,9 @@
 		D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CleverTapFeatureFlags.m; sourceTree = "<group>"; };
 		D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapFeatureFlagsPrivate.h; sourceTree = "<group>"; };
 		F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapPushNotificationDelegate.h; sourceTree = "<group>"; };
+		F9BA41342498D4D300BDD868 /* CleverTapSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CleverTapSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9BA41362498D4D300BDD868 /* CleverTapSDKTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleverTapSDKTests.swift; sourceTree = "<group>"; };
+		F9BA41382498D4D300BDD868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -689,6 +704,14 @@
 				D0CB456522EA550C000762B2 /* libicucore.tbd in Frameworks */,
 				0781852B229FBD5100A72B07 /* SDWebImage.framework in Frameworks */,
 				07B94553219EA44100D4C542 /* libsqlite3.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9BA41312498D4D300BDD868 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9BA41392498D4D300BDD868 /* CleverTapSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1110,6 +1133,7 @@
 			isa = PBXGroup;
 			children = (
 				D0C7BBBF207D82C0001345EF /* CleverTapSDK */,
+				F9BA41352498D4D300BDD868 /* CleverTapSDKTests */,
 				D0C7BBBE207D82C0001345EF /* Products */,
 				07B94551219EA44100D4C542 /* Frameworks */,
 			);
@@ -1120,6 +1144,7 @@
 			children = (
 				D0C7BBBD207D82C0001345EF /* CleverTapSDK.framework */,
 				D014B8D720E2F963001E0780 /* CleverTapSDK.framework */,
+				F9BA41342498D4D300BDD868 /* CleverTapSDKTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1234,6 +1259,15 @@
 				D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */,
 			);
 			path = models;
+			sourceTree = "<group>";
+		};
+		F9BA41352498D4D300BDD868 /* CleverTapSDKTests */ = {
+			isa = PBXGroup;
+			children = (
+				F9BA41362498D4D300BDD868 /* CleverTapSDKTests.swift */,
+				F9BA41382498D4D300BDD868 /* Info.plist */,
+			);
+			path = CleverTapSDKTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1440,12 +1474,31 @@
 			productReference = D0C7BBBD207D82C0001345EF /* CleverTapSDK.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		F9BA41332498D4D300BDD868 /* CleverTapSDKTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F9BA413E2498D4D300BDD868 /* Build configuration list for PBXNativeTarget "CleverTapSDKTests" */;
+			buildPhases = (
+				F9BA41302498D4D300BDD868 /* Sources */,
+				F9BA41312498D4D300BDD868 /* Frameworks */,
+				F9BA41322498D4D300BDD868 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F9BA413B2498D4D300BDD868 /* PBXTargetDependency */,
+			);
+			name = CleverTapSDKTests;
+			productName = CleverTapSDKTests;
+			productReference = F9BA41342498D4D300BDD868 /* CleverTapSDKTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		D0C7BBB4207D82C0001345EF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1150;
 				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = CleverTap;
 				TargetAttributes = {
@@ -1454,6 +1507,9 @@
 					};
 					D0C7BBBC207D82C0001345EF = {
 						CreatedOnToolsVersion = 9.3;
+					};
+					F9BA41332498D4D300BDD868 = {
+						CreatedOnToolsVersion = 11.5;
 					};
 				};
 			};
@@ -1472,6 +1528,7 @@
 			targets = (
 				D0C7BBBC207D82C0001345EF /* CleverTapSDK */,
 				D014B8D620E2F963001E0780 /* CleverTapSDK_TVOS */,
+				F9BA41332498D4D300BDD868 /* CleverTapSDKTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1555,6 +1612,13 @@
 				07238E41221E7A270012DFAE /* CTCarouselImageMessageCell~land.xib in Resources */,
 				07D86D41222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib in Resources */,
 				07238E3D221E79F80012DFAE /* CTInboxSimpleMessageCell~land.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9BA41322498D4D300BDD868 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1724,7 +1788,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F9BA41302498D4D300BDD868 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9BA41372498D4D300BDD868 /* CleverTapSDKTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F9BA413B2498D4D300BDD868 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0C7BBBC207D82C0001345EF /* CleverTapSDK */;
+			targetProxy = F9BA413A2498D4D300BDD868 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D014B8DD20E2F963001E0780 /* Debug */ = {
@@ -1983,6 +2063,49 @@
 			};
 			name = Release;
 		};
+		F9BA413C2498D4D300BDD868 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = CleverTapSDKTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapSDKTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F9BA413D2498D4D300BDD868 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = CleverTapSDKTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapSDKTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2009,6 +2132,15 @@
 			buildConfigurations = (
 				D0C7BBC6207D82C0001345EF /* Debug */,
 				D0C7BBC7207D82C0001345EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9BA413E2498D4D300BDD868 /* Build configuration list for PBXNativeTarget "CleverTapSDKTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9BA413C2498D4D300BDD868 /* Debug */,
+				F9BA413D2498D4D300BDD868 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
