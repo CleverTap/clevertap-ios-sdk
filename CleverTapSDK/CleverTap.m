@@ -1905,6 +1905,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
         [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
     } else if (ctaURL) {
+        
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         [[self class] runSyncMainQueue:^{
             UIApplication *sharedApplication = [[self class] getSharedApplication];
@@ -1912,31 +1913,31 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 return;
             }
             CleverTapLogDebug(self.config.logLevel, @"%@: InApp: firing deep link: %@", self, ctaURL);
-#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_9_0
-            if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                NSMethodSignature *signature = [UIApplication
-                                                instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                NSInvocation *invocation = [NSInvocation
-                                            invocationWithMethodSignature:signature];
-                [invocation setTarget:sharedApplication];
-                [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                NSDictionary *options = @{};
-                id completionHandler = nil;
-                [invocation setArgument:&ctaURL atIndex:2];
-                [invocation setArgument:&options atIndex:3];
-                [invocation setArgument:&completionHandler atIndex:4];
-                [invocation invoke];
+            if (@available(iOS 10.0, *)) {
+                if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                    NSMethodSignature *signature = [UIApplication
+                                                    instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                    NSInvocation *invocation = [NSInvocation
+                                                invocationWithMethodSignature:signature];
+                    [invocation setTarget:sharedApplication];
+                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                    NSDictionary *options = @{};
+                    id completionHandler = nil;
+                    __block NSURL *dlURL = ctaURL;
+                    [invocation setArgument:&dlURL atIndex:2];
+                    [invocation setArgument:&options atIndex:3];
+                    [invocation setArgument:&completionHandler atIndex:4];
+                    [invocation invoke];
+                } else {
+                    if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                        [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                    }
+                }
             } else {
                 if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
                     [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
                 }
             }
-#else
-            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
-                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
-            }
-            
-#endif
         }];
 #endif
     }
@@ -4199,30 +4200,32 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 return;
             }
             CleverTapLogDebug(self.config.logLevel, @"%@: Inbox message: firing deep link: %@", self, ctaURL);
-#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_9_0
-            if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                NSMethodSignature *signature = [UIApplication
-                                                instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                NSInvocation *invocation = [NSInvocation
-                                            invocationWithMethodSignature:signature];
-                [invocation setTarget:sharedApplication];
-                [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                NSDictionary *options = @{};
-                id completionHandler = nil;
-                [invocation setArgument:&ctaURL atIndex:2];
-                [invocation setArgument:&options atIndex:3];
-                [invocation setArgument:&completionHandler atIndex:4];
-                [invocation invoke];
+            if (@available(iOS 10.0, *)) {
+                if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                    NSMethodSignature *signature = [UIApplication
+                                                    instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                    NSInvocation *invocation = [NSInvocation
+                                                invocationWithMethodSignature:signature];
+                    [invocation setTarget:sharedApplication];
+                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                    NSDictionary *options = @{};
+                    id completionHandler = nil;
+                    __block NSURL *dlURL = ctaURL;
+                    [invocation setArgument:&dlURL atIndex:2];
+                    [invocation setArgument:&options atIndex:3];
+                    [invocation setArgument:&completionHandler atIndex:4];
+                    [invocation invoke];
+                } else {
+                    if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                        [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                    }
+                }
             } else {
+                
                 if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
                     [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
                 }
             }
-#else
-            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
-                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
-            }
-#endif
         }];
 #endif
     }
