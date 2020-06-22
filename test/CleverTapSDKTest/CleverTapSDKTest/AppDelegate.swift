@@ -20,8 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-6")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
         
-//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 
 //        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
         
@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
         
         CleverTap.autoIntegrate()
-        CleverTap.setDebugLevel(0)
+        CleverTap.setDebugLevel(3)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
@@ -106,10 +106,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     @available(iOS 10.0, *)
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    
+    private func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         //        CleverTap.sharedInstance()?.handleNotification(withData: response.notification.request.content.userInfo)
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
-        completionHandler()
+        completionHandler(UIBackgroundFetchResult.noData)
     }
     
     @available(iOS 10.0, *)
@@ -118,10 +119,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler([.badge, .sound, .alert])
     }
     
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        NSLog("%@: did receive remote notification completionhandler: %@", self.description, userInfo)
-        completionHandler(UIBackgroundFetchResult.noData)
-    }
+//    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+//        NSLog("%@: did receive remote notification completionhandler: %@", self.description, userInfo)
+//        completionHandler(UIBackgroundFetchResult.noData)
+//    }
     
     private func application(application: UIApplication, openURL url: NSURL,
                              sourceApplication: String?, annotation: AnyObject) -> Bool {

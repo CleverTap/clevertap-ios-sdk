@@ -24,6 +24,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         self.setupImages()
         self.recordUserChargedEvent()
         
+        let displayUnit: CleverTapDisplayUnit = CleverTapDisplayUnit()
+        CleverTap.sharedInstance()?.recordDisplayUnitViewedEvent(forID: displayUnit.unitID ?? "")
+        CleverTap.sharedInstance()?.recordDisplayUnitClickedEvent(forID: displayUnit.unitID ?? "")
+
+        
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
         }
@@ -160,6 +165,15 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
         // CleverTap.sharedInstance()?.markReadInboxMessage(forID: message.messageId ?? "")
         //        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
+        
+        
+//        let vc = ProductConfigVC(nibName: "productVC", bundle: nil)
+//        self.navigationController?.pushViewController(vc, animated: true)
+        
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+        let nextViewController = storyBoard.instantiateViewController(withIdentifier: "productVC") as! ProductConfigVC
+        self.navigationController?.pushViewController(nextViewController, animated:true)
+        
         print(message, index, buttonIndex)
     }
     
@@ -170,7 +184,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 style.title = "Notifications"
                 style.backgroundColor = UIColor.yellow
                 style.navigationBarTintColor = UIColor.groupTableViewBackground
-                style.messageTags = ["Promotions", "Offers"];
+//                style.messageTags = ["Promotions", "Offers"];
                 
                 
                 let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()

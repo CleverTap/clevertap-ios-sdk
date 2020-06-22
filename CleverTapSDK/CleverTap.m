@@ -490,6 +490,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
+
 #pragma mark - AppDelegate Swizzles and Related
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
@@ -530,6 +531,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #pragma clang diagnostic pop
+
 
 #pragma mark - Instance Lifecycle
 
@@ -677,7 +679,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self removeObservers];
 }
 
+
 #pragma mark - Private
+
 + (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
     if (_defaultInstanceConfig) {
         CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
@@ -1252,11 +1256,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
--(void)clearFirstRequestTimestamp {
+- (void)clearFirstRequestTimestamp {
     [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kFIRST_TS_KEY]];
 }
 
--(BOOL)isMuted {
+- (BOOL)isMuted {
     return [NSDate new].timeIntervalSince1970 - _lastMutedTs < 24 * 60 * 60;
 }
 
@@ -1876,14 +1880,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - CTInAppNotificationDisplayDelegate
 
--(void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller  {
+- (void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did dismiss: %@", self, notification.campaignId);
     [self notifyNotificationDismissed:notification];
     [[self class] inAppDisplayControllerDidDismiss:controller];
     [self showInAppNotificationIfAny];
 }
 
--(void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
+- (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did show: %@", self, notification.campaignId);
     [self recordInAppNotificationStateEvent:NO forNotification:notification andQueryParameters:nil];
     [self.inAppFCManager didShow:notification];
@@ -2734,6 +2738,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+
 #pragma mark Response Handling
 
 - (void)parseResponse:(NSData *)responseData {
@@ -2959,6 +2964,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self handleSendQueueFail];
     }
 }
+
 
 #pragma mark Profile Handling Private
 
@@ -4147,6 +4153,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return YES;
 }
 
+
 #pragma mark CTInboxDelegate
 
 - (void)inboxMessagesDidUpdate {
@@ -4157,6 +4164,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
 }
+
 
 #pragma mark CleverTapInboxViewControllerAnalyticsDelegate
 
@@ -4249,6 +4257,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+
 #pragma mark Inbox Message private
 
 - (BOOL)didHandleInboxMessageTestFromPushNotificaton:(NSDictionary*)notification {
@@ -4327,12 +4336,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #endif  //!CLEVERTAP_NO_INBOX_SUPPORT
 
+
 #pragma mark - AB Testing
 
 #if !CLEVERTAP_NO_AB_SUPPORT
 
 #pragma mark AB Testing public
-
 
 + (void)setUIEditorConnectionEnabled:(BOOL)enabled {
     [CTPreferences putInt:enabled forKey:kWR_KEY_AB_TEST_EDITOR_ENABLED];
@@ -4535,7 +4544,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [self.abTestController getDictionaryOfStringVariableWithName:name defaultValue:defaultValue];
 }
 
+
 #pragma mark ABTesting private
+
 - (void) _initABTesting {
     if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
         if (!self.config.enableABTesting) {
@@ -4562,6 +4573,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
 }
+
 
 #pragma mark CTABTestingDelegate
 

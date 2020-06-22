@@ -9,6 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)XibNameForControllerName:(NSString *)controllerName;
 + (UIImage *)imageForName:(NSString *)name type:(NSString *)type;
 + (UIApplication *_Nullable)getSharedApplication;
+
 @end
 
 NS_ASSUME_NONNULL_END

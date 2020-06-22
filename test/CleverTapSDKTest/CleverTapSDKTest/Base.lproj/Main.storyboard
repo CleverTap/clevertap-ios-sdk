@@ -1524,7 +1524,7 @@
         <!--Product Config-->
         <scene sceneID="Y7G-Mk-OfY">
             <objects>
-                <viewController id="Ua9-Yn-hXq" customClass="ProductConfigVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="productVC" id="Ua9-Yn-hXq" customClass="ProductConfigVC" customModule="CleverTapSDKTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="FJ0-xN-wFt">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
