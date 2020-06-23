@@ -379,7 +379,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             } else if (class_getInstanceMethod(ncdCls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
                 sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
                 __block NSInvocation *invocation = nil;
-                invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(UIBackgroundFetchResult result) ) {
+                invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
                     [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
                     [invocation setArgument:&center atIndex:2];
                     [invocation setArgument:&response atIndex:3];
@@ -391,7 +391,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:"))) {
             sel = NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
             __block NSInvocation *invocation = nil;
-            invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UIApplication *application, NSDictionary *userInfo, void (^completion)(void) ) {
+            invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UIApplication *application, NSDictionary *userInfo, void (^completion)(UIBackgroundFetchResult result) ) {
                 [CleverTap handlePushNotification:userInfo openDeepLinksInForeground:NO];
                 [invocation setArgument:&application atIndex:2];
                 [invocation setArgument:&userInfo atIndex:3];
