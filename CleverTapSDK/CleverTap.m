@@ -1911,6 +1911,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else if (ctaURL) {
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+        __block id dlURL;
         [[self class] runSyncMainQueue:^{
             UIApplication *sharedApplication = [[self class] getSharedApplication];
             if (sharedApplication == nil) {
@@ -1927,7 +1928,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [invocation setSelector:@selector(openURL:options:completionHandler:)];
                     NSDictionary *options = @{};
                     id completionHandler = nil;
-                    __block NSURL *dlURL = ctaURL;
+                    dlURL = ctaURL;
                     [invocation setArgument:&dlURL atIndex:2];
                     [invocation setArgument:&options atIndex:3];
                     [invocation setArgument:&completionHandler atIndex:4];
@@ -4202,6 +4203,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
+        __block id dlURL;
         [[self class] runSyncMainQueue:^{
             UIApplication *sharedApplication = [[self class] getSharedApplication];
             if (sharedApplication == nil) {
@@ -4218,7 +4220,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [invocation setSelector:@selector(openURL:options:completionHandler:)];
                     NSDictionary *options = @{};
                     id completionHandler = nil;
-                    __block NSURL *dlURL = ctaURL;
+                    dlURL = ctaURL;
                     [invocation setArgument:&dlURL atIndex:2];
                     [invocation setArgument:&options atIndex:3];
                     [invocation setArgument:&completionHandler atIndex:4];
