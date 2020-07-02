@@ -1,4 +1,3 @@
-
 #import "CTInboxBaseMessageCell.h"
 
 @class SDAnimatedImageView;

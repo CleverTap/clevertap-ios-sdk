@@ -3,13 +3,13 @@
 static NSDictionary *CTCGAffineTransformCreateDictionaryRepresentation(CGAffineTransform transform)
 {
     return @{
-             @"a": @(transform.a),
-             @"b": @(transform.b),
-             @"c": @(transform.c),
-             @"d": @(transform.d),
-             @"tx": @(transform.tx),
-             @"ty": @(transform.ty)
-             };
+        @"a": @(transform.a),
+        @"b": @(transform.b),
+        @"c": @(transform.c),
+        @"d": @(transform.d),
+        @"tx": @(transform.tx),
+        @"ty": @(transform.ty)
+    };
 }
 
 static BOOL CTCGAffineTransformMakeWithDictionaryRepresentation(NSDictionary *dictionary, CGAffineTransform *transform)

@@ -3,13 +3,16 @@
 #import "CTInAppResources.h"
 
 @implementation CTInAppPassThroughWindow
+
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView *view = [super hitTest:point withEvent:event];
     return view == self ? nil : view;
 }
+
 @end
 
 @implementation CTInAppPassThroughView
+
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView *view = [super hitTest:point withEvent:event];
     if (view == self) {
@@ -40,7 +43,7 @@
 #endif
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
         [self loadView];
         [self viewDidLoad];
     } completion:nil];
@@ -62,11 +65,11 @@
 
 #endif
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     NSAssert(false, @"Override in sub-class");
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     NSAssert(false, @"Override in sub-class");
 }
 
@@ -117,7 +120,7 @@
     }
 }
 
--(void)hideFromWindow:(BOOL)animated {
+- (void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
         [self.window removeFromSuperview];
         self.window = nil;
@@ -138,10 +141,13 @@
     }
 }
 
-#pragma mark CTInAppPassThroughViewDelegate
+
+#pragma mark - CTInAppPassThroughViewDelegate
+
 - (void)viewWillPassThroughTouch {
     [self hide:NO];
 }
+
 
 #pragma mark - Setup Buttons
 
@@ -171,6 +177,7 @@
 #endif
 }
 
+
 #pragma mark - Actions
 
 - (void)tappedDismiss {
@@ -198,7 +205,7 @@
     }
 }
 
-- (void)handleImageTapGesture{
+- (void)handleImageTapGesture {
     CTNotificationButton *button = self.notification.buttons[0];
     NSURL *buttonCTA = button.actionURL;
     NSString *buttonText = @"image";

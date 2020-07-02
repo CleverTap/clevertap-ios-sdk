@@ -24,3 +24,7 @@ DerivedData
 
 Carthage
 */build/
+Cartfile
+Cartfile.resolved
+SwiftStarter/Pods
+ObjCStarter/Pods

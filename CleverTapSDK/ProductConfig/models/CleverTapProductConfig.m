@@ -108,6 +108,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     return [NSString stringWithFormat:@"%@:%@",  _config.accountId, suffix];
 }
 
+
 #pragma mark - Public Apis
 
 - (void)fetch {
@@ -171,6 +172,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
     NSTimeInterval lastFetchTime = self.lastFetchTs;
     return [NSDate dateWithTimeIntervalSince1970:lastFetchTime];
 }
+
 
 #pragma mark - Throttling
 

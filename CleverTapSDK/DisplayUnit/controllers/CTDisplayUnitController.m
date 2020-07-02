@@ -2,6 +2,7 @@
 #import "CTPreferences.h"
 
 @interface CTDisplayUnitController() {
+    
 }
 
 @property (nonatomic, copy, readonly) NSString *accountId;

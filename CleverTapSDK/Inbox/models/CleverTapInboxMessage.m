@@ -104,7 +104,7 @@
     } else if (components.minute > 0) {
         return (components.minute > 1) ? [NSString stringWithFormat:@"%ld minutes ago", (long)components.minute] : [NSString stringWithFormat:@"%ld minute ago", (long)components.minute];
     } else {
-       return @"Just now";
+        return @"Just now";
     }
 }
 

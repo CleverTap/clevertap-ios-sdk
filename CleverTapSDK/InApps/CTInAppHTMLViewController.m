@@ -342,7 +342,8 @@ typedef enum {
     }
 }
 
-#pragma mark - revealing setter
+
+#pragma mark - Revealing Setter
 
 - (void)setRevealing:(BOOL)revealing {
     if (_revealing == revealing) {
@@ -360,6 +361,7 @@ typedef enum {
 - (void)_setRevealing:(BOOL)revealing {
     _revealing = revealing;
 }
+
 
 #pragma mark - ContentView Sliding
 
@@ -450,6 +452,7 @@ typedef enum {
     }];
 }
 
+
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
@@ -503,7 +506,7 @@ typedef enum {
     }
 }
 
--(void)hideFromWindow:(BOOL)animated {
+- (void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
         [self.window removeFromSuperview];
         self.window = nil;
@@ -524,14 +527,15 @@ typedef enum {
     }
 }
 
+
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     if (!self.notification.html) return;
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
 

@@ -1,4 +1,3 @@
-
 #import "CTVarCache.h"
 
 @interface CTVarCache() {}
@@ -44,7 +43,7 @@
     @synchronized (self.vars) {
         CTVar *existing = self.vars[name];
         if (existing) {
-           [existing clearValue];
+            [existing clearValue];
         }
     }
 }

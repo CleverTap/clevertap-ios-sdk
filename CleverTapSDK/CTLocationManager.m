@@ -91,7 +91,8 @@ static NSObject *requestsLockObject;
     }
 }
 
-#pragma mark CLLocationManagerDelegate
+
+#pragma mark - CLLocationManagerDelegate
 
 + (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
     
@@ -144,7 +145,8 @@ static NSObject *requestsLockObject;
     }
 }
 
-#pragma mark helpers
+
+#pragma mark - Helpers
 
 + (void)scheduleLocationTimeout {
     [self cancelLocationTimeout];

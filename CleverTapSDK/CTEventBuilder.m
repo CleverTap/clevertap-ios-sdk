@@ -391,4 +391,5 @@ NSString *const kCHARGED_EVENT = @"Charged";
         completion(nil, nil);
     }
 }
+
 @end

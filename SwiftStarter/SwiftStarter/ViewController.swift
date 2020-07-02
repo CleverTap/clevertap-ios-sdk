@@ -70,7 +70,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell")!
         cell.textLabel?.text = self.eventList[indexPath.row]
-        cell.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+        cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
         return cell
     }
     

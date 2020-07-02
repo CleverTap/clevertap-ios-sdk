@@ -26,7 +26,7 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
 
 - (CTABTestEditorMessage *)response {
     CTABTestEditorDeviceInfoMessageResponse *deviceInfoMessageResponse = [CTABTestEditorDeviceInfoMessageResponse messageWithOptions:nil];
-
+    
     deviceInfoMessageResponse.sdkVersion = self.deviceInfo.sdkVersion;
     deviceInfoMessageResponse.appBuild = self.deviceInfo.appBuild;
     deviceInfoMessageResponse.appVersion = self.deviceInfo.appVersion;
@@ -35,11 +35,11 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
     deviceInfoMessageResponse.systemName = self.deviceInfo.osName;
     deviceInfoMessageResponse.deviceName = self.deviceInfo.deviceName;
     deviceInfoMessageResponse.deviceModel = self.deviceInfo.model;
-
+    
     if (self.deviceInfo.library) {
         deviceInfoMessageResponse.library = self.deviceInfo.library;
     }
-
+    
     dispatch_sync(dispatch_get_main_queue(), ^{
         UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
         BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
@@ -51,7 +51,7 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
             deviceInfoMessageResponse.deviceHeight = [self deviceHeight];
         }
     });
-
+    
     deviceInfoMessageResponse.availableFontFamilies = [self availableFontFamilies];
     return deviceInfoMessageResponse;
 }
@@ -89,9 +89,9 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
 
 - (NSMutableDictionary *)fontDictionaryForFontFamilyName:(NSString *)familyName fontNames:(NSArray *)fontNames {
     return [@{
-              @"family": familyName,
-              @"font_names": [fontNames mutableCopy]
-              } mutableCopy];
+        @"family": familyName,
+        @"font_names": [fontNames mutableCopy]
+    } mutableCopy];
 }
 
 - (NSString*)deviceWidth {

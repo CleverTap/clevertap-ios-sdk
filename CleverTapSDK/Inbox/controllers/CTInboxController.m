@@ -78,7 +78,9 @@ static NSManagedObjectContext *privateContext;
     });
 }
 
-#pragma mark Public
+
+#pragma mark - Public
+
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages {
     if (!self.isInitialized) return;
     [privateContext performBlock:^{
@@ -174,16 +176,17 @@ static NSManagedObjectContext *privateContext;
     return messages;
 }
 
-#pragma mark Private
 
--(CTMessageMO *)_messageForId:(NSString *)messageId {
+#pragma mark - Private
+
+- (CTMessageMO *)_messageForId:(NSString *)messageId {
     if (!self.isInitialized) return nil;
     NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
     BOOL existing = results && [results count] > 0;
     return existing ? results[0] : nil;
 }
 
--(void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
+- (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
     [privateContext performBlock:^{
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
@@ -207,6 +210,9 @@ static NSManagedObjectContext *privateContext;
     }
     return res;
 }
+
+
+#pragma mark - Delegate
 
 - (void)notifyUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(inboxMessagesDidUpdate)]) {

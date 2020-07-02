@@ -55,7 +55,7 @@
             self.dividerCenterXConstraint.priority = 999;
         }
     }
-   
+    
     [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;

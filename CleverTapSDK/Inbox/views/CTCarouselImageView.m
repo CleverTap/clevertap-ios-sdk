@@ -137,8 +137,8 @@ static float captionHeight = 0.f;
 - (void)loadImage {
     if (!self.imageUrl) return;
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
-                       placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                                options:(SDWebImageRetryFailed) context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)}];
+                      placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                               options:(SDWebImageRetryFailed) context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)}];
     
 }
 

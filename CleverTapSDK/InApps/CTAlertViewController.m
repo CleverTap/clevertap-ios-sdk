@@ -28,6 +28,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+
 #pragma mark - Setup Notification
 
 - (void)setupDialogNotification {
@@ -125,13 +126,14 @@
     completionBlock();
 }
 
+
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
 

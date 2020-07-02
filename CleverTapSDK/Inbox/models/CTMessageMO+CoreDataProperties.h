@@ -1,13 +1,10 @@
-
 #import "CTMessageMO.h"
 
 @class CTUserMO;
 
-NS_ASSUME_NONNULL_BEGIN
-
 @interface CTMessageMO (CoreDataProperties)
-- (instancetype)initWithJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context;
-- (NSDictionary *)toJSON;
+- (instancetype _Nullable)initWithJSON:(NSDictionary *_Nullable)json forContext:(NSManagedObjectContext *_Nullable)context;
+- (NSDictionary *_Nullable)toJSON;
 
 @property (nonatomic, assign) NSUInteger date;
 @property (nonatomic, assign) NSUInteger expires;
@@ -18,9 +15,4 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, copy) id json;
 @property (nonatomic, assign) BOOL isRead;
 
-
-
-
 @end
-
-NS_ASSUME_NONNULL_END

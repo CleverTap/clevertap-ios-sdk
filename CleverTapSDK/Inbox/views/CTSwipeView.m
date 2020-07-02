@@ -999,7 +999,7 @@
     
     //get number of items
     [self updateItemSizeAndCount];
-
+    
     //layout views
     [self setNeedsLayout];
     

@@ -261,10 +261,10 @@
 }
 
 - (BOOL)appliesTo:(NSObject *)view {
-   return (([self.name isEqualToString:@"*"] || [view isKindOfClass:NSClassFromString(self.name)])
+    return (([self.name isEqualToString:@"*"] || [view isKindOfClass:NSClassFromString(self.name)])
             && (self.nameOnly || (
                                   (!self.predicate || [_predicate evaluateWithObject:view])
-                                  && (!self.index || [self isView:view siblingNumber:_index.integerValue])
+                                  && ((self.index == nil) || [self isView:view siblingNumber:_index.integerValue])
                                   && (!(self.unique) || [self isView:view oneOfNSiblings:1])))
             );
 }

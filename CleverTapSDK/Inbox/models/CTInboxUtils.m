@@ -10,15 +10,15 @@ static NSDictionary *_inboxMessageTypeMap;
 + (CTInboxMessageType)inboxMessageTypeFromString:(NSString*)type {
     if (_inboxMessageTypeMap == nil) {
         _inboxMessageTypeMap = @{
-                                 @"simple": @(CTInboxMessageTypeSimple),
-                                 @"message-icon": @(CTInboxMessageTypeMessageIcon),
-                                 @"carousel": @(CTInboxMessageTypeCarousel),
-                                 @"carousel-image": @(CTInboxMessageTypeCarouselImage),
-                                 };
+            @"simple": @(CTInboxMessageTypeSimple),
+            @"message-icon": @(CTInboxMessageTypeMessageIcon),
+            @"carousel": @(CTInboxMessageTypeCarousel),
+            @"carousel-image": @(CTInboxMessageTypeCarouselImage),
+        };
     }
     
     NSNumber *_type = type != nil ? _inboxMessageTypeMap[type] : @(CTInboxMessageTypeUnknown);
-    if (!_type) {
+    if (_type == nil) {
         _type = @(CTInboxMessageTypeUnknown);
     }
     return [_type integerValue];

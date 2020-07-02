@@ -14,8 +14,8 @@
 - (instancetype _Nonnull)init __unavailable;
 
 - (instancetype _Nonnull)initWithMessages:(NSArray * _Nonnull)messages
-                          config:(CleverTapInboxStyleConfig * _Nonnull)config
-                        delegate:(id<CleverTapInboxViewControllerDelegate> _Nullable)delegate
-               analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate> _Nullable)analyticsDelegate;
+                                   config:(CleverTapInboxStyleConfig * _Nonnull)config
+                                 delegate:(id<CleverTapInboxViewControllerDelegate> _Nullable)delegate
+                        analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate> _Nullable)analyticsDelegate;
 
 @end

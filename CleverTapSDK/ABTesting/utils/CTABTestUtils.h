@@ -1,4 +1,3 @@
-
 #import <Foundation/Foundation.h>
 
 extern NSString * _Nullable const kCTSessionVariantKey;

@@ -5,25 +5,25 @@
 #import "CTObjectSerializerConfig.h"
 #import "CTObjectIdentityProvider.h"
 
-@implementation CTApplicationStateSerializer{
+@implementation CTApplicationStateSerializer {
     CTObjectSerializer *_serializer;
     UIApplication *_application;
 }
 
-- (instancetype)initWithApplication:(UIApplication *)application configuration:(CTObjectSerializerConfig *)configuration objectIdentityProvider:(CTObjectIdentityProvider *)objectIdentityProvider{
-  
+- (instancetype)initWithApplication:(UIApplication *)application configuration:(CTObjectSerializerConfig *)configuration objectIdentityProvider:(CTObjectIdentityProvider *)objectIdentityProvider {
+    
     if (application == nil || configuration == nil) return nil;
     
     self = [super init];
     if (self) {
         _application = application;
         _serializer = [[CTObjectSerializer alloc] initWithConfiguration:configuration
-                       objectIdentityProvider:objectIdentityProvider];
+                                                 objectIdentityProvider:objectIdentityProvider];
     }
     return self;
 }
 
-- (UIImage *)snapshotForWindowAtIndex:(NSUInteger)index{
+- (UIImage *)snapshotForWindowAtIndex:(NSUInteger)index {
     UIImage *snapshotImage = nil;
     UIWindow *window = [self windowAtIndex:index];
     if (window && !CGRectEqualToRect(window.frame, CGRectZero)) {
@@ -37,7 +37,7 @@
     return snapshotImage;
 }
 
-- (NSDictionary *)objectHierarchyForWindowAtIndex:(NSUInteger)index{
+- (NSDictionary *)objectHierarchyForWindowAtIndex:(NSUInteger)index {
     UIWindow *window = [self windowAtIndex:index];
     if (window) {
         return [_serializer serializedObjectsWithRootObject:window];
@@ -45,7 +45,7 @@
     return @{};
 }
 
-- (UIWindow *)windowAtIndex:(NSUInteger)index{
+- (UIWindow *)windowAtIndex:(NSUInteger)index {
     if (index > _application.windows.count) return nil;
     return _application.windows[index];
 }

@@ -4,7 +4,7 @@
 @implementation CTMessageMO (CoreDataProperties)
 
 + (NSFetchRequest<CTMessageMO *> *)fetchRequest {
-	return [NSFetchRequest fetchRequestWithEntityName:@"CTMessage"];
+    return [NSFetchRequest fetchRequestWithEntityName:@"CTMessage"];
 }
 
 - (instancetype)initWithJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context {

@@ -35,9 +35,9 @@
                                                  error:&error];
         if (data) {
             return @{
-                     @"mime_type": @"text/html",
-                     @"data": [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]
-                     };
+                @"mime_type": @"text/html",
+                @"data": [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]
+            };
         } else {
             CleverTapLogStaticDebug(@"Failed transformation from NSAttributedString to HTML: %@", error);
         }

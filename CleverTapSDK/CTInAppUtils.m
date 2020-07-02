@@ -11,21 +11,21 @@ static NSDictionary *_inAppTypeMap;
 + (CTInAppType)inAppTypeFromString:(NSString*)type {
     if (_inAppTypeMap == nil) {
         _inAppTypeMap = @{
-                          @"custom-html": @(CTInAppTypeHTML),
-                          @"interstitial": @(CTInAppTypeInterstitial),
-                          @"cover": @(CTInAppTypeCover),
-                          @"header-template": @(CTInAppTypeHeader),
-                          @"footer-template": @(CTInAppTypeFooter),
-                          @"half-interstitial": @(CTInAppTypeHalfInterstitial),
-                          @"alert-template": @(CTInAppTypeAlert),
-                          @"interstitial-image": @(CTInAppTypeInterstitialImage),
-                          @"half-interstitial-image": @(CTInAppTypeHalfInterstitialImage),
-                          @"cover-image": @(CTInAppTypeCoverImage)
-                          };
+            @"custom-html": @(CTInAppTypeHTML),
+            @"interstitial": @(CTInAppTypeInterstitial),
+            @"cover": @(CTInAppTypeCover),
+            @"header-template": @(CTInAppTypeHeader),
+            @"footer-template": @(CTInAppTypeFooter),
+            @"half-interstitial": @(CTInAppTypeHalfInterstitial),
+            @"alert-template": @(CTInAppTypeAlert),
+            @"interstitial-image": @(CTInAppTypeInterstitialImage),
+            @"half-interstitial-image": @(CTInAppTypeHalfInterstitialImage),
+            @"cover-image": @(CTInAppTypeCoverImage)
+        };
     }
     
     NSNumber *_type = type != nil ? _inAppTypeMap[type] : @(CTInAppTypeUnknown);
-    if (!_type) {
+    if (_type == nil) {
         _type = @(CTInAppTypeUnknown);
     }
     return [_type integerValue];
@@ -53,15 +53,15 @@ static NSDictionary *_inAppTypeMap;
 #else
     return [CTInAppResources imageForName:name type:type];
 #endif
-
+    
 }
 
-+(UIColor * _Nullable)ct_colorWithHexString:(NSString *)string{
++ (UIColor * _Nullable)ct_colorWithHexString:(NSString *)string {
     
     return  [self ct_colorWithHexString:string withAlpha:1.0];
 }
 
-+ (UIColor * _Nullable)ct_colorWithHexString:(NSString *)string withAlpha:(CGFloat)alpha{
++ (UIColor * _Nullable)ct_colorWithHexString:(NSString *)string withAlpha:(CGFloat)alpha {
     
     if (![string isKindOfClass:[NSString class]] || [string length] == 0) {
         return [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:1.0f];
@@ -86,7 +86,6 @@ static NSDictionary *_inAppTypeMap;
                     alpha:alpha];
     
     return color;
-    
 }
 
 @end

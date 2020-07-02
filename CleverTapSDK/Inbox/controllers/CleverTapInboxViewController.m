@@ -235,7 +235,11 @@ static const int kMaxTags = 3;
     segmentedControl.selectedSegmentIndex = _selectedSegmentIndex;
     segmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
     if (_config && _config.tabSelectedBgColor) {
-        segmentedControl.tintColor = _config.tabSelectedBgColor;
+        if (@available(iOS 13.0, *)) {
+            segmentedControl.selectedSegmentTintColor = _config.tabSelectedBgColor;
+        } else {
+            segmentedControl.tintColor = _config.tabSelectedBgColor;
+        }
     }
     if (_config && _config.tabSelectedTextColor) {
         [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
@@ -329,7 +333,8 @@ static const int kMaxTags = 3;
     }
 }
 
-#pragma mark - Table view data source
+
+#pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     if (!self.filterMessages) {
@@ -383,11 +388,14 @@ static const int kMaxTags = 3;
         [message setRead:YES];
     }
 }
+
+
 #pragma mark - Actions
 
 - (void)dismissTapped {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+
 
 #pragma mark - Inbox Message Handling
 
@@ -405,7 +413,7 @@ static const int kMaxTags = 3;
             NSString *copy = link[@"copyText"][@"text"];
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
-            [self.parentViewController.view makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
+            [self.parentViewController.view ct_makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
         }
     }
     [self _notifyMessageSelected:message atIndex:index withButtonIndex:buttonIndex];
@@ -437,9 +445,10 @@ static const int kMaxTags = 3;
     }
 }
 
+
 #pragma mark - Video Player Handling
 
-#pragma mark - UIScrollViewDelegate
+#pragma mark UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     [self handleScroll];

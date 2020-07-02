@@ -60,9 +60,9 @@
     [[NSLayoutConstraint constraintWithItem:self.controlsViewVC.view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual
                                      toItem:self.view attribute:NSLayoutAttributeCenterY
                                  multiplier:1 constant:0] setActive:YES];
-
+    
     if (self.notification.mediaIsAudio) {
-
+        
         NSBundle *bundle = [NSBundle bundleForClass:[self class]];
         UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
         self.imageView = [[UIImageView alloc] initWithFrame: self.controlsViewVC.view.frame];
@@ -79,6 +79,7 @@
     self.imageView.frame = self.controlsViewVC.view.bounds;
     [self.view bringSubviewToFront:self.controlsViewVC.view];
 }
+
 
 #pragma mark - Delegates
 

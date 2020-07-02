@@ -1,4 +1,3 @@
-
 #import "CTBaseHeaderFooterViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
@@ -66,6 +65,7 @@ typedef enum {
     view.delegate = self;
     [self layoutNotification];
 }
+
 
 #pragma mark - Setup Notification
 
@@ -211,7 +211,8 @@ typedef enum {
     }
 }
 
-#pragma mark - revealing setter
+
+#pragma mark - Revealing Setter
 
 - (void)setRevealing:(BOOL)revealing {
     if (_revealing == revealing) {
@@ -229,6 +230,7 @@ typedef enum {
 - (void)_setRevealing:(BOOL)revealing {
     _revealing = revealing;
 }
+
 
 #pragma mark - ContentView Sliding
 
@@ -253,25 +255,25 @@ typedef enum {
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction
                      animations:^{
-                         self->_containerView.center = CGPointMake(self->_originalCenter, self->_containerView.center.y);
-                     }
+        self->_containerView.center = CGPointMake(self->_originalCenter, self->_containerView.center.y);
+    }
                      completion:^(BOOL f) {
-                         [UIView animateWithDuration:0.1 delay:0
-                                             options:UIViewAnimationOptionCurveEaseOut
-                                          animations:^{
-                                              self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
-                                          }
-                                          completion:^(BOOL f2) {
-                                              [UIView animateWithDuration:0.1 delay:0
-                                                                  options:UIViewAnimationOptionCurveEaseIn
-                                                               animations:^{
-                                                                   self->_containerView.frame = CGRectOffset(self->_containerView.frame, -bounceDistance, 0);
-                                                               }
-                                                               completion:^(BOOL f1) {
-                                                                   self->_currentStatus = kWRSlideStatusNormal;
-                                                               }];
-                                          }];
-                     }];
+        [UIView animateWithDuration:0.1 delay:0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^{
+            self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
+        }
+                         completion:^(BOOL f2) {
+            [UIView animateWithDuration:0.1 delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                self->_containerView.frame = CGRectOffset(self->_containerView.frame, -bounceDistance, 0);
+            }
+                             completion:^(BOOL f1) {
+                self->_currentStatus = kWRSlideStatusNormal;
+            }];
+        }];
+    }];
 }
 
 - (void)_slideOutContentViewInDirection:(WRSlideCellDirection)direction; {
@@ -298,26 +300,27 @@ typedef enum {
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
-                         self->_containerView.center = CGPointMake(newCenterX, self->_containerView.center.y);
-                     }
+        self->_containerView.center = CGPointMake(newCenterX, self->_containerView.center.y);
+    }
                      completion:^(BOOL f) {
-                         [UIView animateWithDuration:0.1 delay:0
-                                             options:UIViewAnimationOptionCurveEaseIn
-                                          animations:^{
-                                              self->_containerView.frame = CGRectOffset(self->_containerView.frame, -bounceDistance, 0);
-                                          }
-                                          completion:^(BOOL f1) {
-                                              [UIView animateWithDuration:0.1 delay:0
-                                                                  options:UIViewAnimationOptionCurveEaseIn
-                                                               animations:^{
-                                                                   self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
-                                                               }
-                                                               completion:^(BOOL finished) {
-                                                                   [self hide:NO];
-                                                               }];
-                                          }];
-                     }];
+        [UIView animateWithDuration:0.1 delay:0
+                            options:UIViewAnimationOptionCurveEaseIn
+                         animations:^{
+            self->_containerView.frame = CGRectOffset(self->_containerView.frame, -bounceDistance, 0);
+        }
+                         completion:^(BOOL f1) {
+            [UIView animateWithDuration:0.1 delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
+            }
+                             completion:^(BOOL finished) {
+                [self hide:NO];
+            }];
+        }];
+    }];
 }
+
 
 #pragma mark - UIGestureRecognizerDelegate
 
@@ -369,13 +372,14 @@ typedef enum {
     }
 }
 
+
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
 

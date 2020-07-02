@@ -4,11 +4,11 @@ import CleverTapSDK
 import WatchConnectivity
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate, CleverTapPushNotificationDelegate {
 
     var window: UIWindow?
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         // register for push notifications
         registerForPush()
@@ -22,6 +22,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         ctConfig.logLevel = .debug
         let cleverTapAdditionalInstance = CleverTap.instance(with: ctConfig)
         NSLog("additional CleverTap instance created for accountID: %@", cleverTapAdditionalInstance.config.accountId)
+        
+        cleverTapAdditionalInstance.setPushNotificationDelegate(self)
         
         // watchOS session
         checkSession()
@@ -65,24 +67,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         NSLog("%@: registered for remote notifications: %@", self.description, deviceToken.description)
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
         completionHandler()
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
         NSLog("%@: will present notification: %@", self.description, notification.request.content.userInfo)
+        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: notification.request.content.userInfo)
         completionHandler([.badge, .sound, .alert])
     }
     
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         NSLog("%@: did receive remote notification completionhandler: %@", self.description, userInfo)
         completionHandler(UIBackgroundFetchResult.noData)
     }
     
+    func pushNotificationTapped(withCustomExtras customExtras: [AnyHashable : Any]!) {
+        NSLog("pushNotificationTapped: customExtras: ", customExtras)
+    }
+    
     // MARK: - Handle URL
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
         return true
     }

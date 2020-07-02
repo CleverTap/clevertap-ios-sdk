@@ -5,7 +5,7 @@
 
 @interface CTInAppFCManager : NSObject
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config guid:(NSString *)guid;
 
 - (void)checkUpdateDailyLimits;
 
@@ -15,7 +15,7 @@
 
 - (void)resetSession;
 
-- (void)changeUser;
+- (void)changeUserWithGuid:(NSString *)guid;
 
 - (void)didShow:(CTInAppNotification *)inapp;
 

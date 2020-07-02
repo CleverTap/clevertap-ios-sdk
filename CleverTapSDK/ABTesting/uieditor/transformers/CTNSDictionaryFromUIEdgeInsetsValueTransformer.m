@@ -14,11 +14,11 @@
     if ([value respondsToSelector:@selector(UIEdgeInsetsValue)]) {
         UIEdgeInsets edgeInsets = [value UIEdgeInsetsValue];
         return @{
-                 @"top"    : @(edgeInsets.top),
-                 @"bottom" : @(edgeInsets.bottom),
-                 @"left"   : @(edgeInsets.left),
-                 @"right"  : @(edgeInsets.right)
-                 };
+            @"top"    : @(edgeInsets.top),
+            @"bottom" : @(edgeInsets.bottom),
+            @"left"   : @(edgeInsets.left),
+            @"right"  : @(edgeInsets.right)
+        };
     }
     return nil;
 }

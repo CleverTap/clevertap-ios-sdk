@@ -128,23 +128,38 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
 #pragma mark - Delegates
 
++ (void)runSyncMainQueue:(void (^)(void))block {
+    if ([NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), block);
+    }
+}
+
 - (void)notifyInitUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidInitialize)]) {
-        [self.delegate productConfigDidInitialize];
+        [[self class] runSyncMainQueue:^{
+            [self.delegate productConfigDidInitialize];
+        }];
     }
 }
 
 - (void)notifyFetchUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidFetch)]) {
-        [self.delegate productConfigDidFetch];
+        [[self class] runSyncMainQueue:^{
+            [self.delegate productConfigDidFetch];
+        }];
     }
 }
 
 - (void)notifyActivateUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidActivate)]) {
-        [self.delegate productConfigDidActivate];
+        [[self class] runSyncMainQueue:^{
+            [self.delegate productConfigDidActivate];
+        }];
     }
 }
+
 
 #pragma mark - Storage operations
 
@@ -187,6 +202,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
 - (NSString*)description {
     return [NSString stringWithFormat:@"CleverTap.%@.CTProductConfigController", _config.accountId];
 }
+
 
 #pragma mark - Product Config APIs
 

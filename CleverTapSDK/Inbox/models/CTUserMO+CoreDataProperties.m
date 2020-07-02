@@ -3,22 +3,22 @@
 #import "CTConstants.h"
 
 @interface CTUserMO ()
- - (void)insertObject:(CTMessageMO *)value inMessagesAtIndex:(NSUInteger)idx;
- - (void)removeObjectFromMessagesAtIndex:(NSUInteger)idx;
- - (void)insertMessages:(NSArray<CTMessageMO *> *)value atIndexes:(NSIndexSet *)indexes;
- - (void)removeMessagesAtIndexes:(NSIndexSet *)indexes;
- - (void)replaceObjectInMessagesAtIndex:(NSUInteger)idx withObject:(CTMessageMO *)value;
- - (void)replaceMessagesAtIndexes:(NSIndexSet *)indexes withMessages:(NSArray<CTMessageMO *> *)values;
- - (void)addMessagesObject:(CTMessageMO *)value;
- - (void)removeMessagesObject:(CTMessageMO *)value;
- - (void)addMessages:(NSOrderedSet<CTMessageMO *> *)values;
- - (void)removeMessages:(NSOrderedSet<CTMessageMO *> *)values;
+- (void)insertObject:(CTMessageMO *)value inMessagesAtIndex:(NSUInteger)idx;
+- (void)removeObjectFromMessagesAtIndex:(NSUInteger)idx;
+- (void)insertMessages:(NSArray<CTMessageMO *> *)value atIndexes:(NSIndexSet *)indexes;
+- (void)removeMessagesAtIndexes:(NSIndexSet *)indexes;
+- (void)replaceObjectInMessagesAtIndex:(NSUInteger)idx withObject:(CTMessageMO *)value;
+- (void)replaceMessagesAtIndexes:(NSIndexSet *)indexes withMessages:(NSArray<CTMessageMO *> *)values;
+- (void)addMessagesObject:(CTMessageMO *)value;
+- (void)removeMessagesObject:(CTMessageMO *)value;
+- (void)addMessages:(NSOrderedSet<CTMessageMO *> *)values;
+- (void)removeMessages:(NSOrderedSet<CTMessageMO *> *)values;
 @end
 
 @implementation CTUserMO (CoreDataProperties)
 
 + (instancetype)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context {
-   CTUserMO *_user;
+    CTUserMO *_user;
     @try {
         NSString *identifier = json[@"identifier"];
         
@@ -89,11 +89,11 @@
     BOOL haveUpdates = NO;
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet new];
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
-
+    
     for (NSString *key in [deduped allKeys]) {
         NSDictionary *message = deduped[key];
         NSOrderedSet *results = [self.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", message[@"_id"]]];
-       
+        
         BOOL existing = results && [results count] > 0;
         if (existing) {
             CTMessageMO *msg = (CTMessageMO*)results[0];

@@ -81,7 +81,7 @@ static NSArray *registeredURLSchemes;
         
         NSString *useCustomCleverTapId = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL];
         _useCustomCleverTapId = (useCustomCleverTapId && [useCustomCleverTapId isEqualToString:@"1"]);
-    
+        
         NSString *shouldDisableAppLaunchReporting = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_APP_LAUNCH_LABEL];
         _disableAppLaunchedEvent = (shouldDisableAppLaunchReporting && [shouldDisableAppLaunchReporting isEqualToString:@"1"]);
         

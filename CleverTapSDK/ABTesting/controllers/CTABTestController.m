@@ -51,10 +51,10 @@ typedef void (^CTABTestingOperationBlock)(void);
     self = [super init];
     if (self) {
         _typeToMessagesMap = @{
-           CTABTestEditorDeviceInfoMessageRequestType : [CTABTestEditorDeviceInfoMessageRequest class],
-           CTABTestEditorSnapshotMessageRequestType   : [CTABTestEditorSnapshotMessageRequest class],
-           CTABTestEditorVarsMessageRequestType       : [CTABTestEditorVarsMessageRequest class]
-         };
+            CTABTestEditorDeviceInfoMessageRequestType : [CTABTestEditorDeviceInfoMessageRequest class],
+            CTABTestEditorSnapshotMessageRequestType   : [CTABTestEditorSnapshotMessageRequest class],
+            CTABTestEditorVarsMessageRequestType       : [CTABTestEditorVarsMessageRequest class]
+        };
         _delegate = delegate;
         _config = config;
         _guid = guid;
@@ -254,7 +254,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 
 - (void)_unarchiveVariantsSync:(BOOL)sync {
     NSString *filePath = [self variantsArchiveFileName];
-     __weak CTABTestController *weakSelf = self;
+    __weak CTABTestController *weakSelf = self;
     CTABTestingOperationBlock opBlock = ^{
         NSSet *variants = (NSSet *)[CTPreferences unarchiveFromFile:filePath removeFile:NO];
         if (variants) {
@@ -274,7 +274,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 - (void)_archiveVariants:(NSSet*)variants sync:(BOOL)sync {
     NSString *filePath = [self variantsArchiveFileName];
     CTABTestingOperationBlock opBlock = ^{
-         [CTPreferences archiveObject:variants forFileName:filePath];
+        [CTPreferences archiveObject:variants forFileName:filePath];
     };
     if (sync) {
         opBlock();
@@ -308,7 +308,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     for (id variantData in experiments) {
         CTABVariant *parseVariant = [CTABVariant variantWithData:variantData];
         if (parseVariant) {
-           [parsed addObject:parseVariant];
+            [parsed addObject:parseVariant];
         }
     }
     
@@ -344,6 +344,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     return config ? [[CTObjectSerializerConfig alloc] initWithDictionary:config] : nil;
 }
 
+
 #pragma mark - Handle Editor Messages
 
 - (void)sendHandshake {
@@ -373,7 +374,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     dispatch_async(dispatch_get_main_queue(), ^{
         [[CTInAppResources getSharedApplication] setIdleTimerDisabled:YES];
     });
-   
+    
 }
 
 - (void)handleSessionStarted {
@@ -417,7 +418,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     if (self.sessionEnded) {
         CleverTapLogDebug(_config.logLevel, @"Editor Session is ended ignorning message: %@", message);
     }
-     
+    
     NSData *jsonData = [message isKindOfClass:[NSString class]] ? [(NSString *)message dataUsingEncoding:NSUTF8StringEncoding] : message;
     NSError *error = nil;
     id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData
@@ -435,15 +436,15 @@ typedef void (^CTABTestingOperationBlock)(void);
             };
         } else if ([type isEqualToString:CTABTestEditorChangeMessageRequestType]) {
             opBlock = ^{
-              [self handleTestEditorChangeRequestWithData:data];
+                [self handleTestEditorChangeRequestWithData:data];
             };
         } else if  ([type isEqualToString:CTABTestEditorClearMessageRequestType]) {
             opBlock = ^{
-               [self handleTestEditorClearRequestWithData:data];
+                [self handleTestEditorClearRequestWithData:data];
             };
         } else if ([type isEqualToString:CTABTestVarsRequestType]) {
             opBlock = ^{
-               [self handleTestVars:data];
+                [self handleTestVars:data];
             };
         }  else if ([type isEqualToString:CTABTestEditorDisconnectMessageRequestType]) {
             opBlock = ^{
@@ -481,11 +482,11 @@ typedef void (^CTABTestingOperationBlock)(void);
     NSMutableDictionary *options = [NSMutableDictionary new];
     options[@"session"] = _session;
     options[@"data"] = data;
-
+    
     if ([type isEqualToString:CTABTestEditorVarsMessageRequestType]) {
         options[@"vars"] = [self.varCache serializeVars];
     }
-
+    
     if ([type isEqualToString:CTABTestEditorDeviceInfoMessageRequestType]) {
         options[@"deviceInfo"] = self.deviceInfo;
     }
@@ -614,6 +615,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     _session = nil;
 }
 
+
 #pragma mark - CTWebSocketDelegate Methods
 
 - (void)webSocket:(CTWebSocket *)webSocket didReceiveMessage:(id)message {
@@ -625,7 +627,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 }
 
 - (void)webSocketDidOpen:(CTWebSocket *)webSocket {
-     CleverTapLogDebug(_config.logLevel, @"%@: %@ did open.", self, webSocket);
+    CleverTapLogDebug(_config.logLevel, @"%@: %@ did open.", self, webSocket);
     [self handleConnected];
 }
 
@@ -636,7 +638,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     _open = NO;
     if (_connected) {
         _connected = NO;
-       [self open:YES maxInterval:10 maxRetries:10];
+        [self open:YES maxInterval:10 maxRetries:10];
     }
 }
 

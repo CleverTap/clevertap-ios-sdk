@@ -1,4 +1,3 @@
-
 #import "CTFeatureFlagsController.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
@@ -70,7 +69,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
     CleverTapLogInternal(_config.logLevel, @"%@: get feature flag: %@ with default: %i", self, key, defaultValue);
     @try {
         NSNumber *value = self.store[key];
-        if (value) {
+        if (value != nil) {
             return [value boolValue];
         } else {
             CleverTapLogDebug(_config.logLevel, @"%@: feature flag %@ not found, returning default value", self, key);

@@ -46,7 +46,7 @@ static NSString * const kSnapshot_hierarchyKey = @"snapshot_hierarchy";
     snapshotMessage.orientation = orientation;
     snapshotMessage.screenshot = screenshot;
     NSString *imageHash = [self dataObjectForKey:@"image_hash"];
-
+    
     if ([imageHash isEqualToString:snapshotMessage.imageHash]) {
         serializedObjects = [self.session sessionObjectForKey:@"snapshot_hierarchy"];
     } else {

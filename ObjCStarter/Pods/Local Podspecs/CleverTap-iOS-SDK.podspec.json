@@ -1,6 +1,6 @@
 {
   "name": "CleverTap-iOS-SDK",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "summary": "The CleverTap iOS SDK for App Analytics and Engagement.",
   "homepage": "https://github.com/CleverTap/clevertap-ios-sdk",
   "license": {
@@ -11,7 +11,7 @@
   },
   "source": {
     "git": "https://github.com/CleverTap/clevertap-ios-sdk.git",
-    "tag": "3.8.0"
+    "tag": "3.8.1"
   },
   "requires_arc": true,
   "module_name": "CleverTapSDK",
@@ -42,7 +42,8 @@
       "CleverTapSDK/CleverTap+ABTesting.h",
       "CleverTapSDK/CleverTap+DisplayUnit.h",
       "CleverTapSDK/CleverTap+FeatureFlags.h",
-      "CleverTapSDK/CleverTap+ProductConfig.h"
+      "CleverTapSDK/CleverTap+ProductConfig.h",
+      "CleverTapSDK/CleverTapPushNotificationDelegate.h"
     ]
   },
   "platforms": {

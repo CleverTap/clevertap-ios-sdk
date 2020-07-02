@@ -1,4 +1,3 @@
-
 #import "CleverTapTrackedViewController.h"
 #import "CleverTap.h"
 
@@ -11,6 +10,5 @@
         [[CleverTap sharedInstance] recordScreenView:self.screenName];
     }
 }
-
 
 @end

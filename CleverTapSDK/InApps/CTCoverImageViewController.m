@@ -33,7 +33,7 @@
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
-        
+    
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
     
@@ -67,6 +67,7 @@
     }
 }
 
+
 #pragma mark - Actions
 
 - (IBAction)closeButtonTapped:(id)sender {
@@ -77,13 +78,14 @@
     [self hide:true];
 }
 
+
 #pragma mark - Public
 
--(void)show:(BOOL)animated {
+- (void)show:(BOOL)animated {
     [self showFromWindow:animated];
 }
 
--(void)hide:(BOOL)animated {
+- (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
 

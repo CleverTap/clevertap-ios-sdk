@@ -277,4 +277,5 @@ static NSArray *discardedEvents;
     }
     return YES;
 }
+
 @end

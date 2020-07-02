@@ -60,4 +60,5 @@
 - (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@:%p type='%@'>", NSStringFromClass([self class]), (__bridge void *)self, self.type];
 }
+
 @end

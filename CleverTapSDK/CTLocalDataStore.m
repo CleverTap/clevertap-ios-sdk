@@ -84,6 +84,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     [self clearStoredEvents];
 }
 
+
 #pragma mark - UIApplication State and Events
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
@@ -124,7 +125,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     }
 }
 
-# pragma mark events
+
+# pragma mark - Events
 
 - (NSDictionary *)getStoredEvents {
     NSDictionary *events = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
@@ -233,19 +235,19 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
                 }
                 @try {
                     NSDictionary *evChanged = @{
-                                                @"count" : @{@"oldValue" : @([ed[0] intValue]),
-                                                             @"newValue" : @([upstreamEvent[0] intValue])
-                                                             },
-                                                
-                                                @"firstTime" : @{@"oldValue" : @([ed[1] doubleValue]),
-                                                                 @"newValue" : @([upstreamEvent[1] doubleValue])
-                                                                 },
-                                                
-                                                @"lastTime" : @{@"oldValue" : @([ed[2] doubleValue]),
-                                                                @"newValue" : @([upstreamEvent[2] doubleValue])
-                                                                },
-                                                
-                                                };
+                        @"count" : @{@"oldValue" : @([ed[0] intValue]),
+                                     @"newValue" : @([upstreamEvent[0] intValue])
+                        },
+                        
+                        @"firstTime" : @{@"oldValue" : @([ed[1] doubleValue]),
+                                         @"newValue" : @([upstreamEvent[1] doubleValue])
+                        },
+                        
+                        @"lastTime" : @{@"oldValue" : @([ed[2] doubleValue]),
+                                        @"newValue" : @([upstreamEvent[2] doubleValue])
+                        },
+                        
+                    };
                     changes[eventName] = evChanged;
                 }
                 @catch (NSException *e) {
@@ -386,7 +388,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
         int now = @([[[NSDate alloc] init] timeIntervalSince1970]).intValue;
         [self setLastDataSyncTime:now];
         NSNumber *expiry = responseData[@"expires_in"];
-        if (expiry) {
+        if (expiry != nil) {
             [self setLocalCacheExpiryInterval:expiry.intValue];
         }
         if (somethingGotUpdated) {
@@ -411,7 +413,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 
-#pragma mark Public API
+#pragma mark - Public API
 
 - (NSTimeInterval)getFirstTimeForEvent:(NSString *)event {
     return [self getEventDetail:event withIndex:1];
@@ -512,7 +514,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     [self removeProfileFieldsWithKeys:keys fromUpstream:NO];
 }
 
-#pragma mark Private Local Profile Getters and Setters and disk persistence handling
+
+#pragma mark - Private Local Profile Getters and Setters and disk persistence handling
 
 // local profile is written to the file system on app backgrounding, app termination and on changes after a 30 second interval
 
@@ -636,7 +639,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     }];
 }
 
-#pragma mark Private Local Profile Update Precedence Bookkeeping and Handling
+
+#pragma mark - Private Local Profile Update Precedence Bookkeeping and Handling
 
 
 // checks whether we have a local update expiration time and its greater than the specified time (or now as default)
@@ -678,9 +682,9 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 
 - (long)getLocalCacheExpiryIntervalWithResetValue:(int)resetValue {
     if (self.config.isDefaultInstance) {
-         return  [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLocalCacheExpiry] withResetValue:[CTPreferences getIntForKey:kLocalCacheExpiry withResetValue:resetValue]];
+        return  [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLocalCacheExpiry] withResetValue:[CTPreferences getIntForKey:kLocalCacheExpiry withResetValue:resetValue]];
     } else {
-         return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLocalCacheExpiry] withResetValue:resetValue];
+        return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLocalCacheExpiry] withResetValue:resetValue];
     }
 }
 
@@ -703,7 +707,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     [CTPreferences putInt:time forKey:[self storageKeyWithSuffix:kLocalCacheLastSync]];
 }
 
-# pragma mark helpers
+
+# pragma mark - Helpers
 
 + (NSDictionary *)buildChangeFromOldValue:(id)oldValue toNewValue:(id)newValue {
     if (!newValue && !oldValue) return nil;

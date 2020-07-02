@@ -12,7 +12,7 @@ NSString *const CTABTestEditorVarsMessageRequestType = @"vars_request";
 @implementation CTABTestEditorVarsMessageRequest
 
 + (instancetype)message {
-     return [(CTABTestEditorVarsMessageRequest *)[self alloc] initWithType:CTABTestEditorVarsMessageRequestType];
+    return [(CTABTestEditorVarsMessageRequest *)[self alloc] initWithType:CTABTestEditorVarsMessageRequestType];
 }
 
 + (instancetype)messageWithOptions:(NSDictionary *)options {

@@ -33,7 +33,7 @@
 /*!
  
  @abstract
-  The `CleverTapInboxMessageContent` represents the inbox message content.
+ The `CleverTapInboxMessageContent` represents the inbox message content.
  */
 
 @interface CleverTapInboxMessageContent : NSObject
@@ -223,11 +223,11 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
 - (void)recordInboxNotificationViewedEventForID:(NSString * _Nonnull)messageId;
 
 /*!
-@method
-
-@abstract
-Record Notification Clicked for App Inbox.
-*/
+ @method
+ 
+ @abstract
+ Record Notification Clicked for App Inbox.
+ */
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId;
 
 

@@ -1,4 +1,3 @@
-
 #import "CTValidationResult.h"
 
 @interface CTValidationResult () {
@@ -17,7 +16,6 @@
     [vr setErrorDesc:message];
     return vr;
 }
-
 
 - (id)init {
     if (self = [super init]) {
