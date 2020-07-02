@@ -33,7 +33,7 @@ class NotificationViewController: UIViewController, UNNotificationContentExtensi
     // after handling the action to dismiss the notification and forward the
     // action to the app if necessary.
     func didReceive(_ response: UNNotificationResponse, completionHandler completion: @escaping (UNNotificationContentExtensionResponseOption) -> Void) {
-        
-        CleverTap.sharedInstance()?.recordClickedNotificationEvent(withData: response.notification.request.content.userInfo)
+
+        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: response.notification.request.content.userInfo)
     }
 }

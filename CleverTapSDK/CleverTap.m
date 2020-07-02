@@ -379,7 +379,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             } else if (class_getInstanceMethod(ncdCls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
                 sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
                 __block NSInvocation *invocation = nil;
-                invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(UIBackgroundFetchResult result) ) {
+                invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
                     [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
                     [invocation setArgument:&center atIndex:2];
                     [invocation setArgument:&response atIndex:3];
@@ -391,7 +391,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:"))) {
             sel = NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
             __block NSInvocation *invocation = nil;
-            invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UIApplication *application, NSDictionary *userInfo, void (^completion)(void) ) {
+            invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UIApplication *application, NSDictionary *userInfo, void (^completion)(UIBackgroundFetchResult result) ) {
                 [CleverTap handlePushNotification:userInfo openDeepLinksInForeground:NO];
                 [invocation setArgument:&application atIndex:2];
                 [invocation setArgument:&userInfo atIndex:3];
@@ -490,6 +490,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
+
 #pragma mark - AppDelegate Swizzles and Related
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
@@ -530,6 +531,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #pragma clang diagnostic pop
+
 
 #pragma mark - Instance Lifecycle
 
@@ -677,7 +679,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self removeObservers];
 }
 
+
 #pragma mark - Private
+
 + (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
     if (_defaultInstanceConfig) {
         CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
@@ -1252,11 +1256,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
--(void)clearFirstRequestTimestamp {
+- (void)clearFirstRequestTimestamp {
     [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kFIRST_TS_KEY]];
 }
 
--(BOOL)isMuted {
+- (BOOL)isMuted {
     return [NSDate new].timeIntervalSince1970 - _lastMutedTs < 24 * 60 * 60;
 }
 
@@ -1876,14 +1880,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - CTInAppNotificationDisplayDelegate
 
--(void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller  {
+- (void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did dismiss: %@", self, notification.campaignId);
     [self notifyNotificationDismissed:notification];
     [[self class] inAppDisplayControllerDidDismiss:controller];
     [self showInAppNotificationIfAny];
 }
 
--(void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
+- (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did show: %@", self, notification.campaignId);
     [self recordInAppNotificationStateEvent:NO forNotification:notification andQueryParameters:nil];
     [self.inAppFCManager didShow:notification];
@@ -1905,38 +1909,40 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
         [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
     } else if (ctaURL) {
+        
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+        __block id dlURL;
         [[self class] runSyncMainQueue:^{
             UIApplication *sharedApplication = [[self class] getSharedApplication];
             if (sharedApplication == nil) {
                 return;
             }
             CleverTapLogDebug(self.config.logLevel, @"%@: InApp: firing deep link: %@", self, ctaURL);
-#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_9_0
-            if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                NSMethodSignature *signature = [UIApplication
-                                                instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                NSInvocation *invocation = [NSInvocation
-                                            invocationWithMethodSignature:signature];
-                [invocation setTarget:sharedApplication];
-                [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                NSDictionary *options = @{};
-                id completionHandler = nil;
-                [invocation setArgument:&ctaURL atIndex:2];
-                [invocation setArgument:&options atIndex:3];
-                [invocation setArgument:&completionHandler atIndex:4];
-                [invocation invoke];
+            if (@available(iOS 10.0, *)) {
+                if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                    NSMethodSignature *signature = [UIApplication
+                                                    instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                    NSInvocation *invocation = [NSInvocation
+                                                invocationWithMethodSignature:signature];
+                    [invocation setTarget:sharedApplication];
+                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                    NSDictionary *options = @{};
+                    id completionHandler = nil;
+                    dlURL = ctaURL;
+                    [invocation setArgument:&dlURL atIndex:2];
+                    [invocation setArgument:&options atIndex:3];
+                    [invocation setArgument:&completionHandler atIndex:4];
+                    [invocation invoke];
+                } else {
+                    if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                        [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                    }
+                }
             } else {
                 if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
                     [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
                 }
             }
-#else
-            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
-                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
-            }
-            
-#endif
         }];
 #endif
     }
@@ -2733,6 +2739,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+
 #pragma mark Response Handling
 
 - (void)parseResponse:(NSData *)responseData {
@@ -2958,6 +2965,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self handleSendQueueFail];
     }
 }
+
 
 #pragma mark Profile Handling Private
 
@@ -4146,6 +4154,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return YES;
 }
 
+
 #pragma mark CTInboxDelegate
 
 - (void)inboxMessagesDidUpdate {
@@ -4156,6 +4165,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
 }
+
 
 #pragma mark CleverTapInboxViewControllerAnalyticsDelegate
 
@@ -4193,36 +4203,39 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
+        __block id dlURL;
         [[self class] runSyncMainQueue:^{
             UIApplication *sharedApplication = [[self class] getSharedApplication];
             if (sharedApplication == nil) {
                 return;
             }
             CleverTapLogDebug(self.config.logLevel, @"%@: Inbox message: firing deep link: %@", self, ctaURL);
-#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_9_0
-            if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                NSMethodSignature *signature = [UIApplication
-                                                instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                NSInvocation *invocation = [NSInvocation
-                                            invocationWithMethodSignature:signature];
-                [invocation setTarget:sharedApplication];
-                [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                NSDictionary *options = @{};
-                id completionHandler = nil;
-                [invocation setArgument:&ctaURL atIndex:2];
-                [invocation setArgument:&options atIndex:3];
-                [invocation setArgument:&completionHandler atIndex:4];
-                [invocation invoke];
+            if (@available(iOS 10.0, *)) {
+                if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                    NSMethodSignature *signature = [UIApplication
+                                                    instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                    NSInvocation *invocation = [NSInvocation
+                                                invocationWithMethodSignature:signature];
+                    [invocation setTarget:sharedApplication];
+                    [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                    NSDictionary *options = @{};
+                    id completionHandler = nil;
+                    dlURL = ctaURL;
+                    [invocation setArgument:&dlURL atIndex:2];
+                    [invocation setArgument:&options atIndex:3];
+                    [invocation setArgument:&completionHandler atIndex:4];
+                    [invocation invoke];
+                } else {
+                    if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                        [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+                    }
+                }
             } else {
+                
                 if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
                     [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
                 }
             }
-#else
-            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
-                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
-            }
-#endif
         }];
 #endif
     }
@@ -4245,6 +4258,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }];
 }
+
 
 #pragma mark Inbox Message private
 
@@ -4324,12 +4338,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #endif  //!CLEVERTAP_NO_INBOX_SUPPORT
 
+
 #pragma mark - AB Testing
 
 #if !CLEVERTAP_NO_AB_SUPPORT
 
 #pragma mark AB Testing public
-
 
 + (void)setUIEditorConnectionEnabled:(BOOL)enabled {
     [CTPreferences putInt:enabled forKey:kWR_KEY_AB_TEST_EDITOR_ENABLED];
@@ -4532,7 +4546,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [self.abTestController getDictionaryOfStringVariableWithName:name defaultValue:defaultValue];
 }
 
+
 #pragma mark ABTesting private
+
 - (void) _initABTesting {
     if (!self.config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
         if (!self.config.enableABTesting) {
@@ -4559,6 +4575,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
 }
+
 
 #pragma mark CTABTestingDelegate
 

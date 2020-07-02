@@ -129,7 +129,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     _deviceId = deviceId;
 }
 
--(BOOL)isErrorDeviceID {
+- (BOOL)isErrorDeviceID {
     return [self.deviceId hasPrefix:kCLTAP_ERROR_PROFILE_PREFIX];
 }
 

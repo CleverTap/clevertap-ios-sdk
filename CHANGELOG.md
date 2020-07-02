@@ -1,6 +1,6 @@
 # CHANGE LOG
 
-## Version 3.8.1 (June 18, 2020)
+## Version 3.8.1 (July 2, 2020)
 * Adds public API to raise Notification Clicked event for Push Notifications
 * Adds a callback to provide Push Notifications custom key-value pairs
 * Performance improvements

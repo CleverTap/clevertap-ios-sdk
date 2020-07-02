@@ -3,7 +3,7 @@
 
 @implementation CTCarouselImageMessageCell
 
--(void)onAwake {
+- (void)onAwake {
     // no-op here
 }
 

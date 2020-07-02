@@ -356,7 +356,7 @@ static NSString * const kOrientationPortrait = @"p";
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:self userInfo:@{@"muted":@(self.isAVMuted)}];
 }
 
--(void)mute:(BOOL)mute {
+- (void)mute:(BOOL)mute {
     if (self.avPlayer == nil) return;
     [self.avPlayer setMuted:mute];
     self.isAVMuted = mute;

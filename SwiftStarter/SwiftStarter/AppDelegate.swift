@@ -72,7 +72,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
-        CleverTap.sharedInstance()?.recordClickedNotificationEvent(withData: response.notification.request.content.userInfo)
         completionHandler()
     }
     
