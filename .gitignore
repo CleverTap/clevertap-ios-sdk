@@ -26,5 +26,9 @@ Carthage
 */build/
 Cartfile
 Cartfile.resolved
+
 SwiftStarter/Pods
+SwiftStarter/Podfile.lock
+
 ObjCStarter/Pods
+ObjCStarter/Podfile.lock
