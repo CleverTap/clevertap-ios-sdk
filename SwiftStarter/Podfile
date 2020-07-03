@@ -11,10 +11,6 @@ target 'SwiftStarter' do
     pod 'CTNotificationService'
   end
   
-  target 'NotificationContent' do
-    pod 'CTNotificationContent'
-  end
-  
   target 'SwiftStarterTests' do
     inherit! :search_paths
     # Pods for testing
