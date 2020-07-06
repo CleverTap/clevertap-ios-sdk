@@ -374,10 +374,6 @@
 		D0D4C9F52414EE770029477E /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9356ED42487FE4600B4F507 /* CleverTapPushNotificationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F96D85E42498D8B9007EDF9F /* Nimble.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96D85E12498D8B9007EDF9F /* Nimble.framework */; };
-		F96D85E52498D8B9007EDF9F /* OCMock.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96D85E22498D8B9007EDF9F /* OCMock.framework */; };
-		F96D85E62498D8B9007EDF9F /* Quick.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96D85E32498D8B9007EDF9F /* Quick.framework */; };
-		F96D85E72498D8C8007EDF9F /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D09A5E0221EA33C50032DDDF /* SDWebImage.framework */; };
 		F96D85E92498D96D007EDF9F /* CleverTapSDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D0C7BBBD207D82C0001345EF /* CleverTapSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F96D85EA2498D96D007EDF9F /* Nimble.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F96D85E12498D8B9007EDF9F /* Nimble.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F96D85EB2498D96D007EDF9F /* OCMock.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F96D85E22498D8B9007EDF9F /* OCMock.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -750,10 +746,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F96D85E72498D8C8007EDF9F /* SDWebImage.framework in Frameworks */,
-				F96D85E42498D8B9007EDF9F /* Nimble.framework in Frameworks */,
-				F96D85E52498D8B9007EDF9F /* OCMock.framework in Frameworks */,
-				F96D85E62498D8B9007EDF9F /* Quick.framework in Frameworks */,
 				F9BA41392498D4D300BDD868 /* CleverTapSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
