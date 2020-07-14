@@ -106,7 +106,8 @@ NSString *const kSessionId = @"sessionId";
 NSString *const kWR_KEY_PERSONALISATION_ENABLED = @"boolPersonalisationEnabled";
 NSString *const kWR_KEY_AB_TEST_EDITOR_ENABLED = @"boolABTestEditorEnabled";
 NSString *const CleverTapProfileDidInitializeNotification = CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION;
-NSString* const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
+NSString *const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
+NSString *const CleverTapGeofencesDidUpdateNotification = CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION;
 
 NSString *const kCachedGUIDS = @"CachedGUIDS";
 NSString *const kOnUserLoginAction = @"onUserLogin";
@@ -2902,6 +2903,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         [self.productConfigController updateProductConfig:productConfig];
                         NSString *lastFetchTs = productConfigJSON[@"ts"];
                         [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
+                    }
+                }
+                
+                NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
+                if (geofencesJSON) {
+                    NSMutableArray *geofencesList;
+                    @try {
+                        geofencesList = [[NSMutableArray alloc] initWithArray:geofencesJSON];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Geofences JSON: %@", self, e.debugDescription);
+                    }
+                    if (geofencesList) {
+                        NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
+                        geofencesDict[@"geofences"] = geofencesList;
+                        [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
                     }
                 }
                 

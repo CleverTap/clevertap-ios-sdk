@@ -292,6 +292,18 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
 - (void)setLocationForGeofences:(CLLocationCoordinate2D)location;
 
 /*!
+ 
+ @abstract
+ Posted when the CleverTap Geofences are updated.
+ 
+ @discussion
+ Useful for accessing the CleverTap geofences
+ 
+ */
+extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
+
+
+/*!
  @method
  
  @abstract
