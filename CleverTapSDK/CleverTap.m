@@ -114,7 +114,6 @@ NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
-
 static BOOL isAutoIntegrated;
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
@@ -219,6 +218,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, assign) BOOL firstSession;
 @property (atomic, assign) BOOL firstRequestInSession;
 @property (atomic, assign) int lastSessionLengthSeconds;
+@property (atomic, assign) BOOL geofenceLocation;
 
 @property (atomic, retain) NSString *source;
 @property (atomic, retain) NSString *medium;
@@ -254,6 +254,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
 @synthesize firstRequestInSession=_firstRequestInSession;
+@synthesize geofenceLocation=_geofenceLocation;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
@@ -2418,6 +2419,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         mutableEvent[@"f"] = @(self.firstSession);
         mutableEvent[@"n"] = self.currentViewControllerName ? self.currentViewControllerName : @"_bg";
         
+        if (eventType == CleverTapEventTypePing && _geofenceLocation) {
+            mutableEvent[@"gf"] = @(_geofenceLocation);
+            _geofenceLocation = NO;
+        }
+        
         // Report any pending validation error
         CTValidationResult *vr = [self popValidationResult];
         if (vr != nil) {
@@ -3894,12 +3900,25 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return (BOOL) [CTPreferences getIntForKey:kWR_KEY_PERSONALISATION_ENABLED withResetValue:YES];
 }
 
+- (void)setLocationForGeofences:(CLLocationCoordinate2D)location {
+    _geofenceLocation = YES;
+    [self setLocation:location];
+}
+
 + (void)setLocation:(CLLocationCoordinate2D)location {
     [[self sharedInstance] setLocation:location];
 }
 
 - (void)setLocation:(CLLocationCoordinate2D)location {
     self.userSetLocation = location;
+}
+
+- (void)setGeofenceLocation:(BOOL)geofenceLocation {
+    _geofenceLocation = geofenceLocation;
+}
+
+- (BOOL)geofenceLocation {
+    return _geofenceLocation;
 }
 
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {

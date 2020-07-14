@@ -281,6 +281,20 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @method
  
  @abstract
+ Store the users location for geofences on the default shared CleverTap instance.
+ 
+ @discussion
+ Optional.  If you're application is collection the user location you can pass it to CleverTap
+ for, among other things, more fine-grained geo-targeting and segmentation purposes.
+ 
+ @param location       CLLocationCoordiate2D
+ */
+- (void)setLocationForGeofences:(CLLocationCoordinate2D)location;
+
+/*!
+ @method
+ 
+ @abstract
  Get the device location if available.  Calling this will prompt the user location permissions dialog.
  
  Please be sure to include the NSLocationWhenInUseUsageDescription key in your Info.plist.  See https://developer.apple.com/library/ios/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW26
