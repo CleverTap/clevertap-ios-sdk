@@ -17,8 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
+//        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         
         CleverTap.setUIEditorConnectionEnabled(true)
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)       
@@ -118,12 +119,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler(UIBackgroundFetchResult.noData)
     }
     
-    private func application(application: UIApplication, openURL url: NSURL,
+    func application(application: UIApplication, openURL url: NSURL,
                              sourceApplication: String?, annotation: AnyObject) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url as URL, sourceApplication: sourceApplication)
         return true
     }
-    
+
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
         return true
