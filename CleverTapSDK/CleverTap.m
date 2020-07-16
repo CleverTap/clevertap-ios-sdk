@@ -4968,7 +4968,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - Geofence Public APIs
 
-- (void)recordGeoFenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails {
+- (void)recordGeofenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails {
 #if !defined(CLEVERTAP_TVOS)
     [self runSerialAsync:^{
         [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
@@ -4984,7 +4984,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (void)recordGeoFenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails {
+- (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails {
 #if !defined(CLEVERTAP_TVOS)
     [self runSerialAsync:^{
         [CTEventBuilder buildGeofenceStateEvent:NO forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {

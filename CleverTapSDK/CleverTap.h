@@ -1153,7 +1153,7 @@ Call this to method to set library name in the Auxiliary SDK
  
  @param geofenceDetails      details of the Geofence
  */
-- (void)recordGeoFenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails;
+- (void)recordGeofenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
 /*!
  @method
@@ -1163,7 +1163,7 @@ Call this to method to set library name in the Auxiliary SDK
  
  @param geofenceDetails       details of the Geofence
  */
-- (void)recordGeoFenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
+- (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS

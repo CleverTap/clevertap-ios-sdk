@@ -27,7 +27,7 @@ class GeofenceVC: UIViewController {
         geofenceDetails["lng"] = "77.1718097084959";
         geofenceDetails["lng"] = "77.1718097084959";
         geofenceDetails["r"] = "500";
-        CleverTap.sharedInstance()?.recordGeoFenceEnteredEvent(geofenceDetails as! [AnyHashable : Any])
+        CleverTap.sharedInstance()?.recordGeofenceEnteredEvent(geofenceDetails as! [AnyHashable : Any])
     }
     
     @IBAction func recordGeofenceExited(_ sender: Any) {
@@ -39,6 +39,6 @@ class GeofenceVC: UIViewController {
         geofenceDetails["lng"] = "77.1718097084959";
         geofenceDetails["lng"] = "77.1718097084959";
         geofenceDetails["r"] = "500";
-        CleverTap.sharedInstance()?.recordGeoFenceExitedEvent(geofenceDetails as! [AnyHashable : Any])
+        CleverTap.sharedInstance()?.recordGeofenceExitedEvent(geofenceDetails as! [AnyHashable : Any])
     }
 }
