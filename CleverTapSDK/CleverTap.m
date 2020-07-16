@@ -2917,7 +2917,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (geofencesList) {
                         NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
                         geofencesDict[@"geofences"] = geofencesList;
-                        [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
+                        [[self class] runSyncMainQueue: ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
+                        }];
                     }
                 }
                 
@@ -4961,6 +4963,41 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config not initialized", self);
     return nil;
+}
+
+
+#pragma mark - Geofence Public APIs
+
+- (void)recordGeoFenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails {
+#if !defined(CLEVERTAP_TVOS)
+    [self runSerialAsync:^{
+        [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                self.wzrkParams = [event[@"evtData"] copy];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
+- (void)recordGeoFenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails {
+#if !defined(CLEVERTAP_TVOS)
+    [self runSerialAsync:^{
+        [CTEventBuilder buildGeofenceStateEvent:NO forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                self.wzrkParams = [event[@"evtData"] copy];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
 }
 
 @end

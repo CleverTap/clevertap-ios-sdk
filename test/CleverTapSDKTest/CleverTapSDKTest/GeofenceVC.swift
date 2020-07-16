@@ -9,13 +9,36 @@ class GeofenceVC: UIViewController {
     }
     
     @objc func geofencesDidUpdate(notification: Notification) {
-      // Take Action on Notification
+        // Take Action on Notification
         print("Geofences:", notification.userInfo ?? "")
     }
     
     @IBAction func setLocation(_ sender: Any) {
         let coords = CLLocationCoordinate2DMake(19.100009001977014, 73.03798211097717)
-        //        let coords = CLLocationCoordinate2DMake(51.5083, -0.1384)
         CleverTap.sharedInstance()?.setLocationForGeofences(coords)
+    }
+    
+    @IBAction func recordGeofenceEntered(_ sender: Any) {
+        let geofenceDetails: NSMutableDictionary = NSMutableDictionary()
+        geofenceDetails["gcId"] = "2"
+        geofenceDetails["gcName"] = "iOS Test"
+        geofenceDetails["id"] = "303"
+        geofenceDetails["lat"] = "17.3449698328624";
+        geofenceDetails["lng"] = "77.1718097084959";
+        geofenceDetails["lng"] = "77.1718097084959";
+        geofenceDetails["r"] = "500";
+        CleverTap.sharedInstance()?.recordGeoFenceEnteredEvent(geofenceDetails as! [AnyHashable : Any])
+    }
+    
+    @IBAction func recordGeofenceExited(_ sender: Any) {
+        let geofenceDetails: NSMutableDictionary = NSMutableDictionary()
+        geofenceDetails["gcId"] = "2"
+        geofenceDetails["gcName"] = "iOS Test"
+        geofenceDetails["id"] = "303"
+        geofenceDetails["lat"] = "17.3449698328624";
+        geofenceDetails["lng"] = "77.1718097084959";
+        geofenceDetails["lng"] = "77.1718097084959";
+        geofenceDetails["r"] = "500";
+        CleverTap.sharedInstance()?.recordGeoFenceExitedEvent(geofenceDetails as! [AnyHashable : Any])
     }
 }

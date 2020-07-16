@@ -25,6 +25,8 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_APNS_PROPERTY_DEVICE_TOKEN @"device_token"
 #define CLTAP_NOTIFICATION_CLICKED_EVENT_NAME @"Notification Clicked"
 #define CLTAP_NOTIFICATION_VIEWED_EVENT_NAME @"Notification Viewed"
+#define CLTAP_GEOFENCE_ENTERED_EVENT_NAME @"Geocluster Entered"
+#define CLTAP_GEOFENCE_EXITED_EVENT_NAME @"Geocluster Exited"
 #define CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE @"lastDailyEventsPushedDate"
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"

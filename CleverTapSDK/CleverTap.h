@@ -1134,7 +1134,36 @@ This sets the CleverTapPushNotificationDelegate.
  */
 + (CleverTapLogLevel)getDebugLevel;
 
+/*!
+@method
+
+@abstract
+Set the Library name for Auxiliary SDKs
+
+@discussion
+Call this to method to set library name in the Auxiliary SDK
+*/
 - (void)setLibrary:(NSString * _Nonnull)name;
+
+/*!
+ @method
+ 
+ @abstract
+ Record Geofence Entered Event.
+ 
+ @param geofenceDetails      details of the Geofence
+ */
+- (void)recordGeoFenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails;
+
+/*!
+ @method
+ 
+ @abstract
+ Record Geofence Exited Event.
+ 
+ @param geofenceDetails       details of the Geofence
+ */
+- (void)recordGeoFenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
