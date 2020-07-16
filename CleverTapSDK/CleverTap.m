@@ -2906,6 +2906,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                 }
                 
+#if !CLEVERTAP_NO_GEOFENCE_SUPPORT
                 NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
                 if (geofencesJSON) {
                     NSMutableArray *geofencesList;
@@ -2922,6 +2923,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         }];
                     }
                 }
+#endif
                 
                 // Handle events/profiles sync data
                 @try {
@@ -4973,7 +4975,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self runSerialAsync:^{
         [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
@@ -4989,7 +4990,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self runSerialAsync:^{
         [CTEventBuilder buildGeofenceStateEvent:NO forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
