@@ -109,9 +109,9 @@ Check out the CleverTap iOS SDK [Change Log](https://github.com/CleverTap/clever
 
 ## Questions? #
 
- If you have questions or concerns, you can reach out to the CleverTap support team at [support@clevertap.com](mailto:support@clevertap.com).
+If you have questions or concerns, you can reach out to the CleverTap support team from the CleverTap Dashboard.
  
- ## License #
+## License #
 
 Check out the CleverTap iOS SDK [License](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE) here.
 
