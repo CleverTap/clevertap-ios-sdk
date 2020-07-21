@@ -105,7 +105,7 @@ For more details, Please refer to our [installation guide](https://developer.cle
 
 ## Changelog #
 
-Check out the CleverTap iOS SDK [Change Log](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/CHANGELOG.md) here.
+Checkout the [CleverTap iOS SDK Change Log](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/CHANGELOG.md).
 
 ## Questions? #
 
@@ -113,5 +113,5 @@ If you have questions or concerns, you can reach out to the CleverTap support te
  
 ## License #
 
-Check out the CleverTap iOS SDK [License](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE) here.
+Checkout the CleverTap iOS SDK [License](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE) here.
 
