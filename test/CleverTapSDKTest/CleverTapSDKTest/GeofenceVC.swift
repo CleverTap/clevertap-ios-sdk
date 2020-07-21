@@ -15,7 +15,7 @@ class GeofenceVC: UIViewController {
     
     @IBAction func setLocation(_ sender: Any) {
         let coords = CLLocationCoordinate2DMake(19.100009001977014, 73.03798211097717)
-        CleverTap.sharedInstance()?.setLocationForGeofences(coords)
+        CleverTap.sharedInstance()?.setLocationForGeofences(coords, withPluginVersion: "10000")
     }
     
     @IBAction func recordGeofenceEntered(_ sender: Any) {

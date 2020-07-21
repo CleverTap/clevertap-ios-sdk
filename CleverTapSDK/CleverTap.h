@@ -279,20 +279,6 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
 - (void)setLocation:(CLLocationCoordinate2D)location;
 
 /*!
- @method
- 
- @abstract
- Store the users location for geofences on the default shared CleverTap instance.
- 
- @discussion
- Optional.  If you're application is collection the user location you can pass it to CleverTap
- for, among other things, more fine-grained geo-targeting and segmentation purposes.
- 
- @param location       CLLocationCoordiate2D
- */
-- (void)setLocationForGeofences:(CLLocationCoordinate2D)location;
-
-/*!
  
  @abstract
  Posted when the CleverTap Geofences are updated.
@@ -1145,6 +1131,30 @@ Set the Library name for Auxiliary SDKs
 Call this to method to set library name in the Auxiliary SDK
 */
 - (void)setLibrary:(NSString * _Nonnull)name;
+
+/*!
+ @method
+ 
+ @abstract
+ Store the users location for geofences on the default shared CleverTap instance.
+ 
+ @discussion
+ Optional.  If you're application is collection the user location you can pass it to CleverTap
+ for, among other things, more fine-grained geo-targeting and segmentation purposes.
+ 
+ @param location       CLLocationCoordiate2D
+ */
+- (void)setLocationForGeofences:(CLLocationCoordinate2D)location withPluginVersion:(NSString *_Nullable)version;
+
+/*!
+ @method
+ 
+ @abstract
+ Record the error for geofences
+ 
+ @param error       NSError
+ */
+- (void)didFailToRegisterForGeofencesWithError:(NSError *_Nullable)error;
 
 /*!
  @method

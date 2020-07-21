@@ -3920,7 +3920,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return (BOOL) [CTPreferences getIntForKey:kWR_KEY_PERSONALISATION_ENABLED withResetValue:YES];
 }
 
-- (void)setLocationForGeofences:(CLLocationCoordinate2D)location {
+- (void)setLocationForGeofences:(CLLocationCoordinate2D)location withPluginVersion:(NSString *)version {
     _geofenceLocation = YES;
     [self setLocation:location];
 }
@@ -4969,6 +4969,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 
 #pragma mark - Geofence Public APIs
+
+- (void)didFailToRegisterForGeofencesWithError:(NSError *)error {
+    CTValidationResult *result = [[CTValidationResult alloc] init];
+    [result setErrorCode:(int)error.code];
+    [result setErrorDesc:error.description];
+    [self pushValidationResult:result];
+}
 
 - (void)recordGeofenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails {
 #if !defined(CLEVERTAP_TVOS)
