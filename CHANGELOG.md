@@ -1,6 +1,8 @@
-# CHANGE LOG
+## Change Log
+All notable changes to this project will be documented in this file.
 
 ### [Version 3.8.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.8.1) (July 2, 2020)
+
 * Adds public API to raise Notification Clicked event for Push Notifications
 * Adds a callback to provide Push Notifications custom key-value pairs
 * Performance improvements
@@ -93,57 +95,57 @@
 * iOS 10/Xcode 8 release, supports iOS versions 8+
 * Adds support for Rich Push Notifications, App Extensions and watchOS apps
 
-### Version 2.2.2 (August 18, 2016)
+### [Version 2.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.2.2) (August 18, 2016)
 * Fixes Xcode 8 -> Xcode 7 archiving issue
 
-### Version 2.2.1 (July 21, 2016)
+### [Version 2.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.2.1) (July 21, 2016)
 * Patches NSDate handling in onUserLogin
 
-### Version 2.2.0 (July 19, 2016)
+### [Version 2.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.2.0) (July 19, 2016)
 * Adds `onUserLogin` API to support multiple distinct user profiles per device
 * Adds `getLocation` API
 
-### Version 2.1.2 (June 29, 2016)
+### [Version 2.1.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.1.2) (June 29, 2016)
 * Fixes handling of deep links embedded in push notifications on app launch
 
-### Version 2.1.1 (June 24, 2016)
+### [Version 2.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.1.1) (June 24, 2016)
 * Sending non primitive values for profile/event properties doesn’t abort the entire push (just skips that particular property)
 
-### Version 2.1.0 (May 08, 2016)
+### [Version 2.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.1.0) (May 08, 2016)
 * Adds ability to receive InApp Notification button click callbacks with custom key-value pairs
 * Adds support for dashboard analytics on specific InApp Notification button clicks
 
-### Version 2.0.10 (April 06, 2016)
+### [Version 2.0.10](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.10) (April 06, 2016)
 * Adds support for Segment bundled integration
 * Removes support for Segment webhook integration
 * Fixes rare thread deadlock issue
 
-### Version 2.0.9 (March 15, 2016)
+### [Version 2.0.9](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.9) (March 15, 2016)
 * Adds support for migrating from Parse.com push notifications
 * Adds support for multi-value (JSONArray) user profile properties
 * Adds support for In-App Notification display frequency capping
 
-### Version 2.0.7 (February 09, 2016)
+### [Version 2.0.7](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.7) (February 09, 2016)
 * Handles obscure exception regarding UIViewController detection
 
-### Version 2.0.6 (February 03, 2016)
+### [Version 2.0.6](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.6) (February 03, 2016)
 * Fixes extremely rare issue relating to CTTelephonyNetworkInfo
 
-### Version 2.0.5 (January 09, 2016)
+### [Version 2.0.5](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.5) (January 09, 2016)
 * Added `setLocation` API: if your application is collecting location you can pass it to CleverTap for, among other things, more fine-grained geo-targeting and segmentation purposes
 * Added support for Segment webhook/server-side integration
 
-### Version 2.0.4 (December 09, 2015)
+### [Version 2.0.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.4) (December 09, 2015)
 * Dropped support for iOS 6 - only support 7.0 and above
 * Added optional autoIntegrate method to automatically handle device token registration and
 push notification/url referrer tracking, and set up a singleton instance of the CleverTap class. This is accomplished by proxying the AppDelegate and "inserting" a CleverTap AppDelegate behind the AppDelegate. The proxy will first call the AppDelegate and then call the CleverTap AppDelegate.
 * Added notification of application code of User Profile synchronization via CleverTapSyncDelegate and/or NSNotification broadcast mechanism.
 * Added ability to record custom error events: `recordErrorWithMessage:(NSString *)message andErrorCode:(int)code`
 
-### Version 2.0.2 (September 28, 2015)
+### [Version 2.0.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.2) (September 28, 2015)
 * Added iOS 9/Xcode 7 bitcode support
 
-### Version 2.0.1 (September 5, 2015)
+### [Version 2.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/2.0.1) (September 5, 2015)
 * We’re now CleverTap! All the existing APIs have been changed from WizRocket to CleverTap.
 
 
