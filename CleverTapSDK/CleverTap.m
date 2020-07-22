@@ -219,7 +219,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, assign) BOOL firstSession;
 @property (atomic, assign) BOOL firstRequestInSession;
 @property (atomic, assign) int lastSessionLengthSeconds;
-@property (atomic, assign) BOOL geofenceLocation;
 
 @property (atomic, retain) NSString *source;
 @property (atomic, retain) NSString *medium;
@@ -237,6 +236,9 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
 @property (nonatomic, assign, readonly) BOOL sslPinningEnabled;
+
+@property (atomic, assign) BOOL geofenceLocation;
+@property (nonatomic, strong) NSString *gfSDKVersion;
 
 - (instancetype)init __unavailable;
 
@@ -2422,6 +2424,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         if (eventType == CleverTapEventTypePing && _geofenceLocation) {
             mutableEvent[@"gf"] = @(_geofenceLocation);
+            mutableEvent[@"gfSDKVersion"] = _gfSDKVersion;
             _geofenceLocation = NO;
         }
         
@@ -3921,6 +3924,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)setLocationForGeofences:(CLLocationCoordinate2D)location withPluginVersion:(NSString *)version {
+    if (version) {
+        _gfSDKVersion = version;
+    }
     _geofenceLocation = YES;
     [self setLocation:location];
 }
