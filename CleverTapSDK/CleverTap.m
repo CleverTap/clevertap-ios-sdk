@@ -44,7 +44,7 @@
 #endif
 #if CLEVERTAP_SSL_PINNING
 #import "CTPinnedNSURLSessionDelegate.h"
-static NSArray* sslCertNames;
+static NSArray *sslCertNames;
 #endif
 
 #if !CLEVERTAP_NO_AB_SUPPORT
@@ -72,28 +72,28 @@ static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 
 static const int kMaxBatchSize = 49;
-NSString* const kQUEUE_NAME_PROFILE = @"net_queue_profile";
-NSString* const kQUEUE_NAME_EVENTS = @"events";
-NSString* const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
+NSString *const kQUEUE_NAME_PROFILE = @"net_queue_profile";
+NSString *const kQUEUE_NAME_EVENTS = @"events";
+NSString *const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
 
-NSString* const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
+NSString *const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
 
-NSString* const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
-NSString* const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
-NSString* const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
+NSString *const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
+NSString *const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
+NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 
-NSString* const kREDIRECT_HEADER = @"X-WZRK-RD";
-NSString* const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
-NSString* const kMUTE_HEADER = @"X-WZRK-MUTE";
+NSString *const kREDIRECT_HEADER = @"X-WZRK-RD";
+NSString *const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
+NSString *const kMUTE_HEADER = @"X-WZRK-MUTE";
 
-NSString* const kACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
-NSString* const kACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
+NSString *const kACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
+NSString *const kACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
 
-NSString* const kI_KEY = @"CLTAP_I_KEY";
-NSString* const kJ_KEY = @"CLTAP_J_KEY";
+NSString *const kI_KEY = @"CLTAP_I_KEY";
+NSString *const kJ_KEY = @"CLTAP_J_KEY";
 
-NSString* const kFIRST_TS_KEY = @"CLTAP_FIRST_TS_KEY";
-NSString* const kLAST_TS_KEY = @"CLTAP_LAST_TS_KEY";
+NSString *const kFIRST_TS_KEY = @"CLTAP_FIRST_TS_KEY";
+NSString *const kLAST_TS_KEY = @"CLTAP_LAST_TS_KEY";
 
 NSString *const kMultiUserPrefix = @"mt_";
 
@@ -267,7 +267,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @synthesize productConfigDelegate=_productConfigDelegate;
 
-static CTPlistInfo* _plistInfo;
+static CTPlistInfo *_plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
 static CleverTapInstanceConfig *_defaultInstanceConfig;
 static BOOL sharedInstanceErrorLogged;
