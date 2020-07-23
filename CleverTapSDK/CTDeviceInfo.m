@@ -517,12 +517,25 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     if (!_radio) {
         Class CTTelephonyNetworkInfo = NSClassFromString(@"CTTelephonyNetworkInfo");
         if ([self.networkInfo isKindOfClass:CTTelephonyNetworkInfo]) {
-            SEL currentRadioAccessTechnology = NSSelectorFromString(@"currentRadioAccessTechnology");
-            NSString *(*imp1)(id, SEL) = (NSString *(*)(id, SEL))[_networkInfo methodForSelector:currentRadioAccessTechnology];
-            if (imp1) {
-                NSString *radio = imp1(self.networkInfo, currentRadioAccessTechnology);
-                if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
-                    _radio = [radio substringFromIndex:23];
+            if (@available(iOS 12, *)) {
+                SEL serviceCurrentRadioAccessTechnology = NSSelectorFromString(@"serviceCurrentRadioAccessTechnology");
+                NSDictionary *(*imp1)(id, SEL) = (NSDictionary *(*)(id, SEL))[_networkInfo methodForSelector:serviceCurrentRadioAccessTechnology];
+                if (imp1) {
+                    NSDictionary *radioDict = imp1(self.networkInfo, serviceCurrentRadioAccessTechnology);
+                    [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
+                        if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
+                            _radio = [NSString stringWithString:[value substringFromIndex:23]];
+                        }
+                    }];
+                }
+            } else {
+                SEL currentRadioAccessTechnology = NSSelectorFromString(@"currentRadioAccessTechnology");
+                NSString *(*imp1)(id, SEL) = (NSString *(*)(id, SEL))[_networkInfo methodForSelector:currentRadioAccessTechnology];
+                if (imp1) {
+                    NSString *radio = imp1(self.networkInfo, currentRadioAccessTechnology);
+                    if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
+                        _radio = [radio substringFromIndex:23];
+                    }
                 }
             }
         }
