@@ -1,5 +1,8 @@
 # CHANGE LOG
 
+## Version 3.8.2 (July 28, 2020)
+* Remove radio listener to fix the noticeable crashes in 13.x
+
 ## Version 3.8.1 (July 2, 2020)
 * Adds public API to raise Notification Clicked event for Push Notifications
 * Adds a callback to provide Push Notifications custom key-value pairs
