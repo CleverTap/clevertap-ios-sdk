@@ -1,4 +1,6 @@
-
+<p align="center">
+  <img src="https://github.com/CleverTap/clevertap-segment-ios/blob/master/clevertap-logo.png" width="300"/>
+</p>
 
 # CleverTap iOS SDK  
 [![CI Status](https://api.travis-ci.org/CleverTap/clevertap-ios-sdk.svg?branch=master)](https://travis-ci.org/CleverTap/clevertap-ios-sdk)
@@ -103,13 +105,13 @@ For more details, Please refer to our [installation guide](https://developer.cle
 
 ## Changelog #
 
-Check out the CleverTap iOS SDK [Change Log](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/CHANGELOG.md) here.
+See the [CleverTap iOS SDK Change Log](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/CHANGELOG.md).
 
-## Questions? #
+## Help and Questions? #
 
- If you have questions or concerns, you can reach out to the CleverTap support team at [support@clevertap.com](mailto:support@clevertap.com).
+If you have questions or concerns, you can reach out to the CleverTap support team from the CleverTap Dashboard.
  
- ## License #
+## License #
 
-Check out the CleverTap iOS SDK [License](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE) here.
+CleverTap iOS SDK is released under the MIT license. See [LICENSE](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/LICENSE) for details.
 
