@@ -515,11 +515,21 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString*)radio {
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
     if (!_radio) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(_updateRadio)
-                                                     name:CTRadioAccessTechnologyDidChangeNotification
-                                                   object:nil];
-        [self _updateRadio];
+        Class CTTelephonyNetworkInfo = NSClassFromString(@"CTTelephonyNetworkInfo");
+        if ([self.networkInfo isKindOfClass:CTTelephonyNetworkInfo]) {
+            SEL currentRadioAccessTechnology = NSSelectorFromString(@"currentRadioAccessTechnology");
+            NSString *(*imp1)(id, SEL) = (NSString *(*)(id, SEL))[_networkInfo methodForSelector:currentRadioAccessTechnology];
+            if (imp1) {
+                NSString *radio = imp1(self.networkInfo, currentRadioAccessTechnology);
+                if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
+                    _radio = [radio substringFromIndex:23];
+                }
+            }
+        }
+        if (!_radio) {
+            _radio = @"";
+        }
+        CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
     }
 #endif
     return _radio;
@@ -531,26 +541,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (BOOL)advertisingTrackingEnabled {
     return advertisingTrackingEnabled;
-}
-
-- (void)_updateRadio {
-#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-    Class CTTelephonyNetworkInfo = NSClassFromString(@"CTTelephonyNetworkInfo");
-    if ([self.networkInfo isKindOfClass:CTTelephonyNetworkInfo]) {
-        SEL currentRadioAccessTechnology = NSSelectorFromString(@"currentRadioAccessTechnology");
-        NSString* (*imp1)(id, SEL) = (NSString* (*)(id, SEL))[_networkInfo methodForSelector:currentRadioAccessTechnology];
-        if (imp1) {
-            NSString *radio = imp1(self.networkInfo, currentRadioAccessTechnology);
-            if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
-                _radio = [radio substringFromIndex:23];
-            }
-        }
-    }
-    if (!_radio) {
-        _radio = @"";
-    }
-    CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
-#endif
 }
 
 - (NSObject*)networkInfo {
