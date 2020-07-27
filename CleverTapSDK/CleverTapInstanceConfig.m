@@ -10,7 +10,18 @@
     return [self initWithAccountId:accountId
                       accountToken:accountToken
                      accountRegion:nil
+                       proxyDomain:nil
                  isDefaultInstance:NO];    
+}
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                      proxyDomain:(NSString *)proxyDomain {
+    return [self initWithAccountId:accountId
+                      accountToken:accountToken
+                     accountRegion:nil
+                       proxyDomain:proxyDomain
+                 isDefaultInstance:NO];
 }
 
 - (instancetype)initWithAccountId:(NSString *)accountId
@@ -19,12 +30,26 @@
     return [self initWithAccountId:accountId
                       accountToken:accountToken
                      accountRegion:accountRegion
+                       proxyDomain:nil
                  isDefaultInstance:NO];
 }
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                    accountRegion:(NSString *)accountRegion
+                      proxyDomain:(NSString *)proxyDomain {
+    return [self initWithAccountId:accountId
+                      accountToken:accountToken
+                     accountRegion:accountRegion
+                       proxyDomain:proxyDomain
+                 isDefaultInstance:NO];
+}
+
 // SDK private
 - (instancetype)initWithAccountId:(NSString *)accountId
                      accountToken:(NSString *)accountToken
                     accountRegion:(NSString *)accountRegion
+                      proxyDomain:(NSString *)proxyDomain
                 isDefaultInstance:(BOOL)isDefault {
     if (accountId.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountId is empty");
@@ -38,6 +63,7 @@
         _accountId = accountId;
         _accountToken = accountToken;
         _accountRegion = accountRegion;
+        _proxyDomain = proxyDomain;
         _isDefaultInstance = isDefault;
         
         CTPlistInfo *plist = [CTPlistInfo sharedInstance];
@@ -53,7 +79,7 @@
 }
 
 - (instancetype)copyWithZone:(NSZone*)zone {
-    CleverTapInstanceConfig *copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken accountRegion:self.accountRegion isDefaultInstance:self.isDefaultInstance];
+    CleverTapInstanceConfig *copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken accountRegion:self.accountRegion proxyDomain:self.proxyDomain isDefaultInstance:self.isDefaultInstance];
     copy.analyticsOnly = self.analyticsOnly;
     copy.disableAppLaunchedEvent = self.disableAppLaunchedEvent;
     copy.enablePersonalization = self.enablePersonalization;

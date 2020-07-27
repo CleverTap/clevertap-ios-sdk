@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
 s.name                      = "CleverTap-iOS-SDK"
-s.version                   = "3.8.1"
+s.version                   = "3.8.1x"
 s.summary                   = "The CleverTap iOS SDK for App Analytics and Engagement."
 s.homepage                  = "https://github.com/CleverTap/clevertap-ios-sdk"
 s.license                   = { :type => "MIT" }
 s.author                    = { "CleverTap" => "http://www.clevertap.com" }
-s.source                    = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
+s.source                    = { :git => "https://github.com/nurture-farm/clevertap-ios-sdk.git", :branch => "master" }
 s.requires_arc              = true
 s.module_name               = 'CleverTapSDK'
 s.resources                 = 'CleverTapSDK/*.crt'

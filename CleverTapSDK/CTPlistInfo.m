@@ -74,6 +74,7 @@ static NSArray *registeredURLSchemes;
         _accountId = [CTPlistInfo getMetaDataForAttribute:CLTAP_ACCOUNT_ID_LABEL];
         _accountToken = [CTPlistInfo getMetaDataForAttribute:CLTAP_TOKEN_LABEL];
         _accountRegion = [CTPlistInfo getMetaDataForAttribute:CLTAP_REGION_LABEL];
+        _proxyDomain = [CTPlistInfo getMetaDataForAttribute:CLTAP_PROXY_DOMAIN_LABEL];
         _registeredUrlSchemes = [CTPlistInfo getRegisteredURLSchemes];
         
         NSString *useIFA = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IFA_LABEL];
@@ -91,9 +92,11 @@ static NSArray *registeredURLSchemes;
     return self;
 }
 
-- (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
+- (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token
+                                region:(NSString *)region proxyDomain:(NSString *)proxyDomain {
     _accountId = accountID;
     _accountToken = token;
     _accountRegion = region;
+    _proxyDomain = proxyDomain;
 }
 @end

@@ -553,14 +553,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return nil;
         }
         
-        _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+        _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
         
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
+        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@: %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_PROXY_DOMAIN_LABEL, _plistInfo.proxyDomain, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
     return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
 }
@@ -682,7 +682,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - Private
 
-+ (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
++ (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token
+                                 region:(NSString *)region proxyDomain:(NSString *)proxyDomain {
     if (_defaultInstanceConfig) {
         CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
         return;
@@ -695,7 +696,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             region = nil;
         }
     }
-    [_plistInfo changeCredentialsWithAccountID:accountID token:token region:region];
+    [_plistInfo changeCredentialsWithAccountID:accountID token:token region:region proxyDomain:proxyDomain];
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
@@ -1002,7 +1003,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else {
         endpointDomain = self.redirectDomain;
     }
-    NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/a1?os=iOS&t=%@&z=%@", endpointDomain, sdkRevision, accountId];
+    //here we redirect to proxy domain if present
+    NSString *endpointUrl = @"https://";
+    if(nil == self.config.proxyDomain || 0 == self.config.proxyDomain.length) {
+        endpointUrl = [endpointUrl stringByAppendingFormat:@"%@/a1?os=iOS&t=%@&z=%@", endpointDomain, sdkRevision, accountId];
+    } else {
+        endpointUrl = [endpointUrl stringByAppendingFormat:@"%@?os=iOS&t=%@&z=%@&rt=%@/a1",
+        self.config.proxyDomain, sdkRevision, accountId, endpointDomain];
+    }
     currentRequestTimestamp = (int) [[[NSDate alloc] init] timeIntervalSince1970];
     endpointUrl = [endpointUrl stringByAppendingFormat:@"&ts=%d", currentRequestTimestamp];
     return endpointUrl;
@@ -3819,19 +3827,37 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token {
-    [self _changeCredentialsWithAccountID:accountID token:token region:nil];
+    [self _changeCredentialsWithAccountID:accountID token:token region:nil proxyDomain: nil];
+}
+
++ (void)changeCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    [self _changeCredentialsWithAccountID:accountID token:token region:nil proxyDomain: proxyDomain];
 }
 
 + (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
-    [self _changeCredentialsWithAccountID:accountID token:token region:region];
+    [self _changeCredentialsWithAccountID:accountID token:token region:region proxyDomain: nil];
+}
+
++ (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token
+                                region:(NSString *)region proxyDomain:(NSString *)proxyDomain {
+    [self _changeCredentialsWithAccountID:accountID token:token region:region proxyDomain: proxyDomain];
 }
 
 + (void)setCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token {
-    [self _changeCredentialsWithAccountID:accountID token:token region:nil];
+    [self _changeCredentialsWithAccountID:accountID token:token region:nil proxyDomain: nil];
+}
+
++ (void)setCredentialsWithAccountID:(NSString *)accountID andToken:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    [self _changeCredentialsWithAccountID:accountID token:token region:nil proxyDomain: proxyDomain];
 }
 
 + (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
-    [self _changeCredentialsWithAccountID:accountID token:token region:region];
+    [self _changeCredentialsWithAccountID:accountID token:token region:region proxyDomain: nil];
+}
+
++ (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token
+                             region:(NSString *)region proxyDomain:(NSString *)proxyDomain {
+    [self _changeCredentialsWithAccountID:accountID token:token region:region proxyDomain: proxyDomain];
 }
 
 - (void)setSyncDelegate:(id <CleverTapSyncDelegate>)delegate {

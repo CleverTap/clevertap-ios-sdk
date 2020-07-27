@@ -12,6 +12,7 @@
 - (instancetype _Nonnull)initWithAccountId:(NSString * _Nonnull)accountId
                               accountToken:(NSString * _Nonnull)accountToken
                              accountRegion:(NSString * _Nullable)accountRegion
+                             proxyDomain:(NSString * _Nullable)proxyDomain
                          isDefaultInstance:(BOOL)isDefault;
 
 @end
