@@ -1,14 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
---- 
-
 ### [Version 3.8.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.8.2) (July 28, 2020)
 
 ##### Fixed
-- Remove radio listener to fix the noticeable crashes in 13.x
-- Carthage error on 3.8.1.
-  Addresses - https://github.com/CleverTap/clevertap-ios-sdk/issues/72
+- Removes radio listener `CTRadioAccessTechnologyDidChangeNotification` to fix the noticeable crashes in 13.x
+- Carthage build error on v3.8.1
+  - Addresses - https://github.com/CleverTap/clevertap-ios-sdk/issues/72
 
 ##### Changed
 * Use `serviceCurrentRadioAccessTechnology` over deprecated `currentRadioAccessTechnology` in CTTelephonyNetworkInfo
