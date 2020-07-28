@@ -20,12 +20,13 @@
 #import <CoreTelephony/CTCarrier.h>
 #endif
 
-NSString* const kCLTAP_DEVICE_ID_TAG = @"deviceId";
-NSString* const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
-
-NSString* const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
+NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
+NSString *const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
+NSString *const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
 
 static BOOL advertisingTrackingEnabled;
+static BOOL _wifi;
+
 static NSRecursiveLock *deviceIDLock;
 static NSString *_idfv;
 static NSString *_idfa;
@@ -35,7 +36,7 @@ static NSString *_bundleId;
 static NSString *_build;
 static NSString *_osVersion;
 static NSString *_model;
-static NSObject* _networkInfo;
+static NSObject *_networkInfo;
 static NSString *_carrier;
 static NSString *_countryCode;
 static NSString *_timeZone;
@@ -43,7 +44,6 @@ static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
 static NSString *_deviceName;
-static BOOL _wifi;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 SCNetworkReachabilityRef _reachability;
@@ -104,7 +104,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 #endif
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID{
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (self = [super init]) {
         _config = config;
         _validationErrors = [NSMutableArray new];
@@ -144,9 +144,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 + (NSString *)getIDFA {
-    
     NSString *identifier;
-    
     @try {
         Class asim = NSClassFromString(@"ASIdentifierManager");
         if (!asim) {
