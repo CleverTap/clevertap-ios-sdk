@@ -20,12 +20,13 @@
 #import <CoreTelephony/CTCarrier.h>
 #endif
 
-NSString* const kCLTAP_DEVICE_ID_TAG = @"deviceId";
-NSString* const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
-
-NSString* const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
+NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
+NSString *const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
+NSString *const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
 
 static BOOL advertisingTrackingEnabled;
+static BOOL _wifi;
+
 static NSRecursiveLock *deviceIDLock;
 static NSString *_idfv;
 static NSString *_idfa;
@@ -35,7 +36,7 @@ static NSString *_bundleId;
 static NSString *_build;
 static NSString *_osVersion;
 static NSString *_model;
-static NSObject* _networkInfo;
+static NSObject *_networkInfo;
 static NSString *_carrier;
 static NSString *_countryCode;
 static NSString *_timeZone;
@@ -43,7 +44,6 @@ static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
 static NSString *_deviceName;
-static BOOL _wifi;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 SCNetworkReachabilityRef _reachability;
@@ -104,7 +104,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 #endif
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID{
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (self = [super init]) {
         _config = config;
         _validationErrors = [NSMutableArray new];
@@ -144,9 +144,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 + (NSString *)getIDFA {
-    
     NSString *identifier;
-    
     @try {
         Class asim = NSClassFromString(@"ASIdentifierManager");
         if (!asim) {
@@ -515,11 +513,34 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString*)radio {
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
     if (!_radio) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(_updateRadio)
-                                                     name:CTRadioAccessTechnologyDidChangeNotification
-                                                   object:nil];
-        [self _updateRadio];
+        Class CTTelephonyNetworkInfo = NSClassFromString(@"CTTelephonyNetworkInfo");
+        if ([self.networkInfo isKindOfClass:CTTelephonyNetworkInfo]) {
+            if (@available(iOS 12, *)) {
+                SEL serviceCurrentRadioAccessTechnology = NSSelectorFromString(@"serviceCurrentRadioAccessTechnology");
+                NSDictionary *(*imp1)(id, SEL) = (NSDictionary *(*)(id, SEL))[_networkInfo methodForSelector:serviceCurrentRadioAccessTechnology];
+                if (imp1) {
+                    NSDictionary *radioDict = imp1(self.networkInfo, serviceCurrentRadioAccessTechnology);
+                    [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
+                        if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
+                            _radio = [NSString stringWithString:[value substringFromIndex:23]];
+                        }
+                    }];
+                }
+            } else {
+                SEL currentRadioAccessTechnology = NSSelectorFromString(@"currentRadioAccessTechnology");
+                NSString *(*imp1)(id, SEL) = (NSString *(*)(id, SEL))[_networkInfo methodForSelector:currentRadioAccessTechnology];
+                if (imp1) {
+                    NSString *radio = imp1(self.networkInfo, currentRadioAccessTechnology);
+                    if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
+                        _radio = [radio substringFromIndex:23];
+                    }
+                }
+            }
+        }
+        if (!_radio) {
+            _radio = @"";
+        }
+        CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
     }
 #endif
     return _radio;
@@ -531,26 +552,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (BOOL)advertisingTrackingEnabled {
     return advertisingTrackingEnabled;
-}
-
-- (void)_updateRadio {
-#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-    Class CTTelephonyNetworkInfo = NSClassFromString(@"CTTelephonyNetworkInfo");
-    if ([self.networkInfo isKindOfClass:CTTelephonyNetworkInfo]) {
-        SEL currentRadioAccessTechnology = NSSelectorFromString(@"currentRadioAccessTechnology");
-        NSString* (*imp1)(id, SEL) = (NSString* (*)(id, SEL))[_networkInfo methodForSelector:currentRadioAccessTechnology];
-        if (imp1) {
-            NSString *radio = imp1(self.networkInfo, currentRadioAccessTechnology);
-            if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
-                _radio = [radio substringFromIndex:23];
-            }
-        }
-    }
-    if (!_radio) {
-        _radio = @"";
-    }
-    CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
-#endif
 }
 
 - (NSObject*)networkInfo {
