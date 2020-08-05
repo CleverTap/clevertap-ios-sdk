@@ -24,6 +24,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         self.setupImages()
         self.recordUserChargedEvent()
         
+        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+
+        
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
             //            ...
         }
