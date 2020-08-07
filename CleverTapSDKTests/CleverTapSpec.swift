@@ -2,7 +2,7 @@
 import Quick
 import Nimble
 
-class CleverTapSpec: QuickSpec {
+final class CleverTapSpec: QuickSpec {
 
     override func spec() {
         

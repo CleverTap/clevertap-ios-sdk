@@ -2,7 +2,7 @@
 import Quick
 import Nimble
 
-class FeatureFlagSpec: QuickSpec {
+final class FeatureFlagSpec: QuickSpec {
 
     override func spec() {
         

@@ -2,7 +2,7 @@
 import Quick
 import Nimble
 
-class ProductConfigSpec: QuickSpec {
+final class ProductConfigSpec: QuickSpec {
 
     override func spec() {
         
