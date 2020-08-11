@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name                      = "CleverTap-iOS-SDK"
-s.version                   = "3.8.2"
+s.version                   = "3.9.0"
 s.summary                   = "The CleverTap iOS SDK for App Analytics and Engagement."
 s.homepage                  = "https://github.com/CleverTap/clevertap-ios-sdk"
 s.license                   = { :type => "MIT" }
