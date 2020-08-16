@@ -4979,7 +4979,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)didFailToRegisterForGeofencesWithError:(NSError *)error {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     [result setErrorCode:(int)error.code];
-    [result setErrorDesc:error.description];
+    [result setErrorDesc:error.localizedDescription];
     [self pushValidationResult:result];
 }
 
