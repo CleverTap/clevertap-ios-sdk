@@ -26,6 +26,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
         
+
+        
         let closure1:((Int, Int) -> Int) = { (number1, number2) in
             return number1 + number2
         }

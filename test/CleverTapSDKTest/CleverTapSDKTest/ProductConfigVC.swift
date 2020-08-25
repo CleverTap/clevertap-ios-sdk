@@ -12,6 +12,9 @@ class ProductConfigVC: UIViewController, CleverTapProductConfigDelegate {
         print("Last Fetch Time Stamp:", lastFetchTS ?? "")
         CleverTap.sharedInstance()?.productConfig.setMinimumFetchInterval(100)
         
+//        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+
+        
     }
     
     @IBAction func setDefaultsTapped(_ sender: Any) {

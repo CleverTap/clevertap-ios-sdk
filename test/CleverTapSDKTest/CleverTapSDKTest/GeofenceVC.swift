@@ -4,7 +4,9 @@ import CleverTapSDK
 class GeofenceVC: UIViewController {
     
     override func viewDidLoad() {
-        super.viewDidLoad()
+         super.viewDidLoad()
+//         CleverTap.sharedInstance()?.recordEvent("Charged")
+         CleverTap.sharedInstance()?.recordEvent("Added To Cart")
     }
     
     @objc func geofencesDidUpdate(notification: Notification) {
