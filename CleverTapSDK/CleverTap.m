@@ -1122,14 +1122,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         evtData[@"wifi"] = @(self.deviceInfo.wifi);
     }
     
-    if (self.deviceInfo.advertisingIdentitier) {
-        evtData[@"ifaA"] = @YES;
-        evtData[@"ifaL"] = self.deviceInfo.advertisingTrackingEnabled ? @NO : @YES;
-        NSString *ifaString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifa"] : @"ifa";
-        evtData[ifaString] = self.deviceInfo.advertisingIdentitier;
-    } else {
-        evtData[@"ifaA"] = @NO;
-    }
+    // TODO: need to check
+    
+//    if (self.deviceInfo.advertisingIdentitier) {
+//        evtData[@"ifaA"] = @YES;
+//        evtData[@"ifaL"] = self.deviceInfo.advertisingTrackingEnabled ? @NO : @YES;
+//        NSString *ifaString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifa"] : @"ifa";
+//        evtData[ifaString] = self.deviceInfo.advertisingIdentitier;
+//    } else {
+//        evtData[@"ifaA"] = @NO;
+//    }
     
     if (self.deviceInfo.vendorIdentifier) {
         NSString *ifvString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifv"] : @"ifv";
