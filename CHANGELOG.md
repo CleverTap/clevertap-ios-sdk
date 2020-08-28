@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 3.9.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.0) (August 29, 2020)
+
+##### Added
+- Adds support for Geofence
+
+##### Changed
+- Stop capturing IDFA and removes code that has the ability to access the device’s advertising identifier (IDFA)
+
 ### [Version 3.8.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.8.2) (August 4, 2020)
 
 ##### Fixed
