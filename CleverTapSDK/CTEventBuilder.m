@@ -368,6 +368,11 @@ NSString *const kCHARGED_EVENT = @"Charged";
     }
 }
 
+/**
+ * Raises the Native Display Clicked event, if clicked is true,
+ * otherwise the Native Display Viewed event, if clicked is false.
+ *
+ */
 + (void)buildDisplayViewStateEvent:(BOOL)clicked
                     forDisplayUnit:(CleverTapDisplayUnit *)displayUnit
                 andQueryParameters:(NSDictionary *)params
@@ -385,6 +390,31 @@ NSString *const kCHARGED_EVENT = @"Charged";
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
         event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[@"evtData"] = notif;
+        completion(event, nil);
+    } @catch (NSException *e) {
+        completion(nil, nil);
+    }
+}
+
+/**
+ * Raises the Geofence Entered event, if entered is true,
+ * otherwise the Geofence Exited event, if entered is false.
+ *
+ */
++ (void)buildGeofenceStateEvent:(BOOL)entered
+             forGeofenceDetails:(NSDictionary * _Nonnull)geofenceDetails
+              completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion {
+    @try {
+        NSMutableDictionary *event = [NSMutableDictionary new];
+        NSMutableDictionary *notif = [NSMutableDictionary new];
+        if (geofenceDetails) {
+            [notif addEntriesFromDictionary:geofenceDetails];
+        }
+        if ([notif count] == 0) {
+            CleverTapLogStaticInternal(@"Geofence does not have any field");
+        }
+        event[@"evtName"] = entered ? CLTAP_GEOFENCE_ENTERED_EVENT_NAME : CLTAP_GEOFENCE_EXITED_EVENT_NAME;
         event[@"evtData"] = notif;
         completion(event, nil);
     } @catch (NSException *e) {

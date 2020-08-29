@@ -75,10 +75,7 @@ static NSArray *registeredURLSchemes;
         _accountToken = [CTPlistInfo getMetaDataForAttribute:CLTAP_TOKEN_LABEL];
         _accountRegion = [CTPlistInfo getMetaDataForAttribute:CLTAP_REGION_LABEL];
         _registeredUrlSchemes = [CTPlistInfo getRegisteredURLSchemes];
-        
-        NSString *useIFA = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IFA_LABEL];
-        _useIDFA = (useIFA && [useIFA isEqualToString:@"1"]);
-        
+                
         NSString *useCustomCleverTapId = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL];
         _useCustomCleverTapId = (useCustomCleverTapId && [useCustomCleverTapId isEqualToString:@"1"]);
         

@@ -44,7 +44,7 @@
 #endif
 #if CLEVERTAP_SSL_PINNING
 #import "CTPinnedNSURLSessionDelegate.h"
-static NSArray* sslCertNames;
+static NSArray *sslCertNames;
 #endif
 
 #if !CLEVERTAP_NO_AB_SUPPORT
@@ -72,28 +72,28 @@ static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 
 static const int kMaxBatchSize = 49;
-NSString* const kQUEUE_NAME_PROFILE = @"net_queue_profile";
-NSString* const kQUEUE_NAME_EVENTS = @"events";
-NSString* const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
+NSString *const kQUEUE_NAME_PROFILE = @"net_queue_profile";
+NSString *const kQUEUE_NAME_EVENTS = @"events";
+NSString *const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
 
-NSString* const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
+NSString *const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
 
-NSString* const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
-NSString* const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
-NSString* const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
+NSString *const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
+NSString *const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
+NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 
-NSString* const kREDIRECT_HEADER = @"X-WZRK-RD";
-NSString* const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
-NSString* const kMUTE_HEADER = @"X-WZRK-MUTE";
+NSString *const kREDIRECT_HEADER = @"X-WZRK-RD";
+NSString *const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
+NSString *const kMUTE_HEADER = @"X-WZRK-MUTE";
 
-NSString* const kACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
-NSString* const kACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
+NSString *const kACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
+NSString *const kACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
 
-NSString* const kI_KEY = @"CLTAP_I_KEY";
-NSString* const kJ_KEY = @"CLTAP_J_KEY";
+NSString *const kI_KEY = @"CLTAP_I_KEY";
+NSString *const kJ_KEY = @"CLTAP_J_KEY";
 
-NSString* const kFIRST_TS_KEY = @"CLTAP_FIRST_TS_KEY";
-NSString* const kLAST_TS_KEY = @"CLTAP_LAST_TS_KEY";
+NSString *const kFIRST_TS_KEY = @"CLTAP_FIRST_TS_KEY";
+NSString *const kLAST_TS_KEY = @"CLTAP_LAST_TS_KEY";
 
 NSString *const kMultiUserPrefix = @"mt_";
 
@@ -106,7 +106,8 @@ NSString *const kSessionId = @"sessionId";
 NSString *const kWR_KEY_PERSONALISATION_ENABLED = @"boolPersonalisationEnabled";
 NSString *const kWR_KEY_AB_TEST_EDITOR_ENABLED = @"boolABTestEditorEnabled";
 NSString *const CleverTapProfileDidInitializeNotification = CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION;
-NSString* const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
+NSString *const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
+NSString *const CleverTapGeofencesDidUpdateNotification = CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION;
 
 NSString *const kCachedGUIDS = @"CachedGUIDS";
 NSString *const kOnUserLoginAction = @"onUserLogin";
@@ -114,7 +115,6 @@ NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
-
 static BOOL isAutoIntegrated;
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
@@ -237,6 +237,9 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, assign, readonly) BOOL sslPinningEnabled;
 
+@property (atomic, assign) BOOL geofenceLocation;
+@property (nonatomic, strong) NSString *gfSDKVersion;
+
 - (instancetype)init __unavailable;
 
 @end
@@ -254,6 +257,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
 @synthesize firstRequestInSession=_firstRequestInSession;
+@synthesize geofenceLocation=_geofenceLocation;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
@@ -263,7 +267,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @synthesize productConfigDelegate=_productConfigDelegate;
 
-static CTPlistInfo* _plistInfo;
+static CTPlistInfo *_plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
 static CleverTapInstanceConfig *_defaultInstanceConfig;
 static BOOL sharedInstanceErrorLogged;
@@ -1118,15 +1122,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         evtData[@"wifi"] = @(self.deviceInfo.wifi);
     }
     
-    if (self.deviceInfo.advertisingIdentitier) {
-        evtData[@"ifaA"] = @YES;
-        evtData[@"ifaL"] = self.deviceInfo.advertisingTrackingEnabled ? @NO : @YES;
-        NSString *ifaString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifa"] : @"ifa";
-        evtData[ifaString] = self.deviceInfo.advertisingIdentitier;
-    } else {
-        evtData[@"ifaA"] = @NO;
-    }
-    
+    evtData[@"ifaA"] = @NO;
     if (self.deviceInfo.vendorIdentifier) {
         NSString *ifvString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifv"] : @"ifv";
         evtData[ifvString] = self.deviceInfo.vendorIdentifier;
@@ -2418,6 +2414,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         mutableEvent[@"f"] = @(self.firstSession);
         mutableEvent[@"n"] = self.currentViewControllerName ? self.currentViewControllerName : @"_bg";
         
+        if (eventType == CleverTapEventTypePing && _geofenceLocation) {
+            mutableEvent[@"gf"] = @(_geofenceLocation);
+            mutableEvent[@"gfSDKVersion"] = _gfSDKVersion;
+            _geofenceLocation = NO;
+        }
+        
         // Report any pending validation error
         CTValidationResult *vr = [self popValidationResult];
         if (vr != nil) {
@@ -2898,6 +2900,25 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
                     }
                 }
+                
+#if !CLEVERTAP_NO_GEOFENCE_SUPPORT
+                NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
+                if (geofencesJSON) {
+                    NSMutableArray *geofencesList;
+                    @try {
+                        geofencesList = [[NSMutableArray alloc] initWithArray:geofencesJSON];
+                    } @catch (NSException *e) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Geofences JSON: %@", self, e.debugDescription);
+                    }
+                    if (geofencesList) {
+                        NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
+                        geofencesDict[@"geofences"] = geofencesList;
+                        [[self class] runSyncMainQueue: ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
+                        }];
+                    }
+                }
+#endif
                 
                 // Handle events/profiles sync data
                 @try {
@@ -3894,12 +3915,28 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return (BOOL) [CTPreferences getIntForKey:kWR_KEY_PERSONALISATION_ENABLED withResetValue:YES];
 }
 
+- (void)setLocationForGeofences:(CLLocationCoordinate2D)location withPluginVersion:(NSString *)version {
+    if (version) {
+        _gfSDKVersion = version;
+    }
+    _geofenceLocation = YES;
+    [self setLocation:location];
+}
+
 + (void)setLocation:(CLLocationCoordinate2D)location {
     [[self sharedInstance] setLocation:location];
 }
 
 - (void)setLocation:(CLLocationCoordinate2D)location {
     self.userSetLocation = location;
+}
+
+- (void)setGeofenceLocation:(BOOL)geofenceLocation {
+    _geofenceLocation = geofenceLocation;
+}
+
+- (BOOL)geofenceLocation {
+    return _geofenceLocation;
 }
 
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {
@@ -4926,6 +4963,39 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Product Config not initialized", self);
     return nil;
+}
+
+
+#pragma mark - Geofence Public APIs
+
+- (void)didFailToRegisterForGeofencesWithError:(NSError *)error {
+    CTValidationResult *result = [[CTValidationResult alloc] init];
+    [result setErrorCode:(int)error.code];
+    [result setErrorDesc:error.localizedDescription];
+    [self pushValidationResult:result];
+}
+
+- (void)recordGeofenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails {
+    [self _buildGeofenceStateEvent:YES forGeofenceDetails:geofenceDetails];
+}
+
+- (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails {
+    [self _buildGeofenceStateEvent:NO forGeofenceDetails:geofenceDetails];
+}
+
+- (void)_buildGeofenceStateEvent:(BOOL)entered forGeofenceDetails:(NSDictionary *_Nonnull)geofenceDetails {
+#if !defined(CLEVERTAP_TVOS)
+    [self runSerialAsync:^{
+        [CTEventBuilder buildGeofenceStateEvent:entered forGeofenceDetails:geofenceDetails completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            if (event) {
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
 }
 
 @end
