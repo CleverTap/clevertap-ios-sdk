@@ -12,6 +12,8 @@
     copy.tabUnSelectedTextColor = self.tabUnSelectedTextColor;
     copy.tabSelectedTextColor = self.tabSelectedTextColor;
     copy.tabSelectedBgColor = self.tabSelectedBgColor;
+    copy.noMessageViewText = self.noMessageViewText;
+    copy.noMessageViewTextColor = self.noMessageViewTextColor;
     return copy;
 }
 

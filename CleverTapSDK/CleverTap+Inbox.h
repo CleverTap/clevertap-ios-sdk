@@ -83,6 +83,8 @@
 @property (nonatomic, strong, nullable) UIColor *tabSelectedBgColor;
 @property (nonatomic, strong, nullable) UIColor *tabSelectedTextColor;
 @property (nonatomic, strong, nullable) UIColor *tabUnSelectedTextColor;
+@property (nonatomic, strong, nullable) NSString *noMessageViewText;
+@property (nonatomic, strong, nullable) UIColor *noMessageViewTextColor;
 
 @end
 
