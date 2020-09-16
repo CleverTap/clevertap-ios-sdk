@@ -17,9 +17,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
+
+//        CleverTap.sharedInstance()?.recordEvent("Aditi react native")
+//        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
+//        CleverTap.sharedInstance()?.recordEvent("Aditi ct1")
+//        CleverTap.sharedInstance()?.recordEvent("Event")
+//        CleverTap.sharedInstance()?.recordEvent("aditi")
 
         
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
@@ -30,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
         }
         
-        CleverTap.autoIntegrate()
+//        CleverTap.autoIntegrate()
         
 //        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting((1 != 0))
         
@@ -40,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
         CleverTap.sharedInstance()?.productConfig.delegate = self;
         
-        CleverTap.sharedInstance()?.recordEvent("Content Started")
+        CleverTap.sharedInstance()?.recordEvent("aditi")
         
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")
@@ -77,6 +84,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         } else {
             // Fallback on earlier versions
         }
+        
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().delegate = self
+        } else {
+            // Fallback on earlier versions
+        };
     }
     
     func profileDidInitialize(_ CleverTapID: String!, forAccountId accountId: String!) {
@@ -112,7 +125,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        //        CleverTap.sharedInstance()?.handleNotification(withData: response.notification.request.content.userInfo)
+        CleverTap.sharedInstance()?.handleNotification(withData: response)
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
         completionHandler()
     }

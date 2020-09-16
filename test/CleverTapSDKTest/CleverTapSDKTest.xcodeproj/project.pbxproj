@@ -899,7 +899,7 @@
 					CLEVERTAP_SSL_PINNING,
 				);
 				INFOPLIST_FILE = CleverTapSDKTest/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -921,7 +921,7 @@
 				DEVELOPMENT_TEAM = A5J34NR598;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				INFOPLIST_FILE = CleverTapSDKTest/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

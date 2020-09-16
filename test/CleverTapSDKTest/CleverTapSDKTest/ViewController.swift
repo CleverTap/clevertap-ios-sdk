@@ -17,7 +17,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     override func viewDidLoad() {
         super.viewDidLoad()
-         CleverTap.sharedInstance()?.recordEvent("Cover ios")
+        CleverTap.sharedInstance()?.recordEvent("Cover ios")
         let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("foo", withDefaultValue:false)
         let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("discount", withDefaultValue:false)
         self.setupImages()
@@ -25,20 +25,21 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
         
-//        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
         
         let closure1:((Int, Int) -> Int) = { (number1, number2) in
             return number1 + number2
         }
         
         
-        
         CleverTap.sharedInstance()?.registerExperimentsUpdatedBlock {
-            //            ...
+            print ("experiment called")
+            var string = CleverTap.sharedInstance()?.getStringVariable(withName: "foo", defaultValue: "defaultFooValue")
+            print(string ?? "")
         }
         
         //        inboxRegister()
-//                addWebview()
+        //                addWebview()
         //        addAdUnit()
         //        self.navigationController?.navigationItem.leftBarButtonItem = nil
         self.navigationItem.hidesBackButton = true
@@ -105,21 +106,21 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     func addWebview() {
         
-         let config = WKWebViewConfiguration()
-         let ctInterface: CleverTapJSInterface = CleverTapJSInterface(config: nil)
-         let userContentController = WKUserContentController()
-         userContentController.add(ctInterface, name: "clevertap")
-         userContentController.add(self, name: "appDefault")
-         config.userContentController = userContentController
-         let customFrame =  CGRect(x: 20, y: 220, width: self.view.frame.width - 40, height: 400)
-         self.webView = WKWebView (frame: customFrame , configuration: config)
-         self.webView.layer.cornerRadius = 3.0
-         self.webView.layer.masksToBounds = true
-         webView.translatesAutoresizingMaskIntoConstraints = false
-         self.view.addSubview(webView)
-         webView.navigationDelegate = self
-         self.webView.loadHTMLString(self.htmlStringFromFile(with: "sampleHTMLCode"), baseURL: nil)
-         
+        let config = WKWebViewConfiguration()
+        let ctInterface: CleverTapJSInterface = CleverTapJSInterface(config: nil)
+        let userContentController = WKUserContentController()
+        userContentController.add(ctInterface, name: "clevertap")
+        userContentController.add(self, name: "appDefault")
+        config.userContentController = userContentController
+        let customFrame =  CGRect(x: 20, y: 220, width: self.view.frame.width - 40, height: 400)
+        self.webView = WKWebView (frame: customFrame , configuration: config)
+        self.webView.layer.cornerRadius = 3.0
+        self.webView.layer.masksToBounds = true
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(webView)
+        webView.navigationDelegate = self
+        self.webView.loadHTMLString(self.htmlStringFromFile(with: "sampleHTMLCode"), baseURL: nil)
+        
     }
     
     private func htmlStringFromFile(with name: String) -> String {
@@ -191,11 +192,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 
                 if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
                     let navigationController = UINavigationController.init(rootViewController: inboxController)
-                    //                    navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
-                    //                    navigationController.navigationItem.leftBarButtonItem = nil;
-                    //                    navigationController.navigationItem.hidesBackButton = true;
-                    //                    self.navigationController?.present(navigationController, animated: true, completion: nil)
-                    self.navigationController?.pushViewController(inboxController, animated: true)
+                    //                                        navigationController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+                    //                                        navigationController.navigationItem.leftBarButtonItem = nil;
+                    //                                        navigationController.navigationItem.hidesBackButton = true;
+                    self.navigationController?.present(navigationController, animated: true, completion: nil)
+                    //                    self.navigationController?.pushViewController(inboxController, animated: true)
                 }
             }
         }))
@@ -229,34 +230,58 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         inAppEvents()
     }
     
+    @IBAction func localNotification(_ sender: Any) {
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3,
+                                                        repeats: false)
+        let content = UNMutableNotificationContent()
+        content.title = "Don't forget"
+        content.body = "Buy some milk"
+        content.sound = UNNotificationSound.default
+        content.userInfo = ["customData": "Local CT Notification Test"]
+        
+        // Swift
+        let identifier = "UYLLocalNotification"
+        let request = UNNotificationRequest(identifier: identifier,
+                                            content: content, trigger: trigger)
+        
+        let center = UNUserNotificationCenter.current()
+        center.add(request, withCompletionHandler: { (error) in
+            if let error = error {
+                // Something went wrong
+            }
+        })
+    }
+    
     func inAppEvents() {
-        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
-        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
-        CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
-        CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
-        CleverTap.sharedInstance()?.recordEvent("Cover ios")
-        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
-        CleverTap.sharedInstance()?.recordEvent("Flutter Event")
-        CleverTap.sharedInstance()?.recordEvent("Alert ios")
-        CleverTap.sharedInstance()?.recordEvent("test ios")
-        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Cover")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Header")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
-        CleverTap.sharedInstance()?.recordEvent("Footer")
-        CleverTap.sharedInstance()?.recordEvent("Cover")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-        CleverTap.sharedInstance()?.recordEvent("Header")
-        CleverTap.sharedInstance()?.recordEvent("Cover Image")
-        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
-        CleverTap.sharedInstance()?.recordEvent("Charged")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
-        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+        
+        //        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
+        //        CleverTap.sharedInstance()?.recordScreenView("recordScreen")
+        //        CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+        //        CleverTap.sharedInstance()?.recordEvent("Flutter Event")
+        //        CleverTap.sharedInstance()?.recordEvent("Alert ios")
+        //        CleverTap.sharedInstance()?.recordEvent("test ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Battery Alert")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial")
+        //        CleverTap.sharedInstance()?.recordEvent("Header")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
+        //        CleverTap.sharedInstance()?.recordEvent("Footer")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+        //        CleverTap.sharedInstance()?.recordEvent("Header")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Charged")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial video")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
+        //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
     }

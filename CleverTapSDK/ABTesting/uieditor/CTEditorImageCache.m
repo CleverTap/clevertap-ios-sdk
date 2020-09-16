@@ -22,21 +22,22 @@ static SDImageCache *cache;
 }
 
 + (UIImage *)getImage:(NSString *)imageUrl withScale:(CGFloat)scale andSize:(CGSize)size {
-    UIImage *image = [cache imageFromCacheForKey:imageUrl];
+    __block UIImage *image = [cache imageFromCacheForKey:imageUrl];
     if (!image) {
-        NSURLResponse *response;
-        NSError *error;
         NSMutableURLRequest *request = [NSMutableURLRequest
                                         requestWithURL:[NSURL URLWithString:imageUrl] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:20];
-        NSData *imageData = [NSURLConnection
-                             sendSynchronousRequest:request
-                             returningResponse:&response error:&error];
-        if (imageData) {
-            image = [UIImage imageWithData:imageData scale:fminf(1.0, scale)];
-            if (image) {
-                [cache storeImage:image forKey:imageUrl toDisk:YES completion:nil];
+        NSURLSession *session = [NSURLSession sharedSession];
+        NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            if (!error) {
+                if (data) {
+                    image = [UIImage imageWithData:data scale:fminf(1.0, scale)];
+                    if (image) {
+                        [cache storeImage:image forKey:imageUrl toDisk:YES completion:nil];
+                    }
+                }
             }
-        }
+        }];
+        [task resume];
     }
     if (image && size.height > 0 && size.width > 0) {
         UIGraphicsBeginImageContext(size);
