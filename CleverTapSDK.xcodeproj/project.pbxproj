@@ -56,12 +56,10 @@
 		071EB4E8217F6427008F0FAB /* CTFooterViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */; };
 		071EB4E9217F6427008F0FAB /* CTSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB49A217F6427008F0FAB /* CTSlider.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4EB217F6427008F0FAB /* CTCoverImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */; };
-		071EB4EC217F6427008F0FAB /* CTAVPlayerControlsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */; };
 		071EB4EE217F6427008F0FAB /* CTAlertViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB49F217F6427008F0FAB /* CTAlertViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A0217F6427008F0FAB /* CTInterstitialViewController.m */; };
 		071EB4F0217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		071EB4F1217F6427008F0FAB /* CTAVPlayerControlsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */; };
 		071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */; };
 		071EB4F3217F6427008F0FAB /* CTInAppNotification.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4A4217F6427008F0FAB /* CTInAppNotification.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4F4217F6427008F0FAB /* CTCoverViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */; };
@@ -86,7 +84,6 @@
 		071EB508217F6427008F0FAB /* CTBaseHeaderFooterViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4B9217F6427008F0FAB /* CTBaseHeaderFooterViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB509217F6427008F0FAB /* CTAlertViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4BA217F6427008F0FAB /* CTAlertViewController.m */; };
 		071EB50A217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */; };
-		071EB50B217F6427008F0FAB /* CTAVPlayerControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */; };
 		071EB50C217F6427008F0FAB /* CTCoverImageViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB4BD217F6427008F0FAB /* CTCoverImageViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB50E217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */; };
 		071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */; };
@@ -426,12 +423,10 @@
 		071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTFooterViewController~ipad.xib"; sourceTree = "<group>"; };
 		071EB49A217F6427008F0FAB /* CTSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTSlider.h; sourceTree = "<group>"; };
 		071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCoverImageViewController.m; sourceTree = "<group>"; };
-		071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAVPlayerControlsViewController.h; sourceTree = "<group>"; };
 		071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~iphoneport.xib"; sourceTree = "<group>"; };
 		071EB49F217F6427008F0FAB /* CTAlertViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAlertViewController.h; sourceTree = "<group>"; };
 		071EB4A0217F6427008F0FAB /* CTInterstitialViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTInterstitialViewController.m; sourceTree = "<group>"; };
 		071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayViewControllerPrivate.h; sourceTree = "<group>"; };
-		071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CTAVPlayerControlsViewController.xib; sourceTree = "<group>"; };
 		071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTCoverViewController~iphoneport.xib"; sourceTree = "<group>"; };
 		071EB4A4217F6427008F0FAB /* CTInAppNotification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppNotification.h; sourceTree = "<group>"; };
 		071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTCoverViewController~ipad.xib"; sourceTree = "<group>"; };
@@ -456,7 +451,6 @@
 		071EB4B9217F6427008F0FAB /* CTBaseHeaderFooterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTBaseHeaderFooterViewController.h; sourceTree = "<group>"; };
 		071EB4BA217F6427008F0FAB /* CTAlertViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAlertViewController.m; sourceTree = "<group>"; };
 		071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~ipad.xib"; sourceTree = "<group>"; };
-		071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAVPlayerControlsViewController.m; sourceTree = "<group>"; };
 		071EB4BD217F6427008F0FAB /* CTCoverImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCoverImageViewController.h; sourceTree = "<group>"; };
 		071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~ipad.xib"; sourceTree = "<group>"; };
 		071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~iphoneport.xib"; sourceTree = "<group>"; };
@@ -750,7 +744,6 @@
 				07D86D44222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib */,
 				071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */,
 				070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */,
-				071EB4A2217F6427008F0FAB /* CTAVPlayerControlsViewController.xib */,
 				071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */,
 				071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */,
 				07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */,
@@ -788,8 +781,6 @@
 				071EB4A6217F6427008F0FAB /* CTInAppHTMLViewController.m */,
 				071EB477217F6427008F0FAB /* CTFooterViewController.h */,
 				071EB4B2217F6427008F0FAB /* CTFooterViewController.m */,
-				071EB49D217F6427008F0FAB /* CTAVPlayerControlsViewController.h */,
-				071EB4BC217F6427008F0FAB /* CTAVPlayerControlsViewController.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -1381,7 +1372,6 @@
 				07B8754E22E982F400328982 /* CTPropertyDescription.h in Headers */,
 				07B8757622E982F400328982 /* CTVarCache.h in Headers */,
 				07B8754D22E982F400328982 /* CTEnumDescription.h in Headers */,
-				071EB4EC217F6427008F0FAB /* CTAVPlayerControlsViewController.h in Headers */,
 				07B8754C22E982F400328982 /* CTObjectIdentityProvider.h in Headers */,
 				071EB512217F6427008F0FAB /* CTInAppHTMLViewController.h in Headers */,
 				D01A0894207EC2D400423D6F /* CleverTapInstanceConfig.h in Headers */,
@@ -1542,7 +1532,6 @@
 				07B9453D219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib in Resources */,
 				071EB4DC217F6427008F0FAB /* ic_shrink@3x.png in Resources */,
 				070229A9220831CB0093CA41 /* ct_default_video.png in Resources */,
-				071EB4F1217F6427008F0FAB /* CTAVPlayerControlsViewController.xib in Resources */,
 				071EB4DA217F6427008F0FAB /* ic_shrink@2x.png in Resources */,
 				071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */,
 				071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */,
@@ -1635,7 +1624,6 @@
 				0701E975237A9A760034AAC2 /* CleverTapDisplayUnitContent.m in Sources */,
 				07B8757B22E982F400328982 /* CTABTestController.m in Sources */,
 				D0405B4722050C5200D64EC3 /* CTInboxUtils.m in Sources */,
-				071EB50B217F6427008F0FAB /* CTAVPlayerControlsViewController.m in Sources */,
 				D01651B32097B42C00660178 /* CTValidator.m in Sources */,
 				07B8755922E982F400328982 /* CTEnumDescription.m in Sources */,
 				49C189A2243B08A40003E4D4 /* CTFeatureFlagsController.m in Sources */,

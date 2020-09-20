@@ -17,7 +17,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        CleverTap.sharedInstance()?.recordEvent("Cover ios")
+        //        CleverTap.sharedInstance()?.recordEvent("Cover ios")
         let ffFoo = CleverTap.sharedInstance()?.featureFlags.get("foo", withDefaultValue:false)
         let ffDiscount = CleverTap.sharedInstance()?.featureFlags.get("discount", withDefaultValue:false)
         self.setupImages()
@@ -79,25 +79,25 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             "Amount": 300,
             "Payment mode": "Credit Card",
             "Charged ID": 24052013
-            ] as [String : Any]
+        ] as [String : Any]
         
         let item1 = [
             "Category": "books",
             "Book name": "The Millionaire next door",
             "Quantity": 1
-            ] as [String : Any]
+        ] as [String : Any]
         
         let item2 = [
             "Category": "books",
             "Book name": "Achieving inner zen",
             "Quantity": 1
-            ] as [String : Any]
+        ] as [String : Any]
         
         let item3 = [
             "Category": "books",
             "Book name": "Chuck it, let's do it",
             "Quantity": 5
-            ] as [String : Any]
+        ] as [String : Any]
         
         CleverTap.sharedInstance()?.recordChargedEvent(withDetails: chargeDetails, andItems: [item1, item2, item3])
     }
@@ -257,33 +257,34 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     func inAppEvents() {
         
-                CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
-                CleverTap.sharedInstance()?.recordScreenView("recordScreen")
-                CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
-                CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
-                CleverTap.sharedInstance()?.recordEvent("Cover ios")
-                CleverTap.sharedInstance()?.recordEvent("Added To Cart")
-                CleverTap.sharedInstance()?.recordEvent("Flutter Event")
-                CleverTap.sharedInstance()?.recordEvent("Alert ios")
-                CleverTap.sharedInstance()?.recordEvent("test ios")
-                CleverTap.sharedInstance()?.recordEvent("Battery Alert")
-                CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-                CleverTap.sharedInstance()?.recordEvent("Cover")
-                CleverTap.sharedInstance()?.recordEvent("Interstitial")
-                CleverTap.sharedInstance()?.recordEvent("Header")
-                CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
-                CleverTap.sharedInstance()?.recordEvent("Footer")
-                CleverTap.sharedInstance()?.recordEvent("Cover")
-                CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
-                CleverTap.sharedInstance()?.recordEvent("Header")
-                CleverTap.sharedInstance()?.recordEvent("Cover Image")
-                CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
-                CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
-                CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
-                CleverTap.sharedInstance()?.recordEvent("Charged")
-                CleverTap.sharedInstance()?.recordEvent("Interstitial video")
-                CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
-                CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
+        //                CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
+        //                CleverTap.sharedInstance()?.recordScreenView("recordScreen")
+        //                CleverTap.sharedInstance()?.recordEvent("Custom-HTML ios")
+        //                CleverTap.sharedInstance()?.recordEvent("Tablet only Cover Image")
+        //                CleverTap.sharedInstance()?.recordEvent("Cover ios")
+        //                CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+        //                CleverTap.sharedInstance()?.recordEvent("Flutter Event")
+        //                CleverTap.sharedInstance()?.recordEvent("Alert ios")
+        //                CleverTap.sharedInstance()?.recordEvent("test ios")
+        //                CleverTap.sharedInstance()?.recordEvent("Battery Alert")
+        //                CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+        //                CleverTap.sharedInstance()?.recordEvent("Cover")
+        //                CleverTap.sharedInstance()?.recordEvent("Interstitial")
+        //                CleverTap.sharedInstance()?.recordEvent("Header")
+        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Audio")
+        //                CleverTap.sharedInstance()?.recordEvent("Footer")
+        //                CleverTap.sharedInstance()?.recordEvent("Cover")
+        //                CleverTap.sharedInstance()?.recordEvent("Half Interstitial")
+        //                CleverTap.sharedInstance()?.recordEvent("Header")
+        //                CleverTap.sharedInstance()?.recordEvent("Cover Image")
+        //                CleverTap.sharedInstance()?.recordEvent("Tablet only Header")
+        //                CleverTap.sharedInstance()?.recordEvent("Interstitial Gif")
+        //                CleverTap.sharedInstance()?.recordEvent("Interstitial ios")
+        //                CleverTap.sharedInstance()?.recordEvent("Charged")
+        //                CleverTap.sharedInstance()?.recordEvent("Interstitial video")
+        //                CleverTap.sharedInstance()?.recordEvent("Interstitial Image")
+        //                CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"aditiagrawal@clevertap.com", "identity":"35353533535"])
         //        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"agrawaladiti@clevertap.com", "identity":"111111111"], withCleverTapID: "22222222222")
     }

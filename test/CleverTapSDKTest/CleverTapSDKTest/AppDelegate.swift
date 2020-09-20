@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+//         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
         
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-6")
         
@@ -51,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
         CleverTap.sharedInstance()?.productConfig.delegate = self;
         
-        CleverTap.sharedInstance()?.recordEvent("aditi")
+//        CleverTap.sharedInstance()?.recordEvent("aditi")
         
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")
