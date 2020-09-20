@@ -79,25 +79,25 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             "Amount": 300,
             "Payment mode": "Credit Card",
             "Charged ID": 24052013
-        ] as [String : Any]
+            ] as [String : Any]
         
         let item1 = [
             "Category": "books",
             "Book name": "The Millionaire next door",
             "Quantity": 1
-        ] as [String : Any]
+            ] as [String : Any]
         
         let item2 = [
             "Category": "books",
             "Book name": "Achieving inner zen",
             "Quantity": 1
-        ] as [String : Any]
+            ] as [String : Any]
         
         let item3 = [
             "Category": "books",
             "Book name": "Chuck it, let's do it",
             "Quantity": 5
-        ] as [String : Any]
+            ] as [String : Any]
         
         CleverTap.sharedInstance()?.recordChargedEvent(withDetails: chargeDetails, andItems: [item1, item2, item3])
     }
@@ -271,8 +271,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //                CleverTap.sharedInstance()?.recordEvent("Cover")
         //                CleverTap.sharedInstance()?.recordEvent("Interstitial")
         //                CleverTap.sharedInstance()?.recordEvent("Header")
-        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
-        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Audio")
+        //        CleverTap.sharedInstance()?.recordEvent("Interstitial Video")
+        CleverTap.sharedInstance()?.recordEvent("Interstitial Audio")
         //                CleverTap.sharedInstance()?.recordEvent("Footer")
         //                CleverTap.sharedInstance()?.recordEvent("Cover")
         //                CleverTap.sharedInstance()?.recordEvent("Half Interstitial")

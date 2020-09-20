@@ -8,6 +8,7 @@
 @property (nonatomic, strong) CTInAppNotification *notification;
 @property (nonatomic, strong) UIImageView *imageView;
 
+
 @end
 
 @implementation CTAVPlayerViewController
@@ -42,6 +43,24 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+    [self adjustAudioDefaultImage];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
+        [self adjustAudioDefaultImage];
+    } completion:nil];
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
+- (void)adjustAudioDefaultImage {
+    if (self.notification.mediaIsAudio) {
+        if (!CGRectIsEmpty(self.contentOverlayView.frame)) {
+            self.imageView.frame = self.contentOverlayView.bounds;
+        } else {
+            self.imageView.frame = self.view.bounds;
+        }
+    }
 }
 
 @end
