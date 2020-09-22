@@ -178,11 +178,14 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
                 let style = CleverTapInboxStyleConfig.init()
                 style.title = "Notifications"
                 style.backgroundColor = UIColor.yellow
-                style.navigationBarTintColor = UIColor.groupTableViewBackground
+                style.navigationBarTintColor = UIColor.systemBlue
+                style.tabSelectedBgColor = UIColor.systemGreen
+                style.navigationTintColor = UIColor.systemPink
+                style.tabSelectedTextColor = UIColor.purple
+                style.tabUnSelectedTextColor = UIColor.orange
                 style.messageTags = ["Promotions", "Offers"];
                 style.noMessageViewTextColor = UIColor.red
                 style.noMessageViewText = "no message test"
-                
                 
                 let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
                 let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
