@@ -1913,20 +1913,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         [[self class] runSyncMainQueue:^{
-            UIApplication *sharedApplication = [[self class] getSharedApplication];
-            if (sharedApplication == nil) {
-                return;
-            }
-            CleverTapLogDebug(self.config.logLevel, @"%@: InApp: firing deep link: %@", self, ctaURL);
-            [self openURL:ctaURL withSharedApplication:sharedApplication];
+            [self openURL:ctaURL forModule:@"InApp"];
         }];
 #endif
     }
     [controller hide:true];
 }
 
-
-- (void)openURL:(NSURL *)ctaURL withSharedApplication:(UIApplication *)sharedApplication {
+- (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
+    UIApplication *sharedApplication = [[self class] getSharedApplication];
+    if (sharedApplication == nil) {
+        return;
+    }
+    CleverTapLogDebug(self.config.logLevel, @"%@: %@: firing deep link: %@", module, self, ctaURL);
     id dlURL;
     if (@available(iOS 10.0, *)) {
         if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
@@ -4249,12 +4248,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
         [[self class] runSyncMainQueue:^{
-            UIApplication *sharedApplication = [[self class] getSharedApplication];
-            if (sharedApplication == nil) {
-                return;
-            }
-            CleverTapLogDebug(self.config.logLevel, @"%@: Inbox message: firing deep link: %@", self, ctaURL);
-            [self openURL:ctaURL withSharedApplication:sharedApplication];
+            [self openURL:ctaURL forModule:@"Inbox message"];
         }];
 #endif
     }
