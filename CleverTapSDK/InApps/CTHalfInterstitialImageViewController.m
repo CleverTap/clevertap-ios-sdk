@@ -1,3 +1,4 @@
+
 #import "CTHalfInterstitialImageViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CTDismissButton.h"
@@ -8,6 +9,7 @@
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UIImageView *imageView;
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
+
 
 @end
 
@@ -31,84 +33,74 @@
     // Dispose of any resources that can be recreated.
 }
 
+
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
     
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
-    
     self.closeButton.hidden = !self.notification.showCloseButton;
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         if (self.notification.tablet) {
             if (![self deviceOrientationIsLandscape]) {
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeLeading
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeLeading
-                                             multiplier:1 constant:40] setActive:YES];
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeTrailing
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeTrailing
-                                             multiplier:1 constant:-40] setActive:YES];
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeHeight
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view
-                                              attribute:NSLayoutAttributeHeight
-                                             multiplier:0.5 constant:0] setActive:YES];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeLeading
+                                        withConstant:40
+                                      withMultiplier:1];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeTrailing
+                                        withConstant:-40
+                                      withMultiplier:1];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeHeight
+                                        withConstant:0
+                                      withMultiplier:0.5];
             } else {
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeTop
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeTop
-                                             multiplier:1 constant:40] setActive:YES];
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeBottom
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeBottom
-                                             multiplier:1 constant:-40] setActive:YES];
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeWidth
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view
-                                              attribute:NSLayoutAttributeWidth
-                                             multiplier:0.5 constant:0] setActive:YES];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeTop
+                                        withConstant:40
+                                      withMultiplier:1];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeBottom
+                                        withConstant:-40
+                                      withMultiplier:1];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeWidth
+                                        withConstant:0
+                                      withMultiplier:0.5];
             }
-        }else{
+        } else {
             if (![self deviceOrientationIsLandscape]) {
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeLeading
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeLeading
-                                             multiplier:1 constant:160] setActive:YES];
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeTrailing
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeTrailing
-                                             multiplier:1 constant:-160] setActive:YES];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeLeading
+                                        withConstant:160
+                                      withMultiplier:1];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeTrailing
+                                        withConstant:-160
+                                      withMultiplier:1];
+                
             } else {
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeTop
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeTop
-                                             multiplier:1 constant:160] setActive:YES];
-                [[NSLayoutConstraint constraintWithItem:self.containerView
-                                              attribute:NSLayoutAttributeBottom
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:self.view attribute:NSLayoutAttributeBottom
-                                             multiplier:1 constant:-160] setActive:YES];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeTop
+                                        withConstant:160
+                                      withMultiplier:1];
+                [self addLayoutConstraintToAttribute:NSLayoutAttributeBottom
+                                        withConstant:-160
+                                      withMultiplier:1];
             }
         }
     }
-    
+    [self setUpImage];
+}
+
+- (void)addLayoutConstraintToAttribute:(NSLayoutAttribute)layoutAttribute withConstant:(CGFloat)constant withMultiplier:(CGFloat)multiplier {
+    [[NSLayoutConstraint constraintWithItem:self.containerView
+                                  attribute:layoutAttribute
+                                  relatedBy:NSLayoutRelationEqual
+                                     toItem:self.view attribute:layoutAttribute
+                                 multiplier:multiplier constant:constant] setActive:YES];
+}
+
+- (void)setUpImage {
     // set image
     self.imageView.clipsToBounds = YES;
-    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     self.imageView.userInteractionEnabled = YES;
+    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
     [self.imageView addGestureRecognizer:imageTapGesture];
     
@@ -143,5 +135,6 @@
 - (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
+
 
 @end
