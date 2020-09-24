@@ -162,6 +162,11 @@ static const int kMaxTags = 3;
         self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : _config.navigationTintColor};
     }
     
+    [self setUpTableViewLayout];
+    [self calculateTableViewVisibleFrame];
+}
+
+- (void)setUpTableViewLayout {
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
@@ -169,7 +174,6 @@ static const int kMaxTags = 3;
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
-    [self calculateTableViewVisibleFrame];
 }
 
 - (void)updateInboxLayout {
@@ -253,16 +257,17 @@ static const int kMaxTags = 3;
     }
     
     [self.segmentedControlContainer addSubview:segmentedControl];
-    
-    CGFloat navigationBarHeight = self.navigationController.navigationBar.frame.size.height;
-    CGFloat navBarY = self.navigationController.navigationBar.frame.origin.y;
-    
     [self.tableView setContentInset:UIEdgeInsetsMake(_topContentOffset, 0, 0, 0)];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.tableView setContentOffset:CGPointMake(0, -(self->_topContentOffset))
                                 animated:NO];
     });
-    
+    [self updateSegmentedLayoutConstraint: segmentedControl];
+}
+
+- (void)updateSegmentedLayoutConstraint:(UISegmentedControl *)segmentedControl {
+    CGFloat navigationBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat navBarY = self.navigationController.navigationBar.frame.origin.y;
     [[NSLayoutConstraint constraintWithItem:self.segmentedControlContainer
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeTop
@@ -359,7 +364,6 @@ static const int kMaxTags = 3;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    
     CTInboxMessageType messageType = [CTInboxUtils inboxMessageTypeFromString:message.type];
     NSString *identifier = kCellSimpleMessageIdentifier;
     switch (messageType) {
