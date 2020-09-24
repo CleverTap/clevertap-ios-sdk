@@ -76,7 +76,12 @@ typedef enum {
     if (self.notification.darkenScreen) {
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     }
-    
+    [self setUpImage];
+    [self setUpContent];
+    [self setUpButtons];
+}
+
+- (void)setUpImage {
     // set image
     if (self.notification.image) {
         self.imageView.clipsToBounds = YES;
@@ -84,14 +89,17 @@ typedef enum {
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
     } else {
-        [[NSLayoutConstraint constraintWithItem:self.imageContainer
-                                      attribute:NSLayoutAttributeWidth
-                                      relatedBy:NSLayoutRelationEqual
-                                         toItem:nil
-                                      attribute:NSLayoutAttributeNotAnAttribute
-                                     multiplier:1 constant:20] setActive:YES];
         self.imageView.hidden = YES;
     }
+    [[NSLayoutConstraint constraintWithItem:self.imageContainer
+                                  attribute:NSLayoutAttributeWidth
+                                  relatedBy:NSLayoutRelationEqual
+                                     toItem:nil
+                                  attribute:NSLayoutAttributeNotAnAttribute
+                                 multiplier:1 constant:self.notification.image ? 124 : 20] setActive:YES];
+}
+
+- (void)setUpContent {
     
     if (self.notification.title) {
         self.titleLabel.textAlignment = NSTextAlignmentLeft;
@@ -107,9 +115,14 @@ typedef enum {
         self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
     }
+}
+
+- (void)setUpButtons {
     
     if (!self.notification.showClose) {
-        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureHandle:)];
+        _panGesture = [[UIPanGestureRecognizer alloc]
+                       initWithTarget:self
+                       action:@selector(panGestureHandle:)];
         _panGesture.delegate = self;
         [self.containerView addGestureRecognizer:_panGesture];
     }
@@ -122,7 +135,9 @@ typedef enum {
         if (self.notification.buttons.count == 2) {
             _secondButton = [self setupViewForButton:_secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
-            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                          attribute:NSLayoutAttributeWidth
+                                          relatedBy:NSLayoutRelationEqual
                                              toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                          multiplier:1 constant:0] setActive:YES];
         }

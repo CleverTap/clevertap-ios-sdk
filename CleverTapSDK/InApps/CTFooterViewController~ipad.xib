@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -113,7 +113,7 @@
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
-                                        <constraint firstItem="5oa-Up-oTy" firstAttribute="leading" secondItem="bK8-Sd-3tZ" secondAttribute="leading" id="ULF-LU-Qs3"/>
+                                        <constraint firstItem="5oa-Up-oTy" firstAttribute="leading" secondItem="bK8-Sd-3tZ" secondAttribute="leading" priority="750" id="ULF-LU-Qs3"/>
                                         <constraint firstItem="5oa-Up-oTy" firstAttribute="centerY" secondItem="bK8-Sd-3tZ" secondAttribute="centerY" id="m1B-Bj-S3M"/>
                                         <constraint firstAttribute="trailing" secondItem="5oa-Up-oTy" secondAttribute="trailing" id="ta6-Lk-J08"/>
                                     </constraints>
