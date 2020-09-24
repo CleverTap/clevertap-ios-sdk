@@ -1,3 +1,4 @@
+
 #import "CTBaseHeaderFooterViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
@@ -72,7 +73,6 @@ typedef enum {
 - (void)layoutNotification {
     
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
-    
     if (self.notification.darkenScreen) {
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     }
@@ -84,7 +84,11 @@ typedef enum {
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = [UIImage imageWithData:self.notification.image];
     } else {
-        [[NSLayoutConstraint constraintWithItem:self.imageContainer attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+        [[NSLayoutConstraint constraintWithItem:self.imageContainer
+                                      attribute:NSLayoutAttributeWidth
+                                      relatedBy:NSLayoutRelationEqual
+                                         toItem:nil
+                                      attribute:NSLayoutAttributeNotAnAttribute
                                      multiplier:1 constant:20] setActive:YES];
         self.imageView.hidden = YES;
     }
@@ -382,5 +386,6 @@ typedef enum {
 - (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
+
 
 @end
