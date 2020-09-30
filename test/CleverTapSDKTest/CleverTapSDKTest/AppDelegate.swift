@@ -30,7 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 //        CleverTap.sharedInstance()?.recordEvent("Event")
 //        CleverTap.sharedInstance()?.recordEvent("aditi")
 
-        
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
         
         CleverTap.setUIEditorConnectionEnabled(true)
