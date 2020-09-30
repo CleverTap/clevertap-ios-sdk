@@ -1862,7 +1862,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)recordInAppNotificationStateEvent:(BOOL)clicked
                           forNotification:(CTInAppNotification *)notification andQueryParameters:(NSDictionary *)params {
-        [self runSerialAsync:^{
+    [self runSerialAsync:^{
         [CTEventBuilder buildInAppNotificationStateEvent:clicked forNotification:notification andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 if (clicked) {
@@ -3618,11 +3618,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 self.wzrkParams = [event[@"evtData"] copy];
-                if (clicked) {
-                    [self queueEvent:event withType:CleverTapEventTypeRaised];
-                } else {
-                    [self queueEvent:event withType:CleverTapEventTypeNotificationViewed];
-                }
+                [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
             };
             if (errors) {
                 [self pushValidationResults:errors];
