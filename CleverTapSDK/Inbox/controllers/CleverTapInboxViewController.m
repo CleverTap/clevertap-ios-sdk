@@ -1,32 +1,32 @@
+
 #import "CleverTap+Inbox.h"
 #import "CleverTapInboxViewControllerPrivate.h"
-#import "CTInboxSimpleMessageCell.h"
-#import "CTCarouselMessageCell.h"
 #import "CTCarouselImageMessageCell.h"
+#import "CTInboxSimpleMessageCell.h"
 #import "CTInboxIconMessageCell.h"
 #import "CTInboxBaseMessageCell.h"
-#import "CTConstants.h"
+#import "CTCarouselMessageCell.h"
+
 #import "CTInAppResources.h"
+#import "CTConstants.h"
 #import "CTInAppUtils.h"
 #import "CTInboxUtils.h"
 #import "UIView+CTToast.h"
 
-#import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/UIImage+GIF.h>
 #import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/UIImageView+WebCache.h>
 
-#import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
+#import <AVFoundation/AVFoundation.h>
 
-NSString* const kCellSimpleMessageIdentifier = @"CTInboxSimpleMessageCell";
-NSString* const kCellCarouselMessageIdentifier = @"CTCarouselMessageCell";
-NSString* const kCellCarouselImgMessageIdentifier = @"CTCarouselImageMessageCell";
-NSString* const kCellIconMessageIdentifier = @"CTInboxIconMessageCell";
+NSString * const kCellSimpleMessageIdentifier = @"CTInboxSimpleMessageCell";
+NSString * const kCellCarouselMessageIdentifier = @"CTCarouselMessageCell";
+NSString * const kCellCarouselImgMessageIdentifier = @"CTCarouselImageMessageCell";
+NSString * const kCellIconMessageIdentifier = @"CTInboxIconMessageCell";
 
-NSString* const kDefaultTag = @"All";
-
+NSString * const kDefaultTag = @"All";
 static const float kCellSpacing = 6;
-
 static const int kMaxTags = 3;
 
 @interface CleverTapInboxViewController () <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate>
@@ -50,8 +50,8 @@ static const int kMaxTags = 3;
 @property (nonatomic, strong) NSDictionary<NSString *, NSString *> *unreachableCellDictionary;
 
 @property (nonatomic, assign) BOOL muted;
-
 @property (nonatomic, assign) CGFloat topContentOffset;
+
 
 @end
 
@@ -84,21 +84,8 @@ static const int kMaxTags = 3;
 }
 
 - (void)viewDidLoad {
+    
     [super viewDidLoad];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleMessageTapped:)
-                                                 name:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleMediaPlayingNotification:)
-                                                 name:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleMediaMutedNotification:)
-                                                 name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
-    [self registerNibs];
-    self.muted = YES;
     UIBarButtonItem *closeButton = [[UIBarButtonItem alloc]
                                     initWithTitle:@"✕"
                                     style:UIBarButtonItemStylePlain
@@ -107,7 +94,11 @@ static const int kMaxTags = 3;
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;
-    [self setup];
+    
+    self.muted = YES;
+    [self addObservers];
+    [self registerNibs];
+    [self setUpInboxLayout];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -117,11 +108,7 @@ static const int kMaxTags = 3;
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    if ([self.tags count] > 0) {
-        [self setupSegmentedControl];
-    }
-    [self showListEmptyLabel];
-    [self calculateTableViewVisibleFrame];
+    [self updateInboxLayout];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -140,31 +127,46 @@ static const int kMaxTags = 3;
     [super loadView];
 }
 
-- (void)setup {
-    if (_config && _config.backgroundColor) {
-        self.tableView.backgroundColor = _config.backgroundColor;
-        self.view.backgroundColor = _config.backgroundColor;
-        self.navigationController.view.backgroundColor = _config.backgroundColor;
-    } else {
-        UIColor *color = [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
-        self.tableView.backgroundColor = color;
-        self.view.backgroundColor = color;
-        self.navigationController.view.backgroundColor = color;
-    }
+- (void)traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
+    [super traitCollectionDidChange: previousTraitCollection];
+    [self updateInboxLayout];
+}
+
+- (void)addObservers {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleMessageTapped:)
+                                                 name:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:nil];
     
-    if (_config && _config.navigationBarTintColor) {
-        self.navigationController.navigationBar.barTintColor = _config.navigationBarTintColor;
-    } else  {
-        self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
-    }
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleMediaPlayingNotification:)
+                                                 name:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleMediaMutedNotification:)
+                                                 name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
+    
+}
+
+- (void)setUpInboxLayout {
+    
+    UIColor *color = [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
+    
+    self.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
+    self.tableView.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
+    
+    self.navigationController.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
+    self.navigationController.navigationBar.barTintColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
+    self.navigationController.navigationBar.tintColor = (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor];
     
     if (_config && _config.navigationTintColor) {
-        self.navigationController.navigationBar.tintColor = _config.navigationTintColor;
         self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : _config.navigationTintColor};
-    } else  {
-        self.navigationController.navigationBar.tintColor = [UIColor blackColor];
     }
     
+    [self setUpTableViewLayout];
+    [self calculateTableViewVisibleFrame];
+}
+
+- (void)setUpTableViewLayout {
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
@@ -172,6 +174,13 @@ static const int kMaxTags = 3;
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSelectionStyleNone;
+}
+
+- (void)updateInboxLayout {
+    if ([self.tags count] > 0) {
+        [self setUpSegmentedContainer];
+    }
+    [self showListEmptyLabel];
     [self calculateTableViewVisibleFrame];
 }
 
@@ -186,22 +195,13 @@ static const int kMaxTags = 3;
     return self.config.title ? self.config.title : @"Notifications";
 }
 
-- (void)traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
-    [super traitCollectionDidChange: previousTraitCollection];
-    if ([self.tags count] > 0) {
-        [self setupSegmentedControl];
-    }
-    [self showListEmptyLabel];
-    [self calculateTableViewVisibleFrame];
-}
-
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
         [self loadView];
         [self registerNibs];
-        [self setup];
+        [self setUpInboxLayout];
         if ([self.tags count] > 0) {
-            [self setupSegmentedControl];
+            [self setUpSegmentedContainer];
         }
         [self showListEmptyLabel];
         [self stopPlay];
@@ -222,41 +222,52 @@ static const int kMaxTags = 3;
     self.tableViewVisibleFrame = frame;
 }
 
-- (void)setupSegmentedControl {
+- (void)setUpSegmentedContainer {
     [self.navigationController.view layoutSubviews];
     [self.segmentedControlContainer removeFromSuperview];
     self.segmentedControlContainer = [[UIView alloc] init];
     self.segmentedControlContainer.translatesAutoresizingMaskIntoConstraints = NO;
     self.segmentedControlContainer.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
     [self.navigationController.view addSubview:self.segmentedControlContainer];
-    
+    [self addSegmentedControl];
+}
+
+- (void)addSegmentedControl {
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems: self.tags];
-    [segmentedControl addTarget:self action:@selector(segmentSelected:) forControlEvents:UIControlEventValueChanged];
     segmentedControl.selectedSegmentIndex = _selectedSegmentIndex;
     segmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
-    if (_config && _config.tabSelectedBgColor) {
-        if (@available(iOS 13.0, *)) {
-            segmentedControl.selectedSegmentTintColor = _config.tabSelectedBgColor;
-        } else {
-            segmentedControl.tintColor = _config.tabSelectedBgColor;
+    [segmentedControl addTarget:self
+                         action:@selector(segmentSelected:)
+               forControlEvents:UIControlEventValueChanged];
+    
+    if (_config) {
+        if (_config.tabSelectedBgColor) {
+            if (@available(iOS 13.0, *)) {
+                segmentedControl.selectedSegmentTintColor = _config.tabSelectedBgColor;
+            } else {
+                segmentedControl.tintColor = _config.tabSelectedBgColor;
+            }
+        }
+        if (_config.tabSelectedBgColor) {
+            [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
+        }
+        if (_config.tabUnSelectedTextColor) {
+            [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabUnSelectedTextColor} forState:UIControlStateNormal];
         }
     }
-    if (_config && _config.tabSelectedTextColor) {
-        [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
-    }
-    if (_config && _config.tabUnSelectedTextColor) {
-        [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabUnSelectedTextColor} forState:UIControlStateNormal];
-    }
+    
     [self.segmentedControlContainer addSubview:segmentedControl];
-    
-    CGFloat navigationBarHeight = self.navigationController.navigationBar.frame.size.height;
-    CGFloat navBarY = self.navigationController.navigationBar.frame.origin.y;
-    
     [self.tableView setContentInset:UIEdgeInsetsMake(_topContentOffset, 0, 0, 0)];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.tableView setContentOffset:CGPointMake(0, -(self->_topContentOffset)) animated:NO];
+        [self.tableView setContentOffset:CGPointMake(0, -(self->_topContentOffset))
+                                animated:NO];
     });
-    
+    [self updateSegmentedLayoutConstraint: segmentedControl];
+}
+
+- (void)updateSegmentedLayoutConstraint:(UISegmentedControl *)segmentedControl {
+    CGFloat navigationBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat navBarY = self.navigationController.navigationBar.frame.origin.y;
     [[NSLayoutConstraint constraintWithItem:self.segmentedControlContainer
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
                                      toItem:self.navigationController.view attribute:NSLayoutAttributeTop
@@ -353,7 +364,6 @@ static const int kMaxTags = 3;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     CleverTapInboxMessage *message = [self.filterMessages objectAtIndex:indexPath.section];
-    
     CTInboxMessageType messageType = [CTInboxUtils inboxMessageTypeFromString:message.type];
     NSString *identifier = kCellSimpleMessageIdentifier;
     switch (messageType) {
