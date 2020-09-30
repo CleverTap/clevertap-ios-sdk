@@ -1737,6 +1737,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
             return;
         }
+        
+        NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
+        if (now > notification.timeToLive) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
+            return;
+        }
+        
         [notification prepareWithCompletionHandler:^{
             [[self class] runSyncMainQueue:^{
                 [self notificationReady:notification];

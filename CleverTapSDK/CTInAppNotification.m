@@ -45,6 +45,7 @@
 @property (nonatomic, readwrite) int maxPerSession;
 @property (nonatomic, readwrite) int totalLifetimeCount;
 @property (nonatomic, readwrite) int totalDailyCount;
+@property (nonatomic, readwrite) NSUInteger timeToLive;
 @property (nonatomic, assign, readwrite) char position;
 @property (nonatomic, assign, readwrite) float height;
 @property (nonatomic, assign, readwrite) float heightPercent;
@@ -87,6 +88,17 @@
             }
             if (self.inAppType == CTInAppTypeUnknown) {
                 self.error = @"Unknown InApp Type";
+            }
+        
+            NSUInteger timeToLive = [jsonObject[@"wzrk_ttl"] longValue];
+            if (timeToLive) {
+                _timeToLive = timeToLive;
+            } else {
+                NSDate *now = [NSDate date];
+                NSDate *timeToLiveDate = [now dateByAddingTimeInterval:(48 * 60 * 60)];
+                NSTimeInterval timeToLiveEpoch = [timeToLiveDate timeIntervalSince1970];
+                NSUInteger defaultTimeToLive = (long)timeToLiveEpoch;
+                _timeToLive = defaultTimeToLive;
             }
         } @catch (NSException *e) {
             self.error = e.debugDescription;
