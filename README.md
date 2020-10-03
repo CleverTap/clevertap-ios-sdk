@@ -99,6 +99,12 @@ Update your .plist file:
 
 For more details, Please refer to our [installation guide](https://developer.clevertap.com/docs/ios-quickstart-guide) for instructions on installing and using our iOS SDK in your project.
 
+## 📩 Rich Push Notification
+ ---- TODO
+
+## 📍 Geofence 
+---- TODO
+
 ## 𝌡 Example Usage
 * A [demo application](https://github.com/CleverTap/clevertap-ios-sdk/tree/master/ObjCStarter) showing the integration of our SDK in Objective-C language.
 * A [demo application](https://github.com/CleverTap/clevertap-ios-sdk/tree/master/SwiftStarter) showing the integration of our SDK in Swift language.
