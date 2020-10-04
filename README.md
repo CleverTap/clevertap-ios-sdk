@@ -100,10 +100,14 @@ Update your .plist file:
 For more details, Please refer to our [installation guide](https://developer.clevertap.com/docs/ios-quickstart-guide) for instructions on installing and using our iOS SDK in your project.
 
 ## 📩 Rich Push Notification
- ---- TODO
+
+Apart from Title and Message, you have the below-mentioned options to add to your iOS push notification. Please note that each of these is optional.
+- [CTNotificationService](https://github.com/CleverTap/CTNotificationService)
+- [CTNotificationContent](https://github.com/CleverTap/CTNotificationContent)
 
 ## 📍 Geofence 
----- TODO
+
+CleverTap Geofence SDK provides Geofencing capabilities to CleverTap iOS SDK. To find the installation & integration steps for CleverTap Geofence SDK, click [here](https://github.com/CleverTap/clevertap-geofence-ios).
 
 ## 𝌡 Example Usage
 * A [demo application](https://github.com/CleverTap/clevertap-ios-sdk/tree/master/ObjCStarter) showing the integration of our SDK in Objective-C language.
