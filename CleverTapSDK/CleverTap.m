@@ -1508,31 +1508,34 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // notify application with push notification custom extras
     [self _notifyPushNotificationTapped:notification];
     
-    // determine application state
-    UIApplication *application = [[self class] getSharedApplication];
-    if (application != nil) {
-        BOOL inForeground = !(application.applicationState == UIApplicationStateInactive || application.applicationState == UIApplicationStateBackground);
-        
-        // should we open a deep link ?
-        // if the app is in foreground and force flag is off, then don't fire any deep link
-        if (inForeground && !openInForeground) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: app in foreground and openInForeground flag is FALSE, will not process any deep link for notification: %@", self, notification);
-        } else {
-            [self _checkAndFireDeepLinkForNotification:notification];
-        }
-        
-        [self runSerialAsync:^{
-            [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
-                if (event) {
-                    self.wzrkParams = [event[@"evtData"] copy];
-                    [self queueEvent:event withType:CleverTapEventTypeRaised];
-                };
-                if (errors) {
-                    [self pushValidationResults:errors];
-                }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // determine application state
+        UIApplication *application = [[self class] getSharedApplication];
+        if (application != nil) {
+            BOOL inForeground = !(application.applicationState == UIApplicationStateInactive || application.applicationState == UIApplicationStateBackground);
+            
+            // should we open a deep link ?
+            // if the app is in foreground and force flag is off, then don't fire any deep link
+            if (inForeground && !openInForeground) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: app in foreground and openInForeground flag is FALSE, will not process any deep link for notification: %@", self, notification);
+            } else {
+                [self _checkAndFireDeepLinkForNotification:notification];
+            }
+            
+            [self runSerialAsync:^{
+                [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+                    if (event) {
+                        self.wzrkParams = [event[@"evtData"] copy];
+                        [self queueEvent:event withType:CleverTapEventTypeRaised];
+                    };
+                    if (errors) {
+                        [self pushValidationResults:errors];
+                    }
+                }];
             }];
-        }];
-    }
+        }
+    });
 #endif
 }
 
