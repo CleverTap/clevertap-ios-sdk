@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 3.9.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.1) (October 7, 2020)
+
+##### Added
+- Adds TTL for In-Apps
+- Allow choosing text(with colour) when no messages to display in App Inbox
+
+##### Fixed
+- Fixes misalignment of video for Interstitial In-Apps in landscape mode
+- Handles header with Icon misalignment in case of overflowing characters in portrait mode
+
+##### Changed
+- Update minimum deployment target to iOS 9.0
+
 ### [Version 3.9.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.0) (August 29, 2020)
 
 ##### Added
