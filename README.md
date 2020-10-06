@@ -97,13 +97,15 @@ Update your .plist file:
 * Create a key called **CleverTapToken** with a string value
 * Insert the values from your CleverTap [Dashboard](https://dashboard.clevertap.com) -> Settings -> Integration Details.
 
-For more details, Please refer to our [installation guide](https://developer.clevertap.com/docs/ios-quickstart-guide) for instructions on installing and using our iOS SDK in your project.
+For more details, refer to our [installation guide](https://developer.clevertap.com/docs/ios-quickstart-guide) for instructions on installing and using our iOS SDK in your project.
 
-## 📲 Rich Push Notification
+## 📲 Rich Push Notifications
 
 Apart from Title and Message, you have the below-mentioned options to add to your iOS push notification. Please note that each of these is optional.
 - [CTNotificationService](https://github.com/CleverTap/CTNotificationService)
 - [CTNotificationContent](https://github.com/CleverTap/CTNotificationContent)
+
+For more details, refer to our [Advanced iOS Push Notifications](https://developer.clevertap.com/docs/ios#section-advanced-ios-push-notifications) guide.
 
 ## 📍 Geofence 
 
