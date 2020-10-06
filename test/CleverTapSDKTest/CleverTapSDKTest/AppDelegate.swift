@@ -17,13 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+//         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1-staging-6")
         
 //        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
 //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-//        CleverTap.setCredentialsWithAccountID("ZWW-WWW-WWRZ", andToken: "000-001")
-
+        CleverTap.setCredentialsWithAccountID("445-488-575Z", andToken: "bb4-544")
 //        CleverTap.sharedInstance()?.recordEvent("Aditi react native")
 //        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
 //        CleverTap.sharedInstance()?.recordEvent("Aditi ct1")
@@ -31,7 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 //        CleverTap.sharedInstance()?.recordEvent("aditi")
 
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
-        
         CleverTap.setUIEditorConnectionEnabled(true)
         
         DispatchQueue.main.async {
@@ -39,7 +37,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         
 //        CleverTap.autoIntegrate()
-        
 //        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting((1 != 0))
         
         CleverTap.setDebugLevel(4)
