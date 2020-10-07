@@ -23,6 +23,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         self.setupImages()
         self.recordUserChargedEvent()
         
+//        UIApplication.shared.isStatusBarHidden = true
+        
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
         
         //        CleverTap.sharedInstance()?.recordEvent("Half Interstitial Image")
