@@ -159,7 +159,7 @@ static const float kPageControlViewHeight = 30.f;
             [pageControl removeFromSuperview];
         }
     }
-    [self.carouselView addSubview:self.pageControl];
+    [self.containerView addSubview:self.pageControl];
 }
 
 
