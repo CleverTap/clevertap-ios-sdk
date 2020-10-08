@@ -23,8 +23,9 @@ To get started, sign up [here](https://clevertap.com/live-product-demo/)
 
 ## 📋 Requirements
 Following are required for using CleverTap iOS SDK -
-- iOS version 9.0 or above
-- Xcode 10 or above
+- iOS 9.0 or later
+- tvOS 9.0 or later
+- Xcode 10.0 or later
 
 ## 🎉 Installation
 
