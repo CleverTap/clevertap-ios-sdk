@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="ipad12_9rounded" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -114,7 +114,7 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstAttribute="trailing" secondItem="3fd-cF-mjJ" secondAttribute="trailing" id="CQN-jx-zKP"/>
-                                        <constraint firstItem="3fd-cF-mjJ" firstAttribute="leading" secondItem="eXe-KU-GSW" secondAttribute="leading" id="SvU-Uc-9nh"/>
+                                        <constraint firstItem="3fd-cF-mjJ" firstAttribute="leading" secondItem="eXe-KU-GSW" secondAttribute="leading" priority="750" id="SvU-Uc-9nh"/>
                                         <constraint firstItem="3fd-cF-mjJ" firstAttribute="centerY" secondItem="eXe-KU-GSW" secondAttribute="centerY" id="sj4-hv-01r"/>
                                     </constraints>
                                 </view>

@@ -35,23 +35,24 @@
     [self layoutNotification];
 }
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        CGFloat topLength = self.topLayoutGuide.length;
+        [[NSLayoutConstraint constraintWithItem: self.closeButton
+                                      attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
+                                         toItem:self.containerView
+                                      attribute:NSLayoutAttributeTop
+                                     multiplier:1.0 constant:topLength] setActive:YES];
+    }
+}
+
 
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
     
     self.view.backgroundColor = [UIColor clearColor];
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        if (@available(iOS 11.0, *)) {
-            CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
-            [[NSLayoutConstraint constraintWithItem: self.closeButton
-                                          attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
-                                             toItem:self.containerView
-                                          attribute:NSLayoutAttributeTop
-                                         multiplier:1.0 constant:statusBarFrame] setActive:YES];
-        }
-    }
     
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
@@ -126,5 +127,6 @@
 - (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
+
 
 @end

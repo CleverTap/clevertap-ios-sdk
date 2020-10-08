@@ -1,3 +1,4 @@
+
 #import "CTInboxSimpleMessageCell.h"
 #import <SDWebImage/SDAnimatedImageView+WebCache.h>
 #import <SDWebImage/UIImageView+WebCache.h>
@@ -11,7 +12,9 @@
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleOnMessageTapGesture:)];
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
+                                          initWithTarget:self
+                                          action:@selector(handleOnMessageTapGesture:)];
     self.userInteractionEnabled = YES;
     [self addGestureRecognizer:tapGesture];
 }
@@ -28,37 +31,28 @@
     }
     CleverTapInboxMessageContent *content = message.content[0];
     self.cellImageView.hidden = YES;
+    self.activityIndicator.hidden = YES;
     self.avPlayerControlsView.alpha = 0.0;
     self.avPlayerContainerView.hidden = YES;
-    self.activityIndicator.hidden = YES;
     if ([self mediaIsEmpty]) {
         self.imageViewHeightConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewPRatioConstraint.priority = 750;
-    } else if ([self orientationIsPortrait]) {
-        self.imageViewPRatioConstraint.priority = 999;
-        self.imageViewLRatioConstraint.priority = 750;
-        self.imageViewHeightConstraint.priority = 750;
     } else {
         self.imageViewHeightConstraint.priority = 750;
-        self.imageViewPRatioConstraint.priority = 750;
-        self.imageViewLRatioConstraint.priority = 999;
+        self.imageViewLRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
+        self.imageViewPRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
     }
     
     // handle landscape
     if ([self deviceOrientationIsLandscape]) {
-        if ([self mediaIsEmpty]) {
-            self.imageViewWidthConstraint.priority = 999;
-            self.dividerCenterXConstraint.priority = 750;
-        } else {
-            self.imageViewWidthConstraint.priority = 750;
-            self.dividerCenterXConstraint.priority = 999;
-        }
+        self.imageViewWidthConstraint.priority = [self mediaIsEmpty] ? 999 : 750;
+        self.dividerCenterXConstraint.priority = [self mediaIsEmpty] ? 750 : 999;
     }
     
     [self configureActionView:!content.actionHasLinks];
-    self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;
+    self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
     self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
     self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
@@ -95,5 +89,6 @@
         [self setupMediaPlayer];
     }
 }
+
 
 @end
