@@ -24,16 +24,17 @@
 
 - (void)layoutNotification {
     [super layoutNotification];
-    if (@available(iOS 11.0, *)) {
-        CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
-        [[NSLayoutConstraint constraintWithItem: self.closeButton
-                                      attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
-                                         toItem:self.containerView
-                                      attribute:NSLayoutAttributeTop
-                                     multiplier:1.0 constant:statusBarFrame] setActive:YES];
-        
-    } else {
-        // Fallback on earlier versions
-    }
 }
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    CGFloat topLength = self.topLayoutGuide.length;
+    [[NSLayoutConstraint constraintWithItem: self.closeButton
+                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
+                                     toItem:self.containerView
+                                  attribute:NSLayoutAttributeTop
+                                 multiplier:1.0 constant:topLength] setActive:YES];
+}
+
+
 @end
