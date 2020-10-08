@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 ##### Fixed
 - Fixes misalignment of video for Interstitial In-Apps in landscape mode
 - Handles header with icon misalignment in case of overflowing characters in portrait mode
-- Handles In-App alignment when status bar hidden
+- Handles In-App alignment when status bar is hidden
 
 ##### Changed
 - Update minimum deployment target to iOS 9.0
