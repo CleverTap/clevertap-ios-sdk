@@ -1,3 +1,4 @@
+
 #import "CTDismissButton.h"
 
 @implementation CTDismissButton
@@ -147,5 +148,6 @@ static UIImage *dismissButtonImage;
     UIGraphicsEndImageContext();
     return img;
 }
+
 
 @end

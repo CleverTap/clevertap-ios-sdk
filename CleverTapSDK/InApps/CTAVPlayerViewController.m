@@ -1,12 +1,13 @@
+
 #import "CTAVPlayerViewController.h"
 #import "CTInAppNotification.h"
 #import "CTInAppResources.h"
 
-@interface CTAVPlayerViewController () <CTAVPlayerControlsDelegate>
+@interface CTAVPlayerViewController () 
 
-@property (nonatomic, strong) CTAVPlayerControlsViewController *controlsViewVC;
 @property (nonatomic, strong) CTInAppNotification *notification;
 @property (nonatomic, strong) UIImageView *imageView;
+
 
 @end
 
@@ -22,50 +23,17 @@
     return self;
 }
 
-- (void)dealloc {
-    [self.controlsViewVC removeFromParentViewController];
-    self.controlsViewVC = nil;
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-    self.showsPlaybackControls = NO;
+    self.showsPlaybackControls = YES;
     self.view.backgroundColor = [UIColor clearColor];
     self.view.translatesAutoresizingMaskIntoConstraints = NO;
     
-    self.controlsViewVC = [[CTAVPlayerControlsViewController alloc] initWithPlayer:self.player andConfig:@{@"fullscreen":@(!self.notification.mediaIsAudio)}];
-    [self addChildViewController:self.controlsViewVC];
-    [self.view addSubview:self.controlsViewVC.view];
-    [self.controlsViewVC didMoveToParentViewController:self];
-    self.controlsViewVC.delegate = self;
-    self.controlsViewVC.view.translatesAutoresizingMaskIntoConstraints = NO;
-    
-    [[NSLayoutConstraint constraintWithItem:self.controlsViewVC.view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
-                                     toItem:self.view attribute:NSLayoutAttributeWidth
-                                 multiplier:1 constant:0] setActive:YES];
-    
-    [[NSLayoutConstraint constraintWithItem:self.controlsViewVC.view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
-                                     toItem:self.view attribute:NSLayoutAttributeHeight
-                                 multiplier:1 constant:0] setActive:YES];
-    
-    [[NSLayoutConstraint constraintWithItem:self.controlsViewVC.view attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
-                                     toItem:self.view attribute:NSLayoutAttributeLeading
-                                 multiplier:1 constant:0] setActive:YES];
-    
-    [[NSLayoutConstraint constraintWithItem:self.controlsViewVC.view attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
-                                     toItem:self.view attribute:NSLayoutAttributeTrailing
-                                 multiplier:1 constant:0] setActive:YES];
-    
-    [[NSLayoutConstraint constraintWithItem:self.controlsViewVC.view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual
-                                     toItem:self.view attribute:NSLayoutAttributeCenterY
-                                 multiplier:1 constant:0] setActive:YES];
-    
     if (self.notification.mediaIsAudio) {
-        
         NSBundle *bundle = [NSBundle bundleForClass:[self class]];
         UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
-        self.imageView = [[UIImageView alloc] initWithFrame: self.controlsViewVC.view.frame];
+        self.imageView = [[UIImageView alloc] initWithFrame: self.view.bounds];
         self.imageView.backgroundColor = [UIColor blackColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         self.imageView.image = image;
@@ -75,18 +43,25 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    self.controlsViewVC.view.frame = self.view.bounds;
-    self.imageView.frame = self.controlsViewVC.view.bounds;
-    [self.view bringSubviewToFront:self.controlsViewVC.view];
+    [self adjustAudioDefaultImage];
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context){
+        [self adjustAudioDefaultImage];
+    } completion:nil];
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
 
-#pragma mark - Delegates
-
-- (void)toggleFullscreen {
-    if (self.playerDelegate && [self.playerDelegate respondsToSelector:@selector(toggleFullscreen)]) {
-        [self.playerDelegate toggleFullscreen];
+- (void)adjustAudioDefaultImage {
+    if (self.notification.mediaIsAudio) {
+        if (!CGRectIsEmpty(self.contentOverlayView.frame)) {
+            self.imageView.frame = self.contentOverlayView.bounds;
+        } else {
+            self.imageView.frame = self.view.bounds;
+        }
     }
 }
+
 
 @end
