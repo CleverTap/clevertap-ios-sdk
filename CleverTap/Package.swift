@@ -19,7 +19,6 @@ let package = Package(
     targets: [
         .target(
             name: "CleverTap",
-            dependencies: ["SDWebImage"]
             dependencies: ["SDWebImage"],
             path: "Sources/CleverTap/",
             resources: [
@@ -52,6 +51,10 @@ let package = Package(
                 .headerSearchPath("ProductConfig/models"),
                 .headerSearchPath("ProductConfig/controllers")
             ],
+            linkerSettings: [
+                .linkedFramework("libsqlite3.tbd"),
+                .linkedFramework("libicucore.tbd")
+            ]
         ),
         .testTarget(
             name: "CleverTapTests",
