@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="18G95" minimumToolsVersion="Automatic" sourceLanguage="Objective-C" userDefinedModelVersionIdentifier="">
+    <entity name="CTMessage" representedClassName="CTMessageMO" syncable="YES">
+        <attribute name="date" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="expires" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="String"/>
+        <attribute name="isRead" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="json" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
+        <attribute name="tags" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
+        <attribute name="wzrk_id" optional="YES" attributeType="String"/>
+        <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="CTUser" inverseName="messages" inverseEntity="CTUser"/>
+    </entity>
+    <entity name="CTUser" representedClassName="CTUserMO" syncable="YES">
+        <attribute name="accountId" attributeType="String"/>
+        <attribute name="guid" attributeType="String"/>
+        <attribute name="identifier" attributeType="String"/>
+        <relationship name="messages" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="CTMessage" inverseName="user" inverseEntity="CTMessage"/>
+    </entity>
+    <elements>
+        <element name="CTMessage" positionX="-18" positionY="54" width="128" height="163"/>
+        <element name="CTUser" positionX="-208.91796875" positionY="-234.44140625" width="128" height="105"/>
+    </elements>
+</model>

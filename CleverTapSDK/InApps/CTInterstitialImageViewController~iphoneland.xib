@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="landscape">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CTInterstitialImageViewController">
+            <connections>
+                <outlet property="closeButton" destination="Bf3-I0-wcw" id="pjL-ZJ-xK1"/>
+                <outlet property="containerView" destination="O1a-cZ-Zdj" id="dYa-kB-pNu"/>
+                <outlet property="imageView" destination="2jO-wZ-ZHw" id="R3B-Rw-4sK"/>
+                <outlet property="view" destination="cdh-BK-Jkx" id="jdV-wT-RHv"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="cdh-BK-Jkx">
+            <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O1a-cZ-Zdj">
+                    <rect key="frame" x="53" y="30" width="561" height="315"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j74-dX-FuO">
+                            <rect key="frame" x="0.0" y="0.0" width="561" height="315"/>
+                            <subviews>
+                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="2jO-wZ-ZHw">
+                                    <rect key="frame" x="0.0" y="0.0" width="561" height="315"/>
+                                    <accessibility key="accessibilityConfiguration">
+                                        <accessibilityTraits key="traits" image="YES" notEnabled="YES"/>
+                                    </accessibility>
+                                </imageView>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="bottom" secondItem="2jO-wZ-ZHw" secondAttribute="bottom" id="2cK-Qr-mMv"/>
+                                <constraint firstAttribute="trailing" secondItem="2jO-wZ-ZHw" secondAttribute="trailing" id="dc0-DQ-P6C"/>
+                                <constraint firstItem="2jO-wZ-ZHw" firstAttribute="top" secondItem="j74-dX-FuO" secondAttribute="top" id="sJT-CV-Wn5"/>
+                                <constraint firstItem="2jO-wZ-ZHw" firstAttribute="leading" secondItem="j74-dX-FuO" secondAttribute="leading" id="waA-vJ-Koi"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="j74-dX-FuO" secondAttribute="trailing" id="ael-aH-Ufy"/>
+                        <constraint firstItem="j74-dX-FuO" firstAttribute="leading" secondItem="O1a-cZ-Zdj" secondAttribute="leading" id="nus-rp-On7"/>
+                        <constraint firstAttribute="bottom" secondItem="j74-dX-FuO" secondAttribute="bottom" id="oyT-yc-fvJ"/>
+                        <constraint firstAttribute="width" secondItem="O1a-cZ-Zdj" secondAttribute="height" multiplier="1.78:1" id="rSZ-6e-OEE"/>
+                        <constraint firstItem="j74-dX-FuO" firstAttribute="top" secondItem="O1a-cZ-Zdj" secondAttribute="top" id="tSi-Uf-a8I"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bf3-I0-wcw" customClass="CTDismissButton">
+                    <rect key="frame" x="599" y="15" width="30" height="30"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <accessibility key="accessibilityConfiguration">
+                        <accessibilityTraits key="traits" button="YES"/>
+                    </accessibility>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="30" id="48p-e1-a4Q"/>
+                        <constraint firstAttribute="width" constant="30" id="gkz-u7-FDy"/>
+                    </constraints>
+                    <connections>
+                        <action selector="closeButtonTapped:" destination="-1" eventType="touchUpInside" id="rQm-6H-D2b"/>
+                    </connections>
+                </view>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="O1a-cZ-Zdj" secondAttribute="bottom" constant="30" id="9Wx-Em-vnN"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="centerX" secondItem="cdh-BK-Jkx" secondAttribute="centerX" id="SzO-T0-cp1"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="top" secondItem="cdh-BK-Jkx" secondAttribute="top" constant="30" id="dcL-Wz-b5p"/>
+                <constraint firstItem="Bf3-I0-wcw" firstAttribute="leading" secondItem="O1a-cZ-Zdj" secondAttribute="trailing" constant="-15" id="lAx-yY-gI8"/>
+                <constraint firstItem="O1a-cZ-Zdj" firstAttribute="top" secondItem="Bf3-I0-wcw" secondAttribute="bottom" constant="-15" id="oCa-0o-YwY"/>
+            </constraints>
+        </view>
+    </objects>
+</document>

@@ -1,0 +1,1 @@
+../CleverTapSDK/CleverTapBuildInfo.h
