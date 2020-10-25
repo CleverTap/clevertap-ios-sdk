@@ -23,6 +23,9 @@ let package = Package(
             resources: [
                 .process("ios.modulemap"),
                 .process("tvos.modulemap"),
+                .copy("DigiCertGlobalRootCA.crt"),
+                .copy("DigiCertSHA2SecureServerCA.crt")
+            ],
             cSettings: [
                 .headerSearchPath("CleverTapSDK"),
                 .headerSearchPath("ABTesting"),
