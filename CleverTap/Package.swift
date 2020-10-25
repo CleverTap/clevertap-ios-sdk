@@ -20,6 +20,9 @@ let package = Package(
         .target(
             name: "CleverTap",
             dependencies: ["SDWebImage"]
+            resources: [
+                .process("ios.modulemap"),
+                .process("tvos.modulemap"),
             cSettings: [
                 .headerSearchPath("CleverTapSDK"),
                 .headerSearchPath("ABTesting"),
