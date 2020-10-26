@@ -20,6 +20,10 @@ let package = Package(
             name: "CleverTap",
             dependencies: ["SDWebImage"],
             path: "CleverTapSDK",
+            exclude: [
+                "Info.plist",
+                "tvOS-Info.plist"
+            ],
             resources: [
                 .copy("DigiCertGlobalRootCA.crt"),
                 .copy("DigiCertSHA2SecureServerCA.crt"),
