@@ -1,1 +1,0 @@
-../CleverTapSDK/CleverTap+SSLPinning.h

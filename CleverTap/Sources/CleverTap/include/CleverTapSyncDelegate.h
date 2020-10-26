@@ -1,1 +1,0 @@
-../CleverTapSDK/CleverTapSyncDelegate.h

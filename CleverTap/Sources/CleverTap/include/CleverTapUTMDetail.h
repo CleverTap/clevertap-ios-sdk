@@ -1,1 +1,0 @@
-../CleverTapSDK/CleverTapUTMDetail.h
