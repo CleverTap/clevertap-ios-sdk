@@ -76,12 +76,22 @@ let package = Package(
                 .headerSearchPath("CleverTapSDK/ProductConfig/"),
                 .headerSearchPath("CleverTapSDK/ProductConfig/models"),
                 .headerSearchPath("CleverTapSDK/ProductConfig/controllers")
+            ],
+            linkerSettings: [
+                .linkedFramework("AVFoundation"),
+                .linkedFramework("AVKit"),
+                .linkedFramework("CoreData"),
+                .linkedFramework("CoreLocation"),
+                .linkedFramework("CoreServices"),
+                .linkedFramework("CoreTelephony"),
+                .linkedFramework("ImageIO"),
+                .linkedFramework("QuartzCore"),
+                .linkedFramework("Security"),
+                .linkedFramework("SystemConfiguration"),
+                .linkedFramework("UIKit"),
+                .linkedFramework("UserNotifications"),
+                .linkedFramework("WebKit")
             ]
-//            ,
-//            linkerSettings: [
-//                .linkedFramework("libsqlite3.tbd"),
-//                .linkedFramework("libicucore.tbd")
-//            ]
         ),
         .testTarget(
             name: "CleverTapTests",
