@@ -812,6 +812,8 @@
 		0797134121A338B40011C9A3 /* views */ = {
 			isa = PBXGroup;
 			children = (
+				D079742721FE2F2300773602 /* CTVideoThumbnailGenerator.h */,
+				D079742821FE2F2300773602 /* CTVideoThumbnailGenerator.m */,
 				0797132D21A2F09A0011C9A3 /* CTSwipeView.h */,
 				0797132E21A2F09A0011C9A3 /* CTSwipeView.m */,
 				07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */,
@@ -1010,8 +1012,6 @@
 		07B94525219EA34300D4C542 /* images */ = {
 			isa = PBXGroup;
 			children = (
-				D079742721FE2F2300773602 /* CTVideoThumbnailGenerator.h */,
-				D079742821FE2F2300773602 /* CTVideoThumbnailGenerator.m */,
 				070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */,
 				070229A6220831CB0093CA41 /* ct_default_landscape_image.png */,
 				070229A7220831CB0093CA41 /* ct_default_video.png */,
