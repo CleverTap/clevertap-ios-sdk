@@ -1,0 +1,1 @@
+../CleverTapSyncDelegate.h
