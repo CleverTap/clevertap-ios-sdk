@@ -25,10 +25,6 @@ let package = Package(
                 "tvOS-Info.plist"
             ],
             resources: [
-                .copy("DigiCertGlobalRootCA.crt"),
-                .copy("DigiCertSHA2SecureServerCA.crt"),
-                .process("ios.modulemap"),
-                .process("tvos.modulemap"),
                 .process("InApps/images/ic_expand@1x.png"),
                 .process("InApps/images/ic_expand@2x.png"),
                 .process("InApps/images/ic_expand@3x.png"),
@@ -48,7 +44,11 @@ let package = Package(
                 .process("Inbox/images/ct_default_portrait_image.png"),
                 .process("Inbox/images/placeholder.png"),
                 .process("Inbox/images/volume_off.png"),
-                .process("Inbox/images/volume_on.png")
+                .process("Inbox/images/volume_on.png"),
+                .process("ios.modulemap"),
+                .process("tvos.modulemap"),
+                .copy("DigiCertGlobalRootCA.crt"),
+                .copy("DigiCertSHA2SecureServerCA.crt")
             ],
             cSettings: [
                 .headerSearchPath("./"),
