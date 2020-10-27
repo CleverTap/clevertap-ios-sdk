@@ -684,8 +684,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     });
 }
 
-- (void) dealloc {
-    [self removeObservers];
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
@@ -734,10 +734,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [notificationCenter addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
     [notificationCenter addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [notificationCenter addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
-}
-
-- (void)removeObservers {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (NSString*)description {
