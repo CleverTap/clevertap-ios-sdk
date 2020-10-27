@@ -12,7 +12,7 @@
 @property (strong, readonly) NSString *osName;
 @property (strong, readonly) NSString *osVersion;
 @property (strong, readonly) NSString *manufacturer;
-@property (strong, readonly) NSString *model;
+@property (atomic, readonly) NSString *model;
 @property (strong, readonly) NSString *carrier;
 @property (strong, readonly) NSString *countryCode;
 @property (strong, readonly) NSString *timeZone;
