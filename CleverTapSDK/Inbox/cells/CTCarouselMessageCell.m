@@ -1,3 +1,4 @@
+
 #import "CTCarouselMessageCell.h"
 #import "CTCarouselImageView.h"
 
@@ -113,10 +114,8 @@ static const float kPageControlViewHeight = 30.f;
         self.frame = frame;
         self.carouselView.frame = frame;
         self.carouselViewHeight.constant  = viewHeight;
-        [self layoutIfNeeded];
-        [self layoutSubviews];
         [self populateLandscapeViews];
-        [self configurePageControlWithRect:CGRectMake(viewWidth/2, self.carouselView.frame.size.height - kPageControlViewHeight, 22 * [self.itemViews count], kPageControlViewHeight)];
+        [self configurePageControlWithRect:CGRectMake(viewWidth/2, self.carouselView.frame.size.height - kPageControlViewHeight, 64 * [self.itemViews count], kPageControlViewHeight)];
     } else {
         captionHeight = [CTCarouselImageView captionHeight];
         CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;

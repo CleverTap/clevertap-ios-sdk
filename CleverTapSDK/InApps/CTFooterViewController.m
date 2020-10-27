@@ -1,3 +1,4 @@
+
 #import "CTFooterViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 
@@ -18,11 +19,11 @@
 
 - (void)layoutNotification {
     [super layoutNotification];
-    
     if (@available(iOS 11, *)) {
         UILayoutGuide *layoutGuide = self.view.safeAreaLayoutGuide;
         [self.containerView.bottomAnchor constraintEqualToAnchor:layoutGuide.bottomAnchor].active = YES;
     }
 }
+
 
 @end

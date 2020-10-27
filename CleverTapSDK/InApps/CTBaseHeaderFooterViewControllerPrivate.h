@@ -1,3 +1,4 @@
+
 @interface CTBaseHeaderFooterViewController ()
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil

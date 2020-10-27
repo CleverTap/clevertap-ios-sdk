@@ -76,10 +76,7 @@ static NSArray *registeredURLSchemes;
         _accountRegion = [CTPlistInfo getMetaDataForAttribute:CLTAP_REGION_LABEL];
         _proxyDomain = [CTPlistInfo getMetaDataForAttribute:CLTAP_PROXY_DOMAIN_LABEL];
         _registeredUrlSchemes = [CTPlistInfo getRegisteredURLSchemes];
-        
-        NSString *useIFA = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IFA_LABEL];
-        _useIDFA = (useIFA && [useIFA isEqualToString:@"1"]);
-        
+                
         NSString *useCustomCleverTapId = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL];
         _useCustomCleverTapId = (useCustomCleverTapId && [useCustomCleverTapId isEqualToString:@"1"]);
         

@@ -7,7 +7,6 @@
 @property (nonatomic, strong, readonly, nullable) NSString *accountRegion;
 @property (nonatomic, strong, readonly, nullable) NSString *proxyDomain;
 @property (nonatomic, strong, readonly, nullable) NSArray<NSString*>* registeredUrlSchemes;
-@property (nonatomic, assign, readonly) BOOL useIDFA;
 @property (nonatomic, assign, readonly) BOOL disableAppLaunchedEvent;
 @property (nonatomic, assign, readonly) BOOL useCustomCleverTapId;
 @property (nonatomic, assign, readonly) BOOL beta;

@@ -21,12 +21,16 @@
 
 - (void)layoutNotification {
     [super layoutNotification];
-    
-    CGFloat statusBarFrame = [[CTInAppResources getSharedApplication] statusBarFrame].size.height;
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    CGFloat topLength = self.topLayoutGuide.length;
     [[NSLayoutConstraint constraintWithItem: self.containerView
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
                                      toItem:self.view attribute:NSLayoutAttributeTop
-                                 multiplier:1.0 constant:statusBarFrame] setActive:YES];
+                                 multiplier:1.0 constant:topLength] setActive:YES];
 }
+
 
 @end
