@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EC52D57B25515D190013BA03 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC52D57A25515D190013BA03 /* Package.swift */; };
 		ECAEFCDE254FFC300000662E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAEFCDD254FFC300000662E /* AppDelegate.swift */; };
 		ECAEFCE0254FFC300000662E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAEFCDF254FFC300000662E /* SceneDelegate.swift */; };
 		ECAEFCE2254FFC300000662E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAEFCE1254FFC300000662E /* ViewController.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EC52D57A25515D190013BA03 /* Package.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = "<group>"; };
 		ECAEFCDA254FFC300000662E /* SPMStarter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMStarter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECAEFCDD254FFC300000662E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ECAEFCDF254FFC300000662E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 		ECAEFCD1254FFC300000662E = {
 			isa = PBXGroup;
 			children = (
+				EC52D57A25515D190013BA03 /* Package.swift */,
 				ECAEFCDC254FFC300000662E /* SPMStarter */,
 				ECAEFCF3254FFC330000662E /* SPMStarterTests */,
 				ECAEFCFE254FFC330000662E /* SPMStarterUITests */,
@@ -258,6 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EC52D57B25515D190013BA03 /* Package.swift in Sources */,
 				ECAEFCE2254FFC300000662E /* ViewController.swift in Sources */,
 				ECAEFCDE254FFC300000662E /* AppDelegate.swift in Sources */,
 				ECAEFCE0254FFC300000662E /* SceneDelegate.swift in Sources */,
