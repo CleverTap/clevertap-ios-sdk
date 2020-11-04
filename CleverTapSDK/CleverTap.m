@@ -272,6 +272,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @synthesize productConfigDelegate=_productConfigDelegate;
 
+static NSRecursiveLock *_instanceConfigLock;
 static CTPlistInfo *_plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
 static CleverTapInstanceConfig *_defaultInstanceConfig;
@@ -292,6 +293,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        _instanceConfigLock = [NSRecursiveLock new];
         _instances = [NSMutableDictionary new];
         _plistInfo = [CTPlistInfo sharedInstance];
         pendingNotificationControllers = [NSMutableArray new];
@@ -553,25 +555,31 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)_sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
-    if (_defaultInstanceConfig == nil) {
-        if (!_plistInfo.accountId || !_plistInfo.accountToken) {
-            if (!sharedInstanceErrorLogged) {
-                sharedInstanceErrorLogged = YES;
-                CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
-            }
-            return nil;
-        }
-        
-        _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
-        
+    @try {
+        [_instanceConfigLock lock];
         if (_defaultInstanceConfig == nil) {
-            return nil;
+            if (!_plistInfo.accountId || !_plistInfo.accountToken) {
+                if (!sharedInstanceErrorLogged) {
+                    sharedInstanceErrorLogged = YES;
+                    CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
+                }
+                return nil;
+            }
+            
+            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+            
+            if (_defaultInstanceConfig == nil) {
+                return nil;
+            }
+            _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
+            _defaultInstanceConfig.logLevel = [self getDebugLevel];
+            CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
         }
-        _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
-        _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
+        return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
     }
-    return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    @finally {
+        [_instanceConfigLock unlock];
+    }
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -692,19 +700,25 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark - Private
 
 + (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
-    if (_defaultInstanceConfig) {
-        CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
-        return;
-    }
-    accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (region != nil && ![region isEqualToString:@""]) {
-        region = [region stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if (region.length <= 0) {
-            region = nil;
+    @try {
+        [_instanceConfigLock lock];
+        if (_defaultInstanceConfig) {
+            CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
+            return;
         }
+        accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (region != nil && ![region isEqualToString:@""]) {
+            region = [region stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            if (region.length <= 0) {
+                region = nil;
+            }
+        }
+        [_plistInfo changeCredentialsWithAccountID:accountID token:token region:region];
     }
-    [_plistInfo changeCredentialsWithAccountID:accountID token:token region:region];
+    @finally {
+        [_instanceConfigLock unlock];
+    }
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
@@ -3822,12 +3836,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (void)setDebugLevel:(int)level {
-    [CTLogger setDebugLevel:level];
-    if (_defaultInstanceConfig) {
-        CleverTap *sharedInstance = [CleverTap sharedInstance];
-        if (sharedInstance) {
-            sharedInstance.config.logLevel = level;
+    @try {
+        [_instanceConfigLock lock];
+        [CTLogger setDebugLevel:level];
+        if (_defaultInstanceConfig) {
+            CleverTap *sharedInstance = [CleverTap sharedInstance];
+            if (sharedInstance) {
+                sharedInstance.config.logLevel = level;
+            }
         }
+    } @finally {
+        [_instanceConfigLock unlock];
     }
 }
 
@@ -4962,5 +4981,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 #endif
 }
+
 
 @end
