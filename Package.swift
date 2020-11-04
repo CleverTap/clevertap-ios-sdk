@@ -3,21 +3,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "CleverTap",
+    name: "CleverTapSDK",
     platforms: [
         .iOS(.v9)
     ],
     products: [
         .library(
-            name: "CleverTap",
-            targets: ["CleverTap"])
+            name: "CleverTapSDK",
+            targets: ["CleverTapSDK"])
     ],
     dependencies: [
         .package(url: "https://github.com/SDWebImage/SDWebImage.git", from: "5.1.0")
     ],
     targets: [
         .target(
-            name: "CleverTap",
+            name: "CleverTapSDK",
             dependencies: ["SDWebImage"],
             path: "CleverTapSDK",
             exclude: [
