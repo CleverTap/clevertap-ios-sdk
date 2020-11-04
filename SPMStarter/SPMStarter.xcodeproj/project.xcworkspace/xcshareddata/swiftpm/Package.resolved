@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CleverTap",
+        "repositoryURL": "https://github.com/CleverTap/clevertap-ios-sdk",
+        "state": {
+          "branch": null,
+          "revision": "bce1269903a68a6b61b0cbcf8d8e7446364fb783",
+          "version": null
+        }
+      },
+      {
+        "package": "SDWebImage",
+        "repositoryURL": "https://github.com/SDWebImage/SDWebImage.git",
+        "state": {
+          "branch": null,
+          "revision": "88b3ba211c0d604e60eab204c1baf8229c513399",
+          "version": "5.9.4"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

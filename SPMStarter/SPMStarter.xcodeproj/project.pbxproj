@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,7 @@
 		49F9E69B2552CF9000EF2E5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E6992552CF9000EF2E5C /* Main.storyboard */; };
 		49F9E69D2552CF9000EF2E5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E69C2552CF9000EF2E5C /* Assets.xcassets */; };
 		49F9E6A02552CF9000EF2E5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E69E2552CF9000EF2E5C /* LaunchScreen.storyboard */; };
+		49F9E6AF2552D26A00EF2E5C /* CleverTap in Frameworks */ = {isa = PBXBuildFile; productRef = 49F9E6AE2552D26A00EF2E5C /* CleverTap */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49F9E6AF2552D26A00EF2E5C /* CleverTap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +82,9 @@
 			dependencies = (
 			);
 			name = SPMStarter;
+			packageProductDependencies = (
+				49F9E6AE2552D26A00EF2E5C /* CleverTap */,
+			);
 			productName = SPMStarter;
 			productReference = 49F9E6902552CF9000EF2E5C /* SPMStarter.app */;
 			productType = "com.apple.product-type.application";
@@ -107,6 +112,9 @@
 				Base,
 			);
 			mainGroup = 49F9E6872552CF9000EF2E5C;
+			packageReferences = (
+				49F9E6AD2552D26A00EF2E5C /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */,
+			);
 			productRefGroup = 49F9E6912552CF9000EF2E5C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -339,6 +347,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		49F9E6AD2552D26A00EF2E5C /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CleverTap/clevertap-ios-sdk";
+			requirement = {
+				kind = revision;
+				revision = bce1269903a68a6b61b0cbcf8d8e7446364fb783;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		49F9E6AE2552D26A00EF2E5C /* CleverTap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49F9E6AD2552D26A00EF2E5C /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */;
+			productName = CleverTap;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 49F9E6882552CF9000EF2E5C /* Project object */;
 }
