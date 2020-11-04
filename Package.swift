@@ -26,6 +26,7 @@ let package = Package(
             ],
             resources: [
                 .process("InApps/images"),
+                .process("InApps/xibs"),
                 .process("Inbox/images"),
                 .process("ios.modulemap"),
                 .process("tvos.modulemap"),

@@ -721,39 +721,8 @@
 		071EB476217F6427008F0FAB /* InApps */ = {
 			isa = PBXGroup;
 			children = (
+				49F9E6BA2552E97000EF2E5C /* xibs */,
 				071EB48A217F6427008F0FAB /* images */,
-				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
-				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
-				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
-				07D86D3A22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib */,
-				071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */,
-				07D0D08E2223F24E000D5686 /* CTFooterViewController~iphoneland.xib */,
-				071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */,
-				07D86D3C22269462009EE610 /* CTFooterViewController~ipadland.xib */,
-				071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */,
-				07D86D40222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib */,
-				071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */,
-				070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */,
-				071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */,
-				07D86D3E22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib */,
-				071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */,
-				070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */,
-				071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */,
-				07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */,
-				07D86D42222695B7009EE610 /* CTCoverImageViewController~ipadland.xib */,
-				071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */,
-				071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */,
-				07D86D44222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib */,
-				071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */,
-				070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */,
-				071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */,
-				071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */,
-				07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */,
-				07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */,
-				071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */,
-				07D86D4622269638009EE610 /* CTHeaderViewController~ipadland.xib */,
-				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
-				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
 				071EB478217F6427008F0FAB /* CTDismissButton.m */,
 				071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */,
@@ -1070,6 +1039,45 @@
 				07B94552219EA44100D4C542 /* libsqlite3.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		49F9E6BA2552E97000EF2E5C /* xibs */ = {
+			isa = PBXGroup;
+			children = (
+				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
+				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
+				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
+				07D86D3A22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib */,
+				071EB4B8217F6427008F0FAB /* CTFooterViewController~iphoneport.xib */,
+				07D0D08E2223F24E000D5686 /* CTFooterViewController~iphoneland.xib */,
+				071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */,
+				07D86D3C22269462009EE610 /* CTFooterViewController~ipadland.xib */,
+				071EB4BB217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib */,
+				07D86D40222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib */,
+				071EB4C0217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib */,
+				070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */,
+				071EB47A217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib */,
+				07D86D3E22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib */,
+				071EB47B217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib */,
+				070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */,
+				071EB485217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib */,
+				07D0D09222240329000D5686 /* CTCoverImageViewController~iphoneland.xib */,
+				07D86D42222695B7009EE610 /* CTCoverImageViewController~ipadland.xib */,
+				071EB4C5217F6427008F0FAB /* CTCoverImageViewController~ipad.xib */,
+				071EB4BF217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib */,
+				07D86D44222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib */,
+				071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */,
+				070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */,
+				071EB4A3217F6427008F0FAB /* CTCoverViewController~iphoneport.xib */,
+				071EB4A5217F6427008F0FAB /* CTCoverViewController~ipad.xib */,
+				07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */,
+				07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */,
+				071EB4B1217F6427008F0FAB /* CTHeaderViewController~ipad.xib */,
+				07D86D4622269638009EE610 /* CTHeaderViewController~ipadland.xib */,
+				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
+				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
+			);
+			path = xibs;
 			sourceTree = "<group>";
 		};
 		D0BD7598241760A30006EE55 /* ProductConfig */ = {
