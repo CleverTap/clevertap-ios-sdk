@@ -2,11 +2,11 @@
   "object": {
     "pins": [
       {
-        "package": "CleverTap",
+        "package": "CleverTapSDK",
         "repositoryURL": "https://github.com/CleverTap/clevertap-ios-sdk",
         "state": {
           "branch": null,
-          "revision": "bce1269903a68a6b61b0cbcf8d8e7446364fb783",
+          "revision": "e68d97c4236175bcf954a643c14309b628b8b550",
           "version": null
         }
       },

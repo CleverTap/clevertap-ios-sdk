@@ -18,6 +18,10 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CleverTapAccountID</key>
+	<string>RKW-R77-KW6Z</string>
+	<key>CleverTapToken</key>
+	<string>aa2-032</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

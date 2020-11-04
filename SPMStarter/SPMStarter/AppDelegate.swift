@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CleverTapSDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,7 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        CleverTap.autoIntegrate()
         // other app launch functions
+        CleverTap.setDebugLevel(3)
         return true
     }
 }
