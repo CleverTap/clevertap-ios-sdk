@@ -26,7 +26,6 @@ let package = Package(
                 "tvOS-Info.plist"
             ],
             resources: [
-                .process("Info.plist"),
                 .process("InApps/images"),
                 .process("InApps/xibs"),
                 .process("Inbox/images"),
@@ -53,7 +52,6 @@ let package = Package(
                 .headerSearchPath("FeatureFlags/controllers"),
                 .headerSearchPath("FeatureFlags/models"),
                 .headerSearchPath("InApps/"),
-                .headerSearchPath("InApps/images"),
                 .headerSearchPath("Inbox/"),
                 .headerSearchPath("Inbox/cells"),
                 .headerSearchPath("Inbox/config"),
