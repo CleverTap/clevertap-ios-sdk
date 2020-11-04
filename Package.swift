@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "CleverTapSDK",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v9)
     ],
