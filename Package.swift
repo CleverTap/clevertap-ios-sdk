@@ -26,6 +26,7 @@ let package = Package(
                 "tvOS-Info.plist"
             ],
             resources: [
+                .process("Info.plist"),
                 .process("InApps/images"),
                 .process("InApps/xibs"),
                 .process("Inbox/images"),
