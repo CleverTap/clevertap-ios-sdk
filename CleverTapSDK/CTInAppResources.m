@@ -1,8 +1,14 @@
 #import "CTInAppResources.h"
 
+#define CTSPMBundlePath @"/CleverTapSDK_CleverTapSDK.bundle/"
+
 @implementation CTInAppResources
 
 + (NSBundle *)bundle {
+    NSString *spmBundleAt = [[[NSBundle mainBundle] bundlePath] stringByAppendingString:CTSPMBundlePath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:spmBundleAt]) {
+      return [NSBundle bundleWithPath:spmBundleAt];
+    }
     return [NSBundle bundleForClass:self.class];
 }
 
