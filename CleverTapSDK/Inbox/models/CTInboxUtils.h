@@ -12,5 +12,6 @@ typedef NS_ENUM(NSUInteger, CTInboxMessageType){
 
 + (CTInboxMessageType)inboxMessageTypeFromString:(NSString*_Nonnull)type;
 + (NSString *_Nullable)XibNameForControllerName:(NSString *_Nonnull)controllerName;
++ (NSBundle *_Nullable)bundle;
 
 @end

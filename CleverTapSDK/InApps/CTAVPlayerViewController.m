@@ -31,8 +31,7 @@
     self.view.translatesAutoresizingMaskIntoConstraints = NO;
     
     if (self.notification.mediaIsAudio) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:[CTInAppUtils bundle] compatibleWithTraitCollection:nil];
         self.imageView = [[UIImageView alloc] initWithFrame: self.view.bounds];
         self.imageView.backgroundColor = [UIColor blackColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;

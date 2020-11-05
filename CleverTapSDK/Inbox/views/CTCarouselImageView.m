@@ -1,6 +1,7 @@
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "CTCarouselImageView.h"
 #import "CTInAppUtils.h"
+#import "CTInboxUtils.h"
 
 static const float kCaptionHeight = 20.f;
 static const float kSubCaptionHeight = 54.f;
@@ -125,13 +126,11 @@ static float captionHeight = 0.f;
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
 }
 
 - (UIImage *)getPortraitPlaceHolderImage {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
 }
 
 - (void)loadImage {

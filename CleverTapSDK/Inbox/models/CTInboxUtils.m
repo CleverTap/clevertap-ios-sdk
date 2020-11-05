@@ -40,4 +40,12 @@ static NSDictionary *_inboxMessageTypeMap;
 #endif
 }
 
++ (NSBundle *)bundle {
+#if CLEVERTAP_NO_INBOX_SUPPORT
+    return nil;
+#else
+    return [CTUIUtils bundle];
+#endif
+}
+
 @end

@@ -4,6 +4,7 @@
 #import "CTConstants.h"
 #import "CTUserMO.h"
 #import "CTMessageMO.h"
+#import "CTInboxUtils.h"
 
 static NSManagedObjectContext *mainContext;
 static NSManagedObjectContext *privateContext;
@@ -49,7 +50,7 @@ static NSManagedObjectContext *privateContext;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @try {
-            NSURL *modelURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"Inbox" withExtension:@"momd"];
+            NSURL *modelURL = [[CTInboxUtils bundle] URLForResource:@"Inbox" withExtension:@"momd"];
             NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
             NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
             
