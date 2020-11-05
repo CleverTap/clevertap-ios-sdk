@@ -27,7 +27,7 @@ let package = Package(
             resources: [
                 .copy("DigiCertGlobalRootCA.crt"),
                 .copy("DigiCertSHA2SecureServerCA.crt"),
-                .process("Images"),
+                .process("Resources"),
                 .process("InApps/xibs")
             ],
             cSettings: [

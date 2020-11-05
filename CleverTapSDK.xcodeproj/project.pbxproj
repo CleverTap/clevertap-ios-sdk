@@ -721,7 +721,6 @@
 		071EB476217F6427008F0FAB /* InApps */ = {
 			isa = PBXGroup;
 			children = (
-				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
 				49F9E6BA2552E97000EF2E5C /* xibs */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
 				071EB478217F6427008F0FAB /* CTDismissButton.m */,
@@ -1006,7 +1005,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		490971D32553CD4500B6DBD4 /* Images */ = {
+		490971D32553CD4500B6DBD4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				071EB48B217F6427008F0FAB /* ic_shrink@2x.png */,
@@ -1030,12 +1029,13 @@
 				070BB5CB21E70BC000428DEE /* volume_off.png */,
 				070BB5CA21E70BBF00428DEE /* volume_on.png */,
 			);
-			path = Images;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		49F9E6BA2552E97000EF2E5C /* xibs */ = {
 			isa = PBXGroup;
 			children = (
+				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
 				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
 				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
 				07D86D3A22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib */,
@@ -1120,7 +1120,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
-				490971D32553CD4500B6DBD4 /* Images */,
+				490971D32553CD4500B6DBD4 /* Resources */,
 				D0BD7598241760A30006EE55 /* ProductConfig */,
 				D0D4C9E62414CBA30029477E /* FeatureFlags */,
 				0701E9572372AD550034AAC2 /* DisplayUnit */,
