@@ -25,14 +25,15 @@ let package = Package(
                 "tvOS-Info.plist"
             ],
             resources: [
+                .copy("Info.plist"),
+                .copy("DigiCertGlobalRootCA.crt"),
+                .copy("DigiCertSHA2SecureServerCA.crt"),
                 .process("InApps/images"),
                 .process("InApps/xibs/"),
                 .process("Inbox/images"),
                 .process("Inbox/models/Inbox.xcdatamodeld"),
                 .process("ios.modulemap"),
-                .process("tvos.modulemap"),
-                .copy("DigiCertGlobalRootCA.crt"),
-                .copy("DigiCertSHA2SecureServerCA.crt")
+                .process("tvos.modulemap")
             ],
             cSettings: [
                 .headerSearchPath("./"),
