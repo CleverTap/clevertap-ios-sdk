@@ -185,13 +185,21 @@ static const int kMaxTags = 3;
 }
 
 - (void)registerNibs {
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselMessageCell.class]] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselImageMessageCell.class]] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxIconMessageCell.class]] forCellReuseIdentifier:kCellIconMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTInboxSimpleMessageCell.class]]
+         forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTCarouselMessageCell.class]]
+         forCellReuseIdentifier:kCellCarouselMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTCarouselImageMessageCell.class]]
+         forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
+         forCellReuseIdentifier:kCellIconMessageIdentifier];
 }
 
-- (NSString*)getTitle {
+- (NSString *)getTitle {
     return self.config.title ? self.config.title : @"Notifications";
 }
 
