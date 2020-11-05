@@ -5,11 +5,15 @@
 @implementation CTUIUtils
 
 + (NSBundle *)bundle {
+    return [self bundle:self.class];
+}
+
++ (NSBundle *)bundle:(Class)bundleClass {
     NSString *spmBundleAt = [[[NSBundle mainBundle] bundlePath] stringByAppendingString:CTSPMBundlePath];
     if ([[NSFileManager defaultManager] fileExistsAtPath:spmBundleAt]) {
       return [NSBundle bundleWithPath:spmBundleAt];
     }
-    return [NSBundle bundleForClass:self.class];
+    return [NSBundle bundleForClass:bundleClass];
 }
 
 + (NSString *)XibNameForControllerName:(NSString *)controllerName {

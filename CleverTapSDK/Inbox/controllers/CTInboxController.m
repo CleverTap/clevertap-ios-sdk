@@ -50,7 +50,7 @@ static NSManagedObjectContext *privateContext;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @try {
-            NSURL *modelURL = [[CTInboxUtils bundle] URLForResource:@"Inbox" withExtension:@"momd"];
+            NSURL *modelURL = [[CTInboxUtils bundle:self.class] URLForResource:@"Inbox" withExtension:@"momd"];
             NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
             NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
             

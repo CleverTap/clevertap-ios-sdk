@@ -149,14 +149,14 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage *)getPortraitPlaceHolderImage {
     if (portraitPlaceholderImage == nil) {
-        portraitPlaceholderImage = [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        portraitPlaceholderImage = [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle:self.class] compatibleWithTraitCollection:nil];
     }
     return portraitPlaceholderImage;
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
     if (landscapePlaceholderImage == nil) {
-        landscapePlaceholderImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        landscapePlaceholderImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle:self.class] compatibleWithTraitCollection:nil];
     }
     return landscapePlaceholderImage;
 }
@@ -180,42 +180,42 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage*)getAudioPlaceholderImage {
     if (audioPlaceholderImage == nil) {
-        audioPlaceholderImage = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        audioPlaceholderImage = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return audioPlaceholderImage;
 }
 
 - (UIImage *)getVideoPlaceHolderImage {
     if (videoPlaceholderImage == nil) {
-        videoPlaceholderImage = [UIImage imageNamed:@"ct_default_video.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        videoPlaceholderImage = [UIImage imageNamed:@"ct_default_video.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return videoPlaceholderImage;
 }
 
 - (UIImage*)getPlayImage {
     if (playImage == nil) {
-        playImage = [UIImage imageNamed:@"ic_play.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        playImage = [UIImage imageNamed:@"ic_play.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return playImage;
 }
 
 - (UIImage*)getPauseImage {
     if (pauseImage == nil) {
-        pauseImage = [UIImage imageNamed:@"ic_pause.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        pauseImage = [UIImage imageNamed:@"ic_pause.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return pauseImage;
 }
 
 - (UIImage*)getVolumeOnImage {
     if (volumeOnImage == nil) {
-        volumeOnImage = [UIImage imageNamed:@"volume_on.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        volumeOnImage = [UIImage imageNamed:@"volume_on.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return volumeOnImage;
 }
 
 - (UIImage*)getVolumeOffImage {
     if (volumeOffImage == nil) {
-        volumeOffImage = [UIImage imageNamed:@"volume_off.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+        volumeOffImage = [UIImage imageNamed:@"volume_off.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return volumeOffImage;
 }

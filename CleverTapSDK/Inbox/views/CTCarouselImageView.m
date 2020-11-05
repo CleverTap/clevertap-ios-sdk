@@ -126,11 +126,11 @@ static float captionHeight = 0.f;
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
-    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
 }
 
 - (UIImage *)getPortraitPlaceHolderImage {
-    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle] compatibleWithTraitCollection:nil];
+    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
 }
 
 - (void)loadImage {
