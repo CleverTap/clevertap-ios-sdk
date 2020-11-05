@@ -722,7 +722,6 @@
 			isa = PBXGroup;
 			children = (
 				49F9E6BA2552E97000EF2E5C /* xibs */,
-				071EB48A217F6427008F0FAB /* images */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
 				071EB478217F6427008F0FAB /* CTDismissButton.m */,
 				071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */,
@@ -755,27 +754,6 @@
 				071EB4B2217F6427008F0FAB /* CTFooterViewController.m */,
 			);
 			path = InApps;
-			sourceTree = "<group>";
-		};
-		071EB48A217F6427008F0FAB /* images */ = {
-			isa = PBXGroup;
-			children = (
-				071EB48B217F6427008F0FAB /* ic_shrink@2x.png */,
-				071EB48C217F6427008F0FAB /* ic_play@1x.png */,
-				071EB48D217F6427008F0FAB /* ic_shrink@3x.png */,
-				071EB48E217F6427008F0FAB /* ic_thumb.png */,
-				071EB490217F6427008F0FAB /* ic_expand@3x.png */,
-				071EB491217F6427008F0FAB /* ic_expand@2x.png */,
-				079701E42180A055008BF668 /* sound-wave-headphones.png */,
-				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
-				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
-				071EB494217F6427008F0FAB /* ic_expand@1x.png */,
-				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
-				071EB496217F6427008F0FAB /* ic_play@3x.png */,
-				071EB497217F6427008F0FAB /* ic_play@2x.png */,
-				071EB498217F6427008F0FAB /* ic_shrink@1x.png */,
-			);
-			path = images;
 			sourceTree = "<group>";
 		};
 		0797134121A338B40011C9A3 /* views */ = {
@@ -947,7 +925,6 @@
 				07B94521219EA34300D4C542 /* cells */,
 				07B94527219EA34300D4C542 /* config */,
 				07B94529219EA34300D4C542 /* controllers */,
-				07B94525219EA34300D4C542 /* images */,
 				07B9452F219EA34300D4C542 /* models */,
 			);
 			path = Inbox;
@@ -976,19 +953,6 @@
 				07238E42221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib */,
 			);
 			path = cells;
-			sourceTree = "<group>";
-		};
-		07B94525219EA34300D4C542 /* images */ = {
-			isa = PBXGroup;
-			children = (
-				070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */,
-				070229A6220831CB0093CA41 /* ct_default_landscape_image.png */,
-				070229A7220831CB0093CA41 /* ct_default_video.png */,
-				07B94526219EA34300D4C542 /* placeholder.png */,
-				070BB5CB21E70BC000428DEE /* volume_off.png */,
-				070BB5CA21E70BBF00428DEE /* volume_on.png */,
-			);
-			path = images;
 			sourceTree = "<group>";
 		};
 		07B94527219EA34300D4C542 /* config */ = {
@@ -1039,6 +1003,33 @@
 				07B94552219EA44100D4C542 /* libsqlite3.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		490971D32553CD4500B6DBD4 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				071EB48B217F6427008F0FAB /* ic_shrink@2x.png */,
+				071EB48C217F6427008F0FAB /* ic_play@1x.png */,
+				071EB48D217F6427008F0FAB /* ic_shrink@3x.png */,
+				071EB48E217F6427008F0FAB /* ic_thumb.png */,
+				071EB490217F6427008F0FAB /* ic_expand@3x.png */,
+				071EB491217F6427008F0FAB /* ic_expand@2x.png */,
+				079701E42180A055008BF668 /* sound-wave-headphones.png */,
+				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
+				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
+				071EB494217F6427008F0FAB /* ic_expand@1x.png */,
+				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
+				071EB496217F6427008F0FAB /* ic_play@3x.png */,
+				071EB497217F6427008F0FAB /* ic_play@2x.png */,
+				071EB498217F6427008F0FAB /* ic_shrink@1x.png */,
+				070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */,
+				070229A6220831CB0093CA41 /* ct_default_landscape_image.png */,
+				070229A7220831CB0093CA41 /* ct_default_video.png */,
+				07B94526219EA34300D4C542 /* placeholder.png */,
+				070BB5CB21E70BC000428DEE /* volume_off.png */,
+				070BB5CA21E70BBF00428DEE /* volume_on.png */,
+			);
+			path = Images;
 			sourceTree = "<group>";
 		};
 		49F9E6BA2552E97000EF2E5C /* xibs */ = {
@@ -1129,6 +1120,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				490971D32553CD4500B6DBD4 /* Images */,
 				D0BD7598241760A30006EE55 /* ProductConfig */,
 				D0D4C9E62414CBA30029477E /* FeatureFlags */,
 				0701E9572372AD550034AAC2 /* DisplayUnit */,
