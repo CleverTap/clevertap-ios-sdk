@@ -7,7 +7,7 @@
 #import "CTInboxBaseMessageCell.h"
 #import "CTCarouselMessageCell.h"
 
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
 #import "CTInboxUtils.h"
@@ -213,7 +213,7 @@ static const int kMaxTags = 3;
 
 - (void)calculateTableViewVisibleFrame {
     CGRect frame = self.tableView.frame;
-    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+    UIInterfaceOrientation orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
     BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
     if (landscape) {
         frame.origin.y += self.topContentOffset;

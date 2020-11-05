@@ -1,6 +1,6 @@
 #import "CTHeaderViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @interface CTHeaderViewController () {
 }

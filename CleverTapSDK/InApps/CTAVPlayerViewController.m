@@ -1,7 +1,7 @@
 
 #import "CTAVPlayerViewController.h"
 #import "CTInAppNotification.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @interface CTAVPlayerViewController () 
 

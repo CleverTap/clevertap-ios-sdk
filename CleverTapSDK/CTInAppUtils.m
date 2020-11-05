@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "CTInAppUtils.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #endif
 
 static NSDictionary *_inAppTypeMap;
@@ -35,7 +35,7 @@ static NSDictionary *_inAppTypeMap;
 #if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
 #else
-    return [CTInAppResources bundle];
+    return [CTUIUtils bundle];
 #endif
 }
 
@@ -43,7 +43,7 @@ static NSDictionary *_inAppTypeMap;
 #if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
 #else
-    return [CTInAppResources XibNameForControllerName:controllerName];
+    return [CTUIUtils XibNameForControllerName:controllerName];
 #endif
 }
 
@@ -51,7 +51,7 @@ static NSDictionary *_inAppTypeMap;
 #if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
 #else
-    return [CTInAppResources imageForName:name type:type];
+    return [CTUIUtils imageForName:name type:type];
 #endif
     
 }

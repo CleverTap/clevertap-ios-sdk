@@ -1,6 +1,6 @@
 #import "CTCoverImageViewController.h"
 #import "CTImageInAppViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTDismissButton.h"
 
 @interface CTCoverImageViewController ()

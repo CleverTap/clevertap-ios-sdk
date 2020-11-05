@@ -2,7 +2,7 @@
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @interface CTCoverViewController ()
 

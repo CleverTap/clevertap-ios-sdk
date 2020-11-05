@@ -1,8 +1,8 @@
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 #define CTSPMBundlePath @"/CleverTapSDK_CleverTapSDK.bundle/"
 
-@implementation CTInAppResources
+@implementation CTUIUtils
 
 + (NSBundle *)bundle {
     NSString *spmBundleAt = [[[NSBundle mainBundle] bundlePath] stringByAppendingString:CTSPMBundlePath];

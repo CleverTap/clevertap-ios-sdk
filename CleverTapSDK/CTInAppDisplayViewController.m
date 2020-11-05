@@ -1,6 +1,6 @@
 #import "CTInAppDisplayViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @implementation CTInAppPassThroughWindow
 
@@ -78,7 +78,7 @@
     if (!self.notification) return;
     
     if (@available(iOS 13, tvOS 13.0, *)) {
-        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
@@ -172,7 +172,7 @@
 #if (TARGET_OS_TV)
     return nil;
 #else
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 #endif
 }

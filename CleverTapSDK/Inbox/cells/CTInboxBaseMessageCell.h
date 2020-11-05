@@ -9,7 +9,7 @@
 #import "CTConstants.h"
 #import "CTInAppUtils.h"
 #import "CTInboxUtils.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTVideoThumbnailGenerator.h"
 
 @class SDAnimatedImageView;

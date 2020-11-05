@@ -3,7 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTInAppResources : NSObject
+@interface CTUIUtils : NSObject
 
 + (NSBundle *)bundle;
 + (NSString *)XibNameForControllerName:(NSString *)controllerName;

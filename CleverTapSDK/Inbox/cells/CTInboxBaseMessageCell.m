@@ -173,7 +173,7 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)deviceOrientationIsLandscape {
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 }
 

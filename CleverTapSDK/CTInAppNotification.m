@@ -1,6 +1,6 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView.h>
@@ -282,7 +282,7 @@
 #if (TARGET_OS_TV)
     return nil;
 #else
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 #endif
 }

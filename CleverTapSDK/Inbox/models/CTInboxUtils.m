@@ -1,6 +1,6 @@
 #import "CTInboxUtils.h"
 #if !CLEVERTAP_NO_INBOX_SUPPORT
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #endif
 
 static NSDictionary *_inboxMessageTypeMap;
@@ -29,7 +29,7 @@ static NSDictionary *_inboxMessageTypeMap;
     return nil;
 #else
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
     if (landscape) {
         [xib appendString:@"~land"];

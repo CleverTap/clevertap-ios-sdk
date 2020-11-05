@@ -2,7 +2,7 @@
 #import "CTBaseHeaderFooterViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 typedef enum {
     kWRSlideStatusNormal = 0,
@@ -356,7 +356,7 @@ typedef enum {
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     if (@available(iOS 13, *)) {
-        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
