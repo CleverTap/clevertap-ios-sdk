@@ -39,7 +39,7 @@
     
     // TODO: to be removed, just for testing
     NSBundle *bundle = [CTInAppUtils bundle];
-    UIImage *testImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    UIImage *testImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInAppUtils bundle] compatibleWithTraitCollection:nil];
     
     [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTInterstitialViewController class])] owner:self options:nil];
 }

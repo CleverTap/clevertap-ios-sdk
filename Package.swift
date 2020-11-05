@@ -27,8 +27,8 @@ let package = Package(
             resources: [
                 .copy("DigiCertGlobalRootCA.crt"),
                 .copy("DigiCertSHA2SecureServerCA.crt"),
-                .copy("Images"),
-                .copy("InApps/xibs")
+                .process("Images"),
+                .process("InApps/xibs")
             ],
             cSettings: [
                 .headerSearchPath("./"),
