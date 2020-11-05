@@ -4,7 +4,6 @@ import PackageDescription
 
 let package = Package(
     name: "CleverTapSDK",
-    defaultLocalization: "en",
     platforms: [
         .iOS(.v9)
     ],
@@ -27,7 +26,7 @@ let package = Package(
             ],
             resources: [
                 .process("InApps/images"),
-                .process("InApps/xibs"),
+                .process("InApps/xibs/CTInterstitialViewController~iphoneport.xib"),
                 .process("Inbox/images"),
                 .process("ios.modulemap"),
                 .process("tvos.modulemap"),
