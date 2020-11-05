@@ -26,8 +26,9 @@ let package = Package(
             ],
             resources: [
                 .process("InApps/images"),
-                .process("InApps/xibs/CTInterstitialViewController~iphoneport.xib"),
+                .process("InApps/xibs/"),
                 .process("Inbox/images"),
+                .process("Inbox/models/Inbox.xcdatamodeld"),
                 .process("ios.modulemap"),
                 .process("tvos.modulemap"),
                 .copy("DigiCertGlobalRootCA.crt"),
