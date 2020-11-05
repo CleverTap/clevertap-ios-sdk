@@ -13,6 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // register for push notifications
         registerForPush()
         
+        CleverTap.setCredentialsWithAccountID("RKW-R77-KW6Z", andToken: "aa2-032")
         // Configure and init the default shared CleverTap instance (add CleverTap Account ID and Account Token in your .plist file)
         CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue)
         CleverTap.autoIntegrate()
