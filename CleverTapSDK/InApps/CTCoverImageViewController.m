@@ -14,7 +14,7 @@
 
 - (void)loadView {
     [super loadView];
-    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTCoverImageViewController class])]
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils getXibNameForControllerName:NSStringFromClass([CTCoverImageViewController class])]
                                   owner:self
                                 options:nil];
 }

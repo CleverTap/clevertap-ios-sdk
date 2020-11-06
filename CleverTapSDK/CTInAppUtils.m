@@ -1,3 +1,4 @@
+
 #import <UIKit/UIKit.h>
 #import "CTInAppUtils.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -39,21 +40,12 @@ static NSDictionary *_inAppTypeMap;
 #endif
 }
 
-+ (NSString *)XibNameForControllerName:(NSString *)controllerName {
++ (NSString *)getXibNameForControllerName:(NSString *)controllerName {
 #if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
 #else
     return [CTUIUtils XibNameForControllerName:controllerName];
 #endif
-}
-
-+ (UIImage *)imageForName:(NSString *)name type:(NSString *)type {
-#if CLEVERTAP_NO_INAPP_SUPPORT
-    return nil;
-#else
-    return [CTUIUtils imageForName:name type:type];
-#endif
-    
 }
 
 + (UIColor * _Nullable)ct_colorWithHexString:(NSString *)string {

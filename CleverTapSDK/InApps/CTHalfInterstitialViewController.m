@@ -26,7 +26,7 @@
 
 - (void)loadView {
     [super loadView];
-    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTHalfInterstitialViewController class])] owner:self options:nil];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils getXibNameForControllerName:NSStringFromClass([CTHalfInterstitialViewController class])] owner:self options:nil];
 }
 
 - (void)viewDidLoad {
