@@ -40,19 +40,12 @@
 		071EB4D6217F6427008F0FAB /* CTInAppFCManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB486217F6427008F0FAB /* CTInAppFCManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4D7217F6427008F0FAB /* CTCoverViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 071EB487217F6427008F0FAB /* CTCoverViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		071EB4D8217F6427008F0FAB /* CTHalfInterstitialImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB488217F6427008F0FAB /* CTHalfInterstitialImageViewController.m */; };
-		071EB4DA217F6427008F0FAB /* ic_shrink@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48B217F6427008F0FAB /* ic_shrink@2x.png */; };
 		071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48C217F6427008F0FAB /* ic_play@1x.png */; };
-		071EB4DC217F6427008F0FAB /* ic_shrink@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48D217F6427008F0FAB /* ic_shrink@3x.png */; };
-		071EB4DD217F6427008F0FAB /* ic_thumb.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB48E217F6427008F0FAB /* ic_thumb.png */; };
-		071EB4DF217F6427008F0FAB /* ic_expand@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB490217F6427008F0FAB /* ic_expand@3x.png */; };
-		071EB4E0217F6427008F0FAB /* ic_expand@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB491217F6427008F0FAB /* ic_expand@2x.png */; };
 		071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB492217F6427008F0FAB /* ic_pause@1x.png */; };
 		071EB4E2217F6427008F0FAB /* ic_pause@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB493217F6427008F0FAB /* ic_pause@2x.png */; };
-		071EB4E3217F6427008F0FAB /* ic_expand@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB494217F6427008F0FAB /* ic_expand@1x.png */; };
 		071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB495217F6427008F0FAB /* ic_pause@3x.png */; };
 		071EB4E5217F6427008F0FAB /* ic_play@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB496217F6427008F0FAB /* ic_play@3x.png */; };
 		071EB4E6217F6427008F0FAB /* ic_play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB497217F6427008F0FAB /* ic_play@2x.png */; };
-		071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 071EB498217F6427008F0FAB /* ic_shrink@1x.png */; };
 		071EB4E8217F6427008F0FAB /* CTFooterViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */; };
 		071EB4EB217F6427008F0FAB /* CTCoverImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */; };
 		071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */ = {isa = PBXBuildFile; fileRef = 071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */; };
@@ -118,7 +111,7 @@
 		0796FB6921AE5B6300FC380D /* CTCarouselImageMessageCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 0796FB6621AE5B6300FC380D /* CTCarouselImageMessageCell.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0796FB6A21AE5B6300FC380D /* CTCarouselImageMessageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0796FB6721AE5B6300FC380D /* CTCarouselImageMessageCell.m */; };
 		0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib */; };
-		079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */ = {isa = PBXBuildFile; fileRef = 079701E42180A055008BF668 /* sound-wave-headphones.png */; };
+		079701E52180A055008BF668 /* ct_default_audio.png in Resources */ = {isa = PBXBuildFile; fileRef = 079701E42180A055008BF668 /* ct_default_audio.png */; };
 		0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 0797132D21A2F09A0011C9A3 /* CTSwipeView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0797133021A2F09A0011C9A3 /* CTSwipeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797132E21A2F09A0011C9A3 /* CTSwipeView.m */; };
 		0797133A21A309720011C9A3 /* CTCarouselImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0797133821A309720011C9A3 /* CTCarouselImageView.m */; };
@@ -408,19 +401,12 @@
 		071EB486217F6427008F0FAB /* CTInAppFCManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTInAppFCManager.h; sourceTree = "<group>"; };
 		071EB487217F6427008F0FAB /* CTCoverViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCoverViewController.h; sourceTree = "<group>"; };
 		071EB488217F6427008F0FAB /* CTHalfInterstitialImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHalfInterstitialImageViewController.m; sourceTree = "<group>"; };
-		071EB48B217F6427008F0FAB /* ic_shrink@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_shrink@2x.png"; sourceTree = "<group>"; };
 		071EB48C217F6427008F0FAB /* ic_play@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_play@1x.png"; sourceTree = "<group>"; };
-		071EB48D217F6427008F0FAB /* ic_shrink@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_shrink@3x.png"; sourceTree = "<group>"; };
-		071EB48E217F6427008F0FAB /* ic_thumb.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_thumb.png; sourceTree = "<group>"; };
-		071EB490217F6427008F0FAB /* ic_expand@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_expand@3x.png"; sourceTree = "<group>"; };
-		071EB491217F6427008F0FAB /* ic_expand@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_expand@2x.png"; sourceTree = "<group>"; };
 		071EB492217F6427008F0FAB /* ic_pause@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_pause@1x.png"; sourceTree = "<group>"; };
 		071EB493217F6427008F0FAB /* ic_pause@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_pause@2x.png"; sourceTree = "<group>"; };
-		071EB494217F6427008F0FAB /* ic_expand@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_expand@1x.png"; sourceTree = "<group>"; };
 		071EB495217F6427008F0FAB /* ic_pause@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_pause@3x.png"; sourceTree = "<group>"; };
 		071EB496217F6427008F0FAB /* ic_play@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_play@3x.png"; sourceTree = "<group>"; };
 		071EB497217F6427008F0FAB /* ic_play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_play@2x.png"; sourceTree = "<group>"; };
-		071EB498217F6427008F0FAB /* ic_shrink@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_shrink@1x.png"; sourceTree = "<group>"; };
 		071EB499217F6427008F0FAB /* CTFooterViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTFooterViewController~ipad.xib"; sourceTree = "<group>"; };
 		071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCoverImageViewController.m; sourceTree = "<group>"; };
 		071EB49E217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~iphoneport.xib"; sourceTree = "<group>"; };
@@ -478,7 +464,7 @@
 		0796FB6621AE5B6300FC380D /* CTCarouselImageMessageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTCarouselImageMessageCell.h; sourceTree = "<group>"; };
 		0796FB6721AE5B6300FC380D /* CTCarouselImageMessageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCarouselImageMessageCell.m; sourceTree = "<group>"; };
 		0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCarouselImageMessageCell~port.xib"; sourceTree = "<group>"; };
-		079701E42180A055008BF668 /* sound-wave-headphones.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sound-wave-headphones.png"; sourceTree = "<group>"; };
+		079701E42180A055008BF668 /* ct_default_audio.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_default_audio.png; sourceTree = "<group>"; };
 		0797132D21A2F09A0011C9A3 /* CTSwipeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTSwipeView.h; sourceTree = "<group>"; };
 		0797132E21A2F09A0011C9A3 /* CTSwipeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTSwipeView.m; sourceTree = "<group>"; };
 		0797133821A309720011C9A3 /* CTCarouselImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCarouselImageView.m; sourceTree = "<group>"; };
@@ -998,23 +984,16 @@
 		490971D32553CD4500B6DBD4 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				071EB48B217F6427008F0FAB /* ic_shrink@2x.png */,
 				071EB48C217F6427008F0FAB /* ic_play@1x.png */,
-				071EB48D217F6427008F0FAB /* ic_shrink@3x.png */,
-				071EB48E217F6427008F0FAB /* ic_thumb.png */,
-				071EB490217F6427008F0FAB /* ic_expand@3x.png */,
-				071EB491217F6427008F0FAB /* ic_expand@2x.png */,
-				079701E42180A055008BF668 /* sound-wave-headphones.png */,
-				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
-				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
-				071EB494217F6427008F0FAB /* ic_expand@1x.png */,
-				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
 				071EB496217F6427008F0FAB /* ic_play@3x.png */,
 				071EB497217F6427008F0FAB /* ic_play@2x.png */,
-				071EB498217F6427008F0FAB /* ic_shrink@1x.png */,
+				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
+				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
+				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
 				070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */,
 				070229A6220831CB0093CA41 /* ct_default_landscape_image.png */,
 				070229A7220831CB0093CA41 /* ct_default_video.png */,
+				079701E42180A055008BF668 /* ct_default_audio.png */,
 				07B94526219EA34300D4C542 /* placeholder.png */,
 				070BB5CB21E70BC000428DEE /* volume_off.png */,
 				070BB5CA21E70BBF00428DEE /* volume_on.png */,
@@ -1492,7 +1471,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				071EB4E0217F6427008F0FAB /* ic_expand@2x.png in Resources */,
 				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
 				D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */,
 				07D86D3B22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib in Resources */,
@@ -1507,7 +1485,6 @@
 				07D86D45222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib in Resources */,
 				0796FB6521AE5B2900FC380D /* CTCarouselMessageCell~port.xib in Resources */,
 				070229A8220831CB0093CA41 /* ct_default_landscape_image.png in Resources */,
-				071EB4E7217F6427008F0FAB /* ic_shrink@1x.png in Resources */,
 				070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */,
 				070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */,
 				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
@@ -1518,12 +1495,10 @@
 				070BB5CC21E70BC000428DEE /* volume_on.png in Resources */,
 				071EB500217F6427008F0FAB /* CTHeaderViewController~ipad.xib in Resources */,
 				071EB4F7217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib in Resources */,
-				071EB4DF217F6427008F0FAB /* ic_expand@3x.png in Resources */,
 				071EB4E6217F6427008F0FAB /* ic_play@2x.png in Resources */,
 				07D86D3F22269496009EE610 /* CTHalfInterstitialViewController~ipadland.xib in Resources */,
 				071EB4F4217F6427008F0FAB /* CTCoverViewController~ipad.xib in Resources */,
 				071EB50E217F6427008F0FAB /* CTInterstitialImageViewController~ipad.xib in Resources */,
-				071EB4E3217F6427008F0FAB /* ic_expand@1x.png in Resources */,
 				070CDC0F2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib in Resources */,
 				07238E3B221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib in Resources */,
 				071EB504217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib in Resources */,
@@ -1531,8 +1506,7 @@
 				07D0D0912223F44E000D5686 /* CTHeaderViewController~iphoneland.xib in Resources */,
 				071EB4E2217F6427008F0FAB /* ic_pause@2x.png in Resources */,
 				071EB4E8217F6427008F0FAB /* CTFooterViewController~ipad.xib in Resources */,
-				071EB4DD217F6427008F0FAB /* ic_thumb.png in Resources */,
-				079701E52180A055008BF668 /* sound-wave-headphones.png in Resources */,
+				079701E52180A055008BF668 /* ct_default_audio.png in Resources */,
 				071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */,
 				07D0D08F2223F24E000D5686 /* CTFooterViewController~iphoneland.xib in Resources */,
 				07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */,
@@ -1542,9 +1516,7 @@
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
 				07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,
 				07B9453D219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib in Resources */,
-				071EB4DC217F6427008F0FAB /* ic_shrink@3x.png in Resources */,
 				070229A9220831CB0093CA41 /* ct_default_video.png in Resources */,
-				071EB4DA217F6427008F0FAB /* ic_shrink@2x.png in Resources */,
 				071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */,
 				071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */,
 				07D86D3D22269462009EE610 /* CTFooterViewController~ipadland.xib in Resources */,

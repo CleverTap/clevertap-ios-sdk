@@ -180,7 +180,7 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage*)getAudioPlaceholderImage {
     if (audioPlaceholderImage == nil) {
-        audioPlaceholderImage = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        audioPlaceholderImage = [UIImage imageNamed:@"ct_default_audio.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
     }
     return audioPlaceholderImage;
 }
