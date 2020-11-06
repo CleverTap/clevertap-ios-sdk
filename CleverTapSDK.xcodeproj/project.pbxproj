@@ -721,7 +721,7 @@
 		071EB476217F6427008F0FAB /* InApps */ = {
 			isa = PBXGroup;
 			children = (
-				49F9E6BA2552E97000EF2E5C /* xibs */,
+				49F9E6BA2552E97000EF2E5C /* resources */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
 				071EB478217F6427008F0FAB /* CTDismissButton.m */,
 				071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */,
@@ -765,7 +765,6 @@
 				0797132E21A2F09A0011C9A3 /* CTSwipeView.m */,
 				07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */,
 				0797133821A309720011C9A3 /* CTCarouselImageView.m */,
-				07D86D3822255087009EE610 /* CTCarouselImageView.xib */,
 				072F9E4021B14ECC00BC6313 /* CTInboxMessageActionView.h */,
 				072F9E4121B14ECC00BC6313 /* CTInboxMessageActionView.m */,
 				07053B7021E653E70085B44A /* UIView+CTToast.h */,
@@ -921,6 +920,7 @@
 		07B94520219EA33800D4C542 /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
+				495EA4BE25554718006CADFF /* resources */,
 				0797134121A338B40011C9A3 /* views */,
 				07B94521219EA34300D4C542 /* cells */,
 				07B94527219EA34300D4C542 /* config */,
@@ -937,20 +937,12 @@
 				D06F052721E802D400D1B6BD /* CTInboxBaseMessageCell.m */,
 				07B94522219EA34300D4C542 /* CTInboxSimpleMessageCell.h */,
 				07B94523219EA34300D4C542 /* CTInboxSimpleMessageCell.m */,
-				07B94524219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib */,
-				07238E3C221E79F80012DFAE /* CTInboxSimpleMessageCell~land.xib */,
 				0796FB6021AE5B2900FC380D /* CTCarouselMessageCell.h */,
 				0796FB6121AE5B2900FC380D /* CTCarouselMessageCell.m */,
-				0796FB6221AE5B2900FC380D /* CTCarouselMessageCell~port.xib */,
-				07238E3E221E7A100012DFAE /* CTCarouselMessageCell~land.xib */,
 				0796FB6621AE5B6300FC380D /* CTCarouselImageMessageCell.h */,
 				0796FB6721AE5B6300FC380D /* CTCarouselImageMessageCell.m */,
-				0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib */,
-				07238E40221E7A270012DFAE /* CTCarouselImageMessageCell~land.xib */,
 				072F9E3A21B1368000BC6313 /* CTInboxIconMessageCell.h */,
 				072F9E3B21B1368000BC6313 /* CTInboxIconMessageCell.m */,
-				072F9E3C21B1368000BC6313 /* CTInboxIconMessageCell~port.xib */,
-				07238E42221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib */,
 			);
 			path = cells;
 			sourceTree = "<group>";
@@ -970,7 +962,6 @@
 				07B9452A219EA34300D4C542 /* CTInboxController.m */,
 				07B9452B219EA34300D4C542 /* CleverTapInboxViewControllerPrivate.h */,
 				07B9452C219EA34300D4C542 /* CleverTapInboxViewController.m */,
-				07B9452D219EA34300D4C542 /* CleverTapInboxViewController.xib */,
 			);
 			path = controllers;
 			sourceTree = "<group>";
@@ -988,7 +979,6 @@
 				07B94534219EA34300D4C542 /* CTMessageMO+CoreDataProperties.m */,
 				07B94536219EA34300D4C542 /* CleverTapInboxMessage.m */,
 				07961B7421B50A4C0081953E /* CleverTapInboxMessageContent.m */,
-				07B94538219EA34300D4C542 /* Inbox.xcdatamodeld */,
 				D0405B4422050C5200D64EC3 /* CTInboxUtils.h */,
 				D0405B4522050C5200D64EC3 /* CTInboxUtils.m */,
 			);
@@ -1032,7 +1022,25 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		49F9E6BA2552E97000EF2E5C /* xibs */ = {
+		495EA4BE25554718006CADFF /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				07B94524219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib */,
+				07238E3C221E79F80012DFAE /* CTInboxSimpleMessageCell~land.xib */,
+				0796FB6221AE5B2900FC380D /* CTCarouselMessageCell~port.xib */,
+				07238E3E221E7A100012DFAE /* CTCarouselMessageCell~land.xib */,
+				0796FB6821AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib */,
+				07238E40221E7A270012DFAE /* CTCarouselImageMessageCell~land.xib */,
+				072F9E3C21B1368000BC6313 /* CTInboxIconMessageCell~port.xib */,
+				07238E42221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib */,
+				07B9452D219EA34300D4C542 /* CleverTapInboxViewController.xib */,
+				07B94538219EA34300D4C542 /* Inbox.xcdatamodeld */,
+				07D86D3822255087009EE610 /* CTCarouselImageView.xib */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		49F9E6BA2552E97000EF2E5C /* resources */ = {
 			isa = PBXGroup;
 			children = (
 				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
@@ -1068,7 +1076,7 @@
 				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
 				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
 			);
-			path = xibs;
+			path = resources;
 			sourceTree = "<group>";
 		};
 		D0BD7598241760A30006EE55 /* ProductConfig */ = {
