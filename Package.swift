@@ -22,7 +22,10 @@ let package = Package(
             path: "CleverTapSDK",
             exclude: [
                 "Info.plist",
-                "tvOS-Info.plist"
+                "tvOS-Info.plist",
+                "CHANGELOG.md",
+                "LICENSE",
+                "README.md"
             ],
             resources: [
                 .copy("DigiCertGlobalRootCA.crt"),
