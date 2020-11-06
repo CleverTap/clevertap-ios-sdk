@@ -43,8 +43,24 @@ static NSDictionary *_inAppTypeMap;
 + (NSString *)getXibNameForControllerName:(NSString *)controllerName {
 #if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
-#else
-    return [CTUIUtils XibNameForControllerName:controllerName];
+#else    
+    NSMutableString *xib = [NSMutableString stringWithString:controllerName];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
+    BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        if (landscape) {
+            [xib appendString:@"~iphoneland"];
+        } else {
+            [xib appendString:@"~iphoneport"];
+        }
+    } else {
+        if (landscape) {
+            [xib appendString:@"~ipadland"];
+        } else {
+            [xib appendString:@"~ipad"];
+        }
+    }
+    return [xib copy];
 #endif
 }
 

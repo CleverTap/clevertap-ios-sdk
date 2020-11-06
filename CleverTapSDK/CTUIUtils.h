@@ -12,8 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (UIImage *)imageForName:(NSString *)name type:(NSString *)type;
 
-+ (NSString *)XibNameForControllerName:(NSString *)controllerName;
-
 + (UIColor *_Nullable)ct_colorWithHexString:(NSString *_Nonnull)string;
 + (UIColor *_Nullable)ct_colorWithHexString:(NSString *_Nonnull)string withAlpha:(CGFloat)alpha;
 
