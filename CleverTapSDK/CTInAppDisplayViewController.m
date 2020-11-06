@@ -158,11 +158,11 @@
     if (_notification.inAppType != CTInAppTypeHeader && _notification.inAppType != CTInAppTypeFooter) {
         buttonView.layer.borderWidth = 1.0f;
         buttonView.layer.cornerRadius = [button.borderRadius floatValue];
-        buttonView.layer.borderColor = [[CTInAppUtils ct_colorWithHexString:button.borderColor] CGColor];
+        buttonView.layer.borderColor = [[CTUIUtils ct_colorWithHexString:button.borderColor] CGColor];
     }
     
-    [buttonView setBackgroundColor:[CTInAppUtils ct_colorWithHexString:button.backgroundColor]];
-    [buttonView setTitleColor:[CTInAppUtils ct_colorWithHexString:button.textColor] forState:UIControlStateNormal];
+    [buttonView setBackgroundColor:[CTUIUtils ct_colorWithHexString:button.backgroundColor]];
+    [buttonView setTitleColor:[CTUIUtils ct_colorWithHexString:button.textColor] forState:UIControlStateNormal];
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [buttonView setTitle:button.text forState:UIControlStateNormal];
     return buttonView;

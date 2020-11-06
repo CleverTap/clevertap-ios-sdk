@@ -46,9 +46,9 @@ static const float kPageControlViewHeight = 30.f;
             carouselItemView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
             carouselItemView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
             carouselItemView.titleLabel.text = content.title;
-            carouselItemView.titleLabel.textColor = content.titleColor ? [CTInAppUtils ct_colorWithHexString:content.titleColor] : [CTInAppUtils ct_colorWithHexString:@"#000000"];
+            carouselItemView.titleLabel.textColor = content.titleColor ? [CTUIUtils ct_colorWithHexString:content.titleColor] : [CTUIUtils ct_colorWithHexString:@"#000000"];
             carouselItemView.bodyLabel.text = content.message;
-            carouselItemView.bodyLabel.textColor = content.messageColor ? [CTInAppUtils ct_colorWithHexString:content.messageColor] :  [CTInAppUtils ct_colorWithHexString:@"#7E7E7E"];
+            carouselItemView.bodyLabel.textColor = content.messageColor ? [CTUIUtils ct_colorWithHexString:content.messageColor] : [CTUIUtils ct_colorWithHexString:@"#7E7E7E"];
         }
         
         UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];

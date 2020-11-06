@@ -95,7 +95,7 @@ static NSString * const kOrientationPortrait = @"p";
 - (void)configureForMessage:(CleverTapInboxMessage *)message {
     self.message = message;
     if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
-        self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:message.backgroundColor];
     } else {
         self.containerView.backgroundColor = [UIColor whiteColor];
     }

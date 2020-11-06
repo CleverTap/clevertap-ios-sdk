@@ -9,7 +9,6 @@
 
 #import "CTUIUtils.h"
 #import "CTConstants.h"
-#import "CTInAppUtils.h"
 #import "CTInboxUtils.h"
 #import "UIView+CTToast.h"
 
@@ -149,7 +148,7 @@ static const int kMaxTags = 3;
 
 - (void)setUpInboxLayout {
     
-    UIColor *color = [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
+    UIColor *color = [CTUIUtils ct_colorWithHexString:@"#EAEAEA"];
     
     self.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
     self.tableView.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;

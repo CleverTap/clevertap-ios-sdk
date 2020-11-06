@@ -40,7 +40,7 @@
 - (void)layoutNotification {
     
     self.view.backgroundColor = [UIColor clearColor];
-    self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
+    self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -128,14 +128,14 @@
     if (self.notification.title) {
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
         self.titleLabel.backgroundColor = [UIColor clearColor];
-        self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.titleColor];
+        self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
     }
     
     if (self.notification.message) {
         self.bodyLabel.textAlignment = NSTextAlignmentCenter;
         self.bodyLabel.backgroundColor = [UIColor clearColor];
-        self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.messageColor];
+        self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
     }
