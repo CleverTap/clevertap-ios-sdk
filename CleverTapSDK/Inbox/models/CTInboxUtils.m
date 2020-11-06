@@ -1,3 +1,4 @@
+
 #import "CTInboxUtils.h"
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTUIUtils.h"
@@ -24,7 +25,7 @@ static NSDictionary *_inboxMessageTypeMap;
     return [_type integerValue];
 }
 
-+ (NSString *)XibNameForControllerName:(NSString *)controllerName {
++ (NSString *)getXibNameForControllerName:(NSString *)controllerName {
 #if CLEVERTAP_NO_INBOX_SUPPORT
     return nil;
 #else
