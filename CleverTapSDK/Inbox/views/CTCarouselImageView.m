@@ -127,11 +127,11 @@ static float captionHeight = 0.f;
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
-    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+    return [CTUIUtils getImageForName:@"ct_default_landscape_image.png"];
 }
 
 - (UIImage *)getPortraitPlaceHolderImage {
-    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+    return [CTUIUtils getImageForName:@"ct_default_portrait_image.png"];
 }
 
 - (void)loadImage {

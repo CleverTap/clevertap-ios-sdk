@@ -31,7 +31,7 @@
     self.view.translatesAutoresizingMaskIntoConstraints = NO;
     
     if (self.notification.mediaIsAudio) {
-        UIImage *image = [UIImage imageNamed:@"ct_default_audio.png" inBundle:[CTInAppUtils bundle] compatibleWithTraitCollection:nil];
+        UIImage *image = [CTUIUtils getImageForName:@"ct_default_audio.png"];
         self.imageView = [[UIImageView alloc] initWithFrame: self.view.bounds];
         self.imageView.backgroundColor = [UIColor blackColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;

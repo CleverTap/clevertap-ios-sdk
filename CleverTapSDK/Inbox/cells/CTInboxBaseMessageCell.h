@@ -7,7 +7,6 @@
 #import "CleverTap+Inbox.h"
 #import "CTInboxMessageActionView.h"
 #import "CTConstants.h"
-#import "CTInAppUtils.h"
 #import "CTInboxUtils.h"
 #import "CTUIUtils.h"
 #import "CTVideoThumbnailGenerator.h"

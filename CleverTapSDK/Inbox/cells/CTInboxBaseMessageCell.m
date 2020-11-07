@@ -149,14 +149,14 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage *)getPortraitPlaceHolderImage {
     if (portraitPlaceholderImage == nil) {
-        portraitPlaceholderImage = [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:[CTInboxUtils bundle:self.class] compatibleWithTraitCollection:nil];
+        portraitPlaceholderImage = [CTUIUtils getImageForName:@"ct_default_portrait_image.png"];
     }
     return portraitPlaceholderImage;
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
     if (landscapePlaceholderImage == nil) {
-        landscapePlaceholderImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:[CTInboxUtils bundle:self.class] compatibleWithTraitCollection:nil];
+        landscapePlaceholderImage = [CTUIUtils getImageForName:@"ct_default_landscape_image.png"];
     }
     return landscapePlaceholderImage;
 }
@@ -180,42 +180,42 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage*)getAudioPlaceholderImage {
     if (audioPlaceholderImage == nil) {
-        audioPlaceholderImage = [UIImage imageNamed:@"ct_default_audio.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        audioPlaceholderImage = [CTUIUtils getImageForName:@"ct_default_audio.png"];
     }
     return audioPlaceholderImage;
 }
 
 - (UIImage *)getVideoPlaceHolderImage {
     if (videoPlaceholderImage == nil) {
-        videoPlaceholderImage = [UIImage imageNamed:@"ct_default_video.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        videoPlaceholderImage = [CTUIUtils getImageForName:@"ct_default_video.png"];
     }
     return videoPlaceholderImage;
 }
 
 - (UIImage*)getPlayImage {
     if (playImage == nil) {
-        playImage = [UIImage imageNamed:@"ic_play.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        playImage = [CTUIUtils getImageForName:@"ic_play.png"];
     }
     return playImage;
 }
 
 - (UIImage*)getPauseImage {
     if (pauseImage == nil) {
-        pauseImage = [UIImage imageNamed:@"ic_pause.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        pauseImage = [CTUIUtils getImageForName:@"ic_pause.png"];
     }
     return pauseImage;
 }
 
 - (UIImage*)getVolumeOnImage {
     if (volumeOnImage == nil) {
-        volumeOnImage = [UIImage imageNamed:@"volume_on.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        volumeOnImage = [CTUIUtils getImageForName:@"volume_on.png"];
     }
     return volumeOnImage;
 }
 
 - (UIImage*)getVolumeOffImage {
     if (volumeOffImage == nil) {
-        volumeOffImage = [UIImage imageNamed:@"volume_off.png" inBundle:[CTInboxUtils bundle: self.class] compatibleWithTraitCollection:nil];
+        volumeOffImage = [CTUIUtils getImageForName:@"volume_off.png"];
     }
     return volumeOffImage;
 }

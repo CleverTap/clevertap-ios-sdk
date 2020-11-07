@@ -38,7 +38,7 @@ static const float kPageControlViewHeight = 30.f;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
-            carouselItemView  = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
+            carouselItemView  = [[[CTUIUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
             carouselItemView.backgroundColor = [UIColor clearColor];
             [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]

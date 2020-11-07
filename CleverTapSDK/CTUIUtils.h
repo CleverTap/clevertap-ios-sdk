@@ -8,12 +8,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSBundle *)bundle;
 + (NSBundle *)bundle:(Class)bundleClass;
-+ (UIApplication *_Nullable)getSharedApplication;
++ (UIApplication *)getSharedApplication;
 
-+ (UIImage *)imageForName:(NSString *)name type:(NSString *)type;
++ (UIImage *)getImageForName:(NSString *)name;
 
-+ (UIColor *_Nullable)ct_colorWithHexString:(NSString *_Nonnull)string;
-+ (UIColor *_Nullable)ct_colorWithHexString:(NSString *_Nonnull)string withAlpha:(CGFloat)alpha;
++ (UIColor *)ct_colorWithHexString:(NSString *)string;
++ (UIColor *)ct_colorWithHexString:(NSString *)string withAlpha:(CGFloat)alpha;
 
 @end
 

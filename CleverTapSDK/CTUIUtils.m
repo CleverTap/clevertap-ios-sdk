@@ -17,9 +17,8 @@
     return [NSBundle bundleForClass:bundleClass];
 }
 
-+ (UIImage *)imageForName:(NSString *)name type:(NSString *)type {
-    NSString *imagePath = [[self bundle] pathForResource:name ofType:type];
-    return [UIImage imageWithContentsOfFile:imagePath];
++ (UIImage *)getImageForName:(NSString *)name {
+    return [UIImage imageNamed:name inBundle:[self bundle] compatibleWithTraitCollection:nil];
 }
 
 + (UIApplication *)getSharedApplication {
@@ -30,11 +29,11 @@
     return nil;
 }
 
-+ (UIColor * _Nullable)ct_colorWithHexString:(NSString *)string {
++ (UIColor *)ct_colorWithHexString:(NSString *)string {
     return  [self ct_colorWithHexString:string withAlpha:1.0];
 }
 
-+ (UIColor * _Nullable)ct_colorWithHexString:(NSString *)string withAlpha:(CGFloat)alpha {
++ (UIColor *)ct_colorWithHexString:(NSString *)string withAlpha:(CGFloat)alpha {
     
     if (![string isKindOfClass:[NSString class]] || [string length] == 0) {
         return [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:1.0f];
