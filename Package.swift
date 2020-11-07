@@ -5,7 +5,8 @@ import PackageDescription
 let package = Package(
     name: "CleverTapSDK",
     platforms: [
-        .iOS(.v9)
+        .iOS(.v9),
+        .tvOS(.v9)
     ],
     products: [
         .library(
@@ -22,10 +23,7 @@ let package = Package(
             path: "CleverTapSDK",
             exclude: [
                 "Info.plist",
-                "tvOS-Info.plist",
-                "CHANGELOG.md",
-                "LICENSE",
-                "README.md"
+                "tvOS-Info.plist"
             ],
             resources: [
                 .copy("DigiCertGlobalRootCA.crt"),
@@ -34,6 +32,7 @@ let package = Package(
                 .process("InApps/resources"),
                 .process("Inbox/resources")
             ],
+            publicHeadersPath: "include",
             cSettings: [
                 .headerSearchPath("./"),
                 .headerSearchPath("ABTesting/"),
@@ -56,7 +55,6 @@ let package = Package(
                 .headerSearchPath("Inbox/cells"),
                 .headerSearchPath("Inbox/config"),
                 .headerSearchPath("Inbox/controllers"),
-                .headerSearchPath("Inbox/images"),
                 .headerSearchPath("Inbox/models"),
                 .headerSearchPath("Inbox/views"),
                 .headerSearchPath("ProductConfig/"),
@@ -67,14 +65,12 @@ let package = Package(
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("AVKit"),
                 .linkedFramework("CoreData"),
-                .linkedFramework("CoreLocation"),
                 .linkedFramework("CoreServices"),
                 .linkedFramework("CoreTelephony"),
                 .linkedFramework("ImageIO"),
                 .linkedFramework("QuartzCore"),
                 .linkedFramework("Security"),
                 .linkedFramework("SystemConfiguration"),
-                .linkedFramework("UIKit"),
                 .linkedFramework("UserNotifications"),
                 .linkedFramework("WebKit")
             ]
