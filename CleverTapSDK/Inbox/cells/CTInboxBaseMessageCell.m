@@ -208,14 +208,14 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage*)getVolumeOnImage {
     if (volumeOnImage == nil) {
-        volumeOnImage = [CTUIUtils getImageForName:@"volume_on.png"];
+        volumeOnImage = [CTUIUtils getImageForName:@"ct_volume_on.png"];
     }
     return volumeOnImage;
 }
 
 - (UIImage*)getVolumeOffImage {
     if (volumeOffImage == nil) {
-        volumeOffImage = [CTUIUtils getImageForName:@"volume_off.png"];
+        volumeOffImage = [CTUIUtils getImageForName:@"ct_volume_off.png"];
     }
     return volumeOffImage;
 }

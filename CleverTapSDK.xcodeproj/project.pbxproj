@@ -17,8 +17,8 @@
 		070229AD22084B0B0093CA41 /* ct_default_portrait_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */; };
 		07053B7221E653E70085B44A /* UIView+CTToast.h in Headers */ = {isa = PBXBuildFile; fileRef = 07053B7021E653E70085B44A /* UIView+CTToast.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07053B7321E653E70085B44A /* UIView+CTToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 07053B7121E653E70085B44A /* UIView+CTToast.m */; };
-		070BB5CC21E70BC000428DEE /* volume_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CA21E70BBF00428DEE /* volume_on.png */; };
-		070BB5CD21E70BC000428DEE /* volume_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CB21E70BC000428DEE /* volume_off.png */; };
+		070BB5CC21E70BC000428DEE /* ct_volume_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CA21E70BBF00428DEE /* ct_volume_on.png */; };
+		070BB5CD21E70BC000428DEE /* ct_volume_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 070BB5CB21E70BC000428DEE /* ct_volume_off.png */; };
 		070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */; };
 		070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */; };
 		070CDC0F2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */; };
@@ -377,8 +377,8 @@
 		070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_default_portrait_image.png; sourceTree = "<group>"; };
 		07053B7021E653E70085B44A /* UIView+CTToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+CTToast.h"; sourceTree = "<group>"; };
 		07053B7121E653E70085B44A /* UIView+CTToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+CTToast.m"; sourceTree = "<group>"; };
-		070BB5CA21E70BBF00428DEE /* volume_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = volume_on.png; sourceTree = "<group>"; };
-		070BB5CB21E70BC000428DEE /* volume_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = volume_off.png; sourceTree = "<group>"; };
+		070BB5CA21E70BBF00428DEE /* ct_volume_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_volume_on.png; sourceTree = "<group>"; };
+		070BB5CB21E70BC000428DEE /* ct_volume_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_volume_off.png; sourceTree = "<group>"; };
 		070CDC0A2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~iphoneland.xib"; sourceTree = "<group>"; };
 		070CDC0C2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~iphoneland.xib"; sourceTree = "<group>"; };
 		070CDC0E2223C51C00CA787D /* CTHalfInterstitialViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~iphoneland.xib"; sourceTree = "<group>"; };
@@ -979,25 +979,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		490971D32553CD4500B6DBD4 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				071EB48C217F6427008F0FAB /* ic_play@1x.png */,
-				071EB496217F6427008F0FAB /* ic_play@3x.png */,
-				071EB497217F6427008F0FAB /* ic_play@2x.png */,
-				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
-				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
-				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
-				070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */,
-				070229A6220831CB0093CA41 /* ct_default_landscape_image.png */,
-				070229A7220831CB0093CA41 /* ct_default_video.png */,
-				079701E42180A055008BF668 /* ct_default_audio.png */,
-				070BB5CB21E70BC000428DEE /* volume_off.png */,
-				070BB5CA21E70BBF00428DEE /* volume_on.png */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 		495EA4BE25554718006CADFF /* resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -1010,8 +991,20 @@
 				072F9E3C21B1368000BC6313 /* CTInboxIconMessageCell~port.xib */,
 				07238E42221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib */,
 				07B9452D219EA34300D4C542 /* CleverTapInboxViewController.xib */,
-				07B94538219EA34300D4C542 /* Inbox.xcdatamodeld */,
 				07D86D3822255087009EE610 /* CTCarouselImageView.xib */,
+				07B94538219EA34300D4C542 /* Inbox.xcdatamodeld */,
+				071EB48C217F6427008F0FAB /* ic_play@1x.png */,
+				071EB497217F6427008F0FAB /* ic_play@2x.png */,
+				071EB496217F6427008F0FAB /* ic_play@3x.png */,
+				071EB492217F6427008F0FAB /* ic_pause@1x.png */,
+				071EB493217F6427008F0FAB /* ic_pause@2x.png */,
+				071EB495217F6427008F0FAB /* ic_pause@3x.png */,
+				070229AC22084B0B0093CA41 /* ct_default_portrait_image.png */,
+				070229A6220831CB0093CA41 /* ct_default_landscape_image.png */,
+				070229A7220831CB0093CA41 /* ct_default_video.png */,
+				079701E42180A055008BF668 /* ct_default_audio.png */,
+				070BB5CB21E70BC000428DEE /* ct_volume_off.png */,
+				070BB5CA21E70BBF00428DEE /* ct_volume_on.png */,
 			);
 			path = resources;
 			sourceTree = "<group>";
@@ -1104,7 +1097,6 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
-				490971D32553CD4500B6DBD4 /* Resources */,
 				D0BD7598241760A30006EE55 /* ProductConfig */,
 				D0D4C9E62414CBA30029477E /* FeatureFlags */,
 				0701E9572372AD550034AAC2 /* DisplayUnit */,
@@ -1489,7 +1481,7 @@
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
 				070229AD22084B0B0093CA41 /* ct_default_portrait_image.png in Resources */,
 				0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib in Resources */,
-				070BB5CC21E70BC000428DEE /* volume_on.png in Resources */,
+				070BB5CC21E70BC000428DEE /* ct_volume_on.png in Resources */,
 				071EB500217F6427008F0FAB /* CTHeaderViewController~ipad.xib in Resources */,
 				071EB4F7217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib in Resources */,
 				071EB4E6217F6427008F0FAB /* ic_play@2x.png in Resources */,
@@ -1506,7 +1498,7 @@
 				071EB4E4217F6427008F0FAB /* ic_pause@3x.png in Resources */,
 				07D0D08F2223F24E000D5686 /* CTFooterViewController~iphoneland.xib in Resources */,
 				07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */,
-				070BB5CD21E70BC000428DEE /* volume_off.png in Resources */,
+				070BB5CD21E70BC000428DEE /* ct_volume_off.png in Resources */,
 				07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,

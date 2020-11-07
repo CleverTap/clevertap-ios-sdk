@@ -28,7 +28,6 @@ let package = Package(
             resources: [
                 .copy("DigiCertGlobalRootCA.crt"),
                 .copy("DigiCertSHA2SecureServerCA.crt"),
-                .process("Resources"),
                 .process("InApps/resources"),
                 .process("Inbox/resources")
             ],
