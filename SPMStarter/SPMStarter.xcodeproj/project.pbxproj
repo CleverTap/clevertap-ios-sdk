@@ -16,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		495EA54B2556E3C8006CADFF /* SPMStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SPMStarter.entitlements; sourceTree = "<group>"; };
 		49F9E6902552CF9000EF2E5C /* SPMStarter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMStarter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F9E6932552CF9000EF2E5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		49F9E6972552CF9000EF2E5C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -56,6 +57,7 @@
 		49F9E6922552CF9000EF2E5C /* SPMStarter */ = {
 			isa = PBXGroup;
 			children = (
+				495EA54B2556E3C8006CADFF /* SPMStarter.entitlements */,
 				49F9E6932552CF9000EF2E5C /* AppDelegate.swift */,
 				49F9E6972552CF9000EF2E5C /* ViewController.swift */,
 				49F9E6992552CF9000EF2E5C /* Main.storyboard */,
@@ -290,6 +292,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SPMStarter/SPMStarter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = SPMStarter/Info.plist;
@@ -310,6 +313,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SPMStarter/SPMStarter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
 				INFOPLIST_FILE = SPMStarter/Info.plist;
