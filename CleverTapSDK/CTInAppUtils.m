@@ -41,7 +41,7 @@ static NSDictionary *_inAppTypeMap;
 }
 
 + (NSString *)getXibNameForControllerName:(NSString *)controllerName {
-#if CLEVERTAP_NO_INAPP_SUPPORT
+#if CLEVERTAP_NO_INAPP_SUPPORT || TARGET_OS_TV
     return nil;
 #else    
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
