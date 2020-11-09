@@ -102,6 +102,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1210;
 				LastUpgradeCheck = 1210;
+				ORGANIZATIONNAME = CleverTap;
 				TargetAttributes = {
 					49F9E68F2552CF9000EF2E5C = {
 						CreatedOnToolsVersion = 12.1;
@@ -362,7 +363,7 @@
 			repositoryURL = "https://github.com/CleverTap/clevertap-ios-sdk";
 			requirement = {
 				kind = revision;
-				revision = 520dbc2b84c959c3444c68e5fdae743a78c43c05;
+				revision = 015616e5eabf81b853263e3f97022c9e0bbcff4a;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
