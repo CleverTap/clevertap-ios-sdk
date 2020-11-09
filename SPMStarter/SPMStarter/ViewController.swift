@@ -21,6 +21,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         registerAppInbox()
         initializeAppInbox()
         eventTableView.tableFooterView = UIView()
+        eventTableView.backgroundColor = UIColor.white
     }
 
     override func didReceiveMemoryWarning() {
@@ -71,6 +72,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell")!
         cell.textLabel?.text = self.eventList[indexPath.row]
         cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
+        cell.backgroundColor = UIColor.white
+        cell.textLabel?.textColor = UIColor.black
         return cell
     }
     
@@ -202,6 +205,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         // config the style of App Inbox Controller
         let style = CleverTapInboxStyleConfig.init()
         style.title = "App Inbox"
+        style.navigationTintColor = UIColor.white
+        style.navigationBarTintColor = UIColor(hexString: "#0842B7")
+        style.messageTags = ["Promotions"]
         if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
             self.present(navigationController, animated: true, completion: nil)

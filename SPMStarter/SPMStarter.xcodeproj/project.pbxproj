@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		495EA5492556E0F4006CADFF /* CleverTapSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 495EA5482556E0F4006CADFF /* CleverTapSDK */; };
+		495EA5722559156D006CADFF /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495EA5712559156D006CADFF /* Utilities.swift */; };
 		49F9E6942552CF9000EF2E5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F9E6932552CF9000EF2E5C /* AppDelegate.swift */; };
 		49F9E6982552CF9000EF2E5C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F9E6972552CF9000EF2E5C /* ViewController.swift */; };
 		49F9E69B2552CF9000EF2E5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E6992552CF9000EF2E5C /* Main.storyboard */; };
@@ -17,6 +18,7 @@
 
 /* Begin PBXFileReference section */
 		495EA54B2556E3C8006CADFF /* SPMStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SPMStarter.entitlements; sourceTree = "<group>"; };
+		495EA5712559156D006CADFF /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		49F9E6902552CF9000EF2E5C /* SPMStarter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMStarter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F9E6932552CF9000EF2E5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		49F9E6972552CF9000EF2E5C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 			children = (
 				495EA54B2556E3C8006CADFF /* SPMStarter.entitlements */,
 				49F9E6932552CF9000EF2E5C /* AppDelegate.swift */,
+				495EA5712559156D006CADFF /* Utilities.swift */,
 				49F9E6972552CF9000EF2E5C /* ViewController.swift */,
 				49F9E6992552CF9000EF2E5C /* Main.storyboard */,
 				49F9E69C2552CF9000EF2E5C /* Assets.xcassets */,
@@ -144,6 +147,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				495EA5722559156D006CADFF /* Utilities.swift in Sources */,
 				49F9E6982552CF9000EF2E5C /* ViewController.swift in Sources */,
 				49F9E6942552CF9000EF2E5C /* AppDelegate.swift in Sources */,
 			);
