@@ -65,7 +65,7 @@ let package = Package(
                 .linkedFramework("AVKit"),
                 .linkedFramework("CoreData"),
                 .linkedFramework("CoreServices"),
-                .linkedFramework("CoreTelephony"),
+                .linkedFramework("CoreTelephony", .when(platforms: [.iOS])),
                 .linkedFramework("ImageIO"),
                 .linkedFramework("QuartzCore"),
                 .linkedFramework("Security"),
