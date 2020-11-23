@@ -5,8 +5,7 @@ import PackageDescription
 let package = Package(
     name: "CleverTapSDK",
     platforms: [
-        .iOS(.v9),
-        .tvOS(.v9)
+        .iOS(.v9)
     ],
     products: [
         .library(
