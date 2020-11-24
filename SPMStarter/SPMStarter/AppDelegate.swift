@@ -24,6 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         return true
     }
     
+    
     // MARK: - Setup Push Notifications
     
     func registerForPush() {

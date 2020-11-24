@@ -23,7 +23,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         eventTableView.tableFooterView = UIView()
         eventTableView.backgroundColor = UIColor.white
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -62,6 +62,7 @@ extension ViewController {
         }))
     }
 }
+
 extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -167,7 +168,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             "Category": "Mens Accessories",
             "Price": 59.99,
             "Date": NSDate()
-            ] as [String : Any]
+        ] as [String : Any]
         CleverTap.sharedInstance()?.recordEvent("Product viewed", withProps: props)
     }
     
@@ -177,25 +178,25 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             "Amount": 300,
             "Payment mode": "Credit Card",
             "Charged ID": 24052013
-            ] as [String : Any]
+        ] as [String : Any]
         
         let item1 = [
             "Category": "books",
             "Book name": "The Millionaire next door",
             "Quantity": 1
-            ] as [String : Any]
+        ] as [String : Any]
         
         let item2 = [
             "Category": "books",
             "Book name": "Achieving inner zen",
             "Quantity": 1
-            ] as [String : Any]
+        ] as [String : Any]
         
         let item3 = [
             "Category": "books",
             "Book name": "Chuck it, let's do it",
             "Quantity": 5
-            ] as [String : Any]
+        ] as [String : Any]
         
         CleverTap.sharedInstance()?.recordChargedEvent(withDetails: chargeDetails, andItems: [item1, item2, item3])
     }
@@ -213,6 +214,5 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             self.present(navigationController, animated: true, completion: nil)
         }
     }
-    
 }
 
