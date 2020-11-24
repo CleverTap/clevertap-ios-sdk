@@ -38,7 +38,7 @@ static const float kPageControlViewHeight = 30.f;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
-            carouselItemView  = [[[CTInAppUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
+            carouselItemView  = [[[CTUIUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
             carouselItemView.backgroundColor = [UIColor clearColor];
             [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
@@ -46,9 +46,9 @@ static const float kPageControlViewHeight = 30.f;
             carouselItemView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
             carouselItemView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
             carouselItemView.titleLabel.text = content.title;
-            carouselItemView.titleLabel.textColor = content.titleColor ? [CTInAppUtils ct_colorWithHexString:content.titleColor] : [CTInAppUtils ct_colorWithHexString:@"#000000"];
+            carouselItemView.titleLabel.textColor = content.titleColor ? [CTUIUtils ct_colorWithHexString:content.titleColor] : [CTUIUtils ct_colorWithHexString:@"#000000"];
             carouselItemView.bodyLabel.text = content.message;
-            carouselItemView.bodyLabel.textColor = content.messageColor ? [CTInAppUtils ct_colorWithHexString:content.messageColor] :  [CTInAppUtils ct_colorWithHexString:@"#7E7E7E"];
+            carouselItemView.bodyLabel.textColor = content.messageColor ? [CTUIUtils ct_colorWithHexString:content.messageColor] : [CTUIUtils ct_colorWithHexString:@"#7E7E7E"];
         }
         
         UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -105,7 +105,7 @@ static const float kPageControlViewHeight = 30.f;
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = 0;
         if (@available(iOS 11.0, *)) {
-            UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+            UIWindow *window = [CTUIUtils getSharedApplication].keyWindow;
             margins = window.safeAreaInsets.left;
         }
         CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;

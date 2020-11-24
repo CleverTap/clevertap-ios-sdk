@@ -1,7 +1,7 @@
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 #import "CTObjectSelector.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @interface CTObjectFilter: NSObject
 
@@ -320,7 +320,7 @@
         if (presentingViewController) {
             [result addObject:presentingViewController];
         }
-        UIWindow *keyWindow = [CTInAppResources getSharedApplication].keyWindow;
+        UIWindow *keyWindow = [CTUIUtils getSharedApplication].keyWindow;
         if (keyWindow.rootViewController == obj) {
             [result addObject:keyWindow];
         }

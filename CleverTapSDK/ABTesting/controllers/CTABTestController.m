@@ -3,7 +3,7 @@
 #import "CleverTap.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTWebSocket.h"
 #import "CTConstants.h"
 #import "CTVar.h"
@@ -372,7 +372,7 @@ typedef void (^CTABTestingOperationBlock)(void);
     _session = [[CTEditorSession alloc] init];
     [self sendHandshake];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[CTInAppResources getSharedApplication] setIdleTimerDisabled:YES];
+        [[CTUIUtils getSharedApplication] setIdleTimerDisabled:YES];
     });
     
 }
@@ -386,7 +386,7 @@ typedef void (^CTABTestingOperationBlock)(void);
 
 - (void)handleSessionEnded {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[CTInAppResources getSharedApplication] setIdleTimerDisabled:NO];
+        [[CTUIUtils getSharedApplication] setIdleTimerDisabled:NO];
     });
     self.sessionEnded = YES;
     CTABVariant *variant = [_session sessionObjectForKey:kCTSessionVariantKey];
@@ -564,7 +564,7 @@ typedef void (^CTABTestingOperationBlock)(void);
         self.testConnectGestureRecognizer.cancelsTouchesInView = NO;
         self.testConnectGestureRecognizer.numberOfTouchesRequired = 2;
         self->_testConnectGestureRecognizer.enabled = self->_config.enableUIEditor;
-        [[CTInAppResources getSharedApplication].keyWindow addGestureRecognizer:self.testConnectGestureRecognizer];
+        [[CTUIUtils getSharedApplication].keyWindow addGestureRecognizer:self.testConnectGestureRecognizer];
         CleverTapLogDebug(self->_config.logLevel, @"%@: Added ABTest Editor connection gesture recognizer, enabled state is %@", self, self->_testConnectGestureRecognizer.enabled ? @"YES": @"NO");
     });
 }

@@ -1,6 +1,8 @@
+
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "CTCarouselImageView.h"
-#import "CTInAppUtils.h"
+#import "CTUIUtils.h"
+#import "CTInboxUtils.h"
 
 static const float kCaptionHeight = 20.f;
 static const float kSubCaptionHeight = 54.f;
@@ -110,7 +112,7 @@ static float captionHeight = 0.f;
     self.captionLabel.textAlignment = NSTextAlignmentLeft;
     self.captionLabel.adjustsFontSizeToFitWidth = NO;
     self.captionLabel.font = [UIFont boldSystemFontOfSize:15.f];
-    self.captionLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.captionColor];
+    self.captionLabel.textColor = [CTUIUtils ct_colorWithHexString:self.captionColor];
     self.captionLabel.text = self.caption;
     [self addSubview:self.captionLabel];
     
@@ -119,19 +121,17 @@ static float captionHeight = 0.f;
     self.subcaptionLabel.textAlignment = NSTextAlignmentLeft;
     self.subcaptionLabel.adjustsFontSizeToFitWidth = NO;
     self.subcaptionLabel.font = [UIFont systemFontOfSize:13.f];
-    self.subcaptionLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.subcaptionColor];
+    self.subcaptionLabel.textColor = [CTUIUtils ct_colorWithHexString:self.subcaptionColor];
     self.subcaptionLabel.text = self.subcaption;
     [self addSubview:self.subcaptionLabel];
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    return [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    return [CTUIUtils getImageForName:@"ct_default_landscape_image.png"];
 }
 
 - (UIImage *)getPortraitPlaceHolderImage {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    return [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+    return [CTUIUtils getImageForName:@"ct_default_portrait_image.png"];
 }
 
 - (void)loadImage {

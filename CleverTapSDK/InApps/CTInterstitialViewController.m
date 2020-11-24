@@ -1,7 +1,7 @@
 
 #import "CTInterstitialViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTAVPlayerViewController.h"
@@ -36,7 +36,7 @@
 
 - (void)loadView {
     [super loadView];
-    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTInterstitialViewController class])] owner:self options:nil];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils getXibNameForControllerName:NSStringFromClass([CTInterstitialViewController class])] owner:self options:nil];
 }
 
 - (void)viewDidLoad {
@@ -58,7 +58,7 @@
 - (void)layoutNotification {
     
     self.view.backgroundColor = [UIColor clearColor];
-    self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
+    self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
     
     if ([UIScreen mainScreen].bounds.size.height == 480) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -163,14 +163,14 @@
     if (self.notification.title) {
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
         self.titleLabel.backgroundColor = [UIColor clearColor];
-        self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.titleColor];
+        self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
     }
     
     if (self.notification.message) {
         self.bodyLabel.textAlignment = NSTextAlignmentCenter;
         self.bodyLabel.backgroundColor = [UIColor clearColor];
-        self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.messageColor];
+        self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.text = self.notification.message;
     }
     

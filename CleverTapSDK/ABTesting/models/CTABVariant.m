@@ -2,7 +2,7 @@
 #import "CTABVariant.h"
 #import "CTSwizzler.h"
 #import "CTConstants.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTObjectSelector.h"
 #import "CTValueTransformers.h"
 #import "CTEditorImageCache.h"
@@ -421,7 +421,7 @@ static NSMapTable *originalCache;
             NSArray *invocations = [[self class] executeSelector:self.selector
                                                         withArgs:originalArgs
                                                           onPath:self.objPath
-                                                        fromRoot:[CTInAppResources getSharedApplication].keyWindow.rootViewController
+                                                        fromRoot:[CTUIUtils getSharedApplication].keyWindow.rootViewController
                                                           toLeaf:nil];
             
             for (NSInvocation *invocation in invocations) {
@@ -472,7 +472,7 @@ static NSMapTable *originalCache;
         NSArray *cacheInvocations = [[self class] executeSelector:cacheSelector
                                                          withArgs:self.args
                                                            onPath:self.objPath
-                                                         fromRoot:[CTInAppResources getSharedApplication].keyWindow.rootViewController
+                                                         fromRoot:[CTUIUtils getSharedApplication].keyWindow.rootViewController
                                                            toLeaf:view];
         for (NSInvocation *invocation in cacheInvocations) {
             if (![originalCache objectForKey:invocation.target]) {

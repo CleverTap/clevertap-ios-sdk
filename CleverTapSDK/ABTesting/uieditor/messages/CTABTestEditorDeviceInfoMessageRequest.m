@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTDeviceInfo.h"
 #import "CTABTestEditorDeviceInfoMessageRequest.h"
 #import "CTABTestEditorDeviceInfoMessageResponse.h"
@@ -41,7 +41,7 @@ NSString *const CTABTestEditorDeviceInfoMessageRequestType = @"device_info_reque
     }
     
     dispatch_sync(dispatch_get_main_queue(), ^{
-        UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+        UIInterfaceOrientation orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
         BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
         if  (landscape) {
             deviceInfoMessageResponse.deviceWidth = [self deviceHeight];

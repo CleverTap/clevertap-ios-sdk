@@ -3,7 +3,7 @@
 #import "CTApplicationStateSerializer.h"
 #import "CTObjectSerializerConfig.h"
 #import "CTObjectIdentityProvider.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 NSString * const CTABTestEditorSnapshotMessageRequestType = @"snapshot_request";
 
@@ -31,7 +31,7 @@ static NSString * const kSnapshot_hierarchyKey = @"snapshot_hierarchy";
     }
     
     CTApplicationStateSerializer *serializer = [[CTApplicationStateSerializer alloc]
-                                                initWithApplication:[CTInAppResources getSharedApplication]
+                                                initWithApplication:[CTUIUtils getSharedApplication]
                                                 configuration:serializerConfig objectIdentityProvider:objectIdentityProvider];
     
     CTABTestEditorSnapshotMessageResponse *snapshotMessage = [CTABTestEditorSnapshotMessageResponse messageWithOptions:nil];
@@ -61,7 +61,7 @@ static NSString * const kSnapshot_hierarchyKey = @"snapshot_hierarchy";
 }
 
 - (NSString *)orientation {
-    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+    UIInterfaceOrientation orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
     BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
     if (landscape) {
         return @"landscape";
