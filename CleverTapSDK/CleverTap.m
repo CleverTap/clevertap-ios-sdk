@@ -1642,7 +1642,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.inAppFCManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received in-app notification from push payload: %@", self, notification);
         
-        NSString *jsonString = notification[@"wzrk_inapp"];
+        NSString *jsonString = [self jsonObjectToString:notification[@"wzrk_inapp"]];
+        
+        if (!jsonString || [jsonString isEqual:@""]) {
+            // TODO: update error debug log handling
+            NSLog(@"Error: %@", @"some parse error message");
+            return NO;
+        }
         
         NSDictionary *inapp = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
                                                               options:0
@@ -4279,18 +4285,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     @try {
         CleverTapLogDebug(self.config.logLevel, @"%@: Received inbox message from push payload: %@", self, notification);
         
-        NSDictionary *msg;
-        id data = notification[@"wzrk_inbox"];
-        if ([data isKindOfClass:[NSString class]]) {
-            NSString *jsonString = (NSString*)data;
-            msg = [NSJSONSerialization
-                   JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
-                   options:0
-                   error:nil];
-            
-        } else if ([data isKindOfClass:[NSDictionary class]]) {
-            msg = (NSDictionary*)data;
+        NSString *jsonString = [self jsonObjectToString:notification[@"wzrk_inbox"]];
+        
+        if (!jsonString || [jsonString isEqual:@""]) {
+            // TODO: update error debug log handling
+            NSLog(@"Error: %@", @"some parse error message");
+            return NO;
         }
+        
+        NSDictionary *msg = [NSJSONSerialization
+               JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+               options:0
+               error:nil];
         
         if (!msg) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Unable to decode inbox message from push payload: %@", self, notification);
@@ -4670,7 +4676,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     @try {
         CleverTapLogDebug(self.config.logLevel, @"%@: Received display unit from push payload: %@", self, notification);
         
-        NSString *jsonString = notification[@"wzrk_adunit"];
+        NSString *jsonString = [self jsonObjectToString:notification[@"wzrk_adunit"]];
+        
+        if (!jsonString || [jsonString isEqual:@""]) {
+            // TODO: update error debug log handling
+            NSLog(@"Error: %@", @"some parse error message");
+            return NO;
+        }
         
         NSDictionary *displayUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
                                                                         options:0
