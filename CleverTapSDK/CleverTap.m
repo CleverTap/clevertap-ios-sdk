@@ -1645,8 +1645,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSString *jsonString = [self jsonObjectToString:notification[@"wzrk_inapp"]];
         
         if (!jsonString || [jsonString isEqual:@""]) {
-            // TODO: update error debug log handling
-            NSLog(@"Error: %@", @"some parse error message");
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to serialise inapp notification JSON", self);
             return NO;
         }
         
@@ -4288,15 +4287,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSString *jsonString = [self jsonObjectToString:notification[@"wzrk_inbox"]];
         
         if (!jsonString || [jsonString isEqual:@""]) {
-            // TODO: update error debug log handling
-            NSLog(@"Error: %@", @"some parse error message");
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to serialise inbox message JSON", self);
             return NO;
         }
         
-        NSDictionary *msg = [NSJSONSerialization
-               JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
-               options:0
-               error:nil];
+        NSDictionary *msg = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                                                            options:0
+                                                              error:nil];
         
         if (!msg) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Unable to decode inbox message from push payload: %@", self, notification);
@@ -4679,8 +4676,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSString *jsonString = [self jsonObjectToString:notification[@"wzrk_adunit"]];
         
         if (!jsonString || [jsonString isEqual:@""]) {
-            // TODO: update error debug log handling
-            NSLog(@"Error: %@", @"some parse error message");
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to serialise display unit JSON", self);
             return NO;
         }
         
