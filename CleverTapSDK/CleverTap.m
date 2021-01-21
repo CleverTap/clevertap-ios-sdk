@@ -2095,7 +2095,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [self saveARP:update];
-    [self processDiscardedEventsRequest:arp];
+    [self processDiscardedEventsRequest:update];
     [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
 }
 
