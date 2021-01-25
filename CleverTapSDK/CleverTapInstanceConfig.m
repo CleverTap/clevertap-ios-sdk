@@ -41,7 +41,6 @@
         _isDefaultInstance = isDefault;
         
         CTPlistInfo *plist = [CTPlistInfo sharedInstance];
-        _useIDFA = isDefault ? plist.useIDFA : NO;
         _disableAppLaunchedEvent = isDefault ? plist.disableAppLaunchedEvent : NO;
         _useCustomCleverTapId = isDefault ? plist.useCustomCleverTapId : NO;
         _enablePersonalization = YES;
@@ -57,7 +56,6 @@
     copy.analyticsOnly = self.analyticsOnly;
     copy.disableAppLaunchedEvent = self.disableAppLaunchedEvent;
     copy.enablePersonalization = self.enablePersonalization;
-    copy.useIDFA = self.useIDFA;
     copy.logLevel = self.logLevel;
     copy.enableABTesting = self.enableABTesting;
     copy.enableUIEditor = self.enableUIEditor;

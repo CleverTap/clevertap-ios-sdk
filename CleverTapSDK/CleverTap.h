@@ -16,6 +16,7 @@
 #define CLEVERTAP_NO_INBOX_SUPPORT 1
 #define CLEVERTAP_NO_AB_SUPPORT 1
 #define CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT 1
+#define CLEVERTAP_NO_GEOFENCE_SUPPORT 1
 #endif
 
 @protocol CleverTapSyncDelegate;
@@ -276,6 +277,18 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
  @param location       CLLocationCoordiate2D
  */
 - (void)setLocation:(CLLocationCoordinate2D)location;
+
+/*!
+ 
+ @abstract
+ Posted when the CleverTap Geofences are updated.
+ 
+ @discussion
+ Useful for accessing the CleverTap geofences
+ 
+ */
+extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
+
 
 /*!
  @method
@@ -1108,7 +1121,60 @@ This sets the CleverTapPushNotificationDelegate.
  */
 + (CleverTapLogLevel)getDebugLevel;
 
+/*!
+@method
+
+@abstract
+Set the Library name for Auxiliary SDKs
+
+@discussion
+Call this to method to set library name in the Auxiliary SDK
+*/
 - (void)setLibrary:(NSString * _Nonnull)name;
+
+/*!
+ @method
+ 
+ @abstract
+ Store the users location for geofences on the default shared CleverTap instance.
+ 
+ @discussion
+ Optional.  If you're application is collection the user location you can pass it to CleverTap
+ for, among other things, more fine-grained geo-targeting and segmentation purposes.
+ 
+ @param location       CLLocationCoordiate2D
+ */
+- (void)setLocationForGeofences:(CLLocationCoordinate2D)location withPluginVersion:(NSString *_Nullable)version;
+
+/*!
+ @method
+ 
+ @abstract
+ Record the error for geofences
+ 
+ @param error       NSError
+ */
+- (void)didFailToRegisterForGeofencesWithError:(NSError *_Nullable)error;
+
+/*!
+ @method
+ 
+ @abstract
+ Record Geofence Entered Event.
+ 
+ @param geofenceDetails      details of the Geofence
+ */
+- (void)recordGeofenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails;
+
+/*!
+ @method
+ 
+ @abstract
+ Record Geofence Exited Event.
+ 
+ @param geofenceDetails       details of the Geofence
+ */
+- (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS

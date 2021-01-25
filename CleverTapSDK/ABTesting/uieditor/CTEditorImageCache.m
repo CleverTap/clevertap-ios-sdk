@@ -24,13 +24,8 @@ static SDImageCache *cache;
 + (UIImage *)getImage:(NSString *)imageUrl withScale:(CGFloat)scale andSize:(CGSize)size {
     UIImage *image = [cache imageFromCacheForKey:imageUrl];
     if (!image) {
-        NSURLResponse *response;
-        NSError *error;
-        NSMutableURLRequest *request = [NSMutableURLRequest
-                                        requestWithURL:[NSURL URLWithString:imageUrl] cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:20];
-        NSData *imageData = [NSURLConnection
-                             sendSynchronousRequest:request
-                             returningResponse:&response error:&error];
+        NSError *error = nil;
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrl] options:NSDataReadingMappedIfSafe error:&error];
         if (imageData) {
             image = [UIImage imageWithData:imageData scale:fminf(1.0, scale)];
             if (image) {

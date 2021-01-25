@@ -24,12 +24,10 @@ NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
 NSString *const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
 NSString *const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
 
-static BOOL advertisingTrackingEnabled;
 static BOOL _wifi;
 
 static NSRecursiveLock *deviceIDLock;
 static NSString *_idfv;
-static NSString *_idfa;
 static NSString *_sdkVersion;
 static NSString *_appVersion;
 static NSString *_bundleId;
@@ -55,7 +53,6 @@ SCNetworkReachabilityRef _reachability;
 
 @property (strong, readwrite) NSString *deviceId;
 @property (strong, readwrite) NSString *fallbackDeviceId;
-@property (strong, readwrite) NSString *advertisingIdentitier;
 @property (strong, readwrite) NSString *vendorIdentifier;
 @property (strong, readonly) NSObject *networkInfo;
 @property (strong, readwrite) NSMutableArray *validationErrors;
@@ -75,7 +72,6 @@ static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQu
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _idfa = [self getIDFA];
         _idfv = [self getIDFV];
         deviceIDLock = [NSRecursiveLock new];
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
@@ -143,36 +139,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return identifier;
 }
 
-+ (NSString *)getIDFA {
-    NSString *identifier;
-    @try {
-        Class asim = NSClassFromString(@"ASIdentifierManager");
-        if (!asim) {
-            return nil;
-        }
-        SEL smSelector = NSSelectorFromString(@"sharedManager");
-        id sm = ((id (*)(id, SEL)) [asim methodForSelector:smSelector])(asim, smSelector);
-        
-        SEL ateSelector = NSSelectorFromString(@"isAdvertisingTrackingEnabled");
-        
-        advertisingTrackingEnabled = ((BOOL(*)(id, SEL)) [sm methodForSelector:ateSelector])(sm, ateSelector);
-        
-        SEL aiSelector = NSSelectorFromString(@"advertisingIdentifier");
-        NSUUID *uuid = ((NSUUID *(*)(id, SEL)) [sm methodForSelector:aiSelector])(sm, aiSelector);
-        identifier = [uuid UUIDString];
-        
-        if (identifier && ![identifier isEqualToString:@"00000000-0000-0000-0000-000000000000"]) {
-            identifier = [[identifier stringByReplacingOccurrencesOfString:@"-" withString:@""] lowercaseString];
-        } else {
-            identifier = nil;
-        }
-    } @catch (NSException *e) {
-        CleverTapLogStaticInternal(@"Error checking availability of IDFA: %@", e.debugDescription);
-    }
-    
-    return identifier;
-}
-
 + (NSString*)getPlatformName {
     size_t size;
     sysctlbyname("hw.machine", NULL, &size, NULL, 0);
@@ -187,10 +153,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     @try {
         [deviceIDLock lock];
         
-        _idfa = _idfa ? _idfa : [[self class] getIDFA];
-        if (self.config.useIDFA && _idfa && [_idfa length] > 5) {
-            self.advertisingIdentitier = _idfa;
-        }
         _idfv = _idfv ? _idfv : [[self class] getIDFV];
         if (_idfv && [_idfv length] > 5) {
             self.vendorIdentifier = _idfv;
@@ -221,11 +183,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             [self forceUpdateCustomDeviceID:cleverTapID];
             return;
         }
-        
-        if (self.advertisingIdentitier) {
-            [self forceUpdateDeviceID:[NSString stringWithFormat:@"-g%@", self.advertisingIdentitier]];
-            return;
-        }
+    
         if (self.vendorIdentifier) {
             [self forceUpdateDeviceID:[NSString stringWithFormat:@"-v%@", self.vendorIdentifier]];
             return;
@@ -548,10 +506,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (BOOL)wifi {
     return _wifi;
-}
-
-- (BOOL)advertisingTrackingEnabled {
-    return advertisingTrackingEnabled;
 }
 
 - (NSObject*)networkInfo {

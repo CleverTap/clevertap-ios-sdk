@@ -1,3 +1,4 @@
+
 #import "CTInboxBaseMessageCell.h"
 
 static UIImage *volumeOffImage;
@@ -268,7 +269,6 @@ static NSString * const kOrientationPortrait = @"p";
             [layer removeFromSuperlayer];
         }
     }
-    
     [self.avPlayerContainerView.layer addSublayer:self.avPlayerLayer];
     
     [self hideControls:NO];
