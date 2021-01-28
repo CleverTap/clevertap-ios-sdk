@@ -40,7 +40,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             print(string ?? "")
         }
         
-        //        inboxRegister()
+                inboxRegister()
         //                addWebview()
         //        addAdUnit()
         //        self.navigationController?.navigationItem.leftBarButtonItem = nil
@@ -62,7 +62,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         CleverTap.sharedInstance()?.getDictionaryOfIntegerVariable(withName: "dictOfintVar", defaultValue: ["key1": 1, "key2": 2])
         CleverTap.sharedInstance()?.getDictionaryOfStringVariable(withName: "dictOfstringVar", defaultValue: ["key1": "a", "key2": "b"])
         
-        //        profilePush()
+//        profilePush()
         guard let foo = CleverTap.sharedInstance()?.getStringVariable(withName: "foo", defaultValue: "defaultFooValue") else {return}
         guard let int = CleverTap.sharedInstance()?.getIntegerVariable(withName: "intFoo", defaultValue: 12) else {return}
         print(foo)
@@ -145,23 +145,25 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     // MARK: - Register Inbox
     
     func inboxRegister() {
+        
         CleverTap.sharedInstance()?.registerInboxUpdatedBlock(({
             let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
             let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
             DispatchQueue.main.async {
                 self.inboxButton.isHidden = false;
                 self.inboxButton.setTitle("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread", for: .normal)
+                print("Show Inbox:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread")
             }
         }))
     }
     
     func profilePush() {
         let profile: Dictionary<String, AnyObject> = [
-            "Email": "clevertap@clevertap.com" as AnyObject,
+            "Email": "adi0018@clevertap.com" as AnyObject,
             "Fruit": "orange" as AnyObject,
             "City": "delhi" as AnyObject
         ]
-        CleverTap.sharedInstance()?.profilePush(profile)
+        CleverTap.sharedInstance()?.onUserLogin(profile)
     }
     
     // MARK: - Action Button
@@ -170,7 +172,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //        CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: message.messageId ?? "")
         //        CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: message.messageId ?? "")
         // CleverTap.sharedInstance()?.markReadInboxMessage(forID: message.messageId ?? "")
-        //        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
+        CleverTap.sharedInstance()?.deleteInboxMessage(forID: message.messageId ?? "")
         print(message, index, buttonIndex)
     }
     
@@ -232,9 +234,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
-        
+        profilePush()
         CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
-        inAppEvents()
+//        inAppEvents()
     }
     
     @IBAction func localNotification(_ sender: Any) {

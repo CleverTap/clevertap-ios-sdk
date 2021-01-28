@@ -17,18 +17,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
-//        CleverTap.setCredentialsWithAccountID("R6W-797-865Z", token: "aca-062", region: "sk1-staging-5")
-//        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
-//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-//        CleverTap.setCredentialsWithAccountID("445-488-575Z", andToken: "bb4-544")
-//        CleverTap.sharedInstance()?.recordEvent("Aditi react native")
-//        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
-//        CleverTap.sharedInstance()?.recordEvent("Aditi ct1")
-//        CleverTap.sharedInstance()?.recordEvent("Event")
-//        CleverTap.sharedInstance()?.recordEvent("aditi")
-
-//        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        //        CleverTap.setCredentialsWithAccountID("R6W-797-865Z", token: "aca-062", region: "sk1-staging-5")
+        //        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
+        //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        //        CleverTap.setCredentialsWithAccountID("445-488-575Z", andToken: "bb4-544")
+        //        CleverTap.sharedInstance()?.recordEvent("Aditi react native")
+        //        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")
+        //        CleverTap.sharedInstance()?.recordEvent("Aditi ct1")
+        //        CleverTap.sharedInstance()?.recordEvent("Event")
+        //        CleverTap.sharedInstance()?.recordEvent("aditi")
+        
+        //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
         CleverTap.setUIEditorConnectionEnabled(true)
         
         DispatchQueue.main.async {
@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         
         CleverTap.autoIntegrate()
-//        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting((1 != 0))
+        //        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting((1 != 0))
         
         CleverTap.setDebugLevel(4)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
@@ -44,7 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
         CleverTap.sharedInstance()?.productConfig.delegate = self;
         
-//        CleverTap.sharedInstance()?.recordEvent("aditi")
+        //        CleverTap.sharedInstance()?.recordEvent("aditi")
         
         registerPush()
         CleverTap.sharedInstance()?.registerStringVariable(withName: "foo")
@@ -122,8 +122,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-//        CleverTap.sharedInstance()?.handleNotification(withData: response.notification.request.content.userInfo)
-//        CleverTap.sharedInstance()?.recordNotificationClickedEvent(withData: response.notification.request.content.userInfo)
+        //        CleverTap.sharedInstance()?.handleNotification(withData: response.notification.request.content.userInfo)
+        //        CleverTap.sharedInstance()?.recordNotificationClickedEvent(withData: response.notification.request.content.userInfo)
         NSLog("%@: did receive notification response: %@", self.description, response.notification.request.content.userInfo)
         completionHandler()
     }
@@ -140,11 +140,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func application(application: UIApplication, openURL url: NSURL,
-                             sourceApplication: String?, annotation: AnyObject) -> Bool {
+                     sourceApplication: String?, annotation: AnyObject) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url as URL, sourceApplication: sourceApplication)
         return true
     }
-
+    
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
         return true
