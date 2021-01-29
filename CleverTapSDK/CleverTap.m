@@ -1496,18 +1496,30 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     CleverTapLogDebug(self.config.logLevel, @"%@: handling push notification: %@", self, notification);
     
-    // check to see whether the push includes a test in-app notification, if so don't process further
-    if ([self didHandleInAppTestFromPushNotificaton:notification]) return;
-    
-    // check to see whether the push includes a test inbox message, if so don't process further
-    if ([self didHandleInboxMessageTestFromPushNotificaton:notification]) return;
-    
-    // check to see whether the push includes a test display unit, if so don't process further
-    if ([self didHandleDisplayUnitTestFromPushNotificaton:notification]) return;
+    // check to see whether the push includes a test in-app notification, test inbox message or test display unit, if so don't process further
+    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
+        // remove unknown json attributes
+        NSMutableDictionary *testPayload = [NSMutableDictionary new];
+        for (NSString *key in [notification allKeys]) {
+            if ([CTUtils doesString:key startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:key startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]) {
+                testPayload[key] = notification[key];
+            }
+        }
+        if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
+            return;
+        }
+        if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
+            return;
+        }
+        if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
+            return;
+        }
+        CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in push notification: %@", self, notification);
+        return;
+    }
     
     // notify application with push notification custom extras
     [self _notifyPushNotificationTapped:notification];
-    
     
     dispatch_async(dispatch_get_main_queue(), ^{
         // determine application state
