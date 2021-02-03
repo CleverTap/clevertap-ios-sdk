@@ -1,10 +1,6 @@
 ---
 name: "\U0001F680 Feature request"
 about: Suggest an idea or feature request for the CleverTap iOS SDK
-title: ''
-labels: ''
-assignees: ''
-
 ---
 
 **Is your feature request related to a problem? Please describe.**
