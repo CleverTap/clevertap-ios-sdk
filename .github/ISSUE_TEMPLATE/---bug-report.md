@@ -1,10 +1,6 @@
 ---
 name: "\U0001F41E Bug report"
 about: Report a bug or regression to help us improve
-title: ''
-labels: ''
-assignees: ''
-
 ---
 
 **Describe the bug**
