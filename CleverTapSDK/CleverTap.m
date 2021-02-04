@@ -1544,15 +1544,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
             return;
-        }
-        if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
+        } else if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
+            return;
+        } else if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
+            return;
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
             return;
         }
-        if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
-            return;
-        }
-        CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
-        return;
     }
 #endif
 }
