@@ -1497,26 +1497,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogDebug(self.config.logLevel, @"%@: handling push notification: %@", self, notification);
     
     // check to see whether the push includes a test in-app notification, test inbox message or test display unit, if so don't process further
-    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
-        // remove unknown json attributes
-        NSMutableDictionary *testPayload = [NSMutableDictionary new];
-        for (NSString *key in [notification allKeys]) {
-            if ([CTUtils doesString:key startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:key startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]) {
-                testPayload[key] = notification[key];
-            }
-        }
-        if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
-            return;
-        }
-        if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
-            return;
-        }
-        if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
-            return;
-        }
-        CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in push notification: %@", self, notification);
-        return;
-    }
+    [self _checkAndHandleTestPushPayload:notification];
     
     // notify application with push notification custom extras
     [self _notifyPushNotificationTapped:notification];
@@ -1549,6 +1530,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     });
 #endif
+}
+
+- (void)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
+    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
+        // remove unknown json attributes
+        NSMutableDictionary *testPayload = [NSMutableDictionary new];
+        for (NSString *key in [notification allKeys]) {
+            if ([CTUtils doesString:key startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:key startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]) {
+                testPayload[key] = notification[key];
+            }
+        }
+        if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
+            return;
+        }
+        if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
+            return;
+        }
+        if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
+            return;
+        }
+        CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
+        return;
+    }
 }
 
 - (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
