@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 3.9.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.2) (February 5, 2020)
+
+##### Fixed
+- Removes unknown JSON attributes from Test Push Payload
+- Makes `model` property atomic (thread-safe)
+
 ### [Version 3.9.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.1) (October 8, 2020)
 
 ##### Added
