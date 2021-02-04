@@ -1,6 +1,6 @@
 ---
 name: "\U0001F680 Feature request"
-about: Suggest an idea or feature request for the CleverTap iOS SDK
+about: Suggest an idea, propose improvement, start discussion or put a feature request for the CleverTap iOS SDK
 ---
 
 **Is your feature request related to a problem? Please describe.**
