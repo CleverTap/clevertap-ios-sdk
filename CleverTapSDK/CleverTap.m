@@ -1533,6 +1533,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
+#if !defined(CLEVERTAP_TVOS)
     if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
         // remove unknown json attributes
         NSMutableDictionary *testPayload = [NSMutableDictionary new];
@@ -1553,6 +1554,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
         return;
     }
+#endif
 }
 
 - (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
