@@ -1532,8 +1532,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (BOOL)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
 #if !defined(CLEVERTAP_TVOS)
+- (BOOL)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
     if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
         // remove unknown json attributes
         NSMutableDictionary *testPayload = [NSMutableDictionary new];
@@ -1554,8 +1554,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     return NO;
-#endif
 }
+#endif
 
 - (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
     if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
