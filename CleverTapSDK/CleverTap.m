@@ -1497,7 +1497,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogDebug(self.config.logLevel, @"%@: handling push notification: %@", self, notification);
     
     // check to see whether the push includes a test in-app notification, test inbox message or test display unit, if so don't process further
-    [self _checkAndHandleTestPushPayload:notification];
+    if ([self _checkAndHandleTestPushPayload:notification]) return;
     
     // notify application with push notification custom extras
     [self _notifyPushNotificationTapped:notification];
@@ -1532,7 +1532,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (void)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
+- (BOOL)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
 #if !defined(CLEVERTAP_TVOS)
     if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
         // remove unknown json attributes
@@ -1543,16 +1543,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }
         }
         if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
-            return;
+            return YES;
         } else if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
-            return;
+            return YES;
         } else if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
-            return;
+            return YES;
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
-            return;
+            return YES;
         }
     }
+    return NO;
 #endif
 }
 
