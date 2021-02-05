@@ -1550,7 +1550,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return YES;
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
-            return YES;
+            return NO;
         }
     }
     return NO;
