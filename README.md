@@ -94,7 +94,7 @@ Also, follow steps to link SDWebImage into your project
   - Inside of your project folder, clone SDWebImage repository recursively.
     
       ```
-      git clone https://github.com/SDWebImage/SDWebImage.git"
+      git clone https://github.com/SDWebImage/SDWebImage.git
       ```
       
   - Add SDWebImage.xcodeproj into your Project, by dragging the SDWebImage.xcodeproj you cloned under your main Project file.
