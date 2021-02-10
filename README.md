@@ -82,23 +82,19 @@ Also, follow steps to link SDWebImage into your project
 
 ### Manually
 
-- Download the latest framework [release](https://github.com/CleverTap/clevertap-ios-sdk/releases). Unzip the download.
-
+- Clone the CleverTap iOS SDK repository recursively:
+   ```
+    git clone --recursive https://github.com/CleverTap/clevertap-ios-sdk.git
+    ```
 - Add the CleverTapSDK.xcodeproj to your Xcode Project, by dragging the CleverTapSDK.xcodeproj under the main project file.
 
-- Embed the framework. Select your app.xcodeproj file. Under "General", add the CleverTapSDK framework as an embedded binary.
+- Embed the framework. Select your app.xcodeproj file, open "General", add the CleverTapSDK framework as an embedded binary.
 
 - **SDWebImage Integration:** This library provides an async image downloader with cache support. We are using the SDWebImage cache library in our engagement channels. For example, CleverTap App Inbox uses SDWebImage for image cache and async loading for the image, another example would be CleverTap In-Apps that provides support to display gifs. 
 
-  Please follow the steps below for installing and integrating SDWebImage:
-  - Inside of your project folder, clone SDWebImage repository recursively.
-    
-      ```
-      git clone https://github.com/SDWebImage/SDWebImage.git
-      ```
-      
-  - Add SDWebImage.xcodeproj into your Project, by dragging the SDWebImage.xcodeproj you cloned under your main Project file.
-  - Select your app.xcodeproj file, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", and add the SDWebImage.framework as an embedded binary.
+  Please follow the steps below for integrating SDWebImage:
+  - Navigate to the cloned CleverTap iOS SDK repository and from Vendors directory, add SDWebImage.xcodeproj into your Project, by dragging the SDWebImage.xcodeproj under your main Project file.
+  - Embed SDWebImage framework. Select your app.xcodeproj file, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", and add the SDWebImage.framework as an embedded binary.
 
 
 ## 🚀 Integration
