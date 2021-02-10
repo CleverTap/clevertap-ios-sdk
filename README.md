@@ -98,7 +98,7 @@ Also, follow steps to link SDWebImage into your project
       ```
       
   - Add SDWebImage.xcodeproj into your Project, by dragging the SDWebImage.xcodeproj you cloned under your main Project file.
-  - Select your app.xcodeproj file, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", and add the SDWebImage.framework aas an embedded binary.
+  - Select your app.xcodeproj file, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", and add the SDWebImage.framework as an embedded binary.
 
 
 ## 🚀 Integration
