@@ -92,9 +92,9 @@ Also, follow steps to link SDWebImage into your project
 
   Please follow the steps below for integrating SDWebImage:
   - Navigate to the `Vendors/SDWebImage` directory found under the cloned CleverTap iOS SDK repository. 
-  - Drag-n-drop `SDWebImage.xcodeproj` into the main file.
+  - Drag-n-drop `SDWebImage.xcodeproj` into the main Project file.
   
-- Navigate to the project application’s target settings, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", and add `CleverTapSDK.framework` and `SDWebImage.framework` as an embedded binary.
+- Navigate to the project application’s target settings, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", add `CleverTapSDK.framework` and `SDWebImage.framework` as an embedded binary.
   
 
 
