@@ -80,7 +80,9 @@ Also, follow steps to link SDWebImage into your project
 * Select clevertap-ios-sdk under Checkouts
 * Drag the built `SDWebImage.framework` from Vendors into your Frameworks and Libraries
 
-### Manually
+### Manual
+| :bulb:  We strongly recommend that you implement the SDK via a [CocoaPod](http://cocoapods.org/). However, if you are unable to do so you may complete installation manually using our manual integration instructions below. |
+|-----------------------------------------|
 
 - Clone the CleverTap iOS SDK repository recursively:
    ```
@@ -96,7 +98,6 @@ Also, follow steps to link SDWebImage into your project
   
 - Navigate to the project application’s target settings, open "General", click the "+" button under the "Frameworks, Libraries, and Embedded Content", add `CleverTapSDK.framework` and `SDWebImage.framework` as an embedded binary.
   
-
 
 ## 🚀 Integration
 
