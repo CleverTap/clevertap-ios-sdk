@@ -88,8 +88,8 @@ static NSManagedObjectContext *privateContext;
         CleverTapLogStaticInternal(@"%@: updating messages: %@", self.user, messages);
         BOOL haveUpdates = [self.user updateMessages:messages forContext:privateContext];
         if (haveUpdates) {
-            [self notifyUpdate];
             [self _save];
+            [self notifyUpdate];
         }
     }];
 }
@@ -105,8 +105,8 @@ static NSManagedObjectContext *privateContext;
         CTMessageMO *message = [self _messageForId:messageId];
         if (message) {
             [message setValue:@YES forKey:@"isRead"];
-            [self notifyUpdate];
             [self _save];
+            [self notifyUpdate];
         }
     }];
 }
@@ -192,8 +192,8 @@ static NSManagedObjectContext *privateContext;
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
         }
-        [self notifyUpdate];
         [self _save];
+        [self notifyUpdate];
     }];
 }
 
