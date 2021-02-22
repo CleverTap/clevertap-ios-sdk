@@ -2659,6 +2659,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)pushValidationResult:(CTValidationResult *)vr {
+    if (!vr) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: no object in the validation result", self);
+        return;
+    }
     [self.pendingValidationResults addObject:vr];
     if (self.pendingValidationResults && [self.pendingValidationResults count] > 50) {
         [self.pendingValidationResults removeObjectAtIndex:0];

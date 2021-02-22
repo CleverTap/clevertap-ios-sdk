@@ -65,6 +65,10 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         //        profilePush()
         guard let foo = CleverTap.sharedInstance()?.getStringVariable(withName: "foo", defaultValue: "defaultFooValue") else {return}
         guard let int = CleverTap.sharedInstance()?.getIntegerVariable(withName: "intFoo", defaultValue: 12) else {return}
+        
+        
+        CleverTap.sharedInstance()?.profileSetMultiValues(["CleverTapTestApp"], forKey: "App Launched")
+        
         print(foo)
         print(int)
         
