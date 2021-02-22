@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<header><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'></header>
+<html>
+    <head>
+        <title></title>
+    </head>
+    <body style="background-color:#085ce7; font-size: 20px; ">
+        <h2><center>CleverTap Webview</center></h2><br></br>
+        <button onclick="myFunction()">Record Event</button>
+        <p id="demo"> </p>
+        <script> function myFunction() {
+            document.getElementById("demo").innerHTML = 'Hey, whats up?';
+            var props = {foo: 'xyz', lang: 'French'};
+            var message = { action:'recordEventWithProps', event:'CT Webview event', properties: props};
+            
+            if(window.webkit
+                     && window.webkit.messageHandlers
+                     && window.webkit.messageHandlers.clevertap){
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        } </script></body>
+</html>

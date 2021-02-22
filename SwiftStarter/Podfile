@@ -1,0 +1,42 @@
+
+platform :ios, '10.0'
+
+target 'SwiftStarter' do
+  
+  use_frameworks!
+  
+  pod 'CleverTap-iOS-SDK', :path =>'../'
+  
+  target 'NotificationService' do
+    pod 'CTNotificationService'
+  end
+  
+  target 'SwiftStarterTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+  
+  target 'SwiftStarterUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+  
+  target 'SwiftTvOS' do
+    platform :tvos, '9.0'
+    pod 'CleverTap-iOS-SDK', :path =>'../'
+  end
+  
+  target 'SwiftWatchOS Extension' do
+    platform :watchos, '3.0'
+    pod 'CleverTapWatchOS'
+  end
+  
+  post_install do |installer_representation|
+    installer_representation.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', 'CLEVERTAP_HOST_WATCHOS=1']
+      end
+    end
+  end
+  
+end
