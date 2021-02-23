@@ -30,6 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
         CleverTap.setUIEditorConnectionEnabled(true)
+        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
         
         DispatchQueue.main.async {
             CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
