@@ -45,6 +45,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.featureFlags.delegate = self;
         CleverTap.sharedInstance()?.productConfig.delegate = self;
         
+        
+        
 //        CleverTap.sharedInstance()?.recordEvent("aditi")
         
         registerPush()

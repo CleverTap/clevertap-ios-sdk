@@ -237,8 +237,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     @IBAction func testButtonTapped(_ sender: Any) {
         NSLog("test button tapped")
         
-        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
-        inAppEvents()
+        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
+
+        
+//        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
+//        inAppEvents()
     }
     
     @IBAction func localNotification(_ sender: Any) {

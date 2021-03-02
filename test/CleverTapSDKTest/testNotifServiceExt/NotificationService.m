@@ -1,5 +1,5 @@
 #import "NotificationService.h"
-//@import CleverTapSDK;
+@import CleverTapSDK;
 
 @interface NotificationService ()
 
@@ -14,6 +14,9 @@
 //    [CleverTap setDebugLevel:CleverTapLogDebug+22];
 //    [CleverTap autoIntegrate];
 //    [[CleverTap sharedInstance] recordEvent:@"testEventFromAppex"];
+    NSLog(@"%@", request.content.userInfo);
+    [[CleverTap sharedInstance] recordNotificationViewedEventWithData:request.content.userInfo] ;
+    [CleverTap setDebugLevel:4];
     [super didReceiveNotificationRequest:request withContentHandler:contentHandler];
     
 }
