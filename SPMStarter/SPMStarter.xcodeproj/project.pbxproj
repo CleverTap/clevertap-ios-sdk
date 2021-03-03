@@ -363,7 +363,7 @@
 			repositoryURL = "https://github.com/CleverTap/clevertap-ios-sdk";
 			requirement = {
 				kind = revision;
-				revision = b4f9d390a447928d3fa878a35fabed3b003a2728;
+				revision = d71eda48fc7f2ae460ce5481bd8360fd826f6ada;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

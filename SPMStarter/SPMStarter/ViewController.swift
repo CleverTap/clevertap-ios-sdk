@@ -203,17 +203,19 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func showAppInbox() {
         
-        // config the style of App Inbox Controller
+        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: getAppInboxStyleConfig(), andDelegate: self) {
+            let navigationController = UINavigationController.init(rootViewController: inboxController)
+            self.present(navigationController, animated: true, completion: nil)
+        }
+    }
+    
+    func getAppInboxStyleConfig() -> CleverTapInboxStyleConfig {
         let style = CleverTapInboxStyleConfig.init()
         style.title = "App Inbox"
         style.navigationTintColor = UIColor.white
         style.navigationBarTintColor = UIColor(hexRGB: "#0842B7")
-                                               
         style.messageTags = ["Promotions"]
-        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
-            let navigationController = UINavigationController.init(rootViewController: inboxController)
-            self.present(navigationController, animated: true, completion: nil)
-        }
+        return style
     }
 }
 
