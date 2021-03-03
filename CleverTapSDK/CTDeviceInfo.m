@@ -439,22 +439,21 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)radio {
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
     if (!_radio) {
+        __block NSString *radioValue;
         if (@available(iOS 12, *)) {
             NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
             [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
                 if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
-                    _radio = [NSString stringWithString:[value substringFromIndex:23]];
+                    radioValue = [NSString stringWithString:[value substringFromIndex:23]];
                 }
             }];
         } else {
             NSString *radio = _networkInfo.currentRadioAccessTechnology;
             if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
-                _radio = [radio substringFromIndex:23];
+                radioValue = [radio substringFromIndex:23];
             }
         }
-        if (!_radio) {
-            _radio = @"";
-        }
+        _radio =  radioValue ?: @"";
         CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
     }
 #endif
