@@ -9,23 +9,17 @@ import UIKit
 
 extension UIColor {
     
-    public convenience init?(hex: String) {
-        let r, g, b: CGFloat
-       
-        if hex.hasPrefix("#") {
-            let start = hex.index(hex.startIndex, offsetBy: 1)
-            let hexColor = String(hex[start...])
-            
-            let scanner = Scanner(string: hexColor)
-            var hexNumber: UInt32 = 0
-            if scanner.scanHexInt32(&hexNumber) {
-                r = CGFloat((hexNumber & 0xff0000) >> 16) / 255.0
-                g = CGFloat((hexNumber & 0xff00) >> 8) / 255.0
-                b = CGFloat((hexNumber & 0xff) >> 0) / 255.0
-                self.init(red: r, green: g, blue: b, alpha: 1.0)
-                return
-            }
+    convenience init?(hexRGBA: String?) {
+        guard let rgba = hexRGBA, let val = Int(rgba.replacingOccurrences(of: "#", with: ""), radix: 16) else {
+            return nil
         }
-        return nil
+        self.init(red: CGFloat((val >> 24) & 0xff) / 255.0, green: CGFloat((val >> 16) & 0xff) / 255.0, blue: CGFloat((val >> 8) & 0xff) / 255.0, alpha: CGFloat(val & 0xff) / 255.0)
+    }
+    
+    convenience init?(hexRGB: String?) {
+        guard let rgb = hexRGB else {
+            return nil
+        }
+        self.init(hexRGBA: rgb + "ff") // Add alpha = 1.0
     }
 }

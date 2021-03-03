@@ -207,7 +207,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         let style = CleverTapInboxStyleConfig.init()
         style.title = "App Inbox"
         style.navigationTintColor = UIColor.white
-        style.navigationBarTintColor = UIColor(hex: "#0842B7")
+        style.navigationBarTintColor = UIColor(hexRGB: "#0842B7")
                                                
         style.messageTags = ["Promotions"]
         if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
