@@ -1,7 +1,6 @@
 framework module CleverTapSDK {    
     header "CleverTap.h"
     header "CleverTap+Inbox.h"
-    header "CleverTap+ABTesting.h"
     header "CleverTap+FeatureFlags.h"
     header "CleverTap+ProductConfig.h"
     header "CleverTap+DisplayUnit.h"
