@@ -64,7 +64,7 @@ Then run `pod install`.
 
 ### [Swift Package Manager](https://swift.org/package-manager/)
 
-Starting with the 3.9.2 release, CleverTap supports installation via Swift Package Manager.
+Starting with the 3.9.3 release, CleverTap supports installation via Swift Package Manager.
 
 To add the CleverTap package to your Xcode project, Select File > Swift Packages > Add Package Dependency and enter the repository URL - `https://github.com/CleverTap/clevertap-ios-sdk.git`
 
