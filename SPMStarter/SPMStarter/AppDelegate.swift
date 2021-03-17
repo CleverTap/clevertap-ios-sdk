@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // register for push notifications
         registerForPush()
         // Configure and init the default shared CleverTap instance (add CleverTap Account ID and Account Token in your .plist file)
-        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue)
+        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue + 3)
         CleverTap.autoIntegrate()
         return true
     }
