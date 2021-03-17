@@ -57,8 +57,6 @@
     copy.disableAppLaunchedEvent = self.disableAppLaunchedEvent;
     copy.enablePersonalization = self.enablePersonalization;
     copy.logLevel = self.logLevel;
-    copy.enableABTesting = self.enableABTesting;
-    copy.enableUIEditor = self.enableUIEditor;
     copy.useCustomCleverTapId = self.useCustomCleverTapId;
     copy.beta = self.beta;
     return copy;
