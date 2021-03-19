@@ -17,10 +17,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+//         CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
 //        CleverTap.setCredentialsWithAccountID("R6W-797-865Z", token: "aca-062", region: "sk1-staging-5")
 //        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "sk1-staging-2")
-//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
 //        CleverTap.setCredentialsWithAccountID("445-488-575Z", andToken: "bb4-544")
 //        CleverTap.sharedInstance()?.recordEvent("Aditi react native")
 //        CleverTap.sharedInstance()?.recordEvent("Aditi new instance")

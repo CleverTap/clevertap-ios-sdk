@@ -4027,14 +4027,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-- (NSUInteger)getInboxMessageCount {
+- (NSInteger)getInboxMessageCount {
     if (![self _isInboxInitialized]) {
         return -1;
     }
     return self.inboxController.count;
 }
 
-- (NSUInteger)getInboxMessageUnreadCount {
+- (NSInteger)getInboxMessageUnreadCount {
     if (![self _isInboxInitialized]) {
         return -1;
     }
@@ -4275,7 +4275,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         NSDate *expireDate = [now dateByAddingTimeInterval:(24 * 60 * 60)];
         NSTimeInterval expireEpochSeconds = [expireDate timeIntervalSince1970];
-        NSUInteger expireTime = (long)expireEpochSeconds;
+        NSInteger expireTime = (long)expireEpochSeconds;
         
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];
