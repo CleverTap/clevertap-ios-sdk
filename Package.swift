@@ -34,21 +34,21 @@ let package = Package(
             cSettings: [
                 .headerSearchPath("./"),
                 .headerSearchPath("DisplayUnit/"),
-                .headerSearchPath("DisplayUnit/controllers"),
                 .headerSearchPath("DisplayUnit/models"),
+                .headerSearchPath("DisplayUnit/controllers"),
                 .headerSearchPath("FeatureFlags/"),
-                .headerSearchPath("FeatureFlags/controllers"),
                 .headerSearchPath("FeatureFlags/models"),
+                .headerSearchPath("FeatureFlags/controllers"),
+                .headerSearchPath("ProductConfig/"),
+                .headerSearchPath("ProductConfig/models"),
+                .headerSearchPath("ProductConfig/controllers"),
                 .headerSearchPath("InApps/"),
                 .headerSearchPath("Inbox/"),
                 .headerSearchPath("Inbox/cells"),
                 .headerSearchPath("Inbox/config"),
                 .headerSearchPath("Inbox/controllers"),
                 .headerSearchPath("Inbox/models"),
-                .headerSearchPath("Inbox/views"),
-                .headerSearchPath("ProductConfig/"),
-                .headerSearchPath("ProductConfig/models"),
-                .headerSearchPath("ProductConfig/controllers")
+                .headerSearchPath("Inbox/views")
             ],
             linkerSettings: [
                 .linkedFramework("AVFoundation"),

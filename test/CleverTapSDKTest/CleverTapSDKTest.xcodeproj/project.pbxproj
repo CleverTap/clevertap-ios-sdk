@@ -30,6 +30,8 @@
 		490C764224536154009E5D66 /* ProductConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 490C764124536154009E5D66 /* ProductConfigVC.swift */; };
 		491267C424BD98C300E5B278 /* GeofenceVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491267C324BD98C300E5B278 /* GeofenceVC.swift */; };
 		49C189942428C7C40003E4D4 /* RemoteConfigDefaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49C189932428C7C40003E4D4 /* RemoteConfigDefaults.plist */; };
+		49CEBC9C2604B7B6009F7D52 /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; };
+		49CEBC9D2604B7B6009F7D52 /* CleverTapSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D014B8A320E2F20B001E0780 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D014B8A220E2F20B001E0780 /* NotificationService.m */; };
 		D014B8A720E2F20B001E0780 /* testNotifServiceExt.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D014B89F20E2F20B001E0780 /* testNotifServiceExt.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D014B8AC20E2F216001E0780 /* CleverTapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A66267207EE60A00B403F3 /* CleverTapSDK.framework */; };
@@ -80,6 +82,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				49CEBC9D2604B7B6009F7D52 /* CleverTapSDK.framework in Embed Frameworks */,
 				07B8758122E9906000328982 /* SDWebImage.framework in Embed Frameworks */,
 				D014B92C20E30C68001E0780 /* CTNotificationService.framework in Embed Frameworks */,
 			);
@@ -194,6 +197,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49CEBC9C2604B7B6009F7D52 /* CleverTapSDK.framework in Frameworks */,
 				D0AF3F2A21A8C81A00398780 /* libsqlite3.tbd in Frameworks */,
 				07B8758022E9906000328982 /* SDWebImage.framework in Frameworks */,
 			);

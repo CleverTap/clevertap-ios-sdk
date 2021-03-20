@@ -208,15 +208,13 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
         NSLog("test button tapped")
         
 //        CleverTap.sharedInstance()?.recordEvent("Added To Cart")
-
-        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"adi343@clevertap.com", "identity":"3549035"])
-
+//        CleverTap.sharedInstance()?.onUserLogin(["foo2":"bar2", "Email":"adi343@clevertap.com", "identity":"3549035"])
 //        CleverTap.sharedInstance()?.recordEvent("Cover Portrait")
-//        inAppEvents()
+        inAppEvents()
     }
     
     @IBAction func localNotification(_ sender: Any) {
-        
+
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3,
                                                         repeats: false)
         let content = UNMutableNotificationContent()
