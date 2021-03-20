@@ -10,8 +10,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTInboxController : NSObject
 
 @property (nonatomic, assign, readonly) BOOL isInitialized;
-@property (nonatomic, assign, readonly) NSUInteger count;
-@property (nonatomic, assign, readonly) NSUInteger unreadCount;
+@property (nonatomic, assign, readonly) NSInteger count;
+@property (nonatomic, assign, readonly) NSInteger unreadCount;
 @property (nonatomic, assign, readonly, nullable) NSArray<NSDictionary *> *messages;
 @property (nonatomic, assign, readonly, nullable) NSArray<NSDictionary *> *unreadMessages;
 

@@ -120,12 +120,12 @@ static NSManagedObjectContext *privateContext;
     return [msg toJSON];
 }
 
-- (NSUInteger)count {
+- (NSInteger)count {
     if (!self.isInitialized) return -1;
     return [self.messages count];
 }
 
-- (NSUInteger)unreadCount {
+- (NSInteger)unreadCount {
     if (!self.isInitialized) return -1;
     return [self.unreadMessages count];
 }
