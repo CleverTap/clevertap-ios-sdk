@@ -34,7 +34,7 @@ Details about the different installation methods
 1. [CocoaPods](/docs/CocoaPods.md)
 2. [Swift Package Manager](/docs/SwiftPackageManager.md)
 3. [Carthage](/docs/Carthage.md)
-4. [Manual](/docs/Manual.md)
+4. [Manual Installation](/docs/Manual.md)
 
 ## 🚀 Integration
 
