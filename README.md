@@ -29,6 +29,13 @@ Following are required for using CleverTap iOS SDK -
 
 ## 🎉 Installation
 
+Details about the different installation methods
+
+1. CocoaPods
+2. [Swift Package Manager](/docs/SwiftPackageManager.md)
+3. Carthage
+4. Manual
+
 ### [CocoaPods](https://cocoapods.org)
 
 For your iOS, App Extension target(s) and tvOS app, add the following to your Podfile:
@@ -61,12 +68,6 @@ For your iOS, App Extension target(s) and tvOS app, add the following to your Po
   ```
 
 Then run `pod install`.
-
-### [Swift Package Manager](https://swift.org/package-manager/)
-
-Starting with the 3.9.3 release, CleverTap supports installation via Swift Package Manager.
-
-To add the CleverTap package to your Xcode project, Select File > Swift Packages > Add Package Dependency and enter the repository URL - `https://github.com/CleverTap/clevertap-ios-sdk.git`
 
 ### [Carthage](https://github.com/Carthage/Carthage)
 
