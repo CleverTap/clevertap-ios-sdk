@@ -255,7 +255,7 @@ static const int kMaxTags = 3;
                 segmentedControl.tintColor = _config.tabSelectedBgColor;
             }
         }
-        if (_config.tabSelectedBgColor) {
+        if (_config.tabSelectedTextColor) {
             [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
         }
         if (_config.tabUnSelectedTextColor) {
