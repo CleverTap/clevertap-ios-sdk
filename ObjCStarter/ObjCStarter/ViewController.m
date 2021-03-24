@@ -207,6 +207,7 @@
     CleverTapInboxStyleConfig *style = [[CleverTapInboxStyleConfig alloc] init];
     style.messageTags = @[@"tag1", @"tag2"];
     style.tabSelectedBgColor = [UIColor blueColor];
+    style.tabSelectedTextColor = [UIColor whiteColor];
     CleverTapInboxViewController *inboxController = [[CleverTap sharedInstance] newInboxViewControllerWithConfig:style andDelegate:self];
     if (inboxController) {
         UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:inboxController];
