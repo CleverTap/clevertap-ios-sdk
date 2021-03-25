@@ -27,7 +27,7 @@
     [super viewDidLayoutSubviews];
     CGFloat topLength = self.topLayoutGuide.length;
     [[NSLayoutConstraint constraintWithItem: self.containerView
-                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
+                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual
                                      toItem:self.view attribute:NSLayoutAttributeTop
                                  multiplier:1.0 constant:topLength] setActive:YES];
 }
