@@ -117,7 +117,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  This method returns the total number of inbox messages for the user.
  */
 
-- (NSUInteger)getInboxMessageCount;
+- (NSInteger)getInboxMessageCount;
 
 /*!
  @method
@@ -126,7 +126,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  This method returns the total number of unread inbox messages for the user.
  */
 
-- (NSUInteger)getInboxMessageUnreadCount;
+- (NSInteger)getInboxMessageUnreadCount;
 
 /*!
  @method
