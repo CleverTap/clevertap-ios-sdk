@@ -40,7 +40,7 @@
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         CGFloat topLength = self.topLayoutGuide.length;
         [[NSLayoutConstraint constraintWithItem: self.closeButton
-                                      attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
+                                      attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual
                                          toItem:self.containerView
                                       attribute:NSLayoutAttributeTop
                                      multiplier:1.0 constant:topLength] setActive:YES];
