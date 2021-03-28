@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <sys/sysctl.h>
-#include <sys/types.h>
+#import <sys/utsname.h>
 
 #import "CleverTap.h"
 #import "CTConstants.h"
@@ -140,13 +139,11 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 + (NSString *)getPlatformName {
-    size_t size;
-    sysctlbyname("hw.machine", NULL, &size, NULL, 0);
-    char *machine = malloc(size);
-    sysctlbyname("hw.machine", machine, &size, NULL, 0);
-    NSString *platform = [NSString stringWithUTF8String:machine];
-    free(machine);
-    return platform;
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    
+    return [NSString stringWithCString:systemInfo.machine
+                             encoding:NSUTF8StringEncoding];
 }
 
 - (void)initDeviceID:(NSString *)cleverTapID {
