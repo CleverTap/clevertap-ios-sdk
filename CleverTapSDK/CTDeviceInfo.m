@@ -142,8 +142,13 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     struct utsname systemInfo;
     uname(&systemInfo);
     
-    return [NSString stringWithCString:systemInfo.machine
-                             encoding:NSUTF8StringEncoding];
+    NSString *platform = [NSString stringWithCString:systemInfo.machine
+                                            encoding:NSUTF8StringEncoding];
+    if (!platform || platform.length <= 0) {
+        CleverTapLogStaticDebug(@"Failed to fetch platform name from utsname.");
+        return nil;
+    }
+    return platform;
 }
 
 - (void)initDeviceID:(NSString *)cleverTapID {
