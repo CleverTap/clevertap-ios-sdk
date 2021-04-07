@@ -7,12 +7,12 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "SDImageIOAnimatedCoder.h"
+#import "SDImageCoder.h"
 
 /**
  Built in coder using ImageIO that supports APNG encoding/decoding
  */
-@interface SDImageAPNGCoder : SDImageIOAnimatedCoder <SDProgressiveImageCoder, SDAnimatedImageCoder>
+@interface SDImageAPNGCoder : NSObject <SDProgressiveImageCoder, SDAnimatedImageCoder>
 
 @property (nonatomic, class, readonly, nonnull) SDImageAPNGCoder *sharedCoder;
 
