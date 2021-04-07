@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/CleverTap/clevertap-segment-ios/blob/master/clevertap-logo.png" width="300"/>
+  <img src="/docs/images/clevertap-logo.png" height="220"/>
 </p>
 
 # CleverTap iOS SDK  
@@ -10,6 +10,7 @@
 ![iOS 8.0+](https://img.shields.io/badge/iOS-9.0%2B-blue.svg)
 ![tvOS 9.0+](https://img.shields.io/badge/tvOS-9.0%2B-blue.svg)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 
 ## 👋 Introduction
 
@@ -61,12 +62,13 @@ For more details, refer to our [Advanced iOS Push Notifications](https://develop
 CleverTap Geofence SDK provides Geofencing capabilities to CleverTap iOS SDK. To find the installation & integration steps for CleverTap Geofence SDK, click [here](https://github.com/CleverTap/clevertap-geofence-ios).
 
 ## 𝌡 Example Usage
-* A [demo application](https://github.com/CleverTap/clevertap-ios-sdk/tree/master/ObjCStarter) showing the integration of our SDK in Objective-C language.
-* A [demo application](https://github.com/CleverTap/clevertap-ios-sdk/tree/master/SwiftStarter) showing the integration of our SDK in Swift language.
+* A [demo application](/ObjCStarter) showing the integration of our SDK in Objective-C language.
+* A [demo application](/SwiftStarter) showing the integration of our SDK in Swift language.
+* A [demo application](/SPMStarter) showing the installation of our SDK via Swift Package Manager.
 
 ## 🆕 Change Log
 
-Refer to the [CleverTap iOS SDK Change Log](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/CHANGELOG.md).
+Refer to the [CleverTap iOS SDK Change Log](/CHANGELOG.md).
 
 ## 📄 License
 
