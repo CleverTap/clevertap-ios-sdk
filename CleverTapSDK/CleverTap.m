@@ -573,9 +573,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     __block CleverTap *instance = [_instances objectForKey:config.accountId];
     if (instance == nil) {
-        instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
-        _instances[config.accountId] = instance;
-        [instance recordDeviceErrors];
+        if (config.accountId) {
+            instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
+            _instances[config.accountId] = instance;
+            [instance recordDeviceErrors];
+        }
     } else {
         if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
             [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
@@ -627,7 +629,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (now - initialAppEnteredForegroundTime > 5) {
             _config.isCreatedPostAppLaunched = YES;
         }
-
+        
         [self _initFeatureFlags];
         
         [self _initProductConfig];
