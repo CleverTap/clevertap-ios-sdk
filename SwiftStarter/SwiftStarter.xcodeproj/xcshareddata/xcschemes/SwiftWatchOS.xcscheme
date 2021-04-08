@@ -54,8 +54,10 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/SwiftStarter">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0772937220F601FF0032DC42"
@@ -63,7 +65,7 @@
             BlueprintName = "SwiftWatchOS"
             ReferencedContainer = "container:SwiftStarter.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -71,8 +73,10 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/SwiftStarter">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0772937220F601FF0032DC42"
@@ -80,7 +84,16 @@
             BlueprintName = "SwiftWatchOS"
             ReferencedContainer = "container:SwiftStarter.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "0772937220F601FF0032DC42"
+            BuildableName = "SwiftWatchOS.app"
+            BlueprintName = "SwiftWatchOS"
+            ReferencedContainer = "container:SwiftStarter.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

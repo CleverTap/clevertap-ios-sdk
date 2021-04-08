@@ -5,8 +5,8 @@
         "package": "CleverTapSDK",
         "repositoryURL": "https://github.com/CleverTap/clevertap-ios-sdk",
         "state": {
-          "branch": "3.9.3",
-          "revision": "5627ec2b3e260e7584ae8aff321bb6eaea5a6bab",
+          "branch": null,
+          "revision": "899fa4501ca274b3a7f4af6c6140424ebd43d2bc",
           "version": null
         }
       },
