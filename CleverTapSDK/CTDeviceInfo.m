@@ -150,7 +150,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         [deviceIDLock lock];
         
         _idfv = _idfv ? _idfv : [[self class] getIDFV];
-        if (_idfv && [_idfv length] > 5) {
+        if (self.config.useIDFV && _idfv && [_idfv length] > 5) {
             self.vendorIdentifier = _idfv;
         }
         

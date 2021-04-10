@@ -84,6 +84,14 @@ static NSArray *registeredURLSchemes;
         
         NSString *enableBeta = [CTPlistInfo getMetaDataForAttribute:CLTAP_BETA_LABEL];
         _beta = (enableBeta && [enableBeta isEqualToString:@"1"]);
+        
+        
+        // 1. FETCH IDFV FLAG FROM INFO.PLIST
+        NSString *useIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IDFV_LABEL];
+        
+        // 2. IF NOTHING FOUND, DEFAULT TO YES
+        _useIDFV = useIDFV ? (useIDFV && [useIDFV isEqualToString:@"1"]) : YES;
+        CleverTapLogStaticInfo(@"%s", _useIDFV ? "Clevertap IDFV usage enabled" : "Clevertap IDFV usage disabled");
     }
     return self;
 }

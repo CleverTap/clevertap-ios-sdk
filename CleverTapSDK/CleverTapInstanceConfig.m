@@ -41,6 +41,8 @@
         _isDefaultInstance = isDefault;
         
         CTPlistInfo *plist = [CTPlistInfo sharedInstance];
+        
+        _useIDFV = isDefault ? plist.useIDFV : YES;
         _disableAppLaunchedEvent = isDefault ? plist.disableAppLaunchedEvent : NO;
         _useCustomCleverTapId = isDefault ? plist.useCustomCleverTapId : NO;
         _enablePersonalization = YES;
@@ -58,6 +60,7 @@
     copy.enablePersonalization = self.enablePersonalization;
     copy.logLevel = self.logLevel;
     copy.useCustomCleverTapId = self.useCustomCleverTapId;
+    copy.useIDFV = self.useIDFV;
     copy.beta = self.beta;
     return copy;
 }
