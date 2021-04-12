@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 3.9.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.3) (April 8, 2021)
+### [Version 3.9.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.3) (April 12, 2021)
 
 ##### Added
 - Adds support for installation via Swift Package Manager
