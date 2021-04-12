@@ -52,9 +52,9 @@
     self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.playButton.layer.borderWidth = 2.0;
-    self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
-    self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
-    self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
+    self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:content.titleColor];
+    self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:content.messageColor];
+    self.dateLabel.textColor = [CTUIUtils ct_colorWithHexString:content.titleColor];
     [self configureActionView:!content.actionHasLinks];
     [self layoutSubviews];
     [self layoutIfNeeded];

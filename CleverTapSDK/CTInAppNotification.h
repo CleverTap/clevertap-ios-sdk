@@ -18,7 +18,7 @@
 @property (nonatomic, readonly) int maxPerSession;
 @property (nonatomic, readonly) int totalLifetimeCount;
 @property (nonatomic, readonly) int totalDailyCount;
-@property (nonatomic, readonly) NSUInteger timeToLive;
+@property (nonatomic, readonly) NSInteger timeToLive;
 @property (nonatomic, assign, readonly) char position;
 @property (nonatomic, assign, readonly) float height;
 @property (nonatomic, assign, readonly) float heightPercent;

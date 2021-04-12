@@ -1,3 +1,4 @@
+
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSUInteger, CTInboxMessageType){
@@ -10,7 +11,8 @@ typedef NS_ENUM(NSUInteger, CTInboxMessageType){
 
 @interface CTInboxUtils : NSObject
 
-+ (CTInboxMessageType)inboxMessageTypeFromString:(NSString*_Nonnull)type;
-+ (NSString *_Nullable)XibNameForControllerName:(NSString *_Nonnull)controllerName;
++ (CTInboxMessageType)inboxMessageTypeFromString:(NSString *_Nonnull)type;
++ (NSString *_Nullable)getXibNameForControllerName:(NSString *_Nonnull)controllerName;
++ (NSBundle *_Nullable)bundle:(Class _Nonnull)bundleClass;
 
 @end

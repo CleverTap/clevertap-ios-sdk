@@ -7,9 +7,8 @@
 #import "CTInboxBaseMessageCell.h"
 #import "CTCarouselMessageCell.h"
 
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTConstants.h"
-#import "CTInAppUtils.h"
 #import "CTInboxUtils.h"
 #import "UIView+CTToast.h"
 
@@ -61,7 +60,7 @@ static const int kMaxTags = 3;
                           config:(CleverTapInboxStyleConfig *)config
                         delegate:(id<CleverTapInboxViewControllerDelegate>)delegate
                analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate>)analyticsDelegate {
-    self = [self initWithNibName:NSStringFromClass([CleverTapInboxViewController class]) bundle:[NSBundle bundleForClass:CleverTapInboxViewController.class]];
+    self = [self initWithNibName:NSStringFromClass([CleverTapInboxViewController class]) bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
     if (self) {
         _config = [config copy];
         _delegate = delegate;
@@ -149,7 +148,7 @@ static const int kMaxTags = 3;
 
 - (void)setUpInboxLayout {
     
-    UIColor *color = [CTInAppUtils ct_colorWithHexString:@"#EAEAEA"];
+    UIColor *color = [CTUIUtils ct_colorWithHexString:@"#EAEAEA"];
     
     self.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
     self.tableView.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
@@ -185,13 +184,21 @@ static const int kMaxTags = 3;
 }
 
 - (void)registerNibs {
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxSimpleMessageCell.class]] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselMessageCell.class]] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])] bundle:[NSBundle bundleForClass:CTCarouselImageMessageCell.class]] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils XibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])] bundle:[NSBundle bundleForClass:CTInboxIconMessageCell.class]] forCellReuseIdentifier:kCellIconMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTInboxSimpleMessageCell.class]]
+         forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTCarouselMessageCell.class]]
+         forCellReuseIdentifier:kCellCarouselMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTCarouselImageMessageCell.class]]
+         forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
+         forCellReuseIdentifier:kCellIconMessageIdentifier];
 }
 
-- (NSString*)getTitle {
+- (NSString *)getTitle {
     return self.config.title ? self.config.title : @"Notifications";
 }
 
@@ -213,7 +220,7 @@ static const int kMaxTags = 3;
 
 - (void)calculateTableViewVisibleFrame {
     CGRect frame = self.tableView.frame;
-    UIInterfaceOrientation orientation = [[CTInAppResources getSharedApplication] statusBarOrientation];
+    UIInterfaceOrientation orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
     BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
     if (landscape) {
         frame.origin.y += self.topContentOffset;
@@ -248,7 +255,7 @@ static const int kMaxTags = 3;
                 segmentedControl.tintColor = _config.tabSelectedBgColor;
             }
         }
-        if (_config.tabSelectedBgColor) {
+        if (_config.tabSelectedTextColor) {
             [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
         }
         if (_config.tabUnSelectedTextColor) {

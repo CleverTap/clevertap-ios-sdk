@@ -1,7 +1,7 @@
 
 #import "CTAVPlayerViewController.h"
 #import "CTInAppNotification.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @interface CTAVPlayerViewController () 
 
@@ -31,8 +31,7 @@
     self.view.translatesAutoresizingMaskIntoConstraints = NO;
     
     if (self.notification.mediaIsAudio) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        UIImage *image = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        UIImage *image = [CTUIUtils getImageForName:@"ct_default_audio.png"];
         self.imageView = [[UIImageView alloc] initWithFrame: self.view.bounds];
         self.imageView.backgroundColor = [UIColor blackColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;

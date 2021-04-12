@@ -1,6 +1,6 @@
 #import "CTCoverImageViewController.h"
 #import "CTImageInAppViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTDismissButton.h"
 
 @interface CTCoverImageViewController ()
@@ -14,7 +14,7 @@
 
 - (void)loadView {
     [super loadView];
-    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTCoverImageViewController class])]
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils getXibNameForControllerName:NSStringFromClass([CTCoverImageViewController class])]
                                   owner:self
                                 options:nil];
 }
@@ -30,7 +30,7 @@
     [super viewDidLayoutSubviews];
     CGFloat topLength = self.topLayoutGuide.length;
     [[NSLayoutConstraint constraintWithItem: self.closeButton
-                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
+                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual
                                      toItem:self.containerView
                                   attribute:NSLayoutAttributeTop
                                  multiplier:1.0 constant:topLength] setActive:YES];

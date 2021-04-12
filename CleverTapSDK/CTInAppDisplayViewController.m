@@ -1,6 +1,6 @@
 #import "CTInAppDisplayViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @implementation CTInAppPassThroughWindow
 
@@ -78,7 +78,7 @@
     if (!self.notification) return;
     
     if (@available(iOS 13, tvOS 13.0, *)) {
-        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
@@ -158,11 +158,11 @@
     if (_notification.inAppType != CTInAppTypeHeader && _notification.inAppType != CTInAppTypeFooter) {
         buttonView.layer.borderWidth = 1.0f;
         buttonView.layer.cornerRadius = [button.borderRadius floatValue];
-        buttonView.layer.borderColor = [[CTInAppUtils ct_colorWithHexString:button.borderColor] CGColor];
+        buttonView.layer.borderColor = [[CTUIUtils ct_colorWithHexString:button.borderColor] CGColor];
     }
     
-    [buttonView setBackgroundColor:[CTInAppUtils ct_colorWithHexString:button.backgroundColor]];
-    [buttonView setTitleColor:[CTInAppUtils ct_colorWithHexString:button.textColor] forState:UIControlStateNormal];
+    [buttonView setBackgroundColor:[CTUIUtils ct_colorWithHexString:button.backgroundColor]];
+    [buttonView setTitleColor:[CTUIUtils ct_colorWithHexString:button.textColor] forState:UIControlStateNormal];
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [buttonView setTitle:button.text forState:UIControlStateNormal];
     return buttonView;
@@ -172,7 +172,7 @@
 #if (TARGET_OS_TV)
     return nil;
 #else
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 #endif
 }

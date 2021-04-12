@@ -32,3 +32,6 @@ SwiftStarter/Podfile.lock
 
 ObjCStarter/Pods
 ObjCStarter/Podfile.lock
+
+# Swift Package Manager
+Package.resolved
