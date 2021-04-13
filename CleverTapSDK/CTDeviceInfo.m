@@ -153,6 +153,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         if (self.config.useIDFV && _idfv && [_idfv length] > 5) {
             self.vendorIdentifier = _idfv;
         }
+        CleverTapLogInfo(self.config.logLevel, @"%s", self.config.useIDFV ? "CleverTap IDFV usage enabled" : "CleverTap IDFV usage disabled");
         
         // set the fallbackdeviceId on launch, in the event this instance had a fallbackid on last close
         self.fallbackDeviceId = [self getStoredFallbackDeviceID];
