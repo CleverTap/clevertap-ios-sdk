@@ -87,10 +87,10 @@ static NSArray *registeredURLSchemes;
         
         
         // 1. FETCH IDFV FLAG FROM INFO.PLIST
-        NSString *useIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IDFV_LABEL];
+        NSString *disableIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_IDFV_LABEL];
         
         // 2. IF NOTHING FOUND, DEFAULT TO YES
-        _useIDFV = useIDFV ? (useIDFV && [useIDFV isEqualToString:@"1"]) : YES;
+        _disableIDFV = disableIDFV ? (disableIDFV && [disableIDFV isEqualToString:@"1"]) : NO;
     }
     return self;
 }
