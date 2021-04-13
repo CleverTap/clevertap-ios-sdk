@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/docs/images/clevertap-logo.png" height="220"/>
+  <img src="/docs/images/clevertap-logo.png" height="200"/>
 </p>
 
 # CleverTap iOS SDK  
