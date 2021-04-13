@@ -69,8 +69,12 @@ static const int kMaxTags = 3;
         _filterMessages = _messages;
         
         NSMutableArray *tags = _config.messageTags.count > 0 ?  [NSMutableArray arrayWithArray:_config.messageTags] : [NSMutableArray new];
+        
         if ([tags count] > 0) {
-            [tags insertObject:kDefaultTag atIndex:0];
+            // USE THE FIRST TAB TITLE PROVIDED IN THE CONFIG IF IT EXISTS, OR THE DEFAULT ONE
+            NSString *title = config.firstTabTitle ?: kDefaultTag;
+            
+            [tags insertObject:title atIndex:0];
             _topContentOffset = 33.f;
         }
         if ([tags count] > kMaxTags) {
