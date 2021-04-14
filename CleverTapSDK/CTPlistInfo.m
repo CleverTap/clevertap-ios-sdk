@@ -90,7 +90,7 @@ static NSArray *registeredURLSchemes;
         NSString *disableIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_IDFV_LABEL];
         
         // 2. IF NOTHING FOUND, DEFAULT TO YES
-        _disableIDFV = disableIDFV ? ([disableIDFV isEqualToString:@"1"]) : NO;
+        _disableIDFV = (disableIDFV && [disableIDFV isEqualToString:@"1"]);
     }
     return self;
 }
