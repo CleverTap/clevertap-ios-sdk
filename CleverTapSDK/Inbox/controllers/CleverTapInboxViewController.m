@@ -72,7 +72,7 @@ static const int kMaxTags = 3;
         
         if ([tags count] > 0) {
             // USE THE FIRST TAB TITLE PROVIDED IN THE CONFIG IF IT EXISTS, OR THE DEFAULT ONE
-            NSString *title = config.firstTabTitle ?: kDefaultTag;
+            NSString *title = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTag;
             
             [tags insertObject:title atIndex:0];
             _topContentOffset = 33.f;
