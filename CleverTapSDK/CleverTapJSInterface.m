@@ -57,6 +57,9 @@
     } else if ([action isEqual: @"profileRemoveMultiValues"]) {
         [cleverTap profileRemoveMultiValues: message[@"values"] forKey: message[@"key"]];
     }
+    else if ([action isEqual: @"recordChargedEvent"]) {
+        [cleverTap recordChargedEventWithDetails: message[@"chargeDetails"] andItems: message[@"items"]];
+    }
 }
 
 @end
