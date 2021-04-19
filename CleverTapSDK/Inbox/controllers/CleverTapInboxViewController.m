@@ -71,7 +71,6 @@ static const int kMaxTags = 3;
         NSMutableArray *tags = _config.messageTags.count > 0 ?  [NSMutableArray arrayWithArray:_config.messageTags] : [NSMutableArray new];
         
         if ([tags count] > 0) {
-            // USE THE FIRST TAB TITLE PROVIDED IN THE CONFIG IF IT EXISTS, OR THE DEFAULT ONE
             // Use the first tab title if specified in the config, or else fallback to the Default one
             NSString *firstTabTitle = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTab;
             [tags insertObject:firstTabTitle atIndex:0];
