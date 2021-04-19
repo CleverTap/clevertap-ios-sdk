@@ -24,7 +24,7 @@ NSString * const kCellCarouselMessageIdentifier = @"CTCarouselMessageCell";
 NSString * const kCellCarouselImgMessageIdentifier = @"CTCarouselImageMessageCell";
 NSString * const kCellIconMessageIdentifier = @"CTInboxIconMessageCell";
 
-NSString * const kDefaultTag = @"All";
+NSString * const kDefaultTab = @"All";
 static const float kCellSpacing = 6;
 static const int kMaxTags = 3;
 
@@ -72,8 +72,8 @@ static const int kMaxTags = 3;
         
         if ([tags count] > 0) {
             // USE THE FIRST TAB TITLE PROVIDED IN THE CONFIG IF IT EXISTS, OR THE DEFAULT ONE
-            NSString *firstTabTitle = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTag;
-            
+            // Use the first tab title if specified in the config, or else fallback to the Default one
+            NSString *firstTabTitle = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTab;
             [tags insertObject:firstTabTitle atIndex:0];
             _topContentOffset = 33.f;
         }
