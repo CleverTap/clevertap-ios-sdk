@@ -10,6 +10,14 @@
         <p id="demo"> </p>
         <button onclick="recordChargedEvent()">Record Charged Event</button>
         <p id="chargedEvent"> </p>
+        <button onclick="profilePush()">Push Profile</button>
+        <p id="profilePush"> </p>
+        <button onclick="profileSetMultiValues()">Set Profile with multiple values</button>
+        <p id="profileSetMultiValues"> </p>
+        <button onclick="profileAddMultiValues()">Set Profile with multiple values</button>
+        <p id="profileAddMultiValues"> </p>
+        <button onclick="profileRemoveMultiValues()">Set Profile with multiple values</button>
+        <p id="profileRemoveMultiValues"> </p>
         
         <script>
             function myFunction() {
@@ -17,9 +25,9 @@
                 var props = {foo: 'xyz', lang: 'French'};
                 var message = { action:'recordEventWithProps', event:'CT Webview event', properties: props};
                 
-                if(window.webkit
+                if (window.webkit
                    && window.webkit.messageHandlers
-                   && window.webkit.messageHandlers.clevertap){
+                   && window.webkit.messageHandlers.clevertap) {
                     window.webkit.messageHandlers.clevertap.postMessage(message);
                 }
             }
@@ -45,11 +53,63 @@
                 chargeDetails: chargeDetails,
                 items: items
             };
-            if(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
                 window.webkit.messageHandlers.clevertap.postMessage(message);
             }
         }
-        </script>
+        
+        function profilePush() {
+            document.getElementById("profilePush").innerHTML = 'Profile Pushed.';
+            const props = { name: 'John', email: 'john@mymail.com' };
+            const message = { action:'profilePush', properties: props };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profileSetMultiValues() {
+            document.getElementById("profileSetMultiValues").innerHTML = 'Profile set with multiple values.';
+            const message = {
+                action: 'profileSetMultiValues',
+                values: ['bag', 'kitkat'],
+                key: 'myStuff'
+            };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profileAddMultiValues() {
+            document.getElementById("profileAddMultiValues").innerHTML = 'Profile added with multiple values.';
+            const message = {
+                action: 'profileAddMultiValue',
+                value: 'coat',
+                key: 'myStuff'
+                
+            };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profileRemoveMultiValues() {
+            document.getElementById("profileRemoveMultiValues").innerHTML = 'Profile removed with multiple values.';
+            const message = {
+                action: 'profileRemoveMultiValues',
+                values: ['scarf', 'knife'],
+                key: 'myStuff'
+                
+            };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+            </script>
         
     </body>
 </html>
