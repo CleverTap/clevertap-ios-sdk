@@ -8,15 +8,48 @@
         <h2><center>CleverTap Webview</center></h2><br></br>
         <button onclick="myFunction()">Record Event</button>
         <p id="demo"> </p>
-        <script> function myFunction() {
-            document.getElementById("demo").innerHTML = 'Hey, whats up?';
-            var props = {foo: 'xyz', lang: 'French'};
-            var message = { action:'recordEventWithProps', event:'CT Webview event', properties: props};
-            
-            if(window.webkit
-                     && window.webkit.messageHandlers
-                     && window.webkit.messageHandlers.clevertap){
+        <button onclick="recordChargedEvent()">Record Charged Event</button>
+        <p id="chargedEvent"> </p>
+        
+        <script>
+            function myFunction() {
+                document.getElementById("demo").innerHTML = 'Hey, whats up?';
+                var props = {foo: 'xyz', lang: 'French'};
+                var message = { action:'recordEventWithProps', event:'CT Webview event', properties: props};
+                
+                if(window.webkit
+                   && window.webkit.messageHandlers
+                   && window.webkit.messageHandlers.clevertap){
+                    window.webkit.messageHandlers.clevertap.postMessage(message);
+                }
+            }
+        
+        function recordChargedEvent() {
+            document.getElementById("chargedEvent").innerHTML = 'Charged Event Recorded.';
+            const chargeDetails = {
+                "Amount" : 300,
+                "Payment mode": "Credit Card",
+                "Charged ID": 24052013
+            };
+            const items = [{
+                "Category": "books",
+                "Book name": "The Millionaire next door",
+                "Quantity": 1
+            },{
+                "Category": "books",
+                "Book name": "The Millionaire previous door",
+                "Quantity": 5
+            }];
+            const message = {
+                action:'recordChargedEvent',
+                chargeDetails: chargeDetails,
+                items: items
+            };
+            if(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
                 window.webkit.messageHandlers.clevertap.postMessage(message);
             }
-        } </script></body>
+        }
+        </script>
+        
+    </body>
 </html>
