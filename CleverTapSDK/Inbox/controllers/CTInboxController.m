@@ -188,7 +188,7 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
-    [privateContext performBlock:^{
+    [privateContext performBlockAndWait:^{
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
         }
