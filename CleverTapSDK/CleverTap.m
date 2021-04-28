@@ -1103,7 +1103,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     evtData[@"ifaA"] = @NO;
     if (self.deviceInfo.vendorIdentifier) {
         NSString *ifvString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifv"] : @"ifv";
-        evtData[ifvString] = self.deviceInfo.vendorIdentifier;
+        if (ifvString) {
+            evtData[ifvString] = self.deviceInfo.vendorIdentifier;
+        }
     }
     
     if ([[self class] runningInsideAppExtension]) {
