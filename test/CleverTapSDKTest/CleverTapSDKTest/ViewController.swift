@@ -31,6 +31,9 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
             allocatedMB += 1;
         }
         
+        print(Float (3.0 / 4.0))
+
+        
 //        CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
@@ -54,6 +57,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+    }
+    
+    func add (n1: Int, n2: Int)  {
+        print(Double (3 / 4))
+
     }
     
     func recordUserChargedEvent() {

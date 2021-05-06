@@ -3369,55 +3369,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-- (void)profilePushGraphUser:(id)fbGraphUser {
-    [self runSerialAsync:^{
-        [CTProfileBuilder buildGraphUser:fbGraphUser completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
-            if (systemFields) {
-                [self.localDataStore setProfileFields:systemFields];
-            }
-            NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
-            if (customFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
-                [self.localDataStore setProfileFields:customFields];
-                [profile addEntriesFromDictionary:customFields];
-            }
-            [self cacheGUIDSforProfile:profile];
-            
-            NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
-            event[@"profile"] = profile;
-            [self queueEvent:event withType:CleverTapEventTypeProfile];
-            
-            if (errors) {
-                [self pushValidationResults:errors];
-            }
-        }];
-    }];
-}
-
-- (void)profilePushGooglePlusUser:(id)googleUser {
-    [self runSerialAsync:^{
-        [CTProfileBuilder buildGooglePlusUser:googleUser completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
-            if (systemFields) {
-                [self.localDataStore setProfileFields:systemFields];
-            }
-            NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
-            if (customFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
-                [self.localDataStore setProfileFields:customFields];
-                [profile addEntriesFromDictionary:customFields];
-            }
-            [self cacheGUIDSforProfile:profile];
-            
-            NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
-            event[@"profile"] = profile;
-            [self queueEvent:event withType:CleverTapEventTypeProfile];
-            if (errors) {
-                [self pushValidationResults:errors];
-            }
-        }];
-    }];
-}
-
 - (id)profileGet:(NSString *)propertyName {
     if (!self.config.enablePersonalization) {
         return nil;
