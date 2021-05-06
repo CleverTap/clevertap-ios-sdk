@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 3.9.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.4) (May 11, 2021)
+
+##### Added
+- Adds `setFirstTabTitle` method to set the name of the first tab in App Inbox
+- Adds `recordChargedEvent` to `CTJSInterface` class to allow raising Charged Event from JS
+- Adds a feature to opt-out IDFV based on a flag in Info.plist or while setting up additional instances/configs
+
+##### Changed
+- Removes `profilePushGraphUser` and `profilePushGooglePlusUser` APIs
+
 ### [Version 3.9.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.3) (April 12, 2021)
 
 ##### Added
@@ -9,8 +19,6 @@ All notable changes to this project will be documented in this file.
 
 ##### Changed
 - Refactored code related to `CTTelephonyNetworkInfo` to address - https://github.com/CleverTap/clevertap-ios-sdk/issues/103
-
-##### Breaking 
 - Removes code related to Dynamic Variable and Visual Editor
 
 ### [Version 3.9.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.2) (February 5, 2021)
