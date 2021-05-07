@@ -21,7 +21,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         registerAppInbox()
         initializeAppInbox()
         eventTableView.tableFooterView = UIView()
-        eventTableView.backgroundColor = UIColor.white
+        eventTableView.backgroundColor = .secondarySystemBackground
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -73,8 +74,6 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell")!
         cell.textLabel?.text = self.eventList[indexPath.row]
         cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
-        cell.backgroundColor = UIColor.white
-        cell.textLabel?.textColor = UIColor.black
         return cell
     }
     
