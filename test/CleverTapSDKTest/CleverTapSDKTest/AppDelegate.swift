@@ -17,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
+        
+        
         UIControl().sendAction(Selector(("_performMemoryWarning")), to: UIApplication.shared, for: nil)
         
 //         for i in 0...1200 {

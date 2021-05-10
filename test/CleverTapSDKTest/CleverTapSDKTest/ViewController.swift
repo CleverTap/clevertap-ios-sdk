@@ -97,7 +97,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, WK
     // MARK: - Handle Webview
     
     func addWebview() {
-        
+                
         let config = WKWebViewConfiguration()
         let ctInterface: CleverTapJSInterface = CleverTapJSInterface(config: nil)
         let userContentController = WKUserContentController()
