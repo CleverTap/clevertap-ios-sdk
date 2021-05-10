@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 
 ##### Changed
 - Refactored code related to `CTTelephonyNetworkInfo` to address - https://github.com/CleverTap/clevertap-ios-sdk/issues/103
-- Removes code related to Dynamic Variable and Visual Editor
+- Removes Product Experiences (Screen AB/Dynamic Variables) related code
 
 ### [Version 3.9.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.2) (February 5, 2021)
 
