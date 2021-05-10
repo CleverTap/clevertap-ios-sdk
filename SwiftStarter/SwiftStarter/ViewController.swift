@@ -213,6 +213,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         // config the style of App Inbox Controller
         let style = CleverTapInboxStyleConfig.init()
         style.title = "App Inbox"
+        style.navigationTintColor = .black
+        
         if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
             self.present(navigationController, animated: true, completion: nil)
