@@ -84,6 +84,10 @@ static NSArray *registeredURLSchemes;
         
         NSString *enableBeta = [CTPlistInfo getMetaDataForAttribute:CLTAP_BETA_LABEL];
         _beta = (enableBeta && [enableBeta isEqualToString:@"1"]);
+        
+        // Fetch IDFV Flag from INFO.PLIST
+        NSString *disableIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_IDFV_LABEL];
+        _disableIDFV = (disableIDFV && [disableIDFV isEqualToString:@"1"]);
     }
     return self;
 }

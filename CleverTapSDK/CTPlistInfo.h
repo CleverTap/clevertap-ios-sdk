@@ -9,6 +9,7 @@
 @property (nonatomic, assign, readonly) BOOL disableAppLaunchedEvent;
 @property (nonatomic, assign, readonly) BOOL useCustomCleverTapId;
 @property (nonatomic, assign, readonly) BOOL beta;
+@property (nonatomic, assign, readonly) BOOL disableIDFV;
 
 + (instancetype _Nullable)sharedInstance;
 - (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nullable)region;

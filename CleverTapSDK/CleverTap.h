@@ -540,37 +540,6 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
- Convenience method to set the Facebook Graph User properties on the user profile.
- 
- @discussion
- If you support social login via FB connect in your app and are using the Facebook library in your app,
- you can push a GraphUser object of the user.
- Be sure that you’re sending a GraphUser object of the currently logged in user.
- 
- @param fbGraphUser       fbGraphUser Facebook Graph User object
- 
- */
-- (void)profilePushGraphUser:(id _Nonnull)fbGraphUser;
-
-/*!
- @method
- 
- @abstract
- Convenience method to set the Google Plus User properties on the user profile.
- 
- @discussion
- If you support social login via Google Plus in your app and are using the Google Plus library in your app,
- you can set a GTLPlusPerson object on the user profile, after a successful login.
- 
- @param googleUser       GTLPlusPerson object
- 
- */
-- (void)profilePushGooglePlusUser:(id _Nonnull )googleUser;
-
-/*!
- @method
- 
- @abstract
  Get a user profile property.
  
  @discussion
