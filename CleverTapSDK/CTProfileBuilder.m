@@ -11,6 +11,7 @@
 static NSString* const kCLTAP_COMMAND_SET = @"$set";
 static NSString* const kCLTAP_COMMAND_ADD = @"$add";
 static NSString* const kCLTAP_COMMAND_REMOVE = @"$remove";
+
 #define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
 
 static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
@@ -407,6 +408,26 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
 
 + (void)buildRemoveMultiValues:(NSArray *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
+}
+
++ (NSArray<CTValidationResult*>* _Nullable) buildIncrementDecrementValueBy: (int)value forKey: (NSString* _Nonnull)key {
+    
+    if (value < 0) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be negative", key]];
+        
+        [errors addObject: error];
+        return errors;
+    }
+    
+    if ([key length] == 0) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: @"Profile key cannot be empty while incrementing/decrementing a property value"];
+        
+        [errors addObject: error];
+        return errors;
+    }
+    return nil;
 }
 
 + (CTValidationResult*)_generateEmptyMultiValueErrorForKey:(NSString *)key {

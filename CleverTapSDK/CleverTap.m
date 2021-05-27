@@ -3427,7 +3427,43 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+- (void)profileIncrementValueBy:(int)value forKey:(NSString *_Nonnull)key {
+    
+    NSArray<CTValidationResult*>* errors = [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key];
+    
+    [self _handleIncrementDecrementProfilePushForKey: key byValue: value usingCommand: CLTAP_COMMAND_INCREMENT errors: errors];
+}
+
+- (void)profileDecrementValueBy:(int)value forKey:(NSString *_Nonnull)key {
+    
+    NSArray<CTValidationResult*>* errors = [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key];
+        
+    [self _handleIncrementDecrementProfilePushForKey: key byValue: value usingCommand: CLTAP_COMMAND_DECREMENT errors: errors];
+}
+
 // private
+
+- (void)_handleIncrementDecrementProfilePushForKey: (NSString*)key byValue: (int)value usingCommand: (NSString*)command errors: (NSArray<CTValidationResult*>*)errors {
+    
+    if (errors) {
+        [self pushValidationResults:errors];
+        return;
+    }
+    
+    NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
+    
+    CleverTapLogInternal(self.config.logLevel, @"Created profile push for operation: %@", command);
+    NSDictionary* operatorDict = @{
+        key: @{command : @(value)}
+    };
+    [profile addEntriesFromDictionary:operatorDict];
+    
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[@"profile"] = profile;
+    [self queueEvent:event withType:CleverTapEventTypeProfile];
+    
+}
+
 - (void)_handleMultiValueProfilePush:(NSDictionary*)customFields updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
     if (customFields && [[customFields allKeys] count] > 0) {
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
