@@ -194,7 +194,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     NSString* deviceName = [deviceNamesByCode objectForKey:code];
     
     if (!deviceName) {
-        // Not found on database. At least guess main device type from string contents:
         
         if ([code rangeOfString:@"iPod"].location != NSNotFound) {
             deviceName = @"iPod Touch";
