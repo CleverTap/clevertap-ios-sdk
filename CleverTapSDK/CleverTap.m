@@ -3427,14 +3427,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-- (void)profileIncrementValueBy:(int)value forKey:(NSString *_Nonnull)key {
+- (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     
     NSArray<CTValidationResult*>* errors = [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key];
     
     [self _handleIncrementDecrementProfilePushForKey: key byValue: value usingCommand: CLTAP_COMMAND_INCREMENT errors: errors];
 }
 
-- (void)profileDecrementValueBy:(int)value forKey:(NSString *_Nonnull)key {
+- (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     
     NSArray<CTValidationResult*>* errors = [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key];
         
@@ -3443,7 +3443,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 // private
 
-- (void)_handleIncrementDecrementProfilePushForKey: (NSString*)key byValue: (int)value usingCommand: (NSString*)command errors: (NSArray<CTValidationResult*>*)errors {
+- (void)_handleIncrementDecrementProfilePushForKey: (NSString*)key byValue: (NSNumber*)value usingCommand: (NSString*)command errors: (NSArray<CTValidationResult*>*)errors {
     
     if (errors) {
         [self pushValidationResults:errors];
@@ -3454,7 +3454,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     CleverTapLogInternal(self.config.logLevel, @"Created profile push for operation: %@", command);
     NSDictionary* operatorDict = @{
-        key: @{command : @(value)}
+        key: @{command : value}
     };
     [profile addEntriesFromDictionary:operatorDict];
     

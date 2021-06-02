@@ -410,9 +410,9 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
 }
 
-+ (NSArray<CTValidationResult*>* _Nullable) buildIncrementDecrementValueBy: (int)value forKey: (NSString* _Nonnull)key {
++ (NSArray<CTValidationResult*>* _Nullable) buildIncrementDecrementValueBy: (NSNumber* _Nonnull)value forKey: (NSString* _Nonnull)key {
     
-    if (value < 0) {
+    if (value.intValue < 0 || value.floatValue < 0 || value.doubleValue < 0) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
         CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be negative", key]];
         

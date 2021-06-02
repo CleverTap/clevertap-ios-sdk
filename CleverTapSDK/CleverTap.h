@@ -550,7 +550,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @param key       key string
  @param value     value integer
  */
-- (void)profileIncrementValueBy:(int)value forKey:(NSString *_Nonnull)key;
+- (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -566,7 +566,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @param key       key string
  @param value     value integer
  */
-- (void)profileDecrementValueBy:(int)value forKey:(NSString *_Nonnull)key;
+- (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
