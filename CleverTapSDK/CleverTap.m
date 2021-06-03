@@ -3429,21 +3429,23 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     
-    NSArray<CTValidationResult*>* errors = [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key];
-    
-    [self _handleIncrementDecrementProfilePushForKey: key byValue: value usingCommand: CLTAP_COMMAND_INCREMENT errors: errors];
+    [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key command: CLTAP_COMMAND_INCREMENT localDataStore: _localDataStore completionHandler: ^(NSDictionary * _Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> * _Nullable errors) {
+       
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue command: CLTAP_COMMAND_INCREMENT operatorDict: operatorDict errors: errors];
+    }];
 }
 
 - (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     
-    NSArray<CTValidationResult*>* errors = [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key];
-        
-    [self _handleIncrementDecrementProfilePushForKey: key byValue: value usingCommand: CLTAP_COMMAND_DECREMENT errors: errors];
+    [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key command: CLTAP_COMMAND_DECREMENT localDataStore: _localDataStore completionHandler: ^(NSDictionary * _Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> * _Nullable errors) {
+       
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue command: CLTAP_COMMAND_DECREMENT operatorDict: operatorDict errors: errors];
+    }];
 }
 
 // private
 
-- (void)_handleIncrementDecrementProfilePushForKey: (NSString*)key byValue: (NSNumber*)value usingCommand: (NSString*)command errors: (NSArray<CTValidationResult*>*)errors {
+- (void)_handleIncrementDecrementProfilePushForKey: (NSString*)key updatedValue: (NSNumber*)updatedValue command: (NSString*)command operatorDict: (NSDictionary*)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
     
     if (errors) {
         [self pushValidationResults:errors];
@@ -3451,12 +3453,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
-    
-    CleverTapLogInternal(self.config.logLevel, @"Created profile push for operation: %@", command);
-    NSDictionary* operatorDict = @{
-        key: @{command : value}
-    };
     [profile addEntriesFromDictionary:operatorDict];
+    CleverTapLogInternal(self.config.logLevel, @"Created profile push for operation: %@", command);
+    
+    [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;

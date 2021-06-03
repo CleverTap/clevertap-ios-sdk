@@ -410,24 +410,41 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
 }
 
-+ (NSArray<CTValidationResult*>* _Nullable) buildIncrementDecrementValueBy: (NSNumber* _Nonnull)value forKey: (NSString* _Nonnull)key {
-    
-    if (value.intValue < 0 || value.floatValue < 0 || value.doubleValue < 0) {
-        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be negative", key]];
-        
-        [errors addObject: error];
-        return errors;
-    }
++ (void) buildIncrementDecrementValueBy: (NSNumber* _Nonnull)value forKey: (NSString* _Nonnull)key command: (NSString* _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     
     if ([key length] == 0) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
         CTValidationResult* error =  [self _generateInvalidMultiValueError: @"Profile key cannot be empty while incrementing/decrementing a property value"];
         
         [errors addObject: error];
-        return errors;
+        completion(nil, nil, errors);
+        return;
+//        return errors;
     }
-    return nil;
+    
+    if (value && (value.intValue < 0 || value.floatValue < 0 || value.doubleValue < 0)) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be negative", key]];
+        
+        [errors addObject: error];
+        completion(nil, nil, errors);
+        return;
+//        return errors;
+    }
+    
+    NSDictionary* operatorDict = @{
+        key: @{command: value}
+    };
+    NSNumber *newValue;
+    
+    id cachedValue = [dataStore getProfileFieldForKey: key];
+    if ([cachedValue isKindOfClass: [NSNumber class]]) {
+        NSNumber *cachedNumber = (NSNumber*)cachedValue;
+        newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+    }
+    
+    completion(operatorDict, newValue, nil);
+//    return nil;
 }
 
 + (CTValidationResult*)_generateEmptyMultiValueErrorForKey:(NSString *)key {
@@ -439,8 +456,8 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
 }
 
 + (CTValidationResult*) _generateInvalidMultiValueError:(NSString *)message {
-    return [CTValidationResult resultWithErrorCode:512 andMessage:message];
     CleverTapLogStaticDebug(@"%@: %@", self, message);
+    return [CTValidationResult resultWithErrorCode:512 andMessage:message];
 }
 
 + (void)_handleMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key withCommand:(NSString *)command localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion  {

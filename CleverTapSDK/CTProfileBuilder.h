@@ -23,6 +23,6 @@
 
 + (void)buildRemoveMultiValues:(NSArray<NSString *> *_Nonnull)values forKey:(NSString *_Nullable)key localDataStore:(CTLocalDataStore*_Nullable)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
-+ (NSArray<CTValidationResult*>* _Nullable) buildIncrementDecrementValueBy: (NSNumber* _Nonnull )value forKey: (NSString* _Nonnull)key;
++ (void) buildIncrementDecrementValueBy: (NSNumber* _Nonnull)value forKey: (NSString* _Nonnull)key command: (NSString* _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
 @end
