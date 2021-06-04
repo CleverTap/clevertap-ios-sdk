@@ -422,9 +422,9 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
 //        return errors;
     }
     
-    if (value && (value.intValue < 0 || value.floatValue < 0 || value.doubleValue < 0)) {
+    if (value && (value.intValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be negative", key]];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be zero or negative", key]];
         
         [errors addObject: error];
         completion(nil, nil, errors);
