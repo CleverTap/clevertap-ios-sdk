@@ -61,6 +61,7 @@ static CTTelephonyNetworkInfo *_networkInfo;
 
 @synthesize deviceId =_deviceId;
 @synthesize validationErrors =_validationErrors;
+static NSDictionary* deviceNamesByCode;
 
 static dispatch_queue_t backgroundQueue;
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
