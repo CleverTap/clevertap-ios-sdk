@@ -439,8 +439,20 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     
     id cachedValue = [dataStore getProfileFieldForKey: key];
     if ([cachedValue isKindOfClass: [NSNumber class]]) {
+        
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
-        newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+        CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
+        
+        if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
+            newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+        }
+        else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
+            newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
+        }
+        else if (numberType == kCFNumberDoubleType) {
+            newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
+        }
+        
     }
     
     completion(operatorDict, newValue, nil);
