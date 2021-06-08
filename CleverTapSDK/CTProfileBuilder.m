@@ -444,13 +444,25 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
         CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
         
         if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
-            newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+            
+            if ([command isEqualToString: CLTAP_COMMAND_INCREMENT])
+                newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+            else
+                newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
         }
         else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
-            newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
+            
+            if ([command isEqualToString: CLTAP_COMMAND_INCREMENT])
+                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
+            else
+                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
         }
         else if (numberType == kCFNumberDoubleType) {
-            newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
+            
+            if ([command isEqualToString: CLTAP_COMMAND_INCREMENT])
+                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
+            else
+                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
         }
         
     }

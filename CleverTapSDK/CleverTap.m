@@ -3452,6 +3452,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
+    if (!operatorDict || (operatorDict && [[operatorDict allKeys]count] == 0)) {
+        CleverTapLogInternal(self.config.logLevel, @"Failed to initialise an operator dictionary for operation: %@", command);
+        return;
+    }
+    
     NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
     [profile addEntriesFromDictionary:operatorDict];
     CleverTapLogInternal(self.config.logLevel, @"Created profile push for operation: %@", command);
