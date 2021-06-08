@@ -419,7 +419,6 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
         [errors addObject: error];
         completion(nil, nil, errors);
         return;
-//        return errors;
     }
     
     if (value && (value.intValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
@@ -429,7 +428,6 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
         [errors addObject: error];
         completion(nil, nil, errors);
         return;
-//        return errors;
     }
     
     NSDictionary* operatorDict = @{
@@ -468,7 +466,6 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     }
     
     completion(operatorDict, newValue, nil);
-//    return nil;
 }
 
 + (CTValidationResult*)_generateEmptyMultiValueErrorForKey:(NSString *)key {
