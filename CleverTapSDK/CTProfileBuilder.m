@@ -410,7 +410,7 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
 }
 
-+ (void) buildIncrementDecrementValueBy: (NSNumber* _Nonnull)value forKey: (NSString* _Nonnull)key command: (NSString* _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
++ (void)buildIncrementDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key command:(NSString* _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     
     if ([key length] == 0) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];

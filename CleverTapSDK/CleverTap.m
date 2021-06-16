@@ -3398,54 +3398,66 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildSetMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildSetMultiValues:values forKey:key
+                           localDataStore:self.localDataStore
+                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileAddMultiValue:(NSString *)value forKey:(NSString *)key {
-    [CTProfileBuilder buildAddMultiValue:value forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildAddMultiValue:value forKey:key
+                          localDataStore:self.localDataStore
+                       completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildAddMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildAddMultiValues:values forKey:key
+                           localDataStore:self.localDataStore
+                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValue:(NSString *)value forKey:(NSString *)key {
-    [CTProfileBuilder buildRemoveMultiValue:value forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildRemoveMultiValue:value forKey:key
+                             localDataStore:self.localDataStore
+                          completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildRemoveMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildRemoveMultiValues:values forKey:key
+                              localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
-    
-    [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key command: CLTAP_COMMAND_INCREMENT localDataStore: _localDataStore completionHandler: ^(NSDictionary * _Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> * _Nullable errors) {
-       
+    [CTProfileBuilder buildIncrementDecrementValueBy:value forKey:key command: CLTAP_COMMAND_INCREMENT
+                                      localDataStore: _localDataStore
+                                   completionHandler: ^(NSDictionary * _Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> * _Nullable errors) {
         [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue command: CLTAP_COMMAND_INCREMENT operatorDict: operatorDict errors: errors];
     }];
 }
 
 - (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
-    
-    [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key command: CLTAP_COMMAND_DECREMENT localDataStore: _localDataStore completionHandler: ^(NSDictionary * _Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> * _Nullable errors) {
-       
+    [CTProfileBuilder buildIncrementDecrementValueBy: value forKey: key command: CLTAP_COMMAND_DECREMENT
+                                      localDataStore: _localDataStore
+                                   completionHandler: ^(NSDictionary * _Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> * _Nullable errors) {
         [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue command: CLTAP_COMMAND_DECREMENT operatorDict: operatorDict errors: errors];
     }];
 }
 
 // private
 
-- (void)_handleIncrementDecrementProfilePushForKey: (NSString*)key updatedValue: (NSNumber*)updatedValue command: (NSString*)command operatorDict: (NSDictionary*)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
+- (void)_handleIncrementDecrementProfilePushForKey:(NSString*)key updatedValue:(NSNumber*)updatedValue command:(NSString*)command operatorDict: (NSDictionary*)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
     
     if (errors) {
         [self pushValidationResults:errors];
