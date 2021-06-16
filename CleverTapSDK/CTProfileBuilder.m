@@ -376,8 +376,10 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
     completion(@{key : @{kCLTAP_COMMAND_DELETE : @(YES)}}, nil, errors);
 }
 
-# pragma mark start multi-value handling
 
+# pragma mark - Multi-Value Handling
+
+# pragma mark Start Multi-Value Handling
 
 + (void)buildSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_SET localDataStore:dataStore completionHandler:completion];
@@ -409,78 +411,6 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
 
 + (void)buildRemoveMultiValues:(NSArray *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
-}
-
-+ (void)buildIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    
-    [self _handleIncrementDecrementValue:value forKey:key
-                                 command:kCLTAP_COMMAND_INCREMENT localDataStore:dataStore
-                       completionHandler:completion];
-}
-
-+ (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    
-    [self _handleIncrementDecrementValue:value forKey:key
-                                 command:kCLTAP_COMMAND_DECREMENT
-                          localDataStore:dataStore completionHandler:completion];
-}
-
-+ (void)_handleIncrementDecrementValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key command:(NSString *_Nonnull)command localDataStore:(CTLocalDataStore *_Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSNumber *_Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors))completion {
-    
-    if ([key length] == 0) {
-        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-        CTValidationResult* error =  [self _generateInvalidMultiValueError: @"Profile key cannot be empty while incrementing/decrementing a property value"];
-        
-        [errors addObject: error];
-        completion(nil, nil, errors);
-        return;
-    }
-    
-    if (value && (value.intValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
-        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be zero or negative", key]];
-        
-        [errors addObject: error];
-        completion(nil, nil, errors);
-        return;
-    }
-    
-    NSDictionary* operatorDict = @{
-        key: @{command: value}
-    };
-    NSNumber *newValue;
-    
-    id cachedValue = [dataStore getProfileFieldForKey: key];
-    if ([cachedValue isKindOfClass: [NSNumber class]]) {
-        
-        NSNumber *cachedNumber = (NSNumber*)cachedValue;
-        CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
-        
-        if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
-            
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
-                newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
-            else
-                newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
-        }
-        else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
-            
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
-                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
-            else
-                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
-        }
-        else if (numberType == kCFNumberDoubleType) {
-            
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
-                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
-            else
-                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
-        }
-        
-    }
-    
-    completion(operatorDict, newValue, nil);
 }
 
 + (CTValidationResult*)_generateEmptyMultiValueErrorForKey:(NSString *)key {
@@ -671,7 +601,7 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
 }
 
 
-# pragma mark - End Multi-Value Handling
+# pragma mark End Multi-Value Handling
 
 + (id)getJSONKey:(id)jsonObject
           forKey:(NSString *)key
@@ -685,5 +615,81 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
     else
         return defValue;
 }
+
+
+#pragma mark - Increment and Decrement Operator Handling
+
++ (void)buildIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    
+    [self _handleIncrementDecrementValue:value forKey:key
+                             withCommand:kCLTAP_COMMAND_INCREMENT
+                          localDataStore:dataStore completionHandler:completion];
+}
+
++ (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    
+    [self _handleIncrementDecrementValue:value forKey:key
+                             withCommand:kCLTAP_COMMAND_DECREMENT
+                          localDataStore:dataStore completionHandler:completion];
+}
+
++ (void)_handleIncrementDecrementValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command localDataStore:(CTLocalDataStore *_Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSNumber *_Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors))completion {
+    
+    if ([key length] == 0) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: @"Profile key cannot be empty while incrementing/decrementing a property value"];
+        
+        [errors addObject: error];
+        completion(nil, nil, errors);
+        return;
+    }
+    
+    if (value && (value.intValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be zero or negative", key]];
+        
+        [errors addObject: error];
+        completion(nil, nil, errors);
+        return;
+    }
+    
+    NSDictionary* operatorDict = @{
+        key: @{command: value}
+    };
+    NSNumber *newValue;
+    
+    id cachedValue = [dataStore getProfileFieldForKey: key];
+    if ([cachedValue isKindOfClass: [NSNumber class]]) {
+        
+        NSNumber *cachedNumber = (NSNumber*)cachedValue;
+        CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
+        
+        if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
+            
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
+                newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+            else
+                newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
+        }
+        else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
+            
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
+                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
+            else
+                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
+        }
+        else if (numberType == kCFNumberDoubleType) {
+            
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
+                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
+            else
+                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
+        }
+        
+    }
+    
+    completion(operatorDict, newValue, nil);
+}
+
 
 @end

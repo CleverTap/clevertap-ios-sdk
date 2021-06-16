@@ -3369,6 +3369,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+- (NSString *)profileGetCleverTapID {
+    return self.deviceInfo.deviceId;
+}
+
+- (NSString *)profileGetCleverTapAttributionIdentifier {
+    return self.deviceInfo.deviceId;
+}
+
+- (id)getProperty:(NSString *)propertyName {
+    return [self profileGet:propertyName];
+}
+
 - (id)profileGet:(NSString *)propertyName {
     if (!self.config.enablePersonalization) {
         return nil;
@@ -3455,7 +3467,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
-// private
+
+#pragma mark - Private Profile API
 
 - (void)_handleIncrementDecrementProfilePushForKey:(NSString*)key updatedValue:(NSNumber*)updatedValue operatorDict: (NSDictionary*)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
     
@@ -3464,7 +3477,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
-    if (!operatorDict || (operatorDict && [[operatorDict allKeys]count] == 0)) {
+    if (!operatorDict || (operatorDict && [[operatorDict allKeys] count] == 0)) {
         CleverTapLogInternal(self.config.logLevel, @"Failed to initialise an operator dictionary");
         return;
     }
@@ -3500,14 +3513,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (errors) {
         [self pushValidationResults:errors];
     }
-}
-
-- (NSString *)profileGetCleverTapID {
-    return self.deviceInfo.deviceId;
-}
-
-- (NSString *)profileGetCleverTapAttributionIdentifier {
-    return self.deviceInfo.deviceId;
 }
 
 
@@ -3951,14 +3956,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (CleverTapEventDetail *)getEventDetail:(NSString *)event {
     return [self eventGetDetail:event];
 }
-
-
-#pragma mark - Profile API
-
-- (id)getProperty:(NSString *)propertyName {
-    return [self profileGet:propertyName];
-}
-
 
 #pragma mark - Session API
 
