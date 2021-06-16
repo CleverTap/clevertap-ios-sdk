@@ -1,0 +1,4 @@
+${PODS_ROOT}/Target Support Files/Pods-CleverTapSDKTests/Pods-CleverTapSDKTests-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework
+${BUILT_PRODUCTS_DIR}/OCMock/OCMock.framework
+${BUILT_PRODUCTS_DIR}/Quick/Quick.framework
