@@ -8,13 +8,14 @@
 #import "CTUtils.h"
 
 // profile commands
-static NSString* const kCLTAP_COMMAND_SET = @"$set";
-static NSString* const kCLTAP_COMMAND_ADD = @"$add";
-static NSString* const kCLTAP_COMMAND_REMOVE = @"$remove";
+static NSString *const kCLTAP_COMMAND_SET = @"$set";
+static NSString *const kCLTAP_COMMAND_ADD = @"$add";
+static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
+static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
+static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
+static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
 
 #define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
-
-static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
 
 @implementation CTProfileBuilder
 
@@ -75,7 +76,7 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
                 if ([vr errorDesc] != nil) {
                     CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
                 }
-            }            
+            }
             // if a reserved key add to systemFields else add to customFields
             KnownField kf = [CTKnownProfileFields getKnownFieldIfPossibleForKey:key];
             if (kf != UNKNOWN) {
@@ -410,7 +411,21 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
 }
 
-+ (void)buildIncrementDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key command:(NSString* _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
++ (void)buildIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    
+    [self _handleIncrementDecrementValue:value forKey:key
+                                 command:kCLTAP_COMMAND_INCREMENT localDataStore:dataStore
+                       completionHandler:completion];
+}
+
++ (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    
+    [self _handleIncrementDecrementValue:value forKey:key
+                                 command:kCLTAP_COMMAND_DECREMENT
+                          localDataStore:dataStore completionHandler:completion];
+}
+
++ (void)_handleIncrementDecrementValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key command:(NSString *_Nonnull)command localDataStore:(CTLocalDataStore *_Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSNumber *_Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors))completion {
     
     if ([key length] == 0) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
@@ -443,21 +458,21 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
         
         if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
             
-            if ([command isEqualToString: CLTAP_COMMAND_INCREMENT])
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
                 newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
             else
                 newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
         }
         else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
             
-            if ([command isEqualToString: CLTAP_COMMAND_INCREMENT])
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
                 newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
             else
                 newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
         }
         else if (numberType == kCFNumberDoubleType) {
             
-            if ([command isEqualToString: CLTAP_COMMAND_INCREMENT])
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
                 newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
             else
                 newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
