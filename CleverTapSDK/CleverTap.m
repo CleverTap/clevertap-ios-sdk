@@ -3484,7 +3484,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
     [profile addEntriesFromDictionary:operatorDict];
-    CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: @", key);
+    CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", key);
     
     [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
     
