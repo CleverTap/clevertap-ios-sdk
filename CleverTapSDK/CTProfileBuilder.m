@@ -380,7 +380,7 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
         return;
     }
     
-    if (value && (value.intValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
+    if (value && (value.longValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
         CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be zero or negative", key]];
         
@@ -400,29 +400,53 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
         CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
         
-        if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
-            
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
-            } else {
-                newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
-            }
-        }
-        else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
-            
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
-            } else {
-                newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
-            }
-        }
-        else if (numberType == kCFNumberDoubleType) {
-            
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
-            } else {
-                newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
-            }
+        switch (numberType) {
+            case kCFNumberSInt8Type:
+            case kCFNumberSInt16Type:
+            case kCFNumberIntType:
+            case kCFNumberSInt32Type:
+            case kCFNumberSInt64Type:
+            case kCFNumberNSIntegerType:
+            case kCFNumberShortType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+                } else {
+                    newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
+                }
+                break;
+            case kCFNumberLongType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithLong: cachedNumber.longValue + value.longValue];
+                } else {
+                    newValue = [NSNumber numberWithLong: cachedNumber.longValue - value.longValue];
+                }
+                break;
+            case kCFNumberLongLongType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithLongLong: cachedNumber.longLongValue + value.longLongValue];
+                } else {
+                    newValue = [NSNumber numberWithLongLong: cachedNumber.longLongValue - value.longLongValue];
+                }
+                break;
+            case kCFNumberFloatType:
+            case kCFNumberFloat32Type:
+            case kCFNumberFloat64Type:
+            case kCFNumberCGFloatType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
+                } else {
+                    newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
+                }
+                break;
+            case kCFNumberDoubleType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
+                } else {
+                    newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
+                }
+                break;
+            default:
+                break;
         }
     }
     
