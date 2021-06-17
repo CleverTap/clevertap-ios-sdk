@@ -402,26 +402,28 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
         
         if (numberType == kCFNumberSInt8Type || numberType == kCFNumberSInt16Type || numberType == kCFNumberSInt32Type || numberType == kCFNumberSInt64Type || numberType == kCFNumberIntType || numberType == kCFNumberNSIntegerType || numberType == kCFNumberLongType || numberType == kCFNumberLongLongType || numberType == kCFNumberShortType) {
             
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
                 newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
-            else
+            } else {
                 newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
+            }
         }
         else if (numberType == kCFNumberFloat32Type || numberType == kCFNumberFloat64Type || numberType == kCFNumberFloatType || numberType == kCFNumberCGFloatType) {
             
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
                 newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
-            else
+            } else {
                 newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
+            }
         }
         else if (numberType == kCFNumberDoubleType) {
             
-            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT])
+            if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
                 newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
-            else
+            } else {
                 newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
+            }
         }
-        
     }
     
     completion(operatorDict, newValue, nil);

@@ -3470,7 +3470,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - Private Profile API
 
-- (void)_handleIncrementDecrementProfilePushForKey:(NSString*)key updatedValue:(NSNumber*)updatedValue operatorDict: (NSDictionary*)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
+- (void)_handleIncrementDecrementProfilePushForKey:(NSString *)key updatedValue:(NSNumber *)updatedValue operatorDict: (NSDictionary *)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
     
     if (errors) {
         [self pushValidationResults:errors];
@@ -3484,7 +3484,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
     [profile addEntriesFromDictionary:operatorDict];
-    CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", key);
+    CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", operatorDict);
     
     [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
     

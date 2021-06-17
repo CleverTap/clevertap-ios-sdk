@@ -236,11 +236,11 @@
 }
 
 - (void)incrementUserProfileProperty {
-    [[CleverTap sharedInstance] profileIncrementValueBy: @1 forKey: @"score"];
+    [[CleverTap sharedInstance] profileIncrementValueBy: @3 forKey: @"score"];
 }
 
 - (void)decrementUserProfileProperty {
-    [[CleverTap sharedInstance] profileDecrementValueBy: @1 forKey: @"score"];
+    [[CleverTap sharedInstance] profileDecrementValueBy: @7 forKey: @"score"];
 }
 
     
