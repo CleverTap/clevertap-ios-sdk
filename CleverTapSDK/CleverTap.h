@@ -24,6 +24,8 @@
 @protocol CleverTapInAppNotificationDelegate;
 #endif
 
+@protocol CleverTapURLDelegate;
+
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
 @class CleverTapInstanceConfig;
@@ -38,6 +40,12 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
     CleverTapLogInfo = 0,
     CleverTapLogDebug = 1
 };
+
+typedef enum {
+    CleverTapPush = 0,
+    CleverTapAppInbox = 1,
+    CleverTapInAppNotification = 2
+} CleverTapFeature;
 
 @interface CleverTap : NSObject
 
@@ -903,6 +911,8 @@ This sets the CleverTapPushNotificationDelegate.
  */
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
 #endif
+
+- (void)setURLDelegate:(id <CleverTapURLDelegate> _Nullable)delegate;
 
 /* ------------------------------------------------------------------------------------------------------
  * Notifications

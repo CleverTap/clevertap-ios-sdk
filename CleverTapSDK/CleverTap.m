@@ -65,6 +65,8 @@ static NSArray *sslCertNames;
 #import "CleverTapProductConfigPrivate.h"
 #import "CTProductConfigController.h"
 
+#import "CleverTapURLDelegate.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -222,6 +224,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, weak) id <CleverTapSyncDelegate> syncDelegate;
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
+@property (atomic, weak) id <CleverTapURLDelegate> urlDelegate;
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -244,6 +247,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize syncDelegate=_syncDelegate;
 @synthesize pushNotificationDelegate=_pushNotificationDelegate;
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
+@synthesize urlDelegate = _urlDelegate;
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
 @synthesize firstRequestInSession=_firstRequestInSession;
@@ -1485,7 +1489,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             // should we open a deep link ?
             // if the app is in foreground and force flag is off, then don't fire any deep link
-            if (inForeground && !openInForeground) {
+            if (self->_urlDelegate && [self->_urlDelegate respondsToSelector: @selector(shouldHandleURL: forFeature:)]) {
+                
+                NSURL *url = [self urlForNotification: notification];
+                if (url && [self->_urlDelegate shouldHandleURL: url forFeature: CleverTapPush]) {
+                    [self _checkAndFireDeepLinkForNotification:notification];
+                }
+            }
+            else if (inForeground && !openInForeground) {
                 CleverTapLogDebug(self.config.logLevel, @"%@: app in foreground and openInForeground flag is FALSE, will not process any deep link for notification: %@", self, notification);
             } else {
                 [self _checkAndFireDeepLinkForNotification:notification];
@@ -1540,42 +1551,48 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (NSURL*)urlForNotification:(NSDictionary *)notification {
+    NSString *dl = (NSString *) notification[@"wzrk_dl"];
+    if (dl) {
+        return [NSURL URLWithString:dl];
+    }
+    return nil;
+}
+
 - (void)_checkAndFireDeepLinkForNotification:(NSDictionary *)notification {
     UIApplication *application = [[self class] getSharedApplication];
     if (application != nil) {
         @try {
-            NSString *dl = (NSString *) notification[@"wzrk_dl"];
-            if (dl) {
-                __block NSURL *dlURL = [NSURL URLWithString:dl];
-                if (dlURL) {
-                    [[self class] runSyncMainQueue:^{
-                        CleverTapLogDebug(self.config.logLevel, @"%@: Firing deep link: %@", self, dl);
-                        if (@available(iOS 10.0, *)) {
-                            if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                                NSMethodSignature *signature = [UIApplication
-                                                                instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                                NSInvocation *invocation = [NSInvocation
-                                                            invocationWithMethodSignature:signature];
-                                [invocation setTarget:application];
-                                [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                                NSDictionary *options = @{};
-                                id completionHandler = nil;
-                                [invocation setArgument:&dlURL atIndex:2];
-                                [invocation setArgument:&options atIndex:3];
-                                [invocation setArgument:&completionHandler atIndex:4];
-                                [invocation invoke];
-                            } else {
-                                if ([application respondsToSelector:@selector(openURL:)]) {
-                                    [application performSelector:@selector(openURL:) withObject:dlURL];
-                                }
-                            }
+            __block NSURL *dlURL = [self urlForNotification: notification];
+            if (dlURL) {
+                [[self class] runSyncMainQueue:^{
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Firing deep link: %@", self, dlURL.absoluteString);
+                    if (@available(iOS 10.0, *)) {
+                        if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                            NSMethodSignature *signature = [UIApplication
+                                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                            NSInvocation *invocation = [NSInvocation
+                                                        invocationWithMethodSignature:signature];
+                            [invocation setTarget:application];
+                            [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                            NSDictionary *options = @{};
+                            id completionHandler = nil;
+                            [invocation setArgument:&dlURL atIndex:2];
+                            [invocation setArgument:&options atIndex:3];
+                            [invocation setArgument:&completionHandler atIndex:4];
+                            [invocation invoke];
                         } else {
                             if ([application respondsToSelector:@selector(openURL:)]) {
                                 [application performSelector:@selector(openURL:) withObject:dlURL];
                             }
                         }
-                    }];
-                }
+                    } else {
+                        if ([application respondsToSelector:@selector(openURL:)]) {
+                            [application performSelector:@selector(openURL:) withObject:dlURL];
+                        }
+                    }
+                }];
+                
             }
         }
         @catch (NSException *exception) {
@@ -1911,7 +1928,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (buttonCustomExtras && buttonCustomExtras.count > 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
         [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
-    } else if (ctaURL) {
+    }
+    else if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL: forFeature:)] && [_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapInAppNotification] && ctaURL) {
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         [[self class] runSyncMainQueue:^{
@@ -3826,6 +3844,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _inAppNotificationDelegate;
 }
 
+- (void)setURLDelegate:(id <CleverTapURLDelegate>)delegate {
+//    if ([[self class] runningInsideAppExtension]){
+//        CleverTapLogDebug(self.config.logLevel, @"%@: setInAppNotificationDelegate is a no-op in an app extension.", self);
+//        return;
+//    }
+    if (delegate && [delegate conformsToProtocol: @protocol(CleverTapURLDelegate)]) {
+        _urlDelegate = delegate;
+    }
+    else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap URL Delegate does not conform to the CleverTapURLDelegate protocol", self);
+    }
+}
+
+
 + (void)enablePersonalization {
     [self setPersonalizationEnabled:true];
 }
@@ -4165,7 +4197,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     
-    if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
+    if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL:forFeature:)] && [_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapAppInbox] && ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
         [[self class] runSyncMainQueue:^{
             [self openURL:ctaURL forModule:@"Inbox message"];
