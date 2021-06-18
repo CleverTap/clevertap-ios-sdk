@@ -1493,7 +1493,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 
                 NSURL *url = [self urlForNotification: notification];
                 if (url && [self->_urlDelegate shouldHandleURL: url forFeature: CleverTapPush]) {
-                    [self _checkAndFireDeepLinkForNotification:notification];
+                    [self _checkAndFireDeepLinkForNotification: notification];
                 }
             }
             else if (inForeground && !openInForeground) {
@@ -1929,9 +1929,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
         [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
     }
-    else if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL: forFeature:)] && [_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapInAppNotification] && ctaURL) {
+    else if (ctaURL) {
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL: forFeature:)] && ![_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapInAppNotification]) {
+            return;
+        }
         [[self class] runSyncMainQueue:^{
             [self openURL:ctaURL forModule:@"InApp"];
         }];
@@ -4197,8 +4200,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     
-    if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL:forFeature:)] && [_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapAppInbox] && ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
+    if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
+        if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL:forFeature:)] && ![_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapAppInbox]) {
+            return;
+        }
         [[self class] runSyncMainQueue:^{
             [self openURL:ctaURL forModule:@"Inbox message"];
         }];
