@@ -3369,6 +3369,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+- (NSString *)profileGetCleverTapID {
+    return self.deviceInfo.deviceId;
+}
+
+- (NSString *)profileGetCleverTapAttributionIdentifier {
+    return self.deviceInfo.deviceId;
+}
+
+- (id)getProperty:(NSString *)propertyName {
+    return [self profileGet:propertyName];
+}
+
 - (id)profileGet:(NSString *)propertyName {
     if (!self.config.enablePersonalization) {
         return nil;
@@ -3398,36 +3410,90 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildSetMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildSetMultiValues:values forKey:key
+                           localDataStore:self.localDataStore
+                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileAddMultiValue:(NSString *)value forKey:(NSString *)key {
-    [CTProfileBuilder buildAddMultiValue:value forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildAddMultiValue:value forKey:key
+                          localDataStore:self.localDataStore
+                       completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildAddMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildAddMultiValues:values forKey:key
+                           localDataStore:self.localDataStore
+                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValue:(NSString *)value forKey:(NSString *)key {
-    [CTProfileBuilder buildRemoveMultiValue:value forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildRemoveMultiValue:value forKey:key
+                             localDataStore:self.localDataStore
+                          completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildRemoveMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildRemoveMultiValues:values forKey:key
+                              localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
-// private
+- (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
+    [CTProfileBuilder buildIncrementValueBy: value forKey: key
+                             localDataStore: _localDataStore
+                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+    }];
+}
+
+- (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
+    [CTProfileBuilder buildDecrementValueBy: value forKey: key
+                             localDataStore: _localDataStore
+                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+    }];
+}
+
+
+#pragma mark - Private Profile API
+
+- (void)_handleIncrementDecrementProfilePushForKey:(NSString *)key updatedValue:(NSNumber *)updatedValue operatorDict: (NSDictionary *)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
+    
+    if (errors) {
+        [self pushValidationResults:errors];
+        return;
+    }
+    
+    if (!operatorDict || (operatorDict && [[operatorDict allKeys] count] == 0)) {
+        CleverTapLogInternal(self.config.logLevel, @"Failed to initialise an operator dictionary");
+        return;
+    }
+    
+    NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
+    [profile addEntriesFromDictionary:operatorDict];
+    CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", operatorDict);
+    
+    [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
+    
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[@"profile"] = profile;
+    [self queueEvent:event withType:CleverTapEventTypeProfile];
+    
+}
+
 - (void)_handleMultiValueProfilePush:(NSDictionary*)customFields updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
     if (customFields && [[customFields allKeys] count] > 0) {
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
@@ -3447,14 +3513,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (errors) {
         [self pushValidationResults:errors];
     }
-}
-
-- (NSString *)profileGetCleverTapID {
-    return self.deviceInfo.deviceId;
-}
-
-- (NSString *)profileGetCleverTapAttributionIdentifier {
-    return self.deviceInfo.deviceId;
 }
 
 
@@ -3898,14 +3956,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (CleverTapEventDetail *)getEventDetail:(NSString *)event {
     return [self eventGetDetail:event];
 }
-
-
-#pragma mark - Profile API
-
-- (id)getProperty:(NSString *)propertyName {
-    return [self profileGet:propertyName];
-}
-
 
 #pragma mark - Session API
 
