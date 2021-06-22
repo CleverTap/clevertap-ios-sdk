@@ -130,6 +130,12 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenUnregister,
 };
 
+typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
+    CleverTapInAppSuspend,
+    CleverTapInAppDiscard,
+    CleverTapInAppResume,
+};
+
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 @interface CleverTapInboxMessage ()
 - (instancetype) init __unavailable;
@@ -194,6 +200,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
 @property (nonatomic, assign) int sendQueueFails;
 
+@property (atomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 @property (nonatomic, assign) BOOL pushedAPNSId;
 @property (atomic, assign) BOOL currentUserOptedOut;
 @property (atomic, assign) BOOL offline;
@@ -1707,6 +1714,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_showNotificationIfAvailable {
     if ([[self class] runningInsideAppExtension]) return;
     
+    //If inAppRenderingStatus is suspended do not continue showing inApps
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) return;
+    
     @try {
         NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]]];
         if ([inapps count] < 1) {
@@ -2217,6 +2227,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![[self class] runningInsideAppExtension]) {
         [self.inAppFCManager resetSession];
     }
+    //For each new session resume inApps
+    [self resumeInApp];
 #endif
 }
 
@@ -2785,7 +2797,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [self.inAppFCManager updateLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
                     
                     NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
-                    if (inappsJSON) {
+                    
+                    //If inAppRenderingStatus is discard do not continue saving and displaying inApps
+                    if (inappsJSON && self.inAppRenderingStatus != CleverTapInAppDiscard) {
                         NSMutableArray *inappNotifs;
                         @try {
                             inappNotifs = [[NSMutableArray alloc] initWithArray:inappsJSON];
@@ -3691,6 +3705,35 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (void)suspendInApp {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInApp is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppSuspend;
+    }
+}
+
+- (void)resumeInApp {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInApp is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppResume;
+    }
+}
+
+- (void)discardInApp {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInApp is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppDiscard;
+    }
+}
 
 # pragma mark - Referrer Tracking
 
