@@ -540,6 +540,28 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
+ Method for incrementing a value for a single-value profile property (if it exists).
+ 
+ @param key       key string
+ @param value     value number
+ */
+- (void)profileIncrementValueBy:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key;
+
+/*!
+ @method
+ 
+ @abstract
+ Method for decrementing a value for a single-value profile property (if it exists).
+ 
+ @param key       key string
+ @param value     value number
+ */
+- (void)profileDecrementValueBy:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key;
+
+/*!
+ @method
+ 
+ @abstract
  Get a user profile property.
  
  @discussion
