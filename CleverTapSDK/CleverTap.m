@@ -200,7 +200,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
 @property (nonatomic, assign) int sendQueueFails;
 
-@property (atomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
+@property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 @property (nonatomic, assign) BOOL pushedAPNSId;
 @property (atomic, assign) BOOL currentUserOptedOut;
 @property (atomic, assign) BOOL offline;
@@ -563,7 +563,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
-    return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    __block CleverTap *instance = [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    //Reset resume here to handle it on device level
+    [instance resumeInAppNotifications];
+    return instance;
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -2227,8 +2230,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![[self class] runningInsideAppExtension]) {
         [self.inAppFCManager resetSession];
     }
-    //For each new session resume inApps
-    [self resumeInApp];
 #endif
 }
 
@@ -3763,9 +3764,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (void)suspendInApp {
+- (void)suspendInAppNotifications {
     if ([[self class] runningInsideAppExtension]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInApp is a no-op in an app extension.", self);
+        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInAppNotifications is a no-op in an app extension.", self);
         return;
     }
     if (!self.config.analyticsOnly) {
@@ -3773,9 +3774,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (void)resumeInApp {
+- (void)resumeInAppNotifications {
     if ([[self class] runningInsideAppExtension]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInApp is a no-op in an app extension.", self);
+        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);
         return;
     }
     if (!self.config.analyticsOnly) {
@@ -3783,9 +3784,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (void)discardInApp {
+- (void)discardInAppNotifications {
     if ([[self class] runningInsideAppExtension]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInApp is a no-op in an app extension.", self);
+        CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
         return;
     }
     if (!self.config.analyticsOnly) {

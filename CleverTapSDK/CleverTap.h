@@ -1025,28 +1025,31 @@ This sets the CleverTapPushNotificationDelegate.
  @method
  
  @abstract
- InApps will be suspended until 'resumeInApp' is called.
- Inapps suspension will be disabled on app kill / session reset.
+ Suspends and saves inApp notifications until 'resumeInAppNotifications' is called for current session.
+ 
+ On app kill / session reset inApp notifications suspension is disabled. Pending inApp notifications are not displayed.
  */
-- (void)suspendInApp;
+- (void)suspendInAppNotifications;
 
 /*!
  @method
  
  @abstract
- InApps will be discarded until 'resumeInApp' is called.
- Inapps discard will be disabled on app kill / session reset.
+ Discards inApp notifications until 'resumeInAppNotifications' is called for current session.
+ 
+ On app kill / session reset inApp notifications discard is disabled. Pending inApp notifications are not displayed.
  */
-- (void)discardInApp;
+- (void)discardInAppNotifications;
 
 /*!
  @method
  
  @abstract
- Resume displaying inApps.
- Note: All suspended inApps will be displayed in succession.
+ Resumes displaying inApps notifications.
+ 
+ On app kill / session reset inApp notifications displaying is resumed. Pending inApp notifications are not displayed.
  */
-- (void)resumeInApp;
+- (void)resumeInAppNotifications;
 
 #endif
 
