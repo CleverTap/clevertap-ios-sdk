@@ -401,8 +401,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 - (NSString *)deviceName {
-    if (!_deviceName) {
-        _deviceName = [UIDevice currentDevice].name;
+    @synchronized (self) {
+        if (!_deviceName) {
+            _deviceName = [UIDevice currentDevice].name;
+        }
     }
     return _deviceName;
 }
