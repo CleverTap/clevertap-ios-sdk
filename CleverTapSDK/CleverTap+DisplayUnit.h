@@ -103,7 +103,7 @@
 
 typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
 
-@interface CleverTap (DisplayUnitTest)
+@interface CleverTap (DisplayUnit)
 
 /*!
  @method
