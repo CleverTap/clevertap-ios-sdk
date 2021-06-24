@@ -1,7 +1,7 @@
-#import <Foundation/Foundation.h>
+@import Foundation;
 #import "CleverTap.h"
 
-@interface CleverTap (InAppNotification)
+@interface CleverTap (InApps)
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 /*!
