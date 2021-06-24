@@ -16,4 +16,5 @@ framework module CleverTapSDK {
     header "CleverTapJSInterface.h"
     header "CleverTap+InApps.h"
     export *
+    module * { export * }
 }
