@@ -37,6 +37,7 @@
 #import "CTCoverImageViewController.h"
 #import "CTInterstitialImageViewController.h"
 #import "CTHalfInterstitialImageViewController.h"
+#import "CleverTap+InApps.h"
 #endif
 
 #import "CTLocationManager.h"
@@ -563,10 +564,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
-    __block CleverTap *instance = [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
-    //Reset resume here to handle it on device level
-    [instance resumeInAppNotifications];
-    return instance;
+    return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -587,6 +585,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
             _instances[config.accountId] = instance;
             [instance recordDeviceErrors];
+            //Reset resume here to handle it on device level
+            [instance resumeInAppNotifications];
         }
     } else {
         if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
