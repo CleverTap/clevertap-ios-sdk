@@ -1489,10 +1489,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             // should we open a deep link ?
             // if the app is in foreground and force flag is off, then don't fire any deep link
-            if (self->_urlDelegate && [self->_urlDelegate respondsToSelector: @selector(shouldHandleURL: forFeature:)]) {
+            if (self->_urlDelegate && [self->_urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL: forFeature:)]) {
                 
                 NSURL *url = [self urlForNotification: notification];
-                if (url && [self->_urlDelegate shouldHandleURL: url forFeature: CleverTapPush]) {
+                if (url && [self->_urlDelegate shouldHandleCleverTapURL: url forFeature: CleverTapPush]) {
                     [self _checkAndFireDeepLinkForNotification: notification];
                 }
             }
@@ -1932,7 +1932,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     else if (ctaURL) {
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-        if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL: forFeature:)] && ![_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapInAppNotification]) {
+        if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL: forFeature:)] && ![_urlDelegate shouldHandleCleverTapURL: ctaURL forFeature: CleverTapInAppNotification]) {
             return;
         }
         [[self class] runSyncMainQueue:^{
@@ -4202,7 +4202,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
-        if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleURL:forFeature:)] && ![_urlDelegate shouldHandleURL: ctaURL forFeature: CleverTapAppInbox]) {
+        if (_urlDelegate && [_urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL:forFeature:)] && ![_urlDelegate shouldHandleCleverTapURL: ctaURL forFeature: CleverTapAppInbox]) {
             return;
         }
         [[self class] runSyncMainQueue:^{

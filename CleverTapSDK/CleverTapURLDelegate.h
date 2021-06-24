@@ -1,11 +1,3 @@
-//
-//  Header.h
-//  CleverTapSDK
-//
-//  Created by Akash Malhotra on 16/06/21.
-//  Copyright © 2021 CleverTap. All rights reserved.
-//
-
 #import <Foundation/Foundation.h>
 
 @protocol CleverTapURLDelegate <NSObject>
@@ -28,6 +20,6 @@
  @param url                     the NSURL object
  @param feature                 the CleverTapFeature enum value
  */
-- (BOOL)shouldHandleURL: (NSURL* _Nullable )url forFeature: (CleverTapFeature)feature;
+- (BOOL)shouldHandleCleverTapURL: (NSURL* _Nullable )url forFeature: (CleverTapFeature)feature;
 
 @end
