@@ -37,7 +37,7 @@
 #import "CTCoverImageViewController.h"
 #import "CTInterstitialImageViewController.h"
 #import "CTHalfInterstitialImageViewController.h"
-#import "CleverTap+InApps.h"
+#import "CleverTap+InAppNotifications.h"
 #endif
 
 #import "CTLocationManager.h"
@@ -3782,6 +3782,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!self.config.analyticsOnly) {
         self.inAppRenderingStatus = CleverTapInAppResume;
     }
+    [self showInAppNotificationIfAny];
 }
 
 - (void)discardInAppNotifications {

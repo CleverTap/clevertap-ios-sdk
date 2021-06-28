@@ -907,6 +907,25 @@ This sets the CleverTapPushNotificationDelegate.
 
 - (void)setPushNotificationDelegate:(id <CleverTapPushNotificationDelegate> _Nullable)delegate;
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+/*!
+ 
+ @method
+ 
+ @abstract
+ The `CleverTapInAppNotificationDelegate` protocol provides methods for notifying
+ your application (the adopting delegate) about in-app notifications.
+ 
+ @see CleverTapInAppNotificationDelegate.h
+ 
+ @discussion
+ This sets the CleverTapInAppNotificationDelegate.
+ 
+ @param delegate     an object conforming to the CleverTapInAppNotificationDelegate Protocol
+ */
+- (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
+#endif
+
 /* ------------------------------------------------------------------------------------------------------
  * Notifications
  */
@@ -991,6 +1010,18 @@ This sets the CleverTapPushNotificationDelegate.
  @param payload  notification payload
  */
 - (BOOL)isCleverTapNotification:(NSDictionary *_Nonnull)payload;
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+/*!
+ @method
+ 
+ @abstract
+ Manually initiate the display of any pending in app notifications.
+ 
+ */
+- (void)showInAppNotificationIfAny __attribute__((deprecated("Use resumeInAppNotifications to show pending InApp notifications. This will be removed soon.")));
+
+#endif
 
 /* ------------------------------------------------------------------------------------------------------
  * Referrer tracking

@@ -1,35 +1,9 @@
 @import Foundation;
 #import "CleverTap.h"
 
-@interface CleverTap (InApps)
+@interface CleverTap (InAppNotifications)
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-/*!
- 
- @method
- 
- @abstract
- The `CleverTapInAppNotificationDelegate` protocol provides methods for notifying
- your application (the adopting delegate) about in-app notifications.
- 
- @see CleverTapInAppNotificationDelegate.h
- 
- @discussion
- This sets the CleverTapInAppNotificationDelegate.
- 
- @param delegate     an object conforming to the CleverTapInAppNotificationDelegate Protocol
- */
-- (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
-
-/*!
- @method
- 
- @abstract
- Manually initiate the display of any pending in app notifications.
- 
- */
-- (void)showInAppNotificationIfAny;
-
 /*!
  @method
  
