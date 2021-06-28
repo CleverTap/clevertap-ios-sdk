@@ -10,7 +10,7 @@ s.requires_arc              = true
 s.module_name               = 'CleverTapSDK'
 s.resources                 = 'CleverTapSDK/*.crt'
 s.ios.dependency             'SDWebImage', '~> 5.1'
-s.ios.resources             = 'CleverTapSDK/**/*.{png,xib}', 'CleverTapSDK/**/*.xcdatamodeld'
+s.resource_bundle           = 'CleverTapSDK/**/*.{png,xib}', 'CleverTapSDK/**/*.xcdatamodeld'
 s.ios.deployment_target     = '9.0'
 s.ios.source_files          = 'CleverTapSDK/**/*.{h,m}'
 s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTap+SSLPinning.h','CleverTapSDK/CleverTap+Inbox.h', 'CleverTapSDK/CleverTapInstanceConfig.h', 'CleverTapSDK/CleverTapBuildInfo.h', 'CleverTapSDK/CleverTapEventDetail.h', 'CleverTapSDK/CleverTapInAppNotificationDelegate.h', 'CleverTapSDK/CleverTapSyncDelegate.h', 'CleverTapSDK/CleverTapTrackedViewController.h', 'CleverTapSDK/CleverTapUTMDetail.h', 'CleverTapSDK/CleverTapJSInterface.h', 'CleverTapSDK/CleverTap+DisplayUnit.h', 'CleverTapSDK/CleverTap+FeatureFlags.h', 'CleverTapSDK/CleverTap+ProductConfig.h', 'CleverTapSDK/CleverTapPushNotificationDelegate.h'
