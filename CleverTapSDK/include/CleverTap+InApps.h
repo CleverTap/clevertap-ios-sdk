@@ -1,1 +1,1 @@
-/Users/sonal/Documents/Clevertap/clevertap-ios-sdk/CleverTapSDK/CleverTap+InApps.h
+../CleverTap+InApps.h
