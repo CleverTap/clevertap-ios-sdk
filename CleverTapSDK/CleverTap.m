@@ -3845,10 +3845,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)setURLDelegate:(id <CleverTapURLDelegate>)delegate {
-    //    if ([[self class] runningInsideAppExtension]){
-    //        CleverTapLogDebug(self.config.logLevel, @"%@: setInAppNotificationDelegate is a no-op in an app extension.", self);
-    //        return;
-    //    }
     if (delegate && [delegate conformsToProtocol: @protocol(CleverTapURLDelegate)]) {
         _urlDelegate = delegate;
     }

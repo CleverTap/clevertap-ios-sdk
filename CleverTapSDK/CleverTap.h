@@ -911,6 +911,20 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
 #endif
 
+/*!
+ 
+ @method
+ 
+ @abstract
+ The `CleverTapURLDelegate` protocol provides a method for the confirming class to implement custom handling for URLs in case of in-app notification CTAs, push notifications and App inbox.
+ 
+ @see CleverTapURLDelegate.h
+ 
+ @discussion
+ This sets the CleverTapURLDelegate.
+ 
+ @param delegate     an object conforming to the CleverTapURLDelegate Protocol
+ */
 - (void)setURLDelegate:(id <CleverTapURLDelegate> _Nullable)delegate;
 
 /* ------------------------------------------------------------------------------------------------------
