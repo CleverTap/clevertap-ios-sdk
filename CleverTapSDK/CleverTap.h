@@ -925,7 +925,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param delegate     an object conforming to the CleverTapURLDelegate Protocol
  */
-- (void)setURLDelegate:(id <CleverTapURLDelegate> _Nullable)delegate;
+- (void)setUrlDelegate:(id <CleverTapURLDelegate> _Nullable)delegate;
 
 /* ------------------------------------------------------------------------------------------------------
  * Notifications
