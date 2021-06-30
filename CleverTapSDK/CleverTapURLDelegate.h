@@ -13,13 +13,13 @@
  
  Use the following enum values of type CleverTapFeature to optionally implement URL handling based on the corresponding CleverTap feature.
  
- CleverTapPush - Remote Notifications,
+ CleverTapPushNotification - Remote Notifications,
  CleverTapAppInbox - App Inbox,
- CleverTapInAppNotification - In-App Notifications
+ CleverTapInAppNotification - In-App Notification
  
  @param url                     the NSURL object
  @param feature                 the CleverTapFeature enum value
  */
-- (BOOL)shouldHandleCleverTapURL: (NSURL* _Nullable )url forFeature: (CleverTapFeature)feature;
+- (BOOL)shouldHandleCleverTapURL:(NSURL *_Nullable )url forChannel:(CleverTapChannel)channel;
 
 @end
