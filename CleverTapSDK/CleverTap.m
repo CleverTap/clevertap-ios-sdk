@@ -296,8 +296,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [[self sharedInstance] notifyApplicationLaunchedWithOptions:launchOptions];
         return;
     }
-    for (CleverTap *instance in [_instances allValues]) {
-        [instance notifyApplicationLaunchedWithOptions:launchOptions];
+    
+    if ([_instances respondsToSelector: @selector(enumerateKeysAndObjectsUsingBlock:)]) {
+        [_instances enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, CleverTap* _Nonnull instance, BOOL * _Nonnull stop) {
+            if ([instance respondsToSelector: @selector(notifyApplicationLaunchedWithOptions:)]) {
+                [instance notifyApplicationLaunchedWithOptions:launchOptions];
+            }
+        }];
     }
 }
 
@@ -3609,17 +3614,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
         notification = notificationData;
     }
-    [self runSerialAsync:^{
-        [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
-            if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
-                [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
-            };
-            if (errors) {
-                [self pushValidationResults:errors];
-            }
+    if (notification) {
+        [self runSerialAsync:^{
+            [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+                if (event) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                    [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
+                };
+                if (errors) {
+                    [self pushValidationResults:errors];
+                }
+            }];
         }];
-    }];
+    }
 #endif
 }
 
