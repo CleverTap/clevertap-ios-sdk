@@ -10,7 +10,7 @@
  @abstract
  Suspends and saves inApp notifications until 'resumeInAppNotifications' is called for current session.
  
- On app kill / session reset inApp notifications suspension is disabled. Pending inApp notifications are not displayed.
+ Automatically resumes InApp notifications display on CleverTap shared instance creation. Pending inApp notifications are displayed only for current session.
  */
 - (void)suspendInAppNotifications;
 
@@ -20,7 +20,7 @@
  @abstract
  Discards inApp notifications until 'resumeInAppNotifications' is called for current session.
  
- On app kill / session reset inApp notifications discard is disabled. Pending inApp notifications are not displayed.
+ Automatically resumes InApp notifications display on CleverTap shared instance creation. Pending inApp notifications are not displayed.
  */
 - (void)discardInAppNotifications;
 
@@ -29,8 +29,6 @@
  
  @abstract
  Resumes displaying inApps notifications.
- 
- On app kill / session reset inApp notifications displaying is resumed. Pending inApp notifications are not displayed.
  */
 - (void)resumeInAppNotifications;
 
