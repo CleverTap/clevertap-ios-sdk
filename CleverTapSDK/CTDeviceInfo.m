@@ -141,8 +141,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 + (NSString *)getPlatformName {
     struct utsname systemInfo;
     uname(&systemInfo);
-    
-    return [NSString stringWithCString:systemInfo.machine encoding:NSUTF8StringEncoding];
+    return @(systemInfo.machine);
 }
 
 - (void)initDeviceID:(NSString *)cleverTapID {
@@ -371,8 +370,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 - (NSString *)model {
-    if (!_model) {
-        _model = [[self class] getPlatformName];
+    @synchronized (self) {
+        if (!_model) {
+            _model = [[self class] getPlatformName];
+        }
     }
     return _model;
 }
@@ -400,8 +401,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 - (NSString *)deviceName {
-    if (!_deviceName) {
-        _deviceName = [UIDevice currentDevice].name;
+    @synchronized (self) {
+        if (!_deviceName) {
+            _deviceName = [UIDevice currentDevice].name;
+        }
     }
     return _deviceName;
 }
