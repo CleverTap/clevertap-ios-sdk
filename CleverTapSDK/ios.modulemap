@@ -9,6 +9,7 @@ framework module CleverTapSDK {
     header "CleverTapEventDetail.h"
     header "CleverTapInAppNotificationDelegate.h"
     header "CleverTapPushNotificationDelegate.h"
+    header "CleverTapURLDelegate.h"
     header "CleverTapSyncDelegate.h"
     header "CleverTapUTMDetail.h"
     header "CleverTapTrackedViewController.h"
