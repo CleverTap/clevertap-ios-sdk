@@ -168,6 +168,7 @@
 		49E2B18824237DCB00AD704B /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -434,6 +435,7 @@
 		4987C667251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImageInAppViewControllerPrivate.h; sourceTree = "<group>"; };
 		49E2B18124178E7400AD704B /* CleverTapConfigValue.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTapConfigValue.m; sourceTree = "<group>"; };
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
+		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
@@ -828,6 +830,7 @@
 				D0213D4A207D905700FE5740 /* CleverTapEventDetail.m */,
 				D0213D44207D905700FE5740 /* CleverTapSyncDelegate.h */,
 				F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */,
+				4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */,
 				D0213D43207D905700FE5740 /* CleverTapInAppNotificationDelegate.h */,
 				D0213D45207D905700FE5740 /* CleverTapTrackedViewController.h */,
 				D0213D46207D905700FE5740 /* CleverTapTrackedViewController.m */,
@@ -970,6 +973,7 @@
 			files = (
 				57D2E1C82684B1630068E45A /* CleverTap.h in Headers */,
 				D0CACF8B20B8923700A02327 /* CleverTap+SSLPinning.h in Headers */,
+				4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */,
 				071EB4F3217F6427008F0FAB /* CTInAppNotification.h in Headers */,
 				F9356ED42487FE4600B4F507 /* CleverTapPushNotificationDelegate.h in Headers */,
 				07B9453B219EA34300D4C542 /* CTInboxSimpleMessageCell.h in Headers */,

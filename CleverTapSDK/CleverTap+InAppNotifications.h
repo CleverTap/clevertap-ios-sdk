@@ -28,7 +28,7 @@
  @method
  
  @abstract
- Resumes displaying inApps notifications.
+ Resumes displaying inApps notifications and shows pending inApp notifications if any.
  */
 - (void)resumeInAppNotifications;
 
