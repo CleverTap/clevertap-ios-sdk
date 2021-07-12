@@ -587,7 +587,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
             _instances[config.accountId] = instance;
             [instance recordDeviceErrors];
-            //Reset resume here to handle it on device level
+            //Set resume status for inApp notifications to handle it on device level
             [instance _resumeInAppNotifications];
         }
     } else {
@@ -1730,7 +1730,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_showNotificationIfAvailable {
     if ([[self class] runningInsideAppExtension]) return;
     
-    //If inAppRenderingStatus is suspended do not continue showing inApps
     if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
         return;
@@ -2819,8 +2818,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     
                     NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
                     
-                    //If inAppRenderingStatus is discard do not continue saving and displaying inApps
-                    if (inappsJSON && self.inAppRenderingStatus != CleverTapInAppDiscard) {
+                    if (self.inAppRenderingStatus == CleverTapInAppDiscard) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
+                        return;
+                    }
+                    if (inappsJSON) {
                         NSMutableArray *inappNotifs;
                         @try {
                             inappNotifs = [[NSMutableArray alloc] initWithArray:inappsJSON];
