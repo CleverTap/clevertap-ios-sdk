@@ -1649,7 +1649,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark Public Method
 
 - (void)showInAppNotificationIfAny {
-    [self _showNotificationIfAvailable];
+    [self _showInAppNotificationIfAny];
 }
 
 - (void)suspendInAppNotifications {
