@@ -3776,7 +3776,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)showInAppNotificationIfAny {
     if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: showInappNotificationIfAny is a no-op in an app extension.", self);
+        CleverTapLogDebug(self.config.logLevel, @"%@: showInAppNotificationIfAny is a no-op in an app extension.", self);
         return;
     }
     if (!self.config.analyticsOnly) {
