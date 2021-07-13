@@ -306,8 +306,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [[self sharedInstance] notifyApplicationLaunchedWithOptions:launchOptions];
         return;
     }
-    for (CleverTap *instance in [_instances allValues]) {
-        [instance notifyApplicationLaunchedWithOptions:launchOptions];
+    
+    if ([_instances respondsToSelector: @selector(enumerateKeysAndObjectsUsingBlock:)]) {
+        [_instances enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, CleverTap* _Nonnull instance, BOOL * _Nonnull stop) {
+            if ([instance respondsToSelector: @selector(notifyApplicationLaunchedWithOptions:)]) {
+                [instance notifyApplicationLaunchedWithOptions:launchOptions];
+            }
+        }];
     }
 }
 
@@ -566,7 +571,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
-    return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -3704,17 +3709,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
         notification = notificationData;
     }
-    [self runSerialAsync:^{
-        [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
-            if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
-                [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
-            };
-            if (errors) {
-                [self pushValidationResults:errors];
-            }
+    if (notification) {
+        [self runSerialAsync:^{
+            [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+                if (event) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                    [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
+                };
+                if (errors) {
+                    [self pushValidationResults:errors];
+                }
+            }];
         }];
-    }];
+    }
 #endif
 }
 
