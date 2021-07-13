@@ -1644,7 +1644,65 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-#pragma mark - InApp Notifications Private
+#pragma mark - InApp Notifications
+
+#pragma mark Public Method
+
+- (void)showInAppNotificationIfAny {
+    [self _showNotificationIfAvailable];
+}
+
+- (void)suspendInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppSuspend;
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be suspended till resumeInAppNotifications() is not called again", self);
+    }
+}
+
+- (void)discardInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppDiscard;
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be discarded till resumeInAppNotifications() is not called again", self);
+    }
+}
+
+- (void)resumeInAppNotifications {
+    [self _resumeInAppNotifications];
+    [self _showInAppNotificationIfAny];
+}
+
+#pragma mark Private Method
+
+- (void)_showInAppNotificationIfAny {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: showInAppNotificationIfAny is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        [self runOnNotificationQueue:^{
+            [self _showNotificationIfAvailable];
+        }];
+    }
+}
+
+- (void)_resumeInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppResume;
+        CleverTapLogDebug(self.config.logLevel, @"%@: Resuming inApp Notifications", self);
+    }
+}
 
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary*)notification {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -3729,7 +3787,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-# pragma mark - Notifications
+# pragma mark - Push Notifications
 
 - (void)setPushToken:(NSData *)pushToken {
     if ([[self class] runningInsideAppExtension]){
@@ -3772,60 +3830,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (BOOL)isCleverTapNotification:(NSDictionary *)payload {
     return [self _isCTPushNotification:payload];
-}
-
-- (void)showInAppNotificationIfAny {
-    [self _showNotificationIfAvailable];
-}
-
-- (void)suspendInAppNotifications {
-    if ([[self class] runningInsideAppExtension]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInAppNotifications is a no-op in an app extension.", self);
-        return;
-    }
-    if (!self.config.analyticsOnly) {
-        self.inAppRenderingStatus = CleverTapInAppSuspend;
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be suspended till resumeInAppNotifications() is not called again", self);
-    }
-}
-
-- (void)resumeInAppNotifications {
-    [self _resumeInAppNotifications];
-    [self _showInAppNotificationIfAny];
-}
-
-- (void)discardInAppNotifications {
-    if ([[self class] runningInsideAppExtension]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
-        return;
-    }
-    if (!self.config.analyticsOnly) {
-        self.inAppRenderingStatus = CleverTapInAppDiscard;
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be discarded till resumeInAppNotifications() is not called again", self);
-    }
-}
-
-- (void)_showInAppNotificationIfAny {
-    if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: showInAppNotificationIfAny is a no-op in an app extension.", self);
-        return;
-    }
-    if (!self.config.analyticsOnly) {
-        [self runOnNotificationQueue:^{
-            [self _showNotificationIfAvailable];
-        }];
-    }
-}
-
-- (void)_resumeInAppNotifications {
-    if ([[self class] runningInsideAppExtension]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);
-        return;
-    }
-    if (!self.config.analyticsOnly) {
-        self.inAppRenderingStatus = CleverTapInAppResume;
-        CleverTapLogDebug(self.config.logLevel, @"%@: Resuming inApp Notifications", self);
-    }
 }
 
 
