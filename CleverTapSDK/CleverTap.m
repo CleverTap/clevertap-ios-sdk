@@ -38,6 +38,7 @@
 #import "CTCoverImageViewController.h"
 #import "CTInterstitialImageViewController.h"
 #import "CTHalfInterstitialImageViewController.h"
+#import "CleverTap+InAppNotifications.h"
 #endif
 
 #import "CTLocationManager.h"
@@ -131,6 +132,12 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenUnregister,
 };
 
+typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
+    CleverTapInAppSuspend,
+    CleverTapInAppDiscard,
+    CleverTapInAppResume,
+};
+
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 @interface CleverTapInboxMessage ()
 - (instancetype) init __unavailable;
@@ -195,6 +202,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
 @property (nonatomic, assign) int sendQueueFails;
 
+@property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 @property (nonatomic, assign) BOOL pushedAPNSId;
 @property (atomic, assign) BOOL currentUserOptedOut;
 @property (atomic, assign) BOOL offline;
@@ -579,6 +587,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
             _instances[config.accountId] = instance;
             [instance recordDeviceErrors];
+            //Set resume status for inApp notifications to handle it on device level
+            [instance _resumeInAppNotifications];
         }
     } else {
         if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
@@ -1634,7 +1644,65 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-#pragma mark - InApp Notifications Private
+#pragma mark - InApp Notifications
+
+#pragma mark Public Method
+
+- (void)showInAppNotificationIfAny {
+    [self _showInAppNotificationIfAny];
+}
+
+- (void)suspendInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppSuspend;
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be suspended till resumeInAppNotifications() is not called again", self);
+    }
+}
+
+- (void)discardInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppDiscard;
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be discarded till resumeInAppNotifications() is not called again", self);
+    }
+}
+
+- (void)resumeInAppNotifications {
+    [self _resumeInAppNotifications];
+    [self _showInAppNotificationIfAny];
+}
+
+#pragma mark Private Method
+
+- (void)_showInAppNotificationIfAny {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: showInAppNotificationIfAny is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        [self runOnNotificationQueue:^{
+            [self _showNotificationIfAvailable];
+        }];
+    }
+}
+
+- (void)_resumeInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppResume;
+        CleverTapLogDebug(self.config.logLevel, @"%@: Resuming inApp Notifications", self);
+    }
+}
 
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary*)notification {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -1720,6 +1788,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_showNotificationIfAvailable {
     if ([[self class] runningInsideAppExtension]) return;
     
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
+        return;
+    }
+    
     @try {
         NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]]];
         if ([inapps count] < 1) {
@@ -1793,7 +1866,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (![self.inAppFCManager canShow:notification]) {
         CleverTapLogInternal(self.config.logLevel, @"%@: InApp %@ has been rejected by FC, not showing", self, notification.campaignId);
-        [self showInAppNotificationIfAny];  // auto try the next one
+        [self _showInAppNotificationIfAny];  // auto try the next one
         return;
     }
     
@@ -1804,7 +1877,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (!goFromDelegate) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Application has decided to not show this InApp: %@", self, notification.campaignId ? notification.campaignId : @"<unknown ID>");
-        [self showInAppNotificationIfAny];  // auto try the next one
+        [self _showInAppNotificationIfAny];  // auto try the next one
         return;
     }
     
@@ -1900,7 +1973,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did dismiss: %@", self, notification.campaignId);
     [self notifyNotificationDismissed:notification];
     [[self class] inAppDisplayControllerDidDismiss:controller];
-    [self showInAppNotificationIfAny];
+    [self _showInAppNotificationIfAny];
 }
 
 - (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
@@ -2802,6 +2875,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [self.inAppFCManager updateLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
                     
                     NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
+                    
+                    if (self.inAppRenderingStatus == CleverTapInAppDiscard) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
+                        return;
+                    }
                     if (inappsJSON) {
                         NSMutableArray *inappNotifs;
                         @try {
@@ -3709,7 +3787,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-# pragma mark - Notifications
+# pragma mark - Push Notifications
 
 - (void)setPushToken:(NSData *)pushToken {
     if ([[self class] runningInsideAppExtension]){
@@ -3752,18 +3830,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (BOOL)isCleverTapNotification:(NSDictionary *)payload {
     return [self _isCTPushNotification:payload];
-}
-
-- (void)showInAppNotificationIfAny {
-    if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: showInappNotificationIfAny is a no-op in an app extension.", self);
-        return;
-    }
-    if (!self.config.analyticsOnly) {
-        [self runOnNotificationQueue:^{
-            [self _showNotificationIfAvailable];
-        }];
-    }
 }
 
 

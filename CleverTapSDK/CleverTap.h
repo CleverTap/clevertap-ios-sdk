@@ -1042,7 +1042,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  Manually initiate the display of any pending in app notifications.
  
  */
-- (void)showInAppNotificationIfAny;
+- (void)showInAppNotificationIfAny __attribute__((deprecated("Use resumeInAppNotifications to show pending InApp notifications. This will be removed soon.")));
 
 #endif
 
