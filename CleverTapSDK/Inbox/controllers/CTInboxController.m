@@ -135,7 +135,8 @@ static NSManagedObjectContext *privateContext;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
-    for (CTMessageMO *msg in self.user.messages) {
+    NSOrderedSet *userMessages = [self.user.messages copy];
+    for (CTMessageMO *msg in userMessages) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
             CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
@@ -158,7 +159,8 @@ static NSManagedObjectContext *privateContext;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
+    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *results = [userMessages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
     for (CTMessageMO *msg in results) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
@@ -182,13 +184,14 @@ static NSManagedObjectContext *privateContext;
 
 - (CTMessageMO *)_messageForId:(NSString *)messageId {
     if (!self.isInitialized) return nil;
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
+    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *results = [userMessages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
     BOOL existing = results && [results count] > 0;
     return existing ? results[0] : nil;
 }
 
 - (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
-    [privateContext performBlockAndWait:^{
+    [privateContext performBlock:^{
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
         }
