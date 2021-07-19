@@ -162,6 +162,8 @@ static const int kMaxTags = 3;
     
     if (_config && _config.navigationTintColor) {
         self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : _config.navigationTintColor};
+    } else {
+        self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
     }
     
     [self setUpTableViewLayout];
@@ -237,7 +239,8 @@ static const int kMaxTags = 3;
     [self.segmentedControlContainer removeFromSuperview];
     self.segmentedControlContainer = [[UIView alloc] init];
     self.segmentedControlContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    self.segmentedControlContainer.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
+    UIColor *backgroundColor = [CTUIUtils ct_colorWithHexString:@"#EAEAEA"];
+    self.segmentedControlContainer.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : backgroundColor;
     [self.navigationController.view addSubview:self.segmentedControlContainer];
     [self addSegmentedControl];
 }
@@ -249,6 +252,16 @@ static const int kMaxTags = 3;
     [segmentedControl addTarget:self
                          action:@selector(segmentSelected:)
                forControlEvents:UIControlEventValueChanged];
+    
+    //Set default colors for both dark and light themes
+    if (@available(iOS 13.0, *)) {
+        segmentedControl.selectedSegmentTintColor = [UIColor whiteColor];
+    } else {
+        segmentedControl.tintColor = [UIColor whiteColor];
+    }
+    NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
+    [segmentedControl setTitleTextAttributes:attributes forState:UIControlStateSelected];
+    [segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
     
     if (_config) {
         if (_config.tabSelectedBgColor) {
