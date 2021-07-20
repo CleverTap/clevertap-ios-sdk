@@ -3542,21 +3542,23 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark - User Action Events API
 
 - (void)recordEvent:(NSString *)event {
-    [self runSerialAsync:^{
-        [CTEventBuilder build:event completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
-            if (event) {
-                [self queueEvent:event withType:CleverTapEventTypeRaised];
-            }
-            if (errors) {
-                [self pushValidationResults:errors];
-            }
-        }];
-    }];
+    [self recordEvent:event withProps:[[NSMutableDictionary alloc] init]];
 }
 
 - (void)recordEvent:(NSString *)event withProps:(NSDictionary *)properties {
     [self runSerialAsync:^{
-        [CTEventBuilder build:event withEventActions:properties completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+        //add userId,userType,deviceId in all events if present
+        NSDictionary * mutableProperties =[properties mutableCopy];
+        NSString *userId = [self getProperty:@"userId"];
+        if(nil != userId) {
+            [mutableProperties setValue:userId forKey:@"userId"];
+        }
+        NSString *userType = [self getProperty:@"userType"];
+        if(nil != userType) {
+            [mutableProperties setValue:userType forKey:@"userType"];
+        }
+        [mutableProperties setValue:self.deviceInfo.deviceId forKey:@"deviceId"];
+        [CTEventBuilder build:event withEventActions:mutableProperties completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
