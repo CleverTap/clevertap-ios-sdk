@@ -156,7 +156,7 @@ static const int kMaxTags = 3;
     self.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
     self.tableView.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
     
-    self.navigationController.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
+    self.navigationController.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : [UIColor whiteColor];
     self.navigationController.navigationBar.barTintColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
     self.navigationController.navigationBar.tintColor = (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor];
     
@@ -239,8 +239,7 @@ static const int kMaxTags = 3;
     [self.segmentedControlContainer removeFromSuperview];
     self.segmentedControlContainer = [[UIView alloc] init];
     self.segmentedControlContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    UIColor *backgroundColor = [CTUIUtils ct_colorWithHexString:@"#EAEAEA"];
-    self.segmentedControlContainer.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : backgroundColor;
+    self.segmentedControlContainer.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
     [self.navigationController.view addSubview:self.segmentedControlContainer];
     [self addSegmentedControl];
 }
