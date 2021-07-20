@@ -19,6 +19,7 @@
 #endif
 
 @protocol CleverTapSyncDelegate;
+@protocol CleverTapURLDelegate;
 @protocol CleverTapPushNotificationDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
@@ -37,6 +38,12 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
     CleverTapLogOff = -1,
     CleverTapLogInfo = 0,
     CleverTapLogDebug = 1
+};
+
+typedef NS_ENUM(int, CleverTapChannel) {
+    CleverTapPushNotification = 0,
+    CleverTapAppInbox = 1,
+    CleverTapInAppNotification = 2
 };
 
 @interface CleverTap : NSObject
@@ -890,20 +897,20 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 
 /*!
-
-@method
-
-@abstract
-The `CleverTapPushNotificationDelegate` protocol provides methods for notifying
-your application (the adopting delegate) about push notifications.
-
-@see CleverTapPushNotificationDelegate.h
-
-@discussion
-This sets the CleverTapPushNotificationDelegate.
-
-@param delegate     an object conforming to the CleverTapPushNotificationDelegate Protocol
-*/
+ 
+ @method
+ 
+ @abstract
+ The `CleverTapPushNotificationDelegate` protocol provides methods for notifying
+ your application (the adopting delegate) about push notifications.
+ 
+ @see CleverTapPushNotificationDelegate.h
+ 
+ @discussion
+ This sets the CleverTapPushNotificationDelegate.
+ 
+ @param delegate     an object conforming to the CleverTapPushNotificationDelegate Protocol
+ */
 
 - (void)setPushNotificationDelegate:(id <CleverTapPushNotificationDelegate> _Nullable)delegate;
 
@@ -925,6 +932,22 @@ This sets the CleverTapPushNotificationDelegate.
  */
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
 #endif
+
+/*!
+ 
+ @method
+ 
+ @abstract
+ The `CleverTapURLDelegate` protocol provides a method for the confirming class to implement custom handling for URLs in case of in-app notification CTAs, push notifications and App inbox.
+ 
+ @see CleverTapURLDelegate.h
+ 
+ @discussion
+ This sets the CleverTapURLDelegate.
+ 
+ @param delegate     an object conforming to the CleverTapURLDelegate Protocol
+ */
+- (void)setUrlDelegate:(id <CleverTapURLDelegate> _Nullable)delegate;
 
 /* ------------------------------------------------------------------------------------------------------
  * Notifications
@@ -1019,37 +1042,7 @@ This sets the CleverTapPushNotificationDelegate.
  Manually initiate the display of any pending in app notifications.
  
  */
-- (void)showInAppNotificationIfAny;
-
-/*!
- @method
- 
- @abstract
- Suspends and saves inApp notifications until 'resumeInAppNotifications' is called for current session.
- 
- On app kill / session reset inApp notifications suspension is disabled. Pending inApp notifications are not displayed.
- */
-- (void)suspendInAppNotifications;
-
-/*!
- @method
- 
- @abstract
- Discards inApp notifications until 'resumeInAppNotifications' is called for current session.
- 
- On app kill / session reset inApp notifications discard is disabled. Pending inApp notifications are not displayed.
- */
-- (void)discardInAppNotifications;
-
-/*!
- @method
- 
- @abstract
- Resumes displaying inApps notifications.
- 
- On app kill / session reset inApp notifications displaying is resumed. Pending inApp notifications are not displayed.
- */
-- (void)resumeInAppNotifications;
+- (void)showInAppNotificationIfAny __attribute__((deprecated("Use resumeInAppNotifications to show pending InApp notifications. This will be removed soon.")));
 
 #endif
 
@@ -1142,14 +1135,14 @@ This sets the CleverTapPushNotificationDelegate.
 + (CleverTapLogLevel)getDebugLevel;
 
 /*!
-@method
-
-@abstract
-Set the Library name for Auxiliary SDKs
-
-@discussion
-Call this to method to set library name in the Auxiliary SDK
-*/
+ @method
+ 
+ @abstract
+ Set the Library name for Auxiliary SDKs
+ 
+ @discussion
+ Call this to method to set library name in the Auxiliary SDK
+ */
 - (void)setLibrary:(NSString * _Nonnull)name;
 
 /*!

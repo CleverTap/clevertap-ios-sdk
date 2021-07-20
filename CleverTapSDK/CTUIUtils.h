@@ -8,7 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSBundle *)bundle;
 + (NSBundle *)bundle:(Class)bundleClass;
-+ (UIApplication *)getSharedApplication;
++ (UIApplication * _Nullable)getSharedApplication;
 
 + (UIImage *)getImageForName:(NSString *)name;
 
