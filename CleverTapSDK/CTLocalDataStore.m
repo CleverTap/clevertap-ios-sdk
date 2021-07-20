@@ -529,6 +529,11 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     
     if(!fields) return ;
     
+    //adding userId here from Identity, and we assume userType is passed in the profile, deviceId will be taken from deviceInfo
+    if ([fields objectForKey:@"Identity"]) {
+        [self _setProfileValue:fields[@"Identity"] forKey:@"userId" fromUpstream:fromUpstream];
+    }
+    
     for (NSString *key in fields) {
         id value = fields[key];
         if (!value) continue;
