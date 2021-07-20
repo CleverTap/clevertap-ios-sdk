@@ -162,6 +162,17 @@ static const int kMaxTags = 3;
     
     if (_config && _config.navigationTintColor) {
         self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : _config.navigationTintColor};
+    } else {
+        self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
+    }
+    
+    //Added fix for iOS 15 beta to update navigationBarTintColor and navigationTintColor
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearnace = [UINavigationBarAppearance new];
+        appearnace.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
+        appearnace.titleTextAttributes = @{NSForegroundColorAttributeName : (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor]};
+        self.navigationController.navigationBar.standardAppearance = appearnace;
+        self.navigationController.navigationBar.scrollEdgeAppearance = self.navigationController.navigationBar.standardAppearance;
     }
     
     [self setUpTableViewLayout];
@@ -249,6 +260,16 @@ static const int kMaxTags = 3;
     [segmentedControl addTarget:self
                          action:@selector(segmentSelected:)
                forControlEvents:UIControlEventValueChanged];
+    
+    //Set default colors for both dark and light themes
+    if (@available(iOS 13.0, *)) {
+        segmentedControl.selectedSegmentTintColor = [UIColor whiteColor];
+    } else {
+        segmentedControl.tintColor = [UIColor whiteColor];
+    }
+    NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
+    [segmentedControl setTitleTextAttributes:attributes forState:UIControlStateSelected];
+    [segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
     
     if (_config) {
         if (_config.tabSelectedBgColor) {
