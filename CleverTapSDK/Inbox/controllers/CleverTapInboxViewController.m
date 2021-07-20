@@ -166,6 +166,15 @@ static const int kMaxTags = 3;
         self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
     }
     
+    //Added fix for iOS 15 beta to update navigationBarTintColor and navigationTintColor
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearnace = [UINavigationBarAppearance new];
+        appearnace.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
+        appearnace.titleTextAttributes = @{NSForegroundColorAttributeName : (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor]};
+        self.navigationController.navigationBar.standardAppearance = appearnace;
+        self.navigationController.navigationBar.scrollEdgeAppearance = self.navigationController.navigationBar.standardAppearance;
+    }
+    
     [self setUpTableViewLayout];
     [self calculateTableViewVisibleFrame];
 }
