@@ -152,11 +152,10 @@ static const int kMaxTags = 3;
 - (void)setUpInboxLayout {
     
     UIColor *color = [CTUIUtils ct_colorWithHexString:@"#EAEAEA"];
-    
     self.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
     self.tableView.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
     
-    self.navigationController.view.backgroundColor = (_config && _config.backgroundColor) ? _config.backgroundColor : color;
+    self.navigationController.view.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
     self.navigationController.navigationBar.barTintColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
     self.navigationController.navigationBar.tintColor = (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor];
     
@@ -166,14 +165,14 @@ static const int kMaxTags = 3;
         self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
     }
     
-    //Added fix for iOS 15 beta to update navigationBarTintColor and navigationTintColor
-    if (@available(iOS 13.0, *)) {
-        UINavigationBarAppearance *appearance = [UINavigationBarAppearance new];
-        appearance.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
-        appearance.titleTextAttributes = @{NSForegroundColorAttributeName : (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor]};
-        self.navigationController.navigationBar.standardAppearance = appearance;
-        self.navigationController.navigationBar.scrollEdgeAppearance = self.navigationController.navigationBar.standardAppearance;
-    }
+//    //Added fix for iOS 15 beta to update navigationBarTintColor and navigationTintColor
+//    if (@available(iOS 13.0, *)) {
+//        UINavigationBarAppearance *appearance = [UINavigationBarAppearance new];
+//        appearance.backgroundColor = (_config && _config.navigationBarTintColor) ? _config.navigationBarTintColor : [UIColor whiteColor];
+//        appearance.titleTextAttributes = @{NSForegroundColorAttributeName : (_config && _config.navigationTintColor) ? _config.navigationTintColor : [UIColor blackColor]};
+//        self.navigationController.navigationBar.standardAppearance = appearance;
+//        self.navigationController.navigationBar.scrollEdgeAppearance = self.navigationController.navigationBar.standardAppearance;
+//    }
     
     [self setUpTableViewLayout];
     [self calculateTableViewVisibleFrame];
