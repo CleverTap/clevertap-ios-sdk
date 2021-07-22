@@ -261,7 +261,7 @@ static const int kMaxTags = 3;
                          action:@selector(segmentSelected:)
                forControlEvents:UIControlEventValueChanged];
     
-    //Set default colors for both dark and light themes
+    //Set default segmentedControl colors
     if (@available(iOS 13.0, *)) {
         segmentedControl.selectedSegmentTintColor = [UIColor whiteColor];
     } else {
