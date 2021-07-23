@@ -248,32 +248,18 @@ static const int kMaxTags = 3;
                          action:@selector(segmentSelected:)
                forControlEvents:UIControlEventValueChanged];
     
-    //Set default segmentedControl colors
+    /// Update the Segment Control Tint Color
     if (@available(iOS 13.0, *)) {
-        segmentedControl.selectedSegmentTintColor = [UIColor whiteColor];
+        segmentedControl.selectedSegmentTintColor = (_config && _config.tabSelectedBgColor) ? _config.tabSelectedBgColor : [UIColor whiteColor];
     } else {
-        segmentedControl.tintColor = [UIColor whiteColor];
-    }
-    NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor blackColor]};
-    [segmentedControl setTitleTextAttributes:attributes forState:UIControlStateSelected];
-    [segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
-    
-    if (_config) {
-        if (_config.tabSelectedBgColor) {
-            if (@available(iOS 13.0, *)) {
-                segmentedControl.selectedSegmentTintColor = _config.tabSelectedBgColor;
-            } else {
-                segmentedControl.tintColor = _config.tabSelectedBgColor;
-            }
-        }
-        if (_config.tabSelectedTextColor) {
-            [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabSelectedTextColor} forState:UIControlStateSelected];
-        }
-        if (_config.tabUnSelectedTextColor) {
-            [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName : _config.tabUnSelectedTextColor} forState:UIControlStateNormal];
-        }
+        segmentedControl.tintColor = (_config && _config.tabSelectedBgColor) ? _config.tabSelectedBgColor : [UIColor whiteColor];
     }
     
+    /// Update the Segment Control Tab Selected Color
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabSelectedTextColor) ? _config.tabSelectedTextColor : [UIColor blackColor]} forState:UIControlStateSelected];
+    /// Update the Segment Control Tab UnSelected Color
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabUnSelectedTextColor) ? _config.tabUnSelectedTextColor : [UIColor blackColor]} forState:UIControlStateNormal];
+    /// Add Segment Control
     [self.segmentedControlContainer addSubview:segmentedControl];
     [self.tableView setContentInset:UIEdgeInsetsMake(_topContentOffset, 0, 0, 0)];
     dispatch_async(dispatch_get_main_queue(), ^{
