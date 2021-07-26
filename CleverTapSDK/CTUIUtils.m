@@ -29,6 +29,23 @@
     return nil;
 }
 
++ (BOOL)isUserInterfaceIdiomPad {
+    return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+}
+
++ (BOOL)isDeviceOrientationLandscape {
+    UIInterfaceOrientation orientation;
+    if (@available(iOS 15.0, *)) {
+        orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
+    } else if (@available(iOS 13.0, *)) {
+        orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
+    } else {
+        orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
+    }
+    BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
+    return landscape;
+}
+
 + (UIColor *)ct_colorWithHexString:(NSString *)string {
     return  [self ct_colorWithHexString:string withAlpha:1.0];
 }

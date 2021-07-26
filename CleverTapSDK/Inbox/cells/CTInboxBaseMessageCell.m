@@ -171,8 +171,7 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)deviceOrientationIsLandscape {
-    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
-    return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+    return [CTUIUtils isDeviceOrientationLandscape];
 }
 
 
@@ -405,7 +404,7 @@ static NSString * const kOrientationPortrait = @"p";
     id object = [notification object];
     if (object && [object isKindOfClass:[AVPlayerItem class]]) {
         AVPlayerItem *item = (AVPlayerItem*)[notification object];
-        [item seekToTime:kCMTimeZero];
+        [item seekToTime:kCMTimeZero completionHandler:nil];
     }
     [self pause];
     [self showControls:YES];

@@ -380,7 +380,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)deviceWidth {
     if (!_deviceWidth) {
         float scale = [[UIScreen mainScreen] scale];
-        float ppi = scale * ((UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) ? 132 : 163);
+        float ppi = scale * ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad ? 132 : 163);
         float width = ([[UIScreen mainScreen] bounds].size.width * scale);
         float rWidth = width / ppi;
         _deviceWidth = [NSString stringWithFormat:@"%.2f", [CTUtils toTwoPlaces:rWidth]];
@@ -391,7 +391,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)deviceHeight {
     if (!_deviceHeight) {
         float scale = [[UIScreen mainScreen] scale];
-        float ppi = scale * ((UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) ? 132 : 163);
+        float ppi = scale * ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad ? 132 : 163);
         float height = ([[UIScreen mainScreen] bounds].size.height * scale);
         float rHeight = height / ppi;
         _deviceHeight = [NSString stringWithFormat:@"%.2f", [CTUtils toTwoPlaces:rHeight]];
@@ -402,8 +402,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)carrier {
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
     if (!_carrier) {
-        CTCarrier *carrier = _networkInfo.subscriberCellularProvider;
-        _carrier = carrier.carrierName ?: @"";
+        _carrier = [self getCarrier].carrierName ?: @"";
     }
 #endif
     return _carrier;
@@ -412,8 +411,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)countryCode {
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
     if (!_countryCode) {
-        CTCarrier *carrier = _networkInfo.subscriberCellularProvider;
-        _countryCode =  carrier.isoCountryCode ?: @"";
+        _countryCode =  [self getCarrier].isoCountryCode ?: @"";
     }
 #endif
     return _countryCode;
@@ -429,21 +427,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)radio {
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
     if (!_radio) {
-        __block NSString *radioValue;
-        if (@available(iOS 12, *)) {
-            NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
-            [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
-                if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
-                    radioValue = [NSString stringWithString:[value substringFromIndex:23]];
-                }
-            }];
-        } else {
-            NSString *radio = _networkInfo.currentRadioAccessTechnology;
-            if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
-                radioValue = [radio substringFromIndex:23];
-            }
-        }
-        _radio =  radioValue ?: @"";
+        _radio =  [self getCurrentRadioAccessTechnology] ?: @"";
         CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
     }
 #endif
@@ -453,5 +437,33 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (BOOL)wifi {
     return _wifi;
 }
+
+- (CTCarrier *)getCarrier {
+    if (@available(iOS 12.0, *)) {
+        NSString *providerKey = _networkInfo.serviceSubscriberCellularProviders.allKeys.lastObject;
+        return _networkInfo.serviceSubscriberCellularProviders[providerKey];
+    } else {
+        return _networkInfo.subscriberCellularProvider;
+    }
+}
+
+- (NSString *)getCurrentRadioAccessTechnology {
+    __block NSString *radioValue;
+    if (@available(iOS 12, *)) {
+        NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
+        [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
+            if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
+                radioValue = [NSString stringWithString:[value substringFromIndex:23]];
+            }
+        }];
+    } else {
+        NSString *radio = _networkInfo.currentRadioAccessTechnology;
+        if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
+            radioValue = [radio substringFromIndex:23];
+        }
+    }
+    return radioValue;
+}
+
 
 @end

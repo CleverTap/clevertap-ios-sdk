@@ -38,7 +38,12 @@
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        CGFloat topLength = self.topLayoutGuide.length;
+        CGFloat topLength;
+        if (@available(iOS 11.0, *)) {
+            topLength = self.view.safeAreaInsets.top;
+        } else {
+            topLength = self.topLayoutGuide.length;
+        }
         [[NSLayoutConstraint constraintWithItem: self.closeButton
                                       attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual
                                          toItem:self.containerView

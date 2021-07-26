@@ -1454,13 +1454,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!object) return;
     
 #if !defined(CLEVERTAP_TVOS)
-    // normalize the notification data
-    NSDictionary *notification;
-    if ([object isKindOfClass:[UILocalNotification class]]) {
-        notification = [((UILocalNotification *) object) userInfo];
-    } else if ([object isKindOfClass:[NSDictionary class]]) {
-        notification = object;
-    }
+    NSDictionary *notification = [self getNotificationDictionary:object];
     
     if (!notification || [notification count] <= 0) return;
     
@@ -1648,6 +1642,24 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return isOurs;
 }
 
+/// Get notification dictionary object from id object to normalize the notification data
+/// @param object notification, data or notification userInfo dictionary
+- (NSDictionary *)getNotificationDictionary:(id)object {
+    NSDictionary *notification;
+    
+    if (@available(iOS 10.0, *)) {
+        if ([object isKindOfClass:[UNNotification class]]) {
+            notification = ((UNNotification *) object).request.content.userInfo;
+        } else if ([object isKindOfClass:[NSDictionary class]]) {
+            notification = object;
+        }
+    } else if ([object isKindOfClass:[UILocalNotification class]]) {
+        notification = [((UILocalNotification *) object) userInfo];
+    } else if ([object isKindOfClass:[NSDictionary class]]) {
+        notification = object;
+    }
+    return notification;
+}
 
 #pragma mark - InApp Notifications
 
@@ -3703,12 +3715,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_recordPushNotificationEvent:(BOOL)clicked forNotification:(id)notificationData {
 #if !defined(CLEVERTAP_TVOS)
-    NSDictionary *notification;
-    if ([notificationData isKindOfClass:[UILocalNotification class]]) {
-        notification = [((UILocalNotification *) notificationData) userInfo];
-    } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
-        notification = notificationData;
-    }
+    NSDictionary *notification = [self getNotificationDictionary:notificationData];
+    
     if (notification) {
         [self runSerialAsync:^{
             [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {

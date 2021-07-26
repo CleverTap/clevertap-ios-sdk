@@ -9,6 +9,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSBundle *)bundle;
 + (NSBundle *)bundle:(Class)bundleClass;
 + (UIApplication * _Nullable)getSharedApplication;
++ (BOOL)isDeviceOrientationLandscape;
++ (BOOL)isUserInterfaceIdiomPad;
 
 + (UIImage *)getImageForName:(NSString *)name;
 

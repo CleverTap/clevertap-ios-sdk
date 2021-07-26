@@ -42,7 +42,7 @@
     self.view.backgroundColor = [UIColor clearColor];
     self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
     
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    if ([CTUIUtils isUserInterfaceIdiomPad]) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         if (self.notification.tablet) {
             if (![self deviceOrientationIsLandscape]) {

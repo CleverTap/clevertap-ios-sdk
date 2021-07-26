@@ -394,8 +394,12 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         activityView.layer.shadowRadius = style.shadowRadius;
         activityView.layer.shadowOffset = style.shadowOffset;
     }
-    
-    UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    UIActivityIndicatorView *activityIndicatorView;
+    if (@available(iOS 13.0, *)) {
+        activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+    } else {
+        activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    }
     activityIndicatorView.center = CGPointMake(activityView.bounds.size.width / 2, activityView.bounds.size.height / 2);
     [activityView addSubview:activityIndicatorView];
     [activityIndicatorView startAnimating];
