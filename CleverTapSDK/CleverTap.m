@@ -2626,21 +2626,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)inflateEventsQueue {
-    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] removeFile:YES];
+    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     if (!self.eventsQueue || [self isMuted]) {
         self.eventsQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateProfileQueue {
-    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] removeFile:YES];
+    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     if (!self.profileQueue || [self isMuted]) {
         self.profileQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateNotificationsQueue {
-    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] removeFile:YES];
+    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
     if (!self.notificationsQueue || [self isMuted]) {
         self.notificationsQueue = [NSMutableArray array];
     }
@@ -2653,17 +2653,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)clearEventsQueue {
-    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] removeFile:YES];
+    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     self.eventsQueue = [NSMutableArray array];
 }
 
 - (void)clearProfileQueue {
-    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] removeFile:YES];
+    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     self.profileQueue = [NSMutableArray array];
 }
 
 - (void)clearNotificationsQueue {
-    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] removeFile:YES];
+    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
     self.notificationsQueue = [NSMutableArray array];
 }
 

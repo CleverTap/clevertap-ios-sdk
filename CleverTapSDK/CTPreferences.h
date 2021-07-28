@@ -16,8 +16,10 @@
 
 + (void)removeObjectForKey:(NSString *)key;
 
-+ (id)unarchiveFromFile:(NSString *)filePath removeFile:(BOOL)remove;
++ (id)unarchiveFromFile:(NSString *)filename ofType:(Class)cls  removeFile:(BOOL)remove;
 
-+ (BOOL)archiveObject:(id)object forFileName:(NSString *)fileName;
++ (id)unarchiveFromFile:(NSString *)filename ofTypes:(nonnull NSSet<Class> *)classes removeFile:(BOOL)remove;
+
++ (BOOL)archiveObject:(id _Nonnull )object forFileName:(NSString *_Nonnull)fileName;
 
 @end

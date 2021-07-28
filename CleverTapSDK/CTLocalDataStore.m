@@ -601,7 +601,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 - (NSMutableDictionary *)_inflateLocalProfile {
-    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] removeFile:NO];
+    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofType:[NSMutableDictionary class] removeFile:NO];
     if (!_profile) {
         _profile = [NSMutableDictionary dictionary];
     }

@@ -77,17 +77,9 @@
 #endif
 }
 
-+ (id)unarchiveFromFile:(NSString *)filename removeFile:(BOOL)remove {
-    id data = nil;
-    
-    NSString *filePath = [self filePathfromFileName:filename];
-    
-    @try {
-        data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
-        CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
-    }
-    @catch (NSException *e) {
-        CleverTapLogStaticInternal(@"%@ failed to unarchive data from %@", self, filePath);
++ (void)logUnarchiveError:(NSError *)error filePath:(NSString *)filePath removeFile:(BOOL)remove {
+    if (error) {
+        CleverTapLogStaticInternal(@"%@ failed to unarchive data from %@ - %@", self, filePath, error);
     }
     
     if (remove && [[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
@@ -95,9 +87,63 @@
         BOOL removed = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
         
         if (!removed) {
-            CleverTapLogStaticInternal(@"%@ unable to remove archived file at %@ - %@", self, filePath, error);
+            CleverTapLogStaticInternal(@"%@ failed to remove archived file at %@ - %@", self, filePath, error);
         }
     }
+}
+
++ (id)unarchiveFromFile:(NSString *)filename ofTypes:(nonnull NSSet<Class> *)classes removeFile:(BOOL)remove {
+    id data = nil;
+    NSError *error = nil;
+    NSString *filePath = [self filePathfromFileName:filename];
+    
+    @try {
+        if (@available(iOS 11.0, *)) {
+            NSData *newData = [NSData dataWithContentsOfFile:filePath];
+            if (newData == NULL) {
+                CleverTapLogStaticInternal(@"%@ file not found %@", self, filePath);
+            } else {
+                data = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:newData error:&error];
+                CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
+            }
+        } else {
+            data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+            CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
+        }
+    }
+    @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"%@ failed to unarchive data from %@", self, filePath);
+    }
+    [self logUnarchiveError:error filePath:filePath removeFile:remove];
+    
+    return data;
+}
+
++ (id)unarchiveFromFile:(NSString *)filename ofType:(Class)cls  removeFile:(BOOL)remove {
+    id data = nil;
+    NSError *error = nil;
+    
+    NSString *filePath = [self filePathfromFileName:filename];
+    
+    @try {
+        if (@available(iOS 11.0, *)) {
+            NSData *newData = [NSData dataWithContentsOfFile:filePath];
+            if (newData == NULL) {
+                CleverTapLogStaticInternal(@"%@ file not found %@", self, filePath);
+            } else {
+                data = [NSKeyedUnarchiver unarchivedObjectOfClass:cls fromData:newData error:&error];
+                CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
+            }
+        } else {
+            data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+            CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
+        }
+    }
+    @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"%@ failed to unarchive data from %@", self, filePath);
+    }
+    
+    [self logUnarchiveError:error filePath:filePath removeFile:remove];
     
     return data;
 }
@@ -105,11 +151,20 @@
 + (BOOL)archiveObject:(id)object forFileName:(NSString *)filename {
     
     NSString *filePath = [self filePathfromFileName:filename];
+    NSError *error = nil;
+    
     CleverTapLogStaticInternal(@"%@ archiving data to %@: %@", self, filePath, object);
     
-    BOOL success = [NSKeyedArchiver archiveRootObject:object toFile:filePath];
+    BOOL success = NO;
+
+    if (@available(iOS 11.0, *)) {
+        success = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&error];
+    } else {
+        success = [NSKeyedArchiver archiveRootObject:object toFile:filePath];
+    }
+    
     if (!success) {
-        CleverTapLogStaticInternal(@"%@ failed to archive data to %@: %@", self, filePath, object);
+        CleverTapLogStaticInternal(@"%@ failed to archive data at %@: %@", self, filePath, error);
     }
     
     return success;
