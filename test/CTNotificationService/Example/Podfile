@@ -1,0 +1,14 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+use_frameworks!
+
+target 'CTNotificationServiceExample' do
+  platform :ios, '9.0'
+  pod "CleverTap-iOS-SDK"
+end
+
+target 'NotificationService' do
+  platform :ios, '10.0'
+  pod "CTNotificationService"
+end
+
