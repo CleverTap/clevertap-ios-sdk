@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (UIApplication * _Nullable)getSharedApplication;
 + (BOOL)isDeviceOrientationLandscape;
 + (BOOL)isUserInterfaceIdiomPad;
++ (CGFloat)getLeftMargin;
 
 + (UIImage *)getImageForName:(NSString *)name;
 
