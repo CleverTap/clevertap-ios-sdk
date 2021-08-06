@@ -29,16 +29,22 @@
     return nil;
 }
 
-+ (CGFloat)getLeftMargin {
-    CGFloat margin = 0;
++ (UIWindow * _Nullable)getKeyWindow {
+    UIWindow *keyWindow;
     if (@available(iOS 11.0, *)) {
         for (UIWindow *window in [CTUIUtils getSharedApplication].windows) {
             if (window.isKeyWindow) {
-                margin = window.safeAreaInsets.left;
+                keyWindow = window;
                 break;
             }
         }
     }
+    return keyWindow;
+}
+
++ (CGFloat)getLeftMargin {
+    CGFloat margin = 0;
+    margin = [CTUIUtils getKeyWindow].safeAreaInsets.left;
     return margin;
 }
 

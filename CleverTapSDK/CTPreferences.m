@@ -151,22 +151,28 @@
 + (BOOL)archiveObject:(id)object forFileName:(NSString *)filename {
     
     NSString *filePath = [self filePathfromFileName:filename];
-    NSError *error = nil;
+    NSError *archiveError = nil;
+    NSError *writeError = nil;
     
     CleverTapLogStaticInternal(@"%@ archiving data to %@: %@", self, filePath, object);
     
     BOOL success = NO;
 
     if (@available(iOS 11.0, *)) {
-        success = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&error];
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
+        [data writeToFile:filePath options:NSDataWritingAtomic error:&writeError];
+        if (archiveError) {
+            CleverTapLogStaticInternal(@"%@ failed to archive data at %@: %@", self, filePath, archiveError);
+        }
+        if (writeError) {
+            CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
+        }
     } else {
         success = [NSKeyedArchiver archiveRootObject:object toFile:filePath];
+        if (!success) {
+            CleverTapLogStaticInternal(@"%@ failed to archive data to %@: %@", self, filePath, object);
+        }
     }
-    
-    if (!success) {
-        CleverTapLogStaticInternal(@"%@ failed to archive data at %@: %@", self, filePath, error);
-    }
-    
     return success;
 }
 

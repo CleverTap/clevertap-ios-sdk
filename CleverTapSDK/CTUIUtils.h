@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isDeviceOrientationLandscape;
 + (BOOL)isUserInterfaceIdiomPad;
 + (CGFloat)getLeftMargin;
++ (UIWindow * _Nullable)getKeyWindow;
 
 + (UIImage *)getImageForName:(NSString *)name;
 
