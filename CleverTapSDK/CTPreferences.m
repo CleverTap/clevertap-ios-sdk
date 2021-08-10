@@ -98,7 +98,7 @@
     NSString *filePath = [self filePathfromFileName:filename];
     
     @try {
-        if (@available(iOS 11.0, *)) {
+        if (@available(iOS 11.0, tvOS 11.0, *)) {
             NSData *newData = [NSData dataWithContentsOfFile:filePath];
             if (newData == NULL) {
                 CleverTapLogStaticInternal(@"%@ file not found %@", self, filePath);
@@ -126,7 +126,7 @@
     NSString *filePath = [self filePathfromFileName:filename];
     
     @try {
-        if (@available(iOS 11.0, *)) {
+        if (@available(iOS 11.0, tvOS 11.0 , *)) {
             NSData *newData = [NSData dataWithContentsOfFile:filePath];
             if (newData == NULL) {
                 CleverTapLogStaticInternal(@"%@ file not found %@", self, filePath);
@@ -158,7 +158,7 @@
     
     BOOL success = NO;
 
-    if (@available(iOS 11.0, *)) {
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
         [data writeToFile:filePath options:NSDataWritingAtomic error:&writeError];
         if (archiveError) {

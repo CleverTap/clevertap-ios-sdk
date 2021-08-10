@@ -438,6 +438,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return _wifi;
 }
 
+#if !(TARGET_OS_TV)
 - (CTCarrier *)getCarrier {
     if (@available(iOS 12.0, *)) {
         NSString *providerKey = _networkInfo.serviceSubscriberCellularProviders.allKeys.lastObject;
@@ -464,6 +465,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     }
     return radioValue;
 }
+#endif
 
 
 @end

@@ -9,7 +9,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSBundle *)bundle;
 + (NSBundle *)bundle:(Class)bundleClass;
 + (UIApplication * _Nullable)getSharedApplication;
+#if !(TARGET_OS_TV)
 + (BOOL)isDeviceOrientationLandscape;
+#endif
 + (BOOL)isUserInterfaceIdiomPad;
 + (CGFloat)getLeftMargin;
 + (UIWindow * _Nullable)getKeyWindow;

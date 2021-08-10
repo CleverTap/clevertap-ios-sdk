@@ -1642,12 +1642,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return isOurs;
 }
 
+#if !(TARGET_OS_TV)
 /// Get notification dictionary object from id object to normalize the notification data
 /// @param object notification, data or notification userInfo dictionary
 - (NSDictionary *)getNotificationDictionary:(id)object {
     NSDictionary *notification;
     
-    if (@available(iOS 10.0, *)) {
+    if (@available(iOS 10.0, tvOS 10.0, *)) {
         if ([object isKindOfClass:[UNNotification class]]) {
             notification = ((UNNotification *) object).request.content.userInfo;
         } else if ([object isKindOfClass:[NSDictionary class]]) {
@@ -1660,6 +1661,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     return notification;
 }
+#endif
 
 #pragma mark - InApp Notifications
 

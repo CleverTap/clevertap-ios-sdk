@@ -44,7 +44,7 @@
 
 + (CGFloat)getLeftMargin {
     CGFloat margin = 0;
-    if (@available(iOS 11.0, *)) {
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
         margin = [CTUIUtils getKeyWindow].safeAreaInsets.left;
     }
     return margin;
@@ -54,9 +54,10 @@
     return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
 }
 
+#if !(TARGET_OS_TV)
 + (BOOL)isDeviceOrientationLandscape {
     UIInterfaceOrientation orientation;
-    if (@available(iOS 15.0, *)) {
+    if (@available(iOS 15.0, tvOS 13.0, *)) {
         orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
     } else if (@available(iOS 13.0, *)) {
         orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
@@ -66,6 +67,7 @@
     BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
     return landscape;
 }
+#endif
 
 + (UIColor *)ct_colorWithHexString:(NSString *)string {
     return  [self ct_colorWithHexString:string withAlpha:1.0];
