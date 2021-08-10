@@ -44,7 +44,9 @@
 
 + (CGFloat)getLeftMargin {
     CGFloat margin = 0;
-    margin = [CTUIUtils getKeyWindow].safeAreaInsets.left;
+    if (@available(iOS 11.0, *)) {
+        margin = [CTUIUtils getKeyWindow].safeAreaInsets.left;
+    }
     return margin;
 }
 
