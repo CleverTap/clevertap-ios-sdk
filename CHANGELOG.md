@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 
 ##### Changed
 - Usage `clevertap-prod.com` instead of `wzrkt.com` 
-- Usage `spiky-clevertap-prod.com` instead of `spiky-wzrkt.com`
+- Usage `spiky.clevertap-prod.com` instead of `spiky.wzrkt.com`
 - Refactor and Addresses iOS 15 beta fixes related to App inbox 
 - Synchronize access for `deviceName` and `model` property
 
