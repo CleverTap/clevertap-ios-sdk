@@ -21,6 +21,8 @@
     #endif
     [CleverTap autoIntegrate];
     
+    [CleverTap enablePersonalization];
+    
     // Configure and init an additional instance
     CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"R65-RR9-9R5Z" accountToken:@"c22-562"];
     ctConfig.logLevel = CleverTapLogDebug;

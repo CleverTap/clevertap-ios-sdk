@@ -1,4 +1,4 @@
 #import "CTConstants.h"
 
-NSString *const kCTApiDomain = @"wzrkt.com";
-NSString *const kCTNotifViewedApiDomain = @"spiky.wzrkt.com";
+NSString *const kCTApiDomain = @"clevertap-prod.com";
+NSString *const kCTNotifViewedApiDomain = @"spiky.clevertap-prod.com";

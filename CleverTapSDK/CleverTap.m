@@ -16,6 +16,7 @@
 #import "CleverTapUTMDetail.h"
 #import "CleverTapEventDetail.h"
 #import "CleverTapSyncDelegate.h"
+#import "CleverTapURLDelegate.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CleverTapPushNotificationDelegate.h"
@@ -37,6 +38,7 @@
 #import "CTCoverImageViewController.h"
 #import "CTInterstitialImageViewController.h"
 #import "CTHalfInterstitialImageViewController.h"
+#import "CleverTap+InAppNotifications.h"
 #endif
 
 #import "CTLocationManager.h"
@@ -75,7 +77,7 @@ NSString *const kQUEUE_NAME_PROFILE = @"net_queue_profile";
 NSString *const kQUEUE_NAME_EVENTS = @"events";
 NSString *const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
 
-NSString *const kHANDSHAKE_URL = @"https://wzrkt.com/hello";
+NSString *const kHANDSHAKE_URL = @"https://eu1.clevertap-prod.com/hello";
 
 NSString *const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
 NSString *const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
@@ -128,6 +130,12 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenRegister,
     CleverTapPushTokenUnregister,
+};
+
+typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
+    CleverTapInAppSuspend,
+    CleverTapInAppDiscard,
+    CleverTapInAppResume,
 };
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -194,6 +202,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
 @property (nonatomic, assign) int sendQueueFails;
 
+@property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 @property (nonatomic, assign) BOOL pushedAPNSId;
 @property (atomic, assign) BOOL currentUserOptedOut;
 @property (atomic, assign) BOOL offline;
@@ -220,6 +229,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, strong) NSMutableArray<CTValidationResult *> *pendingValidationResults;
 
 @property (atomic, weak) id <CleverTapSyncDelegate> syncDelegate;
+@property (atomic, weak) id <CleverTapURLDelegate> urlDelegate;
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
 
@@ -242,6 +252,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize campaign=_campaign;
 @synthesize wzrkParams=_wzrkParams;
 @synthesize syncDelegate=_syncDelegate;
+@synthesize urlDelegate=_urlDelegate;
 @synthesize pushNotificationDelegate=_pushNotificationDelegate;
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
 @synthesize userSetLocation=_userSetLocation;
@@ -254,7 +265,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 #endif
 
 @synthesize featureFlagsDelegate=_featureFlagsDelegate;
-
 @synthesize productConfigDelegate=_productConfigDelegate;
 
 static CTPlistInfo *_plistInfo;
@@ -296,8 +306,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [[self sharedInstance] notifyApplicationLaunchedWithOptions:launchOptions];
         return;
     }
-    for (CleverTap *instance in [_instances allValues]) {
-        [instance notifyApplicationLaunchedWithOptions:launchOptions];
+    
+    if ([_instances respondsToSelector: @selector(enumerateKeysAndObjectsUsingBlock:)]) {
+        [_instances enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, CleverTap* _Nonnull instance, BOOL * _Nonnull stop) {
+            if ([instance respondsToSelector: @selector(notifyApplicationLaunchedWithOptions:)]) {
+                [instance notifyApplicationLaunchedWithOptions:launchOptions];
+            }
+        }];
     }
 }
 
@@ -556,7 +571,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
     }
-    return [self instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -577,6 +592,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
             _instances[config.accountId] = instance;
             [instance recordDeviceErrors];
+            //Set resume status for inApp notifications to handle it on device level
+            [instance _resumeInAppNotifications];
         }
     } else {
         if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
@@ -1485,7 +1502,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             // should we open a deep link ?
             // if the app is in foreground and force flag is off, then don't fire any deep link
-            if (inForeground && !openInForeground) {
+            if (self.urlDelegate && [self.urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL: forChannel:)]) {
+                NSURL *url = [self urlForNotification: notification];
+                if (url && [self.urlDelegate shouldHandleCleverTapURL: url forChannel: CleverTapPushNotification]) {
+                    [self _checkAndFireDeepLinkForNotification: notification];
+                }
+            } else if (inForeground && !openInForeground) {
                 CleverTapLogDebug(self.config.logLevel, @"%@: app in foreground and openInForeground flag is FALSE, will not process any deep link for notification: %@", self, notification);
             } else {
                 [self _checkAndFireDeepLinkForNotification:notification];
@@ -1540,42 +1562,48 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (NSURL*)urlForNotification:(NSDictionary *)notification {
+    NSString *dl = (NSString *) notification[@"wzrk_dl"];
+    if (dl) {
+        return [NSURL URLWithString:dl];
+    }
+    return nil;
+}
+
 - (void)_checkAndFireDeepLinkForNotification:(NSDictionary *)notification {
     UIApplication *application = [[self class] getSharedApplication];
     if (application != nil) {
         @try {
-            NSString *dl = (NSString *) notification[@"wzrk_dl"];
-            if (dl) {
-                __block NSURL *dlURL = [NSURL URLWithString:dl];
-                if (dlURL) {
-                    [[self class] runSyncMainQueue:^{
-                        CleverTapLogDebug(self.config.logLevel, @"%@: Firing deep link: %@", self, dl);
-                        if (@available(iOS 10.0, *)) {
-                            if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                                NSMethodSignature *signature = [UIApplication
-                                                                instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                                NSInvocation *invocation = [NSInvocation
-                                                            invocationWithMethodSignature:signature];
-                                [invocation setTarget:application];
-                                [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                                NSDictionary *options = @{};
-                                id completionHandler = nil;
-                                [invocation setArgument:&dlURL atIndex:2];
-                                [invocation setArgument:&options atIndex:3];
-                                [invocation setArgument:&completionHandler atIndex:4];
-                                [invocation invoke];
-                            } else {
-                                if ([application respondsToSelector:@selector(openURL:)]) {
-                                    [application performSelector:@selector(openURL:) withObject:dlURL];
-                                }
-                            }
+            __block NSURL *dlURL = [self urlForNotification: notification];
+            if (dlURL) {
+                [[self class] runSyncMainQueue:^{
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Firing deep link: %@", self, dlURL.absoluteString);
+                    if (@available(iOS 10.0, *)) {
+                        if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                            NSMethodSignature *signature = [UIApplication
+                                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                            NSInvocation *invocation = [NSInvocation
+                                                        invocationWithMethodSignature:signature];
+                            [invocation setTarget:application];
+                            [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                            NSDictionary *options = @{};
+                            id completionHandler = nil;
+                            [invocation setArgument:&dlURL atIndex:2];
+                            [invocation setArgument:&options atIndex:3];
+                            [invocation setArgument:&completionHandler atIndex:4];
+                            [invocation invoke];
                         } else {
                             if ([application respondsToSelector:@selector(openURL:)]) {
                                 [application performSelector:@selector(openURL:) withObject:dlURL];
                             }
                         }
-                    }];
-                }
+                    } else {
+                        if ([application respondsToSelector:@selector(openURL:)]) {
+                            [application performSelector:@selector(openURL:) withObject:dlURL];
+                        }
+                    }
+                }];
+                
             }
         }
         @catch (NSException *exception) {
@@ -1621,7 +1649,65 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-#pragma mark - InApp Notifications Private
+#pragma mark - InApp Notifications
+
+#pragma mark Public Method
+
+- (void)showInAppNotificationIfAny {
+    [self _showInAppNotificationIfAny];
+}
+
+- (void)suspendInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: suspendInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppSuspend;
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be suspended till resumeInAppNotifications() is not called again", self);
+    }
+}
+
+- (void)discardInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppDiscard;
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be discarded till resumeInAppNotifications() is not called again", self);
+    }
+}
+
+- (void)resumeInAppNotifications {
+    [self _resumeInAppNotifications];
+    [self _showInAppNotificationIfAny];
+}
+
+#pragma mark Private Method
+
+- (void)_showInAppNotificationIfAny {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: showInAppNotificationIfAny is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        [self runOnNotificationQueue:^{
+            [self _showNotificationIfAvailable];
+        }];
+    }
+}
+
+- (void)_resumeInAppNotifications {
+    if ([[self class] runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);
+        return;
+    }
+    if (!self.config.analyticsOnly) {
+        self.inAppRenderingStatus = CleverTapInAppResume;
+        CleverTapLogDebug(self.config.logLevel, @"%@: Resuming inApp Notifications", self);
+    }
+}
 
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary*)notification {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -1707,6 +1793,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_showNotificationIfAvailable {
     if ([[self class] runningInsideAppExtension]) return;
     
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
+        return;
+    }
+    
     @try {
         NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]]];
         if ([inapps count] < 1) {
@@ -1780,7 +1871,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (![self.inAppFCManager canShow:notification]) {
         CleverTapLogInternal(self.config.logLevel, @"%@: InApp %@ has been rejected by FC, not showing", self, notification.campaignId);
-        [self showInAppNotificationIfAny];  // auto try the next one
+        [self _showInAppNotificationIfAny];  // auto try the next one
         return;
     }
     
@@ -1791,7 +1882,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (!goFromDelegate) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Application has decided to not show this InApp: %@", self, notification.campaignId ? notification.campaignId : @"<unknown ID>");
-        [self showInAppNotificationIfAny];  // auto try the next one
+        [self _showInAppNotificationIfAny];  // auto try the next one
         return;
     }
     
@@ -1887,7 +1978,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did dismiss: %@", self, notification.campaignId);
     [self notifyNotificationDismissed:notification];
     [[self class] inAppDisplayControllerDidDismiss:controller];
-    [self showInAppNotificationIfAny];
+    [self _showInAppNotificationIfAny];
 }
 
 - (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
@@ -1911,9 +2002,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (buttonCustomExtras && buttonCustomExtras.count > 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
         [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
-    } else if (ctaURL) {
+    }
+    else if (ctaURL) {
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (self.urlDelegate && [self.urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL: forChannel:)] && ![self.urlDelegate shouldHandleCleverTapURL: ctaURL forChannel: CleverTapInAppNotification]) {
+            return;
+        }
         [[self class] runSyncMainQueue:^{
             [self openURL:ctaURL forModule:@"InApp"];
         }];
@@ -2785,6 +2880,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [self.inAppFCManager updateLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
                     
                     NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
+                    
+                    if (self.inAppRenderingStatus == CleverTapInAppDiscard) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
+                        return;
+                    }
                     if (inappsJSON) {
                         NSMutableArray *inappNotifs;
                         @try {
@@ -3369,6 +3469,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+- (NSString *)profileGetCleverTapID {
+    return self.deviceInfo.deviceId;
+}
+
+- (NSString *)profileGetCleverTapAttributionIdentifier {
+    return self.deviceInfo.deviceId;
+}
+
+- (id)getProperty:(NSString *)propertyName {
+    return [self profileGet:propertyName];
+}
+
 - (id)profileGet:(NSString *)propertyName {
     if (!self.config.enablePersonalization) {
         return nil;
@@ -3398,36 +3510,90 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)profileSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildSetMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildSetMultiValues:values forKey:key
+                           localDataStore:self.localDataStore
+                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileAddMultiValue:(NSString *)value forKey:(NSString *)key {
-    [CTProfileBuilder buildAddMultiValue:value forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildAddMultiValue:value forKey:key
+                          localDataStore:self.localDataStore
+                       completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildAddMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildAddMultiValues:values forKey:key
+                           localDataStore:self.localDataStore
+                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValue:(NSString *)value forKey:(NSString *)key {
-    [CTProfileBuilder buildRemoveMultiValue:value forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildRemoveMultiValue:value forKey:key
+                             localDataStore:self.localDataStore
+                          completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
-    [CTProfileBuilder buildRemoveMultiValues:values forKey:key localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
+    [CTProfileBuilder buildRemoveMultiValues:values forKey:key
+                              localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
-// private
+- (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
+    [CTProfileBuilder buildIncrementValueBy: value forKey: key
+                             localDataStore: _localDataStore
+                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+    }];
+}
+
+- (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
+    [CTProfileBuilder buildDecrementValueBy: value forKey: key
+                             localDataStore: _localDataStore
+                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+    }];
+}
+
+
+#pragma mark - Private Profile API
+
+- (void)_handleIncrementDecrementProfilePushForKey:(NSString *)key updatedValue:(NSNumber *)updatedValue operatorDict: (NSDictionary *)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
+    
+    if (errors) {
+        [self pushValidationResults:errors];
+        return;
+    }
+    
+    if (!operatorDict || (operatorDict && [[operatorDict allKeys] count] == 0)) {
+        CleverTapLogInternal(self.config.logLevel, @"Failed to initialise an operator dictionary");
+        return;
+    }
+    
+    NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
+    [profile addEntriesFromDictionary:operatorDict];
+    CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", operatorDict);
+    
+    [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
+    
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[@"profile"] = profile;
+    [self queueEvent:event withType:CleverTapEventTypeProfile];
+    
+}
+
 - (void)_handleMultiValueProfilePush:(NSDictionary*)customFields updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
     if (customFields && [[customFields allKeys] count] > 0) {
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
@@ -3447,14 +3613,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (errors) {
         [self pushValidationResults:errors];
     }
-}
-
-- (NSString *)profileGetCleverTapID {
-    return self.deviceInfo.deviceId;
-}
-
-- (NSString *)profileGetCleverTapAttributionIdentifier {
-    return self.deviceInfo.deviceId;
 }
 
 
@@ -3551,17 +3709,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
         notification = notificationData;
     }
-    [self runSerialAsync:^{
-        [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
-            if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
-                [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
-            };
-            if (errors) {
-                [self pushValidationResults:errors];
-            }
+    if (notification) {
+        [self runSerialAsync:^{
+            [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+                if (event) {
+                    self.wzrkParams = [event[@"evtData"] copy];
+                    [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
+                };
+                if (errors) {
+                    [self pushValidationResults:errors];
+                }
+            }];
         }];
-    }];
+    }
 #endif
 }
 
@@ -3634,7 +3794,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-# pragma mark - Notifications
+# pragma mark - Push Notifications
 
 - (void)setPushToken:(NSData *)pushToken {
     if ([[self class] runningInsideAppExtension]){
@@ -3677,18 +3837,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (BOOL)isCleverTapNotification:(NSDictionary *)payload {
     return [self _isCTPushNotification:payload];
-}
-
-- (void)showInAppNotificationIfAny {
-    if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: showInappNotificationIfAny is a no-op in an app extension.", self);
-        return;
-    }
-    if (!self.config.analyticsOnly) {
-        [self runOnNotificationQueue:^{
-            [self _showNotificationIfAvailable];
-        }];
-    }
 }
 
 
@@ -3782,50 +3930,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _changeCredentialsWithAccountID:accountID token:token region:region];
 }
 
-- (void)setSyncDelegate:(id <CleverTapSyncDelegate>)delegate {
-    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapSyncDelegate)]) {
-        _syncDelegate = delegate;
-    } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Sync Delegate does not conform to the CleverTapSyncDelegate protocol", self);
-    }
-}
-
-- (id<CleverTapSyncDelegate>)syncDelegate {
-    return _syncDelegate;
-}
-
-- (void)setPushNotificationDelegate:(id<CleverTapPushNotificationDelegate>)delegate {
-    if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: setPushNotificationDelegate is a no-op in an app extension.", self);
-        return;
-    }
-    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapPushNotificationDelegate)]) {
-        _pushNotificationDelegate = delegate;
-    } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap PushNotification Delegate does not conform to the CleverTapPushNotificationDelegate protocol", self);
-    }
-}
-
-- (id<CleverTapPushNotificationDelegate>)pushNotificationDelegate {
-    return _pushNotificationDelegate;
-}
-
-- (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate>)delegate {
-    if ([[self class] runningInsideAppExtension]){
-        CleverTapLogDebug(self.config.logLevel, @"%@: setInAppNotificationDelegate is a no-op in an app extension.", self);
-        return;
-    }
-    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapInAppNotificationDelegate)]) {
-        _inAppNotificationDelegate = delegate;
-    } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap InAppNotification Delegate does not conform to the CleverTapInAppNotificationDelegate protocol", self);
-    }
-}
-
-- (id<CleverTapInAppNotificationDelegate>)inAppNotificationDelegate {
-    return _inAppNotificationDelegate;
-}
-
 + (void)enablePersonalization {
     [self setPersonalizationEnabled:true];
 }
@@ -3877,6 +3981,76 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma clang diagnostic pop
 
 
+#pragma mark - Delegates
+
+#pragma mark CleverTap Sync Delegate Implementation
+
+- (void)setSyncDelegate:(id <CleverTapSyncDelegate>)delegate {
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapSyncDelegate)]) {
+        _syncDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Sync Delegate does not conform to the CleverTapSyncDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapSyncDelegate>)syncDelegate {
+    return _syncDelegate;
+}
+
+
+#pragma mark  CleverTap URL Delegate Getter and Setter
+
+- (void)setUrlDelegate:(id <CleverTapURLDelegate>)delegate {
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapURLDelegate)]) {
+        _urlDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap URL Delegate does not conform to the CleverTapURLDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapURLDelegate>)urlDelegate {
+    return _urlDelegate;
+}
+
+
+#pragma mark CleverTap Push Notification Delegate Implementation
+
+- (void)setPushNotificationDelegate:(id<CleverTapPushNotificationDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setPushNotificationDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapPushNotificationDelegate)]) {
+        _pushNotificationDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap PushNotification Delegate does not conform to the CleverTapPushNotificationDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapPushNotificationDelegate>)pushNotificationDelegate {
+    return _pushNotificationDelegate;
+}
+
+
+#pragma mark CleverTap InApp Notification Delegate Implementation
+
+- (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setInAppNotificationDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapInAppNotificationDelegate)]) {
+        _inAppNotificationDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap InAppNotification Delegate does not conform to the CleverTapInAppNotificationDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapInAppNotificationDelegate>)inAppNotificationDelegate {
+    return _inAppNotificationDelegate;
+}
+
+
 #pragma mark - Event API
 
 - (NSTimeInterval)getFirstTime:(NSString *)event {
@@ -3898,14 +4072,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (CleverTapEventDetail *)getEventDetail:(NSString *)event {
     return [self eventGetDetail:event];
 }
-
-
-#pragma mark - Profile API
-
-- (id)getProperty:(NSString *)propertyName {
-    return [self profileGet:propertyName];
-}
-
 
 #pragma mark - Session API
 
@@ -4167,6 +4333,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (ctaURL && ![ctaURL.absoluteString isEqual: @""]) {
 #if !CLEVERTAP_NO_INBOX_SUPPORT
+        if (self.urlDelegate && [self.urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL:forChannel:)] && ![self.urlDelegate shouldHandleCleverTapURL:ctaURL forChannel:CleverTapAppInbox]) {
+            return;
+        }
         [[self class] runSyncMainQueue:^{
             [self openURL:ctaURL forModule:@"Inbox message"];
         }];

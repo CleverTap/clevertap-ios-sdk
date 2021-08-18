@@ -8,12 +8,14 @@
 #import "CTUtils.h"
 
 // profile commands
-static NSString* const kCLTAP_COMMAND_SET = @"$set";
-static NSString* const kCLTAP_COMMAND_ADD = @"$add";
-static NSString* const kCLTAP_COMMAND_REMOVE = @"$remove";
-#define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
+static NSString *const kCLTAP_COMMAND_SET = @"$set";
+static NSString *const kCLTAP_COMMAND_ADD = @"$add";
+static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
+static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
+static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
+static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
 
-static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
+#define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
 
 @implementation CTProfileBuilder
 
@@ -74,7 +76,7 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
                 if ([vr errorDesc] != nil) {
                     CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
                 }
-            }            
+            }
             // if a reserved key add to systemFields else add to customFields
             KnownField kf = [CTKnownProfileFields getKnownFieldIfPossibleForKey:key];
             if (kf != UNKNOWN) {
@@ -86,270 +88,6 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
         completion(customFields, systemFields, errors);
     } @catch (NSException *e) {
         CleverTapLogStaticInternal(@"%@: error building profile: %@", self, e.debugDescription);
-        completion(nil, nil, errors);
-    }
-}
-
-+ (void)buildGraphUser:(id)graphUser completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-    @try {
-        if (graphUser == nil || ![graphUser isKindOfClass:[NSDictionary class]]) {
-            completion(nil, nil, errors);
-            return;
-        }
-        NSString *name = [self getJSONKey:graphUser forKey:@"name" withDefault:nil];
-        if (name) {
-            @try {
-                CTValidationResult *vr = [CTValidator cleanObjectValue:name context:CTValidatorContextProfile];
-                if ([vr object] && [vr.object isKindOfClass:[NSString class]]) {
-                    name = (NSString *) [vr object];
-                }
-                if ([vr errorCode] != 0) {
-                    [errors addObject:vr];
-                    if ([vr errorDesc] != nil) {
-                        CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
-                    }
-                }
-            } @catch (NSException *e) {
-                name = @"";
-            }
-        }
-        NSString *gender = [self getJSONKey:graphUser forKey:@"gender" withDefault:nil];
-        if (gender) {
-            if ([CTUtils doesString:gender.lowercaseString startWith:@"m"])
-                gender = @"M";
-            else if ([CTUtils doesString:gender.lowercaseString startWith:@"f"])
-                gender = @"F";
-            else
-                gender = @"";
-        }
-        NSString *email = [self getJSONKey:graphUser forKey:@"email" withDefault:nil];
-        NSString *birthday = [self getJSONKey:graphUser forKey:@"birthday" withDefault:nil];
-        if (birthday) {
-            @try {
-                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                [dateFormatter setDateFormat:CLTAP_FB_DOB_DATE_FORMAT];
-                NSDate *date = [dateFormatter dateFromString:birthday];
-                if (date != nil) {
-                    birthday = [NSString stringWithFormat:@"$D_%d", (int) ((NSDate *) date).timeIntervalSince1970];
-                } else {
-                    birthday = @"";
-                }
-            } @catch (NSException *e) {
-                birthday = @"";
-            }
-        }
-        NSString *work;
-        @try {
-            id workArray = [self getJSONKey:graphUser forKey:@"work" withDefault:nil];
-            if (workArray) {
-                if ([workArray isKindOfClass:[NSArray class]] && ((int) [(NSArray *) workArray count]) > 0) {
-                    work = @"Y";
-                } else {
-                    work = @"N";
-                }
-            }
-        } @catch (NSException *e) {
-            work = nil;
-        }
-        NSString *education;
-        @try {
-            id eduArray = [self getJSONKey:graphUser forKey:@"education" withDefault:nil];
-            if (eduArray) {
-                if ([eduArray isKindOfClass:[NSArray class]] && ((int) [(NSArray *) eduArray count]) > 0) {
-                    NSString *fbEdu = [[eduArray lastObject] objectForKey:@"type"];
-                    if ([fbEdu.lowercaseString rangeOfString:@"high school"].location != NSNotFound)
-                        education = @"School";
-                    else if ([fbEdu.lowercaseString rangeOfString:@"college"].location != NSNotFound)
-                        education = @"College";
-                    else if ([fbEdu.lowercaseString rangeOfString:@"graduate school"].location != NSNotFound)
-                        education = @"Graduate";
-                    else
-                        education = @"";
-                } else {
-                    education = @"N";
-                }
-            }
-        } @catch (NSException *e) {
-            education = @"";
-        }
-        NSString *fbID = [self getJSONKey:graphUser forKey:@"id" withDefault:nil];
-        NSString *married = [self getJSONKey:graphUser forKey:@"relationship_status" withDefault:nil];
-        if (married) {
-            if ([married.lowercaseString isEqualToString:@"married"]) {
-                married = @"Y";
-            } else {
-                married = @"N";
-            }
-        }
-        NSMutableDictionary *systemFields = [NSMutableDictionary new];
-        if (fbID) {
-            systemFields[CLTAP_FB_ID] = fbID;
-        }
-        if (name) {
-            systemFields[CLTAP_FB_NAME] = name;
-        }
-        if (email) {
-            systemFields[CLTAP_FB_EMAIL] = email;
-        }
-        if (gender) {
-            systemFields[CLTAP_FB_GENDER] = gender;
-        }
-        if (education) {
-            systemFields[CLTAP_FB_EDUCATION] = education;
-        }
-        if (work) {
-            systemFields[CLTAP_FB_EMPLOYED] = work;
-        }
-        if (birthday) {
-            systemFields[CLTAP_FB_DOB] = birthday;
-        }
-        if (married) {
-            systemFields[CLTAP_FB_MARRIED] = married;
-        }
-        completion(nil, systemFields, errors);
-    } @catch (NSException *e) {
-        CleverTapLogStaticDebug(@"%@: Error building a FB profile update: %@", self, e.debugDescription);
-        completion(nil, nil, errors);
-    }
-}
-
-+ (void)buildGooglePlusUser:(id)googleUser completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-    @try {
-        if (googleUser == nil) {
-            completion(nil, nil, errors);
-            return;
-        }
-        NSString *name = [self getJSONKey:googleUser forKey:@"displayName" withDefault:nil];
-        if (name) {
-            @try {
-                CTValidationResult *vr = [CTValidator cleanObjectValue:name context:CTValidatorContextProfile];
-                if (vr.object && [[vr object] isKindOfClass:[NSString class]]) {
-                    if ([vr object] == nil || [((NSString *) [vr object]) isEqualToString:@""]) {
-                        [errors addObject:vr];
-                        CleverTapLogStaticDebug(@"%@: Invalid Google Plus user name: %@", self, name);
-                        completion(nil, nil, errors);
-                        return;
-                    }
-                }
-                name = (NSString *) [vr object];
-                
-                if ([vr errorCode] != 0) {
-                    [errors addObject:vr];
-                    if ([vr errorDesc] != nil) {
-                        CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
-                    }
-                }
-            } @catch (NSException *e) {
-                name = @"";
-            }
-        }
-        NSString *married = [self getJSONKey:googleUser forKey:@"relationshipStatus" withDefault:nil];
-        if (married) {
-            if ([married.lowercaseString isEqualToString:@"married"]) {
-                married = @"Y";
-            } else {
-                married = @"N";
-            }
-        }
-        NSString *gender = [self getJSONKey:googleUser forKey:@"gender" withDefault:nil];
-        if (gender) {
-            // Convert to WR format
-            if ([CTUtils doesString:gender.lowercaseString startWith:@"m"])
-                gender = @"M";
-            else if ([CTUtils doesString:gender.lowercaseString startWith:@"f"])
-                gender = @"F";
-            else
-                gender = @"";
-        }
-        NSString *email;
-        id emailArr = [self getJSONKey:googleUser forKey:@"emails" withDefault:nil];
-        if (emailArr && [(NSArray *) emailArr count]) {
-            @try {
-                email = [emailArr firstObject];
-                email = [self getJSONKey:email forKey:@"value" withDefault:nil];
-            }
-            @catch (NSException *exception) {
-                email = @"";
-            }
-        } else {
-            email = @"";
-        }
-        NSString *birthday = [self getJSONKey:googleUser forKey:@"birthday" withDefault:nil];
-        if (birthday) {
-            @try {
-                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                [dateFormatter setDateFormat:CLTAP_GP_DOB_DATE_FORMAT];
-                NSDate *date = [dateFormatter dateFromString:birthday];
-                
-                if (date != nil) {
-                    birthday = [NSString stringWithFormat:@"$D_%d", (int) ((NSDate *) date).timeIntervalSince1970];
-                } else {
-                    birthday = @"";
-                }
-            } @catch (NSException *e) {
-                // Differs from the specs
-                birthday = @"";
-            }
-        }
-        NSString *work;
-        @try {
-            NSMutableArray *workArray = [self getJSONKey:googleUser forKey:@"organizations" withDefault:nil];
-            if (workArray) {
-                if (((int) [workArray count]) > 0) {
-                    @try {
-                        for (id org in workArray) {
-                            NSString *orgType = [self getJSONKey:org forKey:@"type" withDefault:nil];
-                            if (orgType && [orgType.lowercaseString rangeOfString:@"work"].location != NSNotFound) {
-                                work = @"Y";
-                                break;
-                            }
-                            work = @"N";
-                        }
-                    }
-                    @catch (NSException *exception) {
-                        work = nil;
-                    }
-                } else {
-                    work = @"N";
-                }
-            }
-        } @catch (NSException *e) {
-            work = nil;
-        }
-        NSString *gpID = nil;
-        @try {
-            gpID = [self getJSONKey:googleUser forKey:@"identifier" withDefault:nil];
-        } @catch (NSException *e) {
-            // no-op
-        }
-        NSMutableDictionary *systemFields = [NSMutableDictionary new];
-        if (gpID) {
-            systemFields[CLTAP_GP_ID] = gpID;
-        }
-        if (name) {
-            systemFields[CLTAP_GP_NAME] = name;
-        }
-        if (email) {
-            systemFields[CLTAP_GP_EMAIL] = email;
-        }
-        if (gender) {
-            systemFields[CLTAP_GP_GENDER] = gender;
-        }
-        if (work) {
-            systemFields[CLTAP_GP_EMPLOYED] = work;
-        }
-        if (birthday) {
-            systemFields[CLTAP_GP_DOB] = birthday;
-        }
-        if (married) {
-            systemFields[CLTAP_GP_MARRIED] = married;
-        }
-        completion(nil, systemFields, errors);
-    } @catch (NSException *e) {
-        // We won't get here
-        CleverTapLogStaticDebug(@"Creating Google+ profile update event failed: %@", e);
         completion(nil, nil, errors);
     }
 }
@@ -374,8 +112,10 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     completion(@{key : @{kCLTAP_COMMAND_DELETE : @(YES)}}, nil, errors);
 }
 
-# pragma mark start multi-value handling
 
+# pragma mark - Multi-Value Handling
+
+# pragma mark Start Multi-Value Handling
 
 + (void)buildSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_SET localDataStore:dataStore completionHandler:completion];
@@ -418,8 +158,8 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
 }
 
 + (CTValidationResult*) _generateInvalidMultiValueError:(NSString *)message {
-    return [CTValidationResult resultWithErrorCode:512 andMessage:message];
     CleverTapLogStaticDebug(@"%@: %@", self, message);
+    return [CTValidationResult resultWithErrorCode:512 andMessage:message];
 }
 
 + (void)_handleMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key withCommand:(NSString *)command localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion  {
@@ -597,7 +337,7 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
 }
 
 
-# pragma mark - End Multi-Value Handling
+# pragma mark End Multi-Value Handling
 
 + (id)getJSONKey:(id)jsonObject
           forKey:(NSString *)key
@@ -611,5 +351,107 @@ static NSString* kCLTAP_COMMAND_DELETE = @"$delete";
     else
         return defValue;
 }
+
+
+#pragma mark - Increment and Decrement Operator Handling
+
++ (void)buildIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    
+    [self _handleIncrementDecrementValue:value forKey:key
+                             withCommand:kCLTAP_COMMAND_INCREMENT
+                          localDataStore:dataStore completionHandler:completion];
+}
+
++ (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    
+    [self _handleIncrementDecrementValue:value forKey:key
+                             withCommand:kCLTAP_COMMAND_DECREMENT
+                          localDataStore:dataStore completionHandler:completion];
+}
+
++ (void)_handleIncrementDecrementValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command localDataStore:(CTLocalDataStore *_Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSNumber *_Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors))completion {
+    
+    if ([key length] == 0) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: @"Profile key cannot be empty while incrementing/decrementing a property value"];
+        
+        [errors addObject: error];
+        completion(nil, nil, errors);
+        return;
+    }
+    
+    if (value && (value.longValue <= 0 || value.floatValue <= 0 || value.doubleValue <= 0)) {
+        NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+        CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be zero or negative", key]];
+        
+        [errors addObject: error];
+        completion(nil, nil, errors);
+        return;
+    }
+    
+    NSDictionary* operatorDict = @{
+        key: @{command: value}
+    };
+    NSNumber *newValue;
+    
+    id cachedValue = [dataStore getProfileFieldForKey: key];
+    if ([cachedValue isKindOfClass: [NSNumber class]]) {
+        
+        NSNumber *cachedNumber = (NSNumber*)cachedValue;
+        CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
+        
+        switch (numberType) {
+            case kCFNumberSInt8Type:
+            case kCFNumberSInt16Type:
+            case kCFNumberIntType:
+            case kCFNumberSInt32Type:
+            case kCFNumberSInt64Type:
+            case kCFNumberNSIntegerType:
+            case kCFNumberShortType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
+                } else {
+                    newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
+                }
+                break;
+            case kCFNumberLongType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithLong: cachedNumber.longValue + value.longValue];
+                } else {
+                    newValue = [NSNumber numberWithLong: cachedNumber.longValue - value.longValue];
+                }
+                break;
+            case kCFNumberLongLongType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithLongLong: cachedNumber.longLongValue + value.longLongValue];
+                } else {
+                    newValue = [NSNumber numberWithLongLong: cachedNumber.longLongValue - value.longLongValue];
+                }
+                break;
+            case kCFNumberFloatType:
+            case kCFNumberFloat32Type:
+            case kCFNumberFloat64Type:
+            case kCFNumberCGFloatType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
+                } else {
+                    newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
+                }
+                break;
+            case kCFNumberDoubleType:
+                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
+                    newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
+                } else {
+                    newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    
+    completion(operatorDict, newValue, nil);
+}
+
 
 @end

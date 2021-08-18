@@ -21,7 +21,7 @@
     return [UIImage imageNamed:name inBundle:[self bundle] compatibleWithTraitCollection:nil];
 }
 
-+ (UIApplication *)getSharedApplication {
++ (UIApplication * _Nullable)getSharedApplication {
     Class UIApplicationClass = NSClassFromString(@"UIApplication");
     if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
         return [UIApplication performSelector:@selector(sharedApplication)];

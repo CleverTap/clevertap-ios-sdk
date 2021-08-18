@@ -115,3 +115,4 @@ extern NSString *const kCTNotifViewedApiDomain;
 
 // valid profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"FBID", @"GPID"]
+

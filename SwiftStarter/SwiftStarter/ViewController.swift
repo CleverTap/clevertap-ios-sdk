@@ -42,6 +42,8 @@ extension ViewController {
         eventList.append("Record User event to an Additional instance")
         eventList.append("Show App Inbox")
         eventList.append("Analytics in a Webview")
+        eventList.append("Increment User Profile Property")
+        eventList.append("Decrement User Profile Property")
         self.tblEvent.reloadData()
     }
     
@@ -103,9 +105,16 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 7:
             navigateToWebview()
             break;
+        case 8:
+            incrementUserProfileProperty()
+            break;
+        case 9:
+            decrementUserProfileProperty()
+            break;
         default:
             break;
         }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func recordUserProfile() {
@@ -135,7 +144,11 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             // optional fields. controls whether the user will be sent email, push etc.
             "MSG-email": false as AnyObject,                     // Disable email notifications
             "MSG-push": true as AnyObject,                       // Enable push notifications
-            "MSG-sms": false as AnyObject                        // Disable SMS notifications
+            "MSG-sms": false as AnyObject,                        // Disable SMS notifications
+            
+            //custom fields
+            "score": 15 as AnyObject,
+            "cost": 10.5 as AnyObject
         ]
         
         CleverTap.sharedInstance()?.profilePush(profile)
@@ -223,6 +236,14 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func navigateToWebview() {
         self.performSegue(withIdentifier: "segue_webview", sender: nil)
+    }
+    
+    func incrementUserProfileProperty() {
+        CleverTap.sharedInstance()?.profileIncrementValue(by: NSNumber(value: 1), forKey: "score")
+    }
+    
+    func decrementUserProfileProperty() {
+        CleverTap.sharedInstance()?.profileDecrementValue(by: NSNumber(value: 1), forKey: "score")
     }
 }
 
