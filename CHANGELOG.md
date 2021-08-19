@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 3.10.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.10.0) (Aug 17, 2021)
+### [Version 3.10.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.10.0) (Aug 18, 2021)
 
 ##### Added
 - Adds public methods for suspending/discarding & resuming InApp Notifications
