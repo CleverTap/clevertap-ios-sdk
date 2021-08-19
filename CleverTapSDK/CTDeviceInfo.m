@@ -74,7 +74,7 @@ static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQu
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
         backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
         // reachability callback
-        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "wzrkt.com")) != NULL) {
+        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "eu1.clevertap-prod.com")) != NULL) {
             SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
             if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
                 if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
