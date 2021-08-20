@@ -1,7 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-
 ### [Version 3.9.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.4) (May 17, 2021)
 
 ##### Added
