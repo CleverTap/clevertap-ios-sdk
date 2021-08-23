@@ -1,6 +1,23 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 3.10.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.10.0) (Aug 23, 2021)
+
+##### Added
+- Adds public methods for suspending/discarding & resuming InApp Notifications
+- Adds public methods to increment/decrement values set via User properties
+- Custom Deep-link handling for App inbox, push notifications and in-app notifications
+
+##### Changed
+- Usage `clevertap-prod.com` instead of `wzrkt.com` 
+- Usage `spiky.clevertap-prod.com` instead of `spiky.wzrkt.com`
+- Refactor and Addresses iOS 15 beta fixes related to App inbox 
+- Synchronize access for `deviceName` and `model` property
+
+##### Fixed
+- https://github.com/CleverTap/clevertap-ios-sdk/issues/103
+- https://github.com/CleverTap/clevertap-ios-sdk/issues/137
+
 ### [Version 3.9.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.4) (May 17, 2021)
 
 ##### Added
