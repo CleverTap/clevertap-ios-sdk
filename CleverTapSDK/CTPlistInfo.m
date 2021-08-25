@@ -97,4 +97,10 @@ static NSArray *registeredURLSchemes;
     _accountToken = token;
     _accountRegion = region;
 }
+
+- (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    _accountId = accountID;
+    _accountToken = token;
+    _proxyDomain = proxyDomain;
+}
 @end

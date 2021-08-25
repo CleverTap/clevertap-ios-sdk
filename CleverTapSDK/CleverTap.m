@@ -116,6 +116,8 @@ NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
 static BOOL isAutoIntegrated;
+//created a variable to handle both clevertap-prod(kCTApiDomain) and proxy domain
+static NSString *proxyDomainURL = @"clevertap-prod.com";
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypePage,
@@ -562,7 +564,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return nil;
         }
         
-        _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+        _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
         
         if (_defaultInstanceConfig == nil) {
             return nil;
@@ -765,7 +767,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if CLEVERTAP_SSL_PINNING
         _sslPinningEnabled = YES;
         self.urlSessionDelegate = [[CTPinnedNSURLSessionDelegate alloc] initWithConfig:self.config];
-        NSMutableArray *domains = [NSMutableArray arrayWithObjects:kCTApiDomain, nil];
+        NSMutableArray *domains = [NSMutableArray arrayWithObjects:domainURL, nil];
         if (self.redirectDomain && ![self.redirectDomain isEqualToString:kCTApiDomain]) {
             [domains addObject:self.redirectDomain];
         }
@@ -814,6 +816,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return self.explictEndpointDomain;
         }
     }
+    NSString *proxyDomain = self.config.proxyDomain;
+    if (proxyDomain) {
+        proxyDomain = [proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
+        if (proxyDomain.length > 0) {
+            self.explictEndpointDomain = proxyDomainURL;
+            return self.explictEndpointDomain;
+        }
+    }
     NSString *domain = nil;
     if (self.config.isDefaultInstance) {
         domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY] withResetValue:[CTPreferences getStringForKey:kREDIRECT_DOMAIN_KEY withResetValue:nil]];
@@ -845,7 +855,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.redirectDomain != nil) {
         [CTPreferences putString:self.redirectDomain forKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY]];
 #if CLEVERTAP_SSL_PINNING
-        [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[kCTApiDomain, self.redirectDomain]];
+        [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[domainURL, self.redirectDomain]];
 #endif
     } else {
         [CTPreferences removeObjectForKey:kREDIRECT_DOMAIN_KEY];
@@ -2775,7 +2785,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         @try {
             NSString *jsonBody = [self jsonObjectToString:batchWithHeader];
             
-            CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to CleverTap servers at %@", self, jsonBody, endpoint);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
             
             // update endpoint for current timestamp
             endpoint = [self endpointForQueue:queue];
@@ -3928,6 +3938,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 + (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
     [self _changeCredentialsWithAccountID:accountID token:token region:region];
+}
+
++ (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    proxyDomainURL = proxyDomain;
+    [_plistInfo changeCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
 }
 
 + (void)enablePersonalization {
