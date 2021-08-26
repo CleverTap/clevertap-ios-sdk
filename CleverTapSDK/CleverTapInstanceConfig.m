@@ -10,7 +10,6 @@
     return [self initWithAccountId:accountId
                       accountToken:accountToken
                      accountRegion:nil
-                       proxyDomain:nil
                  isDefaultInstance:NO];
 }
 
@@ -20,14 +19,14 @@
     return [self initWithAccountId:accountId
                       accountToken:accountToken
                      accountRegion:accountRegion
-                       proxyDomain:nil
                  isDefaultInstance:NO];
 }
 
-- (instancetype)initWithAccountId:(NSString *)accountId accountToken:(NSString *)accountToken proxyDomain:(NSString *)proxyDomain {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                      proxyDomain:(NSString *)proxyDomain {
     return [self initWithAccountId:accountId
                       accountToken:accountToken
-                     accountRegion:nil
                        proxyDomain:proxyDomain
                  isDefaultInstance:NO];
 }
@@ -36,38 +35,47 @@
 - (instancetype)initWithAccountId:(NSString *)accountId
                      accountToken:(NSString *)accountToken
                     accountRegion:(NSString *)accountRegion
-                    proxyDomain:(NSString *)proxyDomain
                 isDefaultInstance:(BOOL)isDefault {
-    if (accountId.length <= 0) {
-        CleverTapLogStaticInfo("CleverTap accountId is empty");
-    }
-    
-    if (accountToken.length <= 0) {
-        CleverTapLogStaticInfo("CleverTap accountToken is empty");
-    }
+    [self checkIfAvavilableAccountId:accountId accountToken:accountToken];
     
     if (self = [super init]) {
         _accountId = accountId;
         _accountToken = accountToken;
         _accountRegion = accountRegion;
+        _isDefaultInstance = isDefault;
+        _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
+        
+        [self setupPlistData:isDefault];
+    }
+    return self;
+}
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                      proxyDomain:(NSString *)proxyDomain
+                isDefaultInstance:(BOOL)isDefault {
+    [self checkIfAvavilableAccountId:accountId accountToken:accountToken];
+    
+    if (self = [super init]) {
+        _accountId = accountId;
+        _accountToken = accountToken;
         _proxyDomain = proxyDomain;
         _isDefaultInstance = isDefault;
-        
-        CTPlistInfo *plist = [CTPlistInfo sharedInstance];
-        
-        _disableIDFV = isDefault ? plist.disableIDFV : NO;
-        _disableAppLaunchedEvent = isDefault ? plist.disableAppLaunchedEvent : NO;
-        _useCustomCleverTapId = isDefault ? plist.useCustomCleverTapId : NO;
-        _enablePersonalization = YES;
-        _logLevel = 0;
         _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
-        _beta = plist.beta;
+        
+        [self setupPlistData:isDefault];
     }
     return self;
 }
 
 - (instancetype)copyWithZone:(NSZone*)zone {
-    CleverTapInstanceConfig *copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken accountRegion:self.accountRegion proxyDomain:self.proxyDomain isDefaultInstance:self.isDefaultInstance];
+    CleverTapInstanceConfig *copy;
+    if (self.proxyDomain.length > 0) {
+        copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken proxyDomain:self.proxyDomain isDefaultInstance:self.isDefaultInstance];
+    } else {
+        copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken accountRegion:self.accountRegion isDefaultInstance:self.isDefaultInstance];
+    }
+    
     copy.analyticsOnly = self.analyticsOnly;
     copy.disableAppLaunchedEvent = self.disableAppLaunchedEvent;
     copy.enablePersonalization = self.enablePersonalization;
@@ -78,4 +86,25 @@
     return copy;
 }
 
+- (void) setupPlistData:(BOOL)isDefault {
+    CTPlistInfo *plist = [CTPlistInfo sharedInstance];
+    
+    _disableIDFV = isDefault ? plist.disableIDFV : NO;
+    _disableAppLaunchedEvent = isDefault ? plist.disableAppLaunchedEvent : NO;
+    _useCustomCleverTapId = isDefault ? plist.useCustomCleverTapId : NO;
+    _enablePersonalization = YES;
+    _logLevel = 0;
+    _beta = plist.beta;
+}
+
+- (void) checkIfAvavilableAccountId:(NSString *)accountId
+                       accountToken:(NSString *)accountToken {
+    if (accountId.length <= 0) {
+        CleverTapLogStaticInfo("CleverTap accountId is empty");
+    }
+    
+    if (accountToken.length <= 0) {
+        CleverTapLogStaticInfo("CleverTap accountToken is empty");
+    }
+}
 @end
