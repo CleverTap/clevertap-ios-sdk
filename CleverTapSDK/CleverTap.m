@@ -704,7 +704,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [_plistInfo changeCredentialsWithAccountID:accountID token:token region:region];
-    
+}
+
++ (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    if (_defaultInstanceConfig) {
+        CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
+        return;
+    }
+    accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (proxyDomain != nil && ![proxyDomain isEqualToString:@""]) {
+        proxyDomain = [proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (proxyDomain.length <= 0) {
+            proxyDomain = nil;
+        }
+    }
+    [_plistInfo changeCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
@@ -3946,7 +3961,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 + (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain {
     proxyDomainURL = proxyDomain;
-    [_plistInfo changeCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
+    [self _changeCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
 }
 
 + (void)enablePersonalization {
