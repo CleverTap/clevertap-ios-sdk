@@ -45,7 +45,8 @@ static NSDictionary *_inAppTypeMap;
     return nil;
 #else    
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
-    BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
+    BOOL landscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         if (landscape) {
             [xib appendString:@"~iphoneland"];

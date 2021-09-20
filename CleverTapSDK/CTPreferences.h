@@ -2,24 +2,22 @@
 
 @interface CTPreferences : NSObject
 
-+ (long)getIntForKey:(NSString *_Nonnull)key withResetValue:(long)resetValue;
++ (long)getIntForKey:(NSString *)key withResetValue:(long)resetValue;
 
-+ (void)putInt:(long)resetValue forKey:(NSString *_Nonnull)key;
++ (void)putInt:(long)resetValue forKey:(NSString *)key;
 
-+ (NSString *_Nonnull)getStringForKey:(NSString *_Nonnull)key withResetValue:(NSString *_Nullable)resetValue;
++ (NSString *)getStringForKey:(NSString *)key withResetValue:(NSString *)resetValue;
 
-+ (void)putString:(NSString *_Nonnull)resetValue forKey:(NSString *_Nonnull)key;
++ (void)putString:(NSString *)resetValue forKey:(NSString *)key;
 
-+ (id _Nonnull)getObjectForKey:(NSString *_Nonnull)key;
++ (id)getObjectForKey:(NSString *)key;
 
-+ (void)putObject:(id _Nonnull)object forKey:(NSString *_Nonnull)key;
++ (void)putObject:(id)object forKey:(NSString *)key;
 
-+ (void)removeObjectForKey:(NSString *_Nonnull)key;
++ (void)removeObjectForKey:(NSString *)key;
 
-+ (id _Nonnull)unarchiveFromFile:(NSString *_Nonnull)filename ofType:(Class _Nonnull)cls  removeFile:(BOOL)remove;
++ (id)unarchiveFromFile:(NSString *)filePath removeFile:(BOOL)remove;
 
-+ (id _Nonnull)unarchiveFromFile:(NSString *_Nonnull)filename ofTypes:(nonnull NSSet<Class> *)classes removeFile:(BOOL)remove;
-
-+ (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)fileName;
++ (BOOL)archiveObject:(id)object forFileName:(NSString *)fileName;
 
 @end

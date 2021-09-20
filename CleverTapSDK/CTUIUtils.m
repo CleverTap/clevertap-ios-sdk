@@ -29,6 +29,19 @@
     return nil;
 }
 
++ (UIWindow * _Nullable)getKeyWindow {
+    UIWindow *keyWindow;
+    if (@available(iOS 11.0, *)) {
+        for (UIWindow *window in [CTUIUtils getSharedApplication].windows) {
+            if (window.isKeyWindow) {
+                keyWindow = window;
+                break;
+            }
+        }
+    }
+    return keyWindow;
+}
+
 + (CGFloat)getLeftMargin {
     CGFloat margin = 0;
     if (@available(iOS 11.0, *)) {
