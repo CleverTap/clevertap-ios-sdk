@@ -84,10 +84,12 @@
     
     @try {
         data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
-        CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);    }
+        CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
+    }
     @catch (NSException *e) {
         CleverTapLogStaticInternal(@"%@ failed to unarchive data from %@", self, filePath);
     }
+    
     if (remove && [[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
         NSError *error;
         BOOL removed = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
