@@ -787,7 +787,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if CLEVERTAP_SSL_PINNING
         _sslPinningEnabled = YES;
         self.urlSessionDelegate = [[CTPinnedNSURLSessionDelegate alloc] initWithConfig:self.config];
-        NSMutableArray *domains = [NSMutableArray arrayWithObjects:domainURL, nil];
+        NSMutableArray *domains = [NSMutableArray arrayWithObjects:kCTApiDomain, nil];
         if (self.redirectDomain && ![self.redirectDomain isEqualToString:kCTApiDomain]) {
             [domains addObject:self.redirectDomain];
         }
@@ -875,7 +875,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.redirectDomain != nil) {
         [CTPreferences putString:self.redirectDomain forKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY]];
 #if CLEVERTAP_SSL_PINNING
-        [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[domainURL, self.redirectDomain]];
+        [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[kCTApiDomain, self.redirectDomain]];
 #endif
     } else {
         [CTPreferences removeObjectForKey:kREDIRECT_DOMAIN_KEY];
