@@ -1,29 +1,24 @@
 import UIKit
 import CleverTapSDK
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
+class CustomDomainViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     
     @IBOutlet var tblEvent: UITableView!
     var eventList: [String] = [String]()
     
     lazy var cleverTapAdditionalInstance: CleverTap = {
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
+        let ctConfig = CleverTapInstanceConfig(accountId: "R65-RR9-9R5Z", accountToken: "c22-562", proxyDomain: "analytics.sdktesting.xyz")
         return CleverTap.instance(with: ctConfig)
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
+        cleverTapAdditionalInstance.recordScreenView("CustomDomainViewController")
         loadData()
         registerAppInbox()
         initializeAppInbox()
         tblEvent.tableFooterView = UIView()
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     func messageDidSelect(_ message: CleverTapInboxMessage, at index: Int32, withButtonIndex buttonIndex: Int32) {
@@ -31,7 +26,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     }
 }
 
-extension ViewController {
+extension CustomDomainViewController {
     
     func loadData(){
         eventList.append("Record User Profile")
@@ -39,32 +34,29 @@ extension ViewController {
         eventList.append("Record User Event called Product Viewed")
         eventList.append("Record User Event with Properties")
         eventList.append("Record User Charged Event")
-        eventList.append("Record User event to an Additional instance")
         eventList.append("Show App Inbox")
-        eventList.append("Analytics in a Webview")
         eventList.append("Increment User Profile Property")
         eventList.append("Decrement User Profile Property")
-        eventList.append("Activate Custom domain proxy")
         self.tblEvent.reloadData()
     }
     
     func registerAppInbox() {
-        CleverTap.sharedInstance()?.registerInboxUpdatedBlock({
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+        cleverTapAdditionalInstance.registerInboxUpdatedBlock({ [weak self] in
+            let messageCount = self?.cleverTapAdditionalInstance.getInboxMessageCount()
+            let unreadCount = self?.cleverTapAdditionalInstance.getInboxMessageUnreadCount()
             print("Inbox Message:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread")
         })
     }
     
     func initializeAppInbox() {
-        CleverTap.sharedInstance()?.initializeInbox(callback: ({ (success) in
-            let messageCount = CleverTap.sharedInstance()?.getInboxMessageCount()
-            let unreadCount = CleverTap.sharedInstance()?.getInboxMessageUnreadCount()
+        cleverTapAdditionalInstance.initializeInbox(callback: ({ [weak self] (success) in
+            let messageCount = self?.cleverTapAdditionalInstance.getInboxMessageCount()
+            let unreadCount = self?.cleverTapAdditionalInstance.getInboxMessageUnreadCount()
             print("Inbox Message:\(String(describing: messageCount))/\(String(describing: unreadCount)) unread")
         }))
     }
 }
-extension ViewController: UITableViewDataSource, UITableViewDelegate{
+extension CustomDomainViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.eventList.count
@@ -82,39 +74,15 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         
         switch(indexPath.row)
         {
-        case 0:
-            recordUserProfile()
-            break;
-        case 1:
-            recordUserProfileWithProperties()
-            break;
-        case 2:
-            recordUserEventWithoutProperties()
-            break;
-        case 3:
-            recordUserEventWithProperties()
-            break;
-        case 4:
-            recordUserChargedEvent()
-            break;
-        case 5:
-            recordUserEventforAdditionalInstance()
-            break;
-        case 6:
-            showAppInbox()
-            break;
-        case 7:
-            navigateToWebview()
-            break;
-        case 8:
-            incrementUserProfileProperty()
-            break;
-        case 9:
-            decrementUserProfileProperty()
-            break;
-        case 10: activateCustomDomain()
-        default:
-            break;
+        case 0: recordUserProfile()
+        case 1: recordUserProfileWithProperties()
+        case 2: recordUserEventWithoutProperties()
+        case 3: recordUserEventWithProperties()
+        case 4: recordUserChargedEvent()
+        case 5: showAppInbox()
+        case 6: incrementUserProfileProperty()
+        case 7: decrementUserProfileProperty()
+        default: break;
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -142,40 +110,40 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             "Tz":"Asia/Kolkata" as AnyObject,                    //an abbreviation such as "PST", a full name such as "America/Los_Angeles",
             //or a custom ID such as "GMT-8:00"
             "Photo": "www.foobar.com/image.jpeg" as AnyObject,   // URL to the Image
-            
+
             // optional fields. controls whether the user will be sent email, push etc.
             "MSG-email": false as AnyObject,                     // Disable email notifications
             "MSG-push": true as AnyObject,                       // Enable push notifications
             "MSG-sms": false as AnyObject,                        // Disable SMS notifications
-            
+
             //custom fields
             "score": 15 as AnyObject,
             "cost": 10.5 as AnyObject
         ]
         
-        CleverTap.sharedInstance()?.profilePush(profile)
+        cleverTapAdditionalInstance.profilePush(profile)
     }
     
     func recordUserProfileWithProperties() {
         // To set a multi-value property
-        CleverTap.sharedInstance()?.profileSetMultiValues(["bag", "shoes"], forKey: "myStuff")
+        cleverTapAdditionalInstance.profileSetMultiValues(["bag", "shoes"], forKey: "myStuff")
         
         // To add an additional value(s) to a multi-value property
-        CleverTap.sharedInstance()?.profileAddMultiValue("coat", forKey: "myStuff")
+        cleverTapAdditionalInstance.profileAddMultiValue("coat", forKey: "myStuff")
         // or
-        CleverTap.sharedInstance()?.profileAddMultiValues(["socks", "scarf"], forKey: "myStuff")
+        cleverTapAdditionalInstance.profileAddMultiValues(["socks", "scarf"], forKey: "myStuff")
         
         //To remove a value(s) from a multi-value property
-        CleverTap.sharedInstance()?.profileRemoveMultiValue("bag", forKey: "myStuff")
-        CleverTap.sharedInstance()?.profileRemoveMultiValues(["shoes", "coat"], forKey: "myStuff")
-        
+        cleverTapAdditionalInstance.profileRemoveMultiValue("bag", forKey: "myStuff")
+        cleverTapAdditionalInstance.profileRemoveMultiValues(["shoes", "coat"], forKey: "myStuff")
+
         //To remove the value of a property (scalar or multi-value)
-        CleverTap.sharedInstance()?.profileRemoveValue(forKey: "myStuff")
+        cleverTapAdditionalInstance.profileRemoveValue(forKey: "myStuff")
     }
     
     func recordUserEventWithoutProperties() {
         // event without properties
-        CleverTap.sharedInstance()?.recordEvent("Product viewed")
+        cleverTapAdditionalInstance.recordEvent("Product viewed")
     }
     
     func recordUserEventWithProperties() {
@@ -186,11 +154,10 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             "Price": 59.99,
             "Date": NSDate()
             ] as [String : Any]
-        CleverTap.sharedInstance()?.recordEvent("Product viewed", withProps: props)
+        cleverTapAdditionalInstance.recordEvent("Product viewed", withProps: props)
     }
     
     func recordUserChargedEvent() {
-        //charged event
         let chargeDetails = [
             "Amount": 300,
             "Payment mode": "Credit Card",
@@ -215,12 +182,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             "Quantity": 5
             ] as [String : Any]
         
-        CleverTap.sharedInstance()?.recordChargedEvent(withDetails: chargeDetails, andItems: [item1, item2, item3])
-    }
-    
-    func recordUserEventforAdditionalInstance() {
-        cleverTapAdditionalInstance.recordEvent("TestCT1WProps", withProps: ["one": NSNumber.init(integerLiteral: 1)])
-        cleverTapAdditionalInstance.profileSetMultiValues(["a"], forKey: "letters")
+        cleverTapAdditionalInstance.recordChargedEvent(withDetails: chargeDetails, andItems: [item1, item2, item3])
     }
     
     func showAppInbox() {
@@ -230,28 +192,18 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         style.title = "App Inbox"
         style.navigationTintColor = .black
         
-        if let inboxController = CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: self) {
+        if let inboxController = cleverTapAdditionalInstance.newInboxViewController(with: style, andDelegate: self) {
             let navigationController = UINavigationController.init(rootViewController: inboxController)
             self.present(navigationController, animated: true, completion: nil)
         }
     }
     
-    func navigateToWebview() {
-        self.performSegue(withIdentifier: "segue_webview", sender: nil)
-    }
-    
     func incrementUserProfileProperty() {
-        CleverTap.sharedInstance()?.profileIncrementValue(by: NSNumber(value: 1), forKey: "score")
+        cleverTapAdditionalInstance.profileIncrementValue(by: NSNumber(value: 1), forKey: "score")
     }
     
     func decrementUserProfileProperty() {
-        CleverTap.sharedInstance()?.profileDecrementValue(by: NSNumber(value: 1), forKey: "score")
-    }
-    
-    func activateCustomDomain() {
-        let storyBoard = UIStoryboard.init(name: "Main", bundle: nil)
-        let customDomainVC = storyBoard.instantiateViewController(withIdentifier: "CustomDomainVC")
-        self.navigationController?.pushViewController(customDomainVC, animated: true)
+        cleverTapAdditionalInstance.profileDecrementValue(by: NSNumber(value: 1), forKey: "score")
     }
 }
 

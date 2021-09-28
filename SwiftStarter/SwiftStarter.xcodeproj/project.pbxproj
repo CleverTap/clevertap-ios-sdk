@@ -38,6 +38,7 @@
 		4901893D20E0C0900047E190 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4901893C20E0C0900047E190 /* AdSupport.framework */; };
 		49EA454820E36104005E0E54 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EA454720E36104005E0E54 /* NotificationService.swift */; };
 		49EA454C20E36104005E0E54 /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 49EA454520E36103005E0E54 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		577917AC27034C9C00C676F4 /* CustomDomainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577917AB27034C9B00C676F4 /* CustomDomainViewController.swift */; };
 		F0A02F016419FB45279AA95A /* Pods_SwiftStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C2642089ED734AB77D75233 /* Pods_SwiftStarterTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -179,6 +180,7 @@
 		49EA454720E36104005E0E54 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		49EA454920E36104005E0E54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A9C407E7E966C9F63D763C1 /* Pods_SwiftWatchOS_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftWatchOS_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		577917AB27034C9B00C676F4 /* CustomDomainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDomainViewController.swift; sourceTree = "<group>"; };
 		585FBFF86F84A4168E75DF91 /* Pods-SwiftStarter-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarter-NotificationService.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarter-NotificationService/Pods-SwiftStarter-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		5D2DC4598E7985731AD60960 /* Pods-SwiftStarter-NotificationService.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarter-NotificationService.release.xcconfig"; path = "Target Support Files/Pods-SwiftStarter-NotificationService/Pods-SwiftStarter-NotificationService.release.xcconfig"; sourceTree = "<group>"; };
 		6C2170823E3AB875556D46F1 /* Pods-SwiftStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterTests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarterTests/Pods-SwiftStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -310,6 +312,7 @@
 				0740612820C1509E00D8F4C9 /* AppDelegate.swift */,
 				0740612A20C1509E00D8F4C9 /* ViewController.swift */,
 				07C50073228D57AE003E1404 /* CTWebviewVC.swift */,
+				577917AB27034C9B00C676F4 /* CustomDomainViewController.swift */,
 				F98E7CCC2487E68000610431 /* Supporting Files */,
 			);
 			path = SwiftStarter;
@@ -965,6 +968,7 @@
 			files = (
 				0740612B20C1509E00D8F4C9 /* ViewController.swift in Sources */,
 				07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */,
+				577917AC27034C9C00C676F4 /* CustomDomainViewController.swift in Sources */,
 				0740612920C1509E00D8F4C9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
