@@ -1121,7 +1121,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
     
-    evtData[@"SDK Version"] = self.deviceInfo.sdkVersion;
+    evtData[@"SDK Version"] = @([self.deviceInfo.sdkVersion integerValue]);
     
     if (self.deviceInfo.model) {
         evtData[@"Model"] = self.deviceInfo.model;

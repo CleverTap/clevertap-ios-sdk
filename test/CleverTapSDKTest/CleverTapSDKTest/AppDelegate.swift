@@ -17,21 +17,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Fallback on earlier versions
         };
         
-//        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "eu1")
-//        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
-        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        //        CleverTap.setCredentialsWithAccountID("4RW-Z6Z-485Z", token: "161-024", region: "eu1")
+        //        CleverTap.setCredentialsWithAccountID("TEST-Z9R-486-4W5Z", andToken: "TEST-6b4-2c1")
+        //        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
         
-//        CleverTap.setCredentialsWithAccountID("RWW-WWW-WW4Z", token: "000-002", region: "sk1")
+//        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", andToken: "6b4-2c0")
+        CleverTap.setCredentialsWithAccountID("W9R-486-4W5Z", token: "6b4-2c0", proxyDomain: "eu.lc.clevertap.tech")
         
-        
-        DispatchQueue.main.async {
-            CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
-        }
+        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(false)
         
         CleverTap.autoIntegrate()
-        
-//        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting((1 != 0))
-        
         CleverTap.setDebugLevel(2)
         CleverTap.sharedInstance()?.setInAppNotificationDelegate(self)
         
@@ -41,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         CleverTap.sharedInstance()?.recordEvent("Content Started")
         
         registerPush()
-       
+        
         return true
     }
     
@@ -115,11 +110,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func application(application: UIApplication, openURL url: NSURL,
-                             sourceApplication: String?, annotation: AnyObject) -> Bool {
+                     sourceApplication: String?, annotation: AnyObject) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url as URL, sourceApplication: sourceApplication)
         return true
     }
-
+    
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
         return true
