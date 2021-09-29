@@ -96,6 +96,50 @@
             </objects>
             <point key="canvasLocation" x="1433" y="134"/>
         </scene>
+        <!--Custom Domain View Controller-->
+        <scene sceneID="v2j-du-pmf">
+            <objects>
+                <viewController storyboardIdentifier="CustomDomainVC" id="fXS-9r-yU8" customClass="CustomDomainViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Hfj-Ou-nmW">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="tqg-8o-3Bt">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" id="wjZ-ca-Rp1">
+                                        <rect key="frame" x="0.0" y="24.5" width="375" height="43.5"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="wjZ-ca-Rp1" id="vgb-8r-gbs">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="fXS-9r-yU8" id="4FK-Ss-GV4"/>
+                                    <outlet property="delegate" destination="fXS-9r-yU8" id="PvB-0x-nn5"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="WLc-1K-xDX"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="tqg-8o-3Bt" firstAttribute="trailing" secondItem="WLc-1K-xDX" secondAttribute="trailing" id="9ii-Xy-bNB"/>
+                            <constraint firstItem="tqg-8o-3Bt" firstAttribute="leading" secondItem="WLc-1K-xDX" secondAttribute="leading" id="TeW-qf-Wga"/>
+                            <constraint firstItem="WLc-1K-xDX" firstAttribute="bottom" secondItem="tqg-8o-3Bt" secondAttribute="bottom" id="kk4-8j-kVL"/>
+                            <constraint firstItem="tqg-8o-3Bt" firstAttribute="top" secondItem="WLc-1K-xDX" secondAttribute="top" id="msH-Tc-7X7"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="tblView" destination="tqg-8o-3Bt" id="Nlv-1V-SWp"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="97F-ie-U6W" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1058" y="793"/>
+        </scene>
     </scenes>
     <resources>
         <image name="logo" width="171" height="63"/>
