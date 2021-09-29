@@ -57,7 +57,7 @@ static CTTelephonyNetworkInfo *_networkInfo;
 @end
 
 @implementation CTDeviceInfo
-const char *domainURL = "eu1.clevertap-prod.com";
+const char *domainURL;
 
 @synthesize deviceId =_deviceId;
 @synthesize validationErrors =_validationErrors;
@@ -89,7 +89,8 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (self = [super init]) {
         _config = config;
-        domainURL = [config.proxyDomain cStringUsingEncoding:NSASCIIStringEncoding];
+        NSString *proxyDomainURL = config.proxyDomain ? config.proxyDomain : kCTApiDomain;
+        domainURL = [proxyDomainURL cStringUsingEncoding:NSASCIIStringEncoding];
         _validationErrors = [NSMutableArray new];
         
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
