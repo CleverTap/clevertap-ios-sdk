@@ -16,7 +16,7 @@
     [super viewDidLoad];
     
     // Do any additional setup after loading the view.
-    CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"W9R-486-4W5Z" accountToken:@"6b4-2c0" proxyDomain:@"analytics.sdktesting.xyz"];
+    CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"R65-RR9-9R5Z" accountToken:@"c22-562" proxyDomain:@"analytics.sdktesting.xyz"];
     [ctConfig setLogLevel: CleverTapLogDebug];
     _cleverTapAdditionalInstance = [CleverTap instanceWithConfig:ctConfig];
     
