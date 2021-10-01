@@ -89,8 +89,8 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (self = [super init]) {
         _config = config;
-        NSString *proxyDomainURL = config.proxyDomain ? config.proxyDomain : kCTApiDomain;
-        domainURL = [proxyDomainURL cStringUsingEncoding:NSASCIIStringEncoding];
+        NSString *_domainURL = config.proxyDomain ? config.proxyDomain : kCTApiDomain;
+        domainURL = [_domainURL cStringUsingEncoding:NSASCIIStringEncoding];
         _validationErrors = [NSMutableArray new];
         
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT

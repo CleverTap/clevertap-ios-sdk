@@ -226,10 +226,10 @@ typedef NS_ENUM(int, CleverTapChannel) {
  @method
  
  @abstract
- Sets the CleverTap AccountID, Token and Proxy domain
+ Sets the CleverTap AccountID, token and proxy domain URL
  
  @discussion
- Sets the CleverTap account credentials. Once the default shared instance is intialized subsequent calls will be ignored.
+ Sets the CleverTap account credentials and proxy domain URL. Once the default shared instance is intialized subsequent calls will be ignored.
  Only has effect on the default shared instance.
  
  @param accountID  the CleverTap account id

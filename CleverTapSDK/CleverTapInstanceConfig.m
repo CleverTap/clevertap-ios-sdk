@@ -70,7 +70,8 @@
 
 - (instancetype)copyWithZone:(NSZone*)zone {
     CleverTapInstanceConfig *copy;
-    if (self.proxyDomain.length > 0) {
+    NSString *proxyDomain = [self.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (proxyDomain.length > 0) {
         copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken proxyDomain:self.proxyDomain isDefaultInstance:self.isDefaultInstance];
     } else {
         copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken accountRegion:self.accountRegion isDefaultInstance:self.isDefaultInstance];
