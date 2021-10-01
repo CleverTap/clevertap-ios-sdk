@@ -43,7 +43,7 @@ We will use this certificate while creating CloudFront distribution.
     <li>Select Protocol: HTTPS</li>&nbsp;
     <p align="center">
   <img src="/docs/images/CustomDomain/AWS CloudFront/a.Origin.png" width="85%">
-  </p>
+  </p> 
   </ol>
   
   <li> Default cache behaviour:</li>
@@ -110,7 +110,7 @@ We will use this certificate while creating CloudFront distribution.
 ```swift
   let ctConfig = CleverTapInstanceConfig(accountId: ACCOUNT_ID, accountToken: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
 ```
-- Instantiate the CleverTap instance by calling CleverTapAPI.instanceWithConfig method with the CleverTapInstanceConfig object you created.
+- Instantiate the CleverTap instance by calling CleverTap.instance(with:) method with the CleverTapInstanceConfig object you created.
 ```swift
   let cleverTapProxyInstance = CleverTap.instance(with: ctConfig)
 ```
