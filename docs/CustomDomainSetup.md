@@ -107,7 +107,7 @@ We will use this certificate while creating CloudFront distribution.
 ### 🛠 Using setCredentials API
 - Import CleverTapSDK and call ```setCredentialsWithAccountID:token:proxyDomain:``` method.
 ```swift
-  CleverTap.setCredentialsWithAccountID(<accountID: ACCOUNT_ID, token: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
+  CleverTap.setCredentialsWithAccountID(accountID: ACCOUNT_ID, token: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
 ```
 - Use CleverTap's sharedInstance to log events.
 ```swift
