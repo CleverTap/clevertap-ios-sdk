@@ -1,4 +1,4 @@
-## Overview
+## 🔖 Overview
 Custom proxy domain allows you to proxy all events raised from the CleverTap SDK through your required domain. If you want to use your own application server, then use a proxy domain to handle and/or relay CleverTap events.
 
 Note: In this phase, custom domain support for Push Impression event handling is not provided.
@@ -6,7 +6,7 @@ Note: In this phase, custom domain support for Push Impression event handling is
 Follow these steps to create a CloudFront distribution for the proxy domain and then integrate CleverTap SDK with proxy domain configuration. 
 
 
-## AWS Certificate Manager
+## 📄 AWS Certificate Manager
 To create a certificate using ACM in required region: 
 
 - Go to Certificate Manager in AWS
@@ -35,7 +35,7 @@ To create a certificate using ACM in required region:
 
 We will use this certificate while creating CloudFront distribution. 
 
-## AWS CloudFront Distribution 
+## 📦 AWS CloudFront Distribution 
 <ol type="a">
   <li> Origin:</li>
   <ol type="1">
@@ -87,9 +87,9 @@ We will use this certificate while creating CloudFront distribution.
 </ol>
 
 
-## Integrating CleverTap to use proxy domain
+## 👩‍💻Integrating CleverTap to use proxy domain
 
-### Using autointegrate
+### 🛠 Using autointegrate
 - Add your CleverTap credentials in the Info.plist file of your application. Insert the account ID and account token values from your CleverTap account against keys CleverTapAccountID and CleverTapToken. Add CleverTapProxyDomain key with proxy domain value.
 <p align="center">
 <img src="/docs/images/CustomDomain/SDKIntegration/Infoplist.png" width="85%">
@@ -103,9 +103,8 @@ We will use this certificate while creating CloudFront distribution.
 ```swift
   CleverTap.sharedInstance()?.recordEvent("Product viewed")
 ```
-&nbsp;
 
-### Using manual integration
+### 🛠 Using manual integration
 - Create CleverTapInstanceConfig with parameters account ID, account token and proxy domain values.
 ```swift
   let ctConfig = CleverTapInstanceConfig(accountId: ACCOUNT_ID, accountToken: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
@@ -118,8 +117,7 @@ We will use this certificate while creating CloudFront distribution.
 ```swift
   cleverTapProxyInstance.recordEvent("Product viewed")
 ```
-&nbsp;
 
-### Test
+### ⚙️ Test
 After integration, you should be able to see logged events on CleverTap dashboard.
 
