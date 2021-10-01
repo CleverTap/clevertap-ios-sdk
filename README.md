@@ -49,7 +49,7 @@ Update your .plist file:
 
 For more details, refer to our [installation guide](https://developer.clevertap.com/docs/ios-quickstart-guide) for instructions on installing and using our iOS SDK in your project.
 
-To get started with Custom Proxy domain feature, refer to our [Custom domain setup guide](/docs/CustomDomainSetup.md) for instructions on installing and using our iOS SDK in your project.
+To get started with Custom Proxy domain feature, refer to our [Custom domain setup guide](/docs/CustomDomainSetup.md) for instructions on enabling this feature with AWS proxy setup.
 
 ## 📲 Rich Push Notifications
 
