@@ -59,6 +59,7 @@
     return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
 }
 
+#if !(TARGET_OS_TV)
 + (BOOL)isDeviceOrientationLandscape {
     UIInterfaceOrientation orientation;
     if (@available(iOS 15.0, *)) {
@@ -71,6 +72,7 @@
     BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
     return landscape;
 }
+#endif
 
 + (UIColor *)ct_colorWithHexString:(NSString *)string {
     return  [self ct_colorWithHexString:string withAlpha:1.0];

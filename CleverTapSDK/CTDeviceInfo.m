@@ -399,24 +399,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return _deviceHeight;
 }
 
-- (NSString *)carrier {
-#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-    if (!_carrier) {
-        _carrier = [self getCarrier].carrierName ?: @"";
-    }
-#endif
-    return _carrier;
-}
-
-- (NSString *)countryCode {
-#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-    if (!_countryCode) {
-        _countryCode =  [self getCarrier].isoCountryCode ?: @"";
-    }
-#endif
-    return _countryCode;
-}
-
 - (NSString *)timeZone {
     if (!_timeZone) {
         _timeZone = [NSTimeZone localTimeZone].name;
@@ -424,18 +406,32 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return _timeZone;
 }
 
-- (NSString *)radio {
+- (BOOL)wifi {
+    return _wifi;
+}
+
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+
+- (NSString *)carrier {
+    if (!_carrier) {
+        _carrier = [self getCarrier].carrierName ?: @"";
+    }
+    return _carrier;
+}
+
+- (NSString *)countryCode {
+    if (!_countryCode) {
+        _countryCode =  [self getCarrier].isoCountryCode ?: @"";
+    }
+    return _countryCode;
+}
+
+- (NSString *)radio {
     if (!_radio) {
         _radio =  [self getCurrentRadioAccessTechnology] ?: @"";
         CleverTapLogStaticInternal(@"Updated radio to %@", _radio);
     }
-#endif
     return _radio;
-}
-
-- (BOOL)wifi {
-    return _wifi;
 }
 
 - (CTCarrier *)getCarrier {
@@ -464,6 +460,6 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     }
     return radioValue;
 }
-
+#endif
 
 @end
