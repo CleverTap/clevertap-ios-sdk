@@ -110,6 +110,7 @@ NSString *const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE
 NSString *const CleverTapGeofencesDidUpdateNotification = CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION;
 
 NSString *const kCachedGUIDS = @"CachedGUIDS";
+NSString *const kCachedIdentities = @"CachedIdentities";
 NSString *const kOnUserLoginAction = @"onUserLogin";
 NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 
@@ -3134,6 +3135,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [cache count] <= 0;
 }
 
+- (NSArray *)getIdentifiersFromPlist {
+    NSArray *clevertapIdentifiers = [NSBundle mainBundle].infoDictionary[@"CleverTapIdentifiers"];
+    return clevertapIdentifiers;
+}
+
+- (NSString *)getCachedIdentities {
+    NSString *cachedIdentities = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kCachedIdentities]];
+    if (!cachedIdentities && self.config.isDefaultInstance) {
+        cachedIdentities = [CTPreferences getObjectForKey:kCachedIdentities];
+    }
+    return cachedIdentities;
+}
+
 - (NSDictionary *)getCachedGUIDs {
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kCachedGUIDS]];
     if (!cachedGUIDS && self.config.isDefaultInstance) {
@@ -3144,6 +3158,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)setCachedGUIDs:(NSDictionary *)cache {
     [CTPreferences putObject:cache forKey:[self storageKeyWithSuffix:kCachedGUIDS]];
+}
+
+- (void)setCachedIdentities:(NSString *)cache {
+    [CTPreferences putObject:cache forKey:[self storageKeyWithSuffix:kCachedIdentities]];
 }
 
 - (NSString *)getGUIDforKey:(NSString *)key andIdentifier:(NSString *)identifier {
@@ -3178,10 +3196,51 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_onUserLogin:(NSDictionary *)properties withCleverTapID:(NSString *)cleverTapID {
+    
+    // CHECK IF ITS A LEGACY USER
+    NSDictionary *cachedGUIDs = [self getCachedGUIDs];
+    NSString *cachedIdentities = [self getCachedIdentities];
+    NSArray *finalIdentityKeys;
+    
+    if (cachedGUIDs && cachedGUIDs.count > 0 && (!cachedIdentities || cachedIdentities.length == 0)) {
+        // LEGACY USER FOUND. USE EXISTING LOGIC
+        finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
+    }
+    else {
+        // NEW USER
+        // GET IDENTITIES FROM APP PLIST
+        // TODO: ADD MULTI INSTANCE LOGIC, CONFIG SETTER, RENAME PLIST IDENTIFIERS VARIABLE
+        NSArray *plistIdentifiers = [self getIdentifiersFromPlist];
+        
+        // RAISE ERROR IF CACHED AND PLIST IDENTITIES ARE NOT EQUAL
+        NSArray *cachedIdentityKeys = [cachedIdentities componentsSeparatedByString: @","];
+        if (cachedIdentityKeys.count > 0 && ![cachedIdentityKeys isEqualToArray: plistIdentifiers]) {
+            CTValidationResult *error = [[CTValidationResult alloc] init];
+            NSString *errString = @"Profile Identifiers mismatch with the previously saved ones";
+            [error setErrorCode:531];
+            [error setErrorDesc:errString];
+            [self pushValidationResult:error];
+            CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errString);
+        }
+        
+        // USE CACHED IDENTITIES IF AVAILABLE, ELSE USE PLIST/SETTER, ELSE USE DEFAULT CONSTANTS
+        if (cachedIdentityKeys && cachedIdentityKeys.count > 0) {
+            finalIdentityKeys = cachedIdentityKeys;
+        }
+        else if (plistIdentifiers && plistIdentifiers.count > 0) {
+            finalIdentityKeys = plistIdentifiers;
+            
+            // SAVE IDENTITIES TO CACHE
+            [self setCachedIdentities: [plistIdentifiers componentsJoinedByString: @","]];
+        }
+        else {
+            finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
+        }
+        
+    }
+    
     if (!properties) return;
-    
     NSString *currentGUID = [self profileGetCleverTapID];
-    
     if (!currentGUID) return;
     
     NSString *cachedGUID;
@@ -3191,8 +3250,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // use the first one we find
     for (NSString *key in properties) {
         @try {
-            if ([CLTAP_PROFILE_IDENTIFIER_KEYS containsObject:key]) {
+            if ([finalIdentityKeys containsObject:key]) {
                 NSString *identifier = [NSString stringWithFormat:@"%@", properties[key]];
+                
+                //GET IDENTFIER FROM COMPOSITE KEY FROM PLIST
+                
                 if (identifier && [identifier length] > 0) {
                     haveIdentifier = YES;
                     cachedGUID = [self getGUIDforKey:key andIdentifier:identifier];
