@@ -3137,7 +3137,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSArray *)getIdentifiersFromPlist {
     NSArray *clevertapIdentifiers = [NSBundle mainBundle].infoDictionary[@"CleverTapIdentifiers"];
-    return clevertapIdentifiers;
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self IN %@", CLTAP_ALL_PROFILE_IDENTIFIER_KEYS];
+    NSArray *result = [clevertapIdentifiers filteredArrayUsingPredicate:predicate];
+    return result;
 }
 
 - (NSString *)getCachedIdentities {

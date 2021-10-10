@@ -114,5 +114,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION @"CleverTapGeofencesDidUpdateNotification"
 
 // valid profile identifier keys
-#define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"FBID", @"GPID"]
+#define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email"] // LEGACY KEYS
+#define CLTAP_ALL_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"Phone"]
+
 
