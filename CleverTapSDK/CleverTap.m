@@ -3135,11 +3135,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [cache count] <= 0;
 }
 
-- (NSArray *)getIdentifiersFromPlist {
-    NSArray *clevertapIdentifiers = [NSBundle mainBundle].infoDictionary[@"CleverTapIdentifiers"];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self IN %@", CLTAP_ALL_PROFILE_IDENTIFIER_KEYS];
-    NSArray *result = [clevertapIdentifiers filteredArrayUsingPredicate:predicate];
-    return result;
+- (NSArray *)getConfigIdentifiers {
+    // IF DEFAULT INSTANCE, GET KEYS FROM PLIST, ELSE GET FROM SETTER
+    if (self.config.isDefaultInstance) {
+        // ONLY ADD SUPPORTED KEYS
+        NSArray *clevertapIdentifiers = [NSBundle mainBundle].infoDictionary[@"CleverTapIdentifiers"];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self IN %@", CLTAP_ALL_PROFILE_IDENTIFIER_KEYS];
+        NSArray *result = [clevertapIdentifiers filteredArrayUsingPredicate:predicate];
+        return result;
+    }
+    else {
+        return self.config.identityKeys;
+    }
 }
 
 - (NSString *)getCachedIdentities {
@@ -3210,13 +3217,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     else {
         // NEW USER
-        // GET IDENTITIES FROM APP PLIST
-        // TODO: ADD MULTI INSTANCE LOGIC, CONFIG SETTER, RENAME PLIST IDENTIFIERS VARIABLE
-        NSArray *plistIdentifiers = [self getIdentifiersFromPlist];
+        // GET IDENTIFIERS FROM PLIST IF DEFAULT INSTANCE ELSE CONFIG SETTER
+        NSArray *configIdentifiers = [self getConfigIdentifiers];
         
         // RAISE ERROR IF CACHED AND PLIST IDENTITIES ARE NOT EQUAL
         NSArray *cachedIdentityKeys = [cachedIdentities componentsSeparatedByString: @","];
-        if (cachedIdentityKeys.count > 0 && ![cachedIdentityKeys isEqualToArray: plistIdentifiers]) {
+        if (cachedIdentityKeys.count > 0 && ![cachedIdentityKeys isEqualToArray: configIdentifiers]) {
             CTValidationResult *error = [[CTValidationResult alloc] init];
             NSString *errString = @"Profile Identifiers mismatch with the previously saved ones";
             [error setErrorCode:531];
@@ -3229,11 +3235,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (cachedIdentityKeys && cachedIdentityKeys.count > 0) {
             finalIdentityKeys = cachedIdentityKeys;
         }
-        else if (plistIdentifiers && plistIdentifiers.count > 0) {
-            finalIdentityKeys = plistIdentifiers;
+        else if (configIdentifiers && configIdentifiers.count > 0) {
+            finalIdentityKeys = configIdentifiers;
             
             // SAVE IDENTITIES TO CACHE
-            [self setCachedIdentities: [plistIdentifiers componentsJoinedByString: @","]];
+            [self setCachedIdentities: [configIdentifiers componentsJoinedByString: @","]];
         }
         else {
             finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;

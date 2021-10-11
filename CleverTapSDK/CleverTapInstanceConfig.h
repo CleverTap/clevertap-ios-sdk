@@ -13,6 +13,7 @@
 @property (nonatomic, assign) BOOL useCustomCleverTapId;
 @property (nonatomic, assign) BOOL disableIDFV;
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
+@property (nonatomic, strong, nullable) NSArray *identityKeys;
 
 
 - (instancetype _Nonnull) init __unavailable;
@@ -23,5 +24,4 @@
 - (instancetype _Nonnull)initWithAccountId:(NSString* _Nonnull)accountId
                               accountToken:(NSString* _Nonnull)accountToken
                              accountRegion:(NSString* _Nonnull)accountRegion;
-
 @end
