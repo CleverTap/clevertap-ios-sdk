@@ -1175,7 +1175,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (proxyDomain.length > 0) {
         evtData[@"proxyDomain"] = self.config.proxyDomain;
     }
-
+    
     return evtData;
 }
 
