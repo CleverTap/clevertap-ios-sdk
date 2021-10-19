@@ -1172,7 +1172,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     NSString *proxyDomain = [self.config.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (proxyDomain.length > 0) {
+    if (proxyDomain != nil && proxyDomain.length > 0) {
         evtData[@"proxyDomain"] = self.config.proxyDomain;
     }
     
