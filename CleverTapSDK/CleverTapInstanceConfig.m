@@ -36,7 +36,7 @@
                      accountToken:(NSString *)accountToken
                     accountRegion:(NSString *)accountRegion
                 isDefaultInstance:(BOOL)isDefault {
-    [self checkIfAvavilableAccountId:accountId accountToken:accountToken];
+    [self checkIfAvailableAccountId:accountId accountToken:accountToken];
     
     if (self = [super init]) {
         _accountId = accountId;
@@ -54,7 +54,7 @@
                      accountToken:(NSString *)accountToken
                       proxyDomain:(NSString *)proxyDomain
                 isDefaultInstance:(BOOL)isDefault {
-    [self checkIfAvavilableAccountId:accountId accountToken:accountToken];
+    [self checkIfAvailableAccountId:accountId accountToken:accountToken];
     
     if (self = [super init]) {
         _accountId = accountId;
@@ -98,7 +98,7 @@
     _beta = plist.beta;
 }
 
-- (void) checkIfAvavilableAccountId:(NSString *)accountId
+- (void) checkIfAvailableAccountId:(NSString *)accountId
                        accountToken:(NSString *)accountToken {
     if (accountId.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountId is empty");
