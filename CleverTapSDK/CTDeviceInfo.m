@@ -57,6 +57,7 @@ static CTTelephonyNetworkInfo *_networkInfo;
 @end
 
 @implementation CTDeviceInfo
+const char *domainURL;
 
 @synthesize deviceId =_deviceId;
 @synthesize validationErrors =_validationErrors;
@@ -71,19 +72,6 @@ static const char *backgroundQueueLabel = "com.clevertap.deviceInfo.backgroundQu
     dispatch_once(&onceToken, ^{
         _idfv = [self getIDFV];
         deviceIDLock = [NSRecursiveLock new];
-#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-        backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
-        // reachability callback
-        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, "eu1.clevertap-prod.com")) != NULL) {
-            SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
-            if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
-                if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
-                    SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
-                }
-            }
-        }
-        _networkInfo = [CTTelephonyNetworkInfo new];
-#endif
     });
 }
 
@@ -101,7 +89,23 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID {
     if (self = [super init]) {
         _config = config;
+        NSString *_domainURL = config.proxyDomain ? config.proxyDomain : kCTApiDomain;
+        domainURL = [_domainURL cStringUsingEncoding:NSASCIIStringEncoding];
         _validationErrors = [NSMutableArray new];
+        
+#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+        backgroundQueue = dispatch_queue_create(backgroundQueueLabel, DISPATCH_QUEUE_SERIAL);
+        // reachability callback
+        if ((_reachability = SCNetworkReachabilityCreateWithName(NULL, domainURL)) != NULL) {
+            SCNetworkReachabilityContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
+            if (SCNetworkReachabilitySetCallback(_reachability, CleverTapReachabilityHandler, &context)) {
+                if (!SCNetworkReachabilitySetDispatchQueue(_reachability, backgroundQueue)) {
+                    SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
+                }
+            }
+        }
+        _networkInfo = [CTTelephonyNetworkInfo new];
+#endif
         [self initDeviceID:cleverTapID];
     }
     return self;

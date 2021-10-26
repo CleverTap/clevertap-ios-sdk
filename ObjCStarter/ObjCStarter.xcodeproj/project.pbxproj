@@ -27,6 +27,7 @@
 		07E16EF921300EE500429BDF /* ObjCTvOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E16EF821300EE500429BDF /* ObjCTvOSUITests.m */; };
 		120BBA50CD0EB1C77AC73736 /* Pods_ObjCTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D007B4EE9D950C029DDD72AD /* Pods_ObjCTvOS.framework */; };
 		2C29DAB72159B471E282F5B8 /* Pods_ObjCStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87424E9CB0E51032C4B48DC9 /* Pods_ObjCStarter.framework */; };
+		577917AF270362F300C676F4 /* CustomDomainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 577917AE270362F300C676F4 /* CustomDomainViewController.m */; };
 		7BBDC968856A94AA6ABF00EF /* Pods_ObjCStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F135291A487B7F5C8DE7C99 /* Pods_ObjCStarterTests.framework */; };
 		EB98D2453F3028A32FE1CCB8 /* Pods_ObjCStarterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A78330AC9F28A8538AB26E9C /* Pods_ObjCStarterUITests.framework */; };
 /* End PBXBuildFile section */
@@ -115,6 +116,8 @@
 		07E16EF821300EE500429BDF /* ObjCTvOSUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCTvOSUITests.m; sourceTree = "<group>"; };
 		07E16EFA21300EE500429BDF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		279D0529779ADF90F6383B89 /* Pods-ObjCStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarterTests.debug.xcconfig"; path = "Target Support Files/Pods-ObjCStarterTests/Pods-ObjCStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
+		577917AD270362F300C676F4 /* CustomDomainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomDomainViewController.h; sourceTree = "<group>"; };
+		577917AE270362F300C676F4 /* CustomDomainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomDomainViewController.m; sourceTree = "<group>"; };
 		5F135291A487B7F5C8DE7C99 /* Pods_ObjCStarterTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjCStarterTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		86E058F581A7AD43B1EC480D /* Pods-ObjCStarterUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCStarterUITests.debug.xcconfig"; path = "Target Support Files/Pods-ObjCStarterUITests/Pods-ObjCStarterUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		87424E9CB0E51032C4B48DC9 /* Pods_ObjCStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjCStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -217,6 +220,8 @@
 				07E16E89212FF6E700429BDF /* AppDelegate.m */,
 				07E16E8B212FF6E700429BDF /* ViewController.h */,
 				07E16E8C212FF6E700429BDF /* ViewController.m */,
+				577917AD270362F300C676F4 /* CustomDomainViewController.h */,
+				577917AE270362F300C676F4 /* CustomDomainViewController.m */,
 				07C5006E228D471B003E1404 /* CTWebViewVC.h */,
 				07C5006F228D471B003E1404 /* CTWebViewVC.m */,
 				07E16E8E212FF6E700429BDF /* Main.storyboard */,
@@ -669,6 +674,7 @@
 			files = (
 				07E16E8D212FF6E700429BDF /* ViewController.m in Sources */,
 				07C50070228D471B003E1404 /* CTWebViewVC.m in Sources */,
+				577917AF270362F300C676F4 /* CustomDomainViewController.m in Sources */,
 				07E16E98212FF6EA00429BDF /* main.m in Sources */,
 				07E16E8A212FF6E700429BDF /* AppDelegate.m in Sources */,
 			);
