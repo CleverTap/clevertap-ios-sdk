@@ -1,7 +1,6 @@
 ## 🔖 Overview
 Custom proxy domain allows you to proxy all events raised from the CleverTap SDK through your required domain. If you want to use your own application server, then use a proxy domain to handle and/or relay CleverTap events.
-
-Note: In this phase, custom domain support for Push Impression event handling is not provided.
+Custom domain support for Push Impression event handling is provided.
 
 Follow these steps to create a CloudFront distribution for the proxy domain and then integrate CleverTap SDK with proxy domain configuration. 
 
@@ -90,7 +89,9 @@ We will use this certificate while creating CloudFront distribution.
 ## 👩‍💻Integrating CleverTap to use proxy domain
 
 ### 🛠 Using autointegrate API
-- Add your CleverTap credentials in the Info.plist file of your application. Insert the account ID and account token values from your CleverTap account against keys CleverTapAccountID and CleverTapToken. Add CleverTapProxyDomain key with proxy domain value.
+- Add your CleverTap credentials in the Info.plist file of your application. Insert the account ID and account token values from your CleverTap account against keys CleverTapAccountID and CleverTapToken. 
+Add CleverTapProxyDomain key with proxy domain value for handling events through custom proxy domain. 
+Add CleverTapSpikyProxyDomain key with proxy domain value for handling push impression events through custom proxy domain.
 <p align="center">
 <img src="/docs/images/CustomDomain/SDKIntegration/Infoplist.png" width="85%">
 </p>
@@ -105,9 +106,12 @@ We will use this certificate while creating CloudFront distribution.
 ```
 
 ### 🛠 Using setCredentials API
-- Import CleverTapSDK and call ```setCredentialsWithAccountID:token:proxyDomain:``` method.
+- Import CleverTapSDK and call ```setCredentialsWithAccountID:token:proxyDomain:``` method or ```setCredentialsWithAccountID:token:proxyDomain:spikyProxyDomain:```.
 ```swift
   CleverTap.setCredentialsWithAccountID(accountID: ACCOUNT_ID, token: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
+```
+```swift
+  CleverTap.setCredentialsWithAccountID(accountID: ACCOUNT_ID, token: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz", spikyProxyDomain: "spiky-analytics.sdktesting.xyz")
 ```
 - Use CleverTap's sharedInstance to log events.
 ```swift
@@ -115,9 +119,12 @@ We will use this certificate while creating CloudFront distribution.
 ```
 
 ### 🛠 Creating additional CleverTap's instance 
-- Create CleverTapInstanceConfig with parameters account ID, account token and proxy domain values.
+- Create CleverTapInstanceConfig with either of the following APIs.
 ```swift
   let ctConfig = CleverTapInstanceConfig(accountId: ACCOUNT_ID, accountToken: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
+```
+```swift
+  let ctConfig = CleverTapInstanceConfig(accountId: ACCOUNT_ID, accountToken: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz", spikyProxyDomain: "spiky-analytics.sdktesting.xyz")
 ```
 - Instantiate the CleverTap instance by calling CleverTap.instance(with:) method with the CleverTapInstanceConfig object you created.
 ```swift
