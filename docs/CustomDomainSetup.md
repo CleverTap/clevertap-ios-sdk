@@ -89,9 +89,9 @@ We will use this certificate while creating CloudFront distribution.
 ## 👩‍💻Integrating CleverTap to use proxy domain
 
 ### 🛠 Using autointegrate API
-- Add your CleverTap credentials in the Info.plist file of your application. Insert the account ID and account token values from your CleverTap account against keys CleverTapAccountID and CleverTapToken. 
-Add CleverTapProxyDomain key with proxy domain value for handling events through custom proxy domain. 
-Add CleverTapSpikyProxyDomain key with proxy domain value for handling push impression events through custom proxy domain.
+- Add your CleverTap credentials in the Info.plist file of your application. Insert the account ID and account token values from your CleverTap account against keys <b>CleverTapAccountID</b> and <b>CleverTapToken</b>.<br /> 
+Add <b>CleverTapProxyDomain</b> key with proxy domain value for handling events through custom proxy domain.<br />
+Add <b>CleverTapSpikyProxyDomain</b> key with proxy domain value for handling push impression events.
 <p align="center">
 <img src="/docs/images/CustomDomain/SDKIntegration/Infoplist.png" width="85%">
 </p>
@@ -106,7 +106,7 @@ Add CleverTapSpikyProxyDomain key with proxy domain value for handling push impr
 ```
 
 ### 🛠 Using setCredentials API
-- Import CleverTapSDK and call ```setCredentialsWithAccountID:token:proxyDomain:``` method or ```setCredentialsWithAccountID:token:proxyDomain:spikyProxyDomain:```.
+- Import CleverTapSDK and call either ```setCredentialsWithAccountID:token:proxyDomain:``` method or ```setCredentialsWithAccountID:token:proxyDomain:spikyProxyDomain:``` method.
 ```swift
   CleverTap.setCredentialsWithAccountID(accountID: ACCOUNT_ID, token: ACCOUNT_TOKEN, proxyDomain: "analytics.sdktesting.xyz")
 ```
@@ -136,5 +136,5 @@ Add CleverTapSpikyProxyDomain key with proxy domain value for handling push impr
 ```
 
 ### ⚙️ Debug and Test
-After integration, you should be able to see logged events on CleverTap dashboard. You could also use CleverTapInstanceConfig's logLevel to debug requests and response.
+After integration, you should be able to see logged events on CleverTap dashboard. You could also use CleverTapInstanceConfig's logLevel or ```CleverTap.setDebugLevel(1)``` to debug requests and response.
 
