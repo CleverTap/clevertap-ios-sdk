@@ -106,7 +106,7 @@ static NSArray *registeredURLSchemes;
     _proxyDomain = proxyDomain;
 }
 
-- (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain spikyProxyDomain:(NSString * _Nonnull)spikyProxyDomain {
+- (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain spikyProxyDomain:(NSString *)spikyProxyDomain {
     _accountId = accountID;
     _accountToken = token;
     _proxyDomain = proxyDomain;
