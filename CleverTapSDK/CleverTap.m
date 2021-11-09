@@ -561,9 +561,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }
             return nil;
         }
-        
-        if (_plistInfo.proxyDomain.length > 0 || _plistInfo.spikyProxyDomain.length > 0) {
+        if (_plistInfo.proxyDomain.length > 0 && _plistInfo.spikyProxyDomain.length > 0) {
             _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain spikyProxyDomain:_plistInfo.spikyProxyDomain isDefaultInstance:YES];
+        } else if (_plistInfo.proxyDomain.length > 0) {
+            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
         } else {
             _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
         }
