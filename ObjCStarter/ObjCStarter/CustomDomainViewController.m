@@ -1,54 +1,47 @@
-
-#import "ViewController.h"
 #import "CustomDomainViewController.h"
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
 #import <CleverTapSDK/CleverTap+Inbox.h>
 
-@interface ViewController () <UITableViewDelegate, UITableViewDataSource, CleverTapInboxViewControllerDelegate>
+@interface CustomDomainViewController() <UITableViewDelegate, UITableViewDataSource, CleverTapInboxViewControllerDelegate>
 
-@property (nonatomic, strong) IBOutlet UITableView *tblEvent;
+@property (weak, nonatomic) IBOutlet UITableView *tblView;
 @property (nonatomic, strong) NSMutableArray *eventList;
-
 @property (nonatomic, strong) CleverTap *cleverTapAdditionalInstance;
-
 @end
 
-@implementation ViewController
+@implementation CustomDomainViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
+    // Do any additional setup after loading the view.
+    CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"R65-RR9-9R5Z" accountToken:@"c22-562" proxyDomain:@"analytics.sdktesting.xyz"];
+    [ctConfig setLogLevel: CleverTapLogDebug];
+    _cleverTapAdditionalInstance = [CleverTap instanceWithConfig:ctConfig];
+    
     [self loadData];
     [self initializeAppInbox];
-    self.tblEvent.tableFooterView = [UIView new];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    self.tblView.tableFooterView = [UIView new];
 }
 
 - (void)loadData {
-    
+    [_cleverTapAdditionalInstance recordScreenView:@"CustomDomainViewController"];
     self.eventList = [[NSMutableArray alloc] initWithObjects:@"Record User Profile",
                       @"Record User Profile with Properties",
                       @"Record User Event called Product Viewed",
                       @"Record User Event with Properties",
                       @"Record User Charged Event",
-                      @"Record User event to an Additional instance",
                       @"Open App Inbox",
-                      @"Analytics in a Webview",
                       @"Increment User Profile Property",
-                      @"Decrement User Profile Property",
-                      @"Activate Custom domain proxy", nil];
-    [self. tblEvent reloadData];
+                      @"Decrement User Profile Property", nil];
+    [self.tblView reloadData];
 }
     
 - (void)initializeAppInbox {
-    [[CleverTap sharedInstance] initializeInboxWithCallback:^(BOOL success) {
-        int messageCount = (int)[[CleverTap sharedInstance] getInboxMessageCount];
-        int unreadCount = (int)[[CleverTap sharedInstance] getInboxMessageUnreadCount];
+    [_cleverTapAdditionalInstance initializeInboxWithCallback:^(BOOL success) {
+        int messageCount = (int)[self.cleverTapAdditionalInstance getInboxMessageCount];
+        int unreadCount = (int)[self.cleverTapAdditionalInstance getInboxMessageUnreadCount];
         NSLog(@"Inbox Message: %d/%d", messageCount, unreadCount);
     }];
 }
@@ -92,22 +85,13 @@
             [self recordUserChargedEvent];
             break;
         case 5:
-            [self recordUserEventforAdditionalInstance];
-            break;
-        case 6:
             [self showAppInbox];
             break;
-        case 7:
-            [self navigateToWebview];
-            break;
-        case 8:
+        case 6:
             [self incrementUserProfileProperty];
             break;
-        case 9:
+        case 7:
             [self decrementUserProfileProperty];
-            break;
-        case 10:
-            [self activateCustomDomain];
             break;
         default:
             break;
@@ -150,27 +134,27 @@
 
                               };
     
-    [[CleverTap sharedInstance] profilePush:profile];
+    [_cleverTapAdditionalInstance profilePush:profile];
 }
 - (void)recordUserProfileWithProperties {
     // To set a multi-value property
-    [[CleverTap sharedInstance] profileSetMultiValues:@[@"bag", @"shoes"] forKey:@"myStuff"];
+    [_cleverTapAdditionalInstance profileSetMultiValues:@[@"bag", @"shoes"] forKey:@"myStuff"];
     
     // To add an additional value(s) to a multi-value property
-    [[CleverTap sharedInstance] profileAddMultiValue:@"coat" forKey:@"myStuff"];
+    [_cleverTapAdditionalInstance profileAddMultiValue:@"coat" forKey:@"myStuff"];
     // or
-    [[CleverTap sharedInstance] profileAddMultiValues:@[@"socks", @"scarf"] forKey:@"myStuff"];
+    [_cleverTapAdditionalInstance profileAddMultiValues:@[@"socks", @"scarf"] forKey:@"myStuff"];
     
     //To remove a value(s) from a multi-value property
-    [[CleverTap sharedInstance] profileRemoveMultiValue:@"bag" forKey:@"myStuff"];
-    [[CleverTap sharedInstance] profileRemoveMultiValues:@[@"shoes", @"coat"] forKey:@"myStuff"];
+    [_cleverTapAdditionalInstance profileRemoveMultiValue:@"bag" forKey:@"myStuff"];
+    [_cleverTapAdditionalInstance profileRemoveMultiValues:@[@"shoes", @"coat"] forKey:@"myStuff"];
     
     //To remove the value of a property (scalar or multi-value)
-    [[CleverTap sharedInstance] profileRemoveValueForKey:@"myStuff"];
+    [_cleverTapAdditionalInstance profileRemoveValueForKey:@"myStuff"];
 }
 - (void)recordUserEventWithoutProperties {
     // event without properties
-    [[CleverTap sharedInstance] recordEvent:@"Product viewed"];
+    [_cleverTapAdditionalInstance recordEvent:@"Product viewed"];
 }
 - (void)recordUserEventWithProperties {
     // event with properties
@@ -181,10 +165,9 @@
                             @"Date": [NSDate date]
                             };
     
-    [[CleverTap sharedInstance] recordEvent:@"Product viewed" withProps:props];
+    [_cleverTapAdditionalInstance recordEvent:@"Product viewed" withProps:props];
 }
 - (void)recordUserChargedEvent {
-    // charged event
     NSDictionary *chargeDetails = @{
                                     @"Amount" : @300,
                                     @"Payment mode": @"Credit Card",
@@ -210,24 +193,17 @@
                             };
     
     NSArray *items = @[item1, item2, item3];
-    [[CleverTap sharedInstance] recordChargedEventWithDetails:chargeDetails
+    [_cleverTapAdditionalInstance recordChargedEventWithDetails:chargeDetails
                                                      andItems:items];
 }
-- (void)recordUserEventforAdditionalInstance {
-    if (_cleverTapAdditionalInstance == nil) {
-        CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"R65-RR9-9R5Z" accountToken:@"c22-562"];
-        _cleverTapAdditionalInstance = [CleverTap instanceWithConfig:ctConfig];
-    }
-    [_cleverTapAdditionalInstance recordEvent:@"TestCT1WProps" withProps:@{@"one": @1}];
-    [_cleverTapAdditionalInstance profileSetMultiValues:@[@"bag", @"shoes"] forKey:@"myStuff"];
-}
+
 - (void)showAppInbox {
     
     CleverTapInboxStyleConfig *style = [[CleverTapInboxStyleConfig alloc] init];
     style.messageTags = @[@"tag1", @"tag2"];
     style.tabSelectedBgColor = [UIColor blueColor];
     style.tabSelectedTextColor = [UIColor whiteColor];
-    CleverTapInboxViewController *inboxController = [[CleverTap sharedInstance] newInboxViewControllerWithConfig:style andDelegate:self];
+    CleverTapInboxViewController *inboxController = [_cleverTapAdditionalInstance newInboxViewControllerWithConfig:style andDelegate:self];
     if (inboxController) {
         UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:inboxController];
         [self presentViewController:navigationController animated:YES completion:nil];
@@ -236,21 +212,18 @@
 - (void)messageDidSelect:(CleverTapInboxMessage *)message atIndex:(int)index withButtonIndex:(int)buttonIndex {
     //  This is called when an inbox message is clicked(tapped or call to action)
 }
-- (void)navigateToWebview {
-    [self performSegueWithIdentifier:@"segue_webview" sender:nil];
-}
 
 - (void)incrementUserProfileProperty {
-    [[CleverTap sharedInstance] profileIncrementValueBy: @3 forKey: @"score"];
+    [_cleverTapAdditionalInstance profileIncrementValueBy: @3 forKey: @"score"];
 }
 
 - (void)decrementUserProfileProperty {
-    [[CleverTap sharedInstance] profileDecrementValueBy: @7 forKey: @"score"];
+    [_cleverTapAdditionalInstance profileDecrementValueBy: @7 forKey: @"score"];
 }
 
 - (void)activateCustomDomain {
     UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    CustomDomainViewController *customDomainVC = [storyBoard instantiateViewControllerWithIdentifier:@"CustomDomainVC"];
+    UIViewController *customDomainVC = [storyBoard instantiateViewControllerWithIdentifier:@"CustomDomainVC"];
     [self.navigationController pushViewController:customDomainVC animated:YES];
 }
 

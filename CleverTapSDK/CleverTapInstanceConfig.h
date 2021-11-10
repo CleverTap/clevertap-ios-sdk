@@ -6,6 +6,7 @@
 @property (nonatomic, strong, readonly, nonnull) NSString *accountId;
 @property (nonatomic, strong, readonly, nonnull) NSString *accountToken;
 @property (nonatomic, strong, readonly, nullable) NSString *accountRegion;
+@property (nonatomic, strong, readonly, nullable) NSString *proxyDomain;
 
 @property (nonatomic, assign) BOOL analyticsOnly;
 @property (nonatomic, assign) BOOL disableAppLaunchedEvent;
@@ -24,4 +25,8 @@
 - (instancetype _Nonnull)initWithAccountId:(NSString* _Nonnull)accountId
                               accountToken:(NSString* _Nonnull)accountToken
                              accountRegion:(NSString* _Nonnull)accountRegion;
+
+- (instancetype _Nonnull)initWithAccountId:(NSString* _Nonnull)accountId
+                              accountToken:(NSString* _Nonnull)accountToken
+                             proxyDomain:(NSString* _Nonnull)proxyDomain;
 @end
