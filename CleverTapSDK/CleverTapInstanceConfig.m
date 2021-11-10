@@ -67,9 +67,11 @@
 }
 
 - (void)setIdentityKeys:(NSArray *)identityKeys {
+    if (!_isDefaultInstance) {
         // ONLY ADD SUPPORTED KEYS
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self IN %@", CLTAP_ALL_PROFILE_IDENTIFIER_KEYS];
         _identityKeys = [identityKeys filteredArrayUsingPredicate:predicate];
+    }
 }
 
 @end
