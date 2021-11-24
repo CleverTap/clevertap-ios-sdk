@@ -2,7 +2,8 @@
 Custom proxy domain allows you to proxy all events raised from the CleverTap SDK through your required domain. If you want to use your own application server, then use a proxy domain to handle and/or relay CleverTap events.
 Custom domain support for Push Impression event handling is provided.
 
-Follow these steps to create a CloudFront distribution for the proxy domain and then integrate CleverTap SDK with proxy domain configuration. 
+You will need a domain and access to DNS site settings to setup the proxy domain.
+Follow these steps to create AWS Certificate, CloudFront distribution for the proxy domain and then integrate CleverTap SDK with proxy domain configuration. 
 
 
 ## 📄 AWS Certificate Manager
@@ -13,7 +14,7 @@ To create a certificate using ACM in required region:
   <p align="center">
   <img alt="Request Certificate" src="/docs/images/CustomDomain/ACM/Request a public certificate" width="85%">
   </p>
-- Add the proxy domain name you want to use
+- Add the proxy domain name you want to use. This proxy domain name will be used to relay events to CleverTap's origin domain. Eg: subdomain.domain.com
   <p align="center">
   <img alt="Add the domain name" src="/docs/images/CustomDomain/ACM/Add the domain name" width="85%">
   </p>
@@ -22,7 +23,7 @@ To create a certificate using ACM in required region:
   <img alt="Select validation method" src="/docs/images/CustomDomain/ACM/Select validation method" width="85%">
   </p>
 - After review, Confirm and request the certificate
-- Copy the CNAME record from ACM details to add it in DNS Settings
+- Copy the CNAME record from ACM details to add it in your domain registrar settings
   <p align="center">
   <img alt="CNAME record details" src="/docs/images/CustomDomain/ACM/CNAME record details" width="85%">
   </p>
@@ -60,7 +61,7 @@ We will use this certificate while creating CloudFront distribution.
   
   <li> Settings:</li>
    <ol type="1">
-     <li>Add proxy name in Alternate domain name (CNAME): analytics.sdktesting.xyz</li>
+     <li>Add proxy name in Alternate domain name (CNAME): analytics.sdktesting.xyz. This is the same proxy which was earlier used to create the AWS certificate.</li>
      <li>Choose the earlier created certificate in Custom SSL certificate - optional</li>&nbsp;
      <p align="center">
      <img src="/docs/images/CustomDomain/AWS CloudFront/c1.Settings.png" width="85%">
