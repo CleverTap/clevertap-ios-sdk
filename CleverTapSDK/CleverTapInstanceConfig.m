@@ -31,6 +31,17 @@
                  isDefaultInstance:NO];
 }
 
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                      proxyDomain:(NSString *)proxyDomain
+                 spikyProxyDomain:(NSString *)spikyProxyDomain {
+    return [self initWithAccountId:accountId
+                      accountToken:accountToken
+                       proxyDomain:proxyDomain
+                    spikyProxyDomain:spikyProxyDomain
+                 isDefaultInstance:NO];
+}
+
 // SDK private
 - (instancetype)initWithAccountId:(NSString *)accountId
                      accountToken:(NSString *)accountToken
@@ -68,10 +79,35 @@
     return self;
 }
 
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
+                      proxyDomain:(NSString *)proxyDomain
+                 spikyProxyDomain:(NSString *)spikyProxyDomain
+                isDefaultInstance:(BOOL)isDefault {
+    [self checkIfAvailableAccountId:accountId accountToken:accountToken];
+    
+    if (self = [super init]) {
+        _accountId = accountId;
+        _accountToken = accountToken;
+        _proxyDomain = proxyDomain;
+        _spikyProxyDomain = spikyProxyDomain;
+        _isDefaultInstance = isDefault;
+        _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
+        
+        [self setupPlistData:isDefault];
+    }
+    return self;
+}
+
 - (instancetype)copyWithZone:(NSZone*)zone {
     CleverTapInstanceConfig *copy;
     NSString *proxyDomain = [self.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (proxyDomain.length > 0) {
+    
+    NSString *spikyProxyDomain = [self.spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if (spikyProxyDomain.length > 0 && proxyDomain.length > 0) {
+        copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken proxyDomain:self.proxyDomain spikyProxyDomain:self.spikyProxyDomain isDefaultInstance:self.isDefaultInstance];
+    } else if (proxyDomain.length > 0) {
         copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken proxyDomain:self.proxyDomain isDefaultInstance:self.isDefaultInstance];
     } else {
         copy = [[[self class] allocWithZone:zone] initWithAccountId:self.accountId accountToken:self.accountToken accountRegion:self.accountRegion isDefaultInstance:self.isDefaultInstance];
