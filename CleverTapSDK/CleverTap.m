@@ -3240,6 +3240,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _asyncSwitchUser:properties withCachedGuid:cachedGUID andCleverTapID:cleverTapID forAction:kOnUserLoginAction];
 }
 
+- (void) resetUser{
+    [self _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:nil forAction:kOnUserLoginAction];
+}
+
 - (void) _asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {
     
     [self runSerialAsync:^{

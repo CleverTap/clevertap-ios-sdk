@@ -347,6 +347,12 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  */
 - (void)onUserLogin:(NSDictionary *_Nonnull)properties;
 
+
+/*!
+ Clears all the profile data
+ */
+- (void) resetUser;
+
 /*!
  @method
  
