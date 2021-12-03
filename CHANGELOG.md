@@ -1,6 +1,50 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 3.10.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.10.0) (Aug 23, 2021)
+
+##### Added
+- Adds public methods for suspending/discarding & resuming InApp Notifications
+- Adds public methods to increment/decrement values set via User properties
+- Custom Deep-link handling for App inbox, push notifications and in-app notifications
+
+##### Changed
+- Usage `clevertap-prod.com` instead of `wzrkt.com` 
+- Usage `spiky.clevertap-prod.com` instead of `spiky.wzrkt.com`
+- Refactor and Addresses iOS 15 beta fixes related to App inbox 
+- Synchronize access for `deviceName` and `model` property
+
+##### Fixed
+- https://github.com/CleverTap/clevertap-ios-sdk/issues/103
+- https://github.com/CleverTap/clevertap-ios-sdk/issues/137
+
+### [Version 3.9.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.4) (May 17, 2021)
+
+##### Added
+- Adds `setFirstTabTitle` method to set the name of the first tab in App Inbox
+- Adds `recordChargedEvent` to `CTJSInterface` class to allow raising Charged Event from JS
+- Adds a feature to opt-out IDFV based on a flag in Info.plist or while setting up additional instances/configs
+
+##### Changed
+- Removes `profilePushGraphUser` and `profilePushGooglePlusUser` APIs
+
+### [Version 3.9.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.3) (April 12, 2021)
+
+##### Added
+- Adds support for installation via Swift Package Manager
+- Addresses - https://github.com/CleverTap/clevertap-ios-sdk/issues/70
+
+##### Changed
+- Refactored code related to `CTTelephonyNetworkInfo` to address - https://github.com/CleverTap/clevertap-ios-sdk/issues/103
+- Removes Product Experiences (Screen AB/Dynamic Variables) related code
+
+### [Version 3.9.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.2) (February 5, 2021)
+
+##### Fixed
+- Removes unknown JSON attributes while handling Test In-App Notification, Test App Inbox or Test Display Unit
+- Makes `model` property `atomic` (thread-safe)
+- Minor Performance improvements
+
 ### [Version 3.9.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.1) (October 8, 2020)
 
 ##### Added

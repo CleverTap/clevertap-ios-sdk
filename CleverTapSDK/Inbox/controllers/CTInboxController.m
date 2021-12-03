@@ -4,6 +4,7 @@
 #import "CTConstants.h"
 #import "CTUserMO.h"
 #import "CTMessageMO.h"
+#import "CTInboxUtils.h"
 
 static NSManagedObjectContext *mainContext;
 static NSManagedObjectContext *privateContext;
@@ -49,7 +50,7 @@ static NSManagedObjectContext *privateContext;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @try {
-            NSURL *modelURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"Inbox" withExtension:@"momd"];
+            NSURL *modelURL = [[CTInboxUtils bundle:self.class] URLForResource:@"Inbox" withExtension:@"momd"];
             NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
             NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
             
@@ -87,8 +88,8 @@ static NSManagedObjectContext *privateContext;
         CleverTapLogStaticInternal(@"%@: updating messages: %@", self.user, messages);
         BOOL haveUpdates = [self.user updateMessages:messages forContext:privateContext];
         if (haveUpdates) {
-            [self notifyUpdate];
             [self _save];
+            [self notifyUpdate];
         }
     }];
 }
@@ -104,8 +105,8 @@ static NSManagedObjectContext *privateContext;
         CTMessageMO *message = [self _messageForId:messageId];
         if (message) {
             [message setValue:@YES forKey:@"isRead"];
-            [self notifyUpdate];
             [self _save];
+            [self notifyUpdate];
         }
     }];
 }
@@ -119,12 +120,12 @@ static NSManagedObjectContext *privateContext;
     return [msg toJSON];
 }
 
-- (NSUInteger)count {
+- (NSInteger)count {
     if (!self.isInitialized) return -1;
     return [self.messages count];
 }
 
-- (NSUInteger)unreadCount {
+- (NSInteger)unreadCount {
     if (!self.isInitialized) return -1;
     return [self.unreadMessages count];
 }
@@ -134,7 +135,8 @@ static NSManagedObjectContext *privateContext;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
-    for (CTMessageMO *msg in self.user.messages) {
+    NSOrderedSet *userMessages = [self.user.messages copy];
+    for (CTMessageMO *msg in userMessages) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
             CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
@@ -157,7 +159,8 @@ static NSManagedObjectContext *privateContext;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
+    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *results = [userMessages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
     for (CTMessageMO *msg in results) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
@@ -181,7 +184,8 @@ static NSManagedObjectContext *privateContext;
 
 - (CTMessageMO *)_messageForId:(NSString *)messageId {
     if (!self.isInitialized) return nil;
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
+    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *results = [userMessages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
     BOOL existing = results && [results count] > 0;
     return existing ? results[0] : nil;
 }
@@ -191,8 +195,8 @@ static NSManagedObjectContext *privateContext;
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
         }
-        [self notifyUpdate];
         [self _save];
+        [self notifyUpdate];
     }];
 }
 

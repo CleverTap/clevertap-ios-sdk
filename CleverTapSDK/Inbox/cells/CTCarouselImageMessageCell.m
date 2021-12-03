@@ -44,7 +44,7 @@
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = 0;
         if (@available(iOS 11.0, *)) {
-            UIWindow *window = [CTInAppResources getSharedApplication].keyWindow;
+            UIWindow *window = [CTUIUtils getSharedApplication].keyWindow;
             margins = window.safeAreaInsets.left;
         }
         CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;

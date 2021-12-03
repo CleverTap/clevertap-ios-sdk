@@ -53,9 +53,9 @@
     [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderWidth = 2.0;
     self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
-    self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
-    self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.messageColor];
-    self.dateLabel.textColor = [CTInAppUtils ct_colorWithHexString:content.titleColor];
+    self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:content.titleColor];
+    self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:content.messageColor];
+    self.dateLabel.textColor = [CTUIUtils ct_colorWithHexString:content.titleColor];
     [self layoutSubviews];
     [self layoutIfNeeded];
 }

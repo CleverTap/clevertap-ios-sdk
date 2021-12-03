@@ -2,7 +2,7 @@
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CleverTapJSInterface.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
 
@@ -143,7 +143,7 @@ typedef enum {
     
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     char pos = self.notification.position;
-    CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? [[CTInAppResources getSharedApplication] statusBarFrame].size.height : 0.0;
+    CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? [[CTUIUtils getSharedApplication] statusBarFrame].size.height : 0.0;
     
     int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
     switch (pos) {
@@ -470,7 +470,7 @@ typedef enum {
     Class windowClass = self.shouldPassThroughTouches ? CTInAppPassThroughWindow.class : UIWindow.class;
     
     if (@available(iOS 13, *)) {
-        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;

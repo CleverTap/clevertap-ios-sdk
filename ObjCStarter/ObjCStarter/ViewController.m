@@ -37,7 +37,9 @@
                       @"Record User Charged Event",
                       @"Record User event to an Additional instance",
                       @"Open App Inbox",
-                      @"Analytics in a Webview",nil];
+                      @"Analytics in a Webview",
+                      @"Increment User Profile Property",
+                      @"Decrement User Profile Property", nil];
     [self. tblEvent reloadData];
 }
     
@@ -96,9 +98,16 @@
         case 7:
             [self navigateToWebview];
             break;
+        case 8:
+            [self incrementUserProfileProperty];
+            break;
+        case 9:
+            [self decrementUserProfileProperty];
+            break;
         default:
             break;
     }
+    [tableView deselectRowAtIndexPath: indexPath animated: YES];
 }
 
 - (void)recordUserProfile {
@@ -128,7 +137,12 @@
                               // optional fields. controls whether the user will be sent email, push etc.
                               @"MSG-email": @NO,                      // Disable email notifications
                               @"MSG-push": @YES,                      // Enable push notifications
-                              @"MSG-sms": @NO                         // Disable SMS notifications
+                              @"MSG-sms": @NO,                         // Disable SMS notifications
+                              
+                              //custom fields
+                              @"score": @15,
+                              @"cost": @10.5
+
                               };
     
     [[CleverTap sharedInstance] profilePush:profile];
@@ -207,6 +221,7 @@
     CleverTapInboxStyleConfig *style = [[CleverTapInboxStyleConfig alloc] init];
     style.messageTags = @[@"tag1", @"tag2"];
     style.tabSelectedBgColor = [UIColor blueColor];
+    style.tabSelectedTextColor = [UIColor whiteColor];
     CleverTapInboxViewController *inboxController = [[CleverTap sharedInstance] newInboxViewControllerWithConfig:style andDelegate:self];
     if (inboxController) {
         UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:inboxController];
@@ -218,6 +233,14 @@
 }
 - (void)navigateToWebview {
     [self performSegueWithIdentifier:@"segue_webview" sender:nil];
+}
+
+- (void)incrementUserProfileProperty {
+    [[CleverTap sharedInstance] profileIncrementValueBy: @3 forKey: @"score"];
+}
+
+- (void)decrementUserProfileProperty {
+    [[CleverTap sharedInstance] profileDecrementValueBy: @7 forKey: @"score"];
 }
 
     

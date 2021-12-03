@@ -95,7 +95,7 @@ static NSString * const kOrientationPortrait = @"p";
 - (void)configureForMessage:(CleverTapInboxMessage *)message {
     self.message = message;
     if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
-        self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:message.backgroundColor];
+        self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:message.backgroundColor];
     } else {
         self.containerView.backgroundColor = [UIColor whiteColor];
     }
@@ -149,16 +149,14 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage *)getPortraitPlaceHolderImage {
     if (portraitPlaceholderImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        portraitPlaceholderImage = [UIImage imageNamed:@"ct_default_portrait_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        portraitPlaceholderImage = [CTUIUtils getImageForName:@"ct_default_portrait_image.png"];
     }
     return portraitPlaceholderImage;
 }
 
 - (UIImage *)getLandscapePlaceHolderImage {
     if (landscapePlaceholderImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        landscapePlaceholderImage = [UIImage imageNamed:@"ct_default_landscape_image.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        landscapePlaceholderImage = [CTUIUtils getImageForName:@"ct_default_landscape_image.png"];
     }
     return landscapePlaceholderImage;
 }
@@ -173,7 +171,7 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)deviceOrientationIsLandscape {
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 }
 
@@ -182,48 +180,42 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (UIImage*)getAudioPlaceholderImage {
     if (audioPlaceholderImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        audioPlaceholderImage = [UIImage imageNamed:@"sound-wave-headphones.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        audioPlaceholderImage = [CTUIUtils getImageForName:@"ct_default_audio.png"];
     }
     return audioPlaceholderImage;
 }
 
 - (UIImage *)getVideoPlaceHolderImage {
     if (videoPlaceholderImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        videoPlaceholderImage = [UIImage imageNamed:@"ct_default_video.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        videoPlaceholderImage = [CTUIUtils getImageForName:@"ct_default_video.png"];
     }
     return videoPlaceholderImage;
 }
 
 - (UIImage*)getPlayImage {
     if (playImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        playImage = [UIImage imageNamed:@"ic_play.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        playImage = [CTUIUtils getImageForName:@"ic_play.png"];
     }
     return playImage;
 }
 
 - (UIImage*)getPauseImage {
     if (pauseImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        pauseImage = [UIImage imageNamed:@"ic_pause.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        pauseImage = [CTUIUtils getImageForName:@"ic_pause.png"];
     }
     return pauseImage;
 }
 
 - (UIImage*)getVolumeOnImage {
     if (volumeOnImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        volumeOnImage = [UIImage imageNamed:@"volume_on.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        volumeOnImage = [CTUIUtils getImageForName:@"ct_volume_on.png"];
     }
     return volumeOnImage;
 }
 
 - (UIImage*)getVolumeOffImage {
     if (volumeOffImage == nil) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        volumeOffImage = [UIImage imageNamed:@"volume_off.png" inBundle:bundle compatibleWithTraitCollection:nil];
+        volumeOffImage = [CTUIUtils getImageForName:@"ct_volume_off.png"];
     }
     return volumeOffImage;
 }

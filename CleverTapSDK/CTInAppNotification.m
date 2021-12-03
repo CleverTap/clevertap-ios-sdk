@@ -1,6 +1,6 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 #if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView.h>
@@ -45,7 +45,7 @@
 @property (nonatomic, readwrite) int maxPerSession;
 @property (nonatomic, readwrite) int totalLifetimeCount;
 @property (nonatomic, readwrite) int totalDailyCount;
-@property (nonatomic, readwrite) NSUInteger timeToLive;
+@property (nonatomic, readwrite) NSInteger timeToLive;
 @property (nonatomic, assign, readwrite) char position;
 @property (nonatomic, assign, readwrite) float height;
 @property (nonatomic, assign, readwrite) float heightPercent;
@@ -97,7 +97,7 @@
                 NSDate *now = [NSDate date];
                 NSDate *timeToLiveDate = [now dateByAddingTimeInterval:(48 * 60 * 60)];
                 NSTimeInterval timeToLiveEpoch = [timeToLiveDate timeIntervalSince1970];
-                NSUInteger defaultTimeToLive = (long)timeToLiveEpoch;
+                NSInteger defaultTimeToLive = (long)timeToLiveEpoch;
                 _timeToLive = defaultTimeToLive;
             }
         } @catch (NSException *e) {
@@ -282,7 +282,7 @@
 #if (TARGET_OS_TV)
     return nil;
 #else
-    UIApplication *sharedApplication = [CTInAppResources getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
 #endif
 }

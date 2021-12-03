@@ -17,6 +17,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_PROXY_DOMAIN_LABEL @"CleverTapProxyDomain"
 #define CLTAP_DISABLE_APP_LAUNCH_LABEL @"CleverTapDisableAppLaunched"
 #define CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapUseCustomId"
+#define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
 #define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"
@@ -55,7 +56,6 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
-#define CLTAP_AB_EXP_JSON_RESPONSE_KEY @"ab_exps"
 #define CLTAP_GEOFENCES_JSON_RESPONSE_KEY @"geofences"
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
@@ -116,3 +116,4 @@ extern NSString *const kCTNotifViewedApiDomain;
 
 // valid profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"FBID", @"GPID"]
+

@@ -33,4 +33,9 @@ SwiftStarter/Podfile.lock
 ObjCStarter/Pods
 ObjCStarter/Podfile.lock
 
+<<<<<<< HEAD
 keys.txt
+=======
+# Swift Package Manager
+Package.resolved
+>>>>>>> clevertap/master

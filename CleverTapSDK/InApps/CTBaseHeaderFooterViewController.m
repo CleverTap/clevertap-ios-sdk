@@ -2,7 +2,7 @@
 #import "CTBaseHeaderFooterViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 typedef enum {
     kWRSlideStatusNormal = 0,
@@ -72,7 +72,7 @@ typedef enum {
 
 - (void)layoutNotification {
     
-    self.containerView.backgroundColor = [CTInAppUtils ct_colorWithHexString:self.notification.backgroundColor];
+    self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
     if (self.notification.darkenScreen) {
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     }
@@ -104,14 +104,14 @@ typedef enum {
     if (self.notification.title) {
         self.titleLabel.textAlignment = NSTextAlignmentLeft;
         self.titleLabel.backgroundColor = [UIColor clearColor];
-        self.titleLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.titleColor];
+        self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
     }
     
     if (self.notification.message) {
         self.bodyLabel.textAlignment = NSTextAlignmentLeft;
         self.bodyLabel.backgroundColor = [UIColor clearColor];
-        self.bodyLabel.textColor = [CTInAppUtils ct_colorWithHexString:self.notification.messageColor];
+        self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
     }
@@ -356,7 +356,7 @@ typedef enum {
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     if (@available(iOS 13, *)) {
-        NSSet *connectedScenes = [CTInAppResources getSharedApplication].connectedScenes;
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;

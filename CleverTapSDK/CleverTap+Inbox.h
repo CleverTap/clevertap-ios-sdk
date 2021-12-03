@@ -85,6 +85,7 @@
 @property (nonatomic, strong, nullable) UIColor *tabUnSelectedTextColor;
 @property (nonatomic, strong, nullable) NSString *noMessageViewText;
 @property (nonatomic, strong, nullable) UIColor *noMessageViewTextColor;
+@property (nonatomic, strong, nullable) NSString *firstTabTitle;
 
 @end
 
@@ -117,7 +118,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  This method returns the total number of inbox messages for the user.
  */
 
-- (NSUInteger)getInboxMessageCount;
+- (NSInteger)getInboxMessageCount;
 
 /*!
  @method
@@ -126,7 +127,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  This method returns the total number of unread inbox messages for the user.
  */
 
-- (NSUInteger)getInboxMessageUnreadCount;
+- (NSInteger)getInboxMessageUnreadCount;
 
 /*!
  @method

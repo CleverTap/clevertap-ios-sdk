@@ -1,6 +1,6 @@
 #import "CTHeaderViewController.h"
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
-#import "CTInAppResources.h"
+#import "CTUIUtils.h"
 
 @interface CTHeaderViewController () {
 }
@@ -13,7 +13,7 @@
 
 - (void)loadView {
     [super loadView];
-    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils XibNameForControllerName:NSStringFromClass([CTHeaderViewController class])] owner:self options:nil];
+    [[CTInAppUtils bundle] loadNibNamed:[CTInAppUtils getXibNameForControllerName:NSStringFromClass([CTHeaderViewController class])] owner:self options:nil];
 }
 
 
@@ -27,7 +27,7 @@
     [super viewDidLayoutSubviews];
     CGFloat topLength = self.topLayoutGuide.length;
     [[NSLayoutConstraint constraintWithItem: self.containerView
-                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
+                                  attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual
                                      toItem:self.view attribute:NSLayoutAttributeTop
                                  multiplier:1.0 constant:topLength] setActive:YES];
 }

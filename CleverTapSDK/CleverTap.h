@@ -14,12 +14,12 @@
 #define CLEVERTAP_NO_INAPP_SUPPORT 1
 #define CLEVERTAP_NO_REACHABILITY_SUPPORT 1
 #define CLEVERTAP_NO_INBOX_SUPPORT 1
-#define CLEVERTAP_NO_AB_SUPPORT 1
 #define CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT 1
 #define CLEVERTAP_NO_GEOFENCE_SUPPORT 1
 #endif
 
 @protocol CleverTapSyncDelegate;
+@protocol CleverTapURLDelegate;
 @protocol CleverTapPushNotificationDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
@@ -38,6 +38,12 @@ typedef NS_ENUM(int, CleverTapLogLevel) {
     CleverTapLogOff = -1,
     CleverTapLogInfo = 0,
     CleverTapLogDebug = 1
+};
+
+typedef NS_ENUM(int, CleverTapChannel) {
+    CleverTapPushNotification = 0,
+    CleverTapAppInbox = 1,
+    CleverTapInAppNotification = 2
 };
 
 @interface CleverTap : NSObject
@@ -541,32 +547,23 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
- Convenience method to set the Facebook Graph User properties on the user profile.
+ Method for incrementing a value for a single-value profile property (if it exists).
  
- @discussion
- If you support social login via FB connect in your app and are using the Facebook library in your app,
- you can push a GraphUser object of the user.
- Be sure that you’re sending a GraphUser object of the currently logged in user.
- 
- @param fbGraphUser       fbGraphUser Facebook Graph User object
- 
+ @param key       key string
+ @param value     value number
  */
-- (void)profilePushGraphUser:(id _Nonnull)fbGraphUser;
+- (void)profileIncrementValueBy:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
  
  @abstract
- Convenience method to set the Google Plus User properties on the user profile.
+ Method for decrementing a value for a single-value profile property (if it exists).
  
- @discussion
- If you support social login via Google Plus in your app and are using the Google Plus library in your app,
- you can set a GTLPlusPerson object on the user profile, after a successful login.
- 
- @param googleUser       GTLPlusPerson object
- 
+ @param key       key string
+ @param value     value number
  */
-- (void)profilePushGooglePlusUser:(id _Nonnull )googleUser;
+- (void)profileDecrementValueBy:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key;
 
 /*!
  @method
@@ -900,20 +897,20 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 
 /*!
-
-@method
-
-@abstract
-The `CleverTapPushNotificationDelegate` protocol provides methods for notifying
-your application (the adopting delegate) about push notifications.
-
-@see CleverTapPushNotificationDelegate.h
-
-@discussion
-This sets the CleverTapPushNotificationDelegate.
-
-@param delegate     an object conforming to the CleverTapPushNotificationDelegate Protocol
-*/
+ 
+ @method
+ 
+ @abstract
+ The `CleverTapPushNotificationDelegate` protocol provides methods for notifying
+ your application (the adopting delegate) about push notifications.
+ 
+ @see CleverTapPushNotificationDelegate.h
+ 
+ @discussion
+ This sets the CleverTapPushNotificationDelegate.
+ 
+ @param delegate     an object conforming to the CleverTapPushNotificationDelegate Protocol
+ */
 
 - (void)setPushNotificationDelegate:(id <CleverTapPushNotificationDelegate> _Nullable)delegate;
 
@@ -935,6 +932,22 @@ This sets the CleverTapPushNotificationDelegate.
  */
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
 #endif
+
+/*!
+ 
+ @method
+ 
+ @abstract
+ The `CleverTapURLDelegate` protocol provides a method for the confirming class to implement custom handling for URLs in case of in-app notification CTAs, push notifications and App inbox.
+ 
+ @see CleverTapURLDelegate.h
+ 
+ @discussion
+ This sets the CleverTapURLDelegate.
+ 
+ @param delegate     an object conforming to the CleverTapURLDelegate Protocol
+ */
+- (void)setUrlDelegate:(id <CleverTapURLDelegate> _Nullable)delegate;
 
 /* ------------------------------------------------------------------------------------------------------
  * Notifications
@@ -1029,7 +1042,7 @@ This sets the CleverTapPushNotificationDelegate.
  Manually initiate the display of any pending in app notifications.
  
  */
-- (void)showInAppNotificationIfAny;
+- (void)showInAppNotificationIfAny __attribute__((deprecated("Use resumeInAppNotifications to show pending InApp notifications. This will be removed soon.")));
 
 #endif
 
@@ -1122,14 +1135,14 @@ This sets the CleverTapPushNotificationDelegate.
 + (CleverTapLogLevel)getDebugLevel;
 
 /*!
-@method
-
-@abstract
-Set the Library name for Auxiliary SDKs
-
-@discussion
-Call this to method to set library name in the Auxiliary SDK
-*/
+ @method
+ 
+ @abstract
+ Set the Library name for Auxiliary SDKs
+ 
+ @discussion
+ Call this to method to set library name in the Auxiliary SDK
+ */
 - (void)setLibrary:(NSString * _Nonnull)name;
 
 /*!
