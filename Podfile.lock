@@ -1,4 +1,6 @@
 PODS:
+  - CleverTap-iOS-SDK (3.10.0):
+    - SDWebImage (~> 5.1)
   - OCMock (3.2.2)
   - OHHTTPStubs (9.1.0):
     - OHHTTPStubs/Default (= 9.1.0)
@@ -13,8 +15,12 @@ PODS:
   - OHHTTPStubs/NSURLSession (9.1.0):
     - OHHTTPStubs/Core
   - OHHTTPStubs/OHPathHelpers (9.1.0)
+  - SDWebImage (5.12.1):
+    - SDWebImage/Core (= 5.12.1)
+  - SDWebImage/Core (5.12.1)
 
 DEPENDENCIES:
+  - CleverTap-iOS-SDK (from `./`)
   - OCMock (~> 3.2.1)
   - OHHTTPStubs
 
@@ -22,11 +28,18 @@ SPEC REPOS:
   trunk:
     - OCMock
     - OHHTTPStubs
+    - SDWebImage
+
+EXTERNAL SOURCES:
+  CleverTap-iOS-SDK:
+    :path: "./"
 
 SPEC CHECKSUMS:
+  CleverTap-iOS-SDK: 1e38a25eee5bdb3e525c5c8497504bc64b7d695d
   OCMock: 18c9b7e67d4c2770e95bb77a9cc1ae0c91fe3835
   OHHTTPStubs: 90eac6d8f2c18317baeca36698523dc67c513831
+  SDWebImage: 4dc3e42d9ec0c1028b960a33ac6b637bb432207b
 
-PODFILE CHECKSUM: ea7580e8f2cad3cbb3f71bec5b41f86dad988b98
+PODFILE CHECKSUM: 5beab5a52e2d83fe855401d5000dd5a51d48349c
 
 COCOAPODS: 1.10.1

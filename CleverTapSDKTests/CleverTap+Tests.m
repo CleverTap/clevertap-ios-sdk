@@ -5,6 +5,7 @@
 @property (nonatomic, strong) NSMutableArray *profileQueue;
 @property (nonatomic, strong) NSMutableArray *notificationsQueue;
 
++ (void)onDidFinishLaunchingNotification:(NSNotification *)notification;
 - (NSDictionary *)batchHeader;
 
 @end
@@ -14,6 +15,10 @@
 @dynamic eventsQueue;
 @dynamic profileQueue;
 @dynamic notificationsQueue;
+
++(void)notfityTestAppLaunch {
+    [CleverTap onDidFinishLaunchingNotification:nil];
+}
 
 -(NSDictionary*)getBatchHeader {
     return [self batchHeader]; // just an example of exposing a private method for testing

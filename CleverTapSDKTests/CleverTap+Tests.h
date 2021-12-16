@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 #import "CTValidationResult.h"
 
 @interface CleverTap (Tests)
@@ -14,7 +14,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeFetch,
 };
 - (NSDictionary *)getCachedGUIDs;
--(NSDictionary*)getBatchHeader;
++ (void)notfityTestAppLaunch;
+- (NSDictionary*)getBatchHeader;
 - (void)pushValidationResults:(NSArray<CTValidationResult *> * _Nonnull )results;
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type;
 

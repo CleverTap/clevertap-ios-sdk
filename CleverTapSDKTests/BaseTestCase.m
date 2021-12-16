@@ -3,6 +3,8 @@
 #import <OHHTTPStubs/HTTPStubs.h>
 #import <OHHTTPStubs/HTTPStubsResponse+JSON.h>
 #import <OHHTTPStubs/NSURLRequest+HTTPBodyTesting.h>
+#import <CleverTapSDK/CleverTap.h>
+#import "CleverTap+Tests.h"
 
 @interface BaseTestCase ()
 @property (nonatomic, retain) NSDictionary *lastEvent;
@@ -13,7 +15,8 @@
 @implementation BaseTestCase
 
 + (void)initialize {
-    
+    id mockApplication = OCMClassMock([UIApplication class]);
+    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
 }
 
 - (void)setUp {
@@ -39,6 +42,7 @@
         self.lastBatchHeader = [data objectAtIndex:0];
         self.lastEvent = [data objectAtIndex:1];
     }];
+    [CleverTap notfityTestAppLaunch];
 }
 
 - (void)tearDown {
