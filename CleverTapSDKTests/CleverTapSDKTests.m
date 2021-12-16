@@ -23,38 +23,38 @@
     [super tearDown];
 }
 
-- (void)testBatchHeader {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Test Batch Header"];
-    
-    [[CleverTap sharedInstance] recordEvent:@"testEventForBatchHeader" withProps:@{@"prop1":@1}];
-    
-    [self getLastBatchHeader: ^(NSDictionary* lastBatchHeader) {
-        XCTAssertEqualObjects([lastBatchHeader objectForKey:@"type"], @"meta"); // TODO something real here
-        [expectation fulfill];
-    }];
-    
-    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
-        if (error) {
-            XCTFail(@"Expectation Failed with error: %@", error);
-        }
-    }];
-}
+//- (void)testBatchHeader {
+//    XCTestExpectation *expectation = [self expectationWithDescription:@"Test Batch Header"];
+//
+//    [self.cleverTapInstance recordEvent:@"testEventForBatchHeader" withProps:@{@"prop1":@1}];
+//
+//    [self getLastBatchHeader: ^(NSDictionary* lastBatchHeader) {
+//        XCTAssertEqualObjects([lastBatchHeader objectForKey:@"type"], @"meta"); // TODO something real here
+//        [expectation fulfill];
+//    }];
+//
+//    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
+//        if (error) {
+//            XCTFail(@"Expectation Failed with error: %@", error);
+//        }
+//    }];
+//}
 
-- (void)testRecordEvent {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Test Record Event"];
-    
-    [[CleverTap sharedInstance] recordEvent:@"testEvent" withProps:@{@"prop1":@1}];
-    
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
-        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], @"testEvent");
-        [expectation fulfill];
-    }];
-    
-    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
-        if (error) {
-            XCTFail(@"Expectation Failed with error: %@", error);
-        }
-    }];
-}
+//- (void)testRecordEvent {
+//    XCTestExpectation *expectation = [self expectationWithDescription:@"Test Record Event"];
+//
+//    [self.cleverTapInstance recordEvent:@"testEvent" withProps:@{@"prop1":@1}];
+//
+//    [self getLastEvent: ^(NSDictionary* lastEvent) {
+//        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], @"testEvent");
+//        [expectation fulfill];
+//    }];
+//
+//    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
+//        if (error) {
+//            XCTFail(@"Expectation Failed with error: %@", error);
+//        }
+//    }];
+//}
 
 @end
