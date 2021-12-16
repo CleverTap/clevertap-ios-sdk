@@ -15,11 +15,13 @@
 @implementation BaseTestCase
 
 + (void)initialize {
-    [CleverTap setDebugLevel:3];
-    [CleverTap setCredentialsWithAccountID:@"test" token:@"test" region:@"eu1"];
+    id mockApplication = OCMClassMock([UIApplication class]);
+    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
 }
 
 - (void)setUp {
+    [CleverTap setDebugLevel:3];
+    [CleverTap setCredentialsWithAccountID:@"test" token:@"test" region:@"eu1"];
     [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
@@ -32,6 +34,7 @@
         self.lastBatchHeader = [data objectAtIndex:0];
         self.lastEvent = [data objectAtIndex:1];
     }];
+    [CleverTap notfityTestAppLaunch];
 }
 
 - (void)tearDown {
