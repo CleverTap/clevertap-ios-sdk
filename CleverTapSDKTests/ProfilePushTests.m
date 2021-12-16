@@ -26,8 +26,12 @@
 }
 
 - (void)test_profile_is_pushed {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Profile Push Event"];
+    NSString *stubName = @"Profile Push Event";
+    [self stubRequestsWithName:stubName];
     
+    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
+    
+    NSString *eventType = @"profile";
     NSString *name = @"Jane";
     NSString *email = @"jane@gmail.com";
     
@@ -37,9 +41,9 @@
                               };
     [self.cleverTapInstance profilePush:profile];
     
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
+    [self getLastEventWithStubName:stubName eventName:nil eventType:eventType handler:^(NSDictionary* lastEvent) {
         XCTAssertNotNil(lastEvent);
-        XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
+        XCTAssertEqualObjects(lastEvent[@"type"], eventType);
         
         NSDictionary *profileDetails = lastEvent[@"profile"];
         XCTAssertNotNil(profileDetails);
@@ -85,8 +89,11 @@
 }
 
 - (void)test_onuserlogin_with_identifier_Key {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"On User Login Event"];
+    NSString *stubName = @"On User Login Event";
+    [self stubRequestsWithName:stubName];
+    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
     
+    NSString *eventType = @"profile";
     NSString *name = @"Jill";
     NSString *email = @"jill@gmail.com";
     
@@ -96,7 +103,7 @@
                               };
     [self.cleverTapInstance onUserLogin: profile];
     
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
+    [self getLastEventWithStubName:stubName eventName:nil eventType:eventType handler:^(NSDictionary* lastEvent) {
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
         
@@ -122,16 +129,19 @@
 }
 
 - (void)test_onuserlogin_with_non_identifier_Key {
+    NSString *stubName = @"On User Login Event without identifier";
+    [self stubRequestsWithName:stubName];
+    
     XCTestExpectation *expectation = [self expectationWithDescription:@"On User Login Event"];
     
+    NSString *eventType = @"profile";
     NSString *name = @"Jill";
-    
     NSDictionary *profile = @{
                               @"Name": name
                               };
     [self.cleverTapInstance onUserLogin: profile];
     
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
+    [self getLastEventWithStubName:stubName eventName:nil eventType:eventType handler:^(NSDictionary* lastEvent) {
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
         

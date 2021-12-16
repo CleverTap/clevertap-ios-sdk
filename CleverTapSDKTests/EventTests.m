@@ -26,17 +26,19 @@
 }
 
 - (void)test_event_recorded_with_props {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Test Record Event"];
+    NSString *stubName = @"Test Record Event with props";
+    [self stubRequestsWithName:stubName];
+    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
     
     NSString *eventName = @"testEvent";
     NSDictionary *props = @{@"prop1":@1};
     [self.cleverTapInstance recordEvent:eventName withProps:props];
     
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
-        XCTAssertNotNil(lastEvent);
-        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], eventName);
-        XCTAssertEqualObjects([lastEvent objectForKey:@"evtData"], props);
-        [expectation fulfill];
+    [self getLastEventWithStubName:stubName eventName:eventName eventType:nil handler:^(NSDictionary* lastEvent) {
+            XCTAssertNotNil(lastEvent);
+            XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], eventName);
+            XCTAssertEqualObjects([lastEvent objectForKey:@"evtData"], props);
+            [expectation fulfill];
     }];
     
     [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
@@ -47,12 +49,14 @@
 }
 
 - (void)test_event_recorded {
+    NSString *stubName = @"Test Record Event";
+    [self stubRequestsWithName: stubName];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Test Record Event"];
     
     NSString *eventName = @"testEvent";
     [self.cleverTapInstance recordEvent:eventName];
     
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
+    [self getLastEventWithStubName:stubName eventName:eventName  eventType:nil  handler:^(NSDictionary* lastEvent) {
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], eventName);
         [expectation fulfill];
@@ -66,8 +70,11 @@
 }
 
 - (void)test_chared_event_recorded {
+    NSString *stubName = @"Test Charged Record Event";
+    [self stubRequestsWithName:stubName];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Test Charged Record Event"];
     
+    NSString *eventName = @"Charged";
     NSDictionary *chargeDetails = @{
                                     @"Amount" : @300,
                                     @"Payment mode": @"Credit Card",
@@ -86,9 +93,9 @@
     NSArray *items = @[item1, item2];
     [self.cleverTapInstance recordChargedEventWithDetails:chargeDetails andItems:items];
     
-    [self getLastEvent: ^(NSDictionary* lastEvent) {
+    [self getLastEventWithStubName:stubName eventName:eventName  eventType:nil handler:^(NSDictionary* lastEvent) {
         XCTAssertNotNil(lastEvent);
-        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], @"Charged");
+        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], eventName);
         
         NSMutableDictionary *eventData = [NSMutableDictionary dictionaryWithDictionary:chargeDetails];
         eventData[@"Items"] = items;
