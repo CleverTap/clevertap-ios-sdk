@@ -69,7 +69,7 @@
     }];
 }
 
-- (void)test_chared_event_recorded {
+- (void)test_charged_event_recorded {
     NSString *stubName = @"Test Charged Record Event";
     [self stubRequestsWithName:stubName];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Test Charged Record Event"];
