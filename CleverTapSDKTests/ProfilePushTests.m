@@ -32,8 +32,8 @@
     XCTestExpectation *expectation = [self expectationWithDescription:stubName];
     
     NSString *eventType = @"profile";
-    NSString *name = @"Jane";
-    NSString *email = @"jane@gmail.com";
+    NSString *name = @"Jack";
+    NSString *email = @"jack@gmail.com";
     
     NSDictionary *profile = @{
                               @"Name": name,
@@ -68,16 +68,49 @@
 
 - (void)test_profile_push_without_phone_prefix_pushes_error {
     
-    NSString *name = @"Jack";
-    NSString *phone = @"9876543210";
+    NSString *stubName = @"Profile Push Event Phone Prefix";
+    [self stubRequestsWithName:stubName];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
+    
+    NSString *eventType = @"profile";
+//    NSString *name = @"Jack";
+    NSString *phone = @"976543210";
+    
     NSDictionary *profile = @{
-                              @"Name": name,
-                              @"Phone": phone
-                              };
-    id mockInstance = [OCMockObject partialMockForObject:self.cleverTapInstance];
-    [[mockInstance expect]pushValidationResults:OCMOCK_ANY];
-    [mockInstance profilePush:profile];
-    [mockInstance verifyWithDelay: 2];
+//                            @"Name": name,
+                            @"Phone": phone
+                            };
+    [self.cleverTapInstance profilePush:profile];
+    
+    [self getLastEventWithStubName:stubName eventName:nil eventType:eventType handler:^(NSDictionary* lastEvent) {
+        XCTAssertNotNil(lastEvent);
+        XCTAssertEqualObjects(lastEvent[@"type"], eventType);
+        
+        NSDictionary *wzrk_error = lastEvent[@"wzrk_error"];
+        XCTAssertNotNil(wzrk_error);
+        XCTAssertEqualObjects(wzrk_error[@"c"], @512);
+        NSString *errorMessage = [NSString stringWithFormat:@"Device country code not available and profile phone: %@ does not appear to start with country code", phone];
+        XCTAssertEqualObjects(wzrk_error[@"d"], errorMessage);
+        
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
+        if (error) {
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+    
+//    NSString *name = @"Jack";
+//    NSString *phone = @"9876543210";
+//    NSDictionary *profile = @{
+//                              @"Name": name,
+//                              @"Phone": phone
+//                              };
+//    id mockInstance = [OCMockObject partialMockForObject:self.cleverTapInstance];
+//    [[mockInstance expect]pushValidationResults:OCMOCK_ANY];
+//    [mockInstance profilePush:profile];
+//    [mockInstance verifyWithDelay: 2];
 }
 
 - (void)test_profile_push_fails_with_empty_input {
@@ -94,8 +127,8 @@
     XCTestExpectation *expectation = [self expectationWithDescription:stubName];
     
     NSString *eventType = @"profile";
-    NSString *name = @"Jill";
-    NSString *email = @"jill@gmail.com";
+    NSString *name = @"Jack";
+    NSString *email = @"jack@gmail.com";
     
     NSDictionary *profile = @{
                               @"Name": name,
@@ -135,7 +168,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"On User Login Event"];
     
     NSString *eventType = @"profile";
-    NSString *name = @"Jill";
+    NSString *name = @"Jack";
     NSDictionary *profile = @{
                               @"Name": name
                               };

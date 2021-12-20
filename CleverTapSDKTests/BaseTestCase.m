@@ -48,17 +48,41 @@
         NSLog(@"LAST EVENT");
         NSLog(@"%@", self.lastEvent);
     }];
-    if (!cleverTapInitialized) {
-        [CleverTap notfityTestAppLaunch];
-        XCTestExpectation *expectation = [self expectationWithDescription:@"Wait For App Launch"];
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
-        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-            [expectation fulfill];
-        });
-        [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
-            // no-op
-        }];
+//    if (!cleverTapInitialized) {
+//        [CleverTap notfityTestAppLaunch];
+//        XCTestExpectation *expectation = [self expectationWithDescription:@"Wait For App Launch"];
+//        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+//        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+//            [expectation fulfill];
+//        });
+//        [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
+//            // no-op
+//        }];
+//    }
+}
+
+- (void)test_app_launched {
+    // TEST AND RECORD APP LAUNCHED ONCE
+    if (![NSStringFromClass([self class])isEqualToString:@"BaseTestCase"]) {
+        return;
     }
+    
+    NSString *stubName = @"App Launched";
+    [self stubRequestsWithName: stubName];
+    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
+    
+    [CleverTap notfityTestAppLaunch];
+    [self getLastEventWithStubName:stubName eventName:stubName  eventType:nil  handler:^(NSDictionary* lastEvent) {
+        XCTAssertNotNil(lastEvent);
+        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], stubName);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
+        if (error) {
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
 }
 
 - (void)tearDown {
@@ -69,7 +93,7 @@
     self.responseHeaders = nil;
     self.cleverTapInstance = nil;
     self.additionalInstance = nil;
-    self.eventDetails = nil;
+//    self.eventDetails = nil;
     [super tearDown];
 }
 

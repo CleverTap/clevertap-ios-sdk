@@ -171,6 +171,12 @@
 		4E1F15532769B83D009387AE /* EventTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F155027692042009387AE /* EventTests.m */; };
 		4E1F15552769DF9B009387AE /* ProfilePushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F15542769DF9B009387AE /* ProfilePushTests.m */; };
 		4E1F155B276B662C009387AE /* EventDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F155A276B662C009387AE /* EventDetail.m */; };
+		4E1F1562277090D6009387AE /* inapp_alert.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F1561277090D6009387AE /* inapp_alert.json */; };
+		4E1F1563277090D6009387AE /* inapp_alert.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F1561277090D6009387AE /* inapp_alert.json */; };
+		4E1F156527709304009387AE /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
+		4E1F156627709304009387AE /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
+		4E1F156827709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
+		4E1F156927709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
 		4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -526,6 +532,9 @@
 		4E1F15542769DF9B009387AE /* ProfilePushTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfilePushTests.m; sourceTree = "<group>"; };
 		4E1F1559276B662B009387AE /* EventDetail.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventDetail.h; sourceTree = "<group>"; };
 		4E1F155A276B662C009387AE /* EventDetail.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EventDetail.m; sourceTree = "<group>"; };
+		4E1F1561277090D6009387AE /* inapp_alert.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_alert.json; sourceTree = "<group>"; };
+		4E1F156427709304009387AE /* inapp_interstitial.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_interstitial.json; sourceTree = "<group>"; };
+		4E1F156727709848009387AE /* app_inbox.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = app_inbox.json; sourceTree = "<group>"; };
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
 		840B38DDFBBEAE05FC6C5458 /* Pods-shared-CleverTapSDKTestsApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTestsApp.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTestsApp/Pods-shared-CleverTapSDKTestsApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -908,9 +917,20 @@
 			path = resources;
 			sourceTree = "<group>";
 		};
+		4E1F1560277090D6009387AE /* Stub Responses */ = {
+			isa = PBXGroup;
+			children = (
+				4E1F156727709848009387AE /* app_inbox.json */,
+				4E1F1561277090D6009387AE /* inapp_alert.json */,
+				4E1F156427709304009387AE /* inapp_interstitial.json */,
+			);
+			path = "Stub Responses";
+			sourceTree = "<group>";
+		};
 		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				4E1F1560277090D6009387AE /* Stub Responses */,
 				D02AC2EC2767F4D10031C1BE /* BaseTestCase.h */,
 				D02AC2EA2767F4580031C1BE /* BaseTestCase.m */,
 				4E1F1559276B662B009387AE /* EventDetail.h */,
@@ -1428,6 +1448,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E1F156527709304009387AE /* inapp_interstitial.json in Resources */,
+				4E1F156827709849009387AE /* app_inbox.json in Resources */,
+				4E1F1562277090D6009387AE /* inapp_alert.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1445,6 +1468,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E1F156627709304009387AE /* inapp_interstitial.json in Resources */,
+				4E1F156927709849009387AE /* app_inbox.json in Resources */,
+				4E1F1563277090D6009387AE /* inapp_alert.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
