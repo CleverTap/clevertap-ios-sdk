@@ -1,8 +1,6 @@
 #import "AppDelegate.h"
-#import <OHHTTPStubs/HTTPStubs.h>
-#import <OHHTTPStubs/HTTPStubsResponse+JSON.h>
-#import <OHHTTPStubs/NSURLRequest+HTTPBodyTesting.h>
 #import <CleverTapSDK/CleverTap.h>
+#import "StubHelper.h"
 
 @interface AppDelegate ()
 
@@ -13,14 +11,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSDictionary *responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] }; // TODO
-    NSDictionary *responseHeaders = @{@"Content-Type":@"application/json"}; // TODO
+    
+    [[StubHelper sharedInstance]stubRequests];
     [CleverTap setDebugLevel:3];
     [CleverTap setCredentialsWithAccountID:@"test" token:@"test" region:@"eu1"];
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-        return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];
-    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
-        return [HTTPStubsResponse responseWithJSONObject:responseJson statusCode:200 headers:responseHeaders];
-    }];
     return YES;
 }
 

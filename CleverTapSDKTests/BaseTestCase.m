@@ -20,7 +20,7 @@
 }
 
 - (void)setUp {
-    [CleverTap setDebugLevel:3];
+//    [CleverTap setDebugLevel:3];
     BOOL cleverTapInitialized = [[CleverTap sharedInstance] profileGetCleverTapID] != nil;
     
     if (!cleverTapInitialized) {
@@ -34,11 +34,11 @@
     self.responseHeaders = @{@"Content-Type":@"application/json"};
     
     
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-        return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];
-    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
-        return [HTTPStubsResponse responseWithJSONObject:self.responseJson statusCode:200 headers:self.responseHeaders];
-    }];
+//    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+//        return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];
+//    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+//        return [HTTPStubsResponse responseWithJSONObject:self.responseJson statusCode:200 headers:self.responseHeaders];
+//    }];
     
     [HTTPStubs onStubActivation:^(NSURLRequest * _Nonnull request, id<HTTPStubsDescriptor>  _Nonnull stub, HTTPStubsResponse * _Nonnull responseStub) {
         NSArray *data = [NSJSONSerialization JSONObjectWithData:[request OHHTTPStubs_HTTPBody] options:NSJSONReadingMutableContainers error:nil];

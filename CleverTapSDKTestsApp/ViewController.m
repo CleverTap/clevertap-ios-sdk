@@ -2,9 +2,11 @@
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
 #import <CleverTapSDK/CleverTap+Inbox.h>
+#import "TestConstants.h"
+#import <CleverTapSDK/CleverTapInAppNotificationDelegate.h>
 
-@interface ViewController () <CleverTapInboxViewControllerDelegate>
-
+@interface ViewController () <CleverTapInboxViewControllerDelegate, CleverTapInAppNotificationDelegate>
+//@property (nonatomic, retain) StubHelper *stubHelper;
 @end
 
 @implementation ViewController
@@ -12,7 +14,18 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
-    // Do any additional setup after loading the view.
+    [[CleverTap sharedInstance]setInAppNotificationDelegate:self];
+}
+
+- (IBAction)inappAlertPressed {
+    [[CleverTap sharedInstance]recordEvent: kEventAlertRequested];
+}
+
+- (IBAction)inappInterstitalPressed {
+    [[CleverTap sharedInstance]recordEvent: kEventInterstitalRequested];
+}
+
+- (IBAction)inboxPressed {
     [self initializeAppInbox];
 }
 
@@ -37,7 +50,10 @@
     }
 }
 
-
+- (BOOL)shouldShowInAppNotificationWithExtras:(NSDictionary *)extras; {
+//    [self.stubHelper stubRequests];
+    return YES;
+}
 
 
 @end

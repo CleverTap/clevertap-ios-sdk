@@ -23,19 +23,19 @@
 		"tablet": false,
 		"close": true,
 		"message": {
-			"text": "Message",
+			"text": "Alert Message",
 			"color": "#434761",
 			"replacements": "",
 			"og": ""
 		},
 		"title": {
-			"text": "Title",
+			"text": "Alert Title",
 			"color": "#434761",
 			"replacements": "Title",
 			"og": ""
 		},
 		"buttons": [{
-			"text": "Button",
+			"text": "Button One",
 			"actions": {
 				"close": true,
 				"type": "close",

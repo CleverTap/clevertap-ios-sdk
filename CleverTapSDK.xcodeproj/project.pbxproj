@@ -178,6 +178,11 @@
 		4E1F156827709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
 		4E1F156927709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
 		4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4E872967277CDF9000A7A618 /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
+		4E872968277CDF9000A7A618 /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
+		4E872969277CDF9000A7A618 /* inapp_alert.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F1561277090D6009387AE /* inapp_alert.json */; };
+		4E87296E277CE8EB00A7A618 /* StubHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E87296D277CE8EB00A7A618 /* StubHelper.m */; };
+		4E872973277CEE6700A7A618 /* TestConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E872972277CEE6700A7A618 /* TestConstants.m */; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		583D9573DCDA5D219016B990 /* libPods-shared-CleverTapSDKTestsApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2108AFE9090417CC69A0E3EB /* libPods-shared-CleverTapSDKTestsApp.a */; };
@@ -536,6 +541,10 @@
 		4E1F156427709304009387AE /* inapp_interstitial.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_interstitial.json; sourceTree = "<group>"; };
 		4E1F156727709848009387AE /* app_inbox.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = app_inbox.json; sourceTree = "<group>"; };
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
+		4E87296C277CE8EB00A7A618 /* StubHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StubHelper.h; sourceTree = "<group>"; };
+		4E87296D277CE8EB00A7A618 /* StubHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StubHelper.m; sourceTree = "<group>"; };
+		4E872971277CEE6700A7A618 /* TestConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestConstants.h; sourceTree = "<group>"; };
+		4E872972277CEE6700A7A618 /* TestConstants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestConstants.m; sourceTree = "<group>"; };
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
 		840B38DDFBBEAE05FC6C5458 /* Pods-shared-CleverTapSDKTestsApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTestsApp.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTestsApp/Pods-shared-CleverTapSDKTestsApp.release.xcconfig"; sourceTree = "<group>"; };
 		917B24847F7C2A8B0825AEC1 /* libPods-shared-CleverTapSDKTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-shared-CleverTapSDKTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -954,6 +963,10 @@
 				D0B0449D2769744E000ED628 /* SceneDelegate.m */,
 				D0B0449F2769744E000ED628 /* ViewController.h */,
 				D0B044A02769744E000ED628 /* ViewController.m */,
+				4E87296C277CE8EB00A7A618 /* StubHelper.h */,
+				4E87296D277CE8EB00A7A618 /* StubHelper.m */,
+				4E872971277CEE6700A7A618 /* TestConstants.h */,
+				4E872972277CEE6700A7A618 /* TestConstants.m */,
 				D0B044A22769744E000ED628 /* Main.storyboard */,
 				D0B044A52769744F000ED628 /* Assets.xcassets */,
 				D0B044A72769744F000ED628 /* LaunchScreen.storyboard */,
@@ -1460,7 +1473,10 @@
 			files = (
 				D0B044A92769744F000ED628 /* LaunchScreen.storyboard in Resources */,
 				D0B044A62769744F000ED628 /* Assets.xcassets in Resources */,
+				4E872968277CDF9000A7A618 /* app_inbox.json in Resources */,
+				4E872967277CDF9000A7A618 /* inapp_interstitial.json in Resources */,
 				D0B044A42769744E000ED628 /* Main.storyboard in Resources */,
+				4E872969277CDF9000A7A618 /* inapp_alert.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1666,6 +1682,8 @@
 				D0B0449B2769744E000ED628 /* AppDelegate.m in Sources */,
 				D0B044AC2769744F000ED628 /* main.m in Sources */,
 				D0B0449E2769744E000ED628 /* SceneDelegate.m in Sources */,
+				4E87296E277CE8EB00A7A618 /* StubHelper.m in Sources */,
+				4E872973277CEE6700A7A618 /* TestConstants.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1950,7 +1968,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1988,7 +2006,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2017,7 +2035,7 @@
 					"$(PROJECT_DIR)/Vendors",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -2044,7 +2062,7 @@
 					"$(PROJECT_DIR)/Vendors",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapSDKUITests;
