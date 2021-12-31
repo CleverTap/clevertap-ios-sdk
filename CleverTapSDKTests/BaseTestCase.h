@@ -1,9 +1,10 @@
 #import <XCTest/XCTest.h>
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 #import "EventDetail.h"
 
 @interface BaseTestCase : XCTestCase
 
+@property (nonatomic, retain) NSString *responseFilePath;
 @property (nonatomic, retain) NSDictionary *responseJson;
 @property (nonatomic, retain) NSDictionary *responseHeaders;
 @property (nonatomic, retain) CleverTap *cleverTapInstance;

@@ -91,6 +91,7 @@
     self.lastEvent = nil;
     self.responseJson = nil;
     self.responseHeaders = nil;
+    self.responseFilePath = nil;
     self.cleverTapInstance = nil;
     self.additionalInstance = nil;
 //    self.eventDetails = nil;
@@ -101,7 +102,12 @@
     [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
-        return [HTTPStubsResponse responseWithJSONObject:self.responseJson statusCode:200 headers:self.responseHeaders];
+        if (self.responseFilePath) {
+            return [HTTPStubsResponse responseWithFileAtPath:[[NSBundle bundleForClass:[self class]] pathForResource:self.responseFilePath ofType:@"json"] statusCode:200 headers:self.responseHeaders];
+        } else {
+            return [HTTPStubsResponse responseWithJSONObject:self.responseJson statusCode:200 headers:self.responseHeaders];
+        }
+       
     }].name = name;
 }
 

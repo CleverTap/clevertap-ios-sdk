@@ -24,7 +24,7 @@
 }
 
 - (void)stubRequests {
-    NSDictionary *responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] };
+    // NSDictionary *responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] };
     NSDictionary *responseHeaders = @{@"Content-Type":@"application/json"};
     [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];

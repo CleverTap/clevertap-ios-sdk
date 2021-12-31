@@ -19,6 +19,7 @@
 
 - (void)setUp {
     [super setUp];
+    self.responseFilePath = @"app_inbox"; // TODO just a test but we will need to figure out how to test with Core Data
 }
 
 - (void)tearDown {
