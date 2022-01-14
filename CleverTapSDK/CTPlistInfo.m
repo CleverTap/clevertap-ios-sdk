@@ -74,6 +74,7 @@ static NSArray *registeredURLSchemes;
         _accountId = [CTPlistInfo getMetaDataForAttribute:CLTAP_ACCOUNT_ID_LABEL];
         _accountToken = [CTPlistInfo getMetaDataForAttribute:CLTAP_TOKEN_LABEL];
         _accountRegion = [CTPlistInfo getMetaDataForAttribute:CLTAP_REGION_LABEL];
+        _proxyDomain = [CTPlistInfo getMetaDataForAttribute:CLTAP_PROXY_DOMAIN_LABEL];
         _registeredUrlSchemes = [CTPlistInfo getRegisteredURLSchemes];
                 
         NSString *useCustomCleverTapId = [CTPlistInfo getMetaDataForAttribute:CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL];
@@ -96,5 +97,11 @@ static NSArray *registeredURLSchemes;
     _accountId = accountID;
     _accountToken = token;
     _accountRegion = region;
+}
+
+- (void)changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    _accountId = accountID;
+    _accountToken = token;
+    _proxyDomain = proxyDomain;
 }
 @end

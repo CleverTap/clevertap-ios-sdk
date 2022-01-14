@@ -10,6 +10,8 @@
 #import "BaseTestCase.h"
 #import <OCMock/OCMock.h>
 #import "CleverTap+Tests.h"
+#import "CTValidationResult.h"
+#import "CTValidationResultStack.h"
 
 @interface EventTests : BaseTestCase
 
@@ -31,7 +33,7 @@
     [self stubRequestsWithName:stubName];
     XCTestExpectation *expectation = [self expectationWithDescription:stubName];
     
-    NSString *eventName = @"testEvent";
+    NSString *eventName = [self randomString];
     NSDictionary *props = @{@"prop1":@1};
     [self.cleverTapInstance recordEvent:eventName withProps:props];
     
@@ -54,7 +56,7 @@
     [self stubRequestsWithName: stubName];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Test Record Event"];
     
-    NSString *eventName = @"testEvent";
+    NSString *eventName = [self randomString];
     [self.cleverTapInstance recordEvent:eventName];
     
     [self getLastEventWithStubName:stubName eventName:eventName  eventType:nil  handler:^(NSDictionary* lastEvent) {
@@ -110,22 +112,6 @@
             XCTFail(@"Expectation Failed with error: %@", error);
         }
     }];
-}
-
-- (void)test_event_record_fails_with_empty_name {
-    
-    id mockInstance = [OCMockObject partialMockForObject:self.cleverTapInstance];
-    [[mockInstance expect]pushValidationResults:OCMOCK_ANY];
-    [mockInstance recordEvent:@""];
-    [mockInstance verifyWithDelay: 2];
-}
-
-- (void)test_event_record_fails_with_restricted_name {
-    
-    id mockInstance = [OCMockObject partialMockForObject:self.cleverTapInstance];
-    [[mockInstance expect]pushValidationResults:OCMOCK_ANY];
-    [mockInstance recordEvent:@"Notification Sent"];
-    [mockInstance verifyWithDelay: 2];
 }
 
 @end

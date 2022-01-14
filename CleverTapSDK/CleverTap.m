@@ -22,9 +22,12 @@
 #import "CleverTapPushNotificationDelegate.h"
 #import "CleverTapInAppNotificationDelegate.h"
 #import "CTValidationResult.h"
+#import "CTValidationResultStack.h"
+#import "CTIdentityRepoFactory.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
+#import "CTLoginInfoProvider.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CleverTapJSInterface.h"
@@ -109,7 +112,6 @@ NSString *const CleverTapProfileDidInitializeNotification = CLTAP_PROFILE_DID_IN
 NSString *const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
 NSString *const CleverTapGeofencesDidUpdateNotification = CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION;
 
-NSString *const kCachedGUIDS = @"CachedGUIDS";
 NSString *const kOnUserLoginAction = @"onUserLogin";
 NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 
@@ -226,7 +228,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, retain) NSDictionary *lastUTMFields;
 @property (atomic, strong) NSString *currentViewControllerName;
 
-@property (atomic, strong) NSMutableArray<CTValidationResult *> *pendingValidationResults;
+@property (atomic, strong) CTValidationResultStack *validationResultStack;
 
 @property (atomic, weak) id <CleverTapSyncDelegate> syncDelegate;
 @property (atomic, weak) id <CleverTapURLDelegate> urlDelegate;
@@ -562,14 +564,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return nil;
         }
         
-        _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+        if (_plistInfo.proxyDomain.length > 0) {
+            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
+        } else {
+            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+        }
         
         if (_defaultInstanceConfig == nil) {
             return nil;
         }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion);
+        
+        NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
+        NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
+        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog);
     }
     return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
 }
@@ -627,7 +636,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         dispatch_queue_set_specific(_serialQueue, kQueueKey, (__bridge void *)self, NULL);
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
-        self.pendingValidationResults = [NSMutableArray array];
+        self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = emptyLocation;
         self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
         [self _setDeviceNetworkInfoReportingFromStorage];
@@ -681,7 +690,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-
 #pragma mark - Private
 
 + (void)_changeCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
@@ -698,7 +706,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
     [_plistInfo changeCredentialsWithAccountID:accountID token:token region:region];
-    
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
@@ -734,15 +741,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [NSString stringWithFormat:@"CleverTap.%@", self.config.accountId];
 }
 
-- (NSString *)storageKeyWithSuffix: (NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, suffix];
-}
-
 - (void)initNetworking {
     if (self.config.isDefaultInstance) {
-        self.lastMutedTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:[CTPreferences getIntForKey:kMUTED_TS_KEY withResetValue:0]];
+        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kMUTED_TS_KEY withResetValue:0]];
     } else {
-        self.lastMutedTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:0];
+        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:0];
     }
     self.redirectDomain = [self loadRedirectDomain];
     self.redirectNotifViewedDomain = [self loadRedirectNotifViewedDomain];
@@ -814,11 +817,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             return self.explictEndpointDomain;
         }
     }
+    NSString *proxyDomain = self.config.proxyDomain;
+    if (proxyDomain) {
+        proxyDomain = [proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
+        if (proxyDomain.length > 0) {
+            self.explictEndpointDomain = proxyDomain;
+            return self.explictEndpointDomain;
+        }
+    }
     NSString *domain = nil;
     if (self.config.isDefaultInstance) {
-        domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY] withResetValue:[CTPreferences getStringForKey:kREDIRECT_DOMAIN_KEY withResetValue:nil]];
+        domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY config: self.config] withResetValue:[CTPreferences getStringForKey:kREDIRECT_DOMAIN_KEY withResetValue:nil]];
     } else {
-        domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY] withResetValue:nil];
+        domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY config: self.config] withResetValue:nil];
     }
     return domain;
 }
@@ -834,39 +845,39 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     NSString *domain = nil;
     if (self.config.isDefaultInstance) {
-        domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY] withResetValue:[CTPreferences getStringForKey:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY withResetValue:nil]];
+        domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY  config: self.config] withResetValue:[CTPreferences getStringForKey:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY withResetValue:nil]];
     } else {
-        domain = [CTPreferences getStringForKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY] withResetValue:nil];
+        domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY  config: self.config] withResetValue:nil];
     }
     return domain;
 }
 
 - (void)persistRedirectDomain {
     if (self.redirectDomain != nil) {
-        [CTPreferences putString:self.redirectDomain forKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY]];
+        [CTPreferences putString:self.redirectDomain forKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY config: self.config]];
 #if CLEVERTAP_SSL_PINNING
         [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[kCTApiDomain, self.redirectDomain]];
 #endif
     } else {
         [CTPreferences removeObjectForKey:kREDIRECT_DOMAIN_KEY];
-        [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY]];
+        [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_DOMAIN_KEY config: self.config]];
     }
 }
 
 - (void)persistRedirectNotifViewedDomain {
     if (self.redirectNotifViewedDomain != nil) {
-        [CTPreferences putString:self.redirectNotifViewedDomain forKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY]];
+        [CTPreferences putString:self.redirectNotifViewedDomain forKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY config: self.config]];
 #if CLEVERTAP_SSL_PINNING
         [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:@[kCTNotifViewedApiDomain, self.redirectNotifViewedDomain]];
 #endif
     } else {
         [CTPreferences removeObjectForKey:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY];
-        [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY]];
+        [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY config: self.config]];
     }
 }
 - (void)persistMutedTs {
     self.lastMutedTs = [NSDate new].timeIntervalSince1970;
-    [CTPreferences putInt:self.lastMutedTs forKey:[self storageKeyWithSuffix:kMUTED_TS_KEY]];
+    [CTPreferences putInt:self.lastMutedTs forKey:[CTPreferences storageKeyWithSuffix:kMUTED_TS_KEY config: self.config]];
 }
 
 - (BOOL)needHandshake {
@@ -1091,7 +1102,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
     
-    evtData[@"SDK Version"] = self.deviceInfo.sdkVersion;
+    evtData[@"SDK Version"] = @([self.deviceInfo.sdkVersion integerValue]);
     
     if (self.deviceInfo.model) {
         evtData[@"Model"] = self.deviceInfo.model;
@@ -1119,7 +1130,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     evtData[@"ifaA"] = @NO;
     if (self.deviceInfo.vendorIdentifier) {
-        NSString *ifvString = [self deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifv"] : @"ifv";
+        CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
+        NSString *ifvString = [loginInfoProvider deviceIsMultiUser] ?  [NSString stringWithFormat:@"%@%@", kMultiUserPrefix, @"ifv"] : @"ifv";
         if (ifvString) {
             evtData[ifvString] = self.deviceInfo.vendorIdentifier;
         }
@@ -1140,6 +1152,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.deviceInfo.library) {
         evtData[@"lib"] = self.deviceInfo.library;
     }
+    
+    NSString *proxyDomain = [self.config.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (proxyDomain != nil && proxyDomain.length > 0) {
+        evtData[@"proxyDomain"] = self.config.proxyDomain;
+    }
+    
     return evtData;
 }
 
@@ -1225,32 +1243,32 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSTimeInterval)getLastRequestTimeStamp {
     if (self.config.isDefaultInstance) {
-        return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:[CTPreferences getIntForKey:kLAST_TS_KEY withResetValue:0]];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kLAST_TS_KEY withResetValue:0]];
     } else {
-        return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:0];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:0];
     }
 }
 
 - (void)clearLastRequestTimestamp {
-    [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kLAST_TS_KEY]];
+    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config]];
 }
 
 - (void)setFirstRequestTimestampIfNeeded:(double)ts {
     NSTimeInterval firstRequestTS = [self getFirstRequestTimestamp];
     if (firstRequestTS > 0) return;
-    [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:kFIRST_TS_KEY]];
+    [CTPreferences putInt:ts forKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config]];
 }
 
 - (NSTimeInterval)getFirstRequestTimestamp {
     if (self.config.isDefaultInstance) {
-        return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kFIRST_TS_KEY] withResetValue:[CTPreferences getIntForKey:kFIRST_TS_KEY withResetValue:0]];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kFIRST_TS_KEY withResetValue:0]];
     } else {
-        return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kFIRST_TS_KEY] withResetValue:0];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config] withResetValue:0];
     }
 }
 
 - (void)clearFirstRequestTimestamp {
-    [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kFIRST_TS_KEY]];
+    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config]];
 }
 
 - (BOOL)isMuted {
@@ -1396,7 +1414,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"d"];
     
-    if ([CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE] withResetValue:0] != [[dateFormatter stringFromDate:d] intValue]) {
+    if ([CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE config: self.config] withResetValue:0] != [[dateFormatter stringFromDate:d] intValue]) {
         CleverTapLogInternal(self.config.logLevel, @"%@: queuing daily events", self);
         [self _pushBaseProfile];
         if (!self.pushedAPNSId) {
@@ -1405,7 +1423,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogInternal(self.config.logLevel, @"%@: Skipped push of the APNS ID, already sent.", self);
         }
     }
-    [CTPreferences putInt:[[dateFormatter stringFromDate:d] intValue] forKey:[self storageKeyWithSuffix:CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE]];
+    [CTPreferences putInt:[[dateFormatter stringFromDate:d] intValue] forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE config: self.config]];
 }
 
 
@@ -1520,7 +1538,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         [self queueEvent:event withType:CleverTapEventTypeRaised];
                     };
                     if (errors) {
-                        [self pushValidationResults:errors];
+                        [self.validationResultStack pushValidationResults:errors];
                     }
                 }];
             }];
@@ -1799,13 +1817,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     @try {
-        NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]]];
+        NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]]];
         if ([inapps count] < 1) {
             return;
         }
         [self prepareNotificationForDisplay:inapps[0]];
         [inapps removeObjectAtIndex:0];
-        [CTPreferences putObject:inapps forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]];
+        [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
     }
@@ -1939,7 +1957,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)clearInApps {
     CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending InApp notifications", self);
-    [CTPreferences putObject:[[NSArray alloc] init] forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]];
+    [CTPreferences putObject:[[NSArray alloc] init] forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
 }
 
 - (void)notifyNotificationDismissed:(CTInAppNotification *)notification {
@@ -1965,7 +1983,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -2082,7 +2100,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)recordDeviceErrors {
     for (CTValidationResult *error in self.deviceInfo.validationErrors) {
-        [self pushValidationResult:error];
+        [self.validationResultStack pushValidationResult:error];
     }
 }
 
@@ -2204,27 +2222,27 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (long)getI {
-    return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kI_KEY] withResetValue:0];
+    return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kI_KEY config: self.config] withResetValue:0];
 }
 
 - (void)saveI:(NSNumber *)i {
-    [CTPreferences putInt:[i longValue] forKey:[self storageKeyWithSuffix:kI_KEY]];
+    [CTPreferences putInt:[i longValue] forKey:[CTPreferences storageKeyWithSuffix:kI_KEY config: self.config]];
 }
 
 - (void)clearI {
-    [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kI_KEY]];
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kI_KEY config: self.config]];
 }
 
 - (long)getJ {
-    return [CTPreferences getIntForKey:[self storageKeyWithSuffix:kJ_KEY] withResetValue:0];
+    return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kJ_KEY config: self.config] withResetValue:0];
 }
 
 - (void)saveJ:(NSNumber *)j {
-    [CTPreferences putInt:[j longValue] forKey:[self storageKeyWithSuffix:kJ_KEY]];
+    [CTPreferences putInt:[j longValue] forKey:[CTPreferences storageKeyWithSuffix:kJ_KEY config: self.config]];
 }
 
 - (void)clearJ {
-    [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kJ_KEY]];
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kJ_KEY config: self.config]];
 }
 
 - (void)clearUserContext {
@@ -2272,13 +2290,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (long)lastSessionTime {
-    return (long)[CTPreferences getIntForKey:[self storageKeyWithSuffix:kLastSessionTime] withResetValue:0];
+    return (long)[CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config] withResetValue:0];
 }
 
 - (void)updateSessionTime:(long)ts {
     if (![self inCurrentSession]) return;
     CleverTapLogInternal(self.config.logLevel, @"%@: updating session time: %lu", self, ts);
-    [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:kLastSessionTime]];
+    [CTPreferences putInt:ts forKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config]];
 }
 
 - (void)createFirstRequestInSession {
@@ -2292,17 +2310,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     long lastSessionID = 0;
     long lastSessionEnd = 0;
     if (self.config.isDefaultInstance) {
-        lastSessionID = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kSessionId] withResetValue:[CTPreferences getIntForKey:kSessionId withResetValue:0]];
-        lastSessionEnd = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLastSessionTime] withResetValue:[CTPreferences getIntForKey:kLastSessionPing withResetValue:0]];
+        lastSessionID = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config] withResetValue:[CTPreferences getIntForKey:kSessionId withResetValue:0]];
+        lastSessionEnd = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config] withResetValue:[CTPreferences getIntForKey:kLastSessionPing withResetValue:0]];
     } else {
-        lastSessionID = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kSessionId] withResetValue:0];
-        lastSessionEnd = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLastSessionTime] withResetValue:0];
+        lastSessionID = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config] withResetValue:0];
+        lastSessionEnd = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config] withResetValue:0];
     }
     self.lastSessionLengthSeconds = (lastSessionID > 0 && lastSessionEnd > 0) ? (int)(lastSessionEnd - lastSessionID) : 0;
     self.sessionId = 0;
     [self updateSessionTime:0];
     [CTPreferences removeObjectForKey:kSessionId];
-    [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kSessionId]];
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config]];
     self.screenCount = 1;
     [self clearSource];
     [self clearMedium];
@@ -2317,7 +2335,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)setSessionId:(long)sessionId {
     _sessionId = sessionId;
-    [CTPreferences putInt:self.sessionId forKey:[self storageKeyWithSuffix:kSessionId]];
+    [CTPreferences putInt:self.sessionId forKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config]];
 }
 
 - (long)sessionId {
@@ -2329,11 +2347,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self updateSessionTime:self.sessionId];
     [self createFirstRequestInSession];
     if (self.config.isDefaultInstance) {
-        self.firstSession = [CTPreferences getIntForKey:[self storageKeyWithSuffix:@"firstTime"] withResetValue:[CTPreferences getIntForKey:@"firstTime" withResetValue:0]] == 0;
+        self.firstSession = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:@"firstTime" config: self.config] withResetValue:[CTPreferences getIntForKey:@"firstTime" withResetValue:0]] == 0;
     } else {
-        self.firstSession = [CTPreferences getIntForKey:[self storageKeyWithSuffix:@"firstTime"] withResetValue:0] == 0;
+        self.firstSession = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:@"firstTime" config: self.config] withResetValue:0] == 0;
     }
-    [CTPreferences putInt:1 forKey:[self storageKeyWithSuffix:@"firstTime"]];
+    [CTPreferences putInt:1 forKey:[CTPreferences storageKeyWithSuffix:@"firstTime" config: self.config]];
     CleverTapLogInternal(self.config.logLevel, @"%@: session created with ID: %lu", self, self.sessionId);
     CleverTapLogInternal(self.config.logLevel, @"%@: previous session length: %d seconds", self, self.lastSessionLengthSeconds);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -2526,7 +2544,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         // Report any pending validation error
-        CTValidationResult *vr = [self popValidationResult];
+        CTValidationResult *vr = [self.validationResultStack popValidationResult];
         if (vr != nil) {
             mutableEvent[CLTAP_ERROR_KEY] = [self getErrorObject:vr];
         }
@@ -2709,36 +2727,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [self fileNameForQueue:kQUEUE_NAME_NOTIFICATIONS];
 }
 
-
-#pragma mark - Validation Error Handling
-
-- (void)pushValidationResults:(NSArray<CTValidationResult *> * _Nonnull )results {
-    for (CTValidationResult *vr in results) {
-        [self pushValidationResult:vr];
-    }
-}
-
-- (void)pushValidationResult:(CTValidationResult *)vr {
-    if (!vr) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: no object in the validation result", self);
-        return;
-    }
-    [self.pendingValidationResults addObject:vr];
-    if (self.pendingValidationResults && [self.pendingValidationResults count] > 50) {
-        [self.pendingValidationResults removeObjectAtIndex:0];
-    }
-}
-
-- (CTValidationResult *)popValidationResult {
-    CTValidationResult *vr = nil;
-    if (self.pendingValidationResults && [self.pendingValidationResults count] > 0) {
-        vr = self.pendingValidationResults[0];
-        [self.pendingValidationResults removeObjectAtIndex:0];
-    }
-    return vr;
-}
-
-
 # pragma mark - Request/Response handling
 
 - (void)sendQueue:(NSMutableArray *)queue {
@@ -2775,7 +2763,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         @try {
             NSString *jsonBody = [self jsonObjectToString:batchWithHeader];
             
-            CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to CleverTap servers at %@", self, jsonBody, endpoint);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
             
             // update endpoint for current timestamp
             endpoint = [self endpointForQueue:queue];
@@ -2897,7 +2885,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         if (inappNotifs && [inappNotifs count] > 0) {
                             CleverTapLogInternal(self.config.logLevel, @"%@: Processing new InApps: %@", self, inappNotifs);
                             @try {
-                                NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]]];
+                                NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]]];
                                 for (int i = 0; i < [inappNotifs count]; i++) {
                                     @try {
                                         NSMutableDictionary *inappNotif = [[NSMutableDictionary alloc] initWithDictionary:inappNotifs[(NSUInteger) i]];
@@ -2907,7 +2895,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                     }
                                 }
                                 // Commit all the changes
-                                [CTPreferences putObject:inapps forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY]];
+                                [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
                                 
                                 // Fire the first notification, if any
                                 [self runOnNotificationQueue:^{
@@ -3115,12 +3103,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)cacheGUIDSforProfile:(NSDictionary*)profileEvent {
+    
+//    NSArray *finalIdentityKeys = [self getIdentifierKeysForOnUserLogin];
+    id<CTIdentityRepo> identityRepo = [CTIdentityRepoFactory getRepoForConfig:_config deviceInfo:_deviceInfo validationResultStack:_validationResultStack];
+    
     // cache identifier:guid pairs
     for (NSString *key in profileEvent) {
         @try {
-            if ([CLTAP_PROFILE_IDENTIFIER_KEYS containsObject:key]) {
+            if ([identityRepo isIdentity:key]) {
                 NSString *identifier = [NSString stringWithFormat:@"%@", profileEvent[key]];
-                [self cacheGUID:nil forKey:key andIdentifier:identifier];
+                CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
+                [loginInfoProvider cacheGUID:nil forKey:key andIdentifier:identifier];
             }
         } @catch (NSException *e) {
             // no-op
@@ -3128,49 +3121,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (BOOL)isAnonymousDevice {
-    NSDictionary *cache = [self getCachedGUIDs];
-    if (!cache) cache = @{};
-    return [cache count] <= 0;
-}
-
-- (NSDictionary *)getCachedGUIDs {
-    NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kCachedGUIDS]];
-    if (!cachedGUIDS && self.config.isDefaultInstance) {
-        cachedGUIDS = [CTPreferences getObjectForKey:kCachedGUIDS];
+- (NSArray *)getConfigIdentifiers {
+    // IF DEFAULT INSTANCE, GET KEYS FROM PLIST, ELSE GET FROM SETTER
+    if (self.config.isDefaultInstance) {
+        // ONLY ADD SUPPORTED KEYS
+        NSArray *clevertapIdentifiers = [[NSBundle mainBundle].infoDictionary objectForKey:@"CleverTapIdentifiers"];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self IN %@", CLTAP_ALL_PROFILE_IDENTIFIER_KEYS];
+        NSArray *result = [clevertapIdentifiers filteredArrayUsingPredicate:predicate];
+        return result;
     }
-    return cachedGUIDS;
-}
-
-- (void)setCachedGUIDs:(NSDictionary *)cache {
-    [CTPreferences putObject:cache forKey:[self storageKeyWithSuffix:kCachedGUIDS]];
-}
-
-- (NSString *)getGUIDforKey:(NSString *)key andIdentifier:(NSString *)identifier {
-    if (!key || !identifier) return nil;
-    
-    NSDictionary *cache = [self getCachedGUIDs];
-    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, identifier];
-    if (!cache) return nil;
-    else return cache[cacheKey];
-}
-
-- (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
-    if (!guid) guid = [self profileGetCleverTapID];
-    if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
-    
-    NSDictionary *cache = [self getCachedGUIDs];
-    if (!cache) cache = @{};
-    NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
-    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, identifier];
-    newCache[cacheKey] = guid;
-    [self setCachedGUIDs:newCache];
-}
-
-- (BOOL)deviceIsMultiUser {
-    NSDictionary *cache = [self getCachedGUIDs];
-    if (!cache) cache = @{};
-    return [cache count] > 1;
+    else {
+        return self.config.identityKeys;
+    }
 }
 
 - (BOOL)isProcessingLoginUserWithIdentifier:(NSString *)identifier {
@@ -3178,24 +3140,31 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_onUserLogin:(NSDictionary *)properties withCleverTapID:(NSString *)cleverTapID {
+    
+    // GET IDENTIFIER KEYS FROM CACHE, PLIST OR CONFIG
+//    NSArray *finalIdentityKeys = [self getIdentifierKeysForOnUserLogin];
+    
+    
     if (!properties) return;
-    
     NSString *currentGUID = [self profileGetCleverTapID];
-    
     if (!currentGUID) return;
     
     NSString *cachedGUID;
     BOOL haveIdentifier = NO;
+    CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
     
     // check for valid identifier keys
     // use the first one we find
+    id<CTIdentityRepo> identityRepo = [CTIdentityRepoFactory getRepoForConfig:_config deviceInfo:_deviceInfo validationResultStack:_validationResultStack];
     for (NSString *key in properties) {
         @try {
-            if ([CLTAP_PROFILE_IDENTIFIER_KEYS containsObject:key]) {
+//            if ([finalIdentityKeys containsObject:key]) {
+            if ([identityRepo isIdentity:key]) {
                 NSString *identifier = [NSString stringWithFormat:@"%@", properties[key]];
+                
                 if (identifier && [identifier length] > 0) {
                     haveIdentifier = YES;
-                    cachedGUID = [self getGUIDforKey:key andIdentifier:identifier];
+                    cachedGUID = [loginInfoProvider getGUIDforKey:key andIdentifier:identifier];
                     if (cachedGUID) break;
                 }
             }
@@ -3206,7 +3175,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     // if no identifier provided or there are no identified users on the device; just push on the current profile
     if (![self.deviceInfo isErrorDeviceID]) {
-        if (!haveIdentifier || [self isAnonymousDevice]) {
+        if (!haveIdentifier || [loginInfoProvider isAnonymousDevice]) {
             CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: either don't have identifier or device is anonymous, associating profile %@ with current user profile", self, properties);
             [self profilePush:properties];
             return;
@@ -3304,6 +3273,51 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+//- (NSArray*)getIdentifierKeysForOnUserLogin {
+//    // CHECK IF ITS A LEGACY USER
+//    CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
+//    NSDictionary *cachedGUIDs = [loginInfoProvider getCachedGUIDs];
+//    NSString *cachedIdentities = [loginInfoProvider getCachedIdentities];
+//    NSArray *finalIdentityKeys;
+//    
+//    if (cachedGUIDs && cachedGUIDs.count > 0 && (!cachedIdentities || cachedIdentities.length == 0)) {
+//        // LEGACY USER FOUND. USE EXISTING LOGIC
+//        finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
+//    }
+//    else {
+//        // NEW USER
+//        // GET IDENTIFIERS FROM PLIST IF DEFAULT INSTANCE ELSE CONFIG SETTER
+//        NSArray *configIdentifiers = [self getConfigIdentifiers];
+//        
+//        // RAISE ERROR IF CACHED AND PLIST IDENTITIES ARE NOT EQUAL
+//        NSArray *cachedIdentityKeys = [cachedIdentities componentsSeparatedByString: @","];
+//        if (cachedIdentityKeys.count > 0 && ![cachedIdentityKeys isEqualToArray: configIdentifiers]) {
+//            CTValidationResult *error = [[CTValidationResult alloc] init];
+//            NSString *errString = @"Profile Identifiers mismatch with the previously saved ones";
+//            [error setErrorCode:531];
+//            [error setErrorDesc:errString];
+//            [self.validationResultStack pushValidationResult:error];
+//            CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errString);
+//        }
+//        
+//        // USE CACHED IDENTITIES IF AVAILABLE, ELSE USE PLIST/SETTER, ELSE USE DEFAULT CONSTANTS
+//        if (cachedIdentityKeys && cachedIdentityKeys.count > 0) {
+//            finalIdentityKeys = cachedIdentityKeys;
+//        }
+//        else if (configIdentifiers && configIdentifiers.count > 0) {
+//            finalIdentityKeys = configIdentifiers;
+//            
+//            // SAVE IDENTITIES TO CACHE
+//            CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
+//            [loginInfoProvider setCachedIdentities: [configIdentifiers componentsJoinedByString: @","]];
+//        }
+//        else {
+//            finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
+//        }
+//    }
+//    return finalIdentityKeys;
+//}
+
 
 #pragma mark - Public
 
@@ -3363,16 +3377,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 // public
 - (void)enableDeviceNetworkInfoReporting:(BOOL)enabled {
     self.enableNetworkInfoReporting = enabled;
-    [CTPreferences putInt:enabled forKey:[self storageKeyWithSuffix:kNetworkInfoReportingKey]];
+    [CTPreferences putInt:enabled forKey:[CTPreferences storageKeyWithSuffix:kNetworkInfoReportingKey config: self.config]];
 }
 
 // private
 - (void)_setDeviceNetworkInfoReportingFromStorage {
     BOOL enabled = NO;
     if (self.config.isDefaultInstance) {
-        enabled = (BOOL) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kNetworkInfoReportingKey] withResetValue:[CTPreferences getIntForKey:kNetworkInfoReportingKey withResetValue:NO]];
+        enabled = (BOOL) [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kNetworkInfoReportingKey config: self.config] withResetValue:[CTPreferences getIntForKey:kNetworkInfoReportingKey withResetValue:NO]];
     } else {
-        enabled = (BOOL) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kNetworkInfoReportingKey] withResetValue:NO];
+        enabled = (BOOL) [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kNetworkInfoReportingKey config: self.config] withResetValue:NO];
     }
     CleverTapLogInternal(self.config.logLevel, @"%@: Setting device network info reporting state from storage to: %@", self, enabled ? @"YES" : @"NO");
     [self enableDeviceNetworkInfoReporting:enabled];
@@ -3450,7 +3464,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             CTValidationResult *error = [[CTValidationResult alloc] init];
                             [error setErrorCode:512];
                             [error setErrorDesc:errString];
-                            [self pushValidationResult:error];
+                            [self.validationResultStack pushValidationResult:error];
                             CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errString);
                         }
                     }
@@ -3463,7 +3477,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self queueEvent:event withType:CleverTapEventTypeProfile];
             
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -3503,7 +3517,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeProfile];
             }
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -3573,7 +3587,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_handleIncrementDecrementProfilePushForKey:(NSString *)key updatedValue:(NSNumber *)updatedValue operatorDict: (NSDictionary *)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
     
     if (errors) {
-        [self pushValidationResults:errors];
+        [self.validationResultStack pushValidationResults:errors];
         return;
     }
     
@@ -3611,7 +3625,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self queueEvent:event withType:CleverTapEventTypeProfile];
     }
     if (errors) {
-        [self pushValidationResults:errors];
+        [self.validationResultStack pushValidationResults:errors];
     }
 }
 
@@ -3625,7 +3639,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -3638,7 +3652,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -3651,7 +3665,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -3717,7 +3731,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
                 };
                 if (errors) {
-                    [self pushValidationResults:errors];
+                    [self.validationResultStack pushValidationResults:errors];
                 }
             }];
         }];
@@ -3866,15 +3880,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     @synchronized (self) {
         long installStatus = 0;
         if (self.config.isDefaultInstance) {
-            installStatus = [CTPreferences getIntForKey:[self storageKeyWithSuffix:@"install_referrer_status"] withResetValue:[CTPreferences getIntForKey:@"install_referrer_status" withResetValue:0]];
+            installStatus = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:@"install_referrer_status" config: self.config] withResetValue:[CTPreferences getIntForKey:@"install_referrer_status" withResetValue:0]];
         } else {
-            installStatus = [CTPreferences getIntForKey:[self storageKeyWithSuffix:@"install_referrer_status"] withResetValue:0];
+            installStatus = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:@"install_referrer_status" config: self.config] withResetValue:0];
         }
         if (installStatus == 1) {
             CleverTapLogInternal(self.config.logLevel, @"%@: Install referrer has already been set. Will not overwrite", self);
             return;
         }
-        [CTPreferences putInt:1 forKey:[self storageKeyWithSuffix:@"install_referrer_status"]];
+        [CTPreferences putInt:1 forKey:[CTPreferences storageKeyWithSuffix:@"install_referrer_status" config: self.config]];
     }
     @try {
         if (source) source = [CTUtils urlEncodeString:source];
@@ -3928,6 +3942,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 + (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token region:(NSString *)region {
     [self _changeCredentialsWithAccountID:accountID token:token region:region];
+}
+
++ (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain {
+    if (_defaultInstanceConfig) {
+        CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
+        return;
+    }
+    accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (proxyDomain != nil && ![proxyDomain isEqualToString:@""]) {
+        proxyDomain = [proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (proxyDomain.length <= 0) {
+            proxyDomain = nil;
+        }
+    }
+    [_plistInfo changeCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
 }
 
 + (void)enablePersonalization {
@@ -4355,7 +4385,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -4569,7 +4599,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -4587,7 +4617,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];
@@ -4773,7 +4803,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CTValidationResult *result = [[CTValidationResult alloc] init];
     [result setErrorCode:(int)error.code];
     [result setErrorDesc:error.localizedDescription];
-    [self pushValidationResult:result];
+    [self.validationResultStack pushValidationResult:result];
 }
 
 - (void)recordGeofenceEnteredEvent:(NSDictionary *_Nonnull)geofenceDetails {
@@ -4792,7 +4822,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
-                [self pushValidationResults:errors];
+                [self.validationResultStack pushValidationResults:errors];
             }
         }];
     }];

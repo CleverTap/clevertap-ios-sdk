@@ -5,6 +5,7 @@
 @property (nonatomic, strong, readonly, nullable) NSString *accountId;
 @property (nonatomic, strong, readonly, nullable) NSString *accountToken;
 @property (nonatomic, strong, readonly, nullable) NSString *accountRegion;
+@property (nonatomic, strong, readonly, nullable) NSString *proxyDomain;
 @property (nonatomic, strong, readonly, nullable) NSArray<NSString*>* registeredUrlSchemes;
 @property (nonatomic, assign, readonly) BOOL disableAppLaunchedEvent;
 @property (nonatomic, assign, readonly) BOOL useCustomCleverTapId;
@@ -13,5 +14,6 @@
 
 + (instancetype _Nullable)sharedInstance;
 - (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nullable)region;
+- (void)changeCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token proxyDomain:(NSString * _Nonnull)proxyDomain;
 
 @end

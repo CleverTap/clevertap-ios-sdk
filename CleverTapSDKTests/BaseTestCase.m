@@ -20,7 +20,7 @@
 }
 
 - (void)setUp {
-//    [CleverTap setDebugLevel:3];
+    [CleverTap setDebugLevel:3];
     BOOL cleverTapInitialized = [[CleverTap sharedInstance] profileGetCleverTapID] != nil;
     
     if (!cleverTapInitialized) {
@@ -29,7 +29,10 @@
    
     self.eventDetails = [NSMutableArray array];
     self.cleverTapInstance = [CleverTap sharedInstance];
-    self.additionalInstance = [CleverTap instanceWithConfig:[[CleverTapInstanceConfig alloc]initWithAccountId:@"test" accountToken:@"test" accountRegion:@"eu1"]];
+    
+    CleverTapInstanceConfig *addtionalConfig = [[CleverTapInstanceConfig alloc]initWithAccountId:@"testAddtional" accountToken:@"testAddtional" accountRegion: @"eu1"];
+    addtionalConfig.identityKeys = @[@"Email"];
+    self.additionalInstance = [CleverTap instanceWithConfig:addtionalConfig];
     self.responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] }; // TODO
     self.responseHeaders = @{@"Content-Type":@"application/json"};
     
@@ -45,45 +48,45 @@
         self.lastBatchHeader = [data objectAtIndex:0];
         self.lastEvent = [data objectAtIndex:1];
         [self.eventDetails addObject:[[EventDetail alloc]initWithEvent:[data objectAtIndex:1] name:stub.name]];
-        NSLog(@"LAST EVENT");
+        NSLog(@"LAST EVENT for %@", stub.name);
         NSLog(@"%@", self.lastEvent);
     }];
-//    if (!cleverTapInitialized) {
-//        [CleverTap notfityTestAppLaunch];
-//        XCTestExpectation *expectation = [self expectationWithDescription:@"Wait For App Launch"];
-//        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
-//        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-//            [expectation fulfill];
-//        });
-//        [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
-//            // no-op
-//        }];
-//    }
+    if (!cleverTapInitialized) {
+        [CleverTap notfityTestAppLaunch];
+        XCTestExpectation *expectation = [self expectationWithDescription:@"Wait For App Launch"];
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+            [expectation fulfill];
+        });
+        [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
+            // no-op
+        }];
+    }
 }
 
-- (void)test_app_launched {
-    // TEST AND RECORD APP LAUNCHED ONCE
-    if (![NSStringFromClass([self class])isEqualToString:@"BaseTestCase"]) {
-        return;
-    }
-    
-    NSString *stubName = @"App Launched";
-    [self stubRequestsWithName: stubName];
-    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
-    
-    [CleverTap notfityTestAppLaunch];
-    [self getLastEventWithStubName:stubName eventName:stubName  eventType:nil  handler:^(NSDictionary* lastEvent) {
-        XCTAssertNotNil(lastEvent);
-        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], stubName);
-        [expectation fulfill];
-    }];
-    
-    [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
-        if (error) {
-            XCTFail(@"Expectation Failed with error: %@", error);
-        }
-    }];
-}
+//- (void)test_app_launched {
+//    // TEST AND RECORD APP LAUNCHED ONCE
+//    if (![NSStringFromClass([self class])isEqualToString:@"BaseTestCase"]) {
+//        return;
+//    }
+//
+//    NSString *stubName = @"App Launched";
+//    [self stubRequestsWithName: stubName];
+//    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
+//
+//    [CleverTap notfityTestAppLaunch];
+//    [self getLastEventWithStubName:stubName eventName:stubName  eventType:nil  handler:^(NSDictionary* lastEvent) {
+//        XCTAssertNotNil(lastEvent);
+//        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], stubName);
+//        [expectation fulfill];
+//    }];
+//
+//    [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
+//        if (error) {
+//            XCTFail(@"Expectation Failed with error: %@", error);
+//        }
+//    }];
+//}
 
 - (void)tearDown {
     [HTTPStubs removeAllStubs];
@@ -141,12 +144,35 @@
             return ([d.stubName isEqualToString:stubName]) && ([d.event[@"evtName"]isEqualToString:eventName]);
         }
         else if (eventType) {
+            if ([eventType isEqualToString:@"profile"]) {
+                
+                NSLog(@"stubName is %@", stubName);
+                NSDictionary *profileDict = (NSDictionary*)d.event[@"profile"];
+                NSLog(@"profileDict is %@", profileDict);
+                BOOL result = ([d.stubName isEqualToString:stubName]) && ([d.event[@"type"]isEqualToString:eventType]) && (profileDict.count > 0);
+                NSLog(@"result is %i", result);
+                return result;
+            }
             return ([d.stubName isEqualToString:stubName]) && ([d.event[@"type"]isEqualToString:eventType]);
         }
         return nil;
     }];
     NSArray *filteredEvents = [self.eventDetails filteredArrayUsingPredicate: pred];
     return (filteredEvents && [filteredEvents count] > 0) ? (EventDetail*)filteredEvents[0] : nil;
+}
+
+#pragma mark - Utils
+
+- (NSString*)randomString {
+    NSString *letters = @"abcdefghijklmnopqrstuvwxyz";
+
+    NSMutableString *randomString = [NSMutableString stringWithCapacity: 4];
+
+        for (int i=0; i<4; i++) {
+             [randomString appendFormat: @"%C", [letters characterAtIndex: arc4random_uniform([letters length])]];
+        }
+
+        return randomString;
 }
 
 @end
