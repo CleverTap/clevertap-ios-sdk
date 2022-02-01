@@ -422,4 +422,28 @@ NSString *const kCHARGED_EVENT = @"Charged";
     }
 }
 
+/**
+
+ *
+ */
++ (void)buildDirectCallEvent:(NSString * _Nonnull)event
+              forCallDetails:(NSDictionary * _Nonnull)callDetails
+           completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion {
+    @try {
+        NSMutableDictionary *eventDic = [NSMutableDictionary new];
+        NSMutableDictionary *notif = [NSMutableDictionary new];
+        if (callDetails) {
+            [notif addEntriesFromDictionary:callDetails];
+        }
+        if ([notif count] == 0) {
+            CleverTapLogStaticInternal(@"Direct Call does not have any field");
+        }
+        eventDic[@"evtName"] = event;
+        eventDic[@"evtData"] = notif;
+        completion(eventDic, nil);
+    } @catch (NSException *e) {
+        completion(nil, nil);
+    }
+}
+
 @end
