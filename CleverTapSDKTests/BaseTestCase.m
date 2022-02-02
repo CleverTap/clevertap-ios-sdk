@@ -42,7 +42,6 @@
         self.lastEvent = [data objectAtIndex:1];
         [self.eventDetails addObject:[[EventDetail alloc]initWithEvent:[data objectAtIndex:1] name:stub.name]];
         NSLog(@"LAST EVENT for %@", stub.name);
-        NSLog(@"%@", self.lastEvent);
     }];
     if (!cleverTapInitialized) {
         [CleverTap notfityTestAppLaunch];
@@ -114,11 +113,8 @@
         else if (eventType) {
             if ([eventType isEqualToString:@"profile"]) {
                 
-                NSLog(@"stubName is %@", stubName);
                 NSDictionary *profileDict = (NSDictionary*)d.event[@"profile"];
-                NSLog(@"profileDict is %@", profileDict);
                 BOOL result = ([d.stubName isEqualToString:stubName]) && ([d.event[@"type"]isEqualToString:eventType]) && (profileDict.count > 0);
-                NSLog(@"result is %i", result);
                 return result;
             }
             return ([d.stubName isEqualToString:stubName]) && ([d.event[@"type"]isEqualToString:eventType]);

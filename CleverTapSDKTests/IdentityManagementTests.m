@@ -208,7 +208,6 @@
         // Merge Profile
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
-        NSLog(@"%@ is lastEvent", lastEvent);
 
         NSDictionary *profileDetails = lastEvent[@"profile"];
         XCTAssertNotNil(profileDetails);
@@ -262,7 +261,6 @@
         // Merge Profile
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
-        NSLog(@"%@ is lastEvent", lastEvent);
 
         NSDictionary *profileDetails = lastEvent[@"profile"];
         XCTAssertNotNil(profileDetails);
@@ -370,7 +368,6 @@
         // THEN: Switch User
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
-        NSLog(@"%@ is lastEvent", lastEvent);
 
         NSDictionary *profileDetails = lastEvent[@"profile"];
         XCTAssertNotNil(profileDetails);
@@ -423,7 +420,6 @@
         // Switch User
         XCTAssertNotNil(lastEvent);
         XCTAssertEqualObjects(lastEvent[@"type"], @"profile");
-        NSLog(@"%@ is lastEvent", lastEvent);
         
         NSDictionary *profileDetails = lastEvent[@"profile"];
         XCTAssertNotNil(profileDetails);
