@@ -36,13 +36,6 @@
     self.responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] }; // TODO
     self.responseHeaders = @{@"Content-Type":@"application/json"};
     
-    
-//    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-//        return [request.URL.host isEqualToString:@"eu1.clevertap-prod.com"];
-//    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
-//        return [HTTPStubsResponse responseWithJSONObject:self.responseJson statusCode:200 headers:self.responseHeaders];
-//    }];
-    
     [HTTPStubs onStubActivation:^(NSURLRequest * _Nonnull request, id<HTTPStubsDescriptor>  _Nonnull stub, HTTPStubsResponse * _Nonnull responseStub) {
         NSArray *data = [NSJSONSerialization JSONObjectWithData:[request OHHTTPStubs_HTTPBody] options:NSJSONReadingMutableContainers error:nil];
         self.lastBatchHeader = [data objectAtIndex:0];
@@ -64,30 +57,6 @@
     }
 }
 
-//- (void)test_app_launched {
-//    // TEST AND RECORD APP LAUNCHED ONCE
-//    if (![NSStringFromClass([self class])isEqualToString:@"BaseTestCase"]) {
-//        return;
-//    }
-//
-//    NSString *stubName = @"App Launched";
-//    [self stubRequestsWithName: stubName];
-//    XCTestExpectation *expectation = [self expectationWithDescription:stubName];
-//
-//    [CleverTap notfityTestAppLaunch];
-//    [self getLastEventWithStubName:stubName eventName:stubName  eventType:nil  handler:^(NSDictionary* lastEvent) {
-//        XCTAssertNotNil(lastEvent);
-//        XCTAssertEqualObjects([lastEvent objectForKey:@"evtName"], stubName);
-//        [expectation fulfill];
-//    }];
-//
-//    [self waitForExpectationsWithTimeout:2.5 handler:^(NSError *error) {
-//        if (error) {
-//            XCTFail(@"Expectation Failed with error: %@", error);
-//        }
-//    }];
-//}
-
 - (void)tearDown {
     [HTTPStubs removeAllStubs];
     self.lastBatchHeader = nil;
@@ -97,7 +66,6 @@
     self.responseFilePath = nil;
     self.cleverTapInstance = nil;
     self.additionalInstance = nil;
-//    self.eventDetails = nil;
     [super tearDown];
 }
 

@@ -51,7 +51,7 @@
 }
 
 - (BOOL)shouldShowInAppNotificationWithExtras:(NSDictionary *)extras; {
-//    [self.stubHelper stubRequests];
+
     return YES;
 }
 

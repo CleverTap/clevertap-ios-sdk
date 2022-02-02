@@ -40,7 +40,6 @@
             return [HTTPStubsResponse responseWithFileAtPath:[[NSBundle mainBundle]pathForResource:@"inapp_interstitial" ofType:@"json"] statusCode:200 headers:responseHeaders];
         }
         return [HTTPStubsResponse responseWithFileAtPath:[[NSBundle mainBundle]pathForResource:@"app_inbox" ofType:@"json"] statusCode:200 headers:responseHeaders];
-//        return [HTTPStubsResponse responseWithJSONObject:responseJson statusCode:200 headers:responseHeaders];
     }];
 }
 @end

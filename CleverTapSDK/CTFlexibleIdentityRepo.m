@@ -45,15 +45,9 @@
 
 - (void)loadIdentities {
     // CHECK IF ITS A LEGACY USER
-    //    NSDictionary *cachedGUIDs = [self.loginInfoProvider getCachedGUIDs];
     NSString *cachedIdentities = [self.loginInfoProvider getCachedIdentities];
     NSArray *finalIdentityKeys;
     
-    //    if (cachedGUIDs && cachedGUIDs.count > 0 && (!cachedIdentities || cachedIdentities.length == 0)) {
-    //        // LEGACY USER FOUND. USE EXISTING LOGIC
-    //        finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
-    //    }
-    //    else {
     // NEW USER
     // GET IDENTIFIERS FROM PLIST IF DEFAULT INSTANCE ELSE CONFIG SETTER
     NSArray *configIdentifiers = [self getConfigIdentifiers];
@@ -84,7 +78,6 @@
     if (!cachedIdentityKeys || cachedIdentityKeys.count == 0) {
         [self.loginInfoProvider setCachedIdentities: [configIdentifiers componentsJoinedByString: @","]];
     }
-    //    }
     self.identities = finalIdentityKeys;
 }
 

@@ -947,31 +947,4 @@
         }
     }];
 }
-
-//- (void)test {
-////    NSLog(@"info plist: %@", [NSBundle bundleForClass:[self class]].infoDictionary[@"MyName"]);
-////    NSLog(@"info plist: %@", [NSBundle mainBundle].infoDictionary);
-//
-//
-//    // MOCKING MAIN BUNDLE TO RETURN TEST BUNDLE
-////    id bundleMock = OCMClassMock([NSBundle class]);
-////    OCMStub([bundleMock mainBundle]).andReturn([NSBundle bundleForClass:[self class]]);
-//
-//
-//    // MOCK THE PLIST DICTIONARY VALUE FOR IDENTIFIERS TO RETURN EMAIL
-//    id bundleMock = OCMPartialMock([NSBundle mainBundle].infoDictionary);
-//    OCMStub([bundleMock objectForKey:@"CleverTapIdentifiers"]).andReturn(@[@"Email"]);
-//
-//    NSLog(@"CleverTapIdentifiers: %@", [[NSBundle mainBundle].infoDictionary objectForKey: @"CleverTapIdentifiers"]);
-//
-//    NSLog(@"Your Cached GUIDS: %@", [self.cleverTapInstance getCachedGUIDs]);
-//    NSLog(@"Your Cached Identities: %@", [self.cleverTapInstance getCachedIdentities]);
-//    NSLog(@"Your Cached GUIDS: %@", [self.cleverTapInstance getCachedGUIDs]);
-//    NSLog(@"Your Cached Identities: %@", [self.cleverTapInstance getCachedIdentities]);
-//
-//    CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:[[CTDeviceInfo alloc] initWithConfig:self.cleverTapInstance.config andCleverTapID:nil] config:self.cleverTapInstance.config];
-//    [loginInfoProvider cacheGUID:@"-a31a9c0c056142b7bb24941cf9c0a706" forKey:@"Email" andIdentifier:@"jack@gmail.com"];
-//    NSLog(@"Your Cached GUIDS: %@", [self.cleverTapInstance getCachedGUIDs]);
-//}
-
 @end

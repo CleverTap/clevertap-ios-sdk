@@ -3104,7 +3104,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)cacheGUIDSforProfile:(NSDictionary*)profileEvent {
     
-//    NSArray *finalIdentityKeys = [self getIdentifierKeysForOnUserLogin];
     id<CTIdentityRepo> identityRepo = [CTIdentityRepoFactory getRepoForConfig:_config deviceInfo:_deviceInfo validationResultStack:_validationResultStack];
     
     // cache identifier:guid pairs
@@ -3142,9 +3141,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_onUserLogin:(NSDictionary *)properties withCleverTapID:(NSString *)cleverTapID {
     
     // GET IDENTIFIER KEYS FROM CACHE, PLIST OR CONFIG
-//    NSArray *finalIdentityKeys = [self getIdentifierKeysForOnUserLogin];
-    
-    
     if (!properties) return;
     NSString *currentGUID = [self profileGetCleverTapID];
     if (!currentGUID) return;
@@ -3158,7 +3154,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     id<CTIdentityRepo> identityRepo = [CTIdentityRepoFactory getRepoForConfig:_config deviceInfo:_deviceInfo validationResultStack:_validationResultStack];
     for (NSString *key in properties) {
         @try {
-//            if ([finalIdentityKeys containsObject:key]) {
             if ([identityRepo isIdentity:key]) {
                 NSString *identifier = [NSString stringWithFormat:@"%@", properties[key]];
                 
@@ -3272,52 +3267,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self queueEvent:event withType:CleverTapEventTypeProfile];
     }];
 }
-
-//- (NSArray*)getIdentifierKeysForOnUserLogin {
-//    // CHECK IF ITS A LEGACY USER
-//    CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
-//    NSDictionary *cachedGUIDs = [loginInfoProvider getCachedGUIDs];
-//    NSString *cachedIdentities = [loginInfoProvider getCachedIdentities];
-//    NSArray *finalIdentityKeys;
-//    
-//    if (cachedGUIDs && cachedGUIDs.count > 0 && (!cachedIdentities || cachedIdentities.length == 0)) {
-//        // LEGACY USER FOUND. USE EXISTING LOGIC
-//        finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
-//    }
-//    else {
-//        // NEW USER
-//        // GET IDENTIFIERS FROM PLIST IF DEFAULT INSTANCE ELSE CONFIG SETTER
-//        NSArray *configIdentifiers = [self getConfigIdentifiers];
-//        
-//        // RAISE ERROR IF CACHED AND PLIST IDENTITIES ARE NOT EQUAL
-//        NSArray *cachedIdentityKeys = [cachedIdentities componentsSeparatedByString: @","];
-//        if (cachedIdentityKeys.count > 0 && ![cachedIdentityKeys isEqualToArray: configIdentifiers]) {
-//            CTValidationResult *error = [[CTValidationResult alloc] init];
-//            NSString *errString = @"Profile Identifiers mismatch with the previously saved ones";
-//            [error setErrorCode:531];
-//            [error setErrorDesc:errString];
-//            [self.validationResultStack pushValidationResult:error];
-//            CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errString);
-//        }
-//        
-//        // USE CACHED IDENTITIES IF AVAILABLE, ELSE USE PLIST/SETTER, ELSE USE DEFAULT CONSTANTS
-//        if (cachedIdentityKeys && cachedIdentityKeys.count > 0) {
-//            finalIdentityKeys = cachedIdentityKeys;
-//        }
-//        else if (configIdentifiers && configIdentifiers.count > 0) {
-//            finalIdentityKeys = configIdentifiers;
-//            
-//            // SAVE IDENTITIES TO CACHE
-//            CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
-//            [loginInfoProvider setCachedIdentities: [configIdentifiers componentsJoinedByString: @","]];
-//        }
-//        else {
-//            finalIdentityKeys = CLTAP_PROFILE_IDENTIFIER_KEYS;
-//        }
-//    }
-//    return finalIdentityKeys;
-//}
-
 
 #pragma mark - Public
 
