@@ -17,6 +17,8 @@
     
     // Do any additional setup after loading the view.
     CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"R65-RR9-9R5Z" accountToken:@"c22-562" proxyDomain:@"analytics.sdktesting.xyz"];
+//    or to use spiky proxy domain call
+//    [[CleverTapInstanceConfig alloc] initWithAccountId:@"R65-RR9-9R5Z" accountToken:@"c22-562" proxyDomain:@"analytics.sdktesting.xyz" spikyProxyDomain:@"analyticst.sdktesting.xyz"];
     [ctConfig setLogLevel: CleverTapLogDebug];
     _cleverTapAdditionalInstance = [CleverTap instanceWithConfig:ctConfig];
     
