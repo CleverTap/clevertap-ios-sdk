@@ -764,9 +764,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)initNetworking {
     if (self.config.isDefaultInstance) {
+
         self.lastMutedTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:[CTPreferences getIntForKey:kMUTED_TS_KEY withResetValue:0]];
+        CleverTapLogInternal(self.config.logLevel, @"%@: init networking default %@", self, self.lastMutedTs);
+
     } else {
+
         self.lastMutedTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_TS_KEY] withResetValue:0];
+        CleverTapLogInternal(self.config.logLevel, @"%@: init networking default not %@", self, self.lastMutedTs);
+
     }
     self.redirectDomain = [self loadRedirectDomain];
     self.redirectNotifViewedDomain = [self loadRedirectNotifViewedDomain];
@@ -910,12 +916,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (BOOL)needHandshake {
+    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check 1 %@", self, [self isMuted]);
+    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check 2 %@", self, self.explictEndpointDomain);
+
     if ([self isMuted] || self.explictEndpointDomain) return NO;
+    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check 3 %@", self, self.redirectDomain);
     return self.redirectDomain == nil;
 }
 
 - (void)doHandshakeAsync {
     [self runSerialAsync:^{
+        CleverTapLogInternal(self.config.logLevel, @"%@: handshake check %@", self, [self needHandshake]);
         if (![self needHandshake]) return;
         CleverTapLogInternal(self.config.logLevel, @"%@: starting handshake with %@", self, kHANDSHAKE_URL);
         NSMutableURLRequest *request = [self createURLRequestFromURL:[[NSURL alloc] initWithString:kHANDSHAKE_URL]];
