@@ -226,6 +226,39 @@ typedef NS_ENUM(int, CleverTapChannel) {
  @method
  
  @abstract
+ Sets the CleverTap AccountID, token and proxy domain URL
+ 
+ @discussion
+ Sets the CleverTap account credentials and proxy domain URL. Once the default shared instance is intialized subsequent calls will be ignored.
+ Only has effect on the default shared instance.
+ 
+ @param accountID  the CleverTap account id
+ @param token the CleverTap account token
+ @param proxyDomain the domain of the proxy server eg: example.com or subdomain.example.com
+ */
++ (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token proxyDomain:(NSString * _Nonnull)proxyDomain;
+
+/*!
+ @method
+ 
+ @abstract
+ Sets the CleverTap AccountID, token, proxy domain URL for APIs and spiky proxy domain URL for push impression APIs
+ 
+ @discussion
+ Sets the CleverTap account credentials and proxy domain URL. Once the default shared instance is intialized subsequent calls will be ignored.
+ Only has effect on the default shared instance.
+ 
+ @param accountID  the CleverTap account id
+ @param token the CleverTap account token
+ @param proxyDomain the domain of the proxy server eg: example.com or subdomain.example.com
+ @param spikyProxyDomain the domain of the proxy server for push impression eg: example.com or subdomain.example.com
+ */
++ (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token proxyDomain:(NSString * _Nonnull)proxyDomain spikyProxyDomain:(NSString * _Nonnull)spikyProxyDomain;
+
+/*!
+ @method
+ 
+ @abstract
  notify the SDK instance of application launch
  
  */

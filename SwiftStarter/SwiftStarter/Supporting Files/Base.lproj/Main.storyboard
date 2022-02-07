@@ -73,12 +73,57 @@
                     <navigationItem key="navigationItem" id="pzl-34-CHI"/>
                     <connections>
                         <outlet property="tblEvent" destination="3z1-bv-g7S" id="Qrs-dw-oeF"/>
-                        <segue destination="IQD-po-Bhz" kind="show" identifier="segue_webview" id="Dik-Gc-4MO"/>
+                        <segue destination="IQD-po-Bhz" kind="show" id="kg6-E4-Zt2"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="140" y="128.18590704647679"/>
+        </scene>
+        <!--Custom Domain View Controller-->
+        <scene sceneID="flp-8T-UtO">
+            <objects>
+                <viewController storyboardIdentifier="CustomDomainVC" id="TS7-ra-wao" customClass="CustomDomainViewController" customModule="SwiftStarter" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="HXf-0P-gum">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="3ZM-tY-LOc">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" id="YhP-DT-vhh">
+                                        <rect key="frame" x="0.0" y="24.5" width="375" height="43.5"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="YhP-DT-vhh" id="NoD-lO-VRO">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="TS7-ra-wao" id="bar-oP-CuR"/>
+                                    <outlet property="delegate" destination="TS7-ra-wao" id="4yE-Gn-m7j"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="74o-Vb-6Mu"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="74o-Vb-6Mu" firstAttribute="bottom" secondItem="3ZM-tY-LOc" secondAttribute="bottom" id="97N-GP-1Se"/>
+                            <constraint firstItem="3ZM-tY-LOc" firstAttribute="leading" secondItem="74o-Vb-6Mu" secondAttribute="leading" id="LaC-4l-1Gt"/>
+                            <constraint firstItem="3ZM-tY-LOc" firstAttribute="top" secondItem="74o-Vb-6Mu" secondAttribute="top" id="Y4I-Xu-Spo"/>
+                            <constraint firstItem="74o-Vb-6Mu" firstAttribute="trailing" secondItem="3ZM-tY-LOc" secondAttribute="trailing" id="dOg-4U-Qyw"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="gPD-O8-Uzc"/>
+                    <connections>
+                        <outlet property="tblEvent" destination="3ZM-tY-LOc" id="Lvb-zx-gr1"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gva-jw-pRS" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="929" y="519"/>
         </scene>
         <!--WebviewVC-->
         <scene sceneID="URA-k6-EdP">
@@ -90,10 +135,11 @@
                         <viewLayoutGuide key="safeArea" id="AVF-YT-GAY"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
+                    <navigationItem key="navigationItem" id="0Dr-LC-Ueb"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7Kk-fe-rx8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="946" y="128"/>
+            <point key="canvasLocation" x="930" y="-208"/>
         </scene>
     </scenes>
     <resources>
