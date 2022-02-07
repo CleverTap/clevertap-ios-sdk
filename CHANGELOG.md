@@ -1,8 +1,8 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 4.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.0) (Dec 3, 2021)
-
+### [Version 4.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.0) (February 7, 2022)
+  
 ##### Added
 - Adds Custom Proxy Domain functionality for Push Impressions and Events
 - Adds support for configurable CleverTap Profile identifiers

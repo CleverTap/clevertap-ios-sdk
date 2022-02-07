@@ -1,0 +1,108 @@
+{
+	"arp": {
+		"j_n": "Zm9keQA=",
+		"i_n": "Zm9keQA=",
+		"d_ts": 0,
+		"dh": 0,
+		"v": 1,
+		"j_s": "{ }",
+		"id": "W9R-486-4W5Z",
+		"e_ts": 0,
+		"d_e": ["test event 2"],
+		"r_ts": 1639997549,
+		"wdt": 2.54,
+		"hgt": 5.5,
+		"av": "1.0",
+		"sv": 301000
+	},
+	"inapp_stale": [],
+	"imc": 1,
+	"imp": 1000,
+	"inbox_notifs": [{
+		"_id": "1617126889_1639997549",
+		"wzrk_ttl": 1956391377,
+		"wzrk_id": "1617126889_20211220",
+		"msg": {
+			"type": "simple",
+			"bg": "#A1D79D",
+			"orientation": "l",
+			"content": [{
+				"key": 8150950539,
+				"message": {
+					"text": "Message comes here",
+					"color": "#000000",
+					"og": "Message comes here",
+					"replacements": "Message comes here",
+					"df": {},
+					"defaultValuesSet": {
+						"value": true,
+						"strict": true
+					}
+				},
+				"title": {
+					"text": "APP LAUNCHED",
+					"color": "#1E3BE7",
+					"og": "APP LAUNCHED",
+					"replacements": "APP LAUNCHED",
+					"df": {},
+					"defaultValuesSet": {
+						"value": true,
+						"strict": true
+					}
+				},
+				"action": {
+					"hasUrl": false,
+					"hasLinks": true,
+					"url": {
+						"android": {
+							"text": "",
+							"replacements": "",
+							"og": ""
+						},
+						"ios": {
+							"text": "",
+							"replacements": "",
+							"og": ""
+						}
+					},
+					"links": [{
+						"type": "copy",
+						"text": "Copy me",
+						"color": "#1A6AC0",
+						"bg": "#ffffff",
+						"copyText": {
+							"text": "Copy me",
+							"og": "Copy me",
+							"replacements": "Copy me",
+							"key": "",
+							"df": {},
+							"defaultValuesSet": {
+								"value": true,
+								"strict": true
+							}
+						},
+						"url": {
+							"android": {
+								"text": "",
+								"replacements": "",
+								"og": ""
+							},
+							"ios": {
+								"text": "",
+								"replacements": "",
+								"og": ""
+							}
+						},
+						"kv": {}
+					}]
+				},
+				"media": {},
+				"icon": {}
+			}],
+			"tags": [],
+			"enableTags": false
+		},
+		"wzrk_pivot": "wzrk_default",
+		"date": 1639997549
+	}]
+}
