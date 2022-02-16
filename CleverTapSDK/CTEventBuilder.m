@@ -423,10 +423,9 @@ NSString *const kCHARGED_EVENT = @"Charged";
 }
 
 /**
-
- *
+ * Raises and logs Direct Call system events
  */
-+ (void)buildDirectCallEvent:(NSString * _Nonnull)event
++ (void)buildDirectCallEvent:(int)eventRawValue
               forCallDetails:(NSDictionary * _Nonnull)callDetails
            completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion {
     @try {
@@ -438,7 +437,17 @@ NSString *const kCHARGED_EVENT = @"Charged";
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Direct Call does not have any field");
         }
-        eventDic[@"evtName"] = event;
+        NSString *directCallEvent;
+        switch (eventRawValue) {
+            case 0:
+                directCallEvent = CLTAP_DIRECT_CALL_OUTGOING_EVENT_NAME;
+            case 1:
+                directCallEvent = CLTAP_DIRECT_CALL_INCOMING_EVENT_NAME;
+            case 2:
+                directCallEvent = CLTAP_DIRECT_CALL_END_EVENT_NAME;
+            default: break;
+        }
+        eventDic[@"evtName"] = directCallEvent;
         eventDic[@"evtData"] = notif;
         completion(eventDic, nil);
     } @catch (NSException *e) {

@@ -4880,11 +4880,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - Direct Call Public APIs
 
-- (void)recordDirectCallEvent:(NSString * _Nonnull)event
-              forCallDetails:(NSDictionary *_Nonnull)calldetails {
+
+- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
 #if !defined(CLEVERTAP_TVOS)
     [self runSerialAsync:^{
-        [CTEventBuilder buildDirectCallEvent:event forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+        [CTEventBuilder buildDirectCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
             if (event) {
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };

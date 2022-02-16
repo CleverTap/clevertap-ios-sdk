@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <SDWebImage/SDWebImage.h>
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 #import <WatchConnectivity/WatchConnectivity.h>
@@ -44,6 +45,12 @@ typedef NS_ENUM(int, CleverTapChannel) {
     CleverTapPushNotification = 0,
     CleverTapAppInbox = 1,
     CleverTapInAppNotification = 2
+};
+
+typedef NS_ENUM(int, CTDirectCallEvent) {
+    DIRECT_CALL_OUTGOING_EVENT = 0,
+    DIRECT_CALL_INCOMING_EVENT,
+    DIRECT_CALL_END_EVENT
 };
 
 @interface CleverTap : NSObject
@@ -1236,8 +1243,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param calldetails call details dictionary
  */
-- (void)recordDirectCallEvent:(NSString * _Nonnull)event
-               forCallDetails:(NSDictionary *_Nonnull)calldetails;
+- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *_Nonnull)calldetails;
 @end
 
 #pragma clang diagnostic pop
