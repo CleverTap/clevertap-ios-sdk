@@ -119,8 +119,18 @@
     copy.logLevel = self.logLevel;
     copy.useCustomCleverTapId = self.useCustomCleverTapId;
     copy.disableIDFV = self.disableIDFV;
+    copy.identityKeys = self.identityKeys;
     copy.beta = self.beta;
     return copy;
+}
+
+
+- (void)setIdentityKeys:(NSArray *)identityKeys {
+    if (!_isDefaultInstance) {
+        // ONLY ADD SUPPORTED KEYS
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self IN %@", CLTAP_ALL_PROFILE_IDENTIFIER_KEYS];
+        _identityKeys = [identityKeys filteredArrayUsingPredicate:predicate];
+    }
 }
 
 - (void) setupPlistData:(BOOL)isDefault {
