@@ -3472,6 +3472,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return self.deviceInfo.deviceId;
 }
 
+- (NSString *)getAccountID {
+    return self.config.accountId;
+}
+
 - (NSString *)profileGetCleverTapAttributionIdentifier {
     return self.deviceInfo.deviceId;
 }

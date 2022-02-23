@@ -639,6 +639,18 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
+ Get CleverTap account Id.
+ 
+ @discussion
+ The CleverTap account Id is the unique identifier assigned to the Account by CleverTap.
+ 
+ */
+- (NSString *_Nullable)getAccountID;
+
+/*!
+ @method
+ 
+ @abstract
  Returns a unique CleverTap identifier suitable for use with install attribution providers.
  
  */
