@@ -1590,8 +1590,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
             return YES;
+        #if !defined(CLEVERTAP_NO_INBOX_SUPPORT)
         } else if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
             return YES;
+        #endif
         } else if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
             return YES;
         } else {
