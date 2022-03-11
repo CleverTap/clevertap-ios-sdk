@@ -907,17 +907,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (BOOL)needHandshake {
-    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check 1 %@", self, [self isMuted]);
-    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check 2 %@", self, self.explictEndpointDomain);
+    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check, is muted: %@", self, [self isMuted] ? @"TRUE" : @"FALSE");
+    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check, explicit endpoint is: %@", self, self.explictEndpointDomain);
 
     if ([self isMuted] || self.explictEndpointDomain) return NO;
-    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check 3 %@", self, self.redirectDomain);
+    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check, redirect domain is: %@", self, self.redirectDomain);
     return self.redirectDomain == nil;
 }
 
 - (void)doHandshakeAsync {
     [self runSerialAsync:^{
-        CleverTapLogInternal(self.config.logLevel, @"%@: handshake check %@", self, [self needHandshake]);
+        CleverTapLogInternal(self.config.logLevel, @"%@: handshake check, needs handshake: %@", self, [self needHandshake] ? @"TRUE" : @"FALSE");
         if (![self needHandshake]) return;
         CleverTapLogInternal(self.config.logLevel, @"%@: starting handshake with %@", self, kHANDSHAKE_URL);
         NSMutableURLRequest *request = [self createURLRequestFromURL:[[NSURL alloc] initWithString:kHANDSHAKE_URL]];
