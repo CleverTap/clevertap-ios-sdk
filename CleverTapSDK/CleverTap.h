@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
-#import <SDWebImage/SDWebImage.h>
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
 #import <WatchConnectivity/WatchConnectivity.h>
