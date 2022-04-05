@@ -907,17 +907,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (BOOL)needHandshake {
-    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check, is muted: %@", self, [self isMuted] ? @"TRUE" : @"FALSE");
-    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check, explicit endpoint is: %@", self, self.explictEndpointDomain);
-
     if ([self isMuted] || self.explictEndpointDomain) return NO;
-    CleverTapLogInternal(self.config.logLevel, @"%@:need handshake check, redirect domain is: %@", self, self.redirectDomain);
     return self.redirectDomain == nil;
 }
 
 - (void)doHandshakeAsync {
     [self runSerialAsync:^{
-        CleverTapLogInternal(self.config.logLevel, @"%@: handshake check, needs handshake: %@", self, [self needHandshake] ? @"TRUE" : @"FALSE");
         if (![self needHandshake]) return;
         CleverTapLogInternal(self.config.logLevel, @"%@: starting handshake with %@", self, kHANDSHAKE_URL);
         NSMutableURLRequest *request = [self createURLRequestFromURL:[[NSURL alloc] initWithString:kHANDSHAKE_URL]];
@@ -4820,7 +4815,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #pragma mark - Direct Call Public APIs
-
 
 - (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
 #if !defined(CLEVERTAP_TVOS)
