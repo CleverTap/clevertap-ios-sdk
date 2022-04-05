@@ -39,6 +39,7 @@ static NSString *_timeZone;
 static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
+static NSString *_directCallSDKVersion;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 SCNetworkReachabilityRef _reachability;
@@ -456,6 +457,14 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (BOOL)wifi {
     return _wifi;
+}
+
+- (void)setDirectCallSDKVersion: (NSString *)version {
+    _directCallSDKVersion = version;
+}
+
+- (NSString *)directCallSDKVersion {
+    return _directCallSDKVersion;
 }
 
 @end

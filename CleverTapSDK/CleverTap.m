@@ -1123,6 +1123,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
+    evtData[@"dcv"] = self.deviceInfo.directCallSDKVersion;
     
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
@@ -4829,6 +4830,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }];
 #endif
+}
+
+- (void)setDirectCallVersion:(NSString *)version {
+    [self.deviceInfo setDirectCallSDKVersion: version];
 }
 
 @end

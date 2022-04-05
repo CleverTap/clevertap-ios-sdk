@@ -1255,6 +1255,17 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param calldetails call details dictionary
  */
 - (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *_Nonnull)calldetails;
+
+/*!
+ @method
+ 
+ @abstract
+ Record Direct Call SDK version.
+ 
+ @param version Direct call SDK version
+ */
+- (void)setDirectCallVersion:(NSString* _Nullable)version;
+
 @end
 
 #pragma clang diagnostic pop
