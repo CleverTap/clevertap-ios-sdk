@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.1) (April 12, 2022)
+  
+##### Fixed
+- Fixes deviceID so that it will be fetched from storage instead of memory variables.
+- Fixes compile time errors when building sdk with CLEVERTAP_NO_INBOX_SUPPORT.
+- Adds a check for uname() method when fetching platform name to avoid possible runtime crashes.
+
 ### [Version 4.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.0) (February 7, 2022)
   
 ##### Added
