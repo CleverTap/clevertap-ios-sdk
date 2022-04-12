@@ -598,7 +598,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _instances = [[NSMutableDictionary alloc] init];
     }
     __block CleverTap *instance = [_instances objectForKey:config.accountId];
-    if (instance == nil) {
+    if (instance == nil || instance.deviceInfo.deviceId == nil) {
         if (config.accountId) {
             instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
             _instances[config.accountId] = instance;
@@ -1590,9 +1590,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         if ([self didHandleInAppTestFromPushNotificaton:testPayload]) {
             return YES;
-        } else if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
+        }
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+        else if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
             return YES;
-        } else if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
+        }
+#endif
+        else if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
             return YES;
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);

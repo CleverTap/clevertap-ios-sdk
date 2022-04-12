@@ -49,14 +49,16 @@
         }
         
         NSMutableArray *_contents = [NSMutableArray new];
-        NSMutableArray *contents = json[@"msg"][@"content"];
         
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+        NSMutableArray *contents = json[@"msg"][@"content"];
         for (NSDictionary *content in contents) {
             CleverTapInboxMessageContent *ct_content = [[CleverTapInboxMessageContent alloc] initWithJSON:content];
             if (ct_content) {
                 [_contents addObject:ct_content];
             }
         }
+#endif
         _content = _contents;
         
         _date = (long)[json[@"date"] longValue];
