@@ -18,6 +18,7 @@
 #define CLEVERTAP_NO_GEOFENCE_SUPPORT 1
 #endif
 
+@protocol CleverTapDomainDelegate;
 @protocol CleverTapSyncDelegate;
 @protocol CleverTapURLDelegate;
 @protocol CleverTapPushNotificationDelegate;
@@ -65,6 +66,12 @@ typedef NS_ENUM(int, CTDirectCallEvent) {
  */
 
 @property (nonatomic, strong, readonly, nonnull) CleverTapInstanceConfig *config;
+
+/**
+ CleverTap region/ domain value for direct call domain setup
+ */
+@property (nonatomic, strong, readwrite, nullable) NSString *directCallDomain;
+
 
 /* ------------------------------------------------------------------------------------------------------
  * Initialization
@@ -1265,6 +1272,30 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param version Direct call SDK version
  */
 - (void)setDirectCallVersion:(NSString* _Nullable)version;
+
+/*!
+ @method
+ 
+ @abstract
+ The `CTDomainDelegate` protocol provides methods for notifying your application (the adopting delegate) about domain/ region changes.
+ 
+ @see CleverTap+DCDomain.h
+ 
+ @discussion
+ This sets the CTDomainDelegate
+ 
+ @param delegate  an object conforming to the CTDomainDelegate Protocol
+ */
+- (void)setDomainDelegate:(id <CleverTapDomainDelegate> _Nullable)delegate;
+
+/*!
+ @method
+ 
+ @abstract
+ Get region/ domain string value
+ */
+- (NSString *_Nullable)getDomainString;
+
 
 @end
 
