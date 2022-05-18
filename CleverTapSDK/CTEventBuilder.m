@@ -428,14 +428,18 @@ NSString *const kCHARGED_EVENT = @"Charged";
 + (void)buildDirectCallEvent:(int)eventRawValue
               forCallDetails:(NSDictionary * _Nonnull)callDetails
            completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion {
+    NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+    CTValidationResult *error = [[CTValidationResult alloc] init];
+    [error setErrorCode: 524];
+    [error setErrorDesc: @"Direct Call does not have any field"];
     @try {
         NSMutableDictionary *eventDic = [NSMutableDictionary new];
         NSMutableDictionary *notif = [NSMutableDictionary new];
-        if (callDetails) {
-            [notif addEntriesFromDictionary:callDetails];
-        }
+        [notif addEntriesFromDictionary:callDetails];
+        
         if ([notif count] == 0) {
-            CleverTapLogStaticInternal(@"Direct Call does not have any field");
+            [errors addObject: error];
+            CleverTapLogStaticDebug(@"Direct Call does not have any field");
         }
         NSString *directCallEvent;
         switch (eventRawValue) {
@@ -447,11 +451,14 @@ NSString *const kCHARGED_EVENT = @"Charged";
                 directCallEvent = CLTAP_DIRECT_CALL_END_EVENT_NAME;
             default: break;
         }
-        eventDic[@"evtName"] = directCallEvent;
+        if (directCallEvent) {
+            eventDic[@"evtName"] = directCallEvent;
+        }
         eventDic[@"evtData"] = notif;
-        completion(eventDic, nil);
+        completion(eventDic, errors);
     } @catch (NSException *e) {
-        completion(nil, nil);
+        CleverTapLogStaticDebug(@"Unable to build direct call event: %@", e.debugDescription);
+        completion(nil, errors);
     }
 }
 
