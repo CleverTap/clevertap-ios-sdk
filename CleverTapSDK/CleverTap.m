@@ -938,6 +938,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 } else {
                     [self onDomainUnavailable];
                 }
+            } else {
+                [self onDomainUnavailable];
             }
             dispatch_semaphore_signal(semaphore);
         }];
