@@ -22,5 +22,6 @@
 - (BOOL)isLegacyProfileLoggedIn;
 - (void)setCachedIdentities:(NSString *)cache;
 - (instancetype)initWithDeviceInfo:(CTDeviceInfo*)deviceInfo config:(CleverTapInstanceConfig*)config;
+- (void)removeValueFromCachedGUIDForKey:(NSString *)key andGuid:(NSString*)guid;
 
 @end

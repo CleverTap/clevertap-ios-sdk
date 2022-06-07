@@ -97,4 +97,18 @@ NSString *const kCachedIdentities = @"CachedIdentities";
 - (void)setCachedIdentities:(NSString *)cache {
     [CTPreferences putObject:cache forKey:[CTPreferences storageKeyWithSuffix:kCachedIdentities config: self.config]];
 }
+
+- (void)removeValueFromCachedGUIDForKey:(NSString *)key andGuid:(NSString*)guid {
+    
+    NSMutableDictionary *cachedGUIDs = [[self getCachedGUIDs]mutableCopy];
+    if (!cachedGUIDs || cachedGUIDs.count == 0) return;
+    
+    [cachedGUIDs enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull cachedKey, NSString*  _Nonnull value, BOOL * _Nonnull stop) {
+        if ([cachedKey containsString:key] && [value isEqualToString:guid]) {
+            [cachedGUIDs removeObjectForKey:cachedKey];
+            [self setCachedGUIDs:cachedGUIDs];
+            *stop = YES;
+        }
+    }];
+}
 @end
