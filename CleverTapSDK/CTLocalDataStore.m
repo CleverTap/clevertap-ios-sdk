@@ -573,13 +573,16 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     
     @try {
         @synchronized (localProfileForSession) {
+            // DO NOT REMOVE IDENTITY
             if ([key isEqualToString:@"Identity"]) {
                 return;
             }
+            
+            // CACHED VALUES HAVE a "user" PREFIX, SO PREPEND IT BEFORE SEARCHING CACHE
             NSString *keyToDelete = [localProfileForSession.allKeys containsObject:key] ? key : [NSString stringWithFormat:@"user%@",key];
             [localProfileForSession removeObjectForKey: keyToDelete];
             
-            
+            // REMOVE CORRESPONDING GUID VALUE
             CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
             [loginInfoProvider removeValueFromCachedGUIDForKey:key andGuid:_deviceInfo.deviceId];
             
