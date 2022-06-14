@@ -4876,6 +4876,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+//Updates the format of the domain - from `in1.clevertap-prod.com` to region.auth.domain (i.e. in1.auth.clevertap-prod.com)
 - (NSString *)getDomainString {
     if (self.redirectDomain != nil) {
         NSArray *listItems = [self.redirectDomain componentsSeparatedByString:@"."];
