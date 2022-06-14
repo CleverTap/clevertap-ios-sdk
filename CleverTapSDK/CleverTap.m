@@ -3911,8 +3911,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (void)setDebugLevel:(int)level {
-    @try {
-        [instanceLock lock];
     [CTLogger setDebugLevel:level];
     if (_defaultInstanceConfig) {
         CleverTap *sharedInstance = [CleverTap sharedInstance];
@@ -3920,9 +3918,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             sharedInstance.config.logLevel = level;
         }
     }
-} @finally {
-    [instanceLock unlock];
-}
 }
 
 + (CleverTapLogLevel)getDebugLevel {
