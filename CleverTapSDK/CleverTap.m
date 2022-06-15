@@ -70,6 +70,7 @@ static NSArray *sslCertNames;
 #import "CleverTapProductConfigPrivate.h"
 #import "CTProductConfigController.h"
 
+#import "CleverTap+DCDomain.h"
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -234,6 +235,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, weak) id <CleverTapURLDelegate> urlDelegate;
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
+@property (atomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -261,6 +263,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @synthesize offline=_offline;
 @synthesize firstRequestInSession=_firstRequestInSession;
 @synthesize geofenceLocation=_geofenceLocation;
+@synthesize domainDelegate=_domainDelegate;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
@@ -913,7 +916,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)doHandshakeAsync {
     [self runSerialAsync:^{
-        if (![self needHandshake]) return;
+        if (![self needHandshake]) {
+            //self.redirectDomain contains value
+            [self onDomainAvailable];
+            return;
+        }
         CleverTapLogInternal(self.config.logLevel, @"%@: starting handshake with %@", self, kHANDSHAKE_URL);
         NSMutableURLRequest *request = [self createURLRequestFromURL:[[NSURL alloc] initWithString:kHANDSHAKE_URL]];
         request.HTTPMethod = @"GET";
@@ -928,7 +935,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [self updateStateFromResponseHeadersShouldRedirect:httpResponse.allHeaderFields];
                     [self updateStateFromResponseHeadersShouldRedirectForNotif:httpResponse.allHeaderFields];
                     [self handleHandshakeSuccess];
+                } else {
+                    [self onDomainUnavailable];
                 }
+            } else {
+                [self onDomainUnavailable];
             }
             dispatch_semaphore_signal(semaphore);
         }];
@@ -975,6 +986,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 shouldRedirect = YES;
                 self.redirectDomain = redirectDomain;
                 [self persistRedirectDomain];
+                //domain changed
+                [self onDomainAvailable];
             }
         }
         NSString *mutedString = headers[kMUTE_HEADER];
@@ -1123,6 +1136,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
+    evtData[@"dcv"] = self.deviceInfo.directCallSDKVersion;
     
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
@@ -3471,6 +3485,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return self.deviceInfo.deviceId;
 }
 
+- (NSString *)getAccountID {
+    return self.config.accountId;
+}
+
 - (NSString *)profileGetCleverTapAttributionIdentifier {
     return self.deviceInfo.deviceId;
 }
@@ -4814,5 +4832,68 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
+#pragma mark - Direct Call Public APIs
+
+- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
+#if !defined(CLEVERTAP_TVOS)
+    [self runSerialAsync:^{
+        [CTEventBuilder buildDirectCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+            if (event) {
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self.validationResultStack pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
+- (void)setDirectCallVersion:(NSString *)version {
+    [self.deviceInfo setDirectCallSDKVersion: version];
+}
+
+- (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setDomainDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapDomainDelegate)]) {
+        _domainDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Domain Delegate does not conform to the CleverTapDomainDelegate protocol", self);
+    }
+}
+
+- (void)onDomainAvailable {
+    NSString *dcDomain = [self getDomainString];
+    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onDCDomainAvailable:)]) {
+        [self.domainDelegate onDCDomainAvailable: dcDomain];
+    } else if (dcDomain == nil) {
+        [self onDomainUnavailable];
+    }
+}
+
+- (void)onDomainUnavailable {
+    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onDCDomainUnavailable)]) {
+        [self.domainDelegate onDCDomainUnavailable];
+    }
+}
+
+//Updates the format of the domain - from `in1.clevertap-prod.com` to region.auth.domain (i.e. in1.auth.clevertap-prod.com)
+- (NSString *)getDomainString {
+    if (self.redirectDomain != nil) {
+        NSArray *listItems = [self.redirectDomain componentsSeparatedByString:@"."];
+        NSString *domainItem = [listItems[0] stringByAppendingString:@".auth"];
+        for (int i = 1; i < listItems.count; i++ ) {
+            NSString *dotString = [@"." stringByAppendingString: listItems[i]];
+            domainItem = [domainItem stringByAppendingString: dotString];
+        }
+        self.directCallDomain = domainItem;
+        return domainItem;
+    } else {
+        return nil;
+    }
+}
 
 @end

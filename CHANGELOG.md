@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (May 17, 2022)
+  
+##### Added
+- Adds public APIs to get account ID and to record Direct Call events
+- Adds support for Direct Call SDK integration
+
 ### [Version 4.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.1) (April 12, 2022)
   
 ##### Fixed
