@@ -1,23 +1,28 @@
 #import <Foundation/Foundation.h>
+#import "CleverTapInstanceConfig.h"
 
 @interface CTPreferences : NSObject
 
-+ (long)getIntForKey:(NSString *)key withResetValue:(long)resetValue;
++ (long)getIntForKey:(NSString *_Nonnull)key withResetValue:(long)resetValue;
 
-+ (void)putInt:(long)resetValue forKey:(NSString *)key;
++ (void)putInt:(long)resetValue forKey:(NSString *_Nonnull)key;
 
-+ (NSString *)getStringForKey:(NSString *)key withResetValue:(NSString *)resetValue;
++ (NSString *_Nonnull)getStringForKey:(NSString *_Nonnull)key withResetValue:(NSString *_Nullable)resetValue;
 
-+ (void)putString:(NSString *)resetValue forKey:(NSString *)key;
++ (void)putString:(NSString *_Nonnull)resetValue forKey:(NSString *_Nonnull)key;
 
-+ (id)getObjectForKey:(NSString *)key;
++ (id _Nonnull)getObjectForKey:(NSString *_Nonnull)key;
 
-+ (void)putObject:(id)object forKey:(NSString *)key;
++ (void)putObject:(id _Nonnull)object forKey:(NSString *_Nonnull)key;
 
-+ (void)removeObjectForKey:(NSString *)key;
++ (void)removeObjectForKey:(NSString *_Nonnull)key;
 
-+ (id)unarchiveFromFile:(NSString *)filePath removeFile:(BOOL)remove;
++ (id _Nonnull)unarchiveFromFile:(NSString *_Nonnull)filename ofType:(Class _Nonnull)cls  removeFile:(BOOL)remove;
 
-+ (BOOL)archiveObject:(id)object forFileName:(NSString *)fileName;
++ (id _Nonnull)unarchiveFromFile:(NSString *_Nonnull)filename ofTypes:(nonnull NSSet<Class> *)classes removeFile:(BOOL)remove;
+
++ (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)fileName;
+
++ (NSString *)storageKeyWithSuffix: (NSString *)suffix config: (CleverTapInstanceConfig*)config;
 
 @end

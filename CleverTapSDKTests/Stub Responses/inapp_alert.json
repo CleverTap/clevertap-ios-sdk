@@ -1,0 +1,70 @@
+{
+	"arp": {
+		"j_n": "Zm9keQA=",
+		"i_n": "Zm9keQA=",
+		"d_ts": 0,
+		"dh": 0,
+		"v": 1,
+		"j_s": "{ }",
+		"id": "W9R-486-4W5Z",
+		"e_ts": 0,
+		"r_ts": 1639995545,
+		"wdt": 2.54,
+		"hgt": 5.5,
+		"av": "1.0",
+		"sv": 301000
+	},
+	"inapp_stale": [],
+	"imc": 1,
+	"imp": 1000,
+	"inapp_notifs": [{
+		"type": "alert-template",
+		"bg": "#ffffff",
+		"tablet": false,
+		"close": true,
+		"message": {
+			"text": "Alert Message",
+			"color": "#434761",
+			"replacements": "",
+			"og": ""
+		},
+		"title": {
+			"text": "Alert Title",
+			"color": "#434761",
+			"replacements": "Title",
+			"og": ""
+		},
+		"buttons": [{
+			"text": "Button One",
+			"actions": {
+				"close": true,
+				"type": "close",
+				"android": "",
+				"ios": "",
+				"kv": {}
+			}
+		}],
+		"media": {},
+		"isMediaSourceRecommended": false,
+		"recommendedText": {
+			"text": "",
+			"replacements": "",
+			"og": ""
+		},
+		"mediaLandscape": {},
+		"isMediaSourceRecommendedLandscape": false,
+		"recommendedTextLandscape": {
+			"text": "",
+			"replacements": "",
+			"og": ""
+		},
+		"hasPortrait": true,
+		"hasLandscape": true,
+		"is_native": true,
+		"wzrk_id": "1639994748_20211220",
+		"wzrk_pivot": "wzrk_default",
+		"wzrk_ttl": 1956391377,
+		"ti": 1639994748,
+		"efc": 1
+	}]
+}

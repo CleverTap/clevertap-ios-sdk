@@ -1,6 +1,45 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (May 17, 2022)
+  
+##### Added
+- Adds public APIs to get account ID and to record Direct Call events
+- Adds support for Direct Call SDK integration
+
+### [Version 4.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.1) (April 12, 2022)
+  
+##### Fixed
+- Fixes deviceID so that it will be fetched from storage instead of memory variables.
+- Fixes compile time errors when building sdk with CLEVERTAP_NO_INBOX_SUPPORT.
+- Adds a check for uname() method when fetching platform name to avoid possible runtime crashes.
+
+### [Version 4.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.0) (February 7, 2022)
+  
+##### Added
+- Adds Custom Proxy Domain functionality for Push Impressions and Events
+- Adds support for configurable CleverTap Profile identifiers
+
+#### Changed
+- Use `resource_bundle` instead of `resources` in podspec
+
+### [Version 3.10.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.10.0) (Aug 23, 2021)
+
+##### Added
+- Adds public methods for suspending/discarding & resuming InApp Notifications
+- Adds public methods to increment/decrement values set via User properties
+- Custom Deep-link handling for App inbox, push notifications and in-app notifications
+
+##### Changed
+- Usage `clevertap-prod.com` instead of `wzrkt.com` 
+- Usage `spiky.clevertap-prod.com` instead of `spiky.wzrkt.com`
+- Refactor and Addresses iOS 15 beta fixes related to App inbox 
+- Synchronize access for `deviceName` and `model` property
+
+##### Fixed
+- https://github.com/CleverTap/clevertap-ios-sdk/issues/103
+- https://github.com/CleverTap/clevertap-ios-sdk/issues/137
+
 ### [Version 3.9.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/3.9.4) (May 17, 2021)
 
 ##### Added
