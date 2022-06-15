@@ -76,6 +76,7 @@ static NSArray *sslCertNames;
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 
+static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
 NSString *const kQUEUE_NAME_PROFILE = @"net_queue_profile";
 NSString *const kQUEUE_NAME_EVENTS = @"events";
@@ -292,6 +293,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        instanceLock = [NSRecursiveLock new];
         _instances = [NSMutableDictionary new];
         _plistInfo = [CTPlistInfo sharedInstance];
         pendingNotificationControllers = [NSMutableArray new];
@@ -558,6 +560,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)_sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
+    @try {
+        [instanceLock lock];
     if (_defaultInstanceConfig == nil) {
         if (!_plistInfo.accountId || !_plistInfo.accountToken) {
             if (!sharedInstanceErrorLogged) {
@@ -586,6 +590,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog);
     }
     return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    } @finally {
+        [instanceLock unlock];
+    }
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -721,12 +728,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (void)_setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token {
+    @try {
+        [instanceLock lock];
     if (_defaultInstanceConfig) {
         CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
         return;
     }
     accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    } @finally {
+        [instanceLock unlock];
+    }
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
