@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "CleverTapInstanceConfig.h"
 
 @interface CTPreferences : NSObject
 
@@ -21,4 +22,7 @@
 + (id _Nonnull)unarchiveFromFile:(NSString *_Nonnull)filename ofTypes:(nonnull NSSet<Class> *)classes removeFile:(BOOL)remove;
 
 + (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)fileName;
+
++ (NSString *)storageKeyWithSuffix: (NSString *)suffix config: (CleverTapInstanceConfig*)config;
+
 @end

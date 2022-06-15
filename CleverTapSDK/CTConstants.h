@@ -14,6 +14,8 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_ACCOUNT_ID_LABEL @"CleverTapAccountID"
 #define CLTAP_TOKEN_LABEL @"CleverTapToken"
 #define CLTAP_REGION_LABEL @"CleverTapRegion"
+#define CLTAP_PROXY_DOMAIN_LABEL @"CleverTapProxyDomain"
+#define CLTAP_SPIKY_PROXY_DOMAIN_LABEL @"CleverTapSpikyProxyDomain"
 #define CLTAP_DISABLE_APP_LAUNCH_LABEL @"CleverTapDisableAppLaunched"
 #define CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapUseCustomId"
 #define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
@@ -27,6 +29,11 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_NOTIFICATION_VIEWED_EVENT_NAME @"Notification Viewed"
 #define CLTAP_GEOFENCE_ENTERED_EVENT_NAME @"Geocluster Entered"
 #define CLTAP_GEOFENCE_EXITED_EVENT_NAME @"Geocluster Exited"
+
+#define CLTAP_DIRECT_CALL_OUTGOING_EVENT_NAME @"DCOutgoing"
+#define CLTAP_DIRECT_CALL_INCOMING_EVENT_NAME @"DCIncoming"
+#define CLTAP_DIRECT_CALL_END_EVENT_NAME @"DCEnd"
+
 #define CLTAP_PREFS_LAST_DAILY_PUSHED_EVENTS_DATE @"lastDailyEventsPushedDate"
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
@@ -114,5 +121,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION @"CleverTapGeofencesDidUpdateNotification"
 
 // valid profile identifier keys
-#define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"FBID", @"GPID"]
+#define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email"] // LEGACY KEYS
+#define CLTAP_ALL_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"Phone"]
+
 

@@ -10,11 +10,20 @@
 }
 
 + (NSBundle *)bundle:(Class)bundleClass {
-    NSString *spmBundleAt = [[[NSBundle mainBundle] bundlePath] stringByAppendingString:CTSPMBundlePath];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:spmBundleAt]) {
-        return [NSBundle bundleWithPath:spmBundleAt];
-    }
-    return [NSBundle bundleForClass:bundleClass];
+    
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSBundle *sourceBundle = [NSBundle bundleForClass:bundleClass];
+
+    // SPM
+    NSBundle *bundle = [NSBundle bundleWithPath:[mainBundle pathForResource:@"CleverTapSDK_CleverTapSDK"
+                                                                     ofType:@"bundle"]];
+    // Cocopaods (static)
+    bundle = bundle ? : [NSBundle bundleWithPath:[mainBundle pathForResource:@"CleverTapSDK"
+                                                                      ofType:@"bundle"]];
+    // Cocopaods (framework)
+    bundle = bundle ? : [NSBundle bundleWithPath:[sourceBundle pathForResource:@"CleverTapSDK"
+                                                                        ofType:@"bundle"]];
+    return bundle ? : sourceBundle;
 }
 
 + (UIImage *)getImageForName:(NSString *)name {

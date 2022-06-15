@@ -1,5 +1,6 @@
 
 #import "ViewController.h"
+#import "CustomDomainViewController.h"
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
 #import <CleverTapSDK/CleverTap+Inbox.h>
@@ -39,7 +40,8 @@
                       @"Open App Inbox",
                       @"Analytics in a Webview",
                       @"Increment User Profile Property",
-                      @"Decrement User Profile Property", nil];
+                      @"Decrement User Profile Property",
+                      @"Activate Custom domain proxy", nil];
     [self. tblEvent reloadData];
 }
     
@@ -103,6 +105,9 @@
             break;
         case 9:
             [self decrementUserProfileProperty];
+            break;
+        case 10:
+            [self activateCustomDomain];
             break;
         default:
             break;
@@ -243,5 +248,10 @@
     [[CleverTap sharedInstance] profileDecrementValueBy: @7 forKey: @"score"];
 }
 
-    
+- (void)activateCustomDomain {
+    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    CustomDomainViewController *customDomainVC = [storyBoard instantiateViewControllerWithIdentifier:@"CustomDomainVC"];
+    [self.navigationController pushViewController:customDomainVC animated:YES];
+}
+
 @end

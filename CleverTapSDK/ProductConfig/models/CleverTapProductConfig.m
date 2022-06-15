@@ -36,7 +36,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 - (void)initProductConfigSetting {
     self.fetchConfigCalls = CLTAP_DEFAULT_FETCH_CALLS;
     self.fetchConfigWindowLength = CLTAP_DEFAULT_FETCH_WINDOW_LENGTH;
-    _lastFetchTs = [CTPreferences getIntForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY] withResetValue:0];
+    _lastFetchTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_FETCH_TS_KEY config: _config] withResetValue:0];
 }
 
 - (void)updateProductConfigWithOptions:(NSDictionary *)options {
@@ -45,7 +45,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 }
 
 - (void)resetProductConfigSettings {
-    [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kLAST_FETCH_TS_KEY config: _config]];
     [self initProductConfigSetting];
 }
 
@@ -101,11 +101,7 @@ NSString* const kLAST_FETCH_TS_KEY = @"CLTAP_LAST_FETCH_TS_KEY";
 #pragma mark - Persist Product Config Settings
 
 - (void)persistLastFetchTs {
-    [CTPreferences putInt:self.lastFetchTs forKey:[self storageKeyWithSuffix:kLAST_FETCH_TS_KEY]];
-}
-
-- (NSString *)storageKeyWithSuffix: (NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@",  _config.accountId, suffix];
+    [CTPreferences putInt:self.lastFetchTs forKey:[CTPreferences storageKeyWithSuffix:kLAST_FETCH_TS_KEY config: _config]];
 }
 
 

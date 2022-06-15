@@ -44,6 +44,7 @@ extension ViewController {
         eventList.append("Analytics in a Webview")
         eventList.append("Increment User Profile Property")
         eventList.append("Decrement User Profile Property")
+        eventList.append("Activate Custom domain proxy")
         self.tblEvent.reloadData()
     }
     
@@ -111,6 +112,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 9:
             decrementUserProfileProperty()
             break;
+        case 10: activateCustomDomain()
         default:
             break;
         }
@@ -244,6 +246,12 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func decrementUserProfileProperty() {
         CleverTap.sharedInstance()?.profileDecrementValue(by: NSNumber(value: 1), forKey: "score")
+    }
+    
+    func activateCustomDomain() {
+        let storyBoard = UIStoryboard.init(name: "Main", bundle: nil)
+        let customDomainVC = storyBoard.instantiateViewController(withIdentifier: "CustomDomainVC")
+        self.navigationController?.pushViewController(customDomainVC, animated: true)
     }
 }
 
