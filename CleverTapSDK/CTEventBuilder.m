@@ -453,9 +453,16 @@ NSString *const kCHARGED_EVENT = @"Charged";
         }
         if (directCallEvent) {
             eventDic[@"evtName"] = directCallEvent;
+            eventDic[@"evtData"] = notif;
+            completion(eventDic, errors);
+        } else {
+            CTValidationResult *error = [[CTValidationResult alloc] init];
+            [error setErrorCode: 525];
+            [error setErrorDesc: @"Direct Call did not specify event name"];
+            [errors addObject: error];
+            CleverTapLogStaticDebug(@"Direct Call did not specify event name");
+            completion(nil, errors);
         }
-        eventDic[@"evtData"] = notif;
-        completion(eventDic, errors);
     } @catch (NSException *e) {
         CleverTapLogStaticDebug(@"Unable to build direct call event: %@", e.debugDescription);
         completion(nil, errors);
