@@ -103,11 +103,7 @@ static const float kPageControlViewHeight = 30.f;
     }
     
     if ([self deviceOrientationIsLandscape]) {
-        CGFloat margins = 0;
-        if (@available(iOS 11.0, *)) {
-            UIWindow *window = [CTUIUtils getSharedApplication].keyWindow;
-            margins = window.safeAreaInsets.left;
-        }
+        CGFloat margins = [CTUIUtils getLeftMargin];
         CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;
         CGFloat viewHeight = viewWidth / 3.5;
         CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);

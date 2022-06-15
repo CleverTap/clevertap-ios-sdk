@@ -282,8 +282,7 @@
 #if (TARGET_OS_TV)
     return nil;
 #else
-    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
-    return UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation);
+    return [CTUIUtils isDeviceOrientationLandscape];
 #endif
 }
 

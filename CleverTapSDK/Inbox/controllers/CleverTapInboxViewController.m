@@ -221,8 +221,7 @@ static const int kMaxTags = 3;
 
 - (void)calculateTableViewVisibleFrame {
     CGRect frame = self.tableView.frame;
-    UIInterfaceOrientation orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
-    BOOL landscape = (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight);
+    BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
     if (landscape) {
         frame.origin.y += self.topContentOffset;
         frame.size.height -= self.topContentOffset;
@@ -529,7 +528,7 @@ static const int kMaxTags = 3;
     CGFloat topOffset = 1;
     CGFloat bottomOffset = 2;
     CGFloat cellHeight =  cell.bounds.size.height;
-    CGFloat multiplier = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 1.5 : 1;
+    CGFloat multiplier = [CTUIUtils isUserInterfaceIdiomPad] ? 1.5 : 1;
     
     switch (cell.mediaPlayerCellType) {
         case CTMediaPlayerCellTypeTopLandscape:
