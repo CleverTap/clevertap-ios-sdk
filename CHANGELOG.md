@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 ##### Added
 - Adds public APIs to get account ID and to record Direct Call events
 - Adds support for Direct Call SDK integration
-- Refactors profile `removeValueForKey` method to remove locally cached values.
+- `CleverTap.sharedInstance()?.profileRemoveValue(forKey: )` can now remove PII data like Email, Phone and Date Of Birth.
 
 ##### Fixed
 - Fixes possible crashes by applying locks to make shared instance thread safe.
