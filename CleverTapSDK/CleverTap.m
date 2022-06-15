@@ -642,7 +642,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (_deviceInfo.timeZone&& ![_deviceInfo.timeZone isEqualToString:@""]) {
             initialProfileValues[CLTAP_SYS_TZ] = _deviceInfo.timeZone;
         }
-        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config andProfileValues:initialProfileValues];
+        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo];
         
         _serialQueue = dispatch_queue_create([_config.queueLabel UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_serialQueue, kQueueKey, (__bridge void *)self, NULL);
