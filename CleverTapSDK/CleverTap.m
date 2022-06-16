@@ -70,11 +70,13 @@ static NSArray *sslCertNames;
 #import "CleverTapProductConfigPrivate.h"
 #import "CTProductConfigController.h"
 
+#import "CleverTap+DCDomain.h"
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 
+static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
 NSString *const kQUEUE_NAME_PROFILE = @"net_queue_profile";
 NSString *const kQUEUE_NAME_EVENTS = @"events";
@@ -234,6 +236,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, weak) id <CleverTapURLDelegate> urlDelegate;
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
+@property (atomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -261,6 +264,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @synthesize offline=_offline;
 @synthesize firstRequestInSession=_firstRequestInSession;
 @synthesize geofenceLocation=_geofenceLocation;
+@synthesize domainDelegate=_domainDelegate;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 @synthesize displayUnitDelegate=_displayUnitDelegate;
@@ -289,6 +293,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        instanceLock = [NSRecursiveLock new];
         _instances = [NSMutableDictionary new];
         _plistInfo = [CTPlistInfo sharedInstance];
         pendingNotificationControllers = [NSMutableArray new];
@@ -555,6 +560,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (nullable instancetype)_sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
+    @try {
+        [instanceLock lock];
     if (_defaultInstanceConfig == nil) {
         if (!_plistInfo.accountId || !_plistInfo.accountToken) {
             if (!sharedInstanceErrorLogged) {
@@ -583,6 +590,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog);
     }
     return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+    } @finally {
+        [instanceLock unlock];
+    }
 }
 
 + (instancetype)instanceWithConfig:(CleverTapInstanceConfig*)config {
@@ -632,7 +642,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (_deviceInfo.timeZone&& ![_deviceInfo.timeZone isEqualToString:@""]) {
             initialProfileValues[CLTAP_SYS_TZ] = _deviceInfo.timeZone;
         }
-        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config andProfileValues:initialProfileValues];
+        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo];
         
         _serialQueue = dispatch_queue_create([_config.queueLabel UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_serialQueue, kQueueKey, (__bridge void *)self, NULL);
@@ -718,12 +728,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 + (void)_setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token {
+    @try {
+        [instanceLock lock];
     if (_defaultInstanceConfig) {
         CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
         return;
     }
     accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    } @finally {
+        [instanceLock unlock];
+    }
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
@@ -913,7 +928,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)doHandshakeAsync {
     [self runSerialAsync:^{
-        if (![self needHandshake]) return;
+        if (![self needHandshake]) {
+            //self.redirectDomain contains value
+            [self onDomainAvailable];
+            return;
+        }
         CleverTapLogInternal(self.config.logLevel, @"%@: starting handshake with %@", self, kHANDSHAKE_URL);
         NSMutableURLRequest *request = [self createURLRequestFromURL:[[NSURL alloc] initWithString:kHANDSHAKE_URL]];
         request.HTTPMethod = @"GET";
@@ -928,7 +947,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     [self updateStateFromResponseHeadersShouldRedirect:httpResponse.allHeaderFields];
                     [self updateStateFromResponseHeadersShouldRedirectForNotif:httpResponse.allHeaderFields];
                     [self handleHandshakeSuccess];
+                } else {
+                    [self onDomainUnavailable];
                 }
+            } else {
+                [self onDomainUnavailable];
             }
             dispatch_semaphore_signal(semaphore);
         }];
@@ -975,6 +998,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 shouldRedirect = YES;
                 self.redirectDomain = redirectDomain;
                 [self persistRedirectDomain];
+                //domain changed
+                [self onDomainAvailable];
             }
         }
         NSString *mutedString = headers[kMUTE_HEADER];
@@ -1123,6 +1148,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
+    evtData[@"dcv"] = self.deviceInfo.directCallSDKVersion;
     
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
@@ -1503,13 +1529,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!object) return;
     
 #if !defined(CLEVERTAP_TVOS)
-    // normalize the notification data
-    NSDictionary *notification;
-    if ([object isKindOfClass:[UILocalNotification class]]) {
-        notification = [((UILocalNotification *) object) userInfo];
-    } else if ([object isKindOfClass:[NSDictionary class]]) {
-        notification = object;
-    }
+    NSDictionary *notification = [self getNotificationDictionary:object];
     
     if (!notification || [notification count] <= 0) return;
     
@@ -1701,6 +1721,26 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return isOurs;
 }
 
+#if !(TARGET_OS_TV)
+/// Get notification dictionary object from id object to normalize the notification data
+/// @param object notification, data or notification userInfo dictionary
+- (NSDictionary *)getNotificationDictionary:(id)object {
+    NSDictionary *notification;
+    
+    if (@available(iOS 10.0, tvOS 10.0, *)) {
+        if ([object isKindOfClass:[UNNotification class]]) {
+            notification = ((UNNotification *) object).request.content.userInfo;
+        } else if ([object isKindOfClass:[NSDictionary class]]) {
+            notification = object;
+        }
+    } else if ([object isKindOfClass:[UILocalNotification class]]) {
+        notification = [((UILocalNotification *) object) userInfo];
+    } else if ([object isKindOfClass:[NSDictionary class]]) {
+        notification = object;
+    }
+    return notification;
+}
+#endif
 
 #pragma mark - InApp Notifications
 
@@ -2667,21 +2707,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)inflateEventsQueue {
-    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] removeFile:YES];
+    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     if (!self.eventsQueue || [self isMuted]) {
         self.eventsQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateProfileQueue {
-    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] removeFile:YES];
+    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     if (!self.profileQueue || [self isMuted]) {
         self.profileQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateNotificationsQueue {
-    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] removeFile:YES];
+    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
     if (!self.notificationsQueue || [self isMuted]) {
         self.notificationsQueue = [NSMutableArray array];
     }
@@ -2694,17 +2734,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)clearEventsQueue {
-    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] removeFile:YES];
+    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     self.eventsQueue = [NSMutableArray array];
 }
 
 - (void)clearProfileQueue {
-    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] removeFile:YES];
+    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     self.profileQueue = [NSMutableArray array];
 }
 
 - (void)clearNotificationsQueue {
-    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] removeFile:YES];
+    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
     self.notificationsQueue = [NSMutableArray array];
 }
 
@@ -3471,6 +3511,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return self.deviceInfo.deviceId;
 }
 
+- (NSString *)getAccountID {
+    return self.config.accountId;
+}
+
 - (NSString *)profileGetCleverTapAttributionIdentifier {
     return self.deviceInfo.deviceId;
 }
@@ -3701,12 +3745,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_recordPushNotificationEvent:(BOOL)clicked forNotification:(id)notificationData {
 #if !defined(CLEVERTAP_TVOS)
-    NSDictionary *notification;
-    if ([notificationData isKindOfClass:[UILocalNotification class]]) {
-        notification = [((UILocalNotification *) notificationData) userInfo];
-    } else if ([notificationData isKindOfClass:[NSDictionary class]]) {
-        notification = notificationData;
-    }
+    NSDictionary *notification = [self getNotificationDictionary:notificationData];
     if (notification) {
         [self runSerialAsync:^{
             [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
@@ -4814,5 +4853,68 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
+#pragma mark - Direct Call Public APIs
+
+- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
+#if !defined(CLEVERTAP_TVOS)
+    [self runSerialAsync:^{
+        [CTEventBuilder buildDirectCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+            if (event) {
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            };
+            if (errors) {
+                [self.validationResultStack pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
+- (void)setDirectCallVersion:(NSString *)version {
+    [self.deviceInfo setDirectCallSDKVersion: version];
+}
+
+- (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setDomainDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapDomainDelegate)]) {
+        _domainDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Domain Delegate does not conform to the CleverTapDomainDelegate protocol", self);
+    }
+}
+
+- (void)onDomainAvailable {
+    NSString *dcDomain = [self getDomainString];
+    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onDCDomainAvailable:)]) {
+        [self.domainDelegate onDCDomainAvailable: dcDomain];
+    } else if (dcDomain == nil) {
+        [self onDomainUnavailable];
+    }
+}
+
+- (void)onDomainUnavailable {
+    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onDCDomainUnavailable)]) {
+        [self.domainDelegate onDCDomainUnavailable];
+    }
+}
+
+//Updates the format of the domain - from `in1.clevertap-prod.com` to region.auth.domain (i.e. in1.auth.clevertap-prod.com)
+- (NSString *)getDomainString {
+    if (self.redirectDomain != nil) {
+        NSArray *listItems = [self.redirectDomain componentsSeparatedByString:@"."];
+        NSString *domainItem = [listItems[0] stringByAppendingString:@".auth"];
+        for (int i = 1; i < listItems.count; i++ ) {
+            NSString *dotString = [@"." stringByAppendingString: listItems[i]];
+            domainItem = [domainItem stringByAppendingString: dotString];
+        }
+        self.directCallDomain = domainItem;
+        return domainItem;
+    } else {
+        return nil;
+    }
+}
 
 @end

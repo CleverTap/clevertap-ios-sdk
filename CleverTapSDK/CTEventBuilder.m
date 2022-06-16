@@ -422,4 +422,51 @@ NSString *const kCHARGED_EVENT = @"Charged";
     }
 }
 
+/**
+ * Raises and logs Direct Call system events
+ */
++ (void)buildDirectCallEvent:(int)eventRawValue
+              forCallDetails:(NSDictionary * _Nonnull)callDetails
+           completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion {
+    NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+    CTValidationResult *error = [[CTValidationResult alloc] init];
+    [error setErrorCode: 524];
+    [error setErrorDesc: @"Direct Call does not have any field"];
+    @try {
+        NSMutableDictionary *eventDic = [NSMutableDictionary new];
+        NSMutableDictionary *notif = [NSMutableDictionary new];
+        [notif addEntriesFromDictionary:callDetails];
+        
+        if ([notif count] == 0) {
+            [errors addObject: error];
+            CleverTapLogStaticDebug(@"Direct Call does not have any field");
+        }
+        NSString *directCallEvent;
+        switch (eventRawValue) {
+            case 0:
+                directCallEvent = CLTAP_DIRECT_CALL_OUTGOING_EVENT_NAME;
+            case 1:
+                directCallEvent = CLTAP_DIRECT_CALL_INCOMING_EVENT_NAME;
+            case 2:
+                directCallEvent = CLTAP_DIRECT_CALL_END_EVENT_NAME;
+            default: break;
+        }
+        if (directCallEvent) {
+            eventDic[@"evtName"] = directCallEvent;
+            eventDic[@"evtData"] = notif;
+            completion(eventDic, errors);
+        } else {
+            CTValidationResult *error = [[CTValidationResult alloc] init];
+            [error setErrorCode: 525];
+            [error setErrorDesc: @"Direct Call did not specify event name"];
+            [errors addObject: error];
+            CleverTapLogStaticDebug(@"Direct Call did not specify event name");
+            completion(nil, errors);
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticDebug(@"Unable to build direct call event: %@", e.debugDescription);
+        completion(nil, errors);
+    }
+}
+
 @end

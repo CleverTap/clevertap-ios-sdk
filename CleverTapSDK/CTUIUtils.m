@@ -38,6 +38,51 @@
     return nil;
 }
 
++ (UIWindow * _Nullable)getKeyWindow {
+    UIWindow *keyWindow;
+    if (@available(iOS 11.0, *)) {
+        for (UIWindow *window in [CTUIUtils getSharedApplication].windows) {
+            if (window.isKeyWindow) {
+                keyWindow = window;
+                break;
+            }
+        }
+    }
+    return keyWindow;
+}
+
++ (CGFloat)getLeftMargin {
+    CGFloat margin = 0;
+    if (@available(iOS 11.0, *)) {
+        for (UIWindow *window in [CTUIUtils getSharedApplication].windows) {
+            if (window.isKeyWindow) {
+                margin = window.safeAreaInsets.left;
+                break;
+            }
+        }
+    }
+    return margin;
+}
+
++ (BOOL)isUserInterfaceIdiomPad {
+    return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+}
+
+#if !(TARGET_OS_TV)
++ (BOOL)isDeviceOrientationLandscape {
+    UIInterfaceOrientation orientation;
+    if (@available(iOS 15.0, *)) {
+        orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
+    } else if (@available(iOS 13.0, *)) {
+        orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
+    } else {
+        orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
+    }
+    BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
+    return landscape;
+}
+#endif
+
 + (UIColor *)ct_colorWithHexString:(NSString *)string {
     return  [self ct_colorWithHexString:string withAlpha:1.0];
 }

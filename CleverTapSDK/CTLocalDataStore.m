@@ -6,6 +6,7 @@
 #import "CleverTapEventDetail.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
+#import "CTLoginInfoProvider.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -21,14 +22,16 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
+@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 
 @end
 
 @implementation CTLocalDataStore
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andProfileValues:(NSDictionary*)profileValues {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config profileValues:(NSDictionary*)profileValues andDeviceInfo:(CTDeviceInfo*)deviceInfo {
     if (self = [super init]) {
         _config = config;
+        _deviceInfo = deviceInfo;
         localProfileUpdateExpiryStore = [NSMutableDictionary new];
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
@@ -570,7 +573,19 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     
     @try {
         @synchronized (localProfileForSession) {
-            [localProfileForSession removeObjectForKey:key];
+            // DO NOT REMOVE IDENTITY
+            if ([key isEqualToString:@"Identity"]) {
+                return;
+            }
+            
+            // CACHED VALUES HAVE a "user" PREFIX, SO PREPEND IT BEFORE SEARCHING CACHE
+            NSString *keyToDelete = [localProfileForSession.allKeys containsObject:key] ? key : [NSString stringWithFormat:@"user%@",key];
+            [localProfileForSession removeObjectForKey: keyToDelete];
+            
+            // REMOVE CORRESPONDING GUID VALUE
+            CTLoginInfoProvider *loginInfoProvider = [[CTLoginInfoProvider alloc]initWithDeviceInfo:self.deviceInfo config:self.config];
+            [loginInfoProvider removeValueFromCachedGUIDForKey:key andGuid:_deviceInfo.deviceId];
+            
         }
         
         // if a local change, still add the key to the expiry store so that a premature sync won't restore the key
@@ -601,7 +616,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 - (NSMutableDictionary *)_inflateLocalProfile {
-    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] removeFile:NO];
+    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofType:[NSMutableDictionary class] removeFile:NO];
     if (!_profile) {
         _profile = [NSMutableDictionary dictionary];
     }

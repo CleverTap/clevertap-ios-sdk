@@ -71,7 +71,7 @@
         
     }
     
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    if ([CTUIUtils isUserInterfaceIdiomPad]) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         if (self.notification.tablet) {
             if (![self deviceOrientationIsLandscape]) {
