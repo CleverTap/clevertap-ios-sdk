@@ -135,7 +135,14 @@ static NSManagedObjectContext *privateContext;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
-    NSOrderedSet *userMessages = [self.user.messages copy];
+//    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *userMessages1 = [self.user.messages copy];
+    NSOrderedSet *userMessages = [[NSOrderedSet alloc] initWithSet: [self.user.messages set]];
+    
+    NSLog(@"------------------------------");
+    NSLog(@"%@", userMessages1);
+    NSLog(@"%@", userMessages);
+    NSLog(@"------------------------------");
     for (CTMessageMO *msg in userMessages) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
@@ -159,7 +166,14 @@ static NSManagedObjectContext *privateContext;
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
-    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *userMessages1 = [self.user.messages copy];
+    NSOrderedSet *userMessages = [[NSOrderedSet alloc] initWithSet: [self.user.messages set]];
+    
+    NSLog(@"------------------------------");
+    NSLog(@"%@", userMessages1);
+    NSLog(@"%@", userMessages);
+    NSLog(@"------------------------------");
+//    NSOrderedSet *userMessages = [NSSet setWithSet:self.user.messages];
     NSOrderedSet *results = [userMessages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"isRead == NO"]];
     for (CTMessageMO *msg in results) {
         int ttl = (int)msg.expires;
@@ -184,7 +198,14 @@ static NSManagedObjectContext *privateContext;
 
 - (CTMessageMO *)_messageForId:(NSString *)messageId {
     if (!self.isInitialized) return nil;
-    NSOrderedSet *userMessages = [self.user.messages copy];
+//    NSOrderedSet *userMessages = [self.user.messages copy];
+    NSOrderedSet *userMessages1 = [self.user.messages copy];
+    NSOrderedSet *userMessages = [[NSOrderedSet alloc] initWithSet: [self.user.messages set]];
+    
+    NSLog(@"------------------------------");
+    NSLog(@"%@", userMessages1);
+    NSLog(@"%@", userMessages);
+    NSLog(@"------------------------------");
     NSOrderedSet *results = [userMessages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
     BOOL existing = results && [results count] > 0;
     return existing ? results[0] : nil;
