@@ -1,11 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (May 17, 2022)
+### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (June 16, 2022)
   
 ##### Added
-- Adds public APIs to get account ID and to record Direct Call events
-- Adds support for Direct Call SDK integration
+- Adds analytics support for upcoming CleverTap Direct Call iOS SDK.
+- `CleverTap.sharedInstance()?.profileRemoveValue(forKey: )` can now remove PII data like Email, Phone and Date Of Birth.
+
+##### Fixed
+- Fixes possible crashes by applying locks to make shared instance thread safe.
+- Mitigates FileManager deprecated APIs.
+- Mitigates UIKit deprecated APIs.
+
 
 ### [Version 4.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.0.1) (April 12, 2022)
   
