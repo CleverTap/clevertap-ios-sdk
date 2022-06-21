@@ -7,7 +7,7 @@ class CustomDomainViewController: UIViewController, CleverTapInboxViewController
     var eventList: [String] = [String]()
     
     lazy var cleverTapAdditionalInstance: CleverTap = {
-        let ctConfig = CleverTapInstanceConfig(accountId: "W9R-486-4W5Z", accountToken: "6b4-2c0", proxyDomain: "analytics.sdktesting.xyz")
+        let ctConfig = CleverTapInstanceConfig(accountId: "R65-RR9-9R5Z", accountToken: "c22-562", proxyDomain: "analytics.sdktesting.xyz")
 //        or to use spiky proxy domain call
 //        CleverTapInstanceConfig(accountId: "W9R-486-4W5Z", accountToken: "6b4-2c0", proxyDomain: "analytics.sdktesting.xyz", spikyProxyDomain: "analyticst.sdktesting.xyz")
         return CleverTap.instance(with: ctConfig)
