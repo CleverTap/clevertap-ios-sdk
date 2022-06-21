@@ -2,6 +2,8 @@
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
 
+#define CLEVERTAP_SSL_PINNING 1
+
 #if defined(CLEVERTAP_HOST_WATCHOS)
 #import <WatchConnectivity/WatchConnectivity.h>
 #endif

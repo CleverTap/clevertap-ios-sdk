@@ -15,12 +15,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // Configure and init the default shared CleverTap instance (add CleverTap Account ID and Account Token in your .plist file)
         CleverTap.autoIntegrate()
-        CleverTap.setDebugLevel(CleverTapLogLevel.off.rawValue)
+        CleverTap.setDebugLevel(CleverTapLogLevel.off.rawValue + 1)
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
         
         // Configure and init an additional instance
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
-        ctConfig.logLevel = .off
+        let ctConfig = CleverTapInstanceConfig.init(accountId: "W9R-486-4W5Z", accountToken: "6b4-2c0")
+//        ctConfig.logLevel = .off
         ctConfig.disableIDFV = true
         let cleverTapAdditionalInstance = CleverTap.instance(with: ctConfig)
         NSLog("additional CleverTap instance created for accountID: %@", cleverTapAdditionalInstance.config.accountId)
@@ -29,8 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // watchOS session
         checkSession()
-        
-        return true
+                return true
     }
     
     func checkSession() {

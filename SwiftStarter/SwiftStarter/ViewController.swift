@@ -7,7 +7,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
     var eventList: [String] = [String]()
     
     lazy var cleverTapAdditionalInstance: CleverTap = {
-        let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
+        let ctConfig = CleverTapInstanceConfig.init(accountId: "W9R-486-4W5Z", accountToken: "6b4-2c0")
         return CleverTap.instance(with: ctConfig)
     }()
     
@@ -20,6 +20,11 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         initializeAppInbox()
         tblEvent.tableFooterView = UIView()
     }
+    
+//    func webviewSetup(){
+//        let ctInterface: CleverTapJSInterface = CleverTapJSInterface(config: nil)
+//        self.webView?.configuration.userContentController.add(ctInterface, name: "clevertap")
+//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
