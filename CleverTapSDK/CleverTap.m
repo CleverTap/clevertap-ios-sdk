@@ -299,7 +299,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         pendingNotificationControllers = [NSMutableArray new];
 #if CLEVERTAP_SSL_PINNING
         // Only pin anchor/CA certificates
-        sslCertNames = @[@"DigiCertGlobalRootCA", @"DigiCertSHA2SecureServerCA"];
+        sslCertNames = @[@"AmazonRootCA1"];
 #endif
     });
 }
