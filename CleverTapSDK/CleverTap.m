@@ -805,6 +805,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (self.redirectDomain && ![self.redirectDomain isEqualToString:kCTApiDomain]) {
             [domains addObject:self.redirectDomain];
         }
+        // WITH SSL PINNING ENABLED AND REGION NOT SPECIFIED BY THE USER, WE WILL DEFAULT TO EU1 AND PIN THE CERT TO EU1
+        else if (!self.redirectDomain) {
+            [domains addObject:[NSString stringWithFormat:@"eu1.%@", kCTApiDomain]];
+        }
         [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:domains];
         self.urlSession = [NSURLSession sessionWithConfiguration:sc delegate:self.urlSessionDelegate delegateQueue:nil];
 #else
@@ -922,7 +926,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (BOOL)needHandshake {
-    if ([self isMuted] || self.explictEndpointDomain) return NO;
+    if ([self isMuted] || self.explictEndpointDomain) {
+        return NO;
+    }
     return self.redirectDomain == nil;
 }
 
