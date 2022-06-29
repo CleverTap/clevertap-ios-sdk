@@ -1211,6 +1211,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         evtData[@"lib"] = self.deviceInfo.library;
     }
     
+    #if CLEVERTAP_SSL_PINNING
+        evtData[@"sslpin"] = @YES;
+    #endif
+    
     NSString *proxyDomain = [self.config.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (proxyDomain != nil && proxyDomain.length > 0) {
         evtData[@"proxyDomain"] = self.config.proxyDomain;
