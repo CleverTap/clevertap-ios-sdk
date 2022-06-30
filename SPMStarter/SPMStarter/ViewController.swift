@@ -44,6 +44,7 @@ extension ViewController {
         eventList.append("Record User Event with Properties")
         eventList.append("Record User Charged Event")
         eventList.append("Show App Inbox")
+        eventList.append("Analytics in a Webview")
         self.eventTableView.reloadData()
     }
     
@@ -99,6 +100,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             break;
         case 5:
             showAppInbox()
+            break;
+        case 6:
+            navigateToWebview()
             break;
         default:
             break;
@@ -215,6 +219,10 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         style.navigationBarTintColor = UIColor(hexRGB: "#0842B7")
         style.messageTags = ["Promotions"]
         return style
+    }
+    
+    func navigateToWebview() {
+        self.performSegue(withIdentifier: "segue_webview", sender: nil)
     }
 }
 

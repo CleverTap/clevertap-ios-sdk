@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		326230AE286DADC900DFD545 /* CTWebviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 326230AD286DADC900DFD545 /* CTWebviewVC.swift */; };
+		326230B0286DB66500DFD545 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 326230AF286DB66500DFD545 /* sampleHTMLCode.html */; };
 		4930E308261EE71500A6D316 /* CleverTapSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 4930E307261EE71500A6D316 /* CleverTapSDK */; };
 		495EA5722559156D006CADFF /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495EA5712559156D006CADFF /* Utilities.swift */; };
 		49F9E6942552CF9000EF2E5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F9E6932552CF9000EF2E5C /* AppDelegate.swift */; };
@@ -17,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		326230AD286DADC900DFD545 /* CTWebviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTWebviewVC.swift; sourceTree = "<group>"; };
+		326230AF286DB66500DFD545 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		495EA54B2556E3C8006CADFF /* SPMStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SPMStarter.entitlements; sourceTree = "<group>"; };
 		495EA5712559156D006CADFF /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		49F9E6902552CF9000EF2E5C /* SPMStarter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPMStarter.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,6 +63,7 @@
 		49F9E6922552CF9000EF2E5C /* SPMStarter */ = {
 			isa = PBXGroup;
 			children = (
+				326230AF286DB66500DFD545 /* sampleHTMLCode.html */,
 				495EA54B2556E3C8006CADFF /* SPMStarter.entitlements */,
 				49F9E6932552CF9000EF2E5C /* AppDelegate.swift */,
 				495EA5712559156D006CADFF /* Utilities.swift */,
@@ -67,6 +72,7 @@
 				49F9E69C2552CF9000EF2E5C /* Assets.xcassets */,
 				49F9E69E2552CF9000EF2E5C /* LaunchScreen.storyboard */,
 				49F9E6A12552CF9000EF2E5C /* Info.plist */,
+				326230AD286DADC900DFD545 /* CTWebviewVC.swift */,
 			);
 			path = SPMStarter;
 			sourceTree = "<group>";
@@ -135,6 +141,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				326230B0286DB66500DFD545 /* sampleHTMLCode.html in Resources */,
 				49F9E6A02552CF9000EF2E5C /* LaunchScreen.storyboard in Resources */,
 				49F9E69D2552CF9000EF2E5C /* Assets.xcassets in Resources */,
 				49F9E69B2552CF9000EF2E5C /* Main.storyboard in Resources */,
@@ -149,6 +156,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				495EA5722559156D006CADFF /* Utilities.swift in Sources */,
+				326230AE286DADC900DFD545 /* CTWebviewVC.swift in Sources */,
 				49F9E6982552CF9000EF2E5C /* ViewController.swift in Sources */,
 				49F9E6942552CF9000EF2E5C /* AppDelegate.swift in Sources */,
 			);
