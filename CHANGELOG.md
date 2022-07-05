@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.1) (July 06, 2022)
+  
+##### Added
+- Adds support to call `onUserLogin`, `profileIncrementValueBy`, `profileDecrementValueBy` methods in a WebView.
+- Updates certificates for SSL Pinning.
+
+##### Fixed
+- Fixes possible App Inbox crashes.
+
 ### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (June 16, 2022)
   
 ##### Added
