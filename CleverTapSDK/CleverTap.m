@@ -299,7 +299,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         pendingNotificationControllers = [NSMutableArray new];
 #if CLEVERTAP_SSL_PINNING
         // Only pin anchor/CA certificates
-        sslCertNames = @[@"DigiCertGlobalRootCA", @"DigiCertSHA2SecureServerCA"];
+        sslCertNames = @[@"AmazonRootCA1"];
 #endif
     });
 }
@@ -805,6 +805,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (self.redirectDomain && ![self.redirectDomain isEqualToString:kCTApiDomain]) {
             [domains addObject:self.redirectDomain];
         }
+        // WITH SSL PINNING ENABLED AND REGION NOT SPECIFIED BY THE USER, WE WILL DEFAULT TO EU1 AND PIN THE CERT TO EU1
+        else if (!self.redirectDomain) {
+            [domains addObject:[NSString stringWithFormat:@"eu1.%@", kCTApiDomain]];
+        }
         [self.urlSessionDelegate pinSSLCerts:sslCertNames forDomains:domains];
         self.urlSession = [NSURLSession sessionWithConfiguration:sc delegate:self.urlSessionDelegate delegateQueue:nil];
 #else
@@ -922,7 +926,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (BOOL)needHandshake {
-    if ([self isMuted] || self.explictEndpointDomain) return NO;
+    if ([self isMuted] || self.explictEndpointDomain) {
+        return NO;
+    }
     return self.redirectDomain == nil;
 }
 
@@ -1204,6 +1210,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (self.deviceInfo.library) {
         evtData[@"lib"] = self.deviceInfo.library;
     }
+    
+    #if CLEVERTAP_SSL_PINNING
+        evtData[@"sslpin"] = @YES;
+    #endif
     
     NSString *proxyDomain = [self.config.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (proxyDomain != nil && proxyDomain.length > 0) {

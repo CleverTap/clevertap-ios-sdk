@@ -13,9 +13,19 @@
         return NO;
     }
     
+    //APPEND TO EXISTING PINS
+    NSMutableDictionary *finalPinsDict = [NSMutableDictionary dictionary];
+    [finalPinsDict addEntriesFromDictionary:domainsAndCertificates];
+    
+    NSString *path = [self plistFilePathForAccountId:accountId];
+    NSDictionary *SSLPinsDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByExpandingTildeInPath]];
+    if (SSLPinsDict) {
+        [finalPinsDict addEntriesFromDictionary:SSLPinsDict];
+    }
+    
     // Serialize the dictionary to a plist
     NSError *error;
-    NSData *plistData = [NSPropertyListSerialization dataWithPropertyList:domainsAndCertificates
+    NSData *plistData = [NSPropertyListSerialization dataWithPropertyList:finalPinsDict
                                                                    format:NSPropertyListXMLFormat_v1_0
                                                                   options:0
                                                                     error:&error];

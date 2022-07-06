@@ -28,7 +28,7 @@
     CleverTapLogDebug(self.config.logLevel, @"%@: Pinning SSL certs", self);
     NSMutableArray *certs = [NSMutableArray array];
     for (NSString *filename in filenames) {
-        NSString *certPath =  [[NSBundle bundleForClass:[self class]] pathForResource:filename ofType:@"crt"];
+        NSString *certPath =  [[NSBundle bundleForClass:[self class]] pathForResource:filename ofType:@"cer"];
         NSData *certData = [[NSData alloc] initWithContentsOfFile:certPath];
         if (certData == nil) {
             CleverTapLogDebug(_config.logLevel, @"%@: Failed to load ssl certificate : %@", self, filename);
