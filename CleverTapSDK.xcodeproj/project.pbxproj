@@ -198,6 +198,8 @@
 		4E49AE54275D24570074A774 /* CTValidationResultStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE51275D24570074A774 /* CTValidationResultStack.h */; };
 		4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE52275D24570074A774 /* CTValidationResultStack.m */; };
 		4E49AE56275D24570074A774 /* CTValidationResultStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE52275D24570074A774 /* CTValidationResultStack.m */; };
+		4E64855B287440BA00C2F409 /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */; };
+		4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */; };
 		4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E872967277CDF9000A7A618 /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
 		4E872968277CDF9000A7A618 /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
@@ -221,8 +223,6 @@
 		D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF8A20B890EA00A02327 /* CleverTap+SSLPinning.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D014B8E220E2F9F9001E0780 /* CleverTapInstanceConfigPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D01DBF25207FCEFB00E8F1B0 /* CleverTapInstanceConfigPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D014B8E320E2F9FA001E0780 /* CleverTapInstanceConfigPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D01DBF25207FCEFB00E8F1B0 /* CleverTapInstanceConfigPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D014B8E420E2FA5A001E0780 /* DigiCertGlobalRootCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */; };
-		D014B8E520E2FA5A001E0780 /* DigiCertSHA2SecureServerCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */; };
 		D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = D01A0892207EC2D400423D6F /* CleverTapInstanceConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D014B8E720E2FA6A001E0780 /* CleverTapInstanceConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = D01A0893207EC2D400423D6F /* CleverTapInstanceConfig.m */; };
 		D014B8E820E2FA6D001E0780 /* CleverTapBuildInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBCD207D8EAE001345EF /* CleverTapBuildInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -339,8 +339,6 @@
 		D0CACF9620B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF9420B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0CACF9720B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D0CACF9520B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.m */; };
 		D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = D0CACF9820B8A78600A02327 /* CTConstants.m */; };
-		D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */; };
-		D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */ = {isa = PBXBuildFile; fileRef = D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */; };
 		D0CB456522EA550C000762B2 /* libicucore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D0CB456422EA550C000762B2 /* libicucore.tbd */; };
 		D0D4C9EB2414D1C50029477E /* CTFeatureFlagsController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9E92414D1C50029477E /* CTFeatureFlagsController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */; };
@@ -573,6 +571,7 @@
 		4E49AE52275D24570074A774 /* CTValidationResultStack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultStack.m; sourceTree = "<group>"; };
 		4E49AE57275D31910074A774 /* CTIdentityRepoFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTIdentityRepoFactory.h; sourceTree = "<group>"; };
 		4E49AE58275D31910074A774 /* CTIdentityRepoFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTIdentityRepoFactory.m; sourceTree = "<group>"; };
+		4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AmazonRootCA1.cer; sourceTree = "<group>"; };
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
 		4E87296C277CE8EB00A7A618 /* StubHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StubHelper.h; sourceTree = "<group>"; };
 		4E87296D277CE8EB00A7A618 /* StubHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StubHelper.m; sourceTree = "<group>"; };
@@ -671,8 +670,6 @@
 		D0CACF9420B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPinnedNSURLSessionDelegate.h; sourceTree = "<group>"; };
 		D0CACF9520B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPinnedNSURLSessionDelegate.m; sourceTree = "<group>"; };
 		D0CACF9820B8A78600A02327 /* CTConstants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTConstants.m; sourceTree = "<group>"; };
-		D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertGlobalRootCA.crt; sourceTree = "<group>"; };
-		D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */ = {isa = PBXFileReference; lastKnownFileType = file; path = DigiCertSHA2SecureServerCA.crt; sourceTree = "<group>"; };
 		D0CB456422EA550C000762B2 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
 		D0D4C9E92414D1C50029477E /* CTFeatureFlagsController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTFeatureFlagsController.h; sourceTree = "<group>"; };
 		D0D4C9EA2414D1C50029477E /* CTFeatureFlagsController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFeatureFlagsController.m; sourceTree = "<group>"; };
@@ -1079,6 +1076,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */,
 				D0BD7598241760A30006EE55 /* ProductConfig */,
 				D0D4C9E62414CBA30029477E /* FeatureFlags */,
 				0701E9572372AD550034AAC2 /* DisplayUnit */,
@@ -1167,8 +1165,6 @@
 				071EB4A1217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h */,
 				071EB4AA217F6427008F0FAB /* CTNotificationButton.h */,
 				071EB481217F6427008F0FAB /* CTNotificationButton.m */,
-				D0CACF9E20B8C14B00A02327 /* DigiCertGlobalRootCA.crt */,
-				D0CACFA020B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -1514,8 +1510,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D014B8E420E2FA5A001E0780 /* DigiCertGlobalRootCA.crt in Resources */,
-				D014B8E520E2FA5A001E0780 /* DigiCertSHA2SecureServerCA.crt in Resources */,
+				4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1557,7 +1552,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
-				D0CACFA120B8C19300A02327 /* DigiCertSHA2SecureServerCA.crt in Resources */,
 				07D86D3B22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib in Resources */,
 				07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */,
 				072F9E3F21B1368000BC6313 /* CTInboxIconMessageCell~port.xib in Resources */,
@@ -1595,6 +1589,7 @@
 				07D0D08F2223F24E000D5686 /* CTFooterViewController~iphoneland.xib in Resources */,
 				07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */,
 				070BB5CD21E70BC000428DEE /* ct_volume_off.png in Resources */,
+				4E64855B287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
 				07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
@@ -1604,7 +1599,6 @@
 				071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */,
 				071EB50F217F6427008F0FAB /* CTHalfInterstitialImageViewController~iphoneport.xib in Resources */,
 				07D86D3D22269462009EE610 /* CTFooterViewController~ipadland.xib in Resources */,
-				D0CACF9F20B8C14B00A02327 /* DigiCertGlobalRootCA.crt in Resources */,
 				071EB4D0217F6427008F0FAB /* CTInterstitialViewController~ipad.xib in Resources */,
 				071EB4CB217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib in Resources */,
 				071EB50A217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib in Resources */,

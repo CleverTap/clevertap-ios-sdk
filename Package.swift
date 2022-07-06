@@ -25,8 +25,7 @@ let package = Package(
                 "tvOS-Info.plist"
             ],
             resources: [
-                .copy("DigiCertGlobalRootCA.crt"),
-                .copy("DigiCertSHA2SecureServerCA.crt"),
+                .copy("AmazonRootCA1.cer"),
                 .process("InApps/resources"),
                 .process("Inbox/resources")
             ],
