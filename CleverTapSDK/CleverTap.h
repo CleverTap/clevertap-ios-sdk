@@ -1296,6 +1296,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (NSString *_Nullable)getDomainString;
 
++ (CleverTap *_Nullable)getGlobalInstance:(NSString *_Nonnull)accountId;
 
 @end
 

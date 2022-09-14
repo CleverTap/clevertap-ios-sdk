@@ -651,6 +651,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = emptyLocation;
         self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
+        
+        // save config to defaults
+        [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+        
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
         [self initNetworking];
@@ -676,6 +680,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     return self;
+}
+
++ (CleverTap *)getGlobalInstance:(NSString *)accountId {
+    
+    if (!_instances || [_instances count] <= 0) {
+        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofType:[CleverTapInstanceConfig class] removeFile:NO];
+        return [CleverTap instanceWithConfig:config];
+    }
+    
+    return _instances[accountId];
 }
 
 // notify application code once we have a device GUID
