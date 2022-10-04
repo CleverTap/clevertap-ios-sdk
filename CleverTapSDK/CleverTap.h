@@ -670,7 +670,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @abstract
  Record an event.
  
- Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "UTM Visited", "Notification Sent", "App Launched", "wzrk_d", are prohibited.
+ Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "Notification Sent", "App Launched", "wzrk_d", are prohibited.
  
  Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
  
@@ -686,7 +686,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  @discussion
  Property keys must be NSString and values must be one of NSString, NSNumber, BOOL or NSDate.
- Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "UTM Visited", "Notification Sent", "App Launched", "wzrk_d", are prohibited.
+ Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "Notification Sent", "App Launched", "wzrk_d", are prohibited.
  Keys are limited to 32 characters.
  Values are limited to 40 bytes.
  Longer will be truncated.
