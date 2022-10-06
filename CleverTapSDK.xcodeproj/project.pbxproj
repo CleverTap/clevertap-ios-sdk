@@ -156,6 +156,7 @@
 		07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */; };
 		07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */; };
+		32C575E728EEF5EB00BF0A3F /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 32C575E628EEF5EB00BF0A3F /* AmazonRootCA1.cer */; };
 		4987C665251B5E79003E6BE8 /* CTImageInAppViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4987C663251B5E79003E6BE8 /* CTImageInAppViewController.h */; };
 		4987C666251B5E79003E6BE8 /* CTImageInAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */; };
 		4987C668251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4987C667251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h */; };
@@ -198,8 +199,6 @@
 		4E49AE54275D24570074A774 /* CTValidationResultStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE51275D24570074A774 /* CTValidationResultStack.h */; };
 		4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE52275D24570074A774 /* CTValidationResultStack.m */; };
 		4E49AE56275D24570074A774 /* CTValidationResultStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE52275D24570074A774 /* CTValidationResultStack.m */; };
-		4E64855B287440BA00C2F409 /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */; };
-		4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */; };
 		4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E872967277CDF9000A7A618 /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
 		4E872968277CDF9000A7A618 /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
@@ -548,6 +547,7 @@
 		07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverViewController~ipadland.xib"; sourceTree = "<group>"; };
 		203C2B553FF6FBADEE051C68 /* Pods-shared-CleverTapSDKTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.release.xcconfig"; sourceTree = "<group>"; };
 		2108AFE9090417CC69A0E3EB /* libPods-shared-CleverTapSDKTestsApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-shared-CleverTapSDKTestsApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32C575E628EEF5EB00BF0A3F /* AmazonRootCA1.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AmazonRootCA1.cer; sourceTree = "<group>"; };
 		37D3A7E5589257CFA37243C3 /* libPods-shared-CleverTapSDKUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-shared-CleverTapSDKUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4987C663251B5E79003E6BE8 /* CTImageInAppViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImageInAppViewController.h; sourceTree = "<group>"; };
 		4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImageInAppViewController.m; sourceTree = "<group>"; };
@@ -571,7 +571,6 @@
 		4E49AE52275D24570074A774 /* CTValidationResultStack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultStack.m; sourceTree = "<group>"; };
 		4E49AE57275D31910074A774 /* CTIdentityRepoFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTIdentityRepoFactory.h; sourceTree = "<group>"; };
 		4E49AE58275D31910074A774 /* CTIdentityRepoFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTIdentityRepoFactory.m; sourceTree = "<group>"; };
-		4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AmazonRootCA1.cer; sourceTree = "<group>"; };
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
 		4E87296C277CE8EB00A7A618 /* StubHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StubHelper.h; sourceTree = "<group>"; };
 		4E87296D277CE8EB00A7A618 /* StubHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StubHelper.m; sourceTree = "<group>"; };
@@ -1076,7 +1075,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
-				4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */,
+				32C575E628EEF5EB00BF0A3F /* AmazonRootCA1.cer */,
 				D0BD7598241760A30006EE55 /* ProductConfig */,
 				D0D4C9E62414CBA30029477E /* FeatureFlags */,
 				0701E9572372AD550034AAC2 /* DisplayUnit */,
@@ -1510,7 +1509,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1589,7 +1587,7 @@
 				07D0D08F2223F24E000D5686 /* CTFooterViewController~iphoneland.xib in Resources */,
 				07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */,
 				070BB5CD21E70BC000428DEE /* ct_volume_off.png in Resources */,
-				4E64855B287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
+				32C575E728EEF5EB00BF0A3F /* AmazonRootCA1.cer in Resources */,
 				07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
