@@ -47,10 +47,10 @@ typedef NS_ENUM(int, CleverTapChannel) {
     CleverTapInAppNotification = 2
 };
 
-typedef NS_ENUM(int, CTDirectCallEvent) {
-    DIRECT_CALL_OUTGOING_EVENT = 0,
-    DIRECT_CALL_INCOMING_EVENT,
-    DIRECT_CALL_END_EVENT
+typedef NS_ENUM(int, CTSignedCallEvent) {
+    SIGNED_CALL_OUTGOING_EVENT = 0,
+    SIGNED_CALL_INCOMING_EVENT,
+    SIGNED_CALL_END_EVENT
 };
 
 @interface CleverTap : NSObject
@@ -68,9 +68,9 @@ typedef NS_ENUM(int, CTDirectCallEvent) {
 @property (nonatomic, strong, readonly, nonnull) CleverTapInstanceConfig *config;
 
 /**
- CleverTap region/ domain value for direct call domain setup
+ CleverTap region/ domain value for signed call domain setup
  */
-@property (nonatomic, strong, readwrite, nullable) NSString *directCallDomain;
+@property (nonatomic, strong, readwrite, nullable) NSString *signedCallDomain;
 
 
 /* ------------------------------------------------------------------------------------------------------
@@ -1261,17 +1261,17 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param calldetails call details dictionary
  */
-- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *_Nonnull)calldetails;
+- (void)recordSignedCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *_Nonnull)calldetails;
 
 /*!
  @method
  
  @abstract
- Record Direct Call SDK version.
+ Record Signed Call SDK version.
  
- @param version Direct call SDK version
+ @param version Signed call SDK version
  */
-- (void)setDirectCallVersion:(NSString* _Nullable)version;
+- (void)setSignedCallVersion:(NSString* _Nullable)version;
 
 /*!
  @method
