@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 4.1.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.3) (September 06, 2022)
+### [Version 4.1.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.3) (October 07, 2022)
   
 ##### Changed
 - Updates certificates for SSL Pinning.
