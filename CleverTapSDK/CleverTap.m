@@ -4863,7 +4863,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-#pragma mark - Direct Call Public APIs
+#pragma mark - Signed Call Public APIs
 
 - (void)recordSignedCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
 #if !defined(CLEVERTAP_TVOS)

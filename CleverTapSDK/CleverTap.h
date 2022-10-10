@@ -1257,7 +1257,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @method
  
  @abstract
- Record Direct Call System Events.
+ Record Signed Call System Events.
  
  @param calldetails call details dictionary
  */
