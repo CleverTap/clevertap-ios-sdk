@@ -423,15 +423,15 @@ NSString *const kCHARGED_EVENT = @"Charged";
 }
 
 /**
- * Raises and logs Direct Call system events
+ * Raises and logs Signed Call system events
  */
-+ (void)buildDirectCallEvent:(int)eventRawValue
++ (void)buildSignedCallEvent:(int)eventRawValue
               forCallDetails:(NSDictionary * _Nonnull)callDetails
            completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion {
     NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
     CTValidationResult *error = [[CTValidationResult alloc] init];
     [error setErrorCode: 524];
-    [error setErrorDesc: @"Direct Call does not have any field"];
+    [error setErrorDesc: @"Signed Call does not have any field"];
     @try {
         NSMutableDictionary *eventDic = [NSMutableDictionary new];
         NSMutableDictionary *notif = [NSMutableDictionary new];
@@ -439,32 +439,32 @@ NSString *const kCHARGED_EVENT = @"Charged";
         
         if ([notif count] == 0) {
             [errors addObject: error];
-            CleverTapLogStaticDebug(@"Direct Call does not have any field");
+            CleverTapLogStaticDebug(@"Signed Call does not have any field");
         }
-        NSString *directCallEvent;
+        NSString *signedCallEvent;
         switch (eventRawValue) {
             case 0:
-                directCallEvent = CLTAP_DIRECT_CALL_OUTGOING_EVENT_NAME;
+                signedCallEvent = CLTAP_SIGNED_CALL_OUTGOING_EVENT_NAME;
             case 1:
-                directCallEvent = CLTAP_DIRECT_CALL_INCOMING_EVENT_NAME;
+                signedCallEvent = CLTAP_SIGNED_CALL_INCOMING_EVENT_NAME;
             case 2:
-                directCallEvent = CLTAP_DIRECT_CALL_END_EVENT_NAME;
+                signedCallEvent = CLTAP_SIGNED_CALL_END_EVENT_NAME;
             default: break;
         }
-        if (directCallEvent) {
-            eventDic[@"evtName"] = directCallEvent;
+        if (signedCallEvent) {
+            eventDic[@"evtName"] = signedCallEvent;
             eventDic[@"evtData"] = notif;
             completion(eventDic, errors);
         } else {
             CTValidationResult *error = [[CTValidationResult alloc] init];
             [error setErrorCode: 525];
-            [error setErrorDesc: @"Direct Call did not specify event name"];
+            [error setErrorDesc: @"Signed Call did not specify event name"];
             [errors addObject: error];
-            CleverTapLogStaticDebug(@"Direct Call did not specify event name");
+            CleverTapLogStaticDebug(@"Signed Call did not specify event name");
             completion(nil, errors);
         }
     } @catch (NSException *e) {
-        CleverTapLogStaticDebug(@"Unable to build direct call event: %@", e.debugDescription);
+        CleverTapLogStaticDebug(@"Unable to build signed call event: %@", e.debugDescription);
         completion(nil, errors);
     }
 }

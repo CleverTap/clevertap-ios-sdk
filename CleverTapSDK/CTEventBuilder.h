@@ -38,7 +38,7 @@
                  forGeofenceDetails:(NSDictionary * _Nonnull)geofenceDetails
               completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 
-+ (void)buildDirectCallEvent:(int)eventRawValue
++ (void)buildSignedCallEvent:(int)eventRawValue
               forCallDetails:(NSDictionary * _Nonnull)callDetails
            completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 
