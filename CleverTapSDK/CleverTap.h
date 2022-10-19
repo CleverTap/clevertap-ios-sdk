@@ -1296,6 +1296,13 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (NSString *_Nullable)getDomainString;
 
+/*!
+ @method
+ 
+ @abstract
+ Checks if a custom CleverTapID is valid
+ */
++ (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID;
 
 @end
 
