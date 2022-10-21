@@ -268,8 +268,8 @@ static NSArray *discardedEvents;
     } else if(cleverTapID.length <= 0){
         CleverTapLogStaticInfo(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is empty.");
         return NO;
-    } else if (cleverTapID.length > 128) {
-        CleverTapLogStaticInfo(@"Custom CleverTap ID passed is greater than 128 characters.")
+    } else if (cleverTapID.length > 64) {
+        CleverTapLogStaticInfo(@"Custom CleverTap ID passed is greater than 64 characters.")
         return NO;
     } else if (![predicate evaluateWithObject:cleverTapID]) {
         CleverTapLogStaticInfo(@"Custom CleverTap ID cannot contain special characters apart from (, ), !, :, @, $, _, and -");
