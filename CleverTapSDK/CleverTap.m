@@ -4927,4 +4927,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+#pragma mark - Utility
+
++ (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
+    return [CTValidator isValidCleverTapId:cleverTapID];
+}
+
 @end
