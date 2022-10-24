@@ -260,7 +260,7 @@ static NSArray *discardedEvents;
 }
 
 + (BOOL)isValidCleverTapId:(NSString *)cleverTapID {
-    NSString *allowedCharacters = @"[A-Za-z0-9()!:@$_-]*";
+    NSString *allowedCharacters = @"[=|<>;+.A-Za-z0-9()!:$@_-]*";
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", allowedCharacters];
     if (!cleverTapID) {
         CleverTapLogStaticInternal(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is NULL.");
