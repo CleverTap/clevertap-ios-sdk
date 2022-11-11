@@ -22,7 +22,7 @@
 
 @implementation CleverTapGlobalInstanceTests
 
-- (void)test_clevertap_instance_g {
+- (void)test_clevertap_instance_nscoding {
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     [config setEnablePersonalization:YES];
     [config setDisableAppLaunchedEvent:YES];
@@ -50,7 +50,7 @@
     XCTAssertEqual([cachedConfig logLevel], [config logLevel]);
 }
 
-- (void)test_clevertap_instance_g2 {
+- (void)test_clevertap_instance_nscoding_proxy {
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token"
                                                                              proxyDomain:@"proxy" spikyProxyDomain:@"spikyProxy"];
 
