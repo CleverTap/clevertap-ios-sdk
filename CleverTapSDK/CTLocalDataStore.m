@@ -616,7 +616,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 - (NSMutableDictionary *)_inflateLocalProfile {
-    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofType:[NSMutableDictionary class] removeFile:NO];
+    NSSet *allowedClasses = [NSSet setWithObjects:[NSString class], [NSMutableDictionary class], nil];
+    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofTypes:allowedClasses removeFile:NO];
     if (!_profile) {
         _profile = [NSMutableDictionary dictionary];
     }
@@ -624,16 +625,18 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 - (void)persistLocalProfileIfRequired {
-    BOOL shouldPersist = NO;
-    double now = [[[NSDate alloc] init] timeIntervalSince1970];
-    @synchronized (lastProfilePersistenceTime) {
-        if (now > (lastProfilePersistenceTime.doubleValue + kProfilePersistenceIntervalSeconds)) {
-            shouldPersist = YES;
+    [self runOnBackgroundQueue:^{
+        BOOL shouldPersist = NO;
+        double now = [[[NSDate alloc] init] timeIntervalSince1970];
+        @synchronized (self->lastProfilePersistenceTime) {
+            if (now > (self->lastProfilePersistenceTime.doubleValue + kProfilePersistenceIntervalSeconds)) {
+                shouldPersist = YES;
+            }
         }
-    }
-    if (shouldPersist) {
-        [self _persistLocalProfileAsync];
-    }
+        if (shouldPersist) {
+            [self _persistLocalProfileAsync];
+        }
+    }];
 }
 
 - (void)_persistLocalProfileAsync {

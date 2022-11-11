@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.1.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.4) (October 24, 2022)
+
+#### Changed
+- Allows additional special characters when setting a custom CleverTap ID.
+
+### [Version 4.1.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.3) (October 11, 2022)
+
+##### Fixed
+- Fixes the value of `wzrk_c2a` key for image-only in-app notification CTAs.
+- Possible fix for crashes related to profile caches.
+- Updates support for CleverTap Signed Call iOS SDK.
+
+### [Version 4.1.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.2) (September 16, 2022)
+
+##### Fixed
+- Fixes possible App Inbox crashes.
+- Fixes NSKeyedUnarchiver console warnings
+
 ### [Version 4.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.1) (July 06, 2022)
   
 ##### Added

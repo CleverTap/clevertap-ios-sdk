@@ -1168,7 +1168,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"dcv"] = self.deviceInfo.directCallSDKVersion;
+    evtData[@"scv"] = self.deviceInfo.signedCallSDKVersion;
     
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
@@ -4877,12 +4877,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-#pragma mark - Direct Call Public APIs
+#pragma mark - Signed Call Public APIs
 
-- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
+- (void)recordSignedCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
 #if !defined(CLEVERTAP_TVOS)
     [self runSerialAsync:^{
-        [CTEventBuilder buildDirectCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+        [CTEventBuilder buildSignedCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
             if (event) {
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
@@ -4894,8 +4894,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (void)setDirectCallVersion:(NSString *)version {
-    [self.deviceInfo setDirectCallSDKVersion: version];
+- (void)setSignedCallVersion:(NSString *)version {
+    [self.deviceInfo setSignedCallSDKVersion: version];
 }
 
 - (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
@@ -4934,11 +4934,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             NSString *dotString = [@"." stringByAppendingString: listItems[i]];
             domainItem = [domainItem stringByAppendingString: dotString];
         }
-        self.directCallDomain = domainItem;
+        self.signedCallDomain = domainItem;
         return domainItem;
     } else {
         return nil;
     }
+}
+
+#pragma mark - Utility
+
++ (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
+    return [CTValidator isValidCleverTapId:cleverTapID];
 }
 
 @end

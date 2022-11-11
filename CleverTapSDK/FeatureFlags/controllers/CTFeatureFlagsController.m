@@ -89,7 +89,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
     NSString *filePath = [self dataArchiveFileName];
     __weak CTFeatureFlagsController *weakSelf = self;
     CTFeatureFlagsOperationBlock opBlock = ^{
-        NSSet *allowedClasses = [NSSet setWithObjects:[NSArray class], [NSDictionary class], nil];
+        NSSet *allowedClasses = [NSSet setWithObjects:[NSArray class], [NSDictionary class], [NSNumber class], [NSString class], [NSMutableDictionary class], nil];
         NSArray *featureFlags = [CTPreferences unarchiveFromFile: filePath ofTypes: allowedClasses removeFile:NO];
         if (featureFlags) {
             [weakSelf _updateFeatureFlags:featureFlags isNew:NO];
