@@ -9,6 +9,7 @@
 {
     [coder encodeObject:_accountId forKey:@"accountId"];
     [coder encodeObject:_accountToken forKey:@"accountToken"];
+    [coder encodeObject:_accountRegion forKey:@"accountRegion"];
     [coder encodeObject:_proxyDomain forKey:@"proxyDomain"];
     [coder encodeObject:_spikyProxyDomain forKey:@"spikyProxyDomain"];
     [coder encodeBool:_analyticsOnly forKey:@"analyticsOnly"];
@@ -29,20 +30,21 @@
     if (self = [super init]) {
         _accountId = [coder decodeObjectForKey:@"accountId"];
         _accountToken = [coder decodeObjectForKey:@"accountToken"];
+        _accountRegion = [coder decodeObjectForKey:@"accountRegion"];
         _proxyDomain = [coder decodeObjectForKey:@"proxyDomain"];
         _spikyProxyDomain = [coder decodeObjectForKey:@"spikyProxyDomain"];
-        _analyticsOnly = [coder decodeObjectForKey:@"analyticsOnly"];
-        _disableAppLaunchedEvent = [coder decodeObjectForKey:@"disableAppLaunchedEvent"];
-        _enablePersonalization = [coder decodeObjectForKey:@"enablePersonalization"];
-        _useCustomCleverTapId = [coder decodeObjectForKey:@"useCustomCleverTapId"];
-        _disableIDFV = [coder decodeObjectForKey:@"disableIDFV"];
+        _analyticsOnly = [coder decodeBoolForKey:@"analyticsOnly"];
+        _disableAppLaunchedEvent = [coder decodeBoolForKey:@"disableAppLaunchedEvent"];
+        _enablePersonalization = [coder decodeBoolForKey:@"enablePersonalization"];
+        _useCustomCleverTapId = [coder decodeBoolForKey:@"useCustomCleverTapId"];
+        _disableIDFV = [coder decodeBoolForKey:@"disableIDFV"];
         _logLevel = [coder decodeIntForKey:@"logLevel"];
         _identityKeys = [coder decodeObjectForKey:@"identityKeys"];
         
-        _isDefaultInstance = [coder decodeObjectForKey:@"isDefaultInstance"];
+        _isDefaultInstance = [coder decodeBoolForKey:@"isDefaultInstance"];
         _queueLabel = [coder decodeObjectForKey:@"queueLabel"];
-        _isCreatedPostAppLaunched = [coder decodeObjectForKey:@"isCreatedPostAppLaunched"];
-        _beta = [coder decodeObjectForKey:@"beta"];
+        _isCreatedPostAppLaunched = [coder decodeBoolForKey:@"isCreatedPostAppLaunched"];
+        _beta = [coder decodeBoolForKey:@"beta"];
     }
     return self;
 }
