@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<header><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'></header>
+<html>
+    <head>
+        <title></title>
+    </head>
+    <body style="background-color:#085ce7; font-size: 20px; ">
+        <h2><center>CleverTap Webview</center></h2><br></br>
+        <button onclick="myFunction()">Record Event</button>
+        <p id="demo"> </p>
+        <button onclick="recordChargedEvent()">Record Charged Event</button>
+        <p id="chargedEvent"> </p>
+        <button onclick="profilePush()">Push Profile</button>
+        <p id="profilePush"> </p>
+        <button onclick="profileSetMultiValues()">Set Profile with multiple values</button>
+        <p id="profileSetMultiValues"> </p>
+        <button onclick="profileAddMultiValues()">Set Profile with multiple values</button>
+        <p id="profileAddMultiValues"> </p>
+        <button onclick="profileRemoveMultiValues()">Set Profile with multiple values</button>
+        <p id="profileRemoveMultiValues"> </p>
+        <button onclick="onUserLogin()">On user login</button>
+        <p id="onUserLogin"> </p>
+        <button onclick="profileIncrementValueBy()">Increment profile value</button>
+        <p id="profileIncrementValueBy"> </p>
+        <button onclick="profileDecrementValueBy()">Decrement profile value</button>
+        <p id="profileDecrementValueBy"> </p>
+        
+        <script>
+            function myFunction() {
+                document.getElementById("demo").innerHTML = 'Event recorded.';
+                var props = {foo: 'xyz', lang: 'French'};
+                var message = { action:'recordEventWithProps', event:'CT Webview event', properties: props};
+                
+                if (window.webkit
+                   && window.webkit.messageHandlers
+                   && window.webkit.messageHandlers.clevertap) {
+                    window.webkit.messageHandlers.clevertap.postMessage(message);
+                }
+            }
+        
+        function recordChargedEvent() {
+            document.getElementById("chargedEvent").innerHTML = 'Charged Event Recorded.';
+            const chargeDetails = {
+                "Amount" : 300,
+                "Payment mode": "Credit Card",
+                "Charged ID": 24052013
+            };
+            const items = [{
+                "Category": "books",
+                "Book name": "The Millionaire next door",
+                "Quantity": 1
+            },{
+                "Category": "books",
+                "Book name": "The Millionaire previous door",
+                "Quantity": 5
+            }];
+            const message = {
+                action:'recordChargedEvent',
+                chargeDetails: chargeDetails,
+                items: items
+            };
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profilePush() {
+            document.getElementById("profilePush").innerHTML = 'Profile Pushed.';
+            const props = { name: 'John', email: 'john@mymail.com' , score: 0};
+            const message = { action:'profilePush', properties: props };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profileSetMultiValues() {
+            document.getElementById("profileSetMultiValues").innerHTML = 'Profile set with multiple values.';
+            const message = {
+                action: 'profileSetMultiValues',
+                values: ['bag', 'kitkat'],
+                key: 'myStuff'
+            };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profileAddMultiValues() {
+            document.getElementById("profileAddMultiValues").innerHTML = 'Profile added with multiple values.';
+            const message = {
+                action: 'profileAddMultiValue',
+                value: 'coat',
+                key: 'myStuff'
+                
+            };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+        
+        function profileRemoveMultiValues() {
+            document.getElementById("profileRemoveMultiValues").innerHTML = 'Profile removed with multiple values.';
+            const message = {
+                action: 'profileRemoveMultiValues',
+                values: ['scarf', 'knife'],
+                key: 'myStuff'
+                
+            };
+            
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                window.webkit.messageHandlers.clevertap.postMessage(message);
+            }
+        }
+            
+            function onUserLogin() {
+                document.getElementById("onUserLogin").innerHTML = 'User logged in';
+                const props = { name: 'JohnWeb', email: 'johnWeb@mymail.com' };
+                const message = { action:'onUserLogin', properties: props };
+                
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                    window.webkit.messageHandlers.clevertap.postMessage(message);
+                }
+            }
+            
+            function profileIncrementValueBy() {
+                document.getElementById("profileIncrementValueBy").innerHTML = 'Profile value incremented';
+                const message = {
+                    action: 'profileIncrementValueBy',
+                    value: 1,
+                    key: 'score'
+                };
+                
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                    window.webkit.messageHandlers.clevertap.postMessage(message);
+                }
+            }
+            
+            function profileDecrementValueBy() {
+                document.getElementById("profileDecrementValueBy").innerHTML = 'Profile value decremented';
+                const message = {
+                    action: 'profileDecrementValueBy',
+                    value: 1,
+                    key: 'score'
+                };
+                
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                    window.webkit.messageHandlers.clevertap.postMessage(message);
+                }
+            }
+            
+        
+            </script>
+        
+    </body>
+</html>
