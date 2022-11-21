@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@interface CleverTapInstanceConfig () <NSCopying> {}
+@interface CleverTapInstanceConfig () <NSCopying, NSCoding, NSSecureCoding> {}
 
 @property (nonatomic, assign, readonly) BOOL isDefaultInstance;
 @property (nonatomic, strong, readonly, nonnull) NSString *queueLabel;
@@ -22,4 +22,6 @@
                                proxyDomain:(NSString* _Nonnull)proxyDomain
                           spikyProxyDomain:(NSString* _Nonnull)spikyProxyDomain
                          isDefaultInstance:(BOOL)isDefault;
+
++ (NSString* _Nonnull)dataArchiveFileNameWithAccountId:(NSString* _Nonnull)accountId;
 @end
