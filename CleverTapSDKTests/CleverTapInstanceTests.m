@@ -57,4 +57,17 @@
     XCTAssertFalse(result);
 }
 
+- (void)test_clevertap_shared_get_global_instance {
+    CleverTap *shared = [CleverTap sharedInstance];
+    CleverTap *instance = [CleverTap getGlobalInstance:[shared getAccountID]];
+    XCTAssertEqualObjects(instance, shared);
+}
+
+- (void)test_clevertap_get_global_instance {
+    CleverTap *instance = [CleverTap getGlobalInstance:@"test"];
+    XCTAssertNotNil(instance);
+    XCTAssertEqualObjects([[instance config] accountId], @"test");
+    XCTAssertEqualObjects([[instance config] accountToken], @"test");
+}
+
 @end

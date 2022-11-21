@@ -5,6 +5,55 @@
 
 @implementation CleverTapInstanceConfig
 
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:_accountId forKey:@"accountId"];
+    [coder encodeObject:_accountToken forKey:@"accountToken"];
+    [coder encodeObject:_accountRegion forKey:@"accountRegion"];
+    [coder encodeObject:_proxyDomain forKey:@"proxyDomain"];
+    [coder encodeObject:_spikyProxyDomain forKey:@"spikyProxyDomain"];
+    [coder encodeBool:_analyticsOnly forKey:@"analyticsOnly"];
+    [coder encodeBool:_disableAppLaunchedEvent forKey:@"disableAppLaunchedEvent"];
+    [coder encodeBool:_enablePersonalization forKey:@"enablePersonalization"];
+    [coder encodeBool:_useCustomCleverTapId forKey:@"useCustomCleverTapId"];
+    [coder encodeBool:_disableIDFV forKey:@"disableIDFV"];
+    [coder encodeInt:_logLevel forKey:@"logLevel"];
+    [coder encodeObject:_identityKeys forKey:@"identityKeys"];
+    
+    [coder encodeBool: _isDefaultInstance forKey:@"isDefaultInstance"];
+    [coder encodeObject: _queueLabel forKey:@"queueLabel"];
+    [coder encodeBool: _isCreatedPostAppLaunched forKey:@"isCreatedPostAppLaunched"];
+    [coder encodeBool: _beta forKey:@"beta"];
+}
+
+- (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
+    if (self = [super init]) {
+        _accountId = [coder decodeObjectForKey:@"accountId"];
+        _accountToken = [coder decodeObjectForKey:@"accountToken"];
+        _accountRegion = [coder decodeObjectForKey:@"accountRegion"];
+        _proxyDomain = [coder decodeObjectForKey:@"proxyDomain"];
+        _spikyProxyDomain = [coder decodeObjectForKey:@"spikyProxyDomain"];
+        _analyticsOnly = [coder decodeBoolForKey:@"analyticsOnly"];
+        _disableAppLaunchedEvent = [coder decodeBoolForKey:@"disableAppLaunchedEvent"];
+        _enablePersonalization = [coder decodeBoolForKey:@"enablePersonalization"];
+        _useCustomCleverTapId = [coder decodeBoolForKey:@"useCustomCleverTapId"];
+        _disableIDFV = [coder decodeBoolForKey:@"disableIDFV"];
+        _logLevel = [coder decodeIntForKey:@"logLevel"];
+        _identityKeys = [coder decodeObjectForKey:@"identityKeys"];
+        
+        _isDefaultInstance = [coder decodeBoolForKey:@"isDefaultInstance"];
+        _queueLabel = [coder decodeObjectForKey:@"queueLabel"];
+        _isCreatedPostAppLaunched = [coder decodeBoolForKey:@"isCreatedPostAppLaunched"];
+        _beta = [coder decodeBoolForKey:@"beta"];
+    }
+    return self;
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
+
 - (instancetype)initWithAccountId:(NSString *)accountId
                      accountToken:(NSString *)accountToken {
     return [self initWithAccountId:accountId
@@ -97,6 +146,10 @@
         [self setupPlistData:isDefault];
     }
     return self;
+}
+
++ (NSString*)dataArchiveFileNameWithAccountId:(NSString*)accountId {
+    return [NSString stringWithFormat:@"clevertap-%@-instance-config.plist", accountId];
 }
 
 - (instancetype)copyWithZone:(NSZone*)zone {

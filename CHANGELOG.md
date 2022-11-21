@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.1.5](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.5) (November 15, 2022)
+
+#### Added
+- Adds a class method `getGlobalInstance` to retrieve a CleverTap SDK instance for an account ID.
+
 ### [Version 4.1.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.4) (October 24, 2022)
 
 #### Changed
