@@ -100,6 +100,17 @@ static NSManagedObjectContext *privateContext;
     [self _deleteMessages:@[message]];
 }
 
+- (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds {
+    NSMutableArray *toDeleteInboxMessages = [NSMutableArray new];
+    for (NSString *ids in messageIds) {
+        CTMessageMO *msg = [self _messageForId:ids];
+            [toDeleteInboxMessages addObject:msg];
+        }
+    if ([toDeleteInboxMessages count] > 0) {
+        [self _deleteMessages:toDeleteInboxMessages];
+    }
+}
+
 - (void)markReadMessageWithId:(NSString *)messageId {
     [privateContext performBlock:^{
         CTMessageMO *message = [self _messageForId:messageId];

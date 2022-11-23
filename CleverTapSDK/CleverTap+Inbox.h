@@ -189,6 +189,15 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  @method
  
  @abstract
+ This method deletes `CleverTapInboxMessage` object for the given `Message Id` as String.
+ */
+
+- (void)deleteInboxMessagesForIDs:(NSArray *_Nonnull)messageIds;
+
+/*!
+ @method
+ 
+ @abstract
  This method marks the `CleverTapInboxMessage` object as read for given 'Message Id` as String.
  */
 
