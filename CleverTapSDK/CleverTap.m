@@ -4310,7 +4310,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.inboxController deleteMessageWithId:messageId];
 }
 
-- (void)deleteInboxMessagesForIDs:(NSArray *_Nonnull)messageIds {
+- (void)deleteInboxMessagesForIDs:(NSArray<NSString *> *_Nonnull)messageIds {
     if (![self _isInboxInitialized]) {
         return;
     }
