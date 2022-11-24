@@ -4971,7 +4971,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-<<<<<<< HEAD
 #pragma mark - Push Permission
 
 - (void)setPushPermissionDelegate:(id<CleverTapPushPermissionDelegate>)delegate {
@@ -5106,12 +5105,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [[self class] runSyncMainQueue:^{
         [self openURL:url forModule:@"PushPermission"];
     }];
-=======
+}
 #pragma mark - Utility
 
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
     return [CTValidator isValidCleverTapId:cleverTapID];
->>>>>>> a42a0b997ca1e0d30c41051728d6f5cfa19e1aef
 }
 
 @end

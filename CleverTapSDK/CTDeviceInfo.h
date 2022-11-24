@@ -32,11 +32,8 @@
 - (void)forceNewDeviceID;
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID;
 - (BOOL)isErrorDeviceID;
-<<<<<<< HEAD
 - (void)setDirectCallSDKVersion: (NSString *)version;
 - (void)incrementLocalInAppCount;
 - (int)getLocalInAppCount;
-=======
 - (void)setSignedCallSDKVersion: (NSString *)version;
->>>>>>> a42a0b997ca1e0d30c41051728d6f5cfa19e1aef
 @end
