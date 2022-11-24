@@ -73,6 +73,9 @@ static NSArray *sslCertNames;
 #import "CleverTap+DCDomain.h"
 #import <objc/runtime.h>
 
+#import "CTLocalInApp.h"
+#import "CleverTap+PushPermission.h"
+
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 
@@ -237,6 +240,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
 @property (atomic, weak) id <CleverTapDomainDelegate> domainDelegate;
+@property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -272,6 +276,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 
 @synthesize featureFlagsDelegate=_featureFlagsDelegate;
 @synthesize productConfigDelegate=_productConfigDelegate;
+@synthesize pushPermissionDelegate=_pushPermissionDelegate;
 
 static CTPlistInfo *_plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
@@ -1224,6 +1229,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (spikyProxyDomain != nil && spikyProxyDomain.length > 0) {
         evtData[@"spikyProxyDomain"] = self.config.spikyProxyDomain;
     }
+    // Add Local in-app count to event data.
+    evtData[@"LIAMC"] = @([self.deviceInfo getLocalInAppCount]);
     
     return evtData;
 }
@@ -2033,6 +2040,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
         [[self class] displayInAppDisplayController:controller];
+
+        if (notification.isLocalInApp) {
+            [self.deviceInfo incrementLocalInAppCount];
+        }
     }
     if (errorString) {
         CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errorString);
@@ -2118,6 +2129,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
     }
     [controller hide:true];
+}
+
+- (void)handleInAppPushPrimer:(CTInAppNotification *)notification
+           fromViewController:(CTInAppDisplayViewController *)controller
+       withFallbackToSettings:(BOOL)isFallbackToSettings {
+    CleverTapLogDebug(self.config.logLevel, @"%@: InApp Push Primer Accepted:", self);
+    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
+                                       andSkipSettingsAlert:notification.skipSettingsAlert];
+    
+}
+
+- (void)inAppPushPrimerDidDismissed {
+    [self notifyPushPermissionResponse:NO];
 }
 
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
@@ -4407,6 +4431,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+- (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
+    CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
+    [self promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings
+                                       andSkipSettingsAlert:NO];
+}
+
 - (void)recordInboxMessageStateEvent:(BOOL)clicked
                           forMessage:(CleverTapInboxMessage *)message andQueryParameters:(NSDictionary *)params {
     
@@ -4925,6 +4955,142 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else {
         return nil;
     }
+}
+
+#pragma mark - Push Permission
+
+- (void)setPushPermissionDelegate:(id<CleverTapPushPermissionDelegate>)delegate {
+    if ([[self class] runningInsideAppExtension]){
+        CleverTapLogDebug(self.config.logLevel, @"%@: setPushPermissionDelegate is a no-op in an app extension.", self);
+        return;
+    }
+    if (delegate && [delegate conformsToProtocol:@protocol(CleverTapPushPermissionDelegate)]) {
+        _pushPermissionDelegate = delegate;
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Push Permission Delegate does not conform to the CleverTapPushPermissionDelegate protocol", self);
+    }
+}
+
+- (id<CleverTapPushPermissionDelegate>)pushPermissionDelegate {
+    return _pushPermissionDelegate;
+}
+
+- (void)promptPushPrimer:(NSDictionary *_Nonnull)json {
+    if (@available(iOS 10.0, *)) {
+        [self getNotificationPermissionStatusWithCompletionHandler:^(UNAuthorizationStatus status) {
+            if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
+                [self prepareNotificationForDisplay:json];
+            } else {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
+            }
+        }];
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
+    }
+}
+
+- (void)promptForPushPermission:(BOOL)isFallbackToSettings {
+    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
+                                       andSkipSettingsAlert:NO];
+}
+
+- (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
+    if (@available(iOS 10.0, *)) {
+        [self runSerialAsync:^{
+            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+            [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+                completion(settings.authorizationStatus);
+            }];
+        }];
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
+        completion(UNAuthorizationStatusDenied);
+    }
+}
+
+- (void)notifyPushPermissionResponse:(BOOL)accepted {
+    CleverTapLogInternal(self.config.logLevel, @"%@: Push Permission Response: %s", self, (accepted ? "accepted" : "denied"));
+    if (self.pushPermissionDelegate && [self.pushPermissionDelegate respondsToSelector:@selector(onPushPermissionResponse:)]) {
+        [self.pushPermissionDelegate onPushPermissionResponse:accepted];
+    }
+}
+
+- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
+                                     andSkipSettingsAlert:(BOOL)skipSettingsAlert {
+    if (@available(iOS 10.0, *)) {
+        [self runSerialAsync:^{
+            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+            [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+                if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
+                    [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                        if (granted) {
+                            [self notifyPushPermissionResponse:YES];
+                        } else {
+                            [self notifyPushPermissionResponse:NO];
+                        }
+                        
+                        if (!error) {
+                            [[self class] runSyncMainQueue: ^{
+                                UIApplication *sharedApplication = [[self class] getSharedApplication];
+                                if (sharedApplication == nil) {
+                                    return;
+                                }
+
+                                [sharedApplication registerForRemoteNotifications];
+                            }];
+                        } else {
+                            CleverTapLogDebug(self.config.logLevel, @"%@: Error in request authorization for remote notification: %@", self, error);
+                        }
+                    }];
+                } else if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
+                    if (isFallbackToSettings) {
+                        if (skipSettingsAlert) {
+                            [self openAppSettingsForPushNotification];
+                        } else {
+                            [self showFallbackToSettingsAlertDialog];
+                        }
+                    } else {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Notification permission is denied. Please grant notification permission access in your app's settings to send notifications.", self);
+                    }
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
+                }
+            }];
+        }];
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
+    }
+}
+
+- (void)showFallbackToSettingsAlertDialog {
+    NSString *alertTitle = @"Permission Not Available";
+    NSString *alertMessage = @"You have previously denied notification permission. Please go to settings to enable notifications.";
+    NSString *positiveBtnText = @"Settings";
+    NSString *negativeBtntext = @"Cancel";
+    CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:ALERT
+                                                                    titleText:alertTitle
+                                                                  messageText:alertMessage
+                                                      followDeviceOrientation:YES
+                                                              positiveBtnText:positiveBtnText
+                                                              negativeBtnText:negativeBtntext];
+    [localInAppBuilder setFallbackToSettings:YES];
+    [localInAppBuilder setSkipSettingsAlert:YES];
+    NSMutableDictionary *alertSettings = [NSMutableDictionary dictionaryWithDictionary:localInAppBuilder.getLocalInAppSettings];
+    // Update isLocalInApp key as it is internal alert in-app, so that local in-app count will not increase.
+    alertSettings[@"isLocalInApp"] = @0;
+    [self prepareNotificationForDisplay:alertSettings];
+}
+
+- (void)openAppSettingsForPushNotification {
+    NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+    if (!url) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Unable to retrieve URL from OpenSettingsURL string", self);
+        return;
+    }
+
+    [[self class] runSyncMainQueue:^{
+        [self openURL:url forModule:@"PushPermission"];
+    }];
 }
 
 @end

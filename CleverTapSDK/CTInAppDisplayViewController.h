@@ -9,6 +9,17 @@
 @protocol CTInAppNotificationDisplayDelegate <NSObject>
 - (void)handleNotificationCTA:(NSURL*)ctaURL buttonCustomExtras:(NSDictionary *)buttonCustomExtras forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras;
 - (void)notificationDidDismiss:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller;
+/**
+ Called when in-app button is tapped for requesting push permission.
+ */
+- (void)handleInAppPushPrimer:(CTInAppNotification*)notification
+           fromViewController:(CTInAppDisplayViewController*)controller
+       withFallbackToSettings:(BOOL)isFallbackToSettings;
+
+/**
+ Called to notify that local in-app push primer is dismissed.
+ */
+- (void)inAppPushPrimerDidDismissed;
 @optional
 - (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller;
 @end

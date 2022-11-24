@@ -199,6 +199,31 @@
         campaignId = @"";
     }
     
+    if (self.notification.isLocalInApp) {
+        if  (index == 0) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(handleInAppPushPrimer:fromViewController:withFallbackToSettings:)]) {
+                [self.delegate handleInAppPushPrimer:self.notification
+                                  fromViewController:self
+                              withFallbackToSettings:self.notification.fallBackToNotificationSettings];
+            }
+        } else if (index == 1) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(inAppPushPrimerDidDismissed)]) {
+                [self.delegate inAppPushPrimerDidDismissed];
+            }
+        }
+        return;
+    }
+    
+    // For showing Push Permission through InApp Campaign, positive button type is "rfp".
+    if ([button.type isEqual:@"rfp"]) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(handleInAppPushPrimer:fromViewController:withFallbackToSettings:)]) {
+            [self.delegate handleInAppPushPrimer:self.notification
+                              fromViewController:self
+                          withFallbackToSettings:button.fallbackToSettings];
+        }
+        return;
+    }
+    
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
         [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
     }

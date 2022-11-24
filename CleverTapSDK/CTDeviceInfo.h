@@ -33,4 +33,6 @@
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID;
 - (BOOL)isErrorDeviceID;
 - (void)setDirectCallSDKVersion: (NSString *)version;
+- (void)incrementLocalInAppCount;
+- (int)getLocalInAppCount;
 @end

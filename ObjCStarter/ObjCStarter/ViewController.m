@@ -4,8 +4,10 @@
 #import <CleverTapSDK/CleverTap.h>
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
 #import <CleverTapSDK/CleverTap+Inbox.h>
+#import <CleverTapSDK/CleverTap+PushPermission.h>
+#import "CTLocalInApp.h"
 
-@interface ViewController () <UITableViewDelegate, UITableViewDataSource, CleverTapInboxViewControllerDelegate>
+@interface ViewController () <UITableViewDelegate, UITableViewDataSource, CleverTapInboxViewControllerDelegate, CleverTapPushPermissionDelegate>
 
 @property (nonatomic, strong) IBOutlet UITableView *tblEvent;
 @property (nonatomic, strong) NSMutableArray *eventList;
@@ -30,7 +32,7 @@
 }
 
 - (void)loadData {
-    
+    [[CleverTap sharedInstance] setPushPermissionDelegate:self];
     self.eventList = [[NSMutableArray alloc] initWithObjects:@"Record User Profile",
                       @"Record User Profile with Properties",
                       @"Record User Event called Product Viewed",
@@ -41,7 +43,11 @@
                       @"Analytics in a Webview",
                       @"Increment User Profile Property",
                       @"Decrement User Profile Property",
-                      @"Activate Custom domain proxy", nil];
+                      @"Activate Custom domain proxy",
+                      @"Prompt for Push Notification",
+                      @"Local Half Interstitial Push Primer",
+                      @"Local Alert Push Primer",
+                      @"InApp Campaign Push Primer", nil];
     [self. tblEvent reloadData];
 }
     
@@ -108,6 +114,18 @@
             break;
         case 10:
             [self activateCustomDomain];
+            break;
+        case 11:
+            [self promptForPushNotification];
+            break;
+        case 12:
+            [self createLocalHalfInterstitialPushPrimer];
+            break;
+        case 13:
+            [self createLocalAlertPushPrimer];
+            break;
+        case 14:
+            [self createInAppCampaignPushPrimer];
             break;
         default:
             break;
@@ -252,6 +270,49 @@
     UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     CustomDomainViewController *customDomainVC = [storyBoard instantiateViewControllerWithIdentifier:@"CustomDomainVC"];
     [self.navigationController pushViewController:customDomainVC animated:YES];
+}
+
+- (void)promptForPushNotification {
+    [[CleverTap sharedInstance] promptForPushPermission:YES];
+}
+
+- (void)createLocalHalfInterstitialPushPrimer {
+    [[CleverTap sharedInstance] getNotificationPermissionStatusWithCompletionHandler:^(UNAuthorizationStatus status) {
+        if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
+            CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:HALF_INTERSTITIAL
+                                                                            titleText:@"Get Notified"
+                                                                          messageText:@"Please enable notifications on your device to use Push Notifications."
+                                                              followDeviceOrientation:YES
+                                                                      positiveBtnText:@"Allow"
+                                                                      negativeBtnText:@"Cancel"];
+            [localInAppBuilder setFallbackToSettings:YES];
+            [localInAppBuilder setImageUrl:@"https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png"];
+            [[CleverTap sharedInstance] promptPushPrimer:localInAppBuilder.getLocalInAppSettings];
+        } else {
+            NSLog(@"Push Persmission is already enabled.");
+        }
+    }];
+}
+
+- (void)createLocalAlertPushPrimer {
+    CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:ALERT
+                                                                    titleText:@"Get Notified"
+                                                                  messageText:@"Enable Notification permission"
+                                                      followDeviceOrientation:YES
+                                                              positiveBtnText:@"Allow"
+                                                              negativeBtnText:@"Cancel"];
+    [localInAppBuilder setFallbackToSettings:YES];
+    [[CleverTap sharedInstance] promptPushPrimer:localInAppBuilder.getLocalInAppSettings];
+}
+
+- (void)createInAppCampaignPushPrimer {
+    [[CleverTap sharedInstance] recordEvent:@"InAppCampaignPushPrimer"];
+}
+
+#pragma mark - CleverTapPushPermissionDelegate
+
+- (void)onPushPermissionResponse:(BOOL)accepted {
+    NSLog(@"Push Permission response called ---> accepted = %d", accepted);
 }
 
 @end
