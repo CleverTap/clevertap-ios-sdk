@@ -625,16 +625,18 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 }
 
 - (void)persistLocalProfileIfRequired {
-    BOOL shouldPersist = NO;
-    double now = [[[NSDate alloc] init] timeIntervalSince1970];
-    @synchronized (lastProfilePersistenceTime) {
-        if (now > (lastProfilePersistenceTime.doubleValue + kProfilePersistenceIntervalSeconds)) {
-            shouldPersist = YES;
+    [self runOnBackgroundQueue:^{
+        BOOL shouldPersist = NO;
+        double now = [[[NSDate alloc] init] timeIntervalSince1970];
+        @synchronized (self->lastProfilePersistenceTime) {
+            if (now > (self->lastProfilePersistenceTime.doubleValue + kProfilePersistenceIntervalSeconds)) {
+                shouldPersist = YES;
+            }
         }
-    }
-    if (shouldPersist) {
-        [self _persistLocalProfileAsync];
-    }
+        if (shouldPersist) {
+            [self _persistLocalProfileAsync];
+        }
+    }];
 }
 
 - (void)_persistLocalProfileAsync {

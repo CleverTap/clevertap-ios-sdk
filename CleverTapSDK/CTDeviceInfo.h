@@ -25,14 +25,18 @@
 @property (atomic, readwrite) NSString *library;
 @property (assign, readonly) BOOL wifi;
 @property (strong, readonly) NSMutableArray<CTValidationResult*>* validationErrors;
-@property (strong, readonly) NSString *directCallSDKVersion;
+@property (strong, readonly) NSString *signedCallSDKVersion;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;
 - (void)forceNewDeviceID;
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID;
 - (BOOL)isErrorDeviceID;
+<<<<<<< HEAD
 - (void)setDirectCallSDKVersion: (NSString *)version;
 - (void)incrementLocalInAppCount;
 - (int)getLocalInAppCount;
+=======
+- (void)setSignedCallSDKVersion: (NSString *)version;
+>>>>>>> a42a0b997ca1e0d30c41051728d6f5cfa19e1aef
 @end

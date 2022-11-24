@@ -656,6 +656,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = emptyLocation;
         self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
+        
+        // save config to defaults
+        [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+        
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
         [self initNetworking];
@@ -681,6 +685,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     return self;
+}
+
++ (CleverTap *)getGlobalInstance:(NSString *)accountId {
+    
+    if (!_instances || [_instances count] <= 0) {
+        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofType:[CleverTapInstanceConfig class] removeFile:NO];
+        return [CleverTap instanceWithConfig:config];
+    }
+    
+    return _instances[accountId];
 }
 
 // notify application code once we have a device GUID
@@ -1159,7 +1173,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"dcv"] = self.deviceInfo.directCallSDKVersion;
+    evtData[@"scv"] = self.deviceInfo.signedCallSDKVersion;
     
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
@@ -4893,12 +4907,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-#pragma mark - Direct Call Public APIs
+#pragma mark - Signed Call Public APIs
 
-- (void)recordDirectCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
+- (void)recordSignedCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *)calldetails {
 #if !defined(CLEVERTAP_TVOS)
     [self runSerialAsync:^{
-        [CTEventBuilder buildDirectCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+        [CTEventBuilder buildSignedCallEvent: eventRawValue forCallDetails:calldetails completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
             if (event) {
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
@@ -4910,8 +4924,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 }
 
-- (void)setDirectCallVersion:(NSString *)version {
-    [self.deviceInfo setDirectCallSDKVersion: version];
+- (void)setSignedCallVersion:(NSString *)version {
+    [self.deviceInfo setSignedCallSDKVersion: version];
 }
 
 - (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
@@ -4950,13 +4964,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             NSString *dotString = [@"." stringByAppendingString: listItems[i]];
             domainItem = [domainItem stringByAppendingString: dotString];
         }
-        self.directCallDomain = domainItem;
+        self.signedCallDomain = domainItem;
         return domainItem;
     } else {
         return nil;
     }
 }
 
+<<<<<<< HEAD
 #pragma mark - Push Permission
 
 - (void)setPushPermissionDelegate:(id<CleverTapPushPermissionDelegate>)delegate {
@@ -5091,6 +5106,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [[self class] runSyncMainQueue:^{
         [self openURL:url forModule:@"PushPermission"];
     }];
+=======
+#pragma mark - Utility
+
++ (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
+    return [CTValidator isValidCleverTapId:cleverTapID];
+>>>>>>> a42a0b997ca1e0d30c41051728d6f5cfa19e1aef
 }
 
 @end
