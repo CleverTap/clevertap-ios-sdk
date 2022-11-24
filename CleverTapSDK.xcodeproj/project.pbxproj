@@ -207,7 +207,7 @@
 		4E87296E277CE8EB00A7A618 /* StubHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E87296D277CE8EB00A7A618 /* StubHelper.m */; };
 		4E872973277CEE6700A7A618 /* TestConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E872972277CEE6700A7A618 /* TestConstants.m */; };
 		4EC2D085278AAD8000F4DE54 /* IdentityManagementTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */; };
-		5709005327FD8E1F0011B89F /* CleverTap+DCDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 5709005227FD8E1E0011B89F /* CleverTap+DCDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5709005327FD8E1F0011B89F /* CleverTap+SCDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 5709005227FD8E1E0011B89F /* CleverTap+SCDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		583D9573DCDA5D219016B990 /* libPods-shared-CleverTapSDKTestsApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2108AFE9090417CC69A0E3EB /* libPods-shared-CleverTapSDKTestsApp.a */; };
@@ -579,7 +579,7 @@
 		4E872972277CEE6700A7A618 /* TestConstants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestConstants.m; sourceTree = "<group>"; };
 		4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityManagementTests.m; sourceTree = "<group>"; };
 		4EDCDE4D278AC4DF0065E699 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		5709005227FD8E1E0011B89F /* CleverTap+DCDomain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+DCDomain.h"; sourceTree = "<group>"; };
+		5709005227FD8E1E0011B89F /* CleverTap+SCDomain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+SCDomain.h"; sourceTree = "<group>"; };
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
 		840B38DDFBBEAE05FC6C5458 /* Pods-shared-CleverTapSDKTestsApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTestsApp.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTestsApp/Pods-shared-CleverTapSDKTestsApp.release.xcconfig"; sourceTree = "<group>"; };
 		917B24847F7C2A8B0825AEC1 /* libPods-shared-CleverTapSDKTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-shared-CleverTapSDKTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1084,7 +1084,7 @@
 				071EB476217F6427008F0FAB /* InApps */,
 				D0C7BBC8207D8837001345EF /* CleverTap.h */,
 				D0C7BBC9207D8837001345EF /* CleverTap.m */,
-				5709005227FD8E1E0011B89F /* CleverTap+DCDomain.h */,
+				5709005227FD8E1E0011B89F /* CleverTap+SCDomain.h */,
 				57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */,
 				D0CACF8A20B890EA00A02327 /* CleverTap+SSLPinning.h */,
 				07B9454F219EA38F00D4C542 /* CleverTap+Inbox.h */,
@@ -1280,7 +1280,7 @@
 				D0BD759D241760C60006EE55 /* CTProductConfigController.h in Headers */,
 				4E49AE53275D24570074A774 /* CTValidationResultStack.h in Headers */,
 				07B94544219EA34300D4C542 /* CTInboxController.h in Headers */,
-				5709005327FD8E1F0011B89F /* CleverTap+DCDomain.h in Headers */,
+				5709005327FD8E1F0011B89F /* CleverTap+SCDomain.h in Headers */,
 				D0213D4F207D905800FE5740 /* CleverTapUTMDetail.h in Headers */,
 				071EB4D3217F6427008F0FAB /* CTAVPlayerViewController.h in Headers */,
 				07B9454A219EA34300D4C542 /* CTUserMO+CoreDataProperties.h in Headers */,

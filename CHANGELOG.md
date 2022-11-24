@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 ### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (June 16, 2022)
   
 ##### Added
-- Adds analytics support for upcoming CleverTap Direct Call iOS SDK.
+- Adds analytics support for upcoming CleverTap Signed Call iOS SDK.
 - `CleverTap.sharedInstance()?.profileRemoveValue(forKey: )` can now remove PII data like Email, Phone and Date Of Birth.
 
 ##### Fixed
