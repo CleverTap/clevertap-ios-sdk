@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ### [Version 4.1.6](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.6) (November 28, 2022)
 
 #### Fixed
-- Fixes custom html InApp for displaying video
+- Fixes a bug where embedded videos were not rendering in html inapp messages.
 
 ### [Version 4.1.5](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.5) (November 15, 2022)
 
