@@ -207,7 +207,7 @@
 - (void)handleImageTapGesture {
     CTNotificationButton *button = self.notification.buttons[0];
     NSURL *buttonCTA = button.actionURL;
-    NSString *buttonText = @"image";
+    NSString *buttonText = @"";
     NSString *campaignId = self.notification.campaignId;
     NSDictionary *buttonCustomExtras = button.customExtras;
     

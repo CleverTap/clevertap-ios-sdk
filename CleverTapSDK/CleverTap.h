@@ -173,6 +173,19 @@ typedef NS_ENUM(int, CTSignedCallEvent) {
  @method
  
  @abstract
+ Returns the CleverTap instance corresponding to the CleverTap accountId param.
+ 
+ @discussion
+ Returns the instance if such is already created, otherwise loads it from cache.
+ 
+ @param accountId  the CleverTap account id
+ */
++ (CleverTap *_Nullable)getGlobalInstance:(NSString *_Nonnull)accountId;
+
+/*!
+ @method
+ 
+ @abstract
  Set the CleverTap AccountID and Token
  
  @discussion
@@ -1296,6 +1309,13 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (NSString *_Nullable)getDomainString;
 
+/*!
+ @method
+ 
+ @abstract
+ Checks if a custom CleverTapID is valid
+ */
++ (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID;
 
 @end
 
