@@ -445,10 +445,13 @@ NSString *const kCHARGED_EVENT = @"Charged";
         switch (eventRawValue) {
             case 0:
                 signedCallEvent = CLTAP_SIGNED_CALL_OUTGOING_EVENT_NAME;
+                break;
             case 1:
                 signedCallEvent = CLTAP_SIGNED_CALL_INCOMING_EVENT_NAME;
+                break;
             case 2:
                 signedCallEvent = CLTAP_SIGNED_CALL_END_EVENT_NAME;
+                break;
             default: break;
         }
         if (signedCallEvent) {

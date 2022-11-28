@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 ### [Version 4.1.6](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.6) (November 28, 2022)
 
 #### Added
-Adds a public instance method `deleteInboxMessagesforID` for deleting multiple App Inbox messages by passing a collection of `messageID`s.
+- Adds a public instance method `deleteInboxMessagesforID` for deleting multiple App Inbox messages by passing a collection of `messageID`s.
 
 #### Fixed
 - Fixes a bug where embedded videos were not rendering in html inapp messages.
+- Fixes a bug where incorrect events were being fired for Signed Call iOS SDK.
 
 ### [Version 4.1.5](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.5) (November 15, 2022)
 
@@ -44,7 +45,7 @@ Adds a public instance method `deleteInboxMessagesforID` for deleting multiple A
 ### [Version 4.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.0) (June 16, 2022)
   
 ##### Added
-- Adds analytics support for upcoming CleverTap Direct Call iOS SDK.
+- Adds analytics support for upcoming CleverTap Signed Call iOS SDK.
 - `CleverTap.sharedInstance()?.profileRemoveValue(forKey: )` can now remove PII data like Email, Phone and Date Of Birth.
 
 ##### Fixed
