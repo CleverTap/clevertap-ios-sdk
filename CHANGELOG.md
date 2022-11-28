@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ### [Version 4.1.6](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.6) (November 28, 2022)
 
+#### Added
+Adds a public instance method `deleteInboxMessagesforID` for deleting multiple App Inbox messages by passing a collection of `messageID`s.
+
 #### Fixed
 - Fixes a bug where embedded videos were not rendering in html inapp messages.
 
