@@ -81,6 +81,11 @@ typedef enum {
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
     wkConfig.allowsInlineMediaPlayback = YES;
+    if (@available(iOS 10.0, *)) {
+        [wkConfig setMediaTypesRequiringUserActionForPlayback:WKAudiovisualMediaTypeNone];
+    } else {
+        // Fallback on earlier versions
+    }
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
