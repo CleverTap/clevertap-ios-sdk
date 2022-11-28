@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages;
 - (NSDictionary * _Nullable )messageForId:(NSString *)messageId;
 - (void)deleteMessageWithId:(NSString *)messageId;
+- (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds;
 - (void)markReadMessageWithId:(NSString *)messageId;
 
 @end

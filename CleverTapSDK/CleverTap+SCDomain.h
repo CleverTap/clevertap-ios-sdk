@@ -11,9 +11,9 @@
  @abstract
  When conformed to `CleverTapDomainDelegate`, domain available callback will be received if domain available
  
- @param domain the domain to be used by DC SDK
+ @param domain the domain to be used by SC SDK
  */
-- (void)onDCDomainAvailable:(NSString* _Nonnull)domain;
+- (void)onSCDomainAvailable:(NSString* _Nonnull)domain;
 
 /*!
  @method
@@ -21,8 +21,8 @@
  @abstract
  When conformed to `CleverTapDomainDelegate`, domain unavailable callback will be received if domain not available
  */
-- (void)onDCDomainUnavailable;
+- (void)onSCDomainUnavailable;
 @end
 
-@interface CleverTap (DCDomain)
+@interface CleverTap (SCDomain)
 @end

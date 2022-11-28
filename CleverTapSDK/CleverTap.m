@@ -70,7 +70,7 @@ static NSArray *sslCertNames;
 #import "CleverTapProductConfigPrivate.h"
 #import "CTProductConfigController.h"
 
-#import "CleverTap+DCDomain.h"
+#import "CleverTap+SCDomain.h"
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -4310,6 +4310,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.inboxController deleteMessageWithId:messageId];
 }
 
+- (void)deleteInboxMessagesForIDs:(NSArray<NSString *> *_Nonnull)messageIds {
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    [self.inboxController deleteMessagesWithId:messageIds];
+}
+
 - (void)markReadInboxMessageForID:(NSString *)messageId{
     if (![self _isInboxInitialized]) {
         return;
@@ -4912,16 +4919,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)onDomainAvailable {
     NSString *dcDomain = [self getDomainString];
-    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onDCDomainAvailable:)]) {
-        [self.domainDelegate onDCDomainAvailable: dcDomain];
+    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onSCDomainAvailable:)]) {
+        [self.domainDelegate onSCDomainAvailable: dcDomain];
     } else if (dcDomain == nil) {
         [self onDomainUnavailable];
     }
 }
 
 - (void)onDomainUnavailable {
-    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onDCDomainUnavailable)]) {
-        [self.domainDelegate onDCDomainUnavailable];
+    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onSCDomainUnavailable)]) {
+        [self.domainDelegate onSCDomainUnavailable];
     }
 }
 
