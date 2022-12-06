@@ -54,6 +54,7 @@
 @property (nonatomic, copy, readwrite) NSDictionary *actionExtras;
 
 @property (nonatomic, readonly) BOOL isLocalInApp;
+@property (nonatomic, readonly) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readonly) BOOL fallBackToNotificationSettings;
 @property (nonatomic, readonly) BOOL skipSettingsAlert;
 

@@ -58,6 +58,7 @@
 @property (nonatomic, copy, readwrite) NSDictionary *customExtras;
 
 @property (nonatomic, readwrite) BOOL isLocalInApp;
+@property (nonatomic, readwrite) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readwrite) BOOL fallBackToNotificationSettings;
 @property (nonatomic, readwrite) BOOL skipSettingsAlert;
 
@@ -82,6 +83,7 @@
             self.totalLifetimeCount = jsonObject[@"tlc"] ? [jsonObject[@"tlc"] intValue] : -1;
             self.totalDailyCount = jsonObject[@"tdc"] ? [jsonObject[@"tdc"] intValue] : -1;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
+            self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
             self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
             

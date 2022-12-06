@@ -2055,7 +2055,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         controller.delegate = self;
         [[self class] displayInAppDisplayController:controller];
 
-        if (notification.isLocalInApp) {
+        // Update local in-app count only if it is from local push primer.
+        if (notification.isLocalInApp && !notification.isPushSettingsSoftAlert) {
             [self.deviceInfo incrementLocalInAppCount];
         }
     }
@@ -5090,8 +5091,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [localInAppBuilder setFallbackToSettings:YES];
     [localInAppBuilder setSkipSettingsAlert:YES];
     NSMutableDictionary *alertSettings = [NSMutableDictionary dictionaryWithDictionary:localInAppBuilder.getLocalInAppSettings];
-    // Update isLocalInApp key as it is internal alert in-app, so that local in-app count will not increase.
-    alertSettings[@"isLocalInApp"] = @0;
+    // Update isPushSettingsSoftAlert key as it is internal alert in-app, so that local in-app count will not increase.
+    alertSettings[@"isPushSettingsSoftAlert"] = @1;
     [self prepareNotificationForDisplay:alertSettings];
 }
 
