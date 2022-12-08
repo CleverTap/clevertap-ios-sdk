@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.0) (December 12, 2022)
+
+#### Added
+- Adds a new `CTLocalInApp` builder class to create half-interstitial & alert local in-apps.
+- Adds below new public APIs for supporting push notification runtime permission.
+    - `promptPushPrimer`, `promptForPushPermission`, and `getNotificationPermissionStatusWithCompletionHandler`
+- Adds push permission callback method `onPushPermissionResponse` which returns true/false after user allow/deny notification permission.
+- Also supports Push Primer from in-app and app inbox campaigns created from CleverTap dashboard.
+- Refer [Push Primer doc](/docs/PushPrimer.md) for more details.
+
 ### [Version 4.1.6](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.1.6) (November 28, 2022)
 
 #### Added

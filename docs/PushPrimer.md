@@ -5,18 +5,18 @@ Push Primer allows you to enable runtime push permission for sending notificatio
 Starting with the 4.2.0 release, CleverTap supports Push primer for push notification runtime permission through local and campaign in-app or app inbox campaign.
 Minimum iOS version supported: 10.0
 
-#### Push Primer using Half-Interstitial local In-app
+### Push Primer using Half-Interstitial local In-app
 ```objc
 // Objective-C
 #import <CleverTapSDK/CTLocalInApp.h>
 
 // Required field.
 CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:HALF_INTERSTITIAL
-																titleText:@"Get Notified" 
-															  messageText:@"Please enable notifications on your device to use Push Notifications."
-												  followDeviceOrientation:YES
-														  positiveBtnText:@"Allow"
-														  negativeBtnText:@"Cancel"];
+                                                                titleText:@"Get Notified"
+                                                              messageText:@"Please enable notifications on your device to use Push Notifications."
+                                                  followDeviceOrientation:YES
+                                                          positiveBtnText:@"Allow"
+                                                          negativeBtnText:@"Cancel"];
 
 // Optional fields.
 [localInAppBuilder setFallbackToSettings:YES];	// default is NO.
@@ -37,12 +37,12 @@ CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:HALF_I
 import CleverTapSDK
 
 // Required field.
-let localInAppBuilder = CTLocalInApp(inAppType: CTLocalInAppType.HALF_INTERSTITIAL, 
-									 titleText: "Get Notified", 
-								   messageText: "Please enable notifications on your device to use Push Notifications.", 
-					   followDeviceOrientation: true, 
-					           positiveBtnText: "Allow", 
-					           negativeBtnText: "Cancel")
+let localInAppBuilder = CTLocalInApp(inAppType: CTLocalInAppType.HALF_INTERSTITIAL,
+                                     titleText: "Get Notified",
+                                     messageText: "Please enable notifications on your device to use Push Notifications.",
+                                     followDeviceOrientation: true,
+                                     positiveBtnText: "Allow",
+                                     negativeBtnText: "Cancel")
 
 // Optional fields.
 localInAppBuilder.setFallbackToSettings(true)
@@ -58,18 +58,18 @@ localInAppBuilder.setImageUrl("https://icons.iconarchive.com/icons/treetog/junio
 // Prompt Push Primer with above settings.
 CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
 ```
-#### Push Primer using Alert local In-app
+### Push Primer using Alert local In-app
 ```objc
 // Objective-C
 #import <CleverTapSDK/CTLocalInApp.h>
 
 // Required field.
 CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:ALERT
-																titleText:@"Get Notified" 
-															  messageText:@"Enable Notification permission"
-												  followDeviceOrientation:YES
-														  positiveBtnText:@"Allow"
-														  negativeBtnText:@"Cancel"];
+                                                                titleText:@"Get Notified"
+                                                              messageText:@"Enable Notification permission"
+                                                  followDeviceOrientation:YES
+                                                          positiveBtnText:@"Allow"
+                                                          negativeBtnText:@"Cancel"];
 
 // Optional fields.
 [localInAppBuilder setFallbackToSettings:YES];
@@ -82,12 +82,12 @@ CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:ALERT
 import CleverTapSDK
 
 // Required field.
-let localInAppBuilder = CTLocalInApp(inAppType: CTLocalInAppType.ALERT, 
-									 titleText: "Get Notified", 
-								   messageText: "Enable Notification permission", 
-					   followDeviceOrientation: true, 
-					           positiveBtnText: "Allow", 
-					           negativeBtnText: "Cancel")
+let localInAppBuilder = CTLocalInApp(inAppType: .ALERT,
+                                     titleText: "Get Notified",
+                                     messageText: "Enable Notification permission",
+                                     followDeviceOrientation: true,
+                                     positiveBtnText: "Allow",
+                                     negativeBtnText: "Cancel")
 
 // Optional fields.
 localInAppBuilder.setFallbackToSettings(true)
@@ -95,7 +95,7 @@ localInAppBuilder.setFallbackToSettings(true)
 // Prompt Push Primer with above settings.
 CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
 ```
-#### Call iOS Push Permission dialog without using Push Primer
+### Call iOS Push Permission dialog without using Push Primer
 Takes boolean as a parameter. If true and permission is denied then we fallback to app’s notification settings. If false then we just throw a verbose log saying permission is denied.
 ```objc
 // Objective-C
@@ -107,7 +107,7 @@ Takes boolean as a parameter. If true and permission is denied then we fallback 
 
 CleverTap.sharedInstance()?.prompt(forPushPermission: true)
 ```
-#### Get iOS Push notification permission status
+### Get iOS Push notification permission status
 Returns status of the push notification in completion handler.
 ```objc
 // Objective-C
@@ -131,7 +131,7 @@ CleverTap.sharedInstance()?.getNotificationPermissionStatus(completionHandler: {
 	}
 })
 ```
-####  CTLocalInApp builder methods description
+###  CTLocalInApp builder methods description
 
 Builder Methods | Parameters | Description | Required
 :---:|:---:|:---:|:---
@@ -149,10 +149,9 @@ Builder Methods | Parameters | Description | Required
 `setBtnTextColor(NSString *)` | Accepts Hex color as String | Sets the color of text for both positive/negative buttons | Optional
 `setBtnBackgroundColor(NSString *)` | Accepts Hex color as String | Sets the background color for both positive/negative buttons | Optional
 `setBtnBorderRadius(NSString *)` | Text | Sets the radius for both positive/negative buttons. Default radius is “2” if not set | Optional
-|
 `(NSDictionary *)getLocalInAppSettings` | Returns Dictionary containing all parameters | The dictionary is passed as an argument in `promptPushPrimer` to display push primer | Required
 
-####  Available Callbacks for Push Primer in iOS
+###  Available Callbacks for Push Primer in iOS
 Based on notification permission grant/deny, we’ll be providing a callback with permission status. To use this, make sure your class conforms the `CleverTapPushPermissionDelegate` and implement following method as below:
 ```objc
 // Objective-C
@@ -174,7 +173,7 @@ func  onPushPermissionResponse(_ accepted: Bool) {
 	print("Push Permission response called ---> accepted = \(accepted)")
 }
 ```
-####  Campaign Push Primer
+###  Campaign Push Primer
 We also support campaign push primer with In-App and App Inbox which can be created from CleverTap dashboard.
 
 
