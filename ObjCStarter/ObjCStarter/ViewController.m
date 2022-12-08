@@ -5,7 +5,7 @@
 #import <CleverTapSDK/CleverTapInstanceConfig.h>
 #import <CleverTapSDK/CleverTap+Inbox.h>
 #import <CleverTapSDK/CleverTap+PushPermission.h>
-#import "CTLocalInApp.h"
+#import <CleverTapSDK/CTLocalInApp.h>
 
 @interface ViewController () <UITableViewDelegate, UITableViewDataSource, CleverTapInboxViewControllerDelegate, CleverTapPushPermissionDelegate>
 

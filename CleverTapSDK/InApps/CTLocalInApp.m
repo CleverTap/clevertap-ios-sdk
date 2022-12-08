@@ -42,6 +42,7 @@ static NSDictionary *_inAppTypeMap;
 }
 
 - (void)addRequiredProperties {
+    self.inAppSettings[@"wzrk_id"] = @"";
     self.inAppSettings[@"isLocalInApp"] = @1;
     self.inAppSettings[@"close"] = @1;
     self.inAppSettings[@"type"] = self.inAppType;
