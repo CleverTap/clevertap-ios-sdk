@@ -1,11 +1,15 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 
+__attribute__((deprecated("This protocol has been deprecated and will be removed in the future versions of this SDK.")))
 @protocol CleverTapProductConfigDelegate <NSObject>
 @optional
-- (void)ctProductConfigFetched;
-- (void)ctProductConfigActivated;
-- (void)ctProductConfigInitialized;
+- (void)ctProductConfigFetched
+__attribute__((deprecated("This protocol method has been deprecated and will be removed in the future versions of this SDK.")));
+- (void)ctProductConfigActivated
+__attribute__((deprecated("This protocol method has been deprecated and will be removed in the future versions of this SDK.")));
+- (void)ctProductConfigInitialized
+__attribute__((deprecated("This protocol method has been deprecated and will be removed in the future versions of this SDK.")));
 @end
 
 @interface CleverTap(ProductConfig)
@@ -32,7 +36,8 @@
 
 @interface CleverTapProductConfig : NSObject
 
-@property (nonatomic, weak) id<CleverTapProductConfigDelegate> _Nullable delegate;
+@property (nonatomic, weak) id<CleverTapProductConfigDelegate> _Nullable delegate
+__attribute__((deprecated("This property has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -41,7 +46,8 @@
  Fetches product configs, adhering to the default minimum fetch interval.
  */
 
-- (void)fetch;
+- (void)fetch
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -50,7 +56,8 @@
  Fetches product configs, adhering to the specified minimum fetch interval in seconds.
  */
 
-- (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval;
+- (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -59,7 +66,8 @@
  Sets the minimum interval between successive fetch calls.
  */
 
-- (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval;
+- (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -68,7 +76,8 @@
  Activates Fetched Config data to the Active Config, so that the fetched key value pairs take effect.
  */
 
-- (void)activate;
+- (void)activate
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -77,7 +86,8 @@
  Fetches and then activates the fetched product configs.
  */
 
-- (void)fetchAndActivate;
+- (void)fetchAndActivate
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -86,7 +96,8 @@
  Sets default configs using the given Dictionary
  */
 
-- (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults;
+- (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -95,7 +106,8 @@
  Sets default configs using the given plist
  */
 
-- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName;
+- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -104,7 +116,8 @@
  Returns the config value of the given key
  */
 
-- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key;
+- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -113,7 +126,8 @@
  Returns the last fetch timestamp
  */
 
-- (NSDate *_Nullable)getLastFetchTimeStamp;
+- (NSDate *_Nullable)getLastFetchTimeStamp
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 /*!
  @method
@@ -122,7 +136,8 @@
  Deletes all activated, fetched and defaults configs and resets all Product Config settings.
  */
 
-- (void)reset;
+- (void)reset
+__attribute__((deprecated("This method has been deprecated and will be removed in the future versions of this SDK.")));
 
 
 @end
