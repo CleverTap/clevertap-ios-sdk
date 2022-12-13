@@ -53,6 +53,11 @@
 @property (nonatomic, copy, readonly) NSDictionary *customExtras;
 @property (nonatomic, copy, readwrite) NSDictionary *actionExtras;
 
+@property (nonatomic, readonly) BOOL isLocalInApp;
+@property (nonatomic, readonly) BOOL isPushSettingsSoftAlert;
+@property (nonatomic, readonly) BOOL fallBackToNotificationSettings;
+@property (nonatomic, readonly) BOOL skipSettingsAlert;
+
 - (instancetype)init __unavailable;
 - (instancetype)initWithJSON:(NSDictionary*)json;
 

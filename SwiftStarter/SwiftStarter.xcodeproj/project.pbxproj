@@ -1581,6 +1581,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 585FBFF86F84A4168E75DF91 /* Pods-SwiftStarter-NotificationService.debug.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;
@@ -1603,6 +1604,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5D2DC4598E7985731AD60960 /* Pods-SwiftStarter-NotificationService.release.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A5J34NR598;

@@ -22,6 +22,7 @@
 NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
 NSString *const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
 NSString *const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
+NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
 
 static BOOL _wifi;
 
@@ -54,6 +55,7 @@ static CTTelephonyNetworkInfo *_networkInfo;
 @property (strong, readwrite) NSString *fallbackDeviceId;
 @property (strong, readwrite) NSString *vendorIdentifier;
 @property (strong, readwrite) NSMutableArray *validationErrors;
+@property (assign, readwrite) int localInAppCount;
 
 @end
 
@@ -476,6 +478,16 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString *)signedCallSDKVersion {
     return _signedCallSDKVersion;
+}
+
+- (void)incrementLocalInAppCount {
+    self.localInAppCount = self.localInAppCount + 1;
+    [CTPreferences putInt:self.localInAppCount forKey:kCLTAP_LOCAL_INAPP_COUNT];
+}
+
+- (int)getLocalInAppCount {
+    self.localInAppCount = (int) [CTPreferences getIntForKey:kCLTAP_LOCAL_INAPP_COUNT withResetValue:0];
+    return self.localInAppCount;
 }
 
 @end

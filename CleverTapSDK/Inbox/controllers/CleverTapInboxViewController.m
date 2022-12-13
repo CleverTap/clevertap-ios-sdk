@@ -428,6 +428,10 @@ static const int kMaxTags = 3;
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
             [self.parentViewController.view ct_makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
+        } else if ([actionType caseInsensitiveCompare:@"rfp"] == NSOrderedSame) {
+            BOOL fbSettings = link[@"fbSettings"] ? [link[@"fbSettings"] boolValue] : NO;
+            [self.analyticsDelegate messageDidSelectForPushPermission:fbSettings];
+            return;
         }
     }
     [self _notifyMessageSelected:message atIndex:index withButtonIndex:buttonIndex];
