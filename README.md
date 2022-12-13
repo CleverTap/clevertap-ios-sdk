@@ -63,6 +63,10 @@ For more details, refer to our [Advanced iOS Push Notifications](https://develop
 
 CleverTap Geofence SDK provides Geofencing capabilities to CleverTap iOS SDK. To find the installation & integration steps for CleverTap Geofence SDK, click [here](https://github.com/CleverTap/clevertap-geofence-ios).
 
+## Push Primer
+
+CleverTap iOS SDK supports Push Primer for push notification runtime permission, refer [Push Primer doc](/docs/PushPrimer.md) for more details.
+
 ## 𝌡 Example Usage
 * A [demo application](/ObjCStarter) showing the integration of our SDK in Objective-C language.
 * A [demo application](/SwiftStarter) showing the integration of our SDK in Swift language.

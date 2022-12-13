@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // Configure and init the default shared CleverTap instance (add CleverTap Account ID and Account Token in your .plist file)
         CleverTap.autoIntegrate()
-        CleverTap.setDebugLevel(CleverTapLogLevel.off.rawValue)
+        CleverTap.setDebugLevel(CleverTapLogLevel.debug.rawValue)
         CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(true)
         
         // Configure and init an additional instance

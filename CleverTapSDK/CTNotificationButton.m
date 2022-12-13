@@ -10,6 +10,8 @@
 @property (nonatomic, copy, readwrite) NSString *borderColor;
 @property (nonatomic, copy, readwrite) NSString *backgroundColor;
 @property (nonatomic, copy, readwrite) NSDictionary *customExtras;
+@property (nonatomic, copy, readwrite) NSString *type;
+@property (nonatomic, readwrite) BOOL fallbackToSettings;
 @property (nonatomic, readwrite) NSURL *actionURL;
 
 @property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
@@ -41,6 +43,8 @@
                         self.error = [e debugDescription];
                     }
                 }
+                self.type = actions[@"type"];
+                self.fallbackToSettings = actions[@"fbSettings"] ? [actions[@"fbSettings"] boolValue] : NO;
             }
             
         } @catch (NSException *e) {

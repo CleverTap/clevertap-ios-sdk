@@ -1,7 +1,8 @@
 import UIKit
 import CleverTapSDK
+import UserNotifications
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, CleverTapPushPermissionDelegate {
     
     @IBOutlet var tblEvent: UITableView!
     var eventList: [String] = [String]()
@@ -15,6 +16,7 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        CleverTap.sharedInstance()?.setPushPermissionDelegate(self)
         loadData()
         registerAppInbox()
         initializeAppInbox()
@@ -45,6 +47,10 @@ extension ViewController {
         eventList.append("Increment User Profile Property")
         eventList.append("Decrement User Profile Property")
         eventList.append("Activate Custom domain proxy")
+        eventList.append("Prompt for Push Notification")
+        eventList.append("Local Half Interstitial Push Primer")
+        eventList.append("Local Alert Push Primer")
+        eventList.append("InApp Campaign Push Primer")
         self.tblEvent.reloadData()
     }
     
@@ -112,7 +118,21 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 9:
             decrementUserProfileProperty()
             break;
-        case 10: activateCustomDomain()
+        case 10:
+            activateCustomDomain()
+            break;
+        case 11:
+            promptForPushNotification()
+            break;
+        case 12:
+            createLocalHalfInterstitialPushPrimer()
+            break;
+        case 13:
+            createLocalAlertPushPrimer()
+            break;
+        case 14:
+            createInAppCampaignPushPrimer()
+            break;
         default:
             break;
         }
@@ -252,6 +272,38 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         let storyBoard = UIStoryboard.init(name: "Main", bundle: nil)
         let customDomainVC = storyBoard.instantiateViewController(withIdentifier: "CustomDomainVC")
         self.navigationController?.pushViewController(customDomainVC, animated: true)
+    }
+    
+    func promptForPushNotification() {
+        CleverTap.sharedInstance()?.prompt(forPushPermission: true)
+    }
+    
+    func createLocalHalfInterstitialPushPrimer() {
+        CleverTap.sharedInstance()?.getNotificationPermissionStatus(completionHandler: { status in
+            if status == .notDetermined || status == .denied {
+                let localInAppBuilder = CTLocalInApp(inAppType: CTLocalInAppType.HALF_INTERSTITIAL, titleText: "Get Notified", messageText: "Please enable notifications on your device to use Push Notifications.", followDeviceOrientation: true, positiveBtnText: "Allow", negativeBtnText: "Cancel")
+                localInAppBuilder.setFallbackToSettings(true)
+                localInAppBuilder.setImageUrl("https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png")
+                CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
+            } else {
+                print("Push Persmission is already enabled.")
+            }
+        })
+    }
+    
+    func createLocalAlertPushPrimer() {
+        let localInAppBuilder = CTLocalInApp(inAppType: .ALERT, titleText: "Get Notified", messageText: "Enable Notification permission", followDeviceOrientation: true, positiveBtnText: "Allow", negativeBtnText: "Cancel")
+        localInAppBuilder.setFallbackToSettings(true)
+        CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
+    }
+    
+    func createInAppCampaignPushPrimer() {
+        CleverTap.sharedInstance()?.recordEvent("InAppCampaignPushPrimer")
+    }
+    
+    // MARK: CleverTapPushPermissionDelegate
+    func onPushPermissionResponse(_ accepted: Bool) {
+        print("Push Permission response called ---> accepted = \(accepted)")
     }
 }
 
