@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 4.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.0) (December 12, 2022)
+### [Version 4.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.0) (December 13, 2022)
 
 #### Added
 - Adds a new `CTLocalInApp` builder class to create half-interstitial & alert local in-apps.
