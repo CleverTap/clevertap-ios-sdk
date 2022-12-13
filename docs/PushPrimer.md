@@ -2,7 +2,7 @@
 
 Push Primer allows you to enable runtime push permission for sending notifications from an app.
 
-Starting with the 4.2.0 release, CleverTap supports Push primer for push notification runtime permission through local and campaign in-app or app inbox campaign.
+Starting with the 4.2.0 release, CleverTap supports Push primer for push notification runtime permission through local in-app.
 Minimum iOS version supported: 10.0
 
 ### Push Primer using Half-Interstitial local In-app
@@ -173,7 +173,5 @@ func  onPushPermissionResponse(_ accepted: Bool) {
 	print("Push Permission response called ---> accepted = \(accepted)")
 }
 ```
-###  Campaign Push Primer
-We also support campaign push primer with In-App and App Inbox which can be created from CleverTap dashboard.
 
 

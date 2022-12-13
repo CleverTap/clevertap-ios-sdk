@@ -42,6 +42,8 @@
 #import "CTInterstitialImageViewController.h"
 #import "CTHalfInterstitialImageViewController.h"
 #import "CleverTap+InAppNotifications.h"
+#import "CTLocalInApp.h"
+#import "CleverTap+PushPermission.h"
 #endif
 
 #import "CTLocationManager.h"
@@ -72,9 +74,6 @@ static NSArray *sslCertNames;
 
 #import "CleverTap+SCDomain.h"
 #import <objc/runtime.h>
-
-#import "CTLocalInApp.h"
-#import "CleverTap+PushPermission.h"
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
@@ -240,7 +239,9 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
 @property (atomic, weak) id <CleverTapDomainDelegate> domainDelegate;
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
+#endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -276,7 +277,9 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 
 @synthesize featureFlagsDelegate=_featureFlagsDelegate;
 @synthesize productConfigDelegate=_productConfigDelegate;
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 @synthesize pushPermissionDelegate=_pushPermissionDelegate;
+#endif
 
 static CTPlistInfo *_plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
@@ -2146,6 +2149,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [controller hide:true];
 }
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)handleInAppPushPrimer:(CTInAppNotification *)notification
            fromViewController:(CTInAppDisplayViewController *)controller
        withFallbackToSettings:(BOOL)isFallbackToSettings {
@@ -2158,6 +2162,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)inAppPushPrimerDidDismissed {
     [self notifyPushPermissionResponse:NO];
 }
+#endif
 
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
     UIApplication *sharedApplication = [[self class] getSharedApplication];
@@ -4981,6 +4986,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - Push Permission
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+
 - (void)setPushPermissionDelegate:(id<CleverTapPushPermissionDelegate>)delegate {
     if ([[self class] runningInsideAppExtension]){
         CleverTapLogDebug(self.config.logLevel, @"%@: setPushPermissionDelegate is a no-op in an app extension.", self);
@@ -5114,6 +5121,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self openURL:url forModule:@"PushPermission"];
     }];
 }
+#endif
+
 #pragma mark - Utility
 
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
