@@ -8,7 +8,6 @@ All notable changes to this project will be documented in this file.
 - Adds below new public APIs for supporting push notification runtime permission.
     - `promptPushPrimer`, `promptForPushPermission`, and `getNotificationPermissionStatusWithCompletionHandler`
 - Adds push permission callback method `onPushPermissionResponse` which returns true/false after user allow/deny notification permission.
-- Also supports Push Primer from in-app and app inbox campaigns created from CleverTap dashboard.
 - Refer [Push Primer doc](/docs/PushPrimer.md) for more details.
 - Updated `SDWebImage` dependency.
 
