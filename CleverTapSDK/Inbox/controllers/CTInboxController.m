@@ -122,6 +122,19 @@ static NSManagedObjectContext *privateContext;
     }];
 }
 
+- (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
+    [privateContext performBlock:^{
+        for (NSString *ids in messageIds) {
+            CTMessageMO *message = [self _messageForId:ids];
+            if (message) {
+                [message setValue:@YES forKey:@"isRead"];
+            }
+        }
+        [self _save];
+        [self notifyUpdate];
+    }];
+}
+
 - (NSDictionary *)messageForId:(NSString *)messageId {
     if (!self.isInitialized) return nil;
     CTMessageMO *msg = [self _messageForId:messageId];

@@ -4373,6 +4373,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.inboxController markReadMessageWithId:messageId];
 }
 
+- (void)markReadInboxMessagesForIDs:(NSArray<NSString *> *_Nonnull)messageIds{
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    [self.inboxController markReadMessagesWithId:messageIds];
+}
+
 - (void)registerInboxUpdatedBlock:(CleverTapInboxUpdatedBlock)block {
     if (!_inboxUpdateBlocks) {
         _inboxUpdateBlocks = [NSMutableArray new];
