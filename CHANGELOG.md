@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.1) (February 03, 2023)
+
+#### Added
+- Adds a new `enableLocation` API for enabling location in case of SPM.
+- Adds a public instance method `markReadInboxMessagesForIDs` for marking multiple App Inbox messages as read by passing a collection of `messageID`s.
+
 ### [Version 4.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.0) (December 13, 2022)
 
 #### Added
