@@ -80,4 +80,34 @@
     return result;
 }
 
++ (BOOL)isNullOrEmpty:(id)obj
+{
+    // Need to check for NSString to support RubyMotion.
+    // Ruby String respondsToSelector(count) is true for count: in RubyMotion
+    return obj == nil
+    || ([obj respondsToSelector:@selector(length)] && [obj length] == 0)
+    || ([obj respondsToSelector:@selector(count)]
+        && ![obj isKindOfClass:[NSString class]] && [obj count] == 0);
+}
+
++ (NSString *)jsonObjectToString:(id)object {
+    if ([object isKindOfClass:[NSString class]]) {
+        return object;
+    }
+    @try {
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:object
+                                                           options:0
+                                                             error:&error];
+        if (error) {
+            return @"";
+        }
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        return jsonString;
+    }
+    @catch (NSException *exception) {
+        return @"";
+    }
+}
+
 @end

@@ -17,5 +17,8 @@ framework module CleverTapSDK {
     header "CleverTapJSInterface.h"
     header "CleverTap+InAppNotifications.h"
     header "CleverTap+SCDomain.h"
+    header "CTLocalInApp.h"
+    header "CleverTap+CTVar.h"
+    header "CTVar.h"
     export *
 }
