@@ -5109,13 +5109,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }
 #else
-    CleverTapLogDebug(_config.logLevel, @"%@: syncChanges can only be called from Debug configurations/builds", self);
+    CleverTapLogDebug(_config.logLevel, @"%@: syncVariables can only be called from Debug configurations/builds", self);
 #endif
 }
 
 - (void)syncVariables:(BOOL)isProduction {
     if (isProduction) {
-        CleverTapLogDebug(_config.logLevel, @"%@: syncChanges can only be called from Debug configurations/builds", self);
+        CleverTapLogDebug(_config.logLevel, @"%@: syncVariables can only be called from Debug configurations/builds", self);
     } else {
         [self syncVariables];
     }
@@ -5168,7 +5168,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [allVars addEntriesFromDictionary:flattenedMap];
         }
         else {
-            varData[@"type"] = varValue.kind;
+            if ([varValue.kind isEqualToString:CT_KIND_INT] || [varValue.kind isEqualToString:CT_KIND_FLOAT]) {
+                varData[@"type"] = @"number";
+            }
+            else {
+                varData[@"type"] = varValue.kind;
+            }
             varData[@"defaultValue"] = varValue.defaultValue;
             allVars[key] = varData;
         }
