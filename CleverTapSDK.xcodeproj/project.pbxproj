@@ -222,10 +222,6 @@
 		4E7929FA29799E8F00B81F3C /* CTDomainFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7929F729799E8F00B81F3C /* CTDomainFactory.h */; };
 		4E7929FB29799E8F00B81F3C /* CTDomainFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929F829799E8F00B81F3C /* CTDomainFactory.m */; };
 		4E7929FC29799E8F00B81F3C /* CTDomainFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929F829799E8F00B81F3C /* CTDomainFactory.m */; };
-		4E7929FF2979CAE100B81F3C /* CTSSLPinningFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7929FD2979CAE100B81F3C /* CTSSLPinningFactory.h */; };
-		4E792A002979CAE100B81F3C /* CTSSLPinningFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7929FD2979CAE100B81F3C /* CTSSLPinningFactory.h */; };
-		4E792A012979CAE100B81F3C /* CTSSLPinningFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929FE2979CAE100B81F3C /* CTSSLPinningFactory.m */; };
-		4E792A022979CAE100B81F3C /* CTSSLPinningFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929FE2979CAE100B81F3C /* CTSSLPinningFactory.m */; };
 		4E838C40299F419900ED0875 /* ContentMerger.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E838C3E299F419800ED0875 /* ContentMerger.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4E838C41299F419900ED0875 /* ContentMerger.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E838C3E299F419800ED0875 /* ContentMerger.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4E838C42299F419900ED0875 /* ContentMerger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E838C3F299F419900ED0875 /* ContentMerger.m */; };
@@ -625,8 +621,6 @@
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
 		4E7929F729799E8F00B81F3C /* CTDomainFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDomainFactory.h; sourceTree = "<group>"; };
 		4E7929F829799E8F00B81F3C /* CTDomainFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDomainFactory.m; sourceTree = "<group>"; };
-		4E7929FD2979CAE100B81F3C /* CTSSLPinningFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSSLPinningFactory.h; sourceTree = "<group>"; };
-		4E7929FE2979CAE100B81F3C /* CTSSLPinningFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSSLPinningFactory.m; sourceTree = "<group>"; };
 		4E838C3E299F419800ED0875 /* ContentMerger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContentMerger.h; sourceTree = "<group>"; };
 		4E838C3F299F419900ED0875 /* ContentMerger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContentMerger.m; sourceTree = "<group>"; };
 		4E838C4429A0C94B00ED0875 /* CleverTap+CTVar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+CTVar.h"; sourceTree = "<group>"; };
@@ -1255,8 +1249,6 @@
 				4E6383D6296DE9A7001E83E3 /* CTRequestSender.m */,
 				4E7929F729799E8F00B81F3C /* CTDomainFactory.h */,
 				4E7929F829799E8F00B81F3C /* CTDomainFactory.m */,
-				4E7929FD2979CAE100B81F3C /* CTSSLPinningFactory.h */,
-				4E7929FE2979CAE100B81F3C /* CTSSLPinningFactory.m */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -1328,7 +1320,6 @@
 				D0BD75AF241769E40006EE55 /* CleverTap+ProductConfig.h in Headers */,
 				D014B8F020E2FAB1001E0780 /* CTPlistInfo.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
-				4E792A002979CAE100B81F3C /* CTSSLPinningFactory.h in Headers */,
 				D0BD75AC241769710006EE55 /* CleverTap+FeatureFlags.h in Headers */,
 				4E7929FA29799E8F00B81F3C /* CTDomainFactory.h in Headers */,
 				4E25E3CC278887A80008C888 /* CTFlexibleIdentityRepo.h in Headers */,
@@ -1428,7 +1419,6 @@
 				071EB4FD217F6427008F0FAB /* CTInAppUtils.h in Headers */,
 				D0213D54207D93C300FE5740 /* CTConstants.h in Headers */,
 				D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */,
-				4E7929FF2979CAE100B81F3C /* CTSSLPinningFactory.h in Headers */,
 				071EB4F0217F6427008F0FAB /* CTInAppDisplayViewControllerPrivate.h in Headers */,
 				4987C668251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h in Headers */,
 				D01A0899207ED98300423D6F /* CTPlistInfo.h in Headers */,
@@ -1798,7 +1788,6 @@
 				071EB519217F6513008F0FAB /* CTInAppFCManager.m in Sources */,
 				4EA64A2F296C1190001D9B22 /* CTRequest.m in Sources */,
 				49C189A6243B13110003E4D4 /* CleverTapFeatureFlags.m in Sources */,
-				4E792A022979CAE100B81F3C /* CTSSLPinningFactory.m in Sources */,
 				4E41FD95294F46510001FBED /* CTVar.m in Sources */,
 				4E6383DA296DE9A8001E83E3 /* CTRequestSender.m in Sources */,
 				D014B8ED20E2FAA2001E0780 /* CleverTapTrackedViewController.m in Sources */,
@@ -1959,7 +1948,6 @@
 				49E2B18324178E7400AD704B /* CleverTapConfigValue.m in Sources */,
 				07B94540219EA34300D4C542 /* CTInboxController.m in Sources */,
 				4E25E3C4278887A70008C888 /* CTLegacyIdentityRepo.m in Sources */,
-				4E792A012979CAE100B81F3C /* CTSSLPinningFactory.m in Sources */,
 				078C63AA22420321001FDDB8 /* CleverTapJSInterface.m in Sources */,
 				4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */,
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
