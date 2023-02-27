@@ -5136,12 +5136,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200) {
                 CleverTapLogDebug(self->_config.logLevel, @"%@: Vars synced successfully", self);
-            } else {
-                CleverTapLogDebug(self->_config.logLevel, @"%@: error syncing vars", self);
             }
-        } else {
-            CleverTapLogDebug(self->_config.logLevel, @"%@: error syncing vars", self);
+            else if (httpResponse.statusCode == 401) {
+                CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test device", self);
+            }
         }
+        CT_TRY
+        id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+        if (jsonResp[@"error"]) {
+            CleverTapLogDebug(self->_config.logLevel, @"%@: Error while syncing vars: %@", self, jsonResp[@"error"]);
+        }
+        CT_END_TRY
         dispatch_semaphore_signal(semaphore);
     }];
     [ctRequest onError:^(NSError * _Nullable error) {
