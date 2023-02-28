@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 //@property (readonly, strong) NSMutableArray *fileReadyBlocks;
 @property (readonly, strong) NSMutableArray *valueChangedBlocks;
 @property (readonly) BOOL fileIsPending;
-@property (nonatomic, unsafe_unretained, nullable) id <LPVarDelegate> delegate;
+@property (nonatomic, unsafe_unretained, nullable) id <CTVarDelegate> delegate;
 @property (readonly) BOOL hasChanged;
 
 - (void) update;

@@ -363,7 +363,7 @@ CTVarCache *varCache;
 //}
 
 // TODO: Check if this method is needed
-- (void)setDelegate:(id<LPVarDelegate>)delegate
+- (void)setDelegate:(id<CTVarDelegate>)delegate
 {
 //    CT_TRY
     _delegate = delegate;

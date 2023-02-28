@@ -12,7 +12,7 @@ typedef void (^CleverTapForceContentUpdateBlock)(BOOL success);
  * Receives callbacks for {@link CTVar}
  */
 NS_SWIFT_NAME(VarDelegate)
-@protocol LPVarDelegate <NSObject>
+@protocol CTVarDelegate <NSObject>
 @optional
 /**
  * For file variables, called when the file is ready.
@@ -127,9 +127,9 @@ NS_SWIFT_NAME(Var)
 
 /**
  * Sets the delegate of the variable in order to use
- * {@link LPVarDelegate::fileIsReady:} and {@link LPVarDelegate::valueDidChange:}
+ * {@link CTVarDelegate::fileIsReady:} and {@link CTVarDelegate::valueDidChange:}
  */
-- (void)setDelegate:(nullable id <LPVarDelegate>)delegate;
+- (void)setDelegate:(nullable id <CTVarDelegate>)delegate;
 
 /**
  * @{
