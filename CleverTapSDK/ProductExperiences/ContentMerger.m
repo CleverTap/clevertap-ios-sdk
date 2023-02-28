@@ -27,7 +27,7 @@
         return diff;
     }
     
-    //TODO: add merging for array types from LP ContentMerger
+    // TODO: add merging for array types from LP ContentMerger
     
     NSMutableDictionary *merged = [NSMutableDictionary dictionary];
     if ([vars isKindOfClass:[NSDictionary class]]) {

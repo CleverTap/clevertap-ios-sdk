@@ -5129,7 +5129,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSArray *payload = @[meta,varsPayload];
     
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:[NSString stringWithFormat:@"https://%@/defineVars",self.domainFactory.redirectDomain]];
+    
+    // TODO: REMOVE STATIC ENDPOINT
+//    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:[NSString stringWithFormat:@"https://%@/defineVars",self.domainFactory.redirectDomain]];
+    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:@"https://sk1-staging-25.clevertap-prod.com/defineVars"];
     
     [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
@@ -5138,7 +5141,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 CleverTapLogDebug(self->_config.logLevel, @"%@: Vars synced successfully", self);
             }
             else if (httpResponse.statusCode == 401) {
-                CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test device", self);
+                CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test profile. Please mark this profile as a test profile from the CleverTap dashboard.", self);
             }
         }
         CT_TRY
@@ -5175,6 +5178,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         else {
             if ([varValue.kind isEqualToString:CT_KIND_INT] || [varValue.kind isEqualToString:CT_KIND_FLOAT]) {
                 varData[@"type"] = @"number";
+            }
+            else if ([varValue.kind isEqualToString:CT_KIND_BOOLEAN]) {
+                varData[@"type"] = @"boolean";
             }
             else {
                 varData[@"type"] = varValue.kind;

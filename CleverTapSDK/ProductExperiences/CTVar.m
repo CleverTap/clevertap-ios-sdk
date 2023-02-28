@@ -241,7 +241,7 @@ CTVarCache *varCache;
     NSObject *oldValue = _value;
     _value = [varCache getMergedValueFromComponentArray:_nameComponents];
     
-    //TODO: hadStarted logic
+    // TODO: hadStarted logic
     if ([_value isEqual:oldValue] && _hadStarted) {
         return;
     }
@@ -282,7 +282,7 @@ CTVarCache *varCache;
 //        }
 //    }
     
-    //TODO: hadStarted logic
+    // TODO: hadStarted logic
     // TODO: Add hasStarted equivalent logic
     if (varCache.appLaunchedRecorded) {
         _hadStarted = YES;
