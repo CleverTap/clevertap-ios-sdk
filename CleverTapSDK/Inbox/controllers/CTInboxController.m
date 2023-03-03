@@ -103,9 +103,19 @@ static NSManagedObjectContext *privateContext;
 - (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds {
     NSMutableArray *toDeleteInboxMessages = [NSMutableArray new];
     for (NSString *ids in messageIds) {
-        CTMessageMO *msg = [self _messageForId:ids];
-            [toDeleteInboxMessages addObject:msg];
+        if (ids != nil && ![ids isEqualToString:@""]){
+            CTMessageMO *msg = [self _messageForId:ids];
+            if (msg) {
+                [toDeleteInboxMessages addObject:msg];
+            }
+            else {
+                NSLog(@"%@ is invalid App-inbox ID", ids);
+            }
         }
+        else {
+            NSLog(@"App Inbox ID is null or not a string");
+        }
+    }
     if ([toDeleteInboxMessages count] > 0) {
         [self _deleteMessages:toDeleteInboxMessages];
     }
