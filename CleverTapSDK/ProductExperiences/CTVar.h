@@ -139,7 +139,7 @@ NS_SWIFT_NAME(Var)
 - (id)objectAtIndex:(NSUInteger )index;
 - (id)objectForKeyPath:(nullable id)firstComponent, ... NS_REQUIRES_NIL_TERMINATION;
 - (id)objectForKeyPathComponents:(nullable NSArray<NSString *> *)pathComponents;
-- (NSUInteger)count;
+//- (NSUInteger)count;
 
 - (nullable NSNumber *)numberValue;
 - (nullable NSString *)stringValue;

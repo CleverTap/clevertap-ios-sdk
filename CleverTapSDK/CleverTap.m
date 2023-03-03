@@ -5233,6 +5233,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+#pragma mark - PE Vars
+
 - (CTVar *)defineVar:(NSString *)name {
     return [self.varCache define:name with:nil kind:nil];
 }

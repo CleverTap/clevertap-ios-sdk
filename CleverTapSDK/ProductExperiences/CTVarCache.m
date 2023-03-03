@@ -284,7 +284,10 @@
     @try {
         NSString *fileName = [self dataArchiveFileName];
         NSString *filePath = [CTPreferences filePathfromFileName:fileName];
-        NSData *encryptedDiffs = [NSData dataWithContentsOfFile:filePath];;
+        NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
+        if (!diffsData) {
+            return;
+        }
         NSDictionary *diffs;
         NSDictionary *messages;
         NSArray *variants;
@@ -293,49 +296,43 @@
         NSDictionary *regions;
         NSString *varsJson;
         NSString *varsSignature;
-        if (encryptedDiffs) {
-            NSData *diffsData = encryptedDiffs;
-            if (!diffsData) {
+        
+        NSKeyedUnarchiver *unarchiver;
+        if (@available(iOS 12.0, *)) {
+            NSError *error = nil;
+            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
+            if (error != nil) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Error while loading variables: %@", self, error.localizedDescription);
                 return;
             }
-
-            NSKeyedUnarchiver *unarchiver;
-            if (@available(iOS 12.0, *)) {
-                NSError *error = nil;
-                unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
-                if (error != nil) {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Error while loading variables: %@", self, error.localizedDescription);
-                    return;
-                }
-                unarchiver.requiresSecureCoding = NO;
-            } else {
+            unarchiver.requiresSecureCoding = NO;
+        } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:diffsData];
+            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:diffsData];
 #pragma clang diagnostic pop
-            }
-            diffs = (NSDictionary *) [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
-//            messages = (NSDictionary *) [unarchiver decodeObjectForKey:LEANPLUM_DEFAULTS_MESSAGES_KEY];
-//            regions = (NSDictionary *)[unarchiver decodeObjectForKey:LP_KEY_REGIONS];
-//            variants = (NSArray *)[unarchiver decodeObjectForKey:LP_KEY_VARIANTS];
-//            variantDebugInfo = (NSDictionary *)[unarchiver decodeObjectForKey:LP_KEY_VARIANT_DEBUG_INFO];
-            varsJson = [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARS_JSON_KEY];
-//            varsSignature = [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARS_SIGNATURE_KEY];
-//            NSString *deviceId = [unarchiver decodeObjectForKey:LP_PARAM_DEVICE_ID];
-//            NSString *userId = [unarchiver decodeObjectForKey:LP_PARAM_USER_ID];
-//            BOOL loggingEnabled = [unarchiver decodeBoolForKey:LP_KEY_LOGGING_ENABLED];
-//            localCaps = [unarchiver decodeObjectForKey:LEANPLUM_DEFAULTS_LOCAL_CAPS_KEY];
-//            if (deviceId) {
-//                [[Leanplum user] setDeviceId:deviceId];
-//            }
-//            if (userId) {
-//                [[Leanplum user] setUserId:userId];
-//            }
-//            if (loggingEnabled) {
-//                [LPConstantsState sharedState].loggingEnabled = YES;
-//            }
         }
-
+        diffs = (NSDictionary *) [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
+        //            messages = (NSDictionary *) [unarchiver decodeObjectForKey:LEANPLUM_DEFAULTS_MESSAGES_KEY];
+        //            regions = (NSDictionary *)[unarchiver decodeObjectForKey:LP_KEY_REGIONS];
+        //            variants = (NSArray *)[unarchiver decodeObjectForKey:LP_KEY_VARIANTS];
+        //            variantDebugInfo = (NSDictionary *)[unarchiver decodeObjectForKey:LP_KEY_VARIANT_DEBUG_INFO];
+        varsJson = [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARS_JSON_KEY];
+        //            varsSignature = [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARS_SIGNATURE_KEY];
+        //            NSString *deviceId = [unarchiver decodeObjectForKey:LP_PARAM_DEVICE_ID];
+        //            NSString *userId = [unarchiver decodeObjectForKey:LP_PARAM_USER_ID];
+        //            BOOL loggingEnabled = [unarchiver decodeBoolForKey:LP_KEY_LOGGING_ENABLED];
+        //            localCaps = [unarchiver decodeObjectForKey:LEANPLUM_DEFAULTS_LOCAL_CAPS_KEY];
+        //            if (deviceId) {
+        //                [[Leanplum user] setDeviceId:deviceId];
+        //            }
+        //            if (userId) {
+        //                [[Leanplum user] setUserId:userId];
+        //            }
+        //            if (loggingEnabled) {
+        //                [LPConstantsState sharedState].loggingEnabled = YES;
+        //            }
+        
         [self applyVariableDiffs:diffs
                         messages:messages
                         variants:variants

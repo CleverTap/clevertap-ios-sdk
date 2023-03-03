@@ -453,12 +453,12 @@ CTVarCache *varCache;
     return nil;
 }
 
-- (NSUInteger)count
-{
-    CT_TRY
-    return [[varCache getMergedValueFromComponentArray:_nameComponents] count];
-    CT_END_TRY
-}
+//- (NSUInteger)count
+//{
+//    CT_TRY
+//    return [[varCache getMergedValueFromComponentArray:_nameComponents] count];
+//    CT_END_TRY
+//}
 
 #pragma mark Value accessors
 

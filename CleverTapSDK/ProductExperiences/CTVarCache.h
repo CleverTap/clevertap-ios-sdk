@@ -21,7 +21,7 @@ NS_SWIFT_NAME(VarCache)
 //NS_SWIFT_NAME(shared());
 
 // Location initialization
-- (void)registerRegionInitBlock:(RegionInitBlock)block;
+//- (void)registerRegionInitBlock:(RegionInitBlock)block;
 
 // Handling variables.
 - (CTVar *)define:(NSString *)name
@@ -53,12 +53,12 @@ NS_SWIFT_NAME(define(name:value:kind:));
 - (void)setSilent:(BOOL)silent;
 - (BOOL)silent;
 - (int)contentVersion;
-- (nullable NSArray<NSString *> *)variants;
-- (nullable NSDictionary<NSString *, id> *)regions;
+//- (nullable NSArray<NSString *> *)variants;
+//- (nullable NSDictionary<NSString *, id> *)regions;
 - (nullable NSDictionary<NSString *, id> *)defaultKinds;
 
-- (nullable NSDictionary<NSString *, id> *)variantDebugInfo;
-- (void)setVariantDebugInfo:(nullable NSDictionary<NSString *, id> *)variantDebugInfo;
+//- (nullable NSDictionary<NSString *, id> *)variantDebugInfo;
+//- (void)setVariantDebugInfo:(nullable NSDictionary<NSString *, id> *)variantDebugInfo;
 
 //- (void)clearUserContent;
 //
