@@ -233,12 +233,7 @@ static NSManagedObjectContext *privateContext;
 
 // always call from inside privateContext performBlock
 - (BOOL)_save {
-//    NSError *error = nil;
     __block BOOL res = YES;
-//    res = [privateContext save:&error];
-//    if (!res) {
-//        CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
-//    }
     [privateContext performBlockAndWait:^{
         NSError *error = nil;
         res = [privateContext save:&error];
@@ -246,13 +241,6 @@ static NSManagedObjectContext *privateContext;
             CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
         }
     }];
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        NSError *errorr = nil;
-//        res = [mainContext save:&errorr];
-//        if (!res) {
-//            CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
-//        }
-//    });
     [mainContext performBlockAndWait:^{
         NSError *error = nil;
         res = [mainContext save:&error];
