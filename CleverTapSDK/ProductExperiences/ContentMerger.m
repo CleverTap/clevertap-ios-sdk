@@ -13,35 +13,37 @@
 + (id)mergeWithVars:(id)vars diff:(id)diff {
     
     // Return the modified value if it is a `primitive`
-    if ([diff isKindOfClass:[NSString class]]) {
-        return ((NSString*)diff);
-    }
-    if ([diff isKindOfClass:[NSNumber class]]) {
-        return ((NSNumber*)diff);
-    }
-    if ([diff isKindOfClass:[NSNull class]]) {
-        return [NSNull null];
+    if ([diff isKindOfClass:NSNumber.class] ||
+        [diff isKindOfClass:NSString.class] ||
+        [diff isKindOfClass:NSNull.class]) {
+        return diff;
     }
     
     if ([vars isKindOfClass:[NSNumber class]] || [vars isKindOfClass:[NSString class]]) {
         return diff;
     }
     
-    // TODO: add merging for array types from LP ContentMerger
-    
     NSMutableDictionary *merged = [NSMutableDictionary dictionary];
+    BOOL isVarsDict = NO;
     if ([vars isKindOfClass:[NSDictionary class]]) {
-        merged = vars;
+        // Create new dictionary from vars
+        merged = [NSMutableDictionary dictionaryWithDictionary:vars];
+        isVarsDict = YES;
     }
     
     if ([diff isKindOfClass:[NSDictionary class]]) {
         NSDictionary *diffDict = (NSDictionary*)diff;
         [diffDict enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-                    id defaultValue = merged[key] ?: [NSNull null];
-                    merged[key] = [self mergeWithVars:defaultValue diff:value];
+            id defaultValue = merged[key] ?: [NSNull null];
+            merged[key] = [self mergeWithVars:defaultValue diff:value];
         }];
+        
         return merged;
+    } else if (isVarsDict) {
+        // vars is a dictionary but diff is not or diff is nil, return vars
+        return vars;
     }
+    
     return [NSNull null];
 }
 
