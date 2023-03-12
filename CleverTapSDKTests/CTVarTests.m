@@ -76,15 +76,7 @@ CTVarCache *varCache;
         @"Title": @"TitleUpdated",
     };
     NSString *varsJson = [CTUtils dictionaryToJsonString:updatedVarsFromServer];
-    [varCacheMock
-     applyVariableDiffs:updatedVarsFromServer
-     messages:nil
-     variants:nil
-     localCaps:nil
-     regions:nil
-     variantDebugInfo:nil
-     varsJson:varsJson
-     varsSignature:nil];
+    [varCacheMock applyVariableDiffs:updatedVarsFromServer];
     OCMVerify([varCacheMock saveDiffs]);
     XCTAssertTrue([varCacheMock hasReceivedDiffs]);
     
@@ -93,6 +85,7 @@ CTVarCache *varCache;
     NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
     NSError *error = nil;
     
+    // TODO: fix only available check
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
     XCTAssertNil(error);
     unarchiver.requiresSecureCoding = NO;
@@ -113,15 +106,7 @@ CTVarCache *varCache;
         varName: updatedVarValue,
     };
     NSString *varsJson = [CTUtils dictionaryToJsonString:updatedVarsFromServer];
-    [varCacheMock
-     applyVariableDiffs:updatedVarsFromServer
-     messages:nil
-     variants:nil
-     localCaps:nil
-     regions:nil
-     variantDebugInfo:nil
-     varsJson:varsJson
-     varsSignature:nil];
+    [varCacheMock applyVariableDiffs:updatedVarsFromServer];
     OCMVerify([varCacheMock saveDiffs]);
     XCTAssertTrue([varCacheMock hasReceivedDiffs]);
     
