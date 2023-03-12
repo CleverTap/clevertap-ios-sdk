@@ -73,12 +73,14 @@ static NSArray *sslCertNames;
 #import "CTProductConfigController.h"
 
 #import "CTVarCache.h"
+#import "CTVariables.h"
+#import "CleverTap+CTVar.h"
+
 #import "CTRequestFactory.h"
 #import "CTRequestSender.h"
 #import "CTDomainFactory.h"
-#import "CleverTap+CTVar.h"
-
 #import "CleverTap+SCDomain.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -256,8 +258,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, assign) BOOL geofenceLocation;
 @property (nonatomic, strong) NSString *gfSDKVersion;
 
-@property (nonatomic, strong) CTVarCache *varCache;
-@property(strong, nonatomic) NSMutableArray *variablesChangedBlocks;
+@property (nonatomic, strong) CTVariables *variables;
 @property(strong, nonatomic) CleverTapForceContentUpdateBlock forceContentUpdateBlock;
 
 - (instancetype)init __unavailable;
@@ -694,10 +695,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         [self _initProductConfig];
         
-        self.varCache = [[CTVarCache alloc]initWithConfig:self.config deviceInfo:self.deviceInfo];
-        
+
+        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
+        // TODO: check listeners here are needed
         // ADD PE VAR CHANGED LISTENERS
-        [self addVarListeners];
+        [[self variables] addVarListeners];
         
         [self notifyUserProfileInitialized];
     }
@@ -1340,9 +1342,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     // LOAD VARS FROM CACHE BEFORE APP LAUNCHED
-    [self.varCache setSilent:YES];
-    [self.varCache loadDiffs];
-    [self.varCache setSilent:NO];
+    [self.variables.varCache setSilent:YES];
+    [self.variables.varCache loadDiffs];
+    [self.variables.varCache setSilent:NO];
     
     self.appLaunchProcessed = YES;
     
@@ -3027,31 +3029,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 }
 #endif
                 
-                // HANDLE AND CACHE PE VARS
-                NSDictionary *peVarsJSON = jsonResp[CLTAP_PE_VARS_RESPONSE_KEY];
-                
-                // TODO: REMOVE THIS STATIC JSON WHEN API IS ONLINE
-                peVarsJSON = @{
-                    @"Title.Text": @"TitleUpdated",
-                    @"MyMap.name": @"nikoUpdated",
-                    @"MyMap.phone": @"123Updated"
-                };
-                NSString *varsJson = [CTUtils dictionaryToJsonString:peVarsJSON];
-                
-                if (peVarsJSON) {
-                    self.varCache.appLaunchedRecorded = YES;
-                    [self.varCache
-                     applyVariableDiffs:peVarsJSON
-                     messages:nil
-                     variants:nil
-                     localCaps:nil
-                     regions:nil
-                     variantDebugInfo:nil
-                     varsJson:varsJson
-                     varsSignature:nil];
-                    if (_forceContentUpdateBlock) {
-                        _forceContentUpdateBlock(YES);
-                    }
+                // Handle and Cache PE Variables
+                [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
+                if (self->_forceContentUpdateBlock) {
+                    self->_forceContentUpdateBlock(YES);
                 }
                 
                 // Handle events/profiles sync data
@@ -4731,8 +4712,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 // run off main
 - (void)_resetVars {
     if (self.config && self.deviceInfo.deviceId) {
-        self.varCache = [[CTVarCache alloc]initWithConfig:self.config deviceInfo:self.deviceInfo];
-        self.variablesChangedBlocks = [NSMutableArray array];
+        self.variables = [[CTVariables alloc]initWithConfig:self.config deviceInfo:self.deviceInfo];
         _forceContentUpdateBlock = nil;
     }
 }
@@ -5063,34 +5043,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 #pragma mark - Product Experiences
 
-- (void)addVarListeners {
-    [self.varCache onUpdate:^{
-        [self triggerVariablesChanged];
-
-//        if ([LPFileTransferManager sharedInstance].numPendingDownloads == 0) {
-//            [self triggerVariablesChangedAndNoDownloadsPending];
-//        }
-    }];
-}
-
-
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
-    
-    if (!block) {
-        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onValueChanged].");
-        return;
-    }
-    
-    CT_TRY
-    if (!self.variablesChangedBlocks) {
-        self.variablesChangedBlocks = [NSMutableArray array];
-    }
-    [self.variablesChangedBlocks addObject:[block copy]];
-    CT_END_TRY
-
-    if ([self.varCache hasReceivedDiffs]) {
-        block();
-    }
+    [[self variables] onVariablesChanged:block];
 }
 
 - (void)syncVariables {
@@ -5125,7 +5079,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // META
     NSDictionary *meta = [self batchHeader];
     // VARSPAYLOAD
-    NSDictionary *varsPayload = [self varsPayload];
+    NSDictionary *varsPayload = [[self variables] varsPayload];
     NSArray *payload = @[meta,varsPayload];
     
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
@@ -5160,206 +5114,138 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (NSDictionary*)varsPayload {
-    NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    result[@"type"] = @"varsPayload";
-    
-    NSMutableDictionary *allVars = [NSMutableDictionary dictionary];
-    
-    [self.varCache.vars
-     enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, CTVar * _Nonnull varValue, BOOL * _Nonnull stop) {
-        
-        NSMutableDictionary *varData = [NSMutableDictionary dictionary];
-        
-        if ([varValue.defaultValue isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *flattenedMap = [self flatten:varValue.defaultValue varName:varValue.name];
-            [allVars addEntriesFromDictionary:flattenedMap];
-        }
-        else {
-            if ([varValue.kind isEqualToString:CT_KIND_INT] || [varValue.kind isEqualToString:CT_KIND_FLOAT]) {
-                varData[@"type"] = @"number";
-            }
-            else if ([varValue.kind isEqualToString:CT_KIND_BOOLEAN]) {
-                varData[@"type"] = @"boolean";
-            }
-            else {
-                varData[@"type"] = varValue.kind;
-            }
-            varData[@"defaultValue"] = varValue.defaultValue;
-            allVars[key] = varData;
-        }
-    }];
-    result[@"vars"] = allVars;
-    
-    return result;
-}
-
-- (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName {
-    NSMutableDictionary *varsPayload = [NSMutableDictionary dictionary];
-    
-    [map enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-        
-        if ([value isKindOfClass:[NSString class]] ||
-            [value isKindOfClass:[NSNumber class]]) {
-            NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
-            varsPayload[payloadKey] = @{@"defaultValue": value};
-        }
-        else if ([value isKindOfClass:[NSDictionary class]]) {
-            NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
-            
-            NSDictionary* flattenedMap = [self flatten:value varName:payloadKey];
-            [varsPayload addEntriesFromDictionary:flattenedMap];
-        }
-    }];
-    
-    return varsPayload;
-}
-
 - (void)forceContentUpdateWithBlock:(CleverTapForceContentUpdateBlock)block {
     _forceContentUpdateBlock = block;
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @4}} withType:CleverTapEventTypeFetch];
 }
 
-- (void)triggerVariablesChanged
-{
-    // TODO: CHECK IF THIS IS NEEDED
-//    for (NSInvocation *invocation in [LPInternalState sharedState]
-//            .variablesChangedResponders.copy) {
-//        [invocation invoke];
-//    }
-
-    for (CleverTapVariablesChangedBlock block in self.variablesChangedBlocks.copy) {
-        block();
-    }
-}
-
 #pragma mark - PE Vars
 
 - (CTVar *)defineVar:(NSString *)name {
-    return [self.varCache define:name with:nil kind:nil];
+    return [self.variables define:name with:nil kind:nil];
 }
 
 - (CTVar *)defineVar:(NSString *)name withInt:(int)defaultValue
 {
-    return [self.varCache define:name with:[NSNumber numberWithInt:defaultValue] kind:CT_KIND_INT];
+    return [self.variables define:name with:[NSNumber numberWithInt:defaultValue] kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withFloat:(float)defaultValue
 {
-    return [self.varCache define:name with:[NSNumber numberWithFloat:defaultValue] kind:CT_KIND_FLOAT];
+    return [self.variables define:name with:[NSNumber numberWithFloat:defaultValue] kind:CT_KIND_FLOAT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withDouble:(double)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithDouble:defaultValue]
                          kind:CT_KIND_FLOAT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withCGFloat:(CGFloat)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithDouble:defaultValue]
                          kind:CT_KIND_FLOAT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withShort:(short)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithShort:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withChar:(char)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithChar:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withBool:(BOOL)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithBool:defaultValue]
                          kind:CT_KIND_BOOLEAN];
 }
 
 - (CTVar *)defineVar:(NSString *)name withInteger:(NSInteger)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithInteger:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withLong:(long)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withLongLong:(long long)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithLongLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedChar:(unsigned char)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithUnsignedChar:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedInt:(unsigned int)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithUnsignedInt:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedInteger:(NSUInteger)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithUnsignedInteger:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedLong:(unsigned long)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithUnsignedLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedLongLong:(unsigned long long)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithUnsignedLongLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedShort:(unsigned short)defaultValue
 {
-    return [self.varCache define:name
+    return [self.variables define:name
                          with:[NSNumber numberWithUnsignedShort:defaultValue]
                          kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withString:(NSString *)defaultValue
 {
-    return [self.varCache define:name with:defaultValue kind:CT_KIND_STRING];
+    return [self.variables define:name with:defaultValue kind:CT_KIND_STRING];
 }
 
 - (CTVar *)defineVar:(NSString *)name withNumber:(NSNumber *)defaultValue
 {
-    return [self.varCache define:name with:defaultValue kind:CT_KIND_FLOAT];
+    return [self.variables define:name with:defaultValue kind:CT_KIND_FLOAT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withDictionary:(NSDictionary *)defaultValue
 {
-    return [self.varCache define:name with:defaultValue kind:CT_KIND_DICTIONARY];
+    return [self.variables define:name with:defaultValue kind:CT_KIND_DICTIONARY];
 }
 
 @end

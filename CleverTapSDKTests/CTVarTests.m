@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "CTVariables.h"
 #import "CTVarCache.h"
 #import <OCMock/OCMock.h>
 #import "CTUtils.h"
@@ -21,30 +22,30 @@
 
 @end
 
-CTVarCache *varCache;
+CTVariables *variables;
 
 @implementation CTVarTests
 
 - (void)setUp {
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     config.useCustomCleverTapId = YES;
-    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc]initWithConfig:config andCleverTapID:@"test"];
-    varCache = [[CTVarCache alloc]initWithConfig:config deviceInfo:deviceInfo];
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
+    variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo];
 }
 
 - (void)tearDown {
-    varCache = nil;
+    variables = nil;
 }
 
 - (void)testVarCacheNotNil {
-    XCTAssertNotNil(varCache);
+    XCTAssertNotNil(variables);
 }
 
 - (void)testVarCacheFetchesNameComponents {
     NSString *component1 = @"Primary";
     NSString *component2 = @"Secondary";
     NSString *component3 = @"Tertiary";
-    NSArray *nameComponents = [varCache getNameComponents:[NSString stringWithFormat:@"%@.%@.%@",component1,component2,component3]];
+    NSArray *nameComponents = [[variables varCache] getNameComponents:[NSString stringWithFormat:@"%@.%@.%@",component1,component2,component3]];
     XCTAssertNotNil(nameComponents);
     
     BOOL expression = [nameComponents containsObject:component1] && [nameComponents containsObject:component2] && [nameComponents containsObject:component3];
@@ -54,28 +55,28 @@ CTVarCache *varCache;
 }
 
 - (void)testVarCacheResgitersVars {
-    CTVar *varMock = OCMPartialMock([varCache define:@"test" with:@"test" kind:CT_KIND_STRING]);
-    [varCache registerVariable:varMock];
+    CTVar *varMock = OCMPartialMock([variables define:@"test" with:@"test" kind:CT_KIND_STRING]);
+    [variables.varCache registerVariable:varMock];
     
-    XCTAssertEqual(varCache.vars[varMock.name], varMock);
+    XCTAssertEqual(variables.varCache.vars[varMock.name], varMock);
 }
 
 - (void)testVarCacheGetVarsForName {
     NSString *varName = @"test";
-    CTVar *var = [varCache define:varName with:@"test" kind:CT_KIND_STRING];
-    CTVar *varResult = [varCache getVariable:varName];
-    
+    CTVar *var = [variables define:varName with:@"test" kind:CT_KIND_STRING];
+    CTVar *varResult = [variables getVariable:varName];
+
     XCTAssertEqual(varResult, var);
 }
 
 - (void)testVarCacheSavesDiffs {
-    id varCacheMock = OCMPartialMock(varCache);
-    [varCacheMock define:@"Title" with:@"Hello" kind:CT_KIND_STRING];
+    id variablesMock = OCMPartialMock(variables);
+    [variablesMock define:@"Title" with:@"Hello" kind:CT_KIND_STRING];
     
     NSDictionary *updatedVarsFromServer = @{
         @"Title": @"TitleUpdated",
     };
-    NSString *varsJson = [CTUtils dictionaryToJsonString:updatedVarsFromServer];
+    id varCacheMock = OCMPartialMock(variables.varCache);
     [varCacheMock applyVariableDiffs:updatedVarsFromServer];
     OCMVerify([varCacheMock saveDiffs]);
     XCTAssertTrue([varCacheMock hasReceivedDiffs]);
@@ -83,12 +84,18 @@ CTVarCache *varCache;
     NSString *fileName = [varCacheMock getArchiveFileName];
     NSString *filePath = [CTPreferences filePathfromFileName:fileName];
     NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
+    NSKeyedUnarchiver *unarchiver;
     NSError *error = nil;
-    
-    // TODO: fix only available check
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
-    XCTAssertNil(error);
-    unarchiver.requiresSecureCoding = NO;
+    if (@available(iOS 12.0, *)) {
+        unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
+        XCTAssertNil(error);
+        unarchiver.requiresSecureCoding = NO;
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:diffsData];
+#pragma clang diagnostic pop
+    }
     NSDictionary *loadedVars = (NSDictionary *) [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
     XCTAssertTrue([updatedVarsFromServer isEqualToDictionary:loadedVars]);
     
@@ -99,8 +106,9 @@ CTVarCache *varCache;
     NSString *varName = @"Title";
     NSString *initialVarValue = @"Hello";
     NSString *updatedVarValue = @"TitleUpdated";
-    CTVarCache *varCacheMock = OCMPartialMock(varCache);
-    [varCacheMock define:varName with:initialVarValue kind:CT_KIND_STRING];
+    CTVariables *variablesMock = OCMPartialMock(variables);
+    CTVarCache *varCacheMock = OCMPartialMock(variables.varCache);
+    [variablesMock define:varName with:initialVarValue kind:CT_KIND_STRING];
     
     NSDictionary *updatedVarsFromServer = @{
         varName: updatedVarValue,
@@ -123,7 +131,7 @@ CTVarCache *varCache;
 
 - (void)testVarValues {
     NSNumber *varValue = [NSNumber numberWithDouble:6.67345983745897];
-    CTVar *var = [varCache define:@"MyNumber" with:varValue kind:CT_KIND_FLOAT];
+    CTVar *var = [variables define:@"MyNumber" with:varValue kind:CT_KIND_FLOAT];
     
     XCTAssertEqualObjects(var.stringValue,varValue.stringValue);
     XCTAssertEqual(var.floatValue,varValue.floatValue);
@@ -141,7 +149,7 @@ CTVarCache *varCache;
     XCTAssertEqual(var.unsignedLongLongValue,varValue.unsignedLongLongValue);
     XCTAssertEqual(var.cgFloatValue,varValue.doubleValue);
     
-    CTVar *mapVar = [varCache define:@"MyMap" with:@{@"MyMapNumber":varValue} kind:CT_KIND_DICTIONARY];
+    CTVar *mapVar = [variables define:@"MyMap" with:@{@"MyMapNumber":varValue} kind:CT_KIND_DICTIONARY];
     XCTAssertTrue([[mapVar objectForKey:@"MyMapNumber"]isKindOfClass:[varValue class]]);
     XCTAssertTrue([mapVar.value isKindOfClass:[NSDictionary class]]);
     XCTAssertTrue([mapVar.defaultValue isKindOfClass:[NSDictionary class]]);

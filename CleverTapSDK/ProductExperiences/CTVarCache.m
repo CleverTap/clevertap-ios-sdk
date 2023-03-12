@@ -14,7 +14,6 @@
 @property (assign, nonatomic) BOOL hasReceivedDiffs;
 
 @property (assign, nonatomic) BOOL silent;
-@property (strong, nonatomic) RegionInitBlock regionInitBlock;
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
@@ -41,30 +40,6 @@
     NSError *error = NULL;
     self.varNameRegex = [NSRegularExpression regularExpressionWithPattern:@"(?:[^\\.\\[.(\\\\]+|\\\\.)+"
                                                              options:NSRegularExpressionCaseInsensitive error:&error];
-}
-
-- (CTVar *)define:(NSString *)name with:(NSObject *)defaultValue kind:(NSString *)kind
-{
-    if ([CTUtils isNullOrEmpty:name]) {
-        CleverTapLogDebug(_config.logLevel, @"%@: Empty name provided as parameter while defining a variable.", self);
-        return nil;
-    }
-
-    @synchronized (self.vars) {
-        CT_TRY
-        CTVar *existing = [self getVariable:name];
-        if (existing) {
-            CleverTapLogInfo(self.config.logLevel, @"%@: Variable with name: %@ already exists.", self, name);
-            return existing;
-        }
-        CT_END_TRY
-        CTVar *var = [[CTVar alloc] initWithName:name
-                                  withComponents:[self getNameComponents:name]
-                                withDefaultValue:defaultValue
-                                        withKind:kind
-                                        varCache:self];
-        return var;
-    }
 }
 
 - (NSArray *)arrayOfCaptureComponentsOfString:(NSString *)data matchedBy:(NSRegularExpression *)regExpression

@@ -6,7 +6,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^CacheUpdateBlock)(void);
-typedef void (^RegionInitBlock)(NSDictionary *, NSSet *, NSSet *);
 
 NS_SWIFT_NAME(VarCache)
 @interface CTVarCache : NSObject
@@ -14,11 +13,6 @@ NS_SWIFT_NAME(VarCache)
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
 
 // Handling variables.
-- (CTVar *)define:(NSString *)name
-             with:(nullable NSObject *)defaultValue
-             kind:(nullable NSString *)kind
-NS_SWIFT_NAME(define(name:value:kind:));
-
 - (NSArray<NSString *> *)getNameComponents:(NSString *)name;
 - (void)loadDiffs;
 - (void)saveDiffs;
@@ -35,8 +29,6 @@ NS_SWIFT_NAME(define(name:value:kind:));
 - (void)onUpdate:(CacheUpdateBlock)block;
 - (void)setSilent:(BOOL)silent;
 - (BOOL)silent;
-
-//- (void)clearUserContent;
 
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
 @property (assign, nonatomic) BOOL appLaunchedRecorded;
