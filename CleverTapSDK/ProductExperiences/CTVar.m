@@ -1,14 +1,10 @@
 #import "CTVar-Internal.h"
 #import "CTVarCache.h"
 #import "CTConstants.h"
-// TODO: commented files
-//#import "LPFileManager.h"
 
 static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 CTVarCache *varCache;
 @interface CTVar (PrivateProperties)
-
-
 @property (nonatomic) BOOL isInternal;
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSArray *nameComponents;
@@ -20,10 +16,8 @@ CTVarCache *varCache;
 @property (nonatomic, strong) NSString *kind;
 @property (nonatomic, strong) NSMutableArray *fileReadyBlocks;
 @property (nonatomic, strong) NSMutableArray *valueChangedBlocks;
-//@property (nonatomic, strong) LPVarCache *varCache;
 @property (nonatomic) BOOL fileIsPending;
 @property (nonatomic) BOOL hasChanged;
-
 @end
 
 @implementation CTVar
@@ -64,147 +58,6 @@ CTVarCache *varCache;
     }
     return self;
 }
-
-#pragma mark Defines
-
-//+ (LPVar *)define:(NSString *)name
-//{
-//    return [[LPVarCache sharedCache] define:name with:nil kind:nil];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withInt:(int)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:[NSNumber numberWithInt:defaultValue] kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withFloat:(float)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:[NSNumber numberWithFloat:defaultValue] kind:LP_KIND_FLOAT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withDouble:(double)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithDouble:defaultValue]
-//                         kind:LP_KIND_FLOAT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withCGFloat:(CGFloat)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithDouble:defaultValue]
-//                         kind:LP_KIND_FLOAT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withShort:(short)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithShort:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withChar:(char)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithChar:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withBool:(BOOL)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithBool:defaultValue]
-//                         kind:LP_KIND_BOOLEAN];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withInteger:(NSInteger)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithInteger:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withLong:(long)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithLong:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withLongLong:(long long)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithLongLong:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withUnsignedChar:(unsigned char)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithUnsignedChar:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withUnsignedInt:(unsigned int)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithUnsignedInt:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withUnsignedInteger:(NSUInteger)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithUnsignedInteger:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withUnsignedLong:(unsigned long)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithUnsignedLong:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withUnsignedLongLong:(unsigned long long)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithUnsignedLongLong:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withUnsignedShort:(unsigned short)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name
-//                         with:[NSNumber numberWithUnsignedShort:defaultValue]
-//                         kind:LP_KIND_INT];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withString:(NSString *)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:defaultValue kind:LP_KIND_STRING];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withNumber:(NSNumber *)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:defaultValue kind:LP_KIND_FLOAT];
-//}
-
-// TODO: commented files
-//+ (LPVar *)define:(NSString *)name withFile:(NSString *)defaultFilename
-//{
-//    return [[LPVarCache sharedCache] define:name with:defaultFilename kind:LP_KIND_FILE];
-//}
-
-//+ (LPVar *)define:(NSString *)name withDictionary:(NSDictionary *)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:defaultValue kind:LP_KIND_DICTIONARY];
-//}
-//
-//+ (LPVar *)define:(NSString *)name withArray:(NSArray *)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:defaultValue kind:LP_KIND_ARRAY];
-//}
 
 #pragma mark Updating
 
@@ -251,7 +104,6 @@ CTVarCache *varCache;
 
 - (void)triggerValueChanged
 {
-    
     // TODO: will we provide both protocol valueDidChange method and valueChanged callback block?
     if (self.delegate &&
         [self.delegate respondsToSelector:@selector(valueDidChange:)]) {

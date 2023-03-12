@@ -63,7 +63,8 @@
 {
     if (varsResponse) {
         [[self varCache] setAppLaunchedRecorded:YES];
-        [[self varCache] applyVariableDiffs:varsResponse];
+        NSDictionary *values = [self unflatten:varsResponse];
+        [[self varCache] applyVariableDiffs:values];
     }
 }
 
@@ -137,7 +138,6 @@
     NSMutableDictionary *varsPayload = [NSMutableDictionary dictionary];
     
     [map enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-        
         if ([value isKindOfClass:[NSString class]] ||
             [value isKindOfClass:[NSNumber class]]) {
             NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
@@ -148,6 +148,41 @@
             
             NSDictionary* flattenedMap = [self flatten:value varName:payloadKey];
             [varsPayload addEntriesFromDictionary:flattenedMap];
+        }
+    }];
+    
+    return varsPayload;
+}
+
+- (NSDictionary*)unflatten:(NSDictionary*)result {
+    NSMutableDictionary *varsPayload = [NSMutableDictionary dictionary];
+    
+    [result enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
+        
+        if ([key containsString:@"."]) {
+            NSArray *components = [self.varCache getNameComponents:key];
+            long namePosition =  components.count - 1;
+            NSMutableDictionary *currentMap = varsPayload;
+            
+            for (int i = 0; i < components.count; i++) {
+                NSString *component = components[i];
+                if (i == namePosition) {
+                    currentMap[component] = value;
+                }
+                else {
+                    if (!currentMap[component]) {
+                        NSMutableDictionary *nestedMap = [NSMutableDictionary dictionary];
+                        currentMap[component] = nestedMap;
+                        currentMap = nestedMap;
+                    }
+                    else {
+                        currentMap = ((NSMutableDictionary*)currentMap[component]);
+                    }
+                }
+            }
+        }
+        else {
+            varsPayload[key] = value;
         }
     }];
     

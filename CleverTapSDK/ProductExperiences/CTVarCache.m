@@ -73,8 +73,6 @@
         [nameComponents addObject:matchArray[0]];
     }
     NSArray *result = [NSArray arrayWithArray:nameComponents];
-    
-    // iOS 3.x compatability. NSRegularExpression is not available, so there will be no components.
     if (result.count == 0) {
         return @[name];
     }
@@ -229,17 +227,6 @@
         [archiver encodeObject:self.diffs forKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
         [archiver finishEncoding];
 
-//        NSData *encryptedDiffs = [LPAES encryptedDataFromData:diffsData];
-
-//        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-//
-//        [defaults setObject:encryptedDiffs forKey:LEANPLUM_DEFAULTS_VARIABLES_KEY];
-//
-//        [defaults setObject:LEANPLUM_SDK_VERSION forKey:LEANPLUM_DEFAULTS_SDK_VERSION];
-//
-//        [Leanplum synchronizeDefaults];
-        
-//        [CTPreferences putObject:diffsData forKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
         NSError *writeError = nil;
         NSString *fileName = [self dataArchiveFileName];
         NSString *filePath = [CTPreferences filePathfromFileName:fileName];
@@ -266,7 +253,6 @@
                 // Merger helper will mutate diffs.
                 // We need to lock it in case multiple threads will be accessing this.
                 @synchronized (self.diffs) {
-                    self.diffs = [self convert:self.diffs];
                     self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
                 }
 
@@ -281,7 +267,7 @@
             }
         }
         
-        // DONT SAVE VARS TO CACHE IF SILENT
+        // Do NOT save vars to cache if silent
         if (!self.silent) {
             [self saveDiffs];
 
@@ -296,80 +282,6 @@
 - (void)onUpdate:(CacheUpdateBlock) block
 {
     self.updateBlock = block;
-}
-
-//
-//- (void)clearUserContent
-//{
-//    self.diffs = nil;
-//    self.variants = nil;
-//    self.localCaps = nil;
-//    self.variantDebugInfo = nil;
-//    self.vars = nil;
-//    self.userAttributes = nil;
-//    self.merged = nil;
-//    self.varsJson = nil;
-//    self.varsSignature = nil;
-//
-//    self.devModeValuesFromServer = nil;
-//    self.devModeFileAttributesFromServer = nil;
-//
-//    [LPActionManager shared].messages = [NSMutableDictionary dictionary];
-//    [LPActionManager shared].messagesDataFromServer = [NSMutableDictionary dictionary];
-//    [LPActionManager shared].actionDefinitionsFromServer = [NSMutableDictionary dictionary];
-//}
-//
-// Resets the VarCache to stock state. Used for testing purposes.
-//- (void)reset
-//{
-//    [self clearUserContent];
-//
-//    self.filesToInspect = nil;
-//    self.fileAttributes = nil;
-//
-//    self.valuesFromClient = nil;
-//    self.defaultKinds = nil;
-//
-//    self.updateBlock = nil;
-//    self.hasReceivedDiffs = NO;
-//    self.silent = NO;
-//    self.contentVersion = 0;
-//    self.hasTooManyFiles = NO;
-//}
-
-- (NSDictionary*)convert:(NSDictionary*)result {
-    NSMutableDictionary *varsPayload = [NSMutableDictionary dictionary];
-    
-    [result enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-        
-        if ([key containsString:@"."]) {
-            NSArray *components = [self getNameComponents:key];
-            long namePosition =  components.count - 1;
-            NSMutableDictionary *currentMap = varsPayload;
-            
-            for (int i = 0; i < components.count; i++) {
-                NSString *component = components[i];
-                if (i == namePosition) {
-                    currentMap[component] = value;
-                }
-                else {
-                    if (!currentMap[component]) {
-                        NSMutableDictionary *nestedMap = [NSMutableDictionary dictionary];
-                        currentMap[component] = nestedMap;
-                        currentMap = nestedMap;
-                    }
-                    else {
-                        currentMap = ((NSMutableDictionary*)currentMap[component]);
-                    }
-                }
-            }
-        }
-        else {
-            varsPayload[key] = value;
-        }
-    }];
-    
-    return varsPayload;
 }
 
 @end
