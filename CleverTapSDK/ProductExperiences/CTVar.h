@@ -15,10 +15,6 @@ NS_SWIFT_NAME(VarDelegate)
 @protocol CTVarDelegate <NSObject>
 @optional
 /**
- * For file variables, called when the file is ready.
- */
-//- (void)fileIsReady:(CTVar *)var;
-/**
  * Called when the value of the variable changes.
  */
 - (void)valueDidChange:(CTVar *)var;
@@ -74,7 +70,7 @@ NS_SWIFT_NAME(Var)
 
 /**
  * Sets the delegate of the variable in order to use
- * {@link CTVarDelegate::fileIsReady:} and {@link CTVarDelegate::valueDidChange:}
+ * {@link CTVarDelegate::valueDidChange:}
  */
 - (void)setDelegate:(nullable id <CTVarDelegate>)delegate;
 

@@ -104,7 +104,6 @@ CTVarCache *varCache;
 
 - (void)triggerValueChanged
 {
-    // TODO: will we provide both protocol valueDidChange method and valueChanged callback block?
     if (self.delegate &&
         [self.delegate respondsToSelector:@selector(valueDidChange:)]) {
         [self.delegate valueDidChange:self];
@@ -133,17 +132,11 @@ CTVarCache *varCache;
     CT_END_TRY
 }
 
-// TODO: Check if this method is needed
 - (void)setDelegate:(id<CTVarDelegate>)delegate
 {
-//    CT_TRY
+    CT_TRY
     _delegate = delegate;
-    
-    // TODO: commented files
-//    if ([LPInternalState sharedState].hasStarted && !_fileIsPending) {
-//        [self triggerFileIsReady];
-//    }
-//    CT_END_TRY
+    CT_END_TRY
 }
 
 // TODO: decide if this method is relevant
