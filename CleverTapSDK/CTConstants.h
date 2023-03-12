@@ -11,6 +11,13 @@ extern NSString *CT_KIND_ARRAY;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
+extern NSString *CT_PE_VARS_PAYLOAD_TYPE;
+extern NSString *CT_PE_VARS_PAYLOAD_KEY;
+extern NSString *CT_PE_VAR_TYPE;
+extern NSString *CT_PE_NUMBER_TYPE;
+extern NSString *CT_PE_BOOL_TYPE;
+extern NSString *CT_PE_DEFAULT_VALUE;
+
 #define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogInternal(level, fmt, ...) if (level > 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }

@@ -9,7 +9,6 @@
 #import "CTVariables.h"
 #import "CTConstants.h"
 #import "CTUtils.h"
-//#import "CTVarCache.h"
 
 @interface CTVariables()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -102,7 +101,7 @@
 
 - (NSDictionary*)varsPayload {
     NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    result[@"type"] = @"varsPayload";
+    result[@"type"] = CT_PE_VARS_PAYLOAD_TYPE;
     
     NSMutableDictionary *allVars = [NSMutableDictionary dictionary];
     
@@ -117,19 +116,19 @@
         }
         else {
             if ([varValue.kind isEqualToString:CT_KIND_INT] || [varValue.kind isEqualToString:CT_KIND_FLOAT]) {
-                varData[@"type"] = @"number";
+                varData[CT_PE_VAR_TYPE] = CT_PE_NUMBER_TYPE;
             }
             else if ([varValue.kind isEqualToString:CT_KIND_BOOLEAN]) {
-                varData[@"type"] = @"boolean";
+                varData[CT_PE_VAR_TYPE] = CT_PE_BOOL_TYPE;
             }
             else {
-                varData[@"type"] = varValue.kind;
+                varData[CT_PE_VAR_TYPE] = varValue.kind;
             }
-            varData[@"defaultValue"] = varValue.defaultValue;
+            varData[CT_PE_DEFAULT_VALUE] = varValue.defaultValue;
             allVars[key] = varData;
         }
     }];
-    result[@"vars"] = allVars;
+    result[CT_PE_VARS_PAYLOAD_KEY] = allVars;
     
     return result;
 }
@@ -142,7 +141,7 @@
         if ([value isKindOfClass:[NSString class]] ||
             [value isKindOfClass:[NSNumber class]]) {
             NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
-            varsPayload[payloadKey] = @{@"defaultValue": value};
+            varsPayload[payloadKey] = @{CT_PE_DEFAULT_VALUE: value};
         }
         else if ([value isKindOfClass:[NSDictionary class]]) {
             NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
