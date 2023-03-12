@@ -7,11 +7,12 @@
 @interface CTVarCache()
 @property (strong, nonatomic) NSRegularExpression *varNameRegex;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *valuesFromClient;
-@property (readwrite, nonatomic) NSMutableDictionary<NSString *, id> *defaultKinds;
+@property (strong, nonatomic) id merged;
 @property (strong, nonatomic) NSDictionary<NSString *, id> *diffs;
+
 @property (strong, nonatomic) CacheUpdateBlock updateBlock;
 @property (assign, nonatomic) BOOL hasReceivedDiffs;
-@property (strong, nonatomic) id merged;
+
 @property (assign, nonatomic) BOOL silent;
 @property (strong, nonatomic) RegionInitBlock regionInitBlock;
 
@@ -30,22 +31,11 @@
     return self;
 }
 
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        [self initialize];
-//        _countAggregator = [LPCountAggregator sharedAggregator];
-    }
-    return self;
-}
-
 - (void)initialize
 {
     self.vars = [NSMutableDictionary dictionary];
-    self.valuesFromClient = [NSMutableDictionary dictionary];
     self.diffs = [NSMutableDictionary dictionary];
-    self.defaultKinds = [NSMutableDictionary dictionary];
+    self.valuesFromClient = [NSMutableDictionary dictionary];
     self.hasReceivedDiffs = NO;
     self.silent = NO;
     NSError *error = NULL;
@@ -288,6 +278,7 @@
                 // We need to lock it in case multiple threads will be accessing this.
                 @synchronized (self.diffs) {
                     self.diffs = [self convert:self.diffs];
+                    self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
                 }
 
                 // Update variables with new values.
