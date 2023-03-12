@@ -19,18 +19,7 @@
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @end
 
-//static CTVarCache *sharedInstance = nil;
-//static dispatch_once_t leanplum_onceToken;
-
 @implementation CTVarCache
-
-//+(instancetype)sharedCache
-//{
-//    dispatch_once(&leanplum_onceToken, ^{
-//        sharedInstance = [[self alloc] init];
-//    });
-//    return sharedInstance;
-//}
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
     if ((self = [super init])) {
@@ -62,11 +51,6 @@
     NSError *error = NULL;
     self.varNameRegex = [NSRegularExpression regularExpressionWithPattern:@"(?:[^\\.\\[.(\\\\]+|\\\\.)+"
                                                              options:NSRegularExpressionCaseInsensitive error:&error];
-}
-
-- (void)registerRegionInitBlock:(void (^)(NSDictionary *, NSSet *, NSSet *))block
-{
-    self.regionInitBlock = block;
 }
 
 - (CTVar *)define:(NSString *)name with:(NSObject *)defaultValue kind:(NSString *)kind
@@ -160,13 +144,11 @@
     return result;
 }
 
-// Updates a JSON structure of variable values, and a dictionary of variable kinds.
+// Updates a JSON structure of variable values
 - (void)updateValues:(NSString *)name
       nameComponents:(NSArray *)nameComponents
                value:(id)value
-                kind:(NSString *)kind
               values:(NSMutableDictionary *)values
-               kinds:(NSMutableDictionary *)kinds
 {
     if (value) {
         id valuesPtr = values;
@@ -331,15 +313,6 @@
     }
 }
 
-//- (void)setDevModeValuesFromServer:(NSDictionary *)values
-//                    fileAttributes:(NSDictionary *)fileAttributes
-//                 actionDefinitions:(NSDictionary *)actionDefinitions
-//{
-//    self.devModeValuesFromServer = values;
-//    self.devModeFileAttributesFromServer = fileAttributes;
-//    [[LPActionManager shared] setActionDefinitionsFromServer: actionDefinitions];
-//}
-//
 - (void)onUpdate:(CacheUpdateBlock) block
 {
     self.updateBlock = block;
