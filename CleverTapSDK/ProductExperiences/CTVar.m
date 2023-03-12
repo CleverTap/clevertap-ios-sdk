@@ -33,12 +33,12 @@ CTVarCache *varCache;
 @synthesize hadStarted=_hadStarted;
 @synthesize hasChanged=_hasChanged;
 
-+(BOOL)printedCallbackWarning
++ (BOOL)printedCallbackWarning
 {
     return LPVAR_PRINTED_CALLBACK_WARNING;
 }
 
-+(void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning
++ (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning
 {
     LPVAR_PRINTED_CALLBACK_WARNING = newPrintedCallbackWarning;
 }
@@ -59,13 +59,6 @@ CTVarCache *varCache;
         
         [varCache registerVariable:self];
         
-        // TODO: Commented file types
-//        if ([kind isEqualToString:LP_KIND_FILE]) { // TODO: && var.stringValue)
-//            [[LPVarCache sharedCache] registerFile:_stringValue withDefaultValue:_defaultValue];
-//        }
-//        if ([name hasPrefix:LP_VALUE_RESOURCES_VARIABLE]) {
-//            _isInternal = YES;
-//        }
         [self update];
         CT_END_TRY
     }
@@ -213,12 +206,6 @@ CTVarCache *varCache;
 //    return [[LPVarCache sharedCache] define:name with:defaultValue kind:LP_KIND_ARRAY];
 //}
 
-// TODO: commented color
-//+ (LPVar *)define:(NSString *)name withColor:(UIColor *)defaultValue
-//{
-//    return [[LPVarCache sharedCache] define:name with:@(leanplum_colorToInt(defaultValue)) kind:LP_KIND_COLOR];
-//}
-
 #pragma mark Updating
 
 - (void) cacheComputedValues
@@ -241,7 +228,6 @@ CTVarCache *varCache;
     NSObject *oldValue = _value;
     _value = [varCache getMergedValueFromComponentArray:_nameComponents];
     
-    // TODO: hadStarted logic
     if ([_value isEqual:oldValue] && _hadStarted) {
         return;
     }
@@ -251,40 +237,12 @@ CTVarCache *varCache;
         _hasChanged = YES;
     }
     
-    // TODO: commented files
-//    if ([LPVarCache sharedCache].silent && [[self name] hasPrefix:LP_VALUE_RESOURCES_VARIABLE]
-//        && [_kind isEqualToString:LP_KIND_FILE] && !_fileIsPending) {
-//        [self triggerFileIsReady];
-//    }
-    
     if (varCache.silent) {
         return;
     }
     
-    // TODO: trigger value changed callback
-    // TODO: Add hasStarted equivalent logic
-//    if ([LPInternalState sharedState].hasStarted) {
     if (varCache.appLaunchedRecorded) {
         [self triggerValueChanged];
-    }
-    
-    // TODO: commented files
-    // Check if file exists, otherwise we need to download it.
-    // Ignore app icon. This is a special variable that only needs the filename.
-//    if ([_kind isEqualToString:LP_KIND_FILE]) {
-//        if ([LPFileManager maybeDownloadFile:_stringValue
-//                                defaultValue:_defaultValue
-//                                  onComplete:^{[self triggerFileIsReady];}]) {
-//            _fileIsPending = YES;
-//        }
-//        if ([LPInternalState sharedState].hasStarted && !_fileIsPending) {
-//            [self triggerFileIsReady];
-//        }
-//    }
-    
-    // TODO: hadStarted logic
-    // TODO: Add hasStarted equivalent logic
-    if (varCache.appLaunchedRecorded) {
         _hadStarted = YES;
     }
 }
@@ -317,50 +275,11 @@ CTVarCache *varCache;
         _valueChangedBlocks = [NSMutableArray array];
     }
     [_valueChangedBlocks addObject:[block copy]];
-    
-    // TODO: Add hasStarted equivalent logic
-//    if ([LPInternalState sharedState].hasStarted) {
     if (varCache.appLaunchedRecorded) {
         [self triggerValueChanged];
     }
     CT_END_TRY
 }
-
-#pragma mark File handling
-
-// TODO: commented files
-//- (void)triggerFileIsReady
-//{
-//    _fileIsPending = NO;
-//    LP_BEGIN_USER_CODE
-//    if (self.delegate &&
-//        [self.delegate respondsToSelector:@selector(fileIsReady:)]) {
-//        [self.delegate fileIsReady:self];
-//    }
-//
-//    for (LeanplumVariablesChangedBlock block in _fileReadyBlocks.copy) {
-//        block();
-//    }
-//    LP_END_USER_CODE
-//}
-
-// TODO: Commented files
-//- (void)onFileReady:(LeanplumVariablesChangedBlock)block
-//{
-//    if (!block) {
-//        [Leanplum throwError:@"[LPVar onFileReady:] Nil block parameter provided."];
-//    }
-//
-//    CT_TRY
-//    if (!_fileReadyBlocks) {
-//        _fileReadyBlocks = [NSMutableArray array];
-//    }
-//    [_fileReadyBlocks addObject:[block copy]];
-//    if ([LPInternalState sharedState].hasStarted && !_fileIsPending) {
-//        [self triggerFileIsReady];
-//    }
-//    CT_END_TRY
-//}
 
 // TODO: Check if this method is needed
 - (void)setDelegate:(id<CTVarDelegate>)delegate
@@ -388,30 +307,6 @@ CTVarCache *varCache;
 //        [CTVar setPrintedCallbackWarning:YES];
 //    }
 }
-
-// TODO: commented fileValue and imagevalue
-
-//- (NSString *)fileValue
-//{
-//    CT_TRY
-//    [self warnIfNotStarted];
-//    if ([_kind isEqualToString:LP_KIND_FILE]) {
-//        return [LPFileManager fileValue:_stringValue withDefaultValue:_defaultValue];
-//    }
-//    CT_END_TRY
-//    return nil;
-//}
-//
-//- (UIImage *)imageValue
-//{
-//    CT_TRY
-//    NSString *fileValue = [self fileValue];
-//    if ([[NSFileManager defaultManager] fileExistsAtPath:fileValue]) {
-//        return [UIImage imageWithContentsOfFile:fileValue];
-//    }
-//    CT_END_TRY
-//    return [UIImage imageNamed:_defaultValue];
-//}
 
 #pragma mark Dictionary handling
 
@@ -453,13 +348,6 @@ CTVarCache *varCache;
     return nil;
 }
 
-//- (NSUInteger)count
-//{
-//    CT_TRY
-//    return [[varCache getMergedValueFromComponentArray:_nameComponents] count];
-//    CT_END_TRY
-//}
-
 #pragma mark Value accessors
 
 - (NSNumber *)numberValue
@@ -490,8 +378,5 @@ CTVarCache *varCache;
 - (NSUInteger)unsignedIntegerValue { return [[self numberValue] unsignedIntegerValue]; }
 - (unsigned long)unsignedLongValue { return [[self numberValue] unsignedLongValue]; }
 - (unsigned long long)unsignedLongLongValue { return [[self numberValue] unsignedLongLongValue]; }
-
-// TODO: commented color value
-//- (UIColor *)colorValue { return leanplum_intToColor([self longLongValue]); }
 
 @end
