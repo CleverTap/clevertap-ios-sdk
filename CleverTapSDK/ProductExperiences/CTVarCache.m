@@ -54,6 +54,7 @@
         CT_TRY
         CTVar *existing = [self getVariable:name];
         if (existing) {
+            CleverTapLogInfo(self.config.logLevel, @"%@: Variable with name: %@ already exists.", self, name);
             return existing;
         }
         CT_END_TRY
