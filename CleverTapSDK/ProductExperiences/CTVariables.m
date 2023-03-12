@@ -15,7 +15,7 @@
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 
 @property(strong, nonatomic) NSMutableArray *variablesChangedBlocks;
-@property(strong, nonatomic) NSMutableArray *onceNoDownloadsBlocks;
+@property(strong, nonatomic) NSMutableArray *onceVariablesChangedBlocks;
 @end
 
 @implementation CTVariables
@@ -79,6 +79,15 @@
     for (CleverTapVariablesChangedBlock block in self.variablesChangedBlocks.copy) {
         block();
     }
+    
+    NSArray *onceBlocksCopy;
+    @synchronized (self.onceVariablesChangedBlocks) {
+        onceBlocksCopy = self.onceVariablesChangedBlocks.copy;
+        [self.onceVariablesChangedBlocks removeAllObjects];
+    }
+    for (CleverTapVariablesChangedBlock block in onceBlocksCopy) {
+        block();
+    }
 }
 
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
@@ -97,6 +106,28 @@
 
     if ([self.varCache hasReceivedDiffs]) {
         block();
+    }
+}
+
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
+    
+    if (!block) {
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onceVariablesChanged].");
+        return;
+    }
+    
+    if ([self.varCache hasReceivedDiffs]) {
+        block();
+    } else {
+        CT_TRY
+        static dispatch_once_t onceBlocksToken;
+        dispatch_once(&onceBlocksToken, ^{
+            self.onceVariablesChangedBlocks = [NSMutableArray array];
+        });
+        @synchronized (self.onceVariablesChangedBlocks) {
+            [self.onceVariablesChangedBlocks addObject:[block copy]];
+        }
+        CT_END_TRY
     }
 }
 
@@ -187,28 +218,6 @@
     }];
     
     return varsPayload;
-}
-
-- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
-    
-    if (!block) {
-        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onceVariablesChanged].");
-        return;
-    }
-    
-    if ([self.varCache hasReceivedDiffs]) {
-        block();
-    } else {
-        CT_TRY
-        static dispatch_once_t onceNoDownloadsBlocksToken;
-        dispatch_once(&onceNoDownloadsBlocksToken, ^{
-            self.onceNoDownloadsBlocks = [NSMutableArray array];
-        });
-        @synchronized (self.onceNoDownloadsBlocks) {
-            [self.onceNoDownloadsBlocks addObject:[block copy]];
-        }
-        CT_END_TRY
-    }
 }
 
 @end
