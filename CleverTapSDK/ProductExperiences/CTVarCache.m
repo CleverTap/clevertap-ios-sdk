@@ -67,7 +67,7 @@
     }
 }
 
-- (NSArray *) arrayOfCaptureComponentsOfString:(NSString *)data matchedBy:(NSRegularExpression *)regExpression
+- (NSArray *)arrayOfCaptureComponentsOfString:(NSString *)data matchedBy:(NSRegularExpression *)regExpression
 {
     NSMutableArray *test = [NSMutableArray array];
 
@@ -116,16 +116,6 @@
             result = [NSMutableDictionary dictionary];
             [collection setObject:result forKey:key];
         }
-    } else if ([collection isKindOfClass:[NSArray class]]) {
-        int index = [key intValue];
-        NSArray *arrayCollection = collection;
-        if (arrayCollection.count > index) {
-            result = arrayCollection[index];
-            if (autoInsert && !result && [key isKindOfClass:NSString.class]) {
-                result = [NSMutableArray array];
-                [collection setObject:result atIndex:index];
-            }
-        }
     }
     
     if ([result isKindOfClass:[NSNull class]]) {
@@ -153,26 +143,24 @@
             [value class] != [NSMutableDictionary class]) {
             value = [NSMutableDictionary dictionaryWithDictionary:value];
         }
-        if ([value isKindOfClass:NSArray.class] &&
-            [value class] != [NSMutableArray class]) {
-            value = [NSMutableArray arrayWithArray:value];
+        
+        // Check if value from another Variable will be overridden
+        if (valuesPtr[nameComponents.lastObject] && ![valuesPtr[nameComponents.lastObject] isEqual:value]) {
+            CleverTapLogInfo(self.config.logLevel, @"%@: Variable with name: %@ will override value: %@, with new value: %@.", self, name, valuesPtr[nameComponents.lastObject], value);
         }
+        
         [valuesPtr setObject:value forKey:nameComponents.lastObject];
-    }
-    if (kind) {
-        kinds[name] = kind;
     }
 }
 
 - (void)registerVariable:(CTVar *)var
 {
     [self.vars setObject:var forKey:var.name];
+    
     [self updateValues:var.name
         nameComponents:var.nameComponents
                  value:var.defaultValue
-                  kind:var.kind
-                values:self.valuesFromClient
-                 kinds:_defaultKinds];
+                values:self.valuesFromClient];
 }
 
 - (CTVar *)getVariable:(NSString *)name

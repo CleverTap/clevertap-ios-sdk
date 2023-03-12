@@ -42,7 +42,6 @@ NS_SWIFT_NAME(define(name:value:kind:));
 - (void)onUpdate:(CacheUpdateBlock)block;
 - (void)setSilent:(BOOL)silent;
 - (BOOL)silent;
-- (nullable NSDictionary<NSString *, id> *)defaultKinds;
 
 //- (void)clearUserContent;
 
