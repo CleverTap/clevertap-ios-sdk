@@ -2831,7 +2831,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
                 if (self->_forceContentUpdateBlock) {
-                    self->_forceContentUpdateBlock(NO);
+                    if (![NSThread isMainThread]) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            self->_forceContentUpdateBlock(NO);
+                        });
+                    } else {
+                        self->_forceContentUpdateBlock(NO);
+                    }
                 }
                 dispatch_semaphore_signal(semaphore);
             }];
@@ -3032,7 +3038,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 // Handle and Cache PE Variables
                 [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
                 if (self->_forceContentUpdateBlock) {
-                    self->_forceContentUpdateBlock(YES);
+                    if (![NSThread isMainThread]) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            self->_forceContentUpdateBlock(YES);
+                        });
+                    } else {
+                        self->_forceContentUpdateBlock(YES);
+                    }
                 }
                 
                 // Handle events/profiles sync data
