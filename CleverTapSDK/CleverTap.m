@@ -5047,6 +5047,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [[self variables] onVariablesChanged:block];
 }
 
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
+    [[self variables] onceVariablesChanged:block];
+}
+
 - (void)syncVariables {
     
 #if DEBUG

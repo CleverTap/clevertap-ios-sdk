@@ -1322,6 +1322,8 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
 
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
+    
 - (void)syncVariables;
 
 - (void)syncVariables:(BOOL)isProduction;

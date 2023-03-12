@@ -15,7 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTVariables : NSObject
 
-@property(strong, nonatomic) NSMutableArray *variablesChangedBlocks;
 @property(strong, nonatomic) CTVarCache *varCache;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
@@ -28,6 +27,7 @@ NS_SWIFT_NAME(define(name:value:kind:));
 - (CTVar *)getVariable:(NSString *)name;
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse;
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
 - (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName;
 - (NSDictionary*)varsPayload;
 - (void)addVarListeners;

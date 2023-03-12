@@ -14,6 +14,9 @@
 @interface CTVariables()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+
+@property(strong, nonatomic) NSMutableArray *variablesChangedBlocks;
+@property(strong, nonatomic) NSMutableArray *onceNoDownloadsBlocks;
 @end
 
 @implementation CTVariables
@@ -81,7 +84,7 @@
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
     
     if (!block) {
-        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onValueChanged].");
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onVariablesChanged].");
         return;
     }
     
@@ -152,47 +155,26 @@
     return varsPayload;
 }
 
-
-
-//- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
-//
-//    if (!block) {
-//        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onValueChanged].");
-//        return;
-//    }
-//
-//    CT_TRY
-//    if (!self.variablesChangedBlocks) {
-//        self.variablesChangedBlocks = [NSMutableArray array];
-//    }
-//    [self.variablesChangedBlocks addObject:[block copy]];
-//    CT_END_TRY
-//
-//    if ([self.varCache hasReceivedDiffs]) {
-//        block();
-//    }
-//}
-//+ (void)onceVariablesChangedAndNoDownloadsPending:(LeanplumVariablesChangedBlock)block
-//{
-//    if (!block) {
-//        [self throwError:@"[Leanplum onceVariablesChangedAndNoDownloadsPending:] Nil block "
-//         @"parameter provided."];
-//        return;
-//    }
-//
-//    if ([[LPVarCache sharedCache] hasReceivedDiffs] && [LPFileTransferManager sharedInstance].numPendingDownloads == 0) {
-//        block();
-//    } else {
-//        LP_TRY
-//        static dispatch_once_t onceNoDownloadsBlocksToken;
-//        dispatch_once(&onceNoDownloadsBlocksToken, ^{
-//            [LPInternalState sharedState].onceNoDownloadsBlocks = [NSMutableArray array];
-//        });
-//        @synchronized ([LPInternalState sharedState].onceNoDownloadsBlocks) {
-//            [[LPInternalState sharedState].onceNoDownloadsBlocks addObject:[block copy]];
-//        }
-//        LP_END_TRY
-//    }
-//}
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
+    
+    if (!block) {
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onceVariablesChanged].");
+        return;
+    }
+    
+    if ([self.varCache hasReceivedDiffs]) {
+        block();
+    } else {
+        CT_TRY
+        static dispatch_once_t onceNoDownloadsBlocksToken;
+        dispatch_once(&onceNoDownloadsBlocksToken, ^{
+            self.onceNoDownloadsBlocks = [NSMutableArray array];
+        });
+        @synchronized (self.onceNoDownloadsBlocks) {
+            [self.onceNoDownloadsBlocks addObject:[block copy]];
+        }
+        CT_END_TRY
+    }
+}
 
 @end
