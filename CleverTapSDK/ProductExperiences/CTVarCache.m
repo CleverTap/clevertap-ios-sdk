@@ -153,6 +153,29 @@
     }
 }
 
+// Use this method to merge default variable value with VarCache.merged value
+// This is neccessary if variable was registered after VarCache.applyVariableDiffs
+- (void)mergeVariable:(CTVar * _Nonnull)var {
+    NSString *firsComponent = var.nameComponents.firstObject;
+    id defaultValue = [self.valuesFromClient objectForKey:firsComponent];
+    id mergedValue = [self.merged objectForKey:firsComponent];
+    if (![defaultValue isEqual:mergedValue]) {
+        id newValue = [ContentMerger mergeWithVars:defaultValue diff:mergedValue];
+        [self.merged setObject:newValue forKey:firsComponent];
+        
+        NSMutableString *name = [[NSMutableString alloc] initWithString:firsComponent];
+        for (int i = 1; i < var.nameComponents.count; i++)
+        {
+            CTVar *existingVar = self.vars[name];
+            if (existingVar) {
+                [existingVar update];
+                break;
+            }
+            [name appendFormat:@".%@", var.nameComponents[i]];
+        }
+    }
+}
+
 - (void)registerVariable:(CTVar *)var
 {
     [self.vars setObject:var forKey:var.name];
@@ -161,6 +184,8 @@
         nameComponents:var.nameComponents
                  value:var.defaultValue
                 values:self.valuesFromClient];
+    
+    [self mergeVariable:var];
 }
 
 - (CTVar *)getVariable:(NSString *)name
