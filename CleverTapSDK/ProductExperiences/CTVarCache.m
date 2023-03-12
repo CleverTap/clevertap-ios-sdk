@@ -153,7 +153,7 @@
     }
 }
 
-// Use this method to merge default variable value with VarCache.merged value
+// Merge default variable value with VarCache.merged value
 // This is neccessary if variable was registered after VarCache.applyVariableDiffs
 - (void)mergeVariable:(CTVar * _Nonnull)var {
     NSString *firsComponent = var.nameComponents.firstObject;

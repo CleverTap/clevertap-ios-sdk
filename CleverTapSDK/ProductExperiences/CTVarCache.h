@@ -1,12 +1,9 @@
 #import <Foundation/Foundation.h>
-//#import "LPSecuredVars.h"
 #import "CTVar-Internal.h"
 #import "CleverTapInstanceConfig.h"
 #import "CTDeviceInfo.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-//@class LPVar;
 
 typedef void (^CacheUpdateBlock)(void);
 typedef void (^RegionInitBlock)(NSDictionary *, NSSet *, NSSet *);
@@ -15,10 +12,6 @@ NS_SWIFT_NAME(VarCache)
 @interface CTVarCache : NSObject
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
-//NS_UNAVAILABLE;
-
-//+(instancetype)sharedCache
-//NS_SWIFT_NAME(shared());
 
 // Handling variables.
 - (CTVar *)define:(NSString *)name

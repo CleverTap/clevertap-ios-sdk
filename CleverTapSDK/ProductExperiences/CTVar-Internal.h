@@ -16,19 +16,17 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, strong) NSArray *nameComponents;
 @property (readonly) BOOL hadStarted;
 @property (readonly, strong) NSString *kind;
-//@property (readonly, strong) NSMutableArray *fileReadyBlocks;
 @property (readonly, strong) NSMutableArray *valueChangedBlocks;
 @property (readonly) BOOL fileIsPending;
 @property (nonatomic, unsafe_unretained, nullable) id <CTVarDelegate> delegate;
 @property (readonly) BOOL hasChanged;
 
-- (void) update;
-- (void) cacheComputedValues;
-//- (void) triggerFileIsReady;
-- (void) triggerValueChanged;
+- (void)update;
+- (void)cacheComputedValues;
+- (void)triggerValueChanged;
 
-+(BOOL)printedCallbackWarning;
-+(void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning;
++ (BOOL)printedCallbackWarning;
++ (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning;
 
 @end
 

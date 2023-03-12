@@ -42,54 +42,6 @@ NS_SWIFT_NAME(Var)
  */
 - (instancetype)init NS_UNAVAILABLE;
 
-//+ (LPVar *)define:(NSString *)name
-//NS_SWIFT_NAME(init(name:));
-//+ (LPVar *)define:(NSString *)name withInt:(int)defaultValue
-//NS_SWIFT_NAME(init(name:integer:));
-//+ (LPVar *)define:(NSString *)name withFloat:(float)defaultValue
-//NS_SWIFT_NAME(init(name:float:));
-//+ (LPVar *)define:(NSString *)name withDouble:(double)defaultValue
-//NS_SWIFT_NAME(init(name:double:));
-//+ (LPVar *)define:(NSString *)name withCGFloat:(CGFloat)cgFloatValue
-//NS_SWIFT_NAME(init(name:cgFloat:));
-//+ (LPVar *)define:(NSString *)name withShort:(short)defaultValue
-//NS_SWIFT_NAME(init(name:integer:));
-//+ (LPVar *)define:(NSString *)name withChar:(char)defaultValue
-//NS_SWIFT_NAME(init(name:integer:));
-//+ (LPVar *)define:(NSString *)name withBool:(BOOL)defaultValue
-//NS_SWIFT_NAME(init(name:boolean:));
-//+ (LPVar *)define:(NSString *)name withString:(nullable NSString *)defaultValue
-//NS_SWIFT_NAME(init(name:string:));
-//+ (LPVar *)define:(NSString *)name withNumber:(nullable NSNumber *)defaultValue
-//NS_SWIFT_NAME(init(name:number:));
-//+ (LPVar *)define:(NSString *)name withInteger:(NSInteger)defaultValue
-//NS_SWIFT_NAME(init(name:integer:));
-//+ (LPVar *)define:(NSString *)name withLong:(long)defaultValue
-//NS_SWIFT_NAME(init(name:integer:));
-//+ (LPVar *)define:(NSString *)name withLongLong:(long long)defaultValue
-//NS_SWIFT_NAME(init(name:integer:));
-//+ (LPVar *)define:(NSString *)name withUnsignedChar:(unsigned char)defaultValue
-//NS_SWIFT_NAME(init(name:uinteger:));
-//+ (LPVar *)define:(NSString *)name withUnsignedInt:(unsigned int)defaultValue
-//NS_SWIFT_NAME(init(name:uinteger:));
-//+ (LPVar *)define:(NSString *)name withUnsignedInteger:(NSUInteger)defaultValue
-//NS_SWIFT_NAME(init(name:uinteger:));
-//+ (LPVar *)define:(NSString *)name withUnsignedLong:(unsigned long)defaultValue
-//NS_SWIFT_NAME(init(name:uinteger:));
-//+ (LPVar *)define:(NSString *)name withUnsignedLongLong:(unsigned long long)defaultValue
-//NS_SWIFT_NAME(init(name:uinteger:));
-//+ (LPVar *)define:(NSString *)name withUnsignedShort:(unsigned short)defaultValue
-//NS_SWIFT_NAME(init(name:uinteger:));
-//+ (LPVar *)define:(NSString *)name withFile:(nullable NSString *)defaultFilename
-//NS_SWIFT_NAME(init(name:file:));
-//+ (LPVar *)define:(NSString *)name withDictionary:(nullable NSDictionary *)defaultValue
-//NS_SWIFT_NAME(init(name:dictionary:));
-//+ (LPVar *)define:(NSString *)name withArray:(nullable NSArray *)defaultValue
-//NS_SWIFT_NAME(init(name:array:));
-//+ (LPVar *)define:(NSString *)name withColor:(nullable UIColor *)defaultValue
-//NS_SWIFT_NAME(init(name:color:));
-/**@}*/
-
 /**
  * Returns the name of the variable.
  */
@@ -116,11 +68,6 @@ NS_SWIFT_NAME(Var)
 - (BOOL)hasChanged;
 
 /**
- * For file variables, called when the file is ready.
- */
-//- (void)onFileReady:(CleverTapVariablesChangedBlock)block;
-
-/**
  * Called when the value of the variable changes.
  */
 - (void)onValueChanged:(CleverTapVariablesChangedBlock)block;
@@ -139,12 +86,9 @@ NS_SWIFT_NAME(Var)
 - (id)objectAtIndex:(NSUInteger )index;
 - (id)objectForKeyPath:(nullable id)firstComponent, ... NS_REQUIRES_NIL_TERMINATION;
 - (id)objectForKeyPathComponents:(nullable NSArray<NSString *> *)pathComponents;
-//- (NSUInteger)count;
 
 - (nullable NSNumber *)numberValue;
 - (nullable NSString *)stringValue;
-//- (nullable NSString *)fileValue;
-//- (nullable UIImage *)imageValue;
 - (int)intValue;
 - (double)doubleValue;
 - (CGFloat)cgFloatValue;
@@ -161,7 +105,6 @@ NS_SWIFT_NAME(Var)
 - (NSUInteger)unsignedIntegerValue;
 - (unsigned long)unsignedLongValue;
 - (unsigned long long)unsignedLongLongValue;
-//- (nullable UIColor *)colorValue;
 /**@}*/
 @end
 
