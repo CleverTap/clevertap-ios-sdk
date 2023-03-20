@@ -254,6 +254,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             let navigationController = UINavigationController.init(rootViewController: inboxController)
             self.present(navigationController, animated: true, completion: nil)
         }
+        var array: [String]? = nil
+        CleverTap.sharedInstance()?.markReadInboxMessages(forIDs: array!)
     }
     
     func navigateToWebview() {

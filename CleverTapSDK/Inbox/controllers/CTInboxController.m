@@ -125,9 +125,15 @@ static NSManagedObjectContext *privateContext;
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
     [privateContext performBlock:^{
         for (NSString *ids in messageIds) {
-            CTMessageMO *message = [self _messageForId:ids];
-            if (message) {
-                [message setValue:@YES forKey:@"isRead"];
+            if (ids != nil && ![ids isEqualToString:@""]){
+                CTMessageMO *message = [self _messageForId:ids];
+                if (message) {
+                    [message setValue:@YES forKey:@"isRead"];
+                }else{
+                    CleverTapLogStaticDebug(@"%@ is invalid App-inbox ID", ids);
+                }
+            }else{
+                CleverTapLogStaticDebug(@"App Inbox ID is null or not a string");
             }
         }
         [self _save];
