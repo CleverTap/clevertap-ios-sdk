@@ -77,6 +77,7 @@ static NSArray *sslCertNames;
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
+static BOOL isLocationEnabled;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -249,8 +250,6 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 
 @property (atomic, assign) BOOL geofenceLocation;
 @property (nonatomic, strong) NSString *gfSDKVersion;
-
-@property (atomic, assign) BOOL isLocationEnabled;
 
 - (instancetype)init __unavailable;
 
@@ -4080,27 +4079,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _geofenceLocation;
 }
 
-- (void)enableLocation:(BOOL)enabled{
-    [self setLocationEnabled:enabled];
-}
-
-- (void)setLocationEnabled:(BOOL)enabled {
-    _isLocationEnabled = enabled;
-}
-
-- (BOOL)getIsLocationEnabled {
-    return _isLocationEnabled;
++ (void)enableLocation:(BOOL)enabled{
+    isLocationEnabled = enabled;
 }
 
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {
 #if defined(CLEVERTAP_LOCATION)
     [CTLocationManager getLocationWithSuccess:success andError:error];
 #else
-    if ([[self sharedInstance] getIsLocationEnabled]){
+    if (isLocationEnabled){
         [CTLocationManager getLocationWithSuccess:success andError:error];
-        
-    }else{
-        CleverTapLogStaticInfo(@"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro or use enableLocation method");
+    }
+    else {
+        NSString *errorMsg = @"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro or use enableLocation method";
+        CleverTapLogStaticDebug(@"%@",errorMsg);
+        error(errorMsg);
     }
 #endif
 }
