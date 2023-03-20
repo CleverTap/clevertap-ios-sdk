@@ -242,5 +242,12 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  */
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId;
 
+/*!
+ @method
+ 
+ @abstract
+ This method dismisses the inbox controller
+ */
+- (void)dismissAppInbox;
 
 @end
