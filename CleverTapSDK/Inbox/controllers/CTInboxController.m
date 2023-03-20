@@ -129,11 +129,13 @@ static NSManagedObjectContext *privateContext;
                 CTMessageMO *message = [self _messageForId:ids];
                 if (message) {
                     [message setValue:@YES forKey:@"isRead"];
-                }else{
-                    CleverTapLogStaticDebug(@"%@ is invalid App-inbox ID", ids);
                 }
-            }else{
-                CleverTapLogStaticDebug(@"App Inbox ID is null or not a string");
+                else {
+                    CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID %@ is invalid.", ids);
+                }
+            }
+            else {
+                CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID is null or not a string.");
             }
         }
         [self _save];

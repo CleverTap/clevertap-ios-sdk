@@ -4377,10 +4377,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![self _isInboxInitialized]) {
         return;
     }
-    if (messageIds != nil && [messageIds count] == 0){
+    if (messageIds != nil && [messageIds count] > 0) {
         [self.inboxController markReadMessagesWithId:messageIds];
-    }else{
-        CleverTapLogStaticDebug(@"App Inbox message ids array is null or empty");
+    }
+    else {
+        CleverTapLogStaticDebug(@"App Inbox Message IDs array is null or empty");
     }
 }
 
