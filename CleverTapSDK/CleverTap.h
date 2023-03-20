@@ -364,7 +364,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  Call this method (typically once at app launch) to enable the location API.
  
  */
-+ (void)enableLocation:(BOOL)enabled;
+- (void)enableLocation:(BOOL)enabled;
 
 /*!
  @method

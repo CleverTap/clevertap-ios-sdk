@@ -4080,8 +4080,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _geofenceLocation;
 }
 
-+ (void)enableLocation:(BOOL)enabled{
-    [[self sharedInstance] setLocationEnabled:enabled];
+- (void)enableLocation:(BOOL)enabled{
+    [self setLocationEnabled:enabled];
 }
 
 - (void)setLocationEnabled:(BOOL)enabled {
