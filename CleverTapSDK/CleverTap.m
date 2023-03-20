@@ -4372,12 +4372,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [[CleverTapInboxViewController alloc] initWithMessages:messages config:config delegate:delegate analyticsDelegate:self];
 }
 
-- (void)dismissAppInbox{
+- (void)dismissAppInbox {
     UIApplication *application = [[self class] getSharedApplication];
     UIWindow *window = [[application delegate] window];
-    if ([window rootViewController] != nil){
-        UINavigationController *nv = (UINavigationController *)[[window rootViewController] presentedViewController];
-        if ([nv.topViewController isKindOfClass:[CleverTapInboxViewController class]]){
+    if ([window rootViewController] != nil) {
+        UINavigationController *navigationController = (UINavigationController *)[[window rootViewController] presentedViewController];
+        if ([navigationController.topViewController isKindOfClass:[CleverTapInboxViewController class]]) {
             [[window rootViewController] dismissViewControllerAnimated:YES completion:nil];
         }
     }
