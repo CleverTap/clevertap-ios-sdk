@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.1) (March 21, 2023)
+
+#### Added
+- Adds a public method `dismissAppInbox` to dismiss App Inbox.
+- Adds a public method `enableLocation` for enabling location API in case of SPM.
+- Adds a public method `markReadInboxMessagesForIDs` for marking multiple App Inbox messages as read by passing a collection of `messageID`s.
+- Fixes a bug where CoreData would crash with threading inconsistency exceptions.
+- Fixes a bug where the method `deleteInboxMessageForID` would cause a crash when the message ID was null or invalid.
+
 ### [Version 4.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.0) (December 13, 2022)
 
 #### Added
