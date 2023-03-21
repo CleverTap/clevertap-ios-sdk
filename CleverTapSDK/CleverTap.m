@@ -5064,8 +5064,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)syncVariables {
-    
-#if DEBUG
+    [self syncVariables:NO];
+}
+
+- (void)syncVariablesEnsureHandshake {
     if ([self needHandshake]) {
         [self runSerialAsync:^{
             [self doHandshakeAsyncWithCompletion:^{
@@ -5078,16 +5080,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self _syncVars];
         }];
     }
-#else
-    CleverTapLogDebug(_config.logLevel, @"%@: syncVariables can only be called from Debug configurations/builds", self);
-#endif
 }
-
+    
 - (void)syncVariables:(BOOL)isProduction {
     if (isProduction) {
-        CleverTapLogDebug(_config.logLevel, @"%@: syncVariables can only be called from Debug configurations/builds", self);
+#if DEBUG
+        CleverTapLogInfo(_config.logLevel, @"%@: Calling syncVariables: with isProduction:YES from Debug configuration/build. Use syncVariables in this case", self);
+#else
+        CleverTapLogInfo(_config.logLevel, @"%@: Calling syncVariables: with isProduction:YES from Release configuration/build. Do not release this build and use with caution", self);
+#endif
+        [self syncVariablesEnsureHandshake];
     } else {
-        [self syncVariables];
+#if DEBUG
+        [self syncVariablesEnsureHandshake];
+#else
+        CleverTapLogInfo(_config.logLevel, @"%@: syncVariables can only be called from Debug configurations/builds", self);
+#endif
     }
 }
 
