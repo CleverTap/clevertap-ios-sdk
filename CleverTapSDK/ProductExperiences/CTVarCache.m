@@ -117,9 +117,14 @@
             value = [NSMutableDictionary dictionaryWithDictionary:value];
         }
         
-        // Check if value from another Variable will be overridden
-        if (valuesPtr[nameComponents.lastObject] && ![valuesPtr[nameComponents.lastObject] isEqual:value]) {
-            CleverTapLogInfo(self.config.logLevel, @"%@: Variable with name: %@ will override value: %@, with new value: %@.", self, name, valuesPtr[nameComponents.lastObject], value);
+        // Do not override variable dictionary values. If value is dictionary and
+        // already registered variable value is a dictionary, merge them.
+        // If values are not dictionaries, check if value from another variable will be overridden and log it.
+        id currentValue = valuesPtr[nameComponents.lastObject];
+        if (currentValue && [currentValue isKindOfClass:NSDictionary.class] && [value isKindOfClass:NSMutableDictionary.class]) {
+            [value addEntriesFromDictionary: currentValue];
+        } else if (currentValue && ![currentValue isEqual:value]) {
+            CleverTapLogInfo(self.config.logLevel, @"%@: Variable with name: %@ will override value: %@, with new value: %@.", self, name, currentValue, value);
         }
         
         [valuesPtr setObject:value forKey:nameComponents.lastObject];
