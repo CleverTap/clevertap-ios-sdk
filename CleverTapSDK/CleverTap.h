@@ -354,6 +354,17 @@ typedef NS_ENUM(int, CTSignedCallEvent) {
  */
 extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
 
+/*!
+ @method
+ 
+ @abstract
+ Enables the location API
+ 
+ @discussion
+ Call this method (typically once at app launch) to enable the location API.
+ 
+ */
++ (void)enableLocation:(BOOL)enabled;
 
 /*!
  @method

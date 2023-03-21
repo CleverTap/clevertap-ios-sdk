@@ -207,6 +207,15 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  @method
  
  @abstract
+ This method marks the `CleverTapInboxMessage` object as read for given 'Message Ids` as Collection.
+ */
+
+- (void)markReadInboxMessagesForIDs:(NSArray<NSString *> *_Nonnull)messageIds;
+
+/*!
+ @method
+ 
+ @abstract
  Register a callback block when inbox messages are updated.
  */
 
