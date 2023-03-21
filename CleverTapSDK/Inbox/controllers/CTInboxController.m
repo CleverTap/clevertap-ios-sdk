@@ -109,11 +109,11 @@ static NSManagedObjectContext *privateContext;
                 [toDeleteInboxMessages addObject:msg];
             }
             else {
-                NSLog(@"%@ is invalid App-inbox ID", ids);
+                CleverTapLogStaticDebug(@"Cannot delete App Inbox Message because Message ID %@ is invalid.", ids)
             }
         }
         else {
-            NSLog(@"App Inbox ID is null or not a string");
+            CleverTapLogStaticDebug(@"Cannot delete App Inbox Message because Message ID is null or not a string.");
         }
     }
     if ([toDeleteInboxMessages count] > 0) {
