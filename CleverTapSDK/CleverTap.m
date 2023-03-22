@@ -4400,7 +4400,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [[self class] runSyncMainQueue:^{
         UIApplication *application = [[self class] getSharedApplication];
         UIWindow *window = [[application delegate] window];
-        if ([window rootViewController] != nil) {
+        UIViewController *presentedViewcontoller = [[window rootViewController] presentedViewController];
+        if ([presentedViewcontoller isKindOfClass:[UINavigationController class]]) {
             UINavigationController *navigationController = (UINavigationController *)[[window rootViewController] presentedViewController];
             if ([navigationController.topViewController isKindOfClass:[CleverTapInboxViewController class]]) {
                 [[window rootViewController] dismissViewControllerAnimated:YES completion:nil];
