@@ -77,6 +77,7 @@ static NSArray *sslCertNames;
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
+static BOOL isLocationEnabled;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -4078,11 +4079,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _geofenceLocation;
 }
 
++ (void)enableLocation:(BOOL)enabled{
+    isLocationEnabled = enabled;
+}
+
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {
 #if defined(CLEVERTAP_LOCATION)
     [CTLocationManager getLocationWithSuccess:success andError:error];
 #else
-    CleverTapLogStaticInfo(@"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro");
+    if (isLocationEnabled){
+        [CTLocationManager getLocationWithSuccess:success andError:error];
+    }
+    else {
+        NSString *errorMsg = @"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro or use enableLocation method";
+        CleverTapLogStaticDebug(@"%@",errorMsg);
+        error(errorMsg);
+    }
 #endif
 }
 
@@ -4354,6 +4366,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.inboxController markReadMessageWithId:messageId];
 }
 
+- (void)markReadInboxMessagesForIDs:(NSArray<NSString *> *_Nonnull)messageIds{
+    if (![self _isInboxInitialized]) {
+        return;
+    }
+    if (messageIds != nil && [messageIds count] > 0) {
+        [self.inboxController markReadMessagesWithId:messageIds];
+    }
+    else {
+        CleverTapLogStaticDebug(@"App Inbox Message IDs array is null or empty");
+    }
+}
+
 - (void)registerInboxUpdatedBlock:(CleverTapInboxUpdatedBlock)block {
     if (!_inboxUpdateBlocks) {
         _inboxUpdateBlocks = [NSMutableArray new];
@@ -4372,6 +4396,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [[CleverTapInboxViewController alloc] initWithMessages:messages config:config delegate:delegate analyticsDelegate:self];
 }
 
+- (void)dismissAppInbox {
+    [[self class] runSyncMainQueue:^{
+        UIApplication *application = [[self class] getSharedApplication];
+        UIWindow *window = [[application delegate] window];
+        UIViewController *presentedViewcontoller = [[window rootViewController] presentedViewController];
+        if ([presentedViewcontoller isKindOfClass:[UINavigationController class]]) {
+            UINavigationController *navigationController = (UINavigationController *)[[window rootViewController] presentedViewController];
+            if ([navigationController.topViewController isKindOfClass:[CleverTapInboxViewController class]]) {
+                [[window rootViewController] dismissViewControllerAnimated:YES completion:nil];
+            }
+        }
+    }];
+}
 
 #pragma mark Private
 

@@ -13,7 +13,6 @@ typedef void (^CleverTapLocationErrorBlock)(NSString *);
 @implementation CleverTapLocationRequest
 @end
 
-#if defined(CLEVERTAP_LOCATION)
 NSString *const kLocationTimeoutError = @"Location Request Timed Out: Have You Set NSLocationWhenInUseUsageDescription in Your Info.plist?";
 NSString *const kLocationServicesNotEnabled = @"Location Services Not Enabled";
 NSString *const kLocationPermissionDenied = @"Location Permission Denied";
@@ -26,11 +25,9 @@ static CLLocationManager *locationManager;
 static NSMutableArray<CleverTapLocationRequest *> *pendingRequests;
 
 static NSObject *requestsLockObject;
-#endif
 
 @implementation CTLocationManager
 
-#if defined(CLEVERTAP_LOCATION)
 /**
  NOTE: If NSLocationWhenInUseUsageDescription is not set in the app's Info.plist, calls to the CLLocationManager instance will fail silently. Rely on the location timeout to stop updating and return an error in this case.
  */
@@ -201,6 +198,5 @@ static NSObject *requestsLockObject;
     locationManager.delegate = nil;
     [self cancelLocationTimeout];
 }
-#endif
 
 @end
