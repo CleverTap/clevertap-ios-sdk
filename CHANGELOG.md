@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 4.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.1) (March 21, 2023)
+### [Version 4.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.1) (March 22, 2023)
 
 #### Added
 - Adds a public method `dismissAppInbox` to dismiss App Inbox.
