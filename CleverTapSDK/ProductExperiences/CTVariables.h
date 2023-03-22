@@ -31,6 +31,7 @@ NS_SWIFT_NAME(define(name:value:kind:));
 - (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName;
 - (NSDictionary*)varsPayload;
 - (void)addVarListeners;
+- (NSDictionary*)unflatten:(NSDictionary*)result;
 
 @end
 

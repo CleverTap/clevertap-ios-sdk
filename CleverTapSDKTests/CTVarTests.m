@@ -17,19 +17,22 @@
 #import <OHHTTPStubs/HTTPStubs.h>
 #import <OHHTTPStubs/HTTPStubsResponse+JSON.h>
 #import <OHHTTPStubs/NSURLRequest+HTTPBodyTesting.h>
+#import "CTRequestFactory.h"
 
 @interface CTVarTests : XCTestCase
 
 @end
 
+CleverTapInstanceConfig *config;
+CTDeviceInfo *deviceInfo;
 CTVariables *variables;
 
 @implementation CTVarTests
 
 - (void)setUp {
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
+    config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     config.useCustomCleverTapId = YES;
-    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
+    deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
     variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo];
 }
 
@@ -148,11 +151,71 @@ CTVariables *variables;
     XCTAssertEqual(var.unsignedShortValue,varValue.unsignedShortValue);
     XCTAssertEqual(var.unsignedLongLongValue,varValue.unsignedLongLongValue);
     XCTAssertEqual(var.cgFloatValue,varValue.doubleValue);
+    XCTAssertEqual(var.charValue,varValue.charValue);
+    XCTAssertEqual(var.unsignedCharValue,varValue.unsignedCharValue);
     
     CTVar *mapVar = [variables define:@"MyMap" with:@{@"MyMapNumber":varValue} kind:CT_KIND_DICTIONARY];
     XCTAssertTrue([[mapVar objectForKey:@"MyMapNumber"]isKindOfClass:[varValue class]]);
     XCTAssertTrue([mapVar.value isKindOfClass:[NSDictionary class]]);
     XCTAssertTrue([mapVar.defaultValue isKindOfClass:[NSDictionary class]]);
+}
+
+- (void)testSyncVarsPayload {
+    NSString *varName = @"Title";
+    NSString *varValue = @"Hello";
+
+    CTVariables *variablesMock = OCMPartialMock(variables);
+    CTVar *definedVar = [variablesMock define:varName with:varValue kind:CT_KIND_STRING];
+    
+    NSDictionary *payload = [variables varsPayload];
+    
+    XCTAssertEqualObjects(payload[@"type"],@"varsPayload");
+    NSDictionary *vars = [payload objectForKey:@"vars"];
+    NSDictionary *titleMap = [vars objectForKey:varName];
+    XCTAssertEqualObjects(titleMap[@"defaultValue"],varValue);
+    XCTAssertEqualObjects(titleMap[@"type"],definedVar.kind);
+}
+
+- (void)testVariablesFlatten {
+    
+    NSString *varName = @"EmployeeMap";
+    NSDictionary *employeeMap = @{
+        @"Team": @{
+            @"TeamName": @"Testing",
+            @"Designation": @"Tester"
+        },
+        @"Name": @"Niko",
+        @"EmployeeID": @123
+    };
+    NSDictionary *flattenedEmployeeMap = @{
+        @"EmployeeMap.Team.TeamName": @{ @"defaultValue": @"Testing" },
+        @"EmployeeMap.Team.Designation": @{ @"defaultValue": @"Tester" },
+        @"EmployeeMap.Name": @{ @"defaultValue": @"Niko" },
+        @"EmployeeMap.EmployeeID": @{ @"defaultValue": @123 }
+    };
+    NSDictionary *result = [variables flatten:employeeMap varName:varName];
+    XCTAssertEqualObjects(result,flattenedEmployeeMap);
+}
+
+- (void)testVariablesUnflatten {
+    NSDictionary *flattenedEmployeeMap = @{
+        @"EmployeeMap.Team.TeamName": @{ @"defaultValue": @"Testing" },
+        @"EmployeeMap.Team.Designation": @{ @"defaultValue": @"Tester" },
+        @"EmployeeMap.Name": @{ @"defaultValue": @"Niko" },
+        @"EmployeeMap.EmployeeID": @{ @"defaultValue": @123 }
+    };
+    NSDictionary *unflattenedEmployeeMap = @{
+        @"EmployeeMap": @{
+            @"Team": @{
+                @"TeamName": @{ @"defaultValue": @"Testing" },
+                @"Designation": @{ @"defaultValue": @"Tester" }
+            },
+            @"Name": @{ @"defaultValue": @"Niko" },
+            @"EmployeeID": @{ @"defaultValue": @123 }
+        }
+    };
+    NSDictionary *result = [variables unflatten:flattenedEmployeeMap];
+    XCTAssertEqualObjects(result,unflattenedEmployeeMap);
 }
 
 @end
