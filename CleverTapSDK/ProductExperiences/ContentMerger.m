@@ -11,6 +11,9 @@
 @implementation ContentMerger
 
 + (id)mergeWithVars:(id)vars diff:(id)diff {
+    if (diff == nil) {
+        return vars;
+    }
     
     // Return the modified value if it is a `primitive`
     if ([diff isKindOfClass:NSNumber.class] ||
@@ -19,7 +22,9 @@
         return diff;
     }
     
-    if ([vars isKindOfClass:[NSNumber class]] || [vars isKindOfClass:[NSString class]]) {
+    if ([vars isKindOfClass:[NSNumber class]] ||
+        [vars isKindOfClass:[NSString class]] ||
+        [vars isKindOfClass:NSNull.class]) {
         return diff;
     }
     
