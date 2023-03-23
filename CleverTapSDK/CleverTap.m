@@ -259,7 +259,6 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) NSString *gfSDKVersion;
 
 @property (nonatomic, strong) CTVariables *variables;
-@property(strong, nonatomic) CleverTapForceContentUpdateBlock forceContentUpdateBlock;
 
 - (instancetype)init __unavailable;
 
@@ -2822,23 +2821,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
                 }
-               
+                
                 dispatch_semaphore_signal(semaphore);
             }];
             [ctRequest onError:^(NSError * _Nullable error) {
-               
+                
                 if (error) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
-                if (self->_forceContentUpdateBlock) {
-                    if (![NSThread isMainThread]) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            self->_forceContentUpdateBlock(NO);
-                        });
-                    } else {
-                        self->_forceContentUpdateBlock(NO);
-                    }
-                }
+                [[self variables] triggerForceContentUpdate:NO];
                 dispatch_semaphore_signal(semaphore);
             }];
             [self.requestSender send:ctRequest];
@@ -3036,15 +3027,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
                 
                 // Handle and Cache PE Variables
-                [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
-                if (self->_forceContentUpdateBlock) {
-                    if (![NSThread isMainThread]) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            self->_forceContentUpdateBlock(YES);
-                        });
-                    } else {
-                        self->_forceContentUpdateBlock(YES);
-                    }
+                NSDictionary *varsResponse = jsonResp[CLTAP_PE_VARS_RESPONSE_KEY];
+                if (varsResponse) {
+                    [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
                 }
                 
                 // Handle events/profiles sync data
@@ -4725,7 +4710,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_resetVars {
     if (self.config && self.deviceInfo.deviceId) {
         self.variables = [[CTVariables alloc]initWithConfig:self.config deviceInfo:self.deviceInfo];
-        _forceContentUpdateBlock = nil;
     }
 }
 
@@ -5139,7 +5123,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)forceContentUpdateWithBlock:(CleverTapForceContentUpdateBlock)block {
-    _forceContentUpdateBlock = block;
+    [[self variables] setForceContentUpdateBlock:block];
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @4}} withType:CleverTapEventTypeFetch];
 }
 

@@ -16,6 +16,7 @@
 
 @property(strong, nonatomic) NSMutableArray *variablesChangedBlocks;
 @property(strong, nonatomic) NSMutableArray *onceVariablesChangedBlocks;
+
 @end
 
 @implementation CTVariables
@@ -65,6 +66,22 @@
         [[self varCache] setAppLaunchedRecorded:YES];
         NSDictionary *values = [self unflatten:varsResponse];
         [[self varCache] applyVariableDiffs:values];
+        [self triggerForceContentUpdate:YES];
+    }
+}
+
+- (void)triggerForceContentUpdate:(BOOL)success {
+    if (self.forceContentUpdateBlock) {
+        CleverTapForceContentUpdateBlock block = [self.forceContentUpdateBlock copy];
+        if (![NSThread isMainThread]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                block(success);
+            });
+        } else {
+            block(success);
+        }
+        
+        self.forceContentUpdateBlock = nil;
     }
 }
 
