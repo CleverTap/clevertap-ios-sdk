@@ -122,7 +122,8 @@
         // If values are not dictionaries, check if value from another variable will be overridden and log it.
         id currentValue = valuesPtr[nameComponents.lastObject];
         if (currentValue && [currentValue isKindOfClass:NSDictionary.class] && [value isKindOfClass:NSMutableDictionary.class]) {
-            [value addEntriesFromDictionary: currentValue];
+            // Merge all entries from both dictionaries. NSMutableDictionary addEntriesFromDictionary: will not work for nested dictionaries.
+            value = [ContentMerger mergeWithVars:value diff:currentValue];
         } else if (currentValue && ![currentValue isEqual:value]) {
             CleverTapLogInfo(self.config.logLevel, @"%@: Variable with name: %@ will override value: %@, with new value: %@.", self, name, currentValue, value);
         }
@@ -134,14 +135,20 @@
 // Merge default variable value with VarCache.merged value
 // This is neccessary if variable was registered after VarCache.applyVariableDiffs
 - (void)mergeVariable:(CTVar * _Nonnull)var {
-    NSString *firsComponent = var.nameComponents.firstObject;
-    id defaultValue = [self.valuesFromClient objectForKey:firsComponent];
-    id mergedValue = [self.merged objectForKey:firsComponent];
-    if (![defaultValue isEqual:mergedValue]) {
+    NSString *firstComponent = var.nameComponents.firstObject;
+    id defaultValue = [self.valuesFromClient objectForKey:firstComponent];
+    id mergedValue = [self.merged objectForKey:firstComponent];
+    
+    BOOL shouldMerge = (!defaultValue && mergedValue) ||
+                        (defaultValue && ![defaultValue isEqual:mergedValue]);
+    if (shouldMerge) {
         id newValue = [ContentMerger mergeWithVars:defaultValue diff:mergedValue];
-        [self.merged setObject:newValue forKey:firsComponent];
-        
-        NSMutableString *name = [[NSMutableString alloc] initWithString:firsComponent];
+        if (newValue == nil) {
+            return;
+        }
+        [self.merged setObject:newValue forKey:firstComponent];
+
+        NSMutableString *name = [[NSMutableString alloc] initWithString:firstComponent];
         for (int i = 1; i < var.nameComponents.count; i++)
         {
             CTVar *existingVar = self.vars[name];
