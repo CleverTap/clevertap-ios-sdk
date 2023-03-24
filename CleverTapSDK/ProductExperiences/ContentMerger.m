@@ -11,45 +11,50 @@
 @implementation ContentMerger
 
 + (id)mergeWithVars:(id)vars diff:(id)diff {
-    if (diff == nil) {
+    if (!diff) {
         return vars;
     }
-    
+
     // Return the modified value if it is a `primitive`
-    if ([diff isKindOfClass:NSNumber.class] ||
-        [diff isKindOfClass:NSString.class] ||
-        [diff isKindOfClass:NSNull.class]) {
+    if ([diff isKindOfClass:[NSNumber class]] ||
+        [diff isKindOfClass:[NSString class]] ||
+        [diff isKindOfClass:[NSNull class]]) {
         return diff;
     }
-    
     if ([vars isKindOfClass:[NSNumber class]] ||
         [vars isKindOfClass:[NSString class]] ||
-        [vars isKindOfClass:NSNull.class]) {
+        [vars isKindOfClass:[NSNull class]]) {
         return diff;
     }
     
-    NSMutableDictionary *merged = [NSMutableDictionary dictionary];
-    BOOL isVarsDict = NO;
-    if ([vars isKindOfClass:[NSDictionary class]]) {
-        // Create new dictionary from vars
-        merged = [NSMutableDictionary dictionaryWithDictionary:vars];
-        isVarsDict = YES;
+    // Return nil if neither vars nor diff is dictionary.
+    // Use isKindOfClass: to check first. Note that (NSDictionary *) cast will succeed if object is NSArray*.
+    if (![vars isKindOfClass:[NSDictionary class]] && ![diff isKindOfClass:[NSDictionary class]]) {
+        return nil;
     }
     
-    if ([diff isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *diffDict = (NSDictionary*)diff;
-        [diffDict enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-            id defaultValue = merged[key] ?: [NSNull null];
-            merged[key] = [self mergeWithVars:defaultValue diff:value];
-        }];
-        
+    if (![vars isKindOfClass:[NSDictionary class]]) {
+        // diff is dictionary
+        return diff;
+    }
+    
+    // vars is dictionary
+    NSMutableDictionary *merged = [NSMutableDictionary dictionaryWithDictionary:vars];
+    if (![diff isKindOfClass:[NSDictionary class]]) {
         return merged;
-    } else if (isVarsDict) {
-        // vars is a dictionary but diff is not or diff is nil, return vars
-        return vars;
     }
-    
-    return [NSNull null];
+
+    // vars and diff are dictionary
+    NSDictionary *diffDict = (NSDictionary *)diff;
+    [diffDict enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+        id defaultValue = merged[key];
+        id mergedValue = [self mergeWithVars:defaultValue diff:value];
+        if (mergedValue) {
+            merged[key] = mergedValue;
+        }
+    }];
+
+    return merged;
 }
 
 @end
