@@ -135,6 +135,10 @@
 // Merge default variable value with VarCache.merged value
 // This is neccessary if variable was registered after VarCache.applyVariableDiffs
 - (void)mergeVariable:(CTVar * _Nonnull)var {
+    if (!self.merged || ![self.merged isKindOfClass:[NSMutableDictionary class]]) {
+        return;
+    }
+    
     NSString *firstComponent = var.nameComponents.firstObject;
     id defaultValue = [self.valuesFromClient objectForKey:firstComponent];
     id mergedValue = [self.merged objectForKey:firstComponent];
