@@ -23,7 +23,7 @@
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
     if ((self = [super init])) {
-        self.varCache = [[CTVarCache alloc]initWithConfig:config deviceInfo:deviceInfo];
+        self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo];
     }
     return self;
 }
@@ -156,37 +156,37 @@
 }
 
 - (NSDictionary*)varsPayload {
-    NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    result[@"type"] = CT_PE_VARS_PAYLOAD_TYPE;
+    NSMutableDictionary *payload = [NSMutableDictionary dictionary];
+    payload[@"type"] = CT_PE_VARS_PAYLOAD_TYPE;
     
     NSMutableDictionary *allVars = [NSMutableDictionary dictionary];
     
     [self.varCache.vars
-     enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, CTVar * _Nonnull varValue, BOOL * _Nonnull stop) {
+     enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, CTVar * _Nonnull variable, BOOL * _Nonnull stop) {
         
         NSMutableDictionary *varData = [NSMutableDictionary dictionary];
         
-        if ([varValue.defaultValue isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *flattenedMap = [self flatten:varValue.defaultValue varName:varValue.name];
+        if ([variable.defaultValue isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *flattenedMap = [self flatten:variable.defaultValue varName:variable.name];
             [allVars addEntriesFromDictionary:flattenedMap];
         }
         else {
-            if ([varValue.kind isEqualToString:CT_KIND_INT] || [varValue.kind isEqualToString:CT_KIND_FLOAT]) {
+            if ([variable.kind isEqualToString:CT_KIND_INT] || [variable.kind isEqualToString:CT_KIND_FLOAT]) {
                 varData[CT_PE_VAR_TYPE] = CT_PE_NUMBER_TYPE;
             }
-            else if ([varValue.kind isEqualToString:CT_KIND_BOOLEAN]) {
+            else if ([variable.kind isEqualToString:CT_KIND_BOOLEAN]) {
                 varData[CT_PE_VAR_TYPE] = CT_PE_BOOL_TYPE;
             }
             else {
-                varData[CT_PE_VAR_TYPE] = varValue.kind;
+                varData[CT_PE_VAR_TYPE] = variable.kind;
             }
-            varData[CT_PE_DEFAULT_VALUE] = varValue.defaultValue;
+            varData[CT_PE_DEFAULT_VALUE] = variable.defaultValue;
             allVars[key] = varData;
         }
     }];
-    result[CT_PE_VARS_PAYLOAD_KEY] = allVars;
+    payload[CT_PE_VARS_PAYLOAD_KEY] = allVars;
     
-    return result;
+    return payload;
 }
 
 - (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName {
@@ -195,13 +195,11 @@
     [map enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
         if ([value isKindOfClass:[NSString class]] ||
             [value isKindOfClass:[NSNumber class]]) {
-            NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
-            varsPayload[payloadKey] = @{CT_PE_DEFAULT_VALUE: value};
-        }
-        else if ([value isKindOfClass:[NSDictionary class]]) {
-            NSString *payloadKey = [NSString stringWithFormat:@"%@.%@",varName,key];
-            
-            NSDictionary* flattenedMap = [self flatten:value varName:payloadKey];
+            NSString *flatKey = [NSString stringWithFormat:@"%@.%@", varName, key];
+            varsPayload[flatKey] = @{ CT_PE_DEFAULT_VALUE: value };
+        } else if ([value isKindOfClass:[NSDictionary class]]) {
+            NSString *flatKey = [NSString stringWithFormat:@"%@.%@", varName, key];
+            NSDictionary* flattenedMap = [self flatten:value varName:flatKey];
             [varsPayload addEntriesFromDictionary:flattenedMap];
         }
     }];
@@ -209,15 +207,17 @@
     return varsPayload;
 }
 
-- (NSDictionary*)unflatten:(NSDictionary*)result {
-    NSMutableDictionary *varsPayload = [NSMutableDictionary dictionary];
+- (NSDictionary*)unflatten:(NSDictionary*)flatDictionary {
+    if (!flatDictionary) {
+        return nil;
+    }
     
-    [result enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-        
+    NSMutableDictionary *unflattenVars = [NSMutableDictionary dictionary];
+    [flatDictionary enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
         if ([key containsString:@"."]) {
             NSArray *components = [self.varCache getNameComponents:key];
             long namePosition =  components.count - 1;
-            NSMutableDictionary *currentMap = varsPayload;
+            NSMutableDictionary *currentMap = unflattenVars;
             
             for (int i = 0; i < components.count; i++) {
                 NSString *component = components[i];
@@ -237,11 +237,11 @@
             }
         }
         else {
-            varsPayload[key] = value;
+            unflattenVars[key] = value;
         }
     }];
     
-    return varsPayload;
+    return unflattenVars;
 }
 
 @end
