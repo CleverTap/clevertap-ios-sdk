@@ -5122,7 +5122,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (void)forceContentUpdateWithBlock:(CleverTapForceContentUpdateBlock)block {
+- (void)forceContentUpdate:(CleverTapForceContentUpdateBlock)block {
     [[self variables] setForceContentUpdateBlock:block];
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @4}} withType:CleverTapEventTypeFetch];
 }
