@@ -31,23 +31,10 @@
 
 @implementation CTRequestSender
 
-//+ (instancetype)sharedInstance {
-//    static CTRequestSender *instance = nil;
-//    static dispatch_once_t onceToken;
-//    dispatch_once(&onceToken, ^{
-//        instance = [[self alloc] init];
-//    });
-//    return instance;
-//}
-
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config redirectDomain:(NSString* _Nonnull)redirectDomain {
     
     if ((self = [super init])) {
         self.config = config;
-//#if CLEVERTAP_SSL_PINNING
-//        // Only pin anchor/CA certificates
-//        _sslCertNames = @[@"AmazonRootCA1"];
-//#endif
         self.redirectDomain = redirectDomain;
         [self setUpUrlSession];
 
