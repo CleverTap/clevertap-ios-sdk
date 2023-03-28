@@ -9,10 +9,38 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "CTVariables.h"
+#import "CTConstants.h"
 
 @interface CTVariablesTest : XCTestCase
 
 @property(strong, nonatomic) CTVariables *variables;
+
+@end
+
+@interface CTVarCacheMock : CTVarCache
+@end
+
+@implementation CTVarCacheMock
+
+- (void)loadDiffs {
+    // Do NOT read from file
+}
+
+- (void)saveDiffs {
+    // Do NOT save to file
+}
+
+@end
+
+@implementation CTVariables (Mock)
+
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo *)deviceInfo varCache: (CTVarCacheMock *)varCache {
+    self = [super init];
+    if (self) {
+        self.varCache = varCache;
+    }
+    return self;
+}
 
 @end
 
@@ -21,11 +49,195 @@
 - (void)setUp {
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
-    _variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo];
+    CTVarCacheMock *varCache = [[CTVarCacheMock alloc] initWithConfig:config deviceInfo:deviceInfo];
+    self.variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo varCache:varCache];
 }
 
 - (void)tearDown {
-    _variables = nil;
+    self.variables = nil;
+}
+
+- (void)testVarCacheNotNil {
+    XCTAssertNotNil(self.variables.varCache);
+}
+
+#pragma mark Sync Variables
+- (void)testSyncVars {
+    NSString *varName = @"var1";
+    NSString *varValue = @"value1";
+    
+    CTVar *definedVar = [self.variables define:varName with:varValue kind:CT_KIND_STRING];
+    
+    NSDictionary *payload = [self.variables varsPayload];
+    
+    XCTAssertEqualObjects(payload[@"type"], CT_PE_VARS_PAYLOAD_TYPE);
+    NSDictionary *vars = [payload objectForKey:CT_PE_VARS_PAYLOAD_KEY];
+    NSDictionary *titleMap = [vars objectForKey:varName];
+    XCTAssertEqualObjects(titleMap[CT_PE_DEFAULT_VALUE], varValue);
+    XCTAssertEqualObjects(titleMap[CT_PE_VAR_TYPE], definedVar.kind);
+}
+
+- (void)testSyncVarsComplex {
+    [self.variables define:@"var1" with:@"value1" kind:CT_KIND_STRING];
+    [self.variables define:@"var2.var22" with:@"value2" kind:CT_KIND_STRING];
+    [self.variables define:@"var3" with:@YES kind:CT_KIND_BOOLEAN];
+    [self.variables define:@"var4" with:@1234 kind:CT_KIND_INT];
+    [self.variables define:@"var5" with:@12.34 kind:CT_KIND_FLOAT];
+    [self.variables define:@"var6" with:@{
+        @"var7": @"value7",
+        @"var8": @"value8"
+    } kind:CT_KIND_DICTIONARY];
+    
+    NSDictionary *expected = @{
+        @"type": @"varsPayload",
+        @"vars": @{
+            @"var1": @{
+                @"defaultValue": @"value1",
+                @"type": @"string"
+            },
+            @"var2.var22": @{
+                @"defaultValue": @"value2",
+                @"type": @"string"
+            },
+            @"var3": @{
+                @"defaultValue": @1,
+                @"type": @"boolean"
+            },
+            @"var4": @{
+                @"defaultValue": @1234,
+                @"type": @"number"
+            },
+            @"var5": @{
+                @"defaultValue": @12.34,
+                @"type": @"number"
+            },
+            @"var6.var7": @{
+                @"defaultValue": @"value7",
+            },
+            @"var6.var8": @{
+                @"defaultValue": @"value8",
+            },
+        }
+    };
+    
+    NSDictionary *actual = [self.variables varsPayload];
+    XCTAssertEqualObjects(actual, expected);
+}
+
+- (void)testSyncVarsWithDots {
+    [self.variables define:@"var1.var2" with:@"value2" kind:CT_KIND_STRING];
+    [self.variables define:@"var1.var3" with:@"value3" kind:CT_KIND_STRING];
+    [self.variables define:@"var1.var4.var5" with:@YES kind:CT_KIND_BOOLEAN];
+    [self.variables define:@"var1.var4.var6" with:@1234 kind:CT_KIND_INT];
+    [self.variables define:@"var7.var8" with:@12.34 kind:CT_KIND_FLOAT];
+    
+    NSDictionary *expected = @{
+        @"type": @"varsPayload",
+        @"vars": @{
+            @"var1.var2": @{
+                @"defaultValue": @"value2",
+                @"type": @"string"
+            },
+            @"var1.var3": @{
+                @"defaultValue": @"value3",
+                @"type": @"string"
+            },
+            @"var1.var4.var5": @{
+                @"defaultValue": @1,
+                @"type": @"boolean"
+            },
+            @"var1.var4.var6": @{
+                @"defaultValue": @1234,
+                @"type": @"number"
+            },
+            @"var7.var8": @{
+                @"defaultValue": @12.34,
+                @"type": @"number"
+            }
+        }
+    };
+    
+    NSDictionary *actual = [self.variables varsPayload];
+    XCTAssertEqualObjects(actual, expected);
+}
+
+- (void)testSyncVarsWithDotsAndDictionaries {
+    [self.variables define:@"var1.var2" with:@"value2" kind:CT_KIND_STRING];
+    [self.variables define:@"var1.var4" with:@{
+        @"var5": @NO,
+        @"var6": @1234
+    } kind:CT_KIND_DICTIONARY];
+    [self.variables define:@"var7.var8" with:@"value8" kind:CT_KIND_STRING];
+    [self.variables define:@"var7" with:@{
+        @"var9": @12.34
+    } kind:CT_KIND_DICTIONARY];
+    [self.variables define:@"var7.var10" with:@"value10" kind:CT_KIND_STRING];
+
+    
+    NSDictionary *expected = @{
+        @"type": @"varsPayload",
+        @"vars": @{
+            @"var1.var2": @{
+                @"defaultValue": @"value2",
+                @"type": @"string"
+            },
+            @"var1.var4.var5": @{
+                @"defaultValue": @0
+            },
+            @"var1.var4.var6": @{
+                @"defaultValue": @1234
+            },
+            @"var7.var8": @{
+                @"defaultValue": @"value8",
+                @"type": @"string"
+            },
+            @"var7.var9": @{
+                @"defaultValue": @12.34
+            },
+            @"var7.var10": @{
+                @"defaultValue": @"value10",
+                @"type": @"string"
+            }
+        }
+    };
+    
+    NSDictionary *actual = [self.variables varsPayload];
+    XCTAssertEqualObjects(actual, expected);
+}
+
+- (void)testSyncVarsWithInvalidArray {
+    [self.variables define:@"var1" with:@"value1" kind:CT_KIND_STRING];
+    [self.variables define:@"var2" with:@{
+        @"var3": @[ @"arr" ],
+        @"var4": @"value4"
+    } kind:CT_KIND_DICTIONARY];
+    
+    // The array will be dropped
+    NSDictionary *expected = @{
+        @"type": @"varsPayload",
+        @"vars": @{
+            @"var1": @{
+                @"defaultValue": @"value1",
+                @"type": @"string"
+            },
+            @"var2.var4": @{
+                @"defaultValue": @"value4"
+            }
+        }
+    };
+    
+    NSDictionary *actual = [self.variables varsPayload];
+    XCTAssertEqualObjects(actual, expected);
+}
+
+- (void)testSyncVarsWithEmpty {
+    NSDictionary *expected = @{
+        @"type": @"varsPayload",
+        @"vars": @{}
+    };
+    
+    NSDictionary *actual = [self.variables varsPayload];
+    XCTAssertEqualObjects(actual, expected);
 }
 
 #pragma mark Unflatten Variables
