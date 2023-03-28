@@ -18,7 +18,6 @@ typedef void (^CTNetworkResponseErrorBlock)(NSError * _Nullable error);
 
 - (void)onResponse:(CTNetworkResponseBlock _Nonnull)responseBlock;
 - (void)onError:(CTNetworkResponseErrorBlock _Nonnull)errorBlock;
-//- (void)send:(NSURLSession *_Nonnull)urlSession;
 
 @property (nonatomic, strong, nonnull) NSMutableURLRequest *urlRequest;
 @property (nonatomic, strong, nonnull) CTNetworkResponseBlock responseBlock;
