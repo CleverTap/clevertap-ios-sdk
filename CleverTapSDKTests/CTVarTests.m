@@ -176,46 +176,4 @@ CTVariables *variables;
     XCTAssertEqualObjects(titleMap[@"type"],definedVar.kind);
 }
 
-- (void)testVariablesFlatten {
-    
-    NSString *varName = @"EmployeeMap";
-    NSDictionary *employeeMap = @{
-        @"Team": @{
-            @"TeamName": @"Testing",
-            @"Designation": @"Tester"
-        },
-        @"Name": @"Niko",
-        @"EmployeeID": @123
-    };
-    NSDictionary *flattenedEmployeeMap = @{
-        @"EmployeeMap.Team.TeamName": @{ @"defaultValue": @"Testing" },
-        @"EmployeeMap.Team.Designation": @{ @"defaultValue": @"Tester" },
-        @"EmployeeMap.Name": @{ @"defaultValue": @"Niko" },
-        @"EmployeeMap.EmployeeID": @{ @"defaultValue": @123 }
-    };
-    NSDictionary *result = [variables flatten:employeeMap varName:varName];
-    XCTAssertEqualObjects(result,flattenedEmployeeMap);
-}
-
-- (void)testVariablesUnflatten {
-    NSDictionary *flattenedEmployeeMap = @{
-        @"EmployeeMap.Team.TeamName": @{ @"defaultValue": @"Testing" },
-        @"EmployeeMap.Team.Designation": @{ @"defaultValue": @"Tester" },
-        @"EmployeeMap.Name": @{ @"defaultValue": @"Niko" },
-        @"EmployeeMap.EmployeeID": @{ @"defaultValue": @123 }
-    };
-    NSDictionary *unflattenedEmployeeMap = @{
-        @"EmployeeMap": @{
-            @"Team": @{
-                @"TeamName": @{ @"defaultValue": @"Testing" },
-                @"Designation": @{ @"defaultValue": @"Tester" }
-            },
-            @"Name": @{ @"defaultValue": @"Niko" },
-            @"EmployeeID": @{ @"defaultValue": @123 }
-        }
-    };
-    NSDictionary *result = [variables unflatten:flattenedEmployeeMap];
-    XCTAssertEqualObjects(result,unflattenedEmployeeMap);
-}
-
 @end

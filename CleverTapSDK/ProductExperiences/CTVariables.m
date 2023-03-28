@@ -216,24 +216,22 @@
     [flatDictionary enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
         if ([key containsString:@"."]) {
             NSArray *components = [self.varCache getNameComponents:key];
-            long namePosition =  components.count - 1;
             NSMutableDictionary *currentMap = unflattenVars;
+            NSString *lastComponent = [components lastObject];
             
-            for (int i = 0; i < components.count; i++) {
+            for (int i = 0; i < components.count - 1; i++) {
                 NSString *component = components[i];
-                if (i == namePosition) {
-                    currentMap[component] = value;
+                if (!currentMap[component]) {
+                    NSMutableDictionary *nestedMap = [NSMutableDictionary dictionary];
+                    currentMap[component] = nestedMap;
+                    currentMap = nestedMap;
                 }
                 else {
-                    if (!currentMap[component]) {
-                        NSMutableDictionary *nestedMap = [NSMutableDictionary dictionary];
-                        currentMap[component] = nestedMap;
-                        currentMap = nestedMap;
-                    }
-                    else {
-                        currentMap = ((NSMutableDictionary*)currentMap[component]);
-                    }
+                    currentMap = ((NSMutableDictionary*)currentMap[component]);
                 }
+            }
+            if ([currentMap isKindOfClass:[NSMutableDictionary class]]) {
+                currentMap[lastComponent] = value;
             }
         }
         else {
