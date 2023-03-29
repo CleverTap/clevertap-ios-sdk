@@ -25,7 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
              kind:(nullable NSString *)kind
 NS_SWIFT_NAME(define(name:value:kind:));
 
-- (CTVar *)getVariable:(NSString *)name;
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse;
 - (void)triggerFetchVariables:(BOOL)success;
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;

@@ -1343,6 +1343,10 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)fetchVariables:(CleverTapFetchVariablesBlock _Nullable)block;
 
+- (CTVar * _Nullable)getVariable:(NSString * _Nonnull)name;
+
+- (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
+
 @end
 
 #pragma clang diagnostic pop

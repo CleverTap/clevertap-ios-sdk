@@ -51,15 +51,6 @@
     }
 }
 
-- (CTVar *)getVariable:(NSString *)name
-{
-    CTVar *var = [self.varCache getVariable:name];
-    if (!var) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Variable with name: %@ not found.", self, name);
-    }
-    return var;
-}
-
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse
 {
     if (varsResponse) {

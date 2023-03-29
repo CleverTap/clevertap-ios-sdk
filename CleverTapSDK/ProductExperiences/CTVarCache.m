@@ -180,7 +180,6 @@
     return [self.vars objectForKey:name];
 }
 
-// TODO: expose through CleverTap
 - (id)getMergedValue:(NSString *)name
 {
     NSArray *components = [self getNameComponents:name];

@@ -5125,6 +5125,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @4}} withType:CleverTapEventTypeFetch];
 }
 
+- (CTVar * _Nullable)getVariable:(NSString * _Nonnull)name {
+    CTVar *var = [[self.variables varCache] getVariable:name];
+    if (!var) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Variable with name: %@ not found.", self, name);
+    }
+    return var;
+}
+
+- (id _Nullable)getVariableValue:(NSString * _Nonnull)name {
+    // TODO: return a copy
+    return [[self.variables varCache] getVariable:name];
+}
+
 #pragma mark - PE Vars
 
 - (CTVar *)defineVar:(NSString *)name {
