@@ -8,39 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import "CTVariables+Tests.h"
+#import "CTVarCacheMock.h"
 #import "CTVariables.h"
 #import "CTConstants.h"
 
 @interface CTVariablesTest : XCTestCase
 
 @property(strong, nonatomic) CTVariables *variables;
-
-@end
-
-@interface CTVarCacheMock : CTVarCache
-@end
-
-@implementation CTVarCacheMock
-
-- (void)loadDiffs {
-    // Do NOT read from file
-}
-
-- (void)saveDiffs {
-    // Do NOT save to file
-}
-
-@end
-
-@implementation CTVariables (Mock)
-
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo *)deviceInfo varCache: (CTVarCacheMock *)varCache {
-    self = [super init];
-    if (self) {
-        self.varCache = varCache;
-    }
-    return self;
-}
 
 @end
 
