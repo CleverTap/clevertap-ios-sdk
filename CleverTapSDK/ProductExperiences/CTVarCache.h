@@ -10,28 +10,26 @@ typedef void (^CacheUpdateBlock)(void);
 NS_SWIFT_NAME(VarCache)
 @interface CTVarCache : NSObject
 
+- (instancetype)init NS_UNAVAILABLE;
+
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
 
-// Handling variables.
-- (NSArray<NSString *> *)getNameComponents:(NSString *)name;
-- (void)loadDiffs;
-- (void)saveDiffs;
+@property (assign, nonatomic) BOOL silent;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
+@property (assign, nonatomic) BOOL appLaunchedRecorded;
 
-- (void)registerVariable:(CTVar *)var;
-- (nullable CTVar *)getVariable:(NSString *)name;
-
-// Handling values.
-- (nullable id)getValueFromComponentArray:(NSArray<NSString *> *) components fromDict:(NSDictionary<NSString *, id> *)values;
-- (nullable id)getMergedValueFromComponentArray:(NSArray<NSString *> *) components;
 - (nullable NSDictionary<NSString *, id> *)diffs;
+- (void)loadDiffs;
 - (BOOL)hasReceivedDiffs;
 - (void)applyVariableDiffs:(nullable NSDictionary<NSString *, id> *)diffs_;
 - (void)onUpdate:(CacheUpdateBlock)block;
-- (void)setSilent:(BOOL)silent;
-- (BOOL)silent;
 
-@property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
-@property (assign, nonatomic) BOOL appLaunchedRecorded;
+- (void)registerVariable:(CTVar *)var;
+- (nullable CTVar *)getVariable:(NSString *)name;
+- (id)getMergedValue:(NSString *)name;
+
+- (NSArray<NSString *> *)getNameComponents:(NSString *)name;
+- (nullable id)getMergedValueFromComponentArray:(NSArray<NSString *> *) components;
 
 @end
 

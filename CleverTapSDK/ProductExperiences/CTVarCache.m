@@ -13,8 +13,6 @@
 @property (strong, nonatomic) CacheUpdateBlock updateBlock;
 @property (assign, nonatomic) BOOL hasReceivedDiffs;
 
-@property (assign, nonatomic) BOOL silent;
-
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @end
@@ -180,6 +178,13 @@
 - (CTVar *)getVariable:(NSString *)name
 {
     return [self.vars objectForKey:name];
+}
+
+// TODO: expose through CleverTap
+- (id)getMergedValue:(NSString *)name
+{
+    NSArray *components = [self getNameComponents:name];
+    return [self getMergedValueFromComponentArray:components];
 }
 
 - (id)getValueFromComponentArray:(NSArray *) components fromDict:(NSDictionary *)values
