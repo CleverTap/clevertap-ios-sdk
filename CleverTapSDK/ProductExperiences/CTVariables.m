@@ -66,13 +66,14 @@
         [[self varCache] setAppLaunchedRecorded:YES];
         NSDictionary *values = [self unflatten:varsResponse];
         [[self varCache] applyVariableDiffs:values];
-        [self triggerForceContentUpdate:YES];
+        [self triggerFetchVariables:YES];
     }
 }
 
-- (void)triggerForceContentUpdate:(BOOL)success {
-    if (self.forceContentUpdateBlock) {
-        CleverTapForceContentUpdateBlock block = [self.forceContentUpdateBlock copy];
+// TODO: callback is overridden after second call if first is not ready yet
+- (void)triggerFetchVariables:(BOOL)success {
+    if (self.fetchVariablesBlock) {
+        CleverTapFetchVariablesBlock block = [self.fetchVariablesBlock copy];
         if (![NSThread isMainThread]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 block(success);
@@ -81,7 +82,7 @@
             block(success);
         }
         
-        self.forceContentUpdateBlock = nil;
+        self.fetchVariablesBlock = nil;
     }
 }
 

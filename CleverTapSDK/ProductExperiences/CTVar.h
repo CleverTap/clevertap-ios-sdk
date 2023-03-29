@@ -4,7 +4,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^CleverTapVariablesChangedBlock)(void);
-typedef void (^CleverTapForceContentUpdateBlock)(BOOL success);
+typedef void (^CleverTapFetchVariablesBlock)(BOOL success);
 
 @class CTVar;
 

@@ -1341,7 +1341,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param block a callback with a boolean flag whether the update was successful.
  */
-- (void)forceContentUpdate:(CleverTapForceContentUpdateBlock _Nullable)block;
+- (void)fetchVariables:(CleverTapFetchVariablesBlock _Nullable)block;
 
 @end
 

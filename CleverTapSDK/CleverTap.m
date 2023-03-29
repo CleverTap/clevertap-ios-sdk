@@ -2827,7 +2827,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 if (error) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
-                [[self variables] triggerForceContentUpdate:NO];
+                [[self variables] triggerFetchVariables:NO];
                 dispatch_semaphore_signal(semaphore);
             }];
             [self.requestSender send:ctRequest];
@@ -5120,8 +5120,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (void)forceContentUpdate:(CleverTapForceContentUpdateBlock)block {
-    [[self variables] setForceContentUpdateBlock:block];
+- (void)fetchVariables:(CleverTapFetchVariablesBlock)block {
+    [[self variables] setFetchVariablesBlock:block];
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @4}} withType:CleverTapEventTypeFetch];
 }
 
