@@ -4030,13 +4030,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain spikyProxyDomain:(NSString *)spikyProxyDomain {
     [self _setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
     
+    NSString *spikyProxyDomainResult;
     if (spikyProxyDomain != nil && ![spikyProxyDomain isEqualToString:@""]) {
-        spikyProxyDomain = [spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if (spikyProxyDomain.length <= 0) {
-            spikyProxyDomain = nil;
+        spikyProxyDomainResult = [spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (spikyProxyDomainResult.length <= 0) {
+            spikyProxyDomainResult = nil;
         }
     }
-    [_plistInfo setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain spikyProxyDomain:spikyProxyDomain];
+    [_plistInfo setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain spikyProxyDomain:spikyProxyDomainResult];
 }
 
 + (void)enablePersonalization {
@@ -4562,7 +4563,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];
         [message setObject:[NSNumber numberWithLong:expireTime] forKey:@"wzrk_ttl"];
-        [message addEntriesFromDictionary:msg];
+        [message addEntriesFromDictionary:msg ?: @{}];
         
         NSMutableArray<NSDictionary*> *inboxMsg = [NSMutableArray new];
         [inboxMsg addObject:message];
