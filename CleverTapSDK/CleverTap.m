@@ -4216,7 +4216,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
-- (BOOL)handleMessage:(NSDictionary<NSString *, id> *)message forWatchSession:(WCSession *)session  {
+- (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session  {
     NSString *type = [message objectForKey:@"clevertap_type"];
     
     BOOL handled = (type != nil);

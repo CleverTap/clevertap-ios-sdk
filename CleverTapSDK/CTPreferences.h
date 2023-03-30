@@ -23,6 +23,6 @@
 
 + (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)fileName;
 
-+ (NSString *)storageKeyWithSuffix: (NSString *)suffix config: (CleverTapInstanceConfig*)config;
++ (NSString * _Nonnull)storageKeyWithSuffix: (NSString * _Nonnull)suffix config: (CleverTapInstanceConfig* _Nonnull)config;
 
 @end

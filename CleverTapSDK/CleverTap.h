@@ -1274,7 +1274,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 #if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
  */
-- (BOOL)handleMessage:(NSDictionary<NSString *, id> *)message forWatchSession:(WCSession *)session API_AVAILABLE(ios(9.0));
+- (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session API_AVAILABLE(ios(9.0));
 #endif
 
 /*!

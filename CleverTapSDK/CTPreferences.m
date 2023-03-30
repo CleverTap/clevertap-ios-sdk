@@ -177,7 +177,7 @@
     return success;
 }
 
-+ (NSString *)storageKeyWithSuffix: (NSString *)suffix config: (CleverTapInstanceConfig*)config {
++ (NSString * _Nonnull)storageKeyWithSuffix: (NSString * _Nonnull)suffix config: (CleverTapInstanceConfig* _Nonnull)config {
     return [NSString stringWithFormat:@"%@:%@", config.accountId, suffix];
 }
 
