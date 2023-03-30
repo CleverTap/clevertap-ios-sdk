@@ -51,28 +51,20 @@
     }
 }
 
-- (CTVar *)getVariable:(NSString *)name
-{
-    CTVar *var = [self.varCache getVariable:name];
-    if (!var) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Variable with name: %@ not found.", self, name);
-    }
-    return var;
-}
-
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse
 {
     if (varsResponse) {
         [[self varCache] setAppLaunchedRecorded:YES];
         NSDictionary *values = [self unflatten:varsResponse];
         [[self varCache] applyVariableDiffs:values];
-        [self triggerForceContentUpdate:YES];
+        [self triggerFetchVariables:YES];
     }
 }
 
-- (void)triggerForceContentUpdate:(BOOL)success {
-    if (self.forceContentUpdateBlock) {
-        CleverTapForceContentUpdateBlock block = [self.forceContentUpdateBlock copy];
+// TODO: callback is overridden after second call if first is not ready yet
+- (void)triggerFetchVariables:(BOOL)success {
+    if (self.fetchVariablesBlock) {
+        CleverTapFetchVariablesBlock block = [self.fetchVariablesBlock copy];
         if (![NSThread isMainThread]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 block(success);
@@ -81,7 +73,7 @@
             block(success);
         }
         
-        self.forceContentUpdateBlock = nil;
+        self.fetchVariablesBlock = nil;
     }
 }
 
@@ -216,24 +208,22 @@
     [flatDictionary enumerateKeysAndObjectsUsingBlock:^(NSString* _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
         if ([key containsString:@"."]) {
             NSArray *components = [self.varCache getNameComponents:key];
-            long namePosition =  components.count - 1;
             NSMutableDictionary *currentMap = unflattenVars;
+            NSString *lastComponent = [components lastObject];
             
-            for (int i = 0; i < components.count; i++) {
+            for (int i = 0; i < components.count - 1; i++) {
                 NSString *component = components[i];
-                if (i == namePosition) {
-                    currentMap[component] = value;
+                if (!currentMap[component]) {
+                    NSMutableDictionary *nestedMap = [NSMutableDictionary dictionary];
+                    currentMap[component] = nestedMap;
+                    currentMap = nestedMap;
                 }
                 else {
-                    if (!currentMap[component]) {
-                        NSMutableDictionary *nestedMap = [NSMutableDictionary dictionary];
-                        currentMap[component] = nestedMap;
-                        currentMap = nestedMap;
-                    }
-                    else {
-                        currentMap = ((NSMutableDictionary*)currentMap[component]);
-                    }
+                    currentMap = ((NSMutableDictionary*)currentMap[component]);
                 }
+            }
+            if ([currentMap isKindOfClass:[NSMutableDictionary class]]) {
+                currentMap[lastComponent] = value;
             }
         }
         else {

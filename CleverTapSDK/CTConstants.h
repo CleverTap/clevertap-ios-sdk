@@ -8,7 +8,6 @@ extern NSString *CT_KIND_FLOAT;
 extern NSString *CT_KIND_STRING;
 extern NSString *CT_KIND_BOOLEAN;
 extern NSString *CT_KIND_DICTIONARY;
-extern NSString *CT_KIND_ARRAY;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
