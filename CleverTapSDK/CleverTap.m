@@ -78,6 +78,7 @@ static NSArray *sslCertNames;
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static BOOL isLocationEnabled;
+static NSMutableDictionary *libVersionDict;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -1232,6 +1233,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (self.deviceInfo.library) {
         evtData[@"lib"] = self.deviceInfo.library;
+    }
+    
+    if (libVersionDict){
+        evtData[@"lib"] = libVersionDict[@"name"];
+        evtData[@"libVersion"] = libVersionDict[@"version"];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -3990,6 +3996,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)setLibrary:(NSString *)name {
     self.deviceInfo.library = name;
+}
+
+- (void)setCustomSdkVersion:(NSString *)name version:(int)version{
+    libVersionDict = [NSMutableDictionary new];
+    libVersionDict[@"name"] = name;
+    libVersionDict[@"version"] = @(version);
 }
 
 + (void)setDebugLevel:(int)level {

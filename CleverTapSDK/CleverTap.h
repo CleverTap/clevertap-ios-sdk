@@ -1231,6 +1231,17 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @method
  
  @abstract
+ Set the Library name for Auxiliary SDKs
+ 
+ @discussion
+ Call this to method to set library name in the Auxiliary SDK
+ */
+- (void)setCustomSdkVersion:(NSString * _Nonnull)name version:(int)version;
+
+/*!
+ @method
+ 
+ @abstract
  Store the users location for geofences on the default shared CleverTap instance.
  
  @discussion
