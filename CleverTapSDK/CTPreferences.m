@@ -161,7 +161,7 @@
     
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
-        [data writeToFile:filePath options:NSDataWritingAtomic error:&writeError];
+        success = [data writeToFile:filePath options:NSDataWritingAtomic error:&writeError];
         if (archiveError) {
             CleverTapLogStaticInternal(@"%@ failed to archive data at %@: %@", self, filePath, archiveError);
         }
