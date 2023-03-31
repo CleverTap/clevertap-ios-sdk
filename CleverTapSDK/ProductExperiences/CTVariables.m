@@ -34,6 +34,12 @@
         CleverTapLogDebug(_config.logLevel, @"%@: Empty name provided as parameter while defining a variable.", self);
         return nil;
     }
+    
+    NSArray<NSString *> *nameComponents = [self.varCache getNameComponents:name];
+    if ([nameComponents[0] isEqualToString:@""] || [nameComponents.lastObject isEqualToString:@""]) {
+        CleverTapLogDebug(_config.logLevel, @"%@: Variable name starts or ends with a `.` which is not allowed.", self);
+        return nil;
+    }
 
     @synchronized (self.varCache.vars) {
         CT_TRY
@@ -43,7 +49,7 @@
         }
         CT_END_TRY
         CTVar *var = [[CTVar alloc] initWithName:name
-                                  withComponents:[self.varCache getNameComponents:name]
+                                  withComponents:nameComponents
                                 withDefaultValue:defaultValue
                                         withKind:kind
                                         varCache:self.varCache];

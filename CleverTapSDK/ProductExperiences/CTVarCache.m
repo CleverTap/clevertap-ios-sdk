@@ -5,7 +5,6 @@
 #import "ContentMerger.h"
 
 @interface CTVarCache()
-@property (strong, nonatomic) NSRegularExpression *varNameRegex;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *valuesFromClient;
 @property (strong, nonatomic) id merged;
 @property (strong, nonatomic) NSDictionary<NSString *, id> *diffs;
@@ -35,47 +34,12 @@
     self.valuesFromClient = [NSMutableDictionary dictionary];
     self.hasReceivedDiffs = NO;
     self.silent = NO;
-    NSError *error = NULL;
-    self.varNameRegex = [NSRegularExpression regularExpressionWithPattern:@"(?:[^\\.\\[.(\\\\]+|\\\\.)+"
-                                                             options:NSRegularExpressionCaseInsensitive error:&error];
-}
-
-- (NSArray *)arrayOfCaptureComponentsOfString:(NSString *)data matchedBy:(NSRegularExpression *)regExpression
-{
-    NSMutableArray *test = [NSMutableArray array];
-
-    NSArray *matches = [regExpression matchesInString:data options:0 range:NSMakeRange(0, data.length)];
-
-    for(NSTextCheckingResult *match in matches) {
-        NSMutableArray *result = [NSMutableArray arrayWithCapacity:match.numberOfRanges];
-        for(NSInteger i=0; i<match.numberOfRanges; i++) {
-            NSRange matchRange = [match rangeAtIndex:i];
-            NSString *matchStr = nil;
-            if(matchRange.location != NSNotFound) {
-                matchStr = [data substringWithRange:matchRange];
-            } else {
-                matchStr = @"";
-            }
-            [result addObject:matchStr];
-        }
-        [test addObject:result];
-    }
-    return test;
 }
 
 - (NSArray *)getNameComponents:(NSString *)name
 {
-    NSArray *matches = [self arrayOfCaptureComponentsOfString:name matchedBy:self.varNameRegex];
-    NSMutableArray *nameComponents = [NSMutableArray array];
-    for (NSArray *matchArray in matches) {
-        [nameComponents addObject:matchArray[0]];
-    }
-    NSArray *result = [NSArray arrayWithArray:nameComponents];
-    if (result.count == 0) {
-        return @[name];
-    }
-    
-    return result;
+    NSArray *nameComponents = [name componentsSeparatedByString:@"."];
+    return nameComponents;
 }
 
 - (id)traverse:(id)collection withKey:(id)key autoInsert:(BOOL)autoInsert
@@ -142,14 +106,14 @@
     id mergedValue = [self.merged objectForKey:firstComponent];
     
     BOOL shouldMerge = (!defaultValue && mergedValue) ||
-                        (defaultValue && ![defaultValue isEqual:mergedValue]);
+    (defaultValue && ![defaultValue isEqual:mergedValue]);
     if (shouldMerge) {
         id newValue = [ContentMerger mergeWithVars:defaultValue diff:mergedValue];
         if (newValue == nil) {
             return;
         }
         [self.merged setObject:newValue forKey:firstComponent];
-
+        
         NSMutableString *name = [[NSMutableString alloc] initWithString:firstComponent];
         for (int i = 1; i < var.nameComponents.count; i++)
         {
@@ -246,7 +210,7 @@
 #pragma clang diagnostic pop
         [archiver encodeObject:self.diffs forKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
         [archiver finishEncoding];
-
+        
         NSError *writeError = nil;
         NSString *fileName = [self dataArchiveFileName];
         NSString *filePath = [CTPreferences filePathfromFileName:fileName];
@@ -275,7 +239,7 @@
                 @synchronized (self.diffs) {
                     self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
                 }
-
+                
                 // Update variables with new values.
                 // Have to extract the keys because a dictionary variable may add a new sub-variable,
                 // modifying the variable dictionary.
@@ -290,7 +254,7 @@
         // Do NOT save vars to cache if silent
         if (!self.silent) {
             [self saveDiffs];
-
+            
             self.hasReceivedDiffs = YES;
             if (self.updateBlock) {
                 self.updateBlock();
