@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 #### Fixed
 - Fixed compilation errors in xcode 14.3+.
+- Added guard rails to prevent crashes for background state tasks.
 
 ### [Version 4.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.1) (March 22, 2023)
 
