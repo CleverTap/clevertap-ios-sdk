@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 4.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.2) (April 03, 2023)
+
+#### Fixed
+- Fixed compilation errors in xcode 14.3+.
+
 ### [Version 4.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.1) (March 22, 2023)
 
 #### Added
