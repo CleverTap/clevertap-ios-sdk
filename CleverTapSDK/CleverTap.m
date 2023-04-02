@@ -1442,7 +1442,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self persistQueues];
     }
     [self runSerialAsync:^{
-        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+        @try {
+            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+        }
+        @catch (NSException *exception) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
+        }
     }];
 }
 
@@ -2805,12 +2810,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)persistQueues {
     [self runSerialAsync:^{
-        if ([self isMuted]) {
-            [self clearQueues];
-        } else {
-            [self persistProfileQueue];
-            [self persistEventsQueue];
-            [self persistNotificationsQueue];
+        @try {
+            if ([self isMuted]) {
+                [self clearQueues];
+            } else {
+                [self persistProfileQueue];
+                [self persistEventsQueue];
+                [self persistNotificationsQueue];
+            }
+        }
+        @catch (NSException *exception) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
         }
     }];
 }
