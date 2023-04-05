@@ -14,13 +14,11 @@ NS_SWIFT_NAME(VarCache)
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
 
-@property (assign, nonatomic) BOOL silent;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
-@property (assign, nonatomic) BOOL appLaunchedRecorded;
+@property (assign, nonatomic) BOOL hasVarsRequestCompleted;
 
 - (nullable NSDictionary<NSString *, id> *)diffs;
 - (void)loadDiffs;
-- (BOOL)hasReceivedDiffs;
 - (void)applyVariableDiffs:(nullable NSDictionary<NSString *, id> *)diffs_;
 - (void)onUpdate:(CacheUpdateBlock)block;
 

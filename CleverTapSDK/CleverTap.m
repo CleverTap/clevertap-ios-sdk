@@ -1339,9 +1339,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     // LOAD VARS FROM CACHE BEFORE APP LAUNCHED
-    [self.variables.varCache setSilent:YES];
     [self.variables.varCache loadDiffs];
-    [self.variables.varCache setSilent:NO];
     
     self.appLaunchProcessed = YES;
     

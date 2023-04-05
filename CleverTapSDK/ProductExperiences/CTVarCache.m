@@ -10,8 +10,6 @@
 @property (strong, nonatomic) NSDictionary<NSString *, id> *diffs;
 
 @property (strong, nonatomic) CacheUpdateBlock updateBlock;
-@property (assign, nonatomic) BOOL hasReceivedDiffs;
-
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @end
@@ -32,8 +30,7 @@
     self.vars = [NSMutableDictionary dictionary];
     self.diffs = [NSMutableDictionary dictionary];
     self.valuesFromClient = [NSMutableDictionary dictionary];
-    self.hasReceivedDiffs = NO;
-    self.silent = NO;
+    self.hasVarsRequestCompleted = NO;
 }
 
 - (NSArray *)getNameComponents:(NSString *)name
@@ -228,7 +225,6 @@
 - (void)applyVariableDiffs:(NSDictionary *)diffs_
 {
     @synchronized (self.vars) {
-        if (diffs_ || (!self.silent && !self.hasReceivedDiffs)) {
             // Prevent overriding variables if API returns null
             // If no variables are defined, API returns {}
             if (diffs_ != nil && ![diffs_ isEqual:[NSNull null]]) {
@@ -249,13 +245,10 @@
             } else {
                 CleverTapLogDebug(self.config.logLevel, @"%@: No variables received from the server", self);
             }
-        }
         
         // Do NOT save vars to cache if silent
-        if (!self.silent) {
+        if (self.hasVarsRequestCompleted) {
             [self saveDiffs];
-            
-            self.hasReceivedDiffs = YES;
             if (self.updateBlock) {
                 self.updateBlock();
             }

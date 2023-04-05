@@ -20,7 +20,7 @@
 @end
 
 @implementation CTVariables
-
+// TODO: Linting: Brackets and spaces consistency
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
     if ((self = [super init])) {
         self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo];
@@ -60,11 +60,17 @@
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse
 {
     if (varsResponse) {
-        [[self varCache] setAppLaunchedRecorded:YES];
+        [[self varCache] setHasVarsRequestCompleted:YES];
         NSDictionary *values = [self unflatten:varsResponse];
         [[self varCache] applyVariableDiffs:values];
         [self triggerFetchVariables:YES];
     }
+}
+
+- (void)handleVariablesError
+{
+    [[self varCache] setHasVarsRequestCompleted:YES];
+    [self triggerFetchVariables:NO];
 }
 
 // TODO: callback is overridden after second call if first is not ready yet
@@ -126,7 +132,7 @@
     [self.variablesChangedBlocks addObject:[block copy]];
     CT_END_TRY
 
-    if ([self.varCache hasReceivedDiffs]) {
+    if ([self.varCache hasVarsRequestCompleted]) {
         block();
     }
 }
@@ -138,7 +144,7 @@
         return;
     }
     
-    if ([self.varCache hasReceivedDiffs]) {
+    if ([self.varCache hasVarsRequestCompleted]) {
         block();
     } else {
         CT_TRY

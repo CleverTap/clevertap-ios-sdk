@@ -90,11 +90,7 @@ CTVarCache *varCache;
         _hasChanged = YES;
     }
     
-    if (varCache.silent) {
-        return;
-    }
-    
-    if (varCache.appLaunchedRecorded) {
+    if (varCache.hasVarsRequestCompleted) {
         [self triggerValueChanged];
         _hadStarted = YES;
     }
@@ -126,7 +122,7 @@ CTVarCache *varCache;
         _valueChangedBlocks = [NSMutableArray array];
     }
     [_valueChangedBlocks addObject:[block copy]];
-    if (varCache.appLaunchedRecorded) {
+    if (varCache.hasVarsRequestCompleted) {
         [self triggerValueChanged];
     }
     CT_END_TRY
