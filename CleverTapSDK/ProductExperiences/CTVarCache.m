@@ -225,40 +225,33 @@
 - (void)applyVariableDiffs:(NSDictionary *)diffs_
 {
     @synchronized (self.vars) {
-            // Prevent overriding variables if API returns null
-            // If no variables are defined, API returns {}
-            if (diffs_ != nil && ![diffs_ isEqual:[NSNull null]]) {
-                self.diffs = diffs_;
-                
-                // Merger helper will mutate diffs.
-                // We need to lock it in case multiple threads will be accessing this.
-                @synchronized (self.diffs) {
-                    self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
-                }
-                
-                // Update variables with new values.
-                // Have to extract the keys because a dictionary variable may add a new sub-variable,
-                // modifying the variable dictionary.
-                for (NSString *name in [self.vars allKeys]) {
-                    [self.vars[name] update];
-                }
-            } else {
-                CleverTapLogDebug(self.config.logLevel, @"%@: No variables received from the server", self);
+        // Prevent overriding variables if API returns null
+        // If no variables are defined, API returns {}
+        if (diffs_ != nil && ![diffs_ isEqual:[NSNull null]]) {
+            self.diffs = diffs_;
+            
+            // Merger helper will mutate diffs.
+            // We need to lock it in case multiple threads will be accessing this.
+            @synchronized (self.diffs) {
+                self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
             }
+            
+            // Update variables with new values.
+            // Have to extract the keys because a dictionary variable may add a new sub-variable,
+            // modifying the variable dictionary.
+            for (NSString *name in [self.vars allKeys]) {
+                [self.vars[name] update];
+            }
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: No variables received from the server", self);
+        }
         
-        // Do NOT save vars to cache if silent
+        // Do NOT save diffs when loading from cache
+        // Load diffs is called before vars request has been sent
         if (self.hasVarsRequestCompleted) {
             [self saveDiffs];
-            if (self.updateBlock) {
-                self.updateBlock();
-            }
         }
     }
-}
-
-- (void)onUpdate:(CacheUpdateBlock) block
-{
-    self.updateBlock = block;
 }
 
 @end

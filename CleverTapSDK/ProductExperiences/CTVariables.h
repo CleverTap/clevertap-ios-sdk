@@ -26,12 +26,12 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NAME(define(name:value:kind:));
 
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse;
+- (void)handleVariablesError;
 - (void)triggerFetchVariables:(BOOL)success;
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
 - (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
 - (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName;
 - (NSDictionary*)varsPayload;
-- (void)addVarListeners;
 - (NSDictionary*)unflatten:(NSDictionary*)result;
 
 @end

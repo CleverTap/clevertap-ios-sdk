@@ -694,9 +694,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
 
         self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
-        // TODO: check listeners here are needed
-        // ADD PE VAR CHANGED LISTENERS
-        [[self variables] addVarListeners];
         
         [self notifyUserProfileInitialized];
     }
@@ -2821,11 +2818,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 dispatch_semaphore_signal(semaphore);
             }];
             [ctRequest onError:^(NSError * _Nullable error) {
-                
                 if (error) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
-                [[self variables] triggerFetchVariables:NO];
+                [[self variables] handleVariablesError];
                 dispatch_semaphore_signal(semaphore);
             }];
             [self.requestSender send:ctRequest];

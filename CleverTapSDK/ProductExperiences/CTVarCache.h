@@ -20,7 +20,6 @@ NS_SWIFT_NAME(VarCache)
 - (nullable NSDictionary<NSString *, id> *)diffs;
 - (void)loadDiffs;
 - (void)applyVariableDiffs:(nullable NSDictionary<NSString *, id> *)diffs_;
-- (void)onUpdate:(CacheUpdateBlock)block;
 
 - (void)registerVariable:(CTVar *)var;
 - (nullable CTVar *)getVariable:(NSString *)name;

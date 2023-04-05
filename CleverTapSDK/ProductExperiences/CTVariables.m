@@ -63,14 +63,19 @@
         [[self varCache] setHasVarsRequestCompleted:YES];
         NSDictionary *values = [self unflatten:varsResponse];
         [[self varCache] applyVariableDiffs:values];
+        [self triggerVariablesChanged];
         [self triggerFetchVariables:YES];
     }
 }
 
 - (void)handleVariablesError
 {
-    [[self varCache] setHasVarsRequestCompleted:YES];
-    [self triggerFetchVariables:NO];
+    if (![[self varCache] hasVarsRequestCompleted]) {
+        [[self varCache] setHasVarsRequestCompleted:YES];
+        [self triggerVariablesChanged];
+    } else {
+        [self triggerFetchVariables:NO];
+    }
 }
 
 // TODO: callback is overridden after second call if first is not ready yet
@@ -87,12 +92,6 @@
         
         self.fetchVariablesBlock = nil;
     }
-}
-
-- (void)addVarListeners {
-    [self.varCache onUpdate:^{
-        [self triggerVariablesChanged];
-    }];
 }
 
 - (void)triggerVariablesChanged
