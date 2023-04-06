@@ -1178,8 +1178,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"scv"] = self.deviceInfo.signedCallSDKVersion;
-    
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
@@ -4009,11 +4007,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     self.deviceInfo.library = name;
 }
 
-- (void)setCustomSdkVersion:(NSString *)name version:(int)version {
+- (void)setCustomSdkVersion:(NSString *)name version:(NSString *)version {
     if (!auxiliarySdkVersions) {
         auxiliarySdkVersions = [NSMutableDictionary new];
     }
-    auxiliarySdkVersions[name] = @(version);
+    auxiliarySdkVersions[name] = version;
 }
 
 + (void)setDebugLevel:(int)level {
@@ -4997,10 +4995,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }];
 #endif
-}
-
-- (void)setSignedCallVersion:(NSString *)version {
-    [self.deviceInfo setSignedCallSDKVersion: version];
 }
 
 - (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
