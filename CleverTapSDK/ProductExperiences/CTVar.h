@@ -7,7 +7,6 @@ typedef void (^CleverTapVariablesChangedBlock)(void);
 typedef void (^CleverTapFetchVariablesBlock)(BOOL success);
 
 @class CTVar;
-
 /**
  * Receives callbacks for {@link CTVar}
  */
@@ -17,7 +16,7 @@ NS_SWIFT_NAME(VarDelegate)
 /**
  * Called when the value of the variable changes.
  */
-- (void)valueDidChange:(CTVar *)var;
+- (void)valueDidChange:(CTVar *)variable;
 @end
 
 /**

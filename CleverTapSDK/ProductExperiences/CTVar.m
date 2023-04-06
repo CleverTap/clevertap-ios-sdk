@@ -3,9 +3,9 @@
 #import "CTConstants.h"
 
 static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
-CTVarCache *varCache;
+
 @interface CTVar (PrivateProperties)
-@property (nonatomic) BOOL isInternal;
+@property (nonatomic, strong) CTVarCache *varCache;
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSArray *nameComponents;
 @property (nonatomic, strong) NSString *stringValue;
@@ -14,28 +14,11 @@ CTVarCache *varCache;
 @property (nonatomic, strong) id value;
 @property (nonatomic, strong) id defaultValue;
 @property (nonatomic, strong) NSString *kind;
-@property (nonatomic, strong) NSMutableArray *fileReadyBlocks;
 @property (nonatomic, strong) NSMutableArray *valueChangedBlocks;
-@property (nonatomic) BOOL fileIsPending;
 @property (nonatomic) BOOL hasChanged;
 @end
 
 @implementation CTVar
-
-@synthesize stringValue=_stringValue;
-@synthesize numberValue=_numberValue;
-@synthesize hadStarted=_hadStarted;
-@synthesize hasChanged=_hasChanged;
-
-+ (BOOL)printedCallbackWarning
-{
-    return LPVAR_PRINTED_CALLBACK_WARNING;
-}
-
-+ (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning
-{
-    LPVAR_PRINTED_CALLBACK_WARNING = newPrintedCallbackWarning;
-}
 
 - (instancetype)initWithName:(NSString *)name withComponents:(NSArray *)components
             withDefaultValue:(NSNumber *)defaultValue withKind:(NSString *)kind varCache:(CTVarCache *)cache
@@ -44,14 +27,14 @@ CTVarCache *varCache;
     if (self) {
         CT_TRY
         _name = name;
-        varCache = cache;
-        _nameComponents = [varCache getNameComponents:name];
+        self.varCache = cache;
+        _nameComponents = [self.varCache getNameComponents:name];
         _defaultValue = defaultValue;
         _value = defaultValue;
         _kind = kind;
         [self cacheComputedValues];
         
-        [varCache registerVariable:self];
+        [self.varCache registerVariable:self];
         
         [self update];
         CT_END_TRY
@@ -59,7 +42,22 @@ CTVarCache *varCache;
     return self;
 }
 
-#pragma mark Updating
+// Manually @synthesize since CTVar provides custom getters/setters
+// Properties are defined as readonly in CTVar-Internal
+// and readwrite in PrivateProperties category
+@synthesize stringValue = _stringValue;
+@synthesize numberValue = _numberValue;
+@synthesize varCache = _varCache;
+
+- (CTVarCache *)varCache {
+    return _varCache;
+}
+
+- (void)setVarCache:(CTVarCache *)varCache {
+    _varCache = varCache;
+}
+
+#pragma mark Updates
 
 - (void) cacheComputedValues
 {
@@ -79,7 +77,7 @@ CTVarCache *varCache;
 - (void)update
 {
     NSObject *oldValue = _value;
-    _value = [varCache getMergedValueFromComponentArray:_nameComponents];
+    _value = [self.varCache getMergedValueFromComponentArray:_nameComponents];
     
     if ([_value isEqual:oldValue] && _hadStarted) {
         return;
@@ -90,13 +88,13 @@ CTVarCache *varCache;
         _hasChanged = YES;
     }
     
-    if (varCache.hasVarsRequestCompleted) {
+    if (self.varCache.hasVarsRequestCompleted) {
         [self triggerValueChanged];
         _hadStarted = YES;
     }
 }
 
-#pragma mark Basic accessors
+#pragma mark Callbacks
 
 - (void)triggerValueChanged
 {
@@ -122,7 +120,7 @@ CTVarCache *varCache;
         _valueChangedBlocks = [NSMutableArray array];
     }
     [_valueChangedBlocks addObject:[block copy]];
-    if (varCache.hasVarsRequestCompleted) {
+    if (self.varCache.hasVarsRequestCompleted) {
         [self triggerValueChanged];
     }
     CT_END_TRY
@@ -134,17 +132,6 @@ CTVarCache *varCache;
     // TODO: call immediately if started?
     _delegate = delegate;
     CT_END_TRY
-}
-
-- (void)warnIfNotStarted
-{
-    if (!varCache.hasVarsRequestCompleted && ![CTVar printedCallbackWarning]) {
-        CleverTapLogDebug(varCache.config.logLevel, @"%@: CleverTap hasn't finished retrieving values from the server. You "
-                          @"should use a callback to make sure the value for '%@' is ready. Otherwise, your "
-                          @"app may not use the most up-to-date value.", self, self.name);
-        
-        [CTVar setPrintedCallbackWarning:YES];
-    }
 }
 
 #pragma mark Dictionary handling
@@ -171,7 +158,7 @@ CTVarCache *varCache;
         [components addObject:component];
     }
     va_end(args);
-    return [varCache getMergedValueFromComponentArray:components];
+    return [self.varCache getMergedValueFromComponentArray:components];
     CT_END_TRY
     return nil;
 }
@@ -182,7 +169,7 @@ CTVarCache *varCache;
     [self warnIfNotStarted];
     NSMutableArray *components = [_nameComponents mutableCopy];
     [components addObjectsFromArray:pathComponents];
-    return [varCache getMergedValueFromComponentArray:components];
+    return [self.varCache getMergedValueFromComponentArray:components];
     CT_END_TRY
     return nil;
 }
@@ -217,5 +204,28 @@ CTVarCache *varCache;
 - (NSUInteger)unsignedIntegerValue { return [[self numberValue] unsignedIntegerValue]; }
 - (unsigned long)unsignedLongValue { return [[self numberValue] unsignedLongValue]; }
 - (unsigned long long)unsignedLongLongValue { return [[self numberValue] unsignedLongLongValue]; }
+
+#pragma mark Utils
+
++ (BOOL)printedCallbackWarning
+{
+    return LPVAR_PRINTED_CALLBACK_WARNING;
+}
+
++ (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning
+{
+    LPVAR_PRINTED_CALLBACK_WARNING = newPrintedCallbackWarning;
+}
+
+- (void)warnIfNotStarted
+{
+    if (!self.varCache.hasVarsRequestCompleted && ![CTVar printedCallbackWarning]) {
+        CleverTapLogDebug(self.varCache.config.logLevel, @"%@: CleverTap hasn't finished retrieving values from the server. You "
+                          @"should use a callback to make sure the value for '%@' is ready. Otherwise, your "
+                          @"app may not use the most up-to-date value.", self, self.name);
+        
+        [CTVar setPrintedCallbackWarning:YES];
+    }
+}
 
 @end
