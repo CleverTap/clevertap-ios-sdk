@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTUserMO (CoreDataProperties)
 
-+ (instancetype)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context;
++ (instancetype _Nullable)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context;
 - (BOOL)updateMessages:(NSArray<NSDictionary*> *)messages forContext:(NSManagedObjectContext *)context;
 
 @property (nullable, nonatomic, copy) NSString *accountId;
