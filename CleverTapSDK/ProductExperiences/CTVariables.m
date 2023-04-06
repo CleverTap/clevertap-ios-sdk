@@ -72,6 +72,8 @@
 {
     if (![[self varCache] hasVarsRequestCompleted]) {
         [[self varCache] setHasVarsRequestCompleted:YES];
+        // Ensure variables are loaded from cache. Triggers individual Vars update.
+        [[self varCache] loadDiffs];
         [self triggerVariablesChanged];
     } else {
         [self triggerFetchVariables:NO];
