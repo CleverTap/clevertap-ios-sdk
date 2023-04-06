@@ -14,6 +14,7 @@ NS_SWIFT_NAME(VarCache)
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
 
+@property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
 @property (assign, nonatomic) BOOL hasVarsRequestCompleted;
 

@@ -131,22 +131,20 @@ CTVarCache *varCache;
 - (void)setDelegate:(id<CTVarDelegate>)delegate
 {
     CT_TRY
+    // TODO: call immediately if started?
     _delegate = delegate;
     CT_END_TRY
 }
 
-// TODO: decide if this method is relevant
 - (void)warnIfNotStarted
 {
-    // TODO: Add hasStarted equivalent logic
-    
-//    if (!_isInternal && ![LPInternalState sharedState].hasStarted && ![LPVar printedCallbackWarning]) {
-//        LPLog(LPInfo, @"Leanplum hasn't finished retrieving values from the server. You "
-//              @"should use a callback to make sure the value for '%@' is ready. Otherwise, your "
-//              @"app may not use the most up-to-date value.", self.name);
-    
-//        [CTVar setPrintedCallbackWarning:YES];
-//    }
+    if (!varCache.hasVarsRequestCompleted && ![CTVar printedCallbackWarning]) {
+        CleverTapLogDebug(varCache.config.logLevel, @"%@: CleverTap hasn't finished retrieving values from the server. You "
+                          @"should use a callback to make sure the value for '%@' is ready. Otherwise, your "
+                          @"app may not use the most up-to-date value.", self, self.name);
+        
+        [CTVar setPrintedCallbackWarning:YES];
+    }
 }
 
 #pragma mark Dictionary handling
