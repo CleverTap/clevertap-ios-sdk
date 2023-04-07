@@ -144,7 +144,15 @@
 - (id)getMergedValue:(NSString *)name
 {
     NSArray *components = [self getNameComponents:name];
-    return [self getMergedValueFromComponentArray:components];
+    id value = [self getMergedValueFromComponentArray:components];
+    if ([value conformsToProtocol:@protocol(NSCopying)] && [value respondsToSelector:@selector(copyWithZone:)]) {
+        if ([value respondsToSelector:@selector(mutableCopy)]) {
+            return [value mutableCopy];
+        }
+        return [value copy];
+    }
+    
+    return value;
 }
 
 - (id)getValueFromComponentArray:(NSArray *) components fromDict:(NSDictionary *)values

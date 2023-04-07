@@ -5128,8 +5128,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name {
-    // TODO: return a copy
-    return [[self.variables varCache] getVariable:name];
+    return [[self.variables varCache] getMergedValue:name];
 }
 
 #pragma mark - PE Vars
