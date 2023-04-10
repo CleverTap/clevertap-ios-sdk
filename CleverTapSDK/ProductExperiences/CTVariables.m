@@ -80,7 +80,6 @@
     }
 }
 
-// TODO: callback is overridden after second call if first is not ready yet
 - (void)triggerFetchVariables:(BOOL)success {
     if (self.fetchVariablesBlock) {
         CleverTapFetchVariablesBlock block = [self.fetchVariablesBlock copy];
@@ -91,7 +90,9 @@
         } else {
             block(success);
         }
-        
+        // The callback will be overridden by subsequent fetch call,
+        // if the first one has not completed yet.
+        // Callback cannot be attached to an individual fetch request, only to the queue batch.
         self.fetchVariablesBlock = nil;
     }
 }
