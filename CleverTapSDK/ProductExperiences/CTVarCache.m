@@ -146,7 +146,7 @@
     NSArray *components = [self getNameComponents:name];
     id value = [self getMergedValueFromComponentArray:components];
     if ([value conformsToProtocol:@protocol(NSCopying)] && [value respondsToSelector:@selector(copyWithZone:)]) {
-        if ([value respondsToSelector:@selector(mutableCopy)]) {
+        if ([value respondsToSelector:@selector(mutableCopyWithZone:)]) {
             return [value mutableCopy];
         }
         return [value copy];
