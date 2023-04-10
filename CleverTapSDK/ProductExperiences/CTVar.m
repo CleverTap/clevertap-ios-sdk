@@ -88,7 +88,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
         _hasChanged = YES;
     }
     
-    if (self.varCache.hasVarsRequestCompleted) {
+    if ([[self varCache] hasVarsRequestCompleted]) {
         [self triggerValueChanged];
         _hadStarted = YES;
     }
@@ -120,7 +120,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
         _valueChangedBlocks = [NSMutableArray array];
     }
     [_valueChangedBlocks addObject:[block copy]];
-    if (self.varCache.hasVarsRequestCompleted) {
+    if ([[self varCache] hasVarsRequestCompleted]) {
         [self triggerValueChanged];
     }
     CT_END_TRY
@@ -129,8 +129,10 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 - (void)setDelegate:(id<CTVarDelegate>)delegate
 {
     CT_TRY
-    // TODO: call immediately if started?
     _delegate = delegate;
+    if ([[self varCache] hasVarsRequestCompleted]) {
+        [self triggerValueChanged];
+    }
     CT_END_TRY
 }
 
