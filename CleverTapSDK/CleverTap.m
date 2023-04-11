@@ -4700,9 +4700,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 // run off main
 - (void)_resetVars {
-    if (self.config && self.deviceInfo.deviceId) {
-        self.variables = [[CTVariables alloc]initWithConfig:self.config deviceInfo:self.deviceInfo];
-    }
+    /// Clear content for current user
+    /// Content for new user will be loaded in `recordAppLaunched:` using `CTVarCache.loadDiffs`
+    [[self variables] clearUserContent];
 }
 
 - (NSDictionary *)_setProductConfig:(NSDictionary *)arp {
