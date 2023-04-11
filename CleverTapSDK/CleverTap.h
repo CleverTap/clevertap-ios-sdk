@@ -1302,16 +1302,6 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @method
  
  @abstract
- Record Signed Call SDK version.
- 
- @param version Signed call SDK version
- */
-- (void)setSignedCallVersion:(NSString* _Nullable)version;
-
-/*!
- @method
- 
- @abstract
  The `CTDomainDelegate` protocol provides methods for notifying your application (the adopting delegate) about domain/ region changes.
  
  @see CleverTap+DCDomain.h
