@@ -206,10 +206,6 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) NSMutableArray *profileQueue;
 @property (nonatomic, strong) NSMutableArray *notificationsQueue;
 @property (nonatomic, strong) NSURLSession *urlSession;
-//@property (nonatomic, strong) NSString *redirectDomain;
-//@property (nonatomic, strong) NSString *explictEndpointDomain;
-//@property (nonatomic, strong) NSString *redirectNotifViewedDomain;
-//@property (nonatomic, strong) NSString *explictNotifViewedEndpointDomain;
 @property (nonatomic, strong) CTDomainFactory *domainFactory;
 @property (nonatomic, strong) CTRequestSender *requestSender;
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
@@ -1341,7 +1337,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
-    // LOAD VARS FROM CACHE BEFORE APP LAUNCHED
+    // Load Vars from cache before App Launched
     [self.variables.varCache loadDiffs];
     
     self.appLaunchProcessed = YES;

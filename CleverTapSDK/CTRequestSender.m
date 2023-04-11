@@ -19,15 +19,11 @@
 @property (nonatomic, strong) NSString *redirectDomain;
 @property (nonatomic, assign, readonly) BOOL sslPinningEnabled;
 
-
 #if CLEVERTAP_SSL_PINNING
 @property(nonatomic, strong) CTPinnedNSURLSessionDelegate *urlSessionDelegate;
 @property (nonatomic, strong) NSArray *sslCertNames;
 #endif
 @end
-
-//NSURLSession *urlSession;
-//BOOL sslPinningEnabled;
 
 @implementation CTRequestSender
 
@@ -99,7 +95,5 @@
     }];
     [task resume];
 }
-
-
 
 @end

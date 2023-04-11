@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "CTRequest.h"
-//#import "CTDomainFactory.h"
 #if CLEVERTAP_SSL_PINNING
 #import "CTPinnedNSURLSessionDelegate.h"
 #endif

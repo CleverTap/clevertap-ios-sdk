@@ -26,8 +26,6 @@ NS_SWIFT_NAME(defineVar(name:double:));
 NS_SWIFT_NAME(defineVar(name:cgFloat:));
 - (CTVar *)defineVar:(NSString *)name withShort:(short)defaultValue
 NS_SWIFT_NAME(defineVar(name:short:));
-//- (LPVar *)defineVar:(NSString *)name withChar:(char)defaultValue
-//NS_SWIFT_NAME(defineVar(name:integer:));
 - (CTVar *)defineVar:(NSString *)name withBool:(BOOL)defaultValue
 NS_SWIFT_NAME(defineVar(name:boolean:));
 - (CTVar *)defineVar:(NSString *)name withString:(nullable NSString *)defaultValue
