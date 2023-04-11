@@ -1236,7 +1236,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @discussion
  Call this to method to set library name and version in the Auxiliary SDK
  */
-- (void)setCustomSdkVersion:(NSString * _Nonnull)name version:(NSString *_Nonnull)version;
+- (void)setCustomSdkVersion:(NSString * _Nonnull)name version:(int)version;
 
 /*!
  @method

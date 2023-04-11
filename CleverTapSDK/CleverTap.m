@@ -4007,11 +4007,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     self.deviceInfo.library = name;
 }
 
-- (void)setCustomSdkVersion:(NSString *)name version:(NSString *)version {
+- (void)setCustomSdkVersion:(NSString *)name version:(int)version {
     if (!auxiliarySdkVersions) {
         auxiliarySdkVersions = [NSMutableDictionary new];
     }
-    auxiliarySdkVersions[name] = version;
+    auxiliarySdkVersions[name] = @(version);
 }
 
 + (void)setDebugLevel:(int)level {
