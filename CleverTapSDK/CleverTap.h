@@ -1331,12 +1331,42 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 #pragma mark Product Experiences - Vars
 
+/*!
+ @method
+ 
+ @abstract
+ Adds a callback to be invoked when variables are initialised with server values. Will be called each time new values are fetched.
+ 
+ @param block a callback to add.
+ */
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
 
+/*!
+ @method
+ 
+ @abstract
+ Adds a callback to be invoked only once when variables are initialised with server values.
+ 
+ @param block a callback to add.
+ */
 - (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
-    
+ 
+/*!
+ @method
+ 
+ @abstract
+ Uploads variables to the server. Requires Development/Debug build/configuration.
+ */
 - (void)syncVariables;
 
+/*!
+ @method
+ 
+ @abstract
+ Uploads variables to the server.
+ 
+ @param isProduction Provide `true` if variables must be sync in Productuon build/configuration.
+ */
 - (void)syncVariables:(BOOL)isProduction;
 
 /*!
@@ -1354,8 +1384,28 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)fetchVariables:(CleverTapFetchVariablesBlock _Nullable)block;
 
+/*!
+ @method
+ 
+ @abstract
+ Get an instance of a variable or a group.
+ 
+ @param name The name of the variable or the group.
+ 
+ @return
+ The instance of the variable or the group, or nil if not created yet.
+
+ */
 - (CTVar * _Nullable)getVariable:(NSString * _Nonnull)name;
 
+/*!
+ @method
+ 
+ @abstract
+ Get a copy of the current value of a variable or a group.
+ 
+ @param name The name of the variable or the group.
+ */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
 @end
