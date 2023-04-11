@@ -73,6 +73,8 @@ NS_SWIFT_NAME(Var)
  */
 - (void)setDelegate:(nullable id <CTVarDelegate>)delegate;
 
+- (void)clearState;
+
 /**
  * @{
  * Accessess the value(s) of the variable

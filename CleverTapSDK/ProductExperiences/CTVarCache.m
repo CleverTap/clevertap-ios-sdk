@@ -176,6 +176,7 @@
         NSString *filePath = [CTPreferences filePathfromFileName:fileName];
         NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
         if (!diffsData) {
+            [self applyVariableDiffs:@{}];
             return;
         }
         NSKeyedUnarchiver *unarchiver;
@@ -205,8 +206,7 @@
 {
     // Stores the variables on the device in case we don't have a connection.
     // Restores next time when the app is opened.
-    // Diffs need to be locked incase other thread changes the diffs using
-    // mergeHelper:.
+    // Diffs need to be locked incase other thread changes the diffs
     @synchronized (self.diffs) {
         NSMutableData *diffsData = [[NSMutableData alloc] init];
 #pragma clang diagnostic push
@@ -238,7 +238,6 @@
         if (diffs_ != nil && ![diffs_ isEqual:[NSNull null]]) {
             self.diffs = diffs_;
             
-            // Merger helper will mutate diffs.
             // We need to lock it in case multiple threads will be accessing this.
             @synchronized (self.diffs) {
                 self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
@@ -260,6 +259,16 @@
             [self saveDiffs];
         }
     }
+}
+
+- (void)clearUserContent {
+    // Disable callbacks and wait until fetch is finished
+    [self setHasVarsRequestCompleted:NO];
+    // Clear Var state to allow callback invocation when server values are downloaded
+    [self.vars enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        CTVar *var = (CTVar *)obj;
+        [var clearState];
+    }];
 }
 
 @end

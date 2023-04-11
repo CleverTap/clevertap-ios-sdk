@@ -230,4 +230,10 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
 }
 
+- (void)clearState
+{
+    _hadStarted = NO;
+    _hasChanged = NO;
+}
+
 @end

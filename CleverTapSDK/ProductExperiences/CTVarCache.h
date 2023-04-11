@@ -28,6 +28,7 @@ NS_SWIFT_NAME(VarCache)
 
 - (NSArray<NSString *> *)getNameComponents:(NSString *)name;
 - (nullable id)getMergedValueFromComponentArray:(NSArray<NSString *> *) components;
+- (void)clearUserContent;
 
 @end
 

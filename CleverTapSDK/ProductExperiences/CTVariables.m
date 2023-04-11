@@ -75,9 +75,15 @@
         // Ensure variables are loaded from cache. Triggers individual Vars update.
         [[self varCache] loadDiffs];
         [self triggerVariablesChanged];
-    } else {
+    }
+    
+    if (self.fetchVariablesBlock) {
         [self triggerFetchVariables:NO];
     }
+}
+
+- (void)clearUserContent {
+    [self.varCache clearUserContent];
 }
 
 - (void)triggerFetchVariables:(BOOL)success {
