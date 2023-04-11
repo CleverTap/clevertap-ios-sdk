@@ -7,15 +7,28 @@
 //
 
 #import "CTVarCacheMock.h"
+#import "CTVarCache+Tests.h"
 
 @implementation CTVarCacheMock
 
 - (void)loadDiffs {
-    // Do NOT read from file
+    self.loadCount++;
+    [super loadDiffs];
+}
+
+- (void)applyVariableDiffs:(NSDictionary<NSString *,id> *)diffs_ {
+    self.applyCount++;
+    [super applyVariableDiffs:diffs_];
 }
 
 - (void)saveDiffs {
     // Do NOT save to file
+    self.saveCount++;
+}
+
+- (void)originalSaveDiffs {
+    // Save to file
+    [super saveDiffs];
 }
 
 @end

@@ -12,5 +12,5 @@
 @interface CTVariables (Tests)
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo *)deviceInfo varCache: (CTVarCacheMock *)varCache;
-
+- (void)triggerVariablesChanged;
 @end

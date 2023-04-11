@@ -9,58 +9,76 @@
 #import <XCTest/XCTest.h>
 #import "CTVariables.h"
 #import "CTVarCache.h"
-#import <OCMock/OCMock.h>
 #import "CTUtils.h"
 #import "CTPreferences.h"
 #import "CTVarCache+Tests.h"
 #import "CTVarCacheMock.h"
 #import "CTVariables+Tests.h"
 #import "CTConstants.h"
-#import <OHHTTPStubs/HTTPStubs.h>
-#import <OHHTTPStubs/HTTPStubsResponse+JSON.h>
-#import <OHHTTPStubs/NSURLRequest+HTTPBodyTesting.h>
-#import "CTRequestFactory.h"
-
 
 @interface CTVarCacheTest : XCTestCase
 
 @end
 
-CleverTapInstanceConfig *config;
-CTDeviceInfo *deviceInfo;
 CTVariables *variables;
 
 @implementation CTVarCacheTest
 
 - (void)setUp {
-    config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     config.useCustomCleverTapId = YES;
-    deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
+    CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
     CTVarCacheMock *varCache = [[CTVarCacheMock alloc] initWithConfig:config deviceInfo:deviceInfo];
     variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo varCache:varCache];
-//    variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo];
 }
 
 - (void)tearDown {
     variables = nil;
 }
 
-- (void)testVarCacheFetchesNameComponents {
+#pragma mark Name Components
+- (void)testNameComponents {
+    NSString *name = @"";
+    NSArray *components = [[variables varCache] getNameComponents:name];
+    XCTAssertEqual(1, [components count]);
+    XCTAssertEqual(name, components[0]);
+    
+    NSString *name1 = @"my var 1";
+    NSArray *components1 = [[variables varCache] getNameComponents:name1];
+    XCTAssertEqual(1, [components1 count]);
+    XCTAssertEqual(name1, components1[0]);
+    
+    NSString *name2 = @"   ";
+    NSArray *components2 = [[variables varCache] getNameComponents:name2];
+    XCTAssertEqual(1, [components2 count]);
+    XCTAssertEqual(name2, components2[0]);
+    
+    NSString *name3 = @"var 2.var4. var 5 ";
+    NSArray *components3 = [[variables varCache] getNameComponents:name3];
+    XCTAssertEqual(3, [components3 count]);
+    XCTAssertEqualObjects((@[@"var 2", @"var4", @" var 5 "]), components3);
+    
+    NSString *name4 = @"<var>&</var>";
+    NSArray *components4 = [[variables varCache] getNameComponents:name4];
+    XCTAssertEqual(1, [components4 count]);
+    XCTAssertEqual(name4, components4[0]);
+    
+    NSString *name5 = @"var[0]";
+    NSArray *components5 = [[variables varCache] getNameComponents:name5];
+    XCTAssertEqual(1, [components5 count]);
+    XCTAssertEqual(name5, components5[0]);
+    
     NSString *component1 = @"first";
     NSString *component2 = @"second";
     NSString *component3 = @"third";
     NSArray *nameComponents = [[variables varCache] getNameComponents:[NSString stringWithFormat:@"%@.%@.%@",component1,component2,component3]];
     XCTAssertNotNil(nameComponents);
-    
-    BOOL expression = [nameComponents containsObject:component1] && [nameComponents containsObject:component2] && [nameComponents containsObject:component3];
-    XCTAssertTrue(expression);
-    
+    XCTAssertEqualObjects((@[component1, component2, component3]), nameComponents);
     XCTAssertTrue(nameComponents.count == 3);
 }
 
-// TODO: check test
+#pragma mark Traverse
 - (void)testTraverse {
-    // Create a dictionary for testing purposes
     NSDictionary *dictionary = @{
         @"key1": @"value1",
         @"key2": @{
@@ -69,15 +87,15 @@ CTVariables *variables;
         }
     };
     
-    // Test that the method returns the correct value when the key exists in the dictionary
+    // Returns the correct value when the key exists in the dictionary
     id result = [variables.varCache traverse:dictionary withKey:@"key1" autoInsert:NO];
     XCTAssertEqualObjects(result, @"value1");
     
-    // Test that the method returns nil when the key does not exist in the dictionary
+    // Returns nil when the key does not exist in the dictionary
     result = [variables.varCache traverse:dictionary withKey:@"key3" autoInsert:NO];
     XCTAssertNil(result);
     
-    // Test that the method returns nil when the value for the key is NSNull
+    // Returns nil when the value for the key is NSNull
     NSDictionary *dictionaryWithNull = @{
         @"key1": [NSNull null]
     };
@@ -94,36 +112,23 @@ CTVariables *variables;
         }
     };
     
-    // Test that the method creates a new dictionary and adds it to the collection when autoInsert is true and the key does not exist
+    // Creates a new dictionary and adds it to the collection when autoInsert is true and the key does not exist
     NSMutableDictionary *mutableDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionary];
     [variables.varCache traverse:mutableDictionary withKey:@"newKey" autoInsert:YES];
     XCTAssertTrue([mutableDictionary objectForKey:@"newKey"] != nil);
     XCTAssertTrue([[mutableDictionary objectForKey:@"newKey"] isKindOfClass:[NSMutableDictionary class]]);
     
-    // Test that the method does not create a new dictionary when autoInsert is false and the key does not exist
+    // Does not create a new dictionary when autoInsert is false and the key does not exist
     [variables.varCache traverse:mutableDictionary withKey:@"newKey2" autoInsert:NO];
     XCTAssertNil([mutableDictionary objectForKey:@"newKey2"]);
 }
 
-
-// TODO: check test
-- (void)testVarCacheResgitersVars {
-    CTVar *varMock = OCMPartialMock([variables define:@"test" with:@"test" kind:CT_KIND_STRING]);
-    [variables.varCache registerVariable:varMock];
-    
-    XCTAssertEqual(variables.varCache.vars[varMock.name], varMock);
-}
-
-// TODO: check test
-- (void)testVarCacheGetVarsForName {
-    NSString *varName = @"test";
-    CTVar *var = [variables define:varName with:@"test" kind:CT_KIND_STRING];
-    CTVar *varResult = [variables.varCache getVariable:varName];
-
-    XCTAssertEqual(varResult, var);
-}
-
 #pragma mark Register Variables
+- (void)testRegisterVars {
+    CTVar *var = [variables define:@"test" with:@"test" kind:CT_KIND_STRING];
+    XCTAssertEqual(variables.varCache.vars[var.name], var);
+}
+
 - (void)testRegisterVariableWithGroup {
     [variables define:@"group.var1" with:@"value1" kind:CT_KIND_STRING];
     [variables define:@"group" with:@{
@@ -170,16 +175,16 @@ CTVariables *variables;
     XCTAssertEqualObjects(expectedGroup1Value, [varCache getVariable:@"group1"].value);
 }
 
-#pragma mark GetMergedValue
-- (void)testVarCacheGetMergedValue {
+#pragma mark Get Merged Value
+- (void)testGetMergedValue {
     NSString *varName = @"var1";
     [variables define:varName with:@"value1" kind:CT_KIND_STRING];
     NSString *value = [variables.varCache getMergedValue:varName];
-
-    XCTAssertEqual(@"value1", value);
+    
+    XCTAssertEqualObjects(@"value1", value);
 }
 
-- (void)testVarCacheGetMergedValueWithGroup {
+- (void)testGetMergedValueWithGroup {
     [variables define:@"group1.var1" with:@"value1" kind:CT_KIND_STRING];
     [variables define:@"group1.group2.var3" with:@NO kind:CT_KIND_BOOLEAN];
     [variables define:@"group1" with:@{
@@ -197,11 +202,11 @@ CTVariables *variables;
             @"var3": @NO,
         }
     };
-
+    
     XCTAssertEqualObjects(expectedGroup1Value, [variables.varCache getMergedValue:@"group1"]);
 }
 
-- (void)testVarCacheGetMergedValueWithGroups {
+- (void)testGetMergedValueWithGroups {
     [variables define:@"group1.var1" with:@"value1" kind:CT_KIND_STRING];
     [variables define:@"group1.group2.var3" with:@NO kind:CT_KIND_BOOLEAN];
     [variables define:@"group1" with:@{
@@ -212,88 +217,40 @@ CTVariables *variables;
     } kind:CT_KIND_DICTIONARY];
     
     [variables define:@"var5" with:@"value5" kind:CT_KIND_STRING];
-
-    XCTAssertEqual(@"value1", [variables.varCache getMergedValue:@"group1.var1"]);
-    XCTAssertEqual(@2, [variables.varCache getMergedValue:@"group1.var2"]);
-    XCTAssertEqual(@NO, [variables.varCache getMergedValue:@"group1.group2.var3"]);
-    XCTAssertEqual(@4, [variables.varCache getMergedValue:@"group1.group2.var4"]);
     
-    XCTAssertEqual(@"value5", [variables.varCache getMergedValue:@"var5"]);
+    XCTAssertEqualObjects(@"value1", [variables.varCache getMergedValue:@"group1.var1"]);
+    XCTAssertEqualObjects(@2, [variables.varCache getMergedValue:@"group1.var2"]);
+    XCTAssertEqualObjects(@NO, [variables.varCache getMergedValue:@"group1.group2.var3"]);
+    XCTAssertEqualObjects(@4, [variables.varCache getMergedValue:@"group1.group2.var4"]);
+    
+    XCTAssertEqualObjects(@"value5", [variables.varCache getMergedValue:@"var5"]);
 }
 
-#pragma mark Apply Diffs
-- (void)testVarCacheApplyDiffs {
-    CTVar *var1 = [variables define:@"var1" with:@1 kind:CT_KIND_INT];
-    CTVar *group1_var1 = [variables define:@"group1.var1" with:@"value1" kind:CT_KIND_INT];
-    CTVar *var3 = [variables define:@"group1.group2.var3" with:@NO kind:CT_KIND_BOOLEAN];
+#pragma mark Get Variable
+- (void)testGetVariable {
+    NSString *varName = @"var";
+    CTVar *var = [variables define:varName with:@"value" kind:CT_KIND_STRING];
+    CTVar *varResult = [variables.varCache getVariable:varName];
     
-    NSDictionary *diffs = @{
-        @"var1": @2,
-        @"group1": @{
-            @"var1": @"value2",
-            @"var22": @"value22",
-            @"group2": @{
-                @"var3": @YES,
-            }
-        }
-    };
-    
-    [variables.varCache applyVariableDiffs:diffs];
-
-    XCTAssertEqual(@2, var1.value);
-    XCTAssertEqual(@"value2", group1_var1.value);
-    XCTAssertEqual(@YES, var3.value);
-    XCTAssertEqual(@"value22", [variables.varCache getMergedValue:@"group1.var22"]);
+    XCTAssertEqual(varResult, var);
 }
 
-- (void)testVarCacheApplyDiffsDefaultValue {
-    CTVar *var1 = [variables define:@"var1" with:@1 kind:CT_KIND_INT];
-    CTVar *group1_var1 = [variables define:@"group1.var1" with:@"value1" kind:CT_KIND_STRING];
-    CTVar *var3 = [variables define:@"group1.group2.var3" with:@NO kind:CT_KIND_BOOLEAN];
-    
-    NSDictionary *diffs = @{
-        @"group1": @{
-            @"var22": @"value22",
-        }
-    };
-    
-    [variables.varCache applyVariableDiffs:diffs];
+- (void)testGetVariableGroup {
+    NSString *varName = @"group.var";
+    CTVar *var = [variables define:varName with:@"value" kind:CT_KIND_STRING];
+    CTVar *varResult = [variables.varCache getVariable:varName];
+    CTVar *varGroupResult = [variables.varCache getVariable:@"group"];
 
-    XCTAssertEqual(@1, var1.value);
-    XCTAssertEqual(@"value1", group1_var1.value);
-    XCTAssertEqual(@NO, var3.value);
-    XCTAssertEqual(@"value22", [variables.varCache getMergedValue:@"group1.var22"]);
+    XCTAssertEqual(varResult, var);
+    XCTAssertNil(varGroupResult);
+    
+    CTVar *varDict = [variables define:@"dict" with:@{} kind:CT_KIND_DICTIONARY];
+    CTVar *varDictResult = [variables.varCache getVariable:@"dict"];
+    XCTAssertEqual(varDictResult, varDict);
 }
 
-- (void)testVarCacheApplyDiffsGroup {
-    CTVar *var1 = [variables define:@"group1.group2.var1" with:@1 kind:CT_KIND_INT];
-    CTVar *group1_group2 = [variables define:@"group1.group2" with:@{
-        @"var2": @"value2"
-    } kind:CT_KIND_DICTIONARY];
-    
-    NSDictionary *diffs = @{
-        @"group1": @{
-            @"group2": @{
-                @"var3": @"value3"
-            }
-        }
-    };
-
-    [variables.varCache applyVariableDiffs:diffs];
-    
-    NSDictionary *group1_group2_value = @{
-        @"var1": @1,
-        @"var2": @"value2",
-        @"var3": @"value3"
-    };
-
-    XCTAssertEqual(@1, var1.value);
-    XCTAssertEqualObjects(group1_group2_value, group1_group2.value);
-    XCTAssertEqual(@"value3", [variables.varCache getMergedValue:@"group1.group2.var3"]);
-}
-
-// TODO: test defining var later
-- (void)testVarCacheMergeVariable {
+#pragma mark Merge Variable
+- (void)testMergeVariable {
     NSDictionary *diffs = @{
         @"var1": @2,
         @"group1": @{
@@ -312,33 +269,135 @@ CTVariables *variables;
         @"var2": @NO,
         @"var3": @3,
     } kind:CT_KIND_DICTIONARY];
-
+    
     XCTAssertEqual(@2, var1.value);
     XCTAssertEqual(@"value2", group1_var1.value);
     XCTAssertEqualObjects((@{ @"var2": @YES, @"var3": @3 }), group1_group2.value);
 }
 
-- (void)testVarCacheMergeVariableNestedGroups {
-
+#pragma mark Apply Diffs
+- (void)testApplyDiffs {
+    CTVar *var1 = [variables define:@"var1" with:@1 kind:CT_KIND_INT];
+    CTVar *group1_var1 = [variables define:@"group1.var1" with:@"value1" kind:CT_KIND_STRING];
+    CTVar *var3 = [variables define:@"group1.group2.var3" with:@NO kind:CT_KIND_BOOLEAN];
+    
+    NSDictionary *diffs = @{
+        @"var1": @2,
+        @"group1": @{
+            @"var1": @"value2",
+            @"var22": @"value22",
+            @"group2": @{
+                @"var3": @YES,
+            }
+        }
+    };
+    
+    [variables.varCache applyVariableDiffs:diffs];
+    
+    XCTAssertEqualObjects(@2, var1.value);
+    XCTAssertEqualObjects(@"value2", group1_var1.value);
+    XCTAssertEqualObjects(@YES, var3.value);
+    XCTAssertEqualObjects(@"value22", [variables.varCache getMergedValue:@"group1.var22"]);
 }
 
-
-- (void)testVarCacheSavesDiffs {
+- (void)testApplyDiffsDefaultValue {
+    CTVar *var1 = [variables define:@"var1" with:@1 kind:CT_KIND_INT];
+    CTVar *group1_var1 = [variables define:@"group1.var1" with:@"value1" kind:CT_KIND_STRING];
+    CTVar *var3 = [variables define:@"group1.group2.var3" with:@NO kind:CT_KIND_BOOLEAN];
     
-    variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo];
-    
-    id variablesMock = OCMPartialMock(variables);
-    [variablesMock define:@"Title" with:@"Hello" kind:CT_KIND_STRING];
-    
-    NSDictionary *updatedVarsFromServer = @{
-        @"Title": @"TitleUpdated",
+    NSDictionary *diffs = @{
+        @"group1": @{
+            @"var22": @"value22",
+        }
     };
-    id varCacheMock = OCMPartialMock(variables.varCache);
-    [varCacheMock applyVariableDiffs:updatedVarsFromServer];
-    OCMVerify([varCacheMock saveDiffs]);
-    XCTAssertTrue([varCacheMock hasReceivedDiffs]);
     
-    NSString *fileName = [varCacheMock getArchiveFileName];
+    [variables.varCache applyVariableDiffs:diffs];
+    
+    XCTAssertEqualObjects(@1, var1.value);
+    XCTAssertEqualObjects(@"value1", group1_var1.value);
+    XCTAssertEqualObjects(@NO, var3.value);
+    XCTAssertEqualObjects(@"value22", [variables.varCache getMergedValue:@"group1.var22"]);
+}
+
+- (void)testApplyDiffsGroup {
+    CTVar *var1 = [variables define:@"group1.group2.var1" with:@1 kind:CT_KIND_INT];
+    CTVar *group1_group2 = [variables define:@"group1.group2" with:@{
+        @"var2": @"value2"
+    } kind:CT_KIND_DICTIONARY];
+    
+    NSDictionary *diffs = @{
+        @"group1": @{
+            @"group2": @{
+                @"var3": @"value3"
+            }
+        }
+    };
+    
+    [variables.varCache applyVariableDiffs:diffs];
+    
+    NSDictionary *group1_group2_value = @{
+        @"var1": @1,
+        @"var2": @"value2",
+        @"var3": @"value3"
+    };
+    
+    XCTAssertEqualObjects(@1, var1.value);
+    XCTAssertEqualObjects(group1_group2_value, group1_group2.value);
+    XCTAssertEqualObjects(@"value3", [variables.varCache getMergedValue:@"group1.group2.var3"]);
+}
+
+#pragma mark Save Diffs
+- (void)testLoadSaveSpecialCharacters {
+    CTVar *var1 = [variables define:@"<var>&</var>" with:@"<var>&</var>" kind:CT_KIND_STRING];
+    CTVar *var2 = [variables define:@"[var]" with:@"[var]" kind:CT_KIND_STRING];
+    CTVar *var3 = [variables define:@" " with:@" " kind:CT_KIND_STRING];
+    
+    CTVar *var4 = [variables define:@"<<" with:@"<<" kind:CT_KIND_STRING];
+    CTVar *var5 = [variables define:@"and&" with:@"and&" kind:CT_KIND_STRING];
+    CTVar *var6 = [variables define:@"'a" with:@"'a" kind:CT_KIND_STRING];
+    
+    CTVarCacheMock *varCache = (CTVarCacheMock *)variables.varCache;
+
+    NSDictionary *diffs = @{
+        @"<var>&</var>": @"<var2>&</var2>",
+        @"[var]": @"[var2]",
+        @" ": @"   ",
+        @"<<": @"<<<",
+        @"and&": @"b&",
+        @"'a": @"'b"
+    };
+    
+    [varCache applyVariableDiffs:diffs];
+    // Call original saveDiffs and write to file
+    [varCache originalSaveDiffs];
+    [varCache loadDiffs];
+    
+    XCTAssertEqualObjects(@"<var2>&</var2>", var1.stringValue);
+    XCTAssertEqualObjects(@"[var2]", var2.stringValue);
+    XCTAssertEqualObjects(@"   ", var3.stringValue);
+    XCTAssertEqualObjects(@"<<<", var4.stringValue);
+    XCTAssertEqualObjects(@"b&", var5.stringValue);
+    XCTAssertEqualObjects(@"'b", var6.stringValue);
+    
+    [self deleteSavedFile:[variables.varCache getArchiveFileName]];
+}
+
+- (void)testSavesDiffs {
+    CTVarCacheMock *varCache = (CTVarCacheMock *)variables.varCache;
+    [variables define:@"var1" with:@"value" kind:CT_KIND_STRING];
+    
+    NSDictionary *diff = @{
+        @"var1": @"new value",
+    };
+    [variables handleVariablesResponse:diff];
+    
+    XCTAssertEqual(1, varCache.saveCount);
+    XCTAssertTrue([varCache hasVarsRequestCompleted]);
+    
+    // Call original saveDiffs and write to file
+    [varCache originalSaveDiffs];
+    
+    NSString *fileName = [varCache getArchiveFileName];
     NSString *filePath = [CTPreferences filePathfromFileName:fileName];
     NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
     NSKeyedUnarchiver *unarchiver;
@@ -354,64 +413,40 @@ CTVariables *variables;
 #pragma clang diagnostic pop
     }
     NSDictionary *loadedVars = (NSDictionary *) [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
-    XCTAssertTrue([updatedVarsFromServer isEqualToDictionary:loadedVars]);
+    XCTAssertTrue([diff isEqualToDictionary:loadedVars]);
     
-    [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+    [self deleteSavedFile:fileName];
 }
 
-- (void)testVarCacheLoadsDiffs {
-    NSString *varName = @"Title";
-    NSString *initialVarValue = @"Hello";
-    NSString *updatedVarValue = @"TitleUpdated";
-    CTVariables *variablesMock = OCMPartialMock(variables);
-    CTVarCache *varCacheMock = OCMPartialMock(variables.varCache);
-    [variablesMock define:varName with:initialVarValue kind:CT_KIND_STRING];
+- (void)testLoadsDiffs {
+    NSString *varName = @"var1";
+    NSString *initialValue = @"value";
+    NSString *overriddenValue = @"overridden";
+    CTVarCacheMock *varCache = (CTVarCacheMock *)variables.varCache;
+
+    [variables define:varName with:initialValue kind:CT_KIND_STRING];
     
-    NSDictionary *updatedVarsFromServer = @{
-        varName: updatedVarValue,
+    NSDictionary *diff = @{
+        varName: overriddenValue,
     };
-    NSString *varsJson = [CTUtils dictionaryToJsonString:updatedVarsFromServer];
-    [varCacheMock applyVariableDiffs:updatedVarsFromServer];
-    OCMVerify([varCacheMock saveDiffs]);
-    XCTAssertTrue([varCacheMock hasReceivedDiffs]);
+    [variables handleVariablesResponse:diff];
+    XCTAssertEqual(1, varCache.saveCount);
+    XCTAssertTrue([varCache hasVarsRequestCompleted]);
     
-    [varCacheMock setSilent:YES];
-    [varCacheMock loadDiffs];
-    CTVar *loadedVar = varCacheMock.vars[varName];
-    XCTAssertEqualObjects(loadedVar.value, updatedVarValue);
+    // Call original saveDiffs and write to file
+    [varCache originalSaveDiffs];
     
-    NSString *fileName = [varCacheMock getArchiveFileName];
+    [varCache loadDiffs];
+    CTVar *loadedVar = varCache.vars[varName];
+    XCTAssertEqualObjects(loadedVar.value, overriddenValue);
+    
+    [self deleteSavedFile:[varCache getArchiveFileName]];
+}
+
+- (void)deleteSavedFile:(NSString *)fileName {
     NSString *filePath = [CTPreferences filePathfromFileName:fileName];
     NSError *error = nil;
     [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
-}
-
-- (void)testVarValues {
-    NSNumber *varValue = [NSNumber numberWithDouble:6.67345983745897];
-    CTVar *var = [variables define:@"MyNumber" with:varValue kind:CT_KIND_FLOAT];
-    
-    XCTAssertEqualObjects(var.stringValue,varValue.stringValue);
-    XCTAssertEqual(var.floatValue,varValue.floatValue);
-    XCTAssertEqual(var.intValue,varValue.intValue);
-    XCTAssertEqual(var.integerValue,varValue.integerValue);
-    XCTAssertEqual(var.doubleValue,varValue.doubleValue);
-    XCTAssertEqual(var.boolValue,varValue.boolValue);
-    XCTAssertEqual(var.longValue,varValue.longValue);
-    XCTAssertEqual(var.longLongValue,varValue.longLongValue);
-    XCTAssertEqual(var.unsignedIntValue,varValue.unsignedIntValue);
-    XCTAssertEqual(var.unsignedLongValue,varValue.unsignedLongValue);
-    XCTAssertEqual(var.unsignedIntegerValue,varValue.unsignedIntegerValue);
-    XCTAssertEqual(var.shortValue,varValue.shortValue);
-    XCTAssertEqual(var.unsignedShortValue,varValue.unsignedShortValue);
-    XCTAssertEqual(var.unsignedLongLongValue,varValue.unsignedLongLongValue);
-    XCTAssertEqual(var.cgFloatValue,varValue.doubleValue);
-    XCTAssertEqual(var.charValue,varValue.charValue);
-    XCTAssertEqual(var.unsignedCharValue,varValue.unsignedCharValue);
-    
-    CTVar *mapVar = [variables define:@"MyMap" with:@{@"MyMapNumber":varValue} kind:CT_KIND_DICTIONARY];
-    XCTAssertTrue([[mapVar objectForKey:@"MyMapNumber"]isKindOfClass:[varValue class]]);
-    XCTAssertTrue([mapVar.value isKindOfClass:[NSDictionary class]]);
-    XCTAssertTrue([mapVar.defaultValue isKindOfClass:[NSDictionary class]]);
 }
 
 @end

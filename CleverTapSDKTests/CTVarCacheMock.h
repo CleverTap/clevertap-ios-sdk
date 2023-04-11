@@ -13,6 +13,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTVarCacheMock : CTVarCache
 
+@property int loadCount;
+@property int applyCount;
+@property int saveCount;
+
+- (void)originalSaveDiffs;
+
 @end
 
 NS_ASSUME_NONNULL_END

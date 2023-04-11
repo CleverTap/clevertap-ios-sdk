@@ -477,5 +477,103 @@
     XCTAssertEqualObjects(actualOutput, expectedOutput);
 }
 
+#pragma mark Handle Response
+- (void)testHandleVariablesResponse {
+    XCTAssertFalse([self.variables.varCache hasVarsRequestCompleted]);
+    [self.variables handleVariablesResponse:@{}];
+    XCTAssertTrue([self.variables.varCache hasVarsRequestCompleted]);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache loadCount] == 0);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache applyCount] == 1);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache saveCount] == 1);
+    
+    [self.variables handleVariablesResponse:@{}];
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache loadCount] == 0);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache applyCount] == 2);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache saveCount] == 2);
+}
+
+- (void)testHandleVariablesError {
+    XCTAssertFalse([self.variables.varCache hasVarsRequestCompleted]);
+    [self.variables handleVariablesError];
+    XCTAssertTrue([self.variables.varCache hasVarsRequestCompleted]);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache loadCount] == 1);
+    XCTAssertTrue([(CTVarCacheMock *)self.variables.varCache applyCount] == 1);
+}
+
+- (void)testClearContent {
+    CTVar *var = [self.variables define:@"var1" with:@"value" kind:CT_KIND_STRING];
+    XCTAssertFalse([self.variables.varCache hasVarsRequestCompleted]);
+    [self.variables handleVariablesResponse:@{ @"var1": @"new value"}];
+    XCTAssertTrue([self.variables.varCache hasVarsRequestCompleted]);
+    XCTAssertTrue([var hadStarted]);
+    XCTAssertTrue([var hasChanged]);
+
+    [self.variables clearUserContent];
+    
+    XCTAssertFalse([var hadStarted]);
+    XCTAssertFalse([var hasChanged]);
+}
+
+#pragma mark Callbacks
+- (void)testOnVariablesChanged {
+    XCTestExpectation *expect = [self expectationWithDescription:@"delegate"];
+    XCTestExpectation *expect2 = [self expectationWithDescription:@"delegate2"];
+
+    [self.variables onVariablesChanged:^{
+        [expect fulfill];
+    }];
+    [self.variables onVariablesChanged:^{
+        [expect2 fulfill];
+    }];
+    [self.variables handleVariablesResponse:@{}];
+    
+    [self waitForExpectations:@[expect, expect2] timeout:DISPATCH_TIME_NOW + 5.0];
+}
+
+- (void)testOnceVariablesChanged {
+    XCTestExpectation *expect = [self expectationWithDescription:@"delegate"];
+    [self.variables onceVariablesChanged:^{
+        // Should be called once
+        [expect fulfill];
+    }];
+    // Call twice to trigger callbacks two times
+    [self.variables handleVariablesResponse:@{}];
+    [self.variables handleVariablesResponse:@{}];
+    
+    [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
+}
+
+- (void)testOnVariablesChangedOnError {
+    XCTestExpectation *expect = [self expectationWithDescription:@"delegate"];
+    [self.variables onVariablesChanged:^{
+        [expect fulfill];
+    }];
+    [self.variables handleVariablesError];
+    
+    [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
+}
+
+- (void)testFetchVariables {
+    XCTestExpectation *expect = [self expectationWithDescription:@"delegate"];
+    [self.variables setFetchVariablesBlock:^(BOOL success) {
+        XCTAssertTrue(success);
+        [expect fulfill];
+    }];
+    [self.variables handleVariablesResponse:@{}];
+    
+    [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
+}
+
+- (void)testFetchVariablesOnError {
+    XCTestExpectation *expect = [self expectationWithDescription:@"delegate"];
+    [self.variables setFetchVariablesBlock:^(BOOL success) {
+        XCTAssertFalse(success);
+        [expect fulfill];
+    }];
+    [self.variables handleVariablesError];
+    
+    [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
+}
+
 @end
 
