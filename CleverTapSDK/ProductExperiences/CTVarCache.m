@@ -25,22 +25,19 @@
     return self;
 }
 
-- (void)initialize
-{
+- (void)initialize {
     self.vars = [NSMutableDictionary dictionary];
     self.diffs = [NSMutableDictionary dictionary];
     self.valuesFromClient = [NSMutableDictionary dictionary];
     self.hasVarsRequestCompleted = NO;
 }
 
-- (NSArray *)getNameComponents:(NSString *)name
-{
+- (NSArray *)getNameComponents:(NSString *)name {
     NSArray *nameComponents = [name componentsSeparatedByString:@"."];
     return nameComponents;
 }
 
-- (id)traverse:(id)collection withKey:(id)key autoInsert:(BOOL)autoInsert
-{
+- (id)traverse:(id)collection withKey:(id)key autoInsert:(BOOL)autoInsert {
     id result = nil;
     if ([collection respondsToSelector:@selector(objectForKey:)]) {
         result = [collection objectForKey:key];
@@ -124,8 +121,7 @@
     }
 }
 
-- (void)registerVariable:(CTVar *)var
-{
+- (void)registerVariable:(CTVar *)var {
     [self.vars setObject:var forKey:var.name];
     
     [self updateValues:var.name
@@ -136,13 +132,11 @@
     [self mergeVariable:var];
 }
 
-- (CTVar *)getVariable:(NSString *)name
-{
+- (CTVar *)getVariable:(NSString *)name {
     return [self.vars objectForKey:name];
 }
 
-- (id)getMergedValue:(NSString *)name
-{
+- (id)getMergedValue:(NSString *)name {
     NSArray *components = [self getNameComponents:name];
     id value = [self getMergedValueFromComponentArray:components];
     if ([value conformsToProtocol:@protocol(NSCopying)] && [value respondsToSelector:@selector(copyWithZone:)]) {
@@ -155,8 +149,7 @@
     return value;
 }
 
-- (id)getValueFromComponentArray:(NSArray *) components fromDict:(NSDictionary *)values
-{
+- (id)getValueFromComponentArray:(NSArray *) components fromDict:(NSDictionary *)values {
     id mergedPtr = values;
     for (id component in components) {
         mergedPtr = [self traverse:mergedPtr withKey:component autoInsert:NO];
@@ -164,13 +157,11 @@
     return mergedPtr;
 }
 
-- (id)getMergedValueFromComponentArray:(NSArray *)components
-{
+- (id)getMergedValueFromComponentArray:(NSArray *)components {
     return [self getValueFromComponentArray:components fromDict:self.merged ? self.merged : self.valuesFromClient];
 }
 
-- (void)loadDiffs
-{
+- (void)loadDiffs {
     @try {
         NSString *fileName = [self dataArchiveFileName];
         NSString *filePath = [CTPreferences filePathfromFileName:fileName];
@@ -202,8 +193,7 @@
     }
 }
 
-- (void)saveDiffs
-{
+- (void)saveDiffs {
     // Stores the variables on the device in case we don't have a connection.
     // Restores next time when the app is opened.
     // Diffs need to be locked incase other thread changes the diffs
@@ -230,8 +220,8 @@
     return [NSString stringWithFormat:@"clevertap-%@-%@-pe-vars.plist", _config.accountId, _deviceInfo.deviceId];
 }
 
-- (void)applyVariableDiffs:(NSDictionary *)diffs_
-{
+- (void)applyVariableDiffs:(NSDictionary *)diffs_ {
+    CleverTapLogDebug(self.config.logLevel, @"%@: Applying Variables: %@", self, diffs_);
     @synchronized (self.vars) {
         // Prevent overriding variables if API returns null
         // If no variables are defined, API returns {}

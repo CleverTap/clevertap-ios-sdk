@@ -5134,81 +5134,69 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return [self.variables define:name with:nil kind:nil];
 }
 
-- (CTVar *)defineVar:(NSString *)name withInt:(int)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withInt:(int)defaultValue {
     return [self.variables define:name with:[NSNumber numberWithInt:defaultValue] kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withFloat:(float)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withFloat:(float)defaultValue {
     return [self.variables define:name with:[NSNumber numberWithFloat:defaultValue] kind:CT_KIND_FLOAT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withDouble:(double)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withDouble:(double)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithDouble:defaultValue]
                          kind:CT_KIND_FLOAT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withCGFloat:(CGFloat)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withCGFloat:(CGFloat)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithDouble:defaultValue]
                          kind:CT_KIND_FLOAT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withShort:(short)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withShort:(short)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithShort:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withChar:(char)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withChar:(char)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithChar:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withBool:(BOOL)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withBool:(BOOL)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithBool:defaultValue]
                          kind:CT_KIND_BOOLEAN];
 }
 
-- (CTVar *)defineVar:(NSString *)name withInteger:(NSInteger)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withInteger:(NSInteger)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithInteger:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withLong:(long)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withLong:(long)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withLongLong:(long long)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withLongLong:(long long)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithLongLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withUnsignedChar:(unsigned char)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withUnsignedChar:(unsigned char)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithUnsignedChar:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withUnsignedInt:(unsigned int)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withUnsignedInt:(unsigned int)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithUnsignedInt:defaultValue]
                          kind:CT_KIND_INT];
@@ -5221,39 +5209,33 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withUnsignedLong:(unsigned long)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withUnsignedLong:(unsigned long)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithUnsignedLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withUnsignedLongLong:(unsigned long long)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withUnsignedLongLong:(unsigned long long)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithUnsignedLongLong:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withUnsignedShort:(unsigned short)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withUnsignedShort:(unsigned short)defaultValue {
     return [self.variables define:name
                          with:[NSNumber numberWithUnsignedShort:defaultValue]
                          kind:CT_KIND_INT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withString:(NSString *)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withString:(NSString *)defaultValue {
     return [self.variables define:name with:defaultValue kind:CT_KIND_STRING];
 }
 
-- (CTVar *)defineVar:(NSString *)name withNumber:(NSNumber *)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withNumber:(NSNumber *)defaultValue {
     return [self.variables define:name with:defaultValue kind:CT_KIND_FLOAT];
 }
 
-- (CTVar *)defineVar:(NSString *)name withDictionary:(NSDictionary *)defaultValue
-{
+- (CTVar *)defineVar:(NSString *)name withDictionary:(NSDictionary *)defaultValue {
     return [self.variables define:name with:defaultValue kind:CT_KIND_DICTIONARY];
 }
 

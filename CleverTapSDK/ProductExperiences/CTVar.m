@@ -59,8 +59,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Updates
 
-- (void) cacheComputedValues
-{
+- (void) cacheComputedValues {
     // Cache computed values.
     if ([_value isKindOfClass:NSString.class]) {
         _stringValue = (NSString *) _value;
@@ -74,8 +73,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
 }
 
-- (void)update
-{
+- (void)update {
     NSObject *oldValue = _value;
     _value = [self.varCache getMergedValueFromComponentArray:_nameComponents];
     
@@ -96,8 +94,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Callbacks
 
-- (void)triggerValueChanged
-{
+- (void)triggerValueChanged {
     if (self.delegate &&
         [self.delegate respondsToSelector:@selector(valueDidChange:)]) {
         [self.delegate valueDidChange:self];
@@ -108,8 +105,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
 }
 
-- (void)onValueChanged:(CleverTapVariablesChangedBlock)block
-{
+- (void)onValueChanged:(CleverTapVariablesChangedBlock)block {
     if (!block) {
         CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CTVar onValueChanged].");
         return;
@@ -126,8 +122,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     CT_END_TRY
 }
 
-- (void)setDelegate:(id<CTVarDelegate>)delegate
-{
+- (void)setDelegate:(id<CTVarDelegate>)delegate {
     CT_TRY
     _delegate = delegate;
     if ([[self varCache] hasVarsRequestCompleted]) {
@@ -138,18 +133,15 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Dictionary handling
 
-- (id) objectForKey:(NSString *)key
-{
+- (id) objectForKey:(NSString *)key {
     return [self objectForKeyPath:key, nil];
 }
 
-- (id) objectAtIndex:(NSUInteger)index
-{
+- (id) objectAtIndex:(NSUInteger)index {
     return [self objectForKeyPath:@(index), nil];
 }
 
-- (id) objectForKeyPath:(id)firstComponent, ...
-{
+- (id) objectForKeyPath:(id)firstComponent, ... {
     CT_TRY
     [self warnIfNotStarted];
     NSMutableArray *components = [_nameComponents mutableCopy];
@@ -165,8 +157,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     return nil;
 }
 
-- (id)objectForKeyPathComponents:(NSArray *)pathComponents
-{
+- (id)objectForKeyPathComponents:(NSArray *)pathComponents {
     CT_TRY
     [self warnIfNotStarted];
     NSMutableArray *components = [_nameComponents mutableCopy];
@@ -178,14 +169,12 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Value accessors
 
-- (NSNumber *)numberValue
-{
+- (NSNumber *)numberValue {
     [self warnIfNotStarted];
     return _numberValue;
 }
 
-- (NSString *)stringValue
-{
+- (NSString *)stringValue {
     [self warnIfNotStarted];
     return _stringValue;
 }
@@ -209,18 +198,15 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Utils
 
-+ (BOOL)printedCallbackWarning
-{
++ (BOOL)printedCallbackWarning {
     return LPVAR_PRINTED_CALLBACK_WARNING;
 }
 
-+ (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning
-{
++ (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning {
     LPVAR_PRINTED_CALLBACK_WARNING = newPrintedCallbackWarning;
 }
 
-- (void)warnIfNotStarted
-{
+- (void)warnIfNotStarted {
     if (!self.varCache.hasVarsRequestCompleted && ![CTVar printedCallbackWarning]) {
         CleverTapLogDebug(self.varCache.config.logLevel, @"%@: CleverTap hasn't finished retrieving values from the server. You "
                           @"should use a callback to make sure the value for '%@' is ready. Otherwise, your "
@@ -230,8 +216,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
 }
 
-- (void)clearState
-{
+- (void)clearState {
     _hadStarted = NO;
     _hasChanged = NO;
 }

@@ -20,7 +20,7 @@
 @end
 
 @implementation CTVariables
-// TODO: Linting: Brackets and spaces consistency
+
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
     if ((self = [super init])) {
         self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo];
@@ -28,8 +28,7 @@
     return self;
 }
 
-- (CTVar *)define:(NSString *)name with:(NSObject *)defaultValue kind:(NSString *)kind
-{
+- (CTVar *)define:(NSString *)name with:(NSObject *)defaultValue kind:(NSString *)kind {
     if ([CTUtils isNullOrEmpty:name]) {
         CleverTapLogDebug(_config.logLevel, @"%@: Empty name provided as parameter while defining a variable.", self);
         return nil;
@@ -57,9 +56,9 @@
     }
 }
 
-- (void)handleVariablesResponse:(NSDictionary *)varsResponse
-{
+- (void)handleVariablesResponse:(NSDictionary *)varsResponse {
     if (varsResponse) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Handle Variables Response with: %@", self, varsResponse);
         [[self varCache] setHasVarsRequestCompleted:YES];
         NSDictionary *values = [self unflatten:varsResponse];
         [[self varCache] applyVariableDiffs:values];
@@ -68,8 +67,8 @@
     }
 }
 
-- (void)handleVariablesError
-{
+- (void)handleVariablesError {
+    CleverTapLogDebug(self.config.logLevel, @"%@: Handle Variables Error", self);
     if (![[self varCache] hasVarsRequestCompleted]) {
         [[self varCache] setHasVarsRequestCompleted:YES];
         // Ensure variables are loaded from cache. Triggers individual Vars update.
@@ -103,8 +102,7 @@
     }
 }
 
-- (void)triggerVariablesChanged
-{
+- (void)triggerVariablesChanged {
     if (![NSThread isMainThread]) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self triggerVariablesChanged];
@@ -126,8 +124,7 @@
     }
 }
 
-- (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
-    
+- (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull)block {
     if (!block) {
         CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onVariablesChanged].");
         return;
@@ -145,8 +142,7 @@
     }
 }
 
-- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
-    
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull)block {
     if (!block) {
         CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onceVariablesChanged].");
         return;

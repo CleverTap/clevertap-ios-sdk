@@ -2,7 +2,7 @@
 //  ContentMerger.m
 //  CleverTapSDK
 //
-//  Created by Akash Malhotra on 17/02/23.
+//  Created by Nikola Zagorchev on 12.03.23.
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
