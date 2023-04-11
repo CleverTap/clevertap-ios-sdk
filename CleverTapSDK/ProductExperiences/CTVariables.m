@@ -28,6 +28,7 @@
     return self;
 }
 
+#pragma mark Define Var
 - (CTVar *)define:(NSString *)name with:(NSObject *)defaultValue kind:(NSString *)kind {
     if ([CTUtils isNullOrEmpty:name]) {
         CleverTapLogDebug(_config.logLevel, @"%@: Empty name provided as parameter while defining a variable.", self);
@@ -56,6 +57,7 @@
     }
 }
 
+#pragma mark Handle Response
 - (void)handleVariablesResponse:(NSDictionary *)varsResponse {
     if (varsResponse) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Handle Variables Response with: %@", self, varsResponse);
@@ -85,6 +87,7 @@
     [self.varCache clearUserContent];
 }
 
+#pragma mark Triggers
 - (void)triggerFetchVariables:(BOOL)success {
     if (self.fetchVariablesBlock) {
         CleverTapFetchVariablesBlock block = [self.fetchVariablesBlock copy];
@@ -163,6 +166,7 @@
     }
 }
 
+#pragma mark Vars Payload
 - (NSDictionary*)varsPayload {
     NSMutableDictionary *payload = [NSMutableDictionary dictionary];
     payload[@"type"] = CT_PE_VARS_PAYLOAD_TYPE;

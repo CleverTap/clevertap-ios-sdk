@@ -1066,24 +1066,11 @@
 			path = ProductExperiences;
 			sourceTree = "<group>";
 		};
-		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
+		6A7BB8DE29E60BE900651584 /* ProductExperiences */ = {
 			isa = PBXGroup;
 			children = (
-				4EDCDE4D278AC4DF0065E699 /* Info.plist */,
-				4E1F1560277090D6009387AE /* Stub Responses */,
-				D02AC2EC2767F4D10031C1BE /* BaseTestCase.h */,
-				D02AC2EA2767F4580031C1BE /* BaseTestCase.m */,
-				4E1F1559276B662B009387AE /* EventDetail.h */,
-				4E1F155A276B662C009387AE /* EventDetail.m */,
-				D02AC2E6276402160031C1BE /* CleverTap+Tests.h */,
-				D02AC2E8276402CF0031C1BE /* CleverTap+Tests.m */,
 				4EF1CF9C29B076A300E3CB6A /* CTVarCache+Tests.h */,
 				4EF1CF9D29B076A300E3CB6A /* CTVarCache+Tests.m */,
-				D02AC2DA276044F70031C1BE /* CleverTapSDKTests.m */,
-				4E1F154E27691CA0009387AE /* CleverTapInstanceTests.m */,
-				4E1F155027692042009387AE /* EventTests.m */,
-				4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */,
-				6A2E4C17291E8A4A00385536 /* CleverTapInstanceConfigTests.m */,
 				4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */,
 				6A2E0B9029CCCC8500FCEA5F /* ContentMergerTest.m */,
 				6A2E0B9229D0A5CE00FCEA5F /* CTVariablesTest.m */,
@@ -1092,6 +1079,27 @@
 				6A2E0B9729D49D5100FCEA5F /* CTVarCacheMock.m */,
 				6A2E0B9929D49E4700FCEA5F /* CTVariables+Tests.h */,
 				6A7BB8DB29E47CFF00651584 /* CTVarTest.m */,
+			);
+			path = ProductExperiences;
+			sourceTree = "<group>";
+		};
+		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
+			isa = PBXGroup;
+			children = (
+				6A7BB8DE29E60BE900651584 /* ProductExperiences */,
+				4EDCDE4D278AC4DF0065E699 /* Info.plist */,
+				4E1F1560277090D6009387AE /* Stub Responses */,
+				D02AC2EC2767F4D10031C1BE /* BaseTestCase.h */,
+				D02AC2EA2767F4580031C1BE /* BaseTestCase.m */,
+				4E1F1559276B662B009387AE /* EventDetail.h */,
+				4E1F155A276B662C009387AE /* EventDetail.m */,
+				D02AC2E6276402160031C1BE /* CleverTap+Tests.h */,
+				D02AC2E8276402CF0031C1BE /* CleverTap+Tests.m */,
+				D02AC2DA276044F70031C1BE /* CleverTapSDKTests.m */,
+				4E1F154E27691CA0009387AE /* CleverTapInstanceTests.m */,
+				4E1F155027692042009387AE /* EventTests.m */,
+				4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */,
+				6A2E4C17291E8A4A00385536 /* CleverTapInstanceConfigTests.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
