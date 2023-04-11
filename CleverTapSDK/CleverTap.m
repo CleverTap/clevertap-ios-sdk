@@ -692,7 +692,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         [self _initProductConfig];
         
-
+        // Initialise Variables
         self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
         
         [self notifyUserProfileInitialized];
@@ -5076,17 +5076,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_syncVars {
-    // META
     NSDictionary *meta = [self batchHeader];
-    // VARSPAYLOAD
     NSDictionary *varsPayload = [[self variables] varsPayload];
     NSArray *payload = @[meta,varsPayload];
     
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     
-    // TODO: REMOVE STATIC ENDPOINT
-//    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:[NSString stringWithFormat:@"https://%@/defineVars",self.domainFactory.redirectDomain]];
-    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:@"https://sk1-staging-25.clevertap-prod.com/defineVars"];
+    NSString *url = [NSString stringWithFormat:@"https://%@/%@",self.domainFactory.redirectDomain, CT_PE_DEFINE_VARS_ENDPOINT];
+    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:url];
     
     [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
