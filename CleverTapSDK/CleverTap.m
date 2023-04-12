@@ -78,6 +78,7 @@ static NSArray *sslCertNames;
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static BOOL isLocationEnabled;
+static NSMutableDictionary *auxiliarySdkVersions;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -1177,8 +1178,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"scv"] = self.deviceInfo.signedCallSDKVersion;
-    
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
@@ -1232,6 +1231,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (self.deviceInfo.library) {
         evtData[@"lib"] = self.deviceInfo.library;
+    }
+    
+    if (auxiliarySdkVersions && auxiliarySdkVersions.count > 0) {
+        [auxiliarySdkVersions enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
+            [evtData setObject:value forKey:key];
+        }];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -4002,6 +4007,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     self.deviceInfo.library = name;
 }
 
+- (void)setCustomSdkVersion:(NSString *)name version:(int)version {
+    if (!auxiliarySdkVersions) {
+        auxiliarySdkVersions = [NSMutableDictionary new];
+    }
+    auxiliarySdkVersions[name] = @(version);
+}
+
 + (void)setDebugLevel:(int)level {
     [CTLogger setDebugLevel:level];
     if (_defaultInstanceConfig) {
@@ -4983,10 +4995,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }];
 #endif
-}
-
-- (void)setSignedCallVersion:(NSString *)version {
-    [self.deviceInfo setSignedCallSDKVersion: version];
 }
 
 - (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
