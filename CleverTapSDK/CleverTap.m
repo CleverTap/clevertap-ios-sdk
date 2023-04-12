@@ -78,6 +78,7 @@ static NSArray *sslCertNames;
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static BOOL isLocationEnabled;
+static NSMutableDictionary *auxiliarySdkVersions;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -1177,8 +1178,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"scv"] = self.deviceInfo.signedCallSDKVersion;
-    
     evtData[@"Version"] = self.deviceInfo.appVersion;
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
@@ -1232,6 +1231,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if (self.deviceInfo.library) {
         evtData[@"lib"] = self.deviceInfo.library;
+    }
+    
+    if (auxiliarySdkVersions && auxiliarySdkVersions.count > 0) {
+        [auxiliarySdkVersions enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
+            [evtData setObject:value forKey:key];
+        }];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -4013,6 +4018,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     self.deviceInfo.library = name;
 }
 
+- (void)setCustomSdkVersion:(NSString *)name version:(int)version {
+    if (!auxiliarySdkVersions) {
+        auxiliarySdkVersions = [NSMutableDictionary new];
+    }
+    auxiliarySdkVersions[name] = @(version);
+}
+
 + (void)setDebugLevel:(int)level {
     [CTLogger setDebugLevel:level];
     if (_defaultInstanceConfig) {
@@ -4051,13 +4063,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain spikyProxyDomain:(NSString *)spikyProxyDomain {
     [self _setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
     
+    NSString *spikyProxyDomainResult;
     if (spikyProxyDomain != nil && ![spikyProxyDomain isEqualToString:@""]) {
-        spikyProxyDomain = [spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if (spikyProxyDomain.length <= 0) {
-            spikyProxyDomain = nil;
+        spikyProxyDomainResult = [spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (spikyProxyDomainResult.length <= 0) {
+            spikyProxyDomainResult = nil;
         }
     }
-    [_plistInfo setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain spikyProxyDomain:spikyProxyDomain];
+    [_plistInfo setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain spikyProxyDomain:spikyProxyDomainResult];
 }
 
 + (void)enablePersonalization {
@@ -4237,7 +4250,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #if defined(CLEVERTAP_HOST_WATCHOS)
-- (BOOL)handleMessage:(NSDictionary<NSString *, id> *)message forWatchSession:(WCSession *)session  {
+- (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session  {
     NSString *type = [message objectForKey:@"clevertap_type"];
     
     BOOL handled = (type != nil);
@@ -4583,7 +4596,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         NSMutableDictionary *message = [NSMutableDictionary dictionary];
         [message setObject:nowEpoch forKey:@"_id"];
         [message setObject:[NSNumber numberWithLong:expireTime] forKey:@"wzrk_ttl"];
-        [message addEntriesFromDictionary:msg];
+        [message addEntriesFromDictionary:msg ?: @{}];
         
         NSMutableArray<NSDictionary*> *inboxMsg = [NSMutableArray new];
         [inboxMsg addObject:message];
@@ -4993,10 +5006,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }];
 #endif
-}
-
-- (void)setSignedCallVersion:(NSString *)version {
-    [self.deviceInfo setSignedCallSDKVersion: version];
 }
 
 - (void)setDomainDelegate:(id<CleverTapDomainDelegate>)delegate {
