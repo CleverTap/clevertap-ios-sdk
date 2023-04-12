@@ -1443,17 +1443,28 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_appEnteredBackground {
     self.isAppForeground = NO;
-    if (![self isMuted]) {
-        [self persistQueues];
+    
+    UIApplication *application = [[self class]getSharedApplication];
+    UIBackgroundTaskIdentifier __block backgroundTask;
+    
+    void (^finishTaskHandler)(void) = ^(){
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [application endBackgroundTask:backgroundTask];
+            backgroundTask = UIBackgroundTaskInvalid;
+        });
+    };
+    // Start background task to make sure it runs when the app is in background.
+    backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
+    
+    @try {
+        [self persistOrClearQueues];
+        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+        finishTaskHandler();
     }
-    [self runSerialAsync:^{
-        @try {
-            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-        }
-        @catch (NSException *exception) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
-        }
-    }];
+    @catch (NSException *exception) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
+        finishTaskHandler();
+    }
 }
 
 - (void)recordAppLaunched:(NSString *)caller {
@@ -2813,22 +2824,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     self.notificationsQueue = [NSMutableArray array];
 }
 
+- (void)persistOrClearQueues {
+    if ([self isMuted]) {
+        [self clearQueues];
+    } else {
+        [self persistProfileQueue];
+        [self persistEventsQueue];
+        [self persistNotificationsQueue];
+    }
+}
+
 - (void)persistQueues {
     [self runSerialAsync:^{
-        @try {
-            if ([self isMuted]) {
-                [self clearQueues];
-            } else {
-                [self persistProfileQueue];
-                [self persistEventsQueue];
-                [self persistNotificationsQueue];
-            }
-        }
-        @catch (NSException *exception) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
-        }
+        [self persistOrClearQueues];
     }];
 }
+
 - (void)persistEventsQueue {
     NSString *fileName = [self eventsFileName];
     NSMutableArray *eventsCopy;
