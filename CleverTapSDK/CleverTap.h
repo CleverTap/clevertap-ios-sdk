@@ -1232,6 +1232,17 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @method
  
  @abstract
+ Set the Library name and version for Auxiliary SDKs
+ 
+ @discussion
+ Call this to method to set library name and version in the Auxiliary SDK
+ */
+- (void)setCustomSdkVersion:(NSString * _Nonnull)name version:(int)version;
+
+/*!
+ @method
+ 
+ @abstract
  Store the users location for geofences on the default shared CleverTap instance.
  
  @discussion
@@ -1287,16 +1298,6 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param calldetails call details dictionary
  */
 - (void)recordSignedCallEvent:(int)eventRawValue forCallDetails:(NSDictionary *_Nonnull)calldetails;
-
-/*!
- @method
- 
- @abstract
- Record Signed Call SDK version.
- 
- @param version Signed call SDK version
- */
-- (void)setSignedCallVersion:(NSString* _Nullable)version;
 
 /*!
  @method
