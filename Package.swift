@@ -47,7 +47,8 @@ let package = Package(
                 .headerSearchPath("Inbox/config"),
                 .headerSearchPath("Inbox/controllers"),
                 .headerSearchPath("Inbox/models"),
-                .headerSearchPath("Inbox/views")
+                .headerSearchPath("Inbox/views"),
+                .headerSearchPath("ProductExperiences/")
             ],
             linkerSettings: [
                 .linkedFramework("AVFoundation"),

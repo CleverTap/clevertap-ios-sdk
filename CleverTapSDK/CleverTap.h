@@ -31,6 +31,7 @@
 @class CleverTapInstanceConfig;
 @class CleverTapFeatureFlags;
 @class CleverTapProductConfig;
+#import "CTVar.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMethodInspection"
@@ -1328,6 +1329,85 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  Checks if a custom CleverTapID is valid
  */
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID;
+
+#pragma mark Product Experiences - Vars
+
+/*!
+ @method
+ 
+ @abstract
+ Adds a callback to be invoked when variables are initialised with server values. Will be called each time new values are fetched.
+ 
+ @param block a callback to add.
+ */
+- (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
+
+/*!
+ @method
+ 
+ @abstract
+ Adds a callback to be invoked only once when variables are initialised with server values.
+ 
+ @param block a callback to add.
+ */
+- (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block;
+ 
+/*!
+ @method
+ 
+ @abstract
+ Uploads variables to the server. Requires Development/Debug build/configuration.
+ */
+- (void)syncVariables;
+
+/*!
+ @method
+ 
+ @abstract
+ Uploads variables to the server.
+ 
+ @param isProduction Provide `true` if variables must be sync in Productuon build/configuration.
+ */
+- (void)syncVariables:(BOOL)isProduction;
+
+/*!
+ @method
+ 
+ @abstract
+ Forces variables to update from the server.
+ 
+ @discussion
+ Forces variables to update from the server. If variables have changed, the appropriate callbacks will fire. Use sparingly as if the app is updated, you'll have to deal with potentially inconsistent state or user experience.
+ The provided callback has a boolean flag whether the update was successful or not. The callback fires regardless
+ of whether the variables have changed.
+ 
+ @param block a callback with a boolean flag whether the update was successful.
+ */
+- (void)fetchVariables:(CleverTapFetchVariablesBlock _Nullable)block;
+
+/*!
+ @method
+ 
+ @abstract
+ Get an instance of a variable or a group.
+ 
+ @param name The name of the variable or the group.
+ 
+ @return
+ The instance of the variable or the group, or nil if not created yet.
+
+ */
+- (CTVar * _Nullable)getVariable:(NSString * _Nonnull)name;
+
+/*!
+ @method
+ 
+ @abstract
+ Get a copy of the current value of a variable or a group.
+ 
+ @param name The name of the variable or the group.
+ */
+- (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
 @end
 
