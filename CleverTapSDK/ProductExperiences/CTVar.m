@@ -20,8 +20,8 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 @implementation CTVar
 
-- (instancetype)initWithName:(NSString *)name withComponents:(NSArray *)components
-            withDefaultValue:(NSNumber *)defaultValue withKind:(NSString *)kind varCache:(CTVarCache *)cache
+- (instancetype)initWithName:(NSString *)name withDefaultValue:(NSNumber *)defaultValue
+                    withKind:(NSString *)kind varCache:(CTVarCache *)cache
 {
     self = [super init];
     if (self) {

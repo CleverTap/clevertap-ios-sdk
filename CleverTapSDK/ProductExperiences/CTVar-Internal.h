@@ -6,7 +6,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTVar ()
 
 - (instancetype)initWithName:(NSString *)name
-              withComponents:(NSArray *)components
             withDefaultValue:(NSObject *)defaultValue
                     withKind:(NSString *)kind
                     varCache:(CTVarCache *)cache;

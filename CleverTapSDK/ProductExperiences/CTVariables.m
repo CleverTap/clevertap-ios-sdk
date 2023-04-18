@@ -47,9 +47,7 @@
             return existing;
         }
         CT_END_TRY
-        NSArray<NSString *> *nameComponents = [self.varCache getNameComponents:name];
         CTVar *var = [[CTVar alloc] initWithName:name
-                                  withComponents:nameComponents
                                 withDefaultValue:defaultValue
                                         withKind:kind
                                         varCache:self.varCache];
