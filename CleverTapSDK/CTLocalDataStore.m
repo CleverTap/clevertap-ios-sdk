@@ -409,6 +409,9 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
                 return nil;
             }
         }
+        else {
+            return nil;
+        }
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process data sync from upstream: %@", self, e.debugDescription);
         return nil;

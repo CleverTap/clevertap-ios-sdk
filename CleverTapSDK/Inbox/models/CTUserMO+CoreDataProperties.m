@@ -17,13 +17,13 @@
 
 @implementation CTUserMO (CoreDataProperties)
 
-+ (instancetype)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context {
++ (instancetype _Nullable)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context {
     CTUserMO *_user;
     @try {
         NSString *identifier = json[@"identifier"];
         
         if (!identifier) {
-            CleverTapLogStaticInternal(@"CTUserMO fetchOrCreate for: %@ requires an identifier returning nil", json);
+            CleverTapLogStaticInternal(@"CTUserMO fetchOrCreate for: %@ requires an identifier. Returning nil", json);
             return nil;
         }
         
