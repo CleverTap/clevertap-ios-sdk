@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 #### Fixed
 - Fixes a bug where the `getLocationWithSuccess` method would cause crashes.
 - Minor improvements to saving session data in background state.
+- Streamlined the argument key of `recordEventWithProps`  in CleverTapJSInterface.
 
 ### [Version 4.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.2) (April 03, 2023)
 
