@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 5.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.0.0) (May 05, 2023)
+
+#### Added
+- Introducing PE variables.
+
+#### Fixed
+- Fixes a bug where the `getLocationWithSuccess` method would cause crashes.
+
 ### [Version 4.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.2) (April 03, 2023)
 
 #### Fixed
