@@ -5,8 +5,8 @@
 
 @interface CleverTapWatchOS : NSObject
 
-- (instancetype)initWithSession:(WCSession* _Nonnull)session;
+- (instancetype _Nonnull)initWithSession:(WCSession* _Nonnull)session;
 
-- (void)recordEvent:(NSString *)event withProps:(NSDictionary *)props;
+- (void)recordEvent:(NSString *_Nonnull)event withProps:(NSDictionary *_Nonnull)props;
 
 @end
