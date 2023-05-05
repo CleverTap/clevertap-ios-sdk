@@ -20,6 +20,8 @@ Currently, CleverTap SDK supports the following variable types:
 Variables can be defined using a shared or custom CleverTap instance. The Variable is defined using the `defineVar` method, which returns an instance of a `CTVar` variable. You must provide the name and default value of the variable. 
 
 ```swift
+// Swift
+
 // Primitive types
 let var_string = CleverTap.sharedInstance()?.defineVar(name: "var_string", string: "hello, world")
 let var_int = CleverTap.sharedInstance()?.defineVar(name: "var_int", integer: 10)
@@ -48,6 +50,8 @@ let var_dict_nested = CleverTap.sharedInstance()?.defineVar(name: "var_dict_comp
 
 ```
 ```objectivec
+// Objective-C
+
 #import <CleverTapSDK/CleverTap+CTVar.h>
 
 // Primitive types
@@ -92,11 +96,15 @@ CleverTap iOS SDK provides several callbacks for the developer to receive feedba
 This method provides a boolean flag to ensure that the variables are successfully fetched from the server.
 
 ```swift
+// Swift
+
 CleverTap.sharedInstance()?.fetchVariables({ success in
     print(success)
 })
 ```
 ```objectivec
+// Objective-C
+
 #import <CleverTapSDK/CleverTap+CTVar.h>
 
 [[CleverTap sharedInstance] fetchVariables:^(BOOL success) {
@@ -111,6 +119,8 @@ CleverTap.sharedInstance()?.fetchVariables({ success in
 This callback is invoked when variables are initialized with values fetched from the server. It is called each time new values are fetched.
 
 ```swift
+// Swift
+
 let var_string = CleverTap.sharedInstance()?.defineVar(name: "myString", string: "hello,world")
 CleverTap.sharedInstance()?.onVariablesChanged {
     print("CleverTap.onVariablesChanged: \(var_string?.value ?? "")")
@@ -119,6 +129,8 @@ CleverTap.sharedInstance()?.onVariablesChanged {
 
 ```
 ```objectivec
+// Objective-C
+
 #import <CleverTapSDK/CleverTap+CTVar.h>
 
 CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withString:@"hello, world"];
@@ -134,6 +146,8 @@ CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withStri
 This callback is invoked when variables are initialized with values fetched from the server. It is called only once.
 
 ```swift
+// Swift
+
 let var_string = CleverTap.sharedInstance()?.defineVar(name: "myString", string: "hello,world")
 CleverTap.sharedInstance()?.onceVariablesChanged {
     print("CleverTap.onceVariablesChanged: \(var_string?.value ?? "")")
@@ -141,6 +155,8 @@ CleverTap.sharedInstance()?.onceVariablesChanged {
 
 ```
 ```objectivec
+// Objective-C
+
 #import <CleverTapSDK/CleverTap+CTVar.h>
 
 CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withString:@"hello, world"];
@@ -160,6 +176,8 @@ CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withStri
 This callback is invoked when the value of the variable changes.
 
 ```swift
+// Swift
+
 let var_string = CleverTap.sharedInstance()?.defineVar(name: "myString", string: "hello,world")
 var_string?.onValueChanged {
     print("var_string.onValueChanged: \(var_string?.value ?? "")")
@@ -167,6 +185,8 @@ var_string?.onValueChanged {
 
 ```
 ```objectivec
+// Objective-C
+
 #import <CleverTapSDK/CleverTap+CTVar.h>
 
 CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withString:@"hello, world"];
@@ -182,6 +202,8 @@ CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withStri
 The `VarDelegate` method is implemented to be invoked when the variable value is changed.
 
 ```swift
+// Swift
+
 @objc class VarDelegateImpl: NSObject, VarDelegate {
     func valueDidChange(_ variable: CleverTapSDK.Var) {
         print("CleverTap \(String(describing: variable.name)):valueDidChange to: \(variable.value!)")
@@ -191,6 +213,8 @@ The `VarDelegate` method is implemented to be invoked when the variable value is
 var_string?.setDelegate(self)
 ```
 ```objectivec
+// Objective-C
+
 #import <CleverTapSDK/CleverTap+CTVar.h>
 
 @interface CTVarDelegateImpl : NSObject <CTVarDelegate>
@@ -216,6 +240,8 @@ After defining your variables in the code, you must send/sync variables to the s
 After marking the profile as a test profile,  you must sync the app variables in DEBUG mode:
 
 ```swift
+// Swift
+
 // 1. Define CleverTap variables 
 // …
 // 2. Add variables/values changed callbacks
@@ -225,6 +251,8 @@ After marking the profile as a test profile,  you must sync the app variables in
 CleverTap.sharedInstance()?.syncVariables();
 ```
 ```objectivec
+// Objective-C
+
 // 1. Define CleverTap variables 
 // …
 // 2. Add variables/values changed callbacks
@@ -248,14 +276,18 @@ CleverTap.sharedInstance()?.syncVariables();
 You can fetch the updated values for your CleverTap variables from the server during a session. If variables have changed, the appropriate callbacks will be fired. The provided callback provides a boolean flag that indicates if the fetch call was successful. The callback is fired regardless of whether the variables have changed or not.
 
 ```swift
+// Swift
+
 CleverTap.sharedInstance()?.fetchVariables({ success in
     print(success)
 })
 ```
 ```objectivec
-  [[CleverTap sharedInstance] fetchVariables:^(BOOL success) {
+// Objective-C
+
+[[CleverTap sharedInstance] fetchVariables:^(BOOL success) {
         
-    }];
+}];
 ```
 
 
@@ -272,14 +304,18 @@ This process involves the following two major steps:
 Variables are updated automatically when server values are received. If you want to receive feedback when a specific variable is updated, use the individual callback:
 
 ```swift
+// Swift
+
 variable?.onValueChanged {
     print("variable.onValueChanged: \(variable?.value ?? "")")
 }
 ```
 ```objectivec
- [variable onValueChanged:^{
-        NSLog(@"variable.onValueChanged: %@", [variable value]);
-    }];
+// Objective-C
+
+[variable onValueChanged:^{
+    NSLog(@"variable.onValueChanged: %@", [variable value]);
+}];
 ```
 
 
@@ -293,12 +329,16 @@ You can access these fetched values in the following three ways:
 You can use several methods on the `Var` instance as shown in the following code:
 
 ```swift
+// Swift
+
 variable?.defaultValue // returns default value
 variable?.value // returns current value
 variable?.numberValue // returns value as NSNumber if applicable
 variable?.stringValue // returns value as String
 ```
 ```objectivec
+// Objective-C
+
 variable.defaultValue; // returns default value
 variable.value; // returns current value
 variable.numberValue; // returns value as NSNumber if applicable
@@ -312,8 +352,12 @@ variable.stringValue; // returns value as String
 You can use the `CleverTap` instance method to get the current value of a variable. If the variable is nonexistent, the method returns `null`:
 
 ```swift
+// Swift
+
 CleverTap.sharedInstance()?.getVariableValue("variable name")
 ```
 ```objectivec
+// Objective-C
+
 [[CleverTap sharedInstance]getVariableValue:@"variable name"];
 ```
