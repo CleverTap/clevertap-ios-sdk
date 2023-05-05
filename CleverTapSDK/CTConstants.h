@@ -2,6 +2,22 @@
 
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
+extern NSString *const kHANDSHAKE_URL;
+extern NSString *CT_KIND_INT;
+extern NSString *CT_KIND_FLOAT;
+extern NSString *CT_KIND_STRING;
+extern NSString *CT_KIND_BOOLEAN;
+extern NSString *CT_KIND_DICTIONARY;
+extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
+extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
+
+extern NSString *CT_PE_DEFINE_VARS_ENDPOINT;
+extern NSString *CT_PE_VARS_PAYLOAD_TYPE;
+extern NSString *CT_PE_VARS_PAYLOAD_KEY;
+extern NSString *CT_PE_VAR_TYPE;
+extern NSString *CT_PE_NUMBER_TYPE;
+extern NSString *CT_PE_BOOL_TYPE;
+extern NSString *CT_PE_DEFAULT_VALUE;
 
 #define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
@@ -9,6 +25,13 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CleverTapLogStaticInfo(fmt, ...)  if([CTLogger getDebugLevel] >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogStaticDebug(fmt, ...) if([CTLogger getDebugLevel] > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogStaticInternal(fmt, ...) if([CTLogger getDebugLevel] > 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
+
+
+
+#define CT_TRY @try {
+#define CT_END_TRY }\
+@catch (NSException *e) {\
+[CTLogger logInternalError:e]; }
 
 #define CLTAP_REQUEST_TIME_OUT_INTERVAL 10
 #define CLTAP_ACCOUNT_ID_LABEL @"CleverTapAccountID"
@@ -63,6 +86,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_GEOFENCES_JSON_RESPONSE_KEY @"geofences"
+#define CLTAP_PE_VARS_RESPONSE_KEY @"vars"
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
@@ -123,5 +147,7 @@ extern NSString *const kCTNotifViewedApiDomain;
 // valid profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email"] // LEGACY KEYS
 #define CLTAP_ALL_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"Phone"]
+
+#define CLTAP_DEFINE_VARS_URL @"/defineVars"
 
 
