@@ -267,9 +267,9 @@ CleverTap.sharedInstance()?.syncVariables();
 > 📘 Key Points to Remember
 > 
 > - In a scenario where there is already a draft created by another user profile in the dashboard, the sync call will fail to avoid overriding important changes made by someone else. In this case, Publish or Dismiss the existing draft before you proceed with syncing variables again. However, you can override a draft you created via the sync method previously to optimize the integration experience.
-> - You can receive the following Logcat logs from the CleverTap SDK:
+> - You can receive the following console logs from the CleverTap SDK:
 >   - Variables synced successfully.
->   - Unauthorized access from a non-test profile. To address this, mark the profile as a test profile from the CleverTap dashboard.
+>   - Unauthorized access from a non-test profile. Please mark this profile as a test profile from the CleverTap dashboard.
 
 # Fetch Variables During a Session
 
