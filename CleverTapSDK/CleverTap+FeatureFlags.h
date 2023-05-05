@@ -4,7 +4,7 @@
 __attribute__((deprecated("This protocol has been deprecated and will be removed in the future versions of this SDK.")))
 @protocol CleverTapFeatureFlagsDelegate <NSObject>
 @optional
-- (void)ctFeatureFlagsUpdated;
+- (void)ctFeatureFlagsUpdated
 __attribute__((deprecated("This protocol method has been deprecated and will be removed in the future versions of this SDK.")));
 @end
 
