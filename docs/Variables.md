@@ -235,7 +235,7 @@ CTVarDelegateImpl *del = [[CTVarDelegateImpl alloc] init];
 
 # Sync Defined Variables
 
-After defining your variables in the code, you must send/sync variables to the server. To do so, the app must be in DEBUG mode and mark a particular CleverTap user profile as a test profile from the CleverTap dashboard. [Learn how to mark a profile as **Test Profile**](doc:concepts-user-profiles#mark-a-user-profile-as-a-test-profile)
+After defining your variables in the code, you must send/sync variables to the server. To do so, the app must be in DEBUG mode and mark a particular CleverTap user profile as a test profile from the CleverTap dashboard. [Learn how to mark a profile as **Test Profile**](https://developer.clevertap.com/docs/concepts-user-profiles#mark-a-user-profile-as-a-test-profile)
 
 After marking the profile as a test profile,  you must sync the app variables in DEBUG mode:
 
