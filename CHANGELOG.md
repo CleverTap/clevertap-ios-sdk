@@ -1,6 +1,36 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 5.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.0.0) (May 05, 2023)
+
+#### Added
+- Adds support for Remote Config Variables. Please refer to the [Remote Config Variables doc](/docs/Variables.md) to read more on how to integrate this to your app.
+
+#### Fixed
+- Fixes a bug where the `getLocationWithSuccess` method would cause crashes.
+- Adds minor improvements to saving session data in background state.
+- Streamlines the argument key of `recordEventWithProps` in `CleverTapJSInterface`.
+
+#### Deprecated
+- The following methods related to Product Config and Feature Flags have been marked as deprecated in this release. These methods will be removed in the future with prior notice
+    - Feature Flags
+        - `- (void)ctFeatureFlagsUpdated;`
+        - `- (BOOL)get:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue`
+    - Product Config
+        - `- (void)ctProductConfigFetched`
+        - `- (void)ctProductConfigActivated`
+        - `- (void)ctProductConfigInitialized`
+        - `- (void)fetch`
+        - `- (void)fetchWithMinimumInterval:(NSTimeInterval)minimumInterval`
+        - `- (void)setMinimumFetchInterval:(NSTimeInterval)minimumFetchInterval`
+        - `- (void)activate`
+        - `- (void)fetchAndActivate`
+        - `- (void)setDefaults:(NSDictionary<NSString *, NSObject *> *_Nullable)defaults`
+        - `- (void)setDefaultsFromPlistFileName:(NSString *_Nullable)fileName`
+        - `- (CleverTapConfigValue *_Nullable)get:(NSString* _Nonnull)key`
+        - `- (NSDate *_Nullable)getLastFetchTimeStamp`
+        - `- (void)reset`
+
 ### [Version 4.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/4.2.2) (April 03, 2023)
 
 #### Fixed

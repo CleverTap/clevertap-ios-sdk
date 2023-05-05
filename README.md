@@ -67,6 +67,10 @@ CleverTap Geofence SDK provides Geofencing capabilities to CleverTap iOS SDK. To
 
 CleverTap iOS SDK supports Push Primer for push notification runtime permission, refer [Push Primer doc](/docs/PushPrimer.md) for more details.
 
+## Remote Config Variables
+
+CleverTap iOS SDK supports creating remote config variables, refer [Remote Config Variables](/docs/Variables.md) for more details and usage examples.
+
 ## 𝌡 Example Usage
 * A [demo application](/ObjCStarter) showing the integration of our SDK in Objective-C language.
 * A [demo application](/SwiftStarter) showing the integration of our SDK in Swift language.
