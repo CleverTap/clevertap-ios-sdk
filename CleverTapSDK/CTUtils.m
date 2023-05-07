@@ -30,6 +30,8 @@
 }
 
 + (NSString *)urlEncodeString:(NSString*)s {
+    
+    if (!s) return nil;    
     NSMutableString *output = [NSMutableString string];
     const unsigned char *source = (const unsigned char *) [s UTF8String];
     int sourceLen = (int) strlen((const char *) source);
