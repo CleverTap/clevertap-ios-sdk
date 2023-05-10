@@ -4,5 +4,5 @@
 
 + (void)setDebugLevel:(int)level;
 + (int)getDebugLevel;
-
++ (void)logInternalError:(NSException *)e;
 @end

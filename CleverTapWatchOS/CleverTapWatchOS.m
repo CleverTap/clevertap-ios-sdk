@@ -9,7 +9,7 @@
 
 @implementation CleverTapWatchOS
 
-- (instancetype)initWithSession:(WCSession* _Nonnull)session {
+- (instancetype _Nonnull)initWithSession:(WCSession* _Nonnull)session {
     if (self = [super init]) {
         self.session = session;
     }
@@ -20,13 +20,12 @@
     if (![self.session isReachable]) {
         return;
     }
-    NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
-    message = [content mutableCopy];
+    NSMutableDictionary *message = [content mutableCopy];
     message[@"clevertap_type"] = type;
     [self.session sendMessage:message replyHandler:nil errorHandler:nil];
 }
 
-- (void)recordEvent:(NSString *)event withProps:(NSDictionary *)props {
+- (void)recordEvent:(NSString *_Nonnull)event withProps:(NSDictionary *_Nonnull)props {
     NSMutableDictionary *content = [[NSMutableDictionary alloc] init];
     content[@"event"] = event;
     content[@"props"] = props;
