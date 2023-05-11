@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "CTPreferences.h"
 
 @interface CTPreferencesTest : XCTestCase
 
@@ -15,23 +16,111 @@
 @implementation CTPreferencesTest
 
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@(2333333333333333333) forKey:@"WizRocketlongValueForTesting"];
 }
 
 - (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults removeObjectForKey:@"WizRocketlongValueForTesting"];
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+- (void)test_getIntForKey_withValidKey {
+    long longValue = [CTPreferences getIntForKey:@"longValueForTesting" withResetValue:55555888888];
+    
+    XCTAssertEqual(longValue, 2333333333333333333);
 }
 
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
+-(void)test_getIntForKey_withInvalidKey {
+    long longValue = [CTPreferences getIntForKey:@"invalidTestKey" withResetValue:55555888888];
+    
+    XCTAssertEqual(longValue, 55555888888);
+}
+
+-(void)test_putInt_withValidKey {
+    [CTPreferences putInt:898989898989 forKey:@"putKeyTest"];
+    long checkValue = [[CTPreferences getObjectForKey:@"putKeyTest"] longLongValue];
+    XCTAssertEqual(checkValue, 898989898989);
+}
+
+-(void)test_putInt_withInvalidKey {
+    [CTPreferences putInt:898989898989 forKey:@"putKeyTest"];
+    long checkValue = [[CTPreferences getObjectForKey:@"putInvalidKeyTest"] longLongValue];
+    XCTAssertEqual(checkValue, 0);
+}
+
+- (void)test_getStringForKey_withValidKey {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
+    
+    NSString *stringValue = [CTPreferences getStringForKey:@"stringValueForTesting" withResetValue:@"testResetStringValue"];
+    
+    XCTAssertEqual(stringValue, @"stringValueForTesting");
+}
+
+- (void)test_getStringForKey_withInvalidKey {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
+    
+    NSString *stringValue = [CTPreferences getStringForKey:@"invalidTestKey" withResetValue:@"testResetStringValue"];
+    
+    XCTAssertEqual(stringValue, @"testResetStringValue");
+}
+
+-(void)test_putString_withValidKey {
+    [CTPreferences putString:@"putStringValue" forKey:@"putKeyTest"];
+    NSString *checkValue = [CTPreferences getObjectForKey:@"putKeyTest"];
+    
+    XCTAssertEqualObjects(checkValue, @"putStringValue");
+}
+
+-(void)test_putString_withInvalidKey {
+    [CTPreferences putString:@"putStringValue" forKey:@"putKeyTest"];
+    NSString *checkValue = [CTPreferences getObjectForKey:@"putKeyInvalidTest"];
+    
+    XCTAssertNil(checkValue);
+}
+
+- (void)test_getObjectForKey_withValidKey {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
+
+    id idValue = [CTPreferences getObjectForKey:@"stringValueForTesting"];
+    
+    XCTAssertEqual(idValue, @"stringValueForTesting");
+}
+
+- (void)test_getObjectForKey_withInvalidKey {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
+
+    id idValue = [CTPreferences getObjectForKey:@"invalidTestStringKey"];
+    
+    XCTAssertNil(idValue);
+}
+
+-(void)test_putObject_withValidKey {
+    [CTPreferences putObject:@(88) forKey:@"putObjectKeyTest"];
+    id checkValue = [CTPreferences getObjectForKey:@"putObjectTest"];
+    XCTAssertEqual(checkValue, @(88));
+}
+
+-(void)test_putObject_withInvalidKey {
+    [CTPreferences putObject:@(88) forKey:@"putObjectKeyTest"];
+    id checkValue = [CTPreferences getObjectForKey:@"putInvalidObjectKeyTest"];
+    
+    XCTAssertNil(checkValue);
+}
+
+-(void)test_removeObjectForKey {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:@"objectValueForTesting" forKey:@"WizRocketobjectValueForTesting"];
+
+    [CTPreferences removeObjectForKey:@"objectValueForTesting"];
+    
+    id checkValue = [CTPreferences getObjectForKey:@"WizRocketobjectValueForTesting"];
+    
+    XCTAssertNil(checkValue);
 }
 
 @end
