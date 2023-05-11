@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTValidationResultStack.h"
-#import <objc/runtime.h>
+//#import <objc/runtime.h>
 
 @interface CTValidationResultStackTest : XCTestCase
 

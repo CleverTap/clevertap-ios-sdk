@@ -269,7 +269,7 @@
     XCTAssertFalse(result);
 }
 
-- (void)test_isDiscaredEventName_withRestrictedNameInput {
+- (void)test_isDiscaredEventName_withDiscardedNameInput {
     [CTValidator setDiscardedEvents:@[@"aa",@"bb"]];
     NSString *inputString = @"aa";
     
