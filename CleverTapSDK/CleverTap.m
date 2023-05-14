@@ -46,7 +46,7 @@
 #import "CleverTap+PushPermission.h"
 #endif
 
-#import "CTLocationManager.h"
+//#import "CTLocationManager.h"
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
@@ -4009,16 +4009,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if defined(CLEVERTAP_LOCATION)
     [CTLocationManager getLocationWithSuccess:success andError:error];
 #else
-    if (isLocationEnabled){
-        [CTLocationManager getLocationWithSuccess:success andError:error];
-    }
-    else {
-        NSString *errorMsg = @"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro or use enableLocation method";
-        CleverTapLogStaticDebug(@"%@",errorMsg);
-        if (error) {
-            error(errorMsg);
-        }
-    }
+    CleverTapLogStaticInfo(@"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro");
 #endif
 }
 
