@@ -4005,13 +4005,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     isLocationEnabled = enabled;
 }
 
-+ (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {
-#if defined(CLEVERTAP_LOCATION)
-    [CTLocationManager getLocationWithSuccess:success andError:error];
-#else
-    CleverTapLogStaticInfo(@"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro");
-#endif
-}
+//+ (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {
+//#if defined(CLEVERTAP_LOCATION)
+//    [CTLocationManager getLocationWithSuccess:success andError:error];
+//#else
+//    CleverTapLogStaticInfo(@"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro");
+//#endif
+//}
 
 #pragma clang diagnostic pop
 

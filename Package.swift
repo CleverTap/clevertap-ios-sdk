@@ -70,10 +70,8 @@ let package = Package(
         ),
         .target(
             name: "CleverTapSDKLocation",
-            dependencies: ["CleverTapSDK"],
-            path: "Location",
-            cSettings: [.define("CLEVERTAP_LOCATION")],
-            swiftSettings: [.define("CLEVERTAP_LOCATION")]
+            path: "CleverTapLocation",
+            publicHeadersPath: "CleverTapLocation/include"
         )
     ]
 )

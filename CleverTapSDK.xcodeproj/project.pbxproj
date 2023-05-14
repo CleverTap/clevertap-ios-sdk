@@ -263,8 +263,6 @@
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0F2098E2F00019C6FD /* CTProfileBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */; };
-		D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B102098EDA90019C6FD /* CTLocationManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0047B132098EDA90019C6FD /* CTLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B112098EDA90019C6FD /* CTLocationManager.m */; };
 		D014B8DF20E2F9DE001E0780 /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D014B8E020E2F9E6001E0780 /* CleverTap.m in Sources */ = {isa = PBXBuildFile; fileRef = D0C7BBC9207D8837001345EF /* CleverTap.m */; };
 		D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CACF8A20B890EA00A02327 /* CleverTap+SSLPinning.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -356,8 +354,6 @@
 		D0A84AD9209135D400191B1F /* CTPreferences.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A84AD7209135D400191B1F /* CTPreferences.m */; };
 		D0A84ADC209136D500191B1F /* CTLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A84ADA209136D500191B1F /* CTLogger.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0A84ADD209136D500191B1F /* CTLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A84ADB209136D500191B1F /* CTLogger.m */; };
-		D0A9E9CD20EEA8630004BC6F /* CTLocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B102098EDA90019C6FD /* CTLocationManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		D0A9E9CE20EEA8770004BC6F /* CTLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B112098EDA90019C6FD /* CTLocationManager.m */; };
 		D0B0449B2769744E000ED628 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0449A2769744E000ED628 /* AppDelegate.m */; };
 		D0B0449E2769744E000ED628 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0449D2769744E000ED628 /* SceneDelegate.m */; };
 		D0B044A12769744E000ED628 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B044A02769744E000ED628 /* ViewController.m */; };
@@ -667,8 +663,6 @@
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
 		D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProfileBuilder.m; sourceTree = "<group>"; };
-		D0047B102098EDA90019C6FD /* CTLocationManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocationManager.h; sourceTree = "<group>"; };
-		D0047B112098EDA90019C6FD /* CTLocationManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocationManager.m; sourceTree = "<group>"; };
 		D014B8D720E2F963001E0780 /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D01651AC2097B38400660178 /* CTEventBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTEventBuilder.h; sourceTree = "<group>"; };
 		D01651AD2097B38400660178 /* CTEventBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEventBuilder.m; sourceTree = "<group>"; };
@@ -1267,8 +1261,6 @@
 				D0047B092098D45B0019C6FD /* CTLocalDataStore.m */,
 				D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */,
 				D0047B0D2098E2F00019C6FD /* CTProfileBuilder.m */,
-				D0047B102098EDA90019C6FD /* CTLocationManager.h */,
-				D0047B112098EDA90019C6FD /* CTLocationManager.m */,
 				D0CACF8C20B8A44B00A02327 /* CTCertificatePinning.h */,
 				D0CACF8D20B8A44C00A02327 /* CTCertificatePinning.m */,
 				D0CACF9420B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h */,
@@ -1386,7 +1378,6 @@
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
 				D014B90420E2FB59001E0780 /* CTValidator.h in Headers */,
 				4E6383D8296DE9A8001E83E3 /* CTRequestSender.h in Headers */,
-				D0A9E9CD20EEA8630004BC6F /* CTLocationManager.h in Headers */,
 				4EA64A27296C115E001D9B22 /* CTRequestFactory.h in Headers */,
 				D014B8F420E2FACA001E0780 /* CTSwizzle.h in Headers */,
 				6A775C3429BE78C7007790E0 /* CTVariables.h in Headers */,
@@ -1456,7 +1447,6 @@
 				D0BD75A02417690E0006EE55 /* CleverTapProductConfigPrivate.h in Headers */,
 				D0D4C9EB2414D1C50029477E /* CTFeatureFlagsController.h in Headers */,
 				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
-				D0047B122098EDA90019C6FD /* CTLocationManager.h in Headers */,
 				4E25E3D02788889E0008C888 /* CTLoginInfoProvider.h in Headers */,
 				D079742921FE2F2300773602 /* CTVideoThumbnailGenerator.h in Headers */,
 				071EB4FC217F6427008F0FAB /* CTHalfInterstitialViewController.h in Headers */,
@@ -1844,7 +1834,6 @@
 				07BF465C217F7C4B002E166D /* CTInAppDisplayViewController.m in Sources */,
 				071EB51B217F6568008F0FAB /* CTInAppNotification.m in Sources */,
 				6A775C3629BE78C7007790E0 /* CTVariables.m in Sources */,
-				D0A9E9CE20EEA8770004BC6F /* CTLocationManager.m in Sources */,
 				4E838C43299F419900ED0875 /* ContentMerger.m in Sources */,
 				4E7929FC29799E8F00B81F3C /* CTDomainFactory.m in Sources */,
 				D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */,
@@ -1978,7 +1967,6 @@
 				071EB501217F6427008F0FAB /* CTFooterViewController.m in Sources */,
 				D0A84ADD209136D500191B1F /* CTLogger.m in Sources */,
 				D0A84AD9209135D400191B1F /* CTPreferences.m in Sources */,
-				D0047B132098EDA90019C6FD /* CTLocationManager.m in Sources */,
 				4E25E3CF2788889E0008C888 /* CTLoginInfoProvider.m in Sources */,
 				071EB4EB217F6427008F0FAB /* CTCoverImageViewController.m in Sources */,
 				071EB4D4217F6427008F0FAB /* CTBaseHeaderFooterViewController.m in Sources */,

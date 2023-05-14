@@ -383,7 +383,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  Optional.  You can use location to pass it to CleverTap via the setLocation API
  for, among other things, more fine-grained geo-targeting and segmentation purposes.  To enable, build the SDK with the preprocessor macro CLEVERTAP_LOCATION.
  */
-+ (void)getLocationWithSuccess:(void (^ _Nonnull)(CLLocationCoordinate2D location))success andError:(void (^_Nullable)(NSString * _Nullable reason))error;
+//+ (void)getLocationWithSuccess:(void (^ _Nonnull)(CLLocationCoordinate2D location))success andError:(void (^_Nullable)(NSString * _Nullable reason))error;
 
 /*!
  @method
