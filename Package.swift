@@ -72,8 +72,8 @@ let package = Package(
             name: "CleverTapSDKLocation",
             dependencies: ["CleverTapSDK"],
             path: "Location",
-            cSettings:  [.define("CLEVERTAP_LOCATION", .when(configuration: .debug))],
-            swiftSettings: [.define("CLEVERTAP_LOCATION", .when(configuration: .debug))]
+            cSettings: [.define("CLEVERTAP_LOCATION")],
+            swiftSettings: [.define("CLEVERTAP_LOCATION")]
         )
     ]
 )
