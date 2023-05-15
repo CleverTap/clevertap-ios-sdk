@@ -371,24 +371,6 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
- Get the device location if available.  Calling this will prompt the user location permissions dialog.
- 
- Please be sure to include the NSLocationWhenInUseUsageDescription key in your Info.plist.  See https://developer.apple.com/library/ios/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW26
- 
- Uses desired accuracy of kCLLocationAccuracyHundredMeters.
- 
- If you need background location updates or finer accuracy please implement your own location handling.  Please see https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/index.html for more info.
- 
- @discussion
- Optional.  You can use location to pass it to CleverTap via the setLocation API
- for, among other things, more fine-grained geo-targeting and segmentation purposes.  To enable, build the SDK with the preprocessor macro CLEVERTAP_LOCATION.
- */
-//+ (void)getLocationWithSuccess:(void (^ _Nonnull)(CLLocationCoordinate2D location))success andError:(void (^_Nullable)(NSString * _Nullable reason))error;
-
-/*!
- @method
- 
- @abstract
  Creates a separate and distinct user profile identified by one or more of Identity, Email, FBID or GPID values,
  and populated with the key-values included in the properties dictionary.
  
