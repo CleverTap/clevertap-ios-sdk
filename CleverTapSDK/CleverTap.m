@@ -46,8 +46,6 @@
 #import "CleverTap+PushPermission.h"
 #endif
 
-//#import "CTLocationManager.h"
-
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
 #import "CleverTap+Inbox.h"
