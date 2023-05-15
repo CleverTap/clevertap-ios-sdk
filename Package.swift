@@ -75,7 +75,8 @@ let package = Package(
             cSettings: [
                 .headerSearchPath("./"),
                 .headerSearchPath("CleverTapLocation/"),
-                .headerSearchPath("CleverTapLocation/Classes/")
+                .headerSearchPath("CleverTapLocation/Classes/"),
+                .headerSearchPath("CleverTapLocation/Classes"),
             ],
             linkerSettings: [
                 .linkedFramework("CoreLocation")
