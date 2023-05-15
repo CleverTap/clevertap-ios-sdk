@@ -12,8 +12,8 @@ let package = Package(
             name: "CleverTapSDK",
             targets: ["CleverTapSDK"]),
         .library(
-            name: "CleverTapSDKLocation",
-            targets: ["CleverTapSDKLocation"]
+            name: "CleverTapLocation",
+            targets: ["CleverTapLocation"]
         )
     ],
     dependencies: [
@@ -69,7 +69,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "CleverTapSDKLocation",
+            name: "CleverTapLocation",
             path: "CleverTapLocation",
             publicHeadersPath: "CleverTapLocation/include",
             cSettings: [
