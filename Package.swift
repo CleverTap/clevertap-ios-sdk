@@ -71,12 +71,12 @@ let package = Package(
         .target(
             name: "CleverTapLocation",
             path: "CleverTapLocation",
-            publicHeadersPath: "CleverTapLocation/include",
+            publicHeadersPath: "include",
             cSettings: [
                 .headerSearchPath("./"),
                 .headerSearchPath("CleverTapLocation/"),
                 .headerSearchPath("CleverTapLocation/Classes/"),
-                .headerSearchPath("CleverTapLocation/Classes"),
+                .headerSearchPath("CleverTapLocation/Classes")
             ],
             linkerSettings: [
                 .linkedFramework("CoreLocation")
