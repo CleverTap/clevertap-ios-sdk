@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 #### Breaking API Changes
 - The `enableLocation` method has been removed and the `getLocationWithSuccess` method has been moved to a new module called `CleverTapLocation`. Please import this module via Cocoapods, SPM or manual integration. Please refer to the [Location doc](/docs/CleverTapLocation.md) for more details.
+- The macro `CLEVERTAP_LOCATION` is no longer needed and has been removed.
 
 ### [Version 5.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.0.0) (May 05, 2023)
 
