@@ -83,7 +83,6 @@ static NSArray *sslCertNames;
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
-static BOOL isLocationEnabled;
 static NSMutableDictionary *auxiliarySdkVersions;
 
 static NSRecursiveLock *instanceLock;
@@ -3997,10 +3996,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (BOOL)geofenceLocation {
     return _geofenceLocation;
-}
-
-+ (void)enableLocation:(BOOL)enabled{
-    isLocationEnabled = enabled;
 }
 
 #pragma clang diagnostic pop

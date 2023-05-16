@@ -359,18 +359,6 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
- Enables the location API
- 
- @discussion
- Call this method (typically once at app launch) to enable the location API.
- 
- */
-+ (void)enableLocation:(BOOL)enabled;
-
-/*!
- @method
- 
- @abstract
  Creates a separate and distinct user profile identified by one or more of Identity, Email, FBID or GPID values,
  and populated with the key-values included in the properties dictionary.
  
