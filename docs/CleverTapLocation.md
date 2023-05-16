@@ -38,10 +38,10 @@ Then run pod install.
   <img alt="Light" src="/docs/images/spm-image-3.png" width="85%">
   </p>  
 
-4. Click finish and ensure that the CleverTap iOS SDK has been added to the appropriate target.
+4. Click finish and ensure that the CleverTapLocation has been added to the appropriate target.
 
   <p align="center">
-  <img alt="Light" src="/docs/images/spm-image-4.png" width="85%">
+  <img alt="Light" src="/docs/images/spm-image-5.png" width="85%">
   </p>
 
 # Manual Installation
