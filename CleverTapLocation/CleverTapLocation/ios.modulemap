@@ -1,0 +1,4 @@
+framework module CleverTapLocation {
+    header "CTLocationManager.h"
+    export *
+}
