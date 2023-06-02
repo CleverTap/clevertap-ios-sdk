@@ -259,7 +259,8 @@
 		6A775C3529BE78C7007790E0 /* CTVariables.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A775C3229BE78C7007790E0 /* CTVariables.m */; };
 		6A775C3629BE78C7007790E0 /* CTVariables.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A775C3229BE78C7007790E0 /* CTVariables.m */; };
 		6A7BB8DC29E47CFF00651584 /* CTVarTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A7BB8DB29E47CFF00651584 /* CTVarTest.m */; };
-		6AF6C8012A1BDA6B001E38A8 /* LeanplumCT.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */; };
+		6AA135762A2A3C7100EFF2C1 /* LeanplumCT.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6AF6C8012A1BDA6B001E38A8 /* LeanplumCT.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6AF6C8022A1BDA6B001E38A8 /* LeanplumCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -1358,6 +1359,7 @@
 				07BF465B217F7C41002E166D /* CTInAppDisplayViewController.h in Headers */,
 				071EB51A217F6565008F0FAB /* CTInAppNotification.h in Headers */,
 				4E25E3D22788889F0008C888 /* CTLoginInfoProvider.h in Headers */,
+				6AA135762A2A3C7100EFF2C1 /* LeanplumCT.h in Headers */,
 				D0BD75AF241769E40006EE55 /* CleverTap+ProductConfig.h in Headers */,
 				D014B8F020E2FAB1001E0780 /* CTPlistInfo.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
