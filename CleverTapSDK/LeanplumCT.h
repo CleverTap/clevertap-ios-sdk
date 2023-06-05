@@ -122,37 +122,6 @@ NS_SWIFT_NAME(setUserId(_:attributes:));
 NS_SWIFT_NAME(setTrafficSource(info:));
 
 /**
- * @{
- * Call this when your application starts.
- * This will initiate a call to Leanplum's servers to get the values
- * of the variables used in your app.
- */
-+ (void)start;
-
-+ (void)startWithResponseHandler:(LeanplumStartBlock)response
-NS_SWIFT_NAME(start(completion:));
-
-+ (void)startWithUserAttributes:(NSDictionary<NSString *, id> *)attributes
-NS_SWIFT_NAME(start(attributes:));
-
-+ (void)startWithUserId:(NSString *)userId
-NS_SWIFT_NAME(start(userId:));
-
-+ (void)startWithUserId:(NSString *)userId
-        responseHandler:(nullable LeanplumStartBlock)response
-NS_SWIFT_NAME(start(userId:completion:));
-
-+ (void)startWithUserId:(NSString *)userId
-         userAttributes:(NSDictionary<NSString *, id> *)attributes
-NS_SWIFT_UNAVAILABLE("Use start(userId:attributes:completion:");
-
-+ (void)startWithUserId:(nullable NSString *)userId
-         userAttributes:(nullable NSDictionary<NSString *, id> *)attributes
-        responseHandler:(nullable LeanplumStartBlock)startResponse
-NS_SWIFT_NAME(start(userId:attributes:completion:));
-/**@}*/
-
-/**
  * Manually track purchase event with currency code in your application. It is advised to use
  * trackInAppPurchases to automatically track IAPs.
  */

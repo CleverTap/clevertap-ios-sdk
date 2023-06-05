@@ -113,38 +113,6 @@ static CleverTap * _instance;
     [[self instance] pushInstallReferrerSource:source medium:medium campaign:campaign];
 }
 
-+ (void)start {
-    
-}
-
-+ (void)startWithResponseHandler:(LeanplumStartBlock)response {
-    
-}
-
-+ (void)startWithUserAttributes:(NSDictionary<NSString *, id> *)attributes {
-    
-}
-
-+ (void)startWithUserId:(NSString *)userId {
-    
-}
-
-+ (void)startWithUserId:(NSString *)userId
-        responseHandler:(nullable LeanplumStartBlock)response {
-    
-}
-
-+ (void)startWithUserId:(NSString *)userId
-         userAttributes:(NSDictionary<NSString *, id> *)attributes {
-    
-}
-
-+ (void)startWithUserId:(nullable NSString *)userId
-         userAttributes:(nullable NSDictionary<NSString *, id> *)attributes
-        responseHandler:(nullable LeanplumStartBlock)startResponse {
-    
-}
-
 + (void)trackPurchase:(NSString *)event
             withValue:(double)value
       andCurrencyCode:(nullable NSString *)currencyCode
