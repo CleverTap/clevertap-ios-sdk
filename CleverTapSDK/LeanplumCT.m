@@ -10,6 +10,7 @@
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
 
+NSString *const LP_PURCHASE_EVENT = @"Purchase";
 NSString *const LP_STATE_PREFIX = @"state_";
 NSString *const LP_VALUE_PARAM_NAME = @"value";
 NSString *const LP_INFO_PARAM_NAME = @"info";
