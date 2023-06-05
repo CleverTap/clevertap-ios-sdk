@@ -1,0 +1,6 @@
+runs:
+  using: "composite"
+  steps:
+     - name: Run tests
+       shell: bash
+       run: xcodebuild test -workspace CleverTapSDK.xcworkspace -scheme CleverTapSDKTests -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2'
