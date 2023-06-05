@@ -31,7 +31,7 @@ static CleverTap * _instance;
 }
 
 + (void)onStartResponse:(LeanplumStartBlock)block {
-    
+    // TODO: check if it can be supported in CT
 }
 
 + (void)advanceTo:(nullable NSString *)state {
@@ -177,6 +177,11 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params {
                       @"%@: LeanplumCT.track will call recordEvent \
                         with %@ and %@.", self, event, eventParams);
     [[self instance] recordEvent:event withProps:eventParams];
+}
+
++ (void)setLogLevel:(CleverTapLogLevel)level {
+    [CleverTap setDebugLevel:level];
+    [[[self instance] config] setLogLevel:level];
 }
 
 + (NSDictionary<NSString *, id> *)transformArrayValues:(NSDictionary<NSString *, id> *)dictionary {

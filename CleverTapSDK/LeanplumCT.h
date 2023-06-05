@@ -157,6 +157,11 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params
 NS_SWIFT_NAME(track(_:value:info:params:));
 /**@}*/
 
+/**
+* Sets the log level of the CleverTap SDK
+*/
++ (void)setLogLevel:(CleverTapLogLevel)level;
+
 @end
 
 NS_ASSUME_NONNULL_END
