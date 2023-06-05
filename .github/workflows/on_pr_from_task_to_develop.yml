@@ -18,18 +18,23 @@ jobs:
       uses: actions/checkout@main
 
     - name: Set up Xcode
+      if: always()
       uses: ./.github/mini_flows/setup_xcode  
 
     - name: Install dependencies
+      if: always()
       uses: ./.github/mini_flows/install_dependencies
 
     - name: Build project
+      if: always()
       uses: ./.github/mini_flows/build_project  
 
     - name: Run tests
+      if: always()
       uses: ./.github/mini_flows/run_tests  
     
     - name: Validate PR Title
+      if: always()
       run: |
           PR_TITLE=${{ github.event.pull_request.title }}
           if [[ ! $PR_TITLE =~ ^SDK-[0-9]+ ]]; then
@@ -37,6 +42,7 @@ jobs:
           fi
           
     - name: Validate PR Description
+      if: always()
       uses: ./.github/mini_flows/validate_pr_description
    
    
