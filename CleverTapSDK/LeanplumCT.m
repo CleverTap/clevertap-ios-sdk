@@ -61,14 +61,6 @@ static CleverTap * _instance;
     [self track:eventName withValue:0.0 andInfo:info andParameters:params];
 }
 
-+ (nullable NSString *)deviceId {
-    return [[self instance] profileGetCleverTapID];
-}
-
-+ (nullable NSString *)userId {
-    return [[self instance] profileGet:CLTAP_PROFILE_IDENTITY_KEY];
-}
-
 + (void)setUserAttributes:(NSDictionary *)attributes {
     NSDictionary *profileAttributes = [self filterNullDictionaryValues:[self transformArrayValues:attributes]];
     CleverTapLogDebug(self.instance.config.logLevel,

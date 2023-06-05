@@ -81,18 +81,6 @@ NS_SWIFT_NAME(advance(state:params:));
 NS_SWIFT_NAME(advance(state:info:params:));
 
 /**
- * Returns the deviceId in the current Leanplum session. This should only be called after
- * [Leanplum start].
- */
-+ (nullable NSString *)deviceId;
-
-/**
- * Returns the userId in the current Leanplum session. This should only be called after
- * [Leanplum start].
- */
-+ (nullable NSString *)userId;
-
-/**
  * Sets additional user attributes after the session has started.
  * Variables retrieved by start won't be targeted based on these attributes, but
  * they will count for the current session for reporting purposes.
