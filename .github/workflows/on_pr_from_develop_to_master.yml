@@ -36,7 +36,7 @@ jobs:
     - name: Validate PR Title
       if: always()
       run: |
-          PR_TITLE=${{ github.event.pull_request.title }}
+          PR_TITLE="${{ github.event.pull_request.title }}"
           if [[ ! $PR_TITLE =~ ^Release-[0-9]+ ]]; then
             echo "Invalid PR title format. Please use 'Release-{version}' format."
             exit 1
