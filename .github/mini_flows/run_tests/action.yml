@@ -1,5 +1,4 @@
 runs:
-  permissions: write-all
   using: "composite"
   steps:
      - name: Run tests
