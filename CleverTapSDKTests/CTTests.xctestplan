@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "770A7F83-21E9-4D8C-9613-67E13A959A55",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:CleverTapSDK.xcodeproj",
+          "identifier" : "D0C7BBBC207D82C0001345EF",
+          "name" : "CleverTapSDK"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:CleverTapSDK.xcodeproj",
+        "identifier" : "D02AC2D7276044F60031C1BE",
+        "name" : "CleverTapSDKTests"
+      }
+    }
+  ],
+  "version" : 1
+}
