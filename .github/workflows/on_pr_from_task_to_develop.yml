@@ -8,6 +8,8 @@ on:
       - synchronize
     branches:
       - develop
+      
+permissions: write-all
 
 jobs:
   build:
