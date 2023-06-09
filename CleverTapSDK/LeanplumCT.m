@@ -60,7 +60,7 @@ static CleverTap * _instance;
 }
 
 + (void)setUserAttributes:(NSDictionary *)attributes {
-    NSDictionary *profileAttributes = [[self transformArrayValuesInDictionary:attributes] removeNullValues];
+    NSDictionary *profileAttributes = [[self transformArrayValuesInDictionary:attributes] dictionaryWithRemoveNullValues];
     CleverTapLogDebug(self.instance.config.logLevel,
                       @"%@: LeanplumCT.setUserAttributes will call profilePush with %@.", self, profileAttributes);
     [[self instance] profilePush:profileAttributes];
@@ -182,7 +182,7 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params {
 }
 
 + (NSDictionary<NSString *, id> *)transformArrayValuesInDictionary:(NSDictionary<NSString *, id> *)dictionary {
-    return [dictionary transformValuesWithBlock:^id _Nonnull(id _Nonnull value) {
+    return [dictionary dictionaryWithTransformUsingBlock:^id _Nonnull(id _Nonnull value) {
         if ([value isKindOfClass:[NSArray class]]) {
             NSArray *array = (NSArray *)value;
             NSArray *filteredArray =

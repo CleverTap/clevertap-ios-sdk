@@ -37,7 +37,7 @@
     }
 }
 
-- (NSDictionary *)transformValuesWithBlock:(id(^)(id))block {
+- (NSDictionary *)dictionaryWithTransformUsingBlock:(id(^)(id))block {
     NSMutableDictionary *result = [NSMutableDictionary dictionary];
     
     [self enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
@@ -50,7 +50,7 @@
     return [result copy];
 }
 
-- (NSDictionary *)removeNullValues {
+- (NSDictionary *)dictionaryWithRemoveNullValues {
     NSSet *keys = [self keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop){
         return obj && ![obj isEqual:[NSNull null]];
     }];

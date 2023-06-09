@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface NSDictionary (Extensions)
 
 - (NSString *)toJsonString;
-- (NSDictionary *)transformValuesWithBlock:(id(^)(id))block;
-- (NSDictionary *)removeNullValues;
+- (NSDictionary *)dictionaryWithTransformUsingBlock:(id(^)(id))block;
+- (NSDictionary *)dictionaryWithRemoveNullValues;
 
 @end
 
