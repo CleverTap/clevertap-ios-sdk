@@ -10,7 +10,7 @@
 #import <XCTest/XCTest.h>
 #import "NSDictionary+Extensions.h"
 
-@interface NSDictionaryExtensionsTest: XCTestCase
+@interface NSDictionaryExtensionsTest : XCTestCase
 @end
 
 @implementation NSDictionaryExtensionsTest

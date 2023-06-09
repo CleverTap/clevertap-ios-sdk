@@ -49,7 +49,7 @@ static CleverTap * _instance;
 + (void)advanceTo:(nullable NSString *)state
          withInfo:(nullable NSString *)info
     andParameters:(nullable NSDictionary<NSString *, id> *)params {
-    if (state) {
+    if (!state) {
         return;
     }
 
