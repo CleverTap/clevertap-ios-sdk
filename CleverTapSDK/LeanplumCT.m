@@ -9,6 +9,7 @@
 #import "LeanplumCT.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
+#import "NSDictionary+Extensions.h"
 
 NSString *const LP_PURCHASE_EVENT = @"Purchase";
 NSString *const LP_STATE_PREFIX = @"state_";
@@ -29,10 +30,6 @@ static CleverTap * _instance;
 
 + (void)setInstance:(CleverTap *)instance {
     _instance = instance;
-}
-
-+ (void)onStartResponse:(LeanplumStartBlock)block {
-    // TODO: check if it can be supported in CT
 }
 
 + (void)advanceTo:(nullable NSString *)state {
@@ -63,7 +60,7 @@ static CleverTap * _instance;
 }
 
 + (void)setUserAttributes:(NSDictionary *)attributes {
-    NSDictionary *profileAttributes = [self filterNullDictionaryValues:[self transformArrayValues:attributes]];
+    NSDictionary *profileAttributes = [[self transformArrayValuesInDictionary:attributes] removeNullValues];
     CleverTapLogDebug(self.instance.config.logLevel,
                       @"%@: LeanplumCT.setUserAttributes will call profilePush with %@.", self, profileAttributes);
     [[self instance] profilePush:profileAttributes];
@@ -84,7 +81,6 @@ static CleverTap * _instance;
 
 + (void)setUserId:(NSString *)userId withUserAttributes:(NSDictionary *)attributes {
     if (userId) {
-        // TODO: check if setting the Identity is enough
         CleverTapLogDebug(self.instance.config.logLevel,
                           @"%@: LeanplumCT.setUserId will call onUserLogin with %@: %@.", self, CLTAP_PROFILE_IDENTITY_KEY, userId);
         [[self instance] onUserLogin:@{ CLTAP_PROFILE_IDENTITY_KEY: userId }];
@@ -114,7 +110,7 @@ static CleverTap * _instance;
         return;
     }
     
-    NSMutableDictionary<NSString *, id> *details = [[self transformArrayValues:params] mutableCopy];
+    NSMutableDictionary<NSString *, id> *details = [[self transformArrayValuesInDictionary:params] mutableCopy];
     [details setObject:event forKey:LP_CHARGED_EVENT_PARAM_NAME];
     [details setObject:@(value) forKey:LP_VALUE_PARAM_NAME];
     
@@ -167,7 +163,7 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params {
         return;
     }
     
-    NSMutableDictionary<NSString *, id> *eventParams = [[self transformArrayValues:params] mutableCopy];
+    NSMutableDictionary<NSString *, id> *eventParams = [[self transformArrayValuesInDictionary:params] mutableCopy];
     [eventParams setObject:@(value) forKey:LP_VALUE_PARAM_NAME];
     
     if (info) {
@@ -185,8 +181,8 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params {
     [[[self instance] config] setLogLevel:level];
 }
 
-+ (NSDictionary<NSString *, id> *)transformArrayValues:(NSDictionary<NSString *, id> *)dictionary {
-    return [self transformDictionaryValues:dictionary usingBlock:^id(id value) {
++ (NSDictionary<NSString *, id> *)transformArrayValuesInDictionary:(NSDictionary<NSString *, id> *)dictionary {
+    return [dictionary transformValuesWithBlock:^id _Nonnull(id _Nonnull value) {
         if ([value isKindOfClass:[NSArray class]]) {
             NSArray *array = (NSArray *)value;
             NSArray *filteredArray =
@@ -196,33 +192,11 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params {
             }]];
             NSArray *stringArray = [filteredArray valueForKey:@"description"];
             NSString *joinedString = [stringArray componentsJoinedByString:@","];
-            NSString *finalString = [NSString stringWithFormat:@"[%@]", joinedString];
-            return finalString;
+            NSString *result = [NSString stringWithFormat:@"[%@]", joinedString];
+            return result;
         }
         return value;
     }];
-}
-
-// TODO: Add to category or utils
-+ (NSDictionary<NSString *, id> *)transformDictionaryValues:(NSDictionary<NSString *, id> *)dictionary
-                                                  usingBlock:(id(^)(id))block {
-    NSMutableDictionary<NSString *, id> *result = [NSMutableDictionary dictionary];
-    for (NSString *key in dictionary) {
-        id value = dictionary[key];
-        // If the value is mutable and modified in the block,
-        // this will modify the original dictionary value
-        id transformedValue = block(value);
-        result[key] = transformedValue;
-    }
-    
-    return [result copy];
-}
-
-+ (NSDictionary<NSString *, id> *)filterNullDictionaryValues:(NSDictionary<NSString *, id> *)dictionary {
-    NSSet *keys = [dictionary keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop){
-        return obj && ![obj isEqual:[NSNull null]];
-    }];
-    return [dictionary dictionaryWithValuesForKeys:[keys allObjects]];
 }
 
 @end

@@ -79,6 +79,8 @@ static NSArray *sslCertNames;
 #import "CTDomainFactory.h"
 #import "CleverTap+SCDomain.h"
 
+#import "NSDictionary+Extensions.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -3222,7 +3224,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     // stringify the profile dict to use as a concurrent dupe key
-    NSString *profileToString = [CTUtils dictionaryToJsonString:properties];
+    NSString *profileToString = [properties toJsonString];
     
     // as processing happens async block concurrent onUserLogin requests with the same profile, as our cache is set async
     if ([self isProcessingLoginUserWithIdentifier:profileToString]) {

@@ -21,14 +21,6 @@ FOUNDATION_EXPORT NSString *const LP_CURRENCY_CODE_PARAM_NAME;
 @interface LeanplumCT : NSObject
 
 @property (class) CleverTap *instance;
-typedef void (^LeanplumStartBlock)(BOOL success);
-
-/**
- * Block to call when the start call finishes, and variables are returned
- * back from the server. Calling this multiple times will call each block
- * in succession.
- */
-+ (void)onStartResponse:(LeanplumStartBlock)block;
 
 /**
  * @{
