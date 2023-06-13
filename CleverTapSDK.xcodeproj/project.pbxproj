@@ -256,6 +256,7 @@
 		6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E4C17291E8A4A00385536 /* CleverTapInstanceConfigTests.m */; };
 		6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */; };
 		6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */; };
+		6A59D2162A388F8200531F9D /* LeanplumCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */; };
 		6A775C3329BE78C7007790E0 /* CTVariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A775C3129BE78C7007790E0 /* CTVariables.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		6A775C3429BE78C7007790E0 /* CTVariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A775C3129BE78C7007790E0 /* CTVariables.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		6A775C3529BE78C7007790E0 /* CTVariables.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A775C3229BE78C7007790E0 /* CTVariables.m */; };
@@ -1851,6 +1852,7 @@
 				4E41FD95294F46510001FBED /* CTVar.m in Sources */,
 				4E6383DA296DE9A8001E83E3 /* CTRequestSender.m in Sources */,
 				D014B8ED20E2FAA2001E0780 /* CleverTapTrackedViewController.m in Sources */,
+				6A59D2162A388F8200531F9D /* LeanplumCT.m in Sources */,
 				D014B8F120E2FAB9001E0780 /* CTPlistInfo.m in Sources */,
 				4E25E3D12788889F0008C888 /* CTLoginInfoProvider.m in Sources */,
 				D014B8F320E2FAC2001E0780 /* CTDeviceInfo.m in Sources */,
