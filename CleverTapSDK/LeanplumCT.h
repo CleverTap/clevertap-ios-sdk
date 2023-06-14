@@ -151,8 +151,8 @@ NS_SWIFT_NAME(track(_:value:info:params:));
 /**@}*/
 
 /**
-* Sets the log level of the CleverTap SDK
-*/
+ * Sets the log level of the CleverTap SDK.
+ */
 + (void)setLogLevel:(CleverTapLogLevel)level;
 
 @end

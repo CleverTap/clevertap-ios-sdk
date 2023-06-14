@@ -50,7 +50,7 @@
     return [result copy];
 }
 
-- (NSDictionary *)dictionaryWithRemoveNullValues {
+- (NSDictionary *)dictionaryRemovingNullValues {
     NSSet *keys = [self keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop){
         return obj && ![obj isEqual:[NSNull null]];
     }];

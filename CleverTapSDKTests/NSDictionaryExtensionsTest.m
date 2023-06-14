@@ -103,7 +103,7 @@
     NSDictionary<NSString *, id> *expectedDictionary = @{@"key1": @"value1",
                                                          @"key3": @"value3"};
     
-    NSDictionary<NSString *, id> *transformedDictionary = [originalDictionary dictionaryWithRemoveNullValues];
+    NSDictionary<NSString *, id> *transformedDictionary = [originalDictionary dictionaryRemovingNullValues];
     
     XCTAssertEqualObjects(transformedDictionary, expectedDictionary, @"Transformed dictionary should match the expected dictionary.");
 }
