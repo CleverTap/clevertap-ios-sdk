@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 #### Added
 - Adds public methods of the `Leanplum` class from the `Leanplum` SDK.
 
+#### Fixed
+- Mitgates potential App Inbox errors.
+
 ### [Version 5.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.0.1) (May 17, 2023)
 
 #### Breaking API Changes
