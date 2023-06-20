@@ -211,7 +211,7 @@ static NSManagedObjectContext *privateContext;
     BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
     if (!hasMessages) return nil;
     
-    [privateContext performBlockAndWait:^{
+    [privateContext performBlock:^{
         NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:[NSString stringWithFormat:@"isRead == NO"]]];
         for (CTMessageMO *msg in results) {
             int ttl = (int)msg.expires;
