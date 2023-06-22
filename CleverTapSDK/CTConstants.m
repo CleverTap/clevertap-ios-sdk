@@ -20,3 +20,5 @@ NSString *CT_PE_VAR_TYPE = @"type";
 NSString *CT_PE_NUMBER_TYPE = @"number";
 NSString *CT_PE_BOOL_TYPE = @"boolean";
 NSString *CT_PE_DEFAULT_VALUE = @"defaultValue";
+
+NSString *CLTAP_PROFILE_IDENTITY_KEY = @"Identity";
