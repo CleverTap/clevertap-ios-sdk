@@ -1,13 +1,13 @@
-name: Release version to Pod
-on:
-  release:
-    types:
-      - created
+# name: Release version to Pod
+# on:
+#   release:
+#     types:
+#       - created
       
-jobs:
-  build:
-    runs-on: macos-latest
+# jobs:
+#   build:
+#     runs-on: macos-latest
     
-    steps:
-     - name: Release to pod
-       uses: ./.github/mini_flows/pod_release
+#     steps:
+#      - name: Release to pod
+#        uses: ./.github/mini_flows/pod_release
