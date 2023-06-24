@@ -37,7 +37,7 @@ static NSManagedObjectContext *privateContext;
             _guid = guid;
             NSString *userIdentifier = [NSString stringWithFormat:@"%@:%@", accountId, guid];
             _userIdentifier = userIdentifier;
-            [privateContext performBlockAndWait:^{
+            [privateContext performBlock:^{
                 CT_TRY
                 self->_user = [CTUserMO fetchOrCreateFromJSON:@{@"accountId":accountId, @"guid":guid, @"identifier": userIdentifier} forContext:privateContext];
                 [self _save];
@@ -189,7 +189,7 @@ static NSManagedObjectContext *privateContext;
     BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
     if (!hasMessages) return nil;
     
-    [privateContext performBlockAndWait:^{
+    [privateContext performBlock:^{
         CT_TRY
         for (CTMessageMO *msg in self.user.messages) {
             int ttl = (int)msg.expires;
@@ -256,7 +256,7 @@ static NSManagedObjectContext *privateContext;
     if (!hasMessages) return nil;
     __block NSOrderedSet *results;
     
-    [privateContext performBlockAndWait:^{
+    [privateContext performBlock:^{
         CT_TRY
         results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
         CT_END_TRY
@@ -267,7 +267,7 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
-    [privateContext performBlockAndWait:^{
+    [privateContext performBlock:^{
         CT_TRY
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
@@ -281,7 +281,7 @@ static NSManagedObjectContext *privateContext;
 // always call from inside privateContext performBlock
 - (BOOL)_save {
     __block BOOL res = YES;
-    [privateContext performBlockAndWait:^{
+    [privateContext performBlock:^{
         CT_TRY
         NSError *error = nil;
         if ([privateContext hasChanges]) {
