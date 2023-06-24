@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 5.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.0) (June 26, 2023)
+### [Version 5.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.0) (June 27, 2023)
 
 #### Added
 - Adds public methods of the `Leanplum` class from the `Leanplum` SDK.
