@@ -29,9 +29,9 @@
     XCTAssertNotNil(self.cleverTapInstance);
 }
 
-//- (void)test_clevertap_addtional_instance_exists {
-//    XCTAssertNotNil(self.additionalInstance);
-//}
+- (void)test_clevertap_addtional_instance_exists {
+    XCTAssertNotNil(self.additionalInstance);
+}
 
 - (void)test_clevertap_instance_has_guid {
     NSString *ctguid = [self.cleverTapInstance profileGetCleverTapID];
