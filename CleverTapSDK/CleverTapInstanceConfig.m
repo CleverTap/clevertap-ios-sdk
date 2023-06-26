@@ -24,6 +24,7 @@
     [coder encodeObject: _queueLabel forKey:@"queueLabel"];
     [coder encodeBool: _isCreatedPostAppLaunched forKey:@"isCreatedPostAppLaunched"];
     [coder encodeBool: _beta forKey:@"beta"];
+    [coder encodeBool: _wv_init forKey:@"wv_init"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -45,6 +46,7 @@
         _queueLabel = [coder decodeObjectForKey:@"queueLabel"];
         _isCreatedPostAppLaunched = [coder decodeBoolForKey:@"isCreatedPostAppLaunched"];
         _beta = [coder decodeBoolForKey:@"beta"];
+        _wv_init = [coder decodeBoolForKey:@"wv_init"];
     }
     return self;
 }

@@ -44,6 +44,7 @@
 #import "CleverTap+InAppNotifications.h"
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
+#import "CleverTapJSInterfacePrivate.h"
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -1151,6 +1152,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // Add Local in-app count to event data.
     evtData[@"LIAMC"] = @([self.deviceInfo getLocalInAppCount]);
     
+    if (self.config.wv_init) {
+        evtData[@"wv_init"] = @(YES);
+    }
+    
     return evtData;
 }
 
@@ -1921,7 +1926,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     switch (notification.inAppType) {
         case CTInAppTypeHTML:
-            jsInterface = [[CleverTapJSInterface alloc] initWithConfig:self.config];
+            jsInterface = [[CleverTapJSInterface alloc] initWithConfigForInApps:self.config];
             controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification jsInterface:jsInterface];
             break;
         case CTInAppTypeInterstitial:
