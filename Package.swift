@@ -10,7 +10,11 @@ let package = Package(
     products: [
         .library(
             name: "CleverTapSDK",
-            targets: ["CleverTapSDK"])
+            targets: ["CleverTapSDK"]),
+        .library(
+            name: "CleverTapLocation",
+            targets: ["CleverTapLocation"]
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/SDWebImage/SDWebImage.git", from: "5.11.1")
@@ -63,6 +67,20 @@ let package = Package(
                 .linkedFramework("UserNotifications"),
                 .linkedFramework("WebKit")
             ]
+        ),
+        .target(
+            name: "CleverTapLocation",
+            path: "CleverTapLocation",
+            publicHeadersPath: "include",
+            cSettings: [
+                .headerSearchPath("./"),
+                .headerSearchPath("CleverTapLocation/"),
+                .headerSearchPath("CleverTapLocation/Classes/"),
+                .headerSearchPath("CleverTapLocation/Classes")
+            ],
+            linkerSettings: [
+                .linkedFramework("CoreLocation")
+                ]
         )
     ]
 )

@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTUtils.h"
+#import "NSDictionary+Extensions.h"
 
 @interface CTUtilsTest : XCTestCase
 
@@ -23,15 +24,9 @@
     // Put teardown code here. This method is called after the invocation of each test method in the class.
 }
 
-- (void)test_dictionaryToJsonString_when_nil_dictionary {
-    NSString *jsonString = [CTUtils dictionaryToJsonString:nil];
-    
-    XCTAssertNil(jsonString, @"Nil dictionary should return nil");
-}
-
 - (void)test_dictionaryToJsonString_withEmptyDictionary {
     NSDictionary *emptyDict = @{};
-    NSString *jsonString = [CTUtils dictionaryToJsonString:emptyDict];
+    NSString *jsonString = [emptyDict toJsonString];
     
     XCTAssertNotNil(jsonString, @"Empty dictionary should return a non-nil JSON string");
     XCTAssertEqualObjects(jsonString, @"{}", @"Empty dictionary should produce empty JSON object");
@@ -39,7 +34,7 @@
 
 - (void)test_dictionaryToJsonString{
     NSDictionary *dict = @{@"key1":@"value1"};
-    NSString *jsonString = [CTUtils dictionaryToJsonString:dict];
+    NSString *jsonString = [dict toJsonString];
     
     XCTAssertEqualObjects(jsonString, @"{\"key1\":\"value1\"}", @"JSON convertion should match given dictionary");
 }

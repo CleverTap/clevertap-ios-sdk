@@ -19,6 +19,8 @@ extern NSString *CT_PE_NUMBER_TYPE;
 extern NSString *CT_PE_BOOL_TYPE;
 extern NSString *CT_PE_DEFAULT_VALUE;
 
+extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
+
 #define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogInternal(level, fmt, ...) if (level > 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }

@@ -87,7 +87,7 @@
 
     id idValue = [CTPreferences getObjectForKey:@"stringValueForTesting"];
     
-    XCTAssertEqual(idValue, @"stringValueForTesting");
+    XCTAssertEqualObjects(idValue, @"stringValueForTesting");
 }
 
 - (void)test_getObjectForKey_withInvalidKey {

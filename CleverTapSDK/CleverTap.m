@@ -46,8 +46,6 @@
 #import "CleverTap+PushPermission.h"
 #endif
 
-#import "CTLocationManager.h"
-
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
 #import "CleverTap+Inbox.h"
@@ -81,11 +79,12 @@ static NSArray *sslCertNames;
 #import "CTDomainFactory.h"
 #import "CleverTap+SCDomain.h"
 
+#import "NSDictionary+Extensions.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
-static BOOL isLocationEnabled;
 static NSMutableDictionary *auxiliarySdkVersions;
 
 static NSRecursiveLock *instanceLock;
@@ -3225,7 +3224,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     // stringify the profile dict to use as a concurrent dupe key
-    NSString *profileToString = [CTUtils dictionaryToJsonString:properties];
+    NSString *profileToString = [properties toJsonString];
     
     // as processing happens async block concurrent onUserLogin requests with the same profile, as our cache is set async
     if ([self isProcessingLoginUserWithIdentifier:profileToString]) {
@@ -3999,27 +3998,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (BOOL)geofenceLocation {
     return _geofenceLocation;
-}
-
-+ (void)enableLocation:(BOOL)enabled{
-    isLocationEnabled = enabled;
-}
-
-+ (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error; {
-#if defined(CLEVERTAP_LOCATION)
-    [CTLocationManager getLocationWithSuccess:success andError:error];
-#else
-    if (isLocationEnabled){
-        [CTLocationManager getLocationWithSuccess:success andError:error];
-    }
-    else {
-        NSString *errorMsg = @"To Enable CleverTap Location services/apis please build the SDK with the CLEVERTAP_LOCATION macro or use enableLocation method";
-        CleverTapLogStaticDebug(@"%@",errorMsg);
-        if (error) {
-            error(errorMsg);
-        }
-    }
-#endif
 }
 
 #pragma clang diagnostic pop
