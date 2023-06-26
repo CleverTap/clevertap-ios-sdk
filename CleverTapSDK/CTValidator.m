@@ -229,7 +229,7 @@ static NSArray *discardedEvents;
  */
 + (BOOL)isRestrictedEventName:(NSString *)name {
     NSArray *restrictedNames = @[@"Notification Sent", @"Notification Viewed", @"Notification Clicked",
-                                 @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d", @"wzrk_fetch", CLTAP_GEOFENCE_ENTERED_EVENT_NAME, CLTAP_GEOFENCE_EXITED_EVENT_NAME];
+                                 @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d", @"wzrk_fetch", @"SCCampaignOptOut", CLTAP_GEOFENCE_ENTERED_EVENT_NAME, CLTAP_GEOFENCE_EXITED_EVENT_NAME];
     for (NSString *x in restrictedNames)
         if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
             // The event name is restricted
