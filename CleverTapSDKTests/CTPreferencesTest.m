@@ -55,7 +55,7 @@
     
     NSString *stringValue = [CTPreferences getStringForKey:@"stringValueForTesting" withResetValue:@"testResetStringValue"];
     
-    XCTAssertEqual(stringValue, @"stringValueForTesting");
+    XCTAssertEqualObjects(stringValue, @"stringValueForTesting");
 }
 
 - (void)test_getStringForKey_withInvalidKey {
@@ -100,15 +100,13 @@
 }
 
 -(void)test_putObject_withValidKey {
-    [CTPreferences putObject:@(88) forKey:@"putObjectKeyTest"];
-    id checkValue = [CTPreferences getObjectForKey:@"putObjectTest"];
-    XCTAssertEqual(checkValue, @(88));
+    [CTPreferences putObject:@88 forKey:@"putObjectValidKeyTest"];
+    id checkValue = [CTPreferences getObjectForKey:@"putObjectValidKeyTest"];
+    XCTAssertEqualObjects(checkValue, @88);
 }
 
 -(void)test_putObject_withInvalidKey {
-    [CTPreferences putObject:@(88) forKey:@"putObjectKeyTest"];
-    id checkValue = [CTPreferences getObjectForKey:@"putInvalidObjectKeyTest"];
-    
+    id checkValue = [CTPreferences getObjectForKey:[self randomString]];
     XCTAssertNil(checkValue);
 }
 
@@ -121,6 +119,19 @@
     id checkValue = [CTPreferences getObjectForKey:@"WizRocketobjectValueForTesting"];
     
     XCTAssertNil(checkValue);
+}
+
+// TODO: move this to a test utils class
+- (NSString*)randomString {
+    NSString *letters = @"abcdefghijklmnopqrstuvwxyz";
+
+    NSMutableString *randomString = [NSMutableString stringWithCapacity: 4];
+
+        for (int i=0; i<4; i++) {
+             [randomString appendFormat: @"%C", [letters characterAtIndex: arc4random_uniform([letters length])]];
+        }
+
+        return randomString;
 }
 
 @end
