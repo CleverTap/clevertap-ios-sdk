@@ -24,7 +24,9 @@ class CTWebviewVC: UIViewController {
     func addWebview() {
         let ctInterface: CleverTapJSInterface = CleverTapJSInterface(config: nil)
         self.webView = WKWebView (frame: self.view.frame)
-        self.webView.configuration.userContentController.add(ctInterface, name: "clevertap")
+        // Ensure using a unique identifier for addScriptMessageHandler to avoid interfering with other apps leading to namespace issues.
+        // We recommend using your app's package name, For example: com.clevertap.SPMStarter if your app package name is com.clevertap.SPMStarter.
+        self.webView.configuration.userContentController.add(ctInterface, name: "com_clevertap_SPMStarter")
         self.webView.loadHTMLString(self.htmlStringFromFile(with: "sampleHTMLCode"), baseURL: nil)
         self.view.addSubview(self.webView)
     }

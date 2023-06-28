@@ -1,0 +1,57 @@
+name: Validate PR from develop branch to master branch
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+    branches:
+      - master
+      
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@main
+
+    - name: Set up Xcode
+      if: always()
+      uses: ./.github/mini_flows/setup_xcode  
+
+    - name: Install dependencies
+      if: always()
+      uses: ./.github/mini_flows/install_dependencies
+
+    - name: Build project
+      if: always()
+      uses: ./.github/mini_flows/build_project  
+
+    - name: Run tests
+      if: always()
+      uses: ./.github/mini_flows/run_tests  
+    
+    - name: Validate PR Title
+      if: always()
+      run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ ! $PR_TITLE =~ ^Release+ ]]; then
+            echo "Invalid PR title format. Please use 'Release-{version}' format."
+            exit 1
+          fi
+          
+    - name: Validate PR Description
+      if: always()
+      uses: ./.github/mini_flows/validate_pr_description
+
+    - name: Mandatory File Changes
+      if: always()
+      uses: ./.github/mini_flows/mandatory_filechanges
+      
+    - name: Run pod lib lint
+      if: always()
+      uses: ./.github/mini_flows/pod_lib_lint
+      
+

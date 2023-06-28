@@ -32,7 +32,9 @@
     // Inititialize the Webview and add the CleverTapJSInterface as a script message handler
     CleverTapJSInterface *ctInterface = [[CleverTapJSInterface alloc] initWithConfig:nil];
     self.webView = [[WKWebView alloc] initWithFrame:self.view.frame];
-    [self.webView.configuration.userContentController addScriptMessageHandler:ctInterface name:@"clevertap"];
+    // Ensure using a unique identifier for addScriptMessageHandler to avoid interfering with other apps leading to namespace issues.
+    // We recommend using your app's package name, For example: com_clevertap_ObjCStarter if your app package name is com.clevertap.ObjCStarter.
+    [self.webView.configuration.userContentController addScriptMessageHandler:ctInterface name:@"com_clevertap_ObjCStarter"];
     [self.webView loadRequest:request];
     [self.view addSubview:self.webView];
 }

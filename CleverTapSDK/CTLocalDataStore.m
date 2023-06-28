@@ -577,7 +577,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     @try {
         @synchronized (localProfileForSession) {
             // DO NOT REMOVE IDENTITY
-            if ([key isEqualToString:@"Identity"]) {
+            if ([key isEqualToString:CLTAP_PROFILE_IDENTITY_KEY]) {
                 return;
             }
             

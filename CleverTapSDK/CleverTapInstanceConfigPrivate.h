@@ -7,6 +7,9 @@
 @property (nonatomic, assign) BOOL isCreatedPostAppLaunched;
 @property (nonatomic, assign) BOOL beta;
 
+// SET ONLY WHEN THE USER INITIALISES A WEBVIEW WITH CT JS INTERFACE
+@property (nonatomic, assign) BOOL wv_init;
+
 - (instancetype _Nonnull)initWithAccountId:(NSString * _Nonnull)accountId
                               accountToken:(NSString * _Nonnull)accountToken
                              accountRegion:(NSString * _Nullable)accountRegion

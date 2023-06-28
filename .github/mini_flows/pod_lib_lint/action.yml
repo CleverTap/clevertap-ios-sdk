@@ -1,0 +1,7 @@
+runs:
+  using: "composite"
+  steps:
+     - name: Run Pod lib lint
+       shell: bash
+       run: |
+          pod lib lint --allow-warnings    

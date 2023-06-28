@@ -1,0 +1,12 @@
+runs:
+  using: "composite"
+  steps:
+     - name: Run tests
+       shell: bash
+       run: xcodebuild test -workspace CleverTapSDK.xcworkspace -scheme CleverTapSDKTests -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' -enableCodeCoverage YES
+       
+     # - uses: kishikawakatsumi/xcresulttool@v1
+       # with:
+       #   path: '/Users/runner/work/clevertap-ios-sdk/clevertap-ios-sdk/TestResults.xcresult'
+       #   show-code-coverage: true
+       # if: success() || failure()

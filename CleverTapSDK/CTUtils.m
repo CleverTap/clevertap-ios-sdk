@@ -2,34 +2,9 @@
 
 @implementation CTUtils
 
-+ (NSString *)dictionaryToJsonString:(NSDictionary *)dict {
-    if (dict == nil) return nil;
-    
-    NSData *jsonData;
-    @try {
-        NSError *error;
-        NSMutableDictionary *_cleaned = [NSMutableDictionary new];
-        
-        for (NSString *key in dict) {
-            id value = dict[key];
-            if ([value isKindOfClass:[NSDate class]]) {
-                continue;
-            }
-            _cleaned[key] = value;
-        }
-        
-        jsonData = [NSJSONSerialization dataWithJSONObject:_cleaned
-                                                   options:0
-                                                     error:&error];
-        
-        return jsonData != nil ? [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] : nil;
-        
-    } @catch (NSException *e) {
-        return nil;
-    }
-}
-
 + (NSString *)urlEncodeString:(NSString*)s {
+    
+    if (!s) return nil;    
     NSMutableString *output = [NSMutableString string];
     const unsigned char *source = (const unsigned char *) [s UTF8String];
     int sourceLen = (int) strlen((const char *) source);
