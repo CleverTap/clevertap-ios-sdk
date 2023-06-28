@@ -1205,6 +1205,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return nil;
 }
 
+- (BOOL)allQueuesEmpty {
+    return (_eventsQueue.count == 0 && _profileQueue.count == 0 && _notificationsQueue.count == 0);
+}
+
 
 #pragma mark - Timestamp bookkeeping helpers
 
@@ -2645,11 +2649,56 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }];
 }
 
+- (void)checkServerHealthWithCompletion:(void (^ _Nullable )(void))taskBlock {
+    [self runSerialAsync:^{
+        
+        // Need to simulate a synchronous request
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        
+        CTRequest *ctRequest = [CTRequestFactory healthRequestWithConfig:self.config];
+        [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
+            
+            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+                if (httpResponse.statusCode == 200) {
+                    CleverTapLogStaticDebug(@"Server Status: 200 OK");
+                    taskBlock();
+                }
+                else if (httpResponse.statusCode == 503) {
+                    // SERVICE UNAVAILABLE.
+                    CleverTapLogStaticDebug(@"Server Error: %@", @"HTTP 503 Service Unavailable");
+                }
+                else if (httpResponse.statusCode == 598) {
+                    CleverTapLogStaticDebug(@"Server Error: %@", @"HTTP 598 Network read timeout error");
+                }
+            } else {
+               
+            }
+            dispatch_semaphore_signal(semaphore);
+        }];
+        [ctRequest onError:^(NSError * _Nullable error) {
+            
+            dispatch_semaphore_signal(semaphore);
+        }];
+        [self.requestSender send:ctRequest];
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    }];
+}
+
 - (void)sendQueues {
-    if ([self isMuted] || _offline) return;
-    [self sendQueue:_profileQueue];
-    [self sendQueue:_eventsQueue];
-    [self sendQueue:_notificationsQueue];
+    if ([self isMuted] || _offline || [self allQueuesEmpty]) return;
+    
+    // CHECK THE SERVER STATUS VIA /health
+    [self runSerialAsync:^{
+        [self checkServerHealthWithCompletion:^{
+            // SERVER IS UP. SEND QUEUES
+            [self runSerialAsync:^{
+                [self sendQueue:self->_profileQueue];
+                [self sendQueue:self->_eventsQueue];
+                [self sendQueue:self->_notificationsQueue];
+            }];
+        }];
+    }];
 }
 
 - (void)inflateQueuesAsync {
@@ -2822,7 +2871,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                     
                     success = (httpResponse.statusCode == 200);
+                    NSIndexSet *migrationStatusCodes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(300, 99)];
                     
+                    // STATUS CODE: 200
                     if (success) {
                         if (queue == self->_notificationsQueue) {
                             redirect = [self updateStateFromResponseHeadersShouldRedirectForNotif: httpResponse.allHeaderFields];
@@ -2830,9 +2881,30 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             redirect = [self updateStateFromResponseHeadersShouldRedirect: httpResponse.allHeaderFields];
                         }
                         
-                    } else {
-                        CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
+                    // STATUS CODE: 300-399
+                    else if ([migrationStatusCodes containsIndex:httpResponse.statusCode]) {
+                       // ACCOUNT HAS MIGRATED. DO HANDSHAKE
+                        [self.domainFactory clearRedirectDomain];
+                        [self doHandshakeAsyncWithCompletion:^{
+//                            [self sendQueue:queue];
+                            [self checkServerHealthWithCompletion:^{
+                                [self sendQueue:queue];
+                            }];
+                        }];
+                    }
+                    else if (httpResponse.statusCode == 503) {
+                        // SERVER OUTAGE. CHECK SERVER STATUS
+                        [self checkServerHealthWithCompletion:^{
+                            [self sendQueue:queue];
+                        }];
+                    }
+                    else if (httpResponse.statusCode == 598) {
+                        
+                    }
+//                    else {
+//                        CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
+//                    }
                 }
                 
                 dispatch_semaphore_signal(semaphore);
@@ -2848,6 +2920,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
             
             if (!success) {
+                // TODO: STOP RETRY EVERY ONE SECOND
                 [self scheduleQueueFlush];
                 [self handleSendQueueFail];
             }

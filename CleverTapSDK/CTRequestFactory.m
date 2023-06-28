@@ -23,4 +23,8 @@
     return [[CTRequest alloc]initWithHttpMethod:@"POST" config:config params: params url:url];
 }
 
++ (CTRequest *_Nonnull)healthRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config {
+    return [[CTRequest alloc]initWithHttpMethod:@"GET" config:config params:nil url:kHEALTH_URL];
+}
+
 @end

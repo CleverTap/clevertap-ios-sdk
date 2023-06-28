@@ -13,6 +13,7 @@
 #endif
 
 @interface CTRequestSender : NSObject
+
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config redirectDomain:(NSString* _Nonnull)redirectDomain;
 - (void)send:(CTRequest *_Nonnull)ctRequest;
 

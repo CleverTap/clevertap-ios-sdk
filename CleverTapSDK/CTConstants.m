@@ -3,6 +3,7 @@
 NSString *const kCTApiDomain = @"clevertap-prod.com";
 NSString *const kCTNotifViewedApiDomain = @"spiky.clevertap-prod.com";
 NSString *const kHANDSHAKE_URL = @"https://clevertap-prod.com/hello";
+NSString *const kHEALTH_URL = @"https://clevertap-prod.com/health";
 
 NSString *CT_KIND_INT = @"integer";
 NSString *CT_KIND_FLOAT = @"float";

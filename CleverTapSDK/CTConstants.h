@@ -3,6 +3,7 @@
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
 extern NSString *const kHANDSHAKE_URL;
+extern NSString *const kHEALTH_URL;
 extern NSString *CT_KIND_INT;
 extern NSString *CT_KIND_FLOAT;
 extern NSString *CT_KIND_STRING;
