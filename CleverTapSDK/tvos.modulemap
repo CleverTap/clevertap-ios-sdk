@@ -11,5 +11,6 @@ framework module CleverTapSDK {
     header "CleverTapInstanceConfig.h"
     header "CleverTap+CTVar.h"
     header "CTVar.h"
+    header "LeanplumCT.h"
     export *
 }
