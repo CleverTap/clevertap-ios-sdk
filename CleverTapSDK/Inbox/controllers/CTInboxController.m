@@ -1,4 +1,3 @@
-
 @import CoreData;
 #import "CTInboxController.h"
 #import "CTConstants.h"
@@ -37,11 +36,11 @@ static NSManagedObjectContext *privateContext;
             _guid = guid;
             NSString *userIdentifier = [NSString stringWithFormat:@"%@:%@", accountId, guid];
             _userIdentifier = userIdentifier;
-            [privateContext performBlock:^{
-                CT_TRY
+            [privateContext performBlockAndWait:^{
+                
                 self->_user = [CTUserMO fetchOrCreateFromJSON:@{@"accountId":accountId, @"guid":guid, @"identifier": userIdentifier} forContext:privateContext];
                 [self _save];
-                CT_END_TRY
+                
             }];
         }
     }
@@ -87,14 +86,14 @@ static NSManagedObjectContext *privateContext;
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages {
     if (!self.isInitialized) return;
     [privateContext performBlock:^{
-        CT_TRY
+        
         CleverTapLogStaticInternal(@"%@: updating messages: %@", self.user, messages);
         BOOL haveUpdates = [self.user updateMessages:messages forContext:privateContext];
         if (haveUpdates) {
             [self _save];
             [self notifyUpdate];
         }
-        CT_END_TRY
+        
     }];
 }
 
@@ -127,20 +126,20 @@ static NSManagedObjectContext *privateContext;
 
 - (void)markReadMessageWithId:(NSString *)messageId {
     [privateContext performBlock:^{
-        CT_TRY
+        
         CTMessageMO *message = [self _messageForId:messageId];
         if (message) {
             [message setValue:@YES forKey:@"isRead"];
             [self _save];
             [self notifyUpdate];
         }
-        CT_END_TRY
+        
     }];
 }
 
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
     [privateContext performBlock:^{
-        CT_TRY
+        
         for (NSString *ids in messageIds) {
             if (ids != nil && ![ids isEqualToString:@""]){
                 CTMessageMO *message = [self _messageForId:ids];
@@ -157,7 +156,7 @@ static NSManagedObjectContext *privateContext;
         }
         [self _save];
         [self notifyUpdate];
-        CT_END_TRY
+        
     }];
 }
 
@@ -189,8 +188,8 @@ static NSManagedObjectContext *privateContext;
     BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
     if (!hasMessages) return nil;
     
-    [privateContext performBlock:^{
-        CT_TRY
+    [privateContext performBlockAndWait:^{
+        
         for (CTMessageMO *msg in self.user.messages) {
             int ttl = (int)msg.expires;
             if (ttl > 0 && now >= ttl) {
@@ -206,7 +205,7 @@ static NSManagedObjectContext *privateContext;
         if ([toDelete count] > 0) {
             [self _deleteMessages:toDelete];
         }
-        CT_END_TRY
+        
     }];
     return messages;
 }
@@ -221,8 +220,8 @@ static NSManagedObjectContext *privateContext;
     BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
     if (!hasMessages) return nil;
     
-    [privateContext performBlock:^{
-        CT_TRY
+    [privateContext performBlockAndWait:^{
+        
         NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:[NSString stringWithFormat:@"isRead == NO"]]];
         for (CTMessageMO *msg in results) {
             int ttl = (int)msg.expires;
@@ -239,7 +238,7 @@ static NSManagedObjectContext *privateContext;
         if ([toDelete count] > 0) {
             [self _deleteMessages:toDelete];
         }
-        CT_END_TRY
+        
     }];
     
     
@@ -256,10 +255,10 @@ static NSManagedObjectContext *privateContext;
     if (!hasMessages) return nil;
     __block NSOrderedSet *results;
     
-    [privateContext performBlock:^{
-        CT_TRY
+    [privateContext performBlockAndWait:^{
+        
         results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
-        CT_END_TRY
+        
     }];
     
     BOOL existing = results && [results count] > 0;
@@ -267,42 +266,29 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
-    [privateContext performBlock:^{
-        CT_TRY
+    [privateContext performBlockAndWait:^{
+        
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
         }
         [self _save];
         [self notifyUpdate];
-        CT_END_TRY
+        
     }];
 }
 
 // always call from inside privateContext performBlock
 - (BOOL)_save {
-    __block BOOL res = YES;
-    [privateContext performBlock:^{
-        CT_TRY
-        NSError *error = nil;
-        if ([privateContext hasChanges]) {
-            res = [privateContext save:&error];
-        }
-        if (!res) {
-            CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
-        }
-        CT_END_TRY
-    }];
-    [mainContext performBlock:^{
-        CT_TRY
-        NSError *error = nil;
-        if ([mainContext hasChanges]) {
-            res = [mainContext save:&error];
-        }
-        if (!res) {
-            CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
-        }
-        CT_END_TRY
-    }];
+    NSError *error = nil;
+    BOOL res = YES;
+    res = [privateContext save:&error];
+    if (!res) {
+        CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
+    }
+    res = [mainContext save:&error];
+    if (!res) {
+        CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
+    }
     return res;
 }
 
