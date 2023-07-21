@@ -132,7 +132,7 @@
                 CleverTapLogStaticInternal(@"%@ file not found %@", self, filePath);
             } else {
                 // Allow NSString and NSSet unarchiving
-                NSSet *allowedClasses = [NSSet setWithObjects:cls, [NSArray class], [NSString class], nil];
+                NSSet *allowedClasses = [NSSet setWithObjects:cls, [NSArray class], [NSString class], [NSMutableDictionary class], nil];
                 data = [NSKeyedUnarchiver unarchivedObjectOfClasses:allowedClasses fromData:newData error:&error];
                 CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
             }

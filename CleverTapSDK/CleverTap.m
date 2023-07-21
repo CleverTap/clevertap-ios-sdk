@@ -199,6 +199,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, assign) BOOL isAppForeground;
+@property (nonatomic, assign) BOOL isServerOnline;
 
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
 @property (nonatomic, strong) NSMutableArray *profileQueue;
@@ -682,6 +683,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (now - initialAppEnteredForegroundTime > 5) {
             _config.isCreatedPostAppLaunched = YES;
         }
+        
+        // CHECK SERVER HEALTH AT THE START
+        [self checkServerHealthWithCompletion:^{
+            self.isServerOnline = YES;
+        }];
         
         [self _initFeatureFlags];
         
@@ -2660,6 +2666,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                 NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+                NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]initWithURL:httpResponse.URL statusCode:503 HTTPVersion:nil headerFields:nil];
                 if (httpResponse.statusCode == 200) {
                     CleverTapLogStaticDebug(@"Server Status: 200 OK");
                     taskBlock();
@@ -2667,6 +2674,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 else if (httpResponse.statusCode == 503) {
                     // SERVICE UNAVAILABLE.
                     CleverTapLogStaticDebug(@"Server Error: %@", @"HTTP 503 Service Unavailable");
+                    [self persistOrClearQueues];
                 }
                 else if (httpResponse.statusCode == 598) {
                     CleverTapLogStaticDebug(@"Server Error: %@", @"HTTP 598 Network read timeout error");
@@ -2689,16 +2697,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if ([self isMuted] || _offline || [self allQueuesEmpty]) return;
     
     // CHECK THE SERVER STATUS VIA /health
-    [self runSerialAsync:^{
-        [self checkServerHealthWithCompletion:^{
+//    [self runSerialAsync:^{
+//        [self checkServerHealthWithCompletion:^{
             // SERVER IS UP. SEND QUEUES
-            [self runSerialAsync:^{
+    
+        [self runSerialAsync:^{
+            if (self.isServerOnline) {
                 [self sendQueue:self->_profileQueue];
                 [self sendQueue:self->_eventsQueue];
                 [self sendQueue:self->_notificationsQueue];
-            }];
+            }
         }];
-    }];
+    
+//        }];
+//    }];
 }
 
 - (void)inflateQueuesAsync {
@@ -2869,6 +2881,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 
                 if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+                    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]initWithURL:httpResponse.URL statusCode:300 HTTPVersion:nil headerFields:nil];
                     
                     success = (httpResponse.statusCode == 200);
                     NSIndexSet *migrationStatusCodes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(300, 99)];
@@ -2889,14 +2902,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         [self doHandshakeAsyncWithCompletion:^{
 //                            [self sendQueue:queue];
                             [self checkServerHealthWithCompletion:^{
-                                [self sendQueue:queue];
+                                [self runSerialAsync:^{
+                                    [self sendQueue:queue];
+                                }];
                             }];
                         }];
                     }
-                    else if (httpResponse.statusCode == 503) {
+                    else if (response.statusCode == 503) {
                         // SERVER OUTAGE. CHECK SERVER STATUS
                         [self checkServerHealthWithCompletion:^{
-                            [self sendQueue:queue];
+                            [self runSerialAsync:^{
+                                [self sendQueue:queue];
+                            }];
                         }];
                     }
                     else if (httpResponse.statusCode == 598) {
