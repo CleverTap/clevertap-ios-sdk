@@ -122,6 +122,10 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)markReadMessageWithId:(NSString *)messageId {
+    if (!messageId || messageId.length == 0) {
+        CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID is null or empty.");
+        return;
+    }
     [privateContext performBlock:^{
         CTMessageMO *message = [self _messageForId:messageId];
         if (message) {
@@ -134,7 +138,6 @@ static NSManagedObjectContext *privateContext;
 
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
     [privateContext performBlock:^{
-
         for (NSString *ids in messageIds) {
             if (ids != nil && ![ids isEqualToString:@""]){
                 CTMessageMO *message = [self _messageForId:ids];
@@ -256,11 +259,15 @@ static NSManagedObjectContext *privateContext;
 - (BOOL)_save {
     NSError *error = nil;
     BOOL res = YES;
-    res = [privateContext save:&error];
+    if ([privateContext hasChanges]) {
+        res = [privateContext save:&error];
+    }
     if (!res) {
         CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
     }
-    res = [mainContext save:&error];
+    if ([mainContext hasChanges]) {
+        res = [mainContext save:&error];
+    }
     if (!res) {
         CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
     }
