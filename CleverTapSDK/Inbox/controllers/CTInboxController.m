@@ -129,12 +129,13 @@ static NSManagedObjectContext *privateContext;
     __block CTMessageMO *message;
     [privateContext performBlockAndWait:^{
         message = [self _messageForId:messageId];
+        if (message) {
+            [message setValue:@YES forKey:@"isRead"];
+        }
     }];
-    if (message) {
-        [message setValue:@YES forKey:@"isRead"];
-        [self _save];
-        [self notifyUpdate];
-    }
+    
+    [self _save];
+    [self notifyUpdate];
     
 }
 
@@ -268,21 +269,25 @@ static NSManagedObjectContext *privateContext;
 
 // always call from inside privateContext performBlock
 - (BOOL)_save {
-    NSError *error = nil;
-    BOOL res = YES;
-    if ([privateContext hasChanges]) {
-        res = [privateContext save:&error];
-    }
+    __block NSError *error = nil;
+    __block BOOL res = YES;
+    [privateContext performBlockAndWait:^{
+        if ([privateContext hasChanges]) {
+            res = [privateContext save:&error];
+            [mainContext performBlock:^{
+                if ([mainContext hasChanges]) {
+                    NSError *error = nil;
+                    [mainContext save:&error];
+                }
+            }];
+            
+        }
+    }];
     if (!res) {
         CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
     }
     
-    [mainContext performBlock:^{
-        if ([mainContext hasChanges]) {
-            NSError *error = nil;
-            [mainContext save:&error];
-        }
-    }];
+    
     
     if (!res) {
         CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
