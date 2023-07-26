@@ -140,7 +140,7 @@ static NSManagedObjectContext *privateContext;
 }
 
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
-    [privateContext performBlock:^{
+    [privateContext performBlockAndWait:^{
         for (NSString *ids in messageIds) {
             if (ids != nil && ![ids isEqualToString:@""]){
                 CTMessageMO *message = [self _messageForId:ids];
@@ -155,9 +155,10 @@ static NSManagedObjectContext *privateContext;
                 CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID is null or not a string.");
             }
         }
+    }];
         [self _save];
         [self notifyUpdate];
-    }];
+    
 }
 
 - (NSDictionary *)messageForId:(NSString *)messageId {
