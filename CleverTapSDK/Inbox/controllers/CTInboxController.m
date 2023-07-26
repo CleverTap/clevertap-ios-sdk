@@ -126,14 +126,16 @@ static NSManagedObjectContext *privateContext;
         CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID is null or empty.");
         return;
     }
+    __block CTMessageMO *message;
     [privateContext performBlockAndWait:^{
-        CTMessageMO *message = [self _messageForId:messageId];
-        if (message) {
-            [message setValue:@YES forKey:@"isRead"];
-            [self _save];
-            [self notifyUpdate];
-        }
+        message = [self _messageForId:messageId];
     }];
+    if (message) {
+        [message setValue:@YES forKey:@"isRead"];
+        [self _save];
+        [self notifyUpdate];
+    }
+    
 }
 
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
@@ -215,22 +217,22 @@ static NSManagedObjectContext *privateContext;
     if (!hasMessages) return nil;
     
     [privateContext performBlockAndWait:^{
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:[NSString stringWithFormat:@"isRead == NO"]]];
-    for (CTMessageMO *msg in results) {
-        int ttl = (int)msg.expires;
-        if (ttl > 0 && now >= ttl) {
-            CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
-            [toDelete addObject:msg];
-        } else {
-            [messages addObject:[msg toJSON]];
+        NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:[NSString stringWithFormat:@"isRead == NO"]]];
+        for (CTMessageMO *msg in results) {
+            int ttl = (int)msg.expires;
+            if (ttl > 0 && now >= ttl) {
+                CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
+                [toDelete addObject:msg];
+            } else {
+                [messages addObject:[msg toJSON]];
+            }
         }
-    }
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
-    [messages sortUsingDescriptors:@[sortDescriptor]];
-    
-    if ([toDelete count] > 0) {
-        [self _deleteMessages:toDelete];
-    }
+        NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
+        [messages sortUsingDescriptors:@[sortDescriptor]];
+        
+        if ([toDelete count] > 0) {
+            [self _deleteMessages:toDelete];
+        }
     }];
     return messages;
 }
@@ -247,8 +249,8 @@ static NSManagedObjectContext *privateContext;
     __block NSOrderedSet *results;
     
     [privateContext performBlockAndWait:^{
-    results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
-    existing = (results && [results count] > 0);
+        results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
+        existing = (results && [results count] > 0);
     }];
     return existing ? results[0] : nil;
 }
@@ -258,9 +260,10 @@ static NSManagedObjectContext *privateContext;
         for (CTMessageMO *msg in messages) {
             [privateContext deleteObject:msg];
         }
-        [self _save];
-        [self notifyUpdate];
     }];
+    [self _save];
+    [self notifyUpdate];
+    
 }
 
 // always call from inside privateContext performBlock
@@ -274,12 +277,12 @@ static NSManagedObjectContext *privateContext;
         CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
     }
     
-        [mainContext performBlock:^{
-            if ([mainContext hasChanges]) {
-                NSError *error = nil;
-                [mainContext save:&error];
-            }
-        }];
+    [mainContext performBlock:^{
+        if ([mainContext hasChanges]) {
+            NSError *error = nil;
+            [mainContext save:&error];
+        }
+    }];
     
     if (!res) {
         CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
