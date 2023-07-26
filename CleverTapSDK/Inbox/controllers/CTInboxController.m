@@ -287,12 +287,6 @@ static NSManagedObjectContext *privateContext;
     if (!res) {
         CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
     }
-    
-    
-    
-    if (!res) {
-        CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
-    }
     return res;
 }
 
