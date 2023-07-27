@@ -37,10 +37,14 @@
 }
 
 - (NSDictionary *)toJSON {
-    NSMutableDictionary *json = [NSMutableDictionary dictionaryWithDictionary:self.json];
-    json[@"isRead"] = @(self.isRead);
-    json[@"date"] = @(self.date);
-    return json;
+    __block NSDictionary *json = nil;
+       [self.managedObjectContext performBlockAndWait:^{
+           NSMutableDictionary *mutableJson = [NSMutableDictionary dictionaryWithDictionary:self.json];
+           [mutableJson setObject:@(self.isRead) forKey:@"isRead"];
+           [mutableJson setObject:@(self.date) forKey:@"date"];
+           json = [NSDictionary dictionaryWithDictionary:mutableJson];
+       }];
+       return json;
 }
 
 @dynamic date;
