@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 5.1.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.2) (July 28, 2023)
+
+#### Fixed
+- Fixed a bug where the App Inbox would appear empty.
+
 ### [Version 5.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.1) (July 13, 2023)
 
 #### Fixed

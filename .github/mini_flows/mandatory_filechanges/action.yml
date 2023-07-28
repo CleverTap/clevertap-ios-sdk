@@ -7,7 +7,7 @@ runs:
       with:
         filters: |
           md: ['CHANGELOG.md']
-          podspec: ['CleverTap-iOS-SDK.podspec']
+          txt: ['sdk-version.txt']
           h: ['CleverTapSDK/CleverTapBuildInfo.h']
 
     - name: FAIL if mandatory files are not changed
