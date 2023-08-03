@@ -2,6 +2,7 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTPlistInfo.h"
 #import "CTConstants.h"
+#import "CTAES.h"
 
 @implementation CleverTapInstanceConfig
 
@@ -197,6 +198,8 @@
     _enablePersonalization = YES;
     _logLevel = 0;
     _beta = plist.beta;
+    _encryptionLevel = isDefault ? [plist.encryptionLevel intValue] : CleverTapEncryptionOff;
+    _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
 }
 
 - (void) checkIfAvailableAccountId:(NSString *)accountId
@@ -207,6 +210,14 @@
     
     if (accountToken.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountToken is empty");
+    }
+}
+
+- (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
+    if(_isDefaultInstance) {
+        _encryptionLevel = CleverTapEncryptionOff;
+    } else {
+        _encryptionLevel = encryptionLevel;
     }
 }
 @end

@@ -12,6 +12,7 @@
 @property (nonatomic, assign, readonly) BOOL useCustomCleverTapId;
 @property (nonatomic, assign, readonly) BOOL beta;
 @property (nonatomic, assign, readonly) BOOL disableIDFV;
+@property (nonatomic, strong, readonly, nullable) NSString *encryptionLevel;
 
 + (instancetype _Nullable)sharedInstance;
 - (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token region:(NSString * _Nullable)region;

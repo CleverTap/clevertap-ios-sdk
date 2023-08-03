@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
+@class CTAES;
 
 @interface CleverTapInstanceConfig : NSObject
 
@@ -16,6 +17,8 @@
 @property (nonatomic, assign) BOOL disableIDFV;
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 @property (nonatomic, strong, nullable) NSArray *identityKeys;
+@property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
+@property (nonatomic, strong, readonly, nullable) CTAES *aesCrypt;
 
 
 - (instancetype _Nonnull) init __unavailable;
@@ -35,4 +38,20 @@
                               accountToken:(NSString* _Nonnull)accountToken
                                proxyDomain:(NSString* _Nonnull)proxyDomain
                           spikyProxyDomain:(NSString* _Nonnull)spikyProxyDomain;
+
+/*!
+ @method
+ 
+ @abstract
+ Set the encryption level
+ 
+ @discussion
+ Set using CleverTapEncryptionLevel enum values (or the corresponding int values).
+ 
+ CleverTapEncryptionOff - turns off all encryption.
+ CleverTapEncryptionOn - turns enxryption on for PII data
+ 
+ @param encryptionLevel  the encryption level to set
+ */
+- (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel;
 @end

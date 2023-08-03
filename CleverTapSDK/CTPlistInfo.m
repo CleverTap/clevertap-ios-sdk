@@ -90,6 +90,8 @@ static NSArray *registeredURLSchemes;
         // Fetch IDFV Flag from INFO.PLIST
         NSString *disableIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_IDFV_LABEL];
         _disableIDFV = (disableIDFV && [disableIDFV isEqualToString:@"1"]);
+        
+        _encryptionLevel = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_LEVEL];
     }
     return self;
 }

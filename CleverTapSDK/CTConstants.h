@@ -152,4 +152,6 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 
 #define CLTAP_DEFINE_VARS_URL @"/defineVars"
 
+#define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"
+
 
