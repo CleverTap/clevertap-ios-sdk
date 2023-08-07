@@ -18,7 +18,7 @@
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 @property (nonatomic, strong, nullable) NSArray *identityKeys;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
-@property (nonatomic, strong, readonly, nullable) CTAES *aesCrypt;
+@property (nonatomic, strong, nullable) CTAES *aesCrypt;
 
 
 - (instancetype _Nonnull) init __unavailable;

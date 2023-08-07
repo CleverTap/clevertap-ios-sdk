@@ -1,8 +1,11 @@
 #import <CommonCrypto/CommonCryptor.h>
 #import "CTAES.h"
+#import "CTConstants.h"
 #import "CTPreferences.h"
 
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
+NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
+NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 @interface CTAES () {}
@@ -32,43 +35,59 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (void)updateValues {
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
-    if (!cachedGUIDS) cachedGUIDS = @{};
-    NSMutableDictionary *newCache = [NSMutableDictionary new];
-    if (_encryptionLevel == CleverTapEncryptionOff) {
-        [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull cachedKey, NSString*  _Nonnull value, BOOL * _Nonnull stopp) {
-            NSString *key = [self getCachedKey:cachedKey];
-            NSString *identifier = [self getCachedIdentifier:cachedKey];
-            NSString *decryptedString = [self getDecryptedString:identifier];
-            NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, decryptedString];
-            newCache[cacheKey] = value;
-        }];
-        [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
-    } else if (_encryptionLevel == CleverTapEncryptionOn) {
-        [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull cachedKey, NSString*  _Nonnull value, BOOL * _Nonnull stopp) {
-            NSString *key = [self getCachedKey:cachedKey];
-            NSString *identifier = [self getCachedIdentifier:cachedKey];
-            NSString *encryptedString = [self getEncryptedString:identifier];
-            NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedString];
-            newCache[cacheKey] = value;
-        }];
-        [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
+    if (cachedGUIDS) {
+        NSMutableDictionary *newCache = [NSMutableDictionary new];
+        if (_encryptionLevel == CleverTapEncryptionOff) {
+            [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull cachedKey, NSString*  _Nonnull value, BOOL * _Nonnull stopp) {
+                NSString *key = [self getCachedKey:cachedKey];
+                NSString *identifier = [self getCachedIdentifier:cachedKey];
+                NSString *decryptedString = [self getDecryptedString:identifier];
+                NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, decryptedString];
+                newCache[cacheKey] = value;
+            }];
+            [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
+        } else if (_encryptionLevel == CleverTapEncryptionOn) {
+            [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull cachedKey, NSString*  _Nonnull value, BOOL * _Nonnull stopp) {
+                NSString *key = [self getCachedKey:cachedKey];
+                NSString *identifier = [self getCachedIdentifier:cachedKey];
+                NSString *encryptedString = [self getEncryptedString:identifier];
+                NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedString];
+                newCache[cacheKey] = value;
+            }];
+            [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
+        }
     }
 }
 
 - (NSString *)getEncryptedString:(NSString *)identifier {
     NSString *encryptedString = identifier;
     if (_encryptionLevel == CleverTapEncryptionOn) {
-        NSData *dataValue = [identifier dataUsingEncoding:NSUTF8StringEncoding];
-        NSData *encryptedData = [self convertData:dataValue withOperation:kCCEncrypt];
-        encryptedString = [encryptedData base64EncodedStringWithOptions:kNilOptions];
+        @try {
+            NSData *dataValue = [identifier dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *encryptedData = [self convertData:dataValue withOperation:kCCEncrypt];
+            if (encryptedData) {
+                encryptedString = [encryptedData base64EncodedStringWithOptions:kNilOptions];
+            }
+        } @catch (NSException *e) {
+            CleverTapLogStaticInternal(@"Error: %@ while encrypting the string: %@", e.debugDescription, identifier);
+            return identifier;
+        }
     }
     return encryptedString;
 }
 
 - (NSString *)getDecryptedString:(NSString *)identifier {
-    NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:identifier options:kNilOptions];
-    NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
-    NSString *decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
+    NSString *decryptedString = identifier;
+    @try {
+        NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:identifier options:kNilOptions];
+        NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
+        if (decryptedData) {
+            decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error: %@ while decrypting the string: %@", e.debugDescription, identifier);
+        return identifier;
+    }
     return decryptedString;
 }
 
@@ -76,8 +95,8 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
           withOperation:(CCOperation)operation {
     // TODO: will update key and identifier.
     NSData *outputData = [self AES128WithOperation:operation
-                                               key:@"TestKey"
-                                        identifier:@"TestIdentifier"
+                                               key:[self generateKeyPassword]
+                                        identifier:CLTAP_ENCRYPTION_IV
                                               data:data];
     return outputData;
 }
@@ -116,6 +135,7 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
                                           &outputMovedSize);
     
     if (cryptStatus != kCCSuccess) {
+        CleverTapLogStaticInternal(@"Failed to encode/deocde the string with error code: %d", cryptStatus);
         free(output);
         return nil;
     }
@@ -144,6 +164,11 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     } else {
         return nil;
     }
+}
+
+- (NSString *)generateKeyPassword {
+    NSString *keyPassword = [NSString stringWithFormat:@"%@%@%@",kCRYPT_KEY_PREFIX, _accountID, kCRYPT_KEY_SUFFIX];
+    return keyPassword;
 }
 
 @end

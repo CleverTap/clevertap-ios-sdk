@@ -26,6 +26,8 @@
     [coder encodeBool: _isCreatedPostAppLaunched forKey:@"isCreatedPostAppLaunched"];
     [coder encodeBool: _beta forKey:@"beta"];
     [coder encodeBool: _wv_init forKey:@"wv_init"];
+    [coder encodeBool: _encryptionLevel forKey:@"encryptionLevel"];
+    [coder encodeBool: _aesCrypt forKey:@"aesCrypt"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -48,6 +50,8 @@
         _isCreatedPostAppLaunched = [coder decodeBoolForKey:@"isCreatedPostAppLaunched"];
         _beta = [coder decodeBoolForKey:@"beta"];
         _wv_init = [coder decodeBoolForKey:@"wv_init"];
+        _encryptionLevel = [coder decodeIntForKey:@"encryptionLevel"];
+        _aesCrypt = [coder decodeObjectForKey:@"aesCrypt"];
     }
     return self;
 }
@@ -177,6 +181,8 @@
     copy.disableIDFV = self.disableIDFV;
     copy.identityKeys = self.identityKeys;
     copy.beta = self.beta;
+    copy.encryptionLevel = self.encryptionLevel;
+    copy.aesCrypt = self.aesCrypt;
     return copy;
 }
 
@@ -199,7 +205,9 @@
     _logLevel = 0;
     _beta = plist.beta;
     _encryptionLevel = isDefault ? [plist.encryptionLevel intValue] : CleverTapEncryptionOff;
-    _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
+    if (isDefault) {
+        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
+    }
 }
 
 - (void) checkIfAvailableAccountId:(NSString *)accountId
@@ -214,10 +222,9 @@
 }
 
 - (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
-    if(_isDefaultInstance) {
-        _encryptionLevel = CleverTapEncryptionOff;
-    } else {
+    if (!_isDefaultInstance) {
         _encryptionLevel = encryptionLevel;
+        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
     }
 }
 @end
