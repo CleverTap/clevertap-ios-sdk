@@ -39,7 +39,7 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
 
     NSString *encryptedIdentifier = identifier;
-    if (!self.config.aesCrypt) {
+    if (self.config.aesCrypt) {
         encryptedIdentifier = [self.config.aesCrypt getEncryptedString:identifier];
     }
     NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
@@ -78,7 +78,7 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     
     NSDictionary *cache = [self getCachedGUIDs];
     NSString *encryptedIdentifier = identifier;
-    if (!self.config.aesCrypt) {
+    if (self.config.aesCrypt) {
         encryptedIdentifier = [self.config.aesCrypt getEncryptedString:identifier];
     }
     NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];

@@ -29,11 +29,11 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     long lastEncryptionLevel = [CTPreferences getIntForKey:[self getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID] withResetValue:0];
     if (lastEncryptionLevel != _encryptionLevel) {
         [CTPreferences putInt:_encryptionLevel forKey:[self getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID]];
-        [self updateValues];
+        [self updatePreferencesValues];
     }
 }
 
-- (void)updateValues {
+- (void)updatePreferencesValues {
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
     if (cachedGUIDS) {
         NSMutableDictionary *newCache = [NSMutableDictionary new];
@@ -45,7 +45,6 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
                 NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, decryptedString];
                 newCache[cacheKey] = value;
             }];
-            [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
         } else if (_encryptionLevel == CleverTapEncryptionOn) {
             [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull cachedKey, NSString*  _Nonnull value, BOOL * _Nonnull stopp) {
                 NSString *key = [self getCachedKey:cachedKey];
@@ -54,8 +53,8 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
                 NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedString];
                 newCache[cacheKey] = value;
             }];
-            [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
         }
+        [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
     }
 }
 
@@ -81,7 +80,7 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     @try {
         NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:identifier options:kNilOptions];
         NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
-        if (decryptedData) {
+        if (decryptedData && decryptedData.length > 0) {
             decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
         }
     } @catch (NSException *e) {
@@ -93,7 +92,6 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (NSData *)convertData:(NSData *)data
           withOperation:(CCOperation)operation {
-    // TODO: will update key and identifier.
     NSData *outputData = [self AES128WithOperation:operation
                                                key:[self generateKeyPassword]
                                         identifier:CLTAP_ENCRYPTION_IV

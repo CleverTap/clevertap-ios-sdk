@@ -7,6 +7,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTLoginInfoProvider.h"
+#import "CTAES.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -656,7 +657,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
             self->lastProfilePersistenceTime = @([[[NSDate alloc] init] timeIntervalSince1970]);
         }
         
-        [CTPreferences archiveObject:_profile forFileName:[self profileFileName]];
+        NSMutableDictionary *updatedProfile = [self cryptValuesIfNeeded:_profile];
+        [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName]];
     }];
 }
 
@@ -805,6 +807,28 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     [self addPropertyFromStoreIfExists:@"Carrier" profile:profile storageKeys:@[CLTAP_SYS_CARRIER]];
     [self addPropertyFromStoreIfExists:@"cc" profile:profile storageKeys:@[CLTAP_SYS_CC]];
     return profile;
+}
+
+- (NSMutableDictionary *)cryptValuesIfNeeded:(NSMutableDictionary *)profile {
+    NSArray *piiData = @[CLTAP_USER_NAME, CLTAP_USER_EMAIL, CLTAP_USER_PHONE, CLTAP_PROFILE_IDENTITY_KEY];
+    NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+    for (NSString *key in profile) {
+        if ([piiData containsObject:key] && self.config.aesCrypt) {
+            NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
+            NSString *encryptedString;
+            if (self.config.encryptionLevel == CleverTapEncryptionOn) {
+                encryptedString = [self.config.aesCrypt getEncryptedString:value];
+            } else if (self.config.encryptionLevel == CleverTapEncryptionOff) {
+                encryptedString = [self.config.aesCrypt getDecryptedString:value];
+            } else {
+                encryptedString = value;
+            }
+            updatedProfile[key] = encryptedString;
+        } else {
+            updatedProfile[key] = profile[key];
+        }
+    }
+    return updatedProfile;
 }
 
 @end
