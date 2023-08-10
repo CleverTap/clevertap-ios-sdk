@@ -48,8 +48,8 @@
  @discussion
  Set using CleverTapEncryptionLevel enum values (or the corresponding int values).
  
- CleverTapEncryptionOff - turns off all encryption.
- CleverTapEncryptionOn - turns enxryption on for PII data
+ CleverTapEncryptionNone - turns off all encryption.
+ CleverTapEncryptionMedium - turns enxryption on for PII data
  
  @param encryptionLevel  the encryption level to set
  */

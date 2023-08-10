@@ -204,7 +204,7 @@
     _enablePersonalization = YES;
     _logLevel = 0;
     _beta = plist.beta;
-    _encryptionLevel = isDefault ? [plist.encryptionLevel intValue] : CleverTapEncryptionOff;
+    _encryptionLevel = isDefault ? plist.encryptionLevel : CleverTapEncryptionNone;
     if (isDefault) {
         _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
     }

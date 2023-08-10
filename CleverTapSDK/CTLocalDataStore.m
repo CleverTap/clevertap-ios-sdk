@@ -816,9 +816,9 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
         if ([piiData containsObject:key] && self.config.aesCrypt) {
             NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
             NSString *encryptedString;
-            if (self.config.encryptionLevel == CleverTapEncryptionOn) {
+            if (self.config.encryptionLevel == CleverTapEncryptionMedium) {
                 encryptedString = [self.config.aesCrypt getEncryptedString:value];
-            } else if (self.config.encryptionLevel == CleverTapEncryptionOff) {
+            } else if (self.config.encryptionLevel == CleverTapEncryptionNone) {
                 encryptedString = [self.config.aesCrypt getDecryptedString:value];
             } else {
                 encryptedString = value;

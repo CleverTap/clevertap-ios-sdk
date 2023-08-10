@@ -55,8 +55,8 @@ typedef NS_ENUM(int, CTSignedCallEvent) {
 };
 
 typedef NS_ENUM(int, CleverTapEncryptionLevel) {
-    CleverTapEncryptionOff = 0,
-    CleverTapEncryptionOn = 1
+    CleverTapEncryptionNone = 0,
+    CleverTapEncryptionMedium = 1
 };
 
 @interface CleverTap : NSObject
