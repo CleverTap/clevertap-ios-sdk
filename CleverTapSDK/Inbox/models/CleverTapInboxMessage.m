@@ -21,9 +21,9 @@
         if (campaignId) {
             _campaignId = campaignId;
         }
-        NSDictionary *customData = json[@"kv"];
+        NSArray *customData = json[@"msg"][@"custom_kv"];
         if (customData) {
-            _customData = customData;
+            _customData = [self getMessageCustomKV:customData];
         }
         NSArray *tags = json[@"msg"][@"tags"];
         if (tags) {
@@ -108,6 +108,24 @@
     } else {
         return @"Just now";
     }
+}
+
+- (NSDictionary *)getMessageCustomKV:(NSArray *)data {
+    NSMutableDictionary *customKV = [NSMutableDictionary new];
+    for (NSUInteger i = 0; i < [data count]; ++i) {
+        NSDictionary *kv = data[i];
+        if ([kv objectForKey:@"key"]) {
+            NSString *key = kv[@"key"];
+            if ([kv objectForKey:@"value"]) {
+                NSDictionary *value = kv[@"value"];
+                if ([value objectForKey:@"text"]) {
+                    NSString *text = value[@"text"];
+                    customKV[key] = text;
+                }
+            }
+        }
+    }
+    return customKV;
 }
 
 @end
