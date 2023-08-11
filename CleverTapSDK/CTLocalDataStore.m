@@ -24,6 +24,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+@property (nonatomic, strong) NSArray *piiKeys;
 
 @end
 
@@ -37,6 +38,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
         lastProfilePersistenceTime = 0;
+        _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
                 self->localProfileForSession = [self _inflateLocalProfile];
@@ -625,7 +627,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     if (!_profile) {
         _profile = [NSMutableDictionary dictionary];
     }
-    return _profile;
+    NSMutableDictionary *updatedProfile = [self decryptPIIDataIfEncrypted:_profile];
+    return updatedProfile;
 }
 
 - (void)persistLocalProfileIfRequired {
@@ -809,11 +812,29 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     return profile;
 }
 
+- (NSMutableDictionary *)decryptPIIDataIfEncrypted:(NSMutableDictionary *)profile {
+    NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+    if (self.config.aesCrypt && self.config.encryptionLevel == CleverTapEncryptionMedium) {
+        // If Encyption is Medium, store the local profile data in decrypted values.
+        for (NSString *key in profile) {
+            if ([_piiKeys containsObject:key]) {
+                NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
+                NSString *decryptedString = [self.config.aesCrypt getDecryptedString:value];
+                updatedProfile[key] = decryptedString;
+            } else {
+                updatedProfile[key] = profile[key];
+            }
+        }
+    } else {
+        updatedProfile = profile;
+    }
+    return updatedProfile;
+}
+
 - (NSMutableDictionary *)cryptValuesIfNeeded:(NSMutableDictionary *)profile {
-    NSArray *piiData = @[CLTAP_USER_NAME, CLTAP_USER_EMAIL, CLTAP_USER_PHONE, CLTAP_PROFILE_IDENTITY_KEY];
     NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
     for (NSString *key in profile) {
-        if ([piiData containsObject:key] && self.config.aesCrypt) {
+        if ([_piiKeys containsObject:key] && self.config.aesCrypt) {
             NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
             NSString *encryptedString;
             if (self.config.encryptionLevel == CleverTapEncryptionMedium) {
