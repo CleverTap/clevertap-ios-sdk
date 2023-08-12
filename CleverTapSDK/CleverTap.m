@@ -78,6 +78,7 @@ static NSArray *sslCertNames;
 #import "CTRequestSender.h"
 #import "CTDomainFactory.h"
 #import "CleverTap+SCDomain.h"
+#import "CTRetryManager.h"
 
 #import <objc/runtime.h>
 
@@ -207,8 +208,8 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) NSURLSession *urlSession;
 @property (nonatomic, strong) CTDomainFactory *domainFactory;
 @property (nonatomic, strong) CTRequestSender *requestSender;
+@property (nonatomic, strong) CTRetryManager *retryManager;
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
-@property (nonatomic, assign) int sendQueueFails;
 
 @property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 @property (nonatomic, assign) BOOL pushedAPNSId;
@@ -574,34 +575,34 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (nullable instancetype)_sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
     @try {
         [instanceLock lock];
-    if (_defaultInstanceConfig == nil) {
-        if (!_plistInfo.accountId || !_plistInfo.accountToken) {
-            if (!sharedInstanceErrorLogged) {
-                sharedInstanceErrorLogged = YES;
-                CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
-            }
-            return nil;
-        }
-        if (_plistInfo.proxyDomain.length > 0 && _plistInfo.spikyProxyDomain.length > 0) {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain spikyProxyDomain:_plistInfo.spikyProxyDomain isDefaultInstance:YES];
-        } else if (_plistInfo.proxyDomain.length > 0) {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
-        } else {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
-        }
-        
         if (_defaultInstanceConfig == nil) {
-            return nil;
+            if (!_plistInfo.accountId || !_plistInfo.accountToken) {
+                if (!sharedInstanceErrorLogged) {
+                    sharedInstanceErrorLogged = YES;
+                    CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
+                }
+                return nil;
+            }
+            if (_plistInfo.proxyDomain.length > 0 && _plistInfo.spikyProxyDomain.length > 0) {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain spikyProxyDomain:_plistInfo.spikyProxyDomain isDefaultInstance:YES];
+            } else if (_plistInfo.proxyDomain.length > 0) {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
+            } else {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+            }
+            
+            if (_defaultInstanceConfig == nil) {
+                return nil;
+            }
+            _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
+            _defaultInstanceConfig.logLevel = [self getDebugLevel];
+            
+            NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
+            NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
+            NSString *spikyProxyDomainLog = (!_plistInfo.spikyProxyDomain || _plistInfo.spikyProxyDomain.length < 1) ? @"" : _plistInfo.spikyProxyDomain;
+            CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog);
         }
-        _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
-        _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        
-        NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
-        NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
-        NSString *spikyProxyDomainLog = (!_plistInfo.spikyProxyDomain || _plistInfo.spikyProxyDomain.length < 1) ? @"" : _plistInfo.spikyProxyDomain;
-        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog);
-    }
-    return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+        return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
     } @finally {
         [instanceLock unlock];
     }
@@ -764,12 +765,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)_setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token {
     @try {
         [instanceLock lock];
-    if (_defaultInstanceConfig) {
-        CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
-        return;
-    }
-    accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (_defaultInstanceConfig) {
+            CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
+            return;
+        }
+        accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     } @finally {
         [instanceLock unlock];
     }
@@ -814,9 +815,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else {
         self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:0];
     }
-
+    
+    self.retryManager = [[CTRetryManager alloc]initWithConfig:self.config];
 #if CLEVERTAP_SSL_PINNING
-     self.urlSessionDelegate = [[CTPinnedNSURLSessionDelegate alloc] initWithConfig:self.config];
+    self.urlSessionDelegate = [[CTPinnedNSURLSessionDelegate alloc] initWithConfig:self.config];
     self.domainFactory = [[CTDomainFactory alloc]initWithConfig:self.config pinnedNSURLSessionDelegate: self.urlSessionDelegate sslCertNames: sslCertNames];
     self.requestSender = [[CTRequestSender alloc]initWithConfig:self.config redirectDomain:self.domainFactory.redirectDomain pinnedNSURLSessionDelegate: self.urlSessionDelegate sslCertNames: sslCertNames];
 #else
@@ -891,7 +893,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if (taskBlock) {
                 taskBlock();
             }
-                
+            
             dispatch_semaphore_signal(semaphore);
         }];
         [ctRequest onError:^(NSError * _Nullable error) {
@@ -959,27 +961,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)handleHandshakeSuccess {
     CleverTapLogInternal(self.config.logLevel, @"%@: handshake success", self);
-    [self resetFailsCounter];
-}
-
-- (void)resetFailsCounter {
-    self.sendQueueFails = 0;
+    [self.retryManager resetFailsCounter];
 }
 
 - (void)handleSendQueueSuccess {
     [self setLastRequestTimestamp:currentRequestTimestamp];
     [self setFirstRequestTimestampIfNeeded:currentRequestTimestamp];
-    [self resetFailsCounter];
+    [self.retryManager resetFailsCounter];
 }
-
-- (void)handleSendQueueFail {
-    self.sendQueueFails += 1;
-    if (self.sendQueueFails > 5) {
-        [self.domainFactory clearRedirectDomain];
-        self.sendQueueFails = 0;
-    }
-}
-
 
 #pragma mark - Queue/Dispatch helpers
 
@@ -993,7 +982,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } else {
         endpointDomain = self.domainFactory.redirectDomain;
     }
-    NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/a1?os=iOS&t=%@&z=%@", endpointDomain, sdkRevision, accountId];
+    NSString *endpointUrl = [[NSString alloc] initWithFormat:kURL_A3, endpointDomain, sdkRevision, accountId];
     currentRequestTimestamp = (int) [[[NSDate alloc] init] timeIntervalSince1970];
     endpointUrl = [endpointUrl stringByAppendingFormat:@"&ts=%d", currentRequestTimestamp];
     return endpointUrl;
@@ -1139,9 +1128,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }
     
-    #if CLEVERTAP_SSL_PINNING
-        evtData[@"sslpin"] = @YES;
-    #endif
+#if CLEVERTAP_SSL_PINNING
+    evtData[@"sslpin"] = @YES;
+#endif
     
     NSString *proxyDomain = [self.config.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (proxyDomain != nil && proxyDomain.length > 0) {
@@ -1967,7 +1956,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
         [[self class] displayInAppDisplayController:controller];
-
+        
         // Update local in-app count only if it is from local push primer.
         if (notification.isLocalInApp && !notification.isPushSettingsSoftAlert) {
             [self.deviceInfo incrementLocalInAppCount];
@@ -2626,10 +2615,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 - (void)scheduleQueueFlush {
-    CleverTapLogInternal(self.config.logLevel, @"%@: scheduling delayed queue flush", self);
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(flushQueue) object:nil];
-        [self performSelector:@selector(flushQueue) withObject:nil afterDelay:CLTAP_PUSH_DELAY_SECONDS];
+        [self performSelector:@selector(flushQueue) withObject:nil afterDelay:[self.retryManager getDelayFrequency]];
     });
 }
 
@@ -2661,12 +2650,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // Need to simulate a synchronous request
         dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
         
-        CTRequest *ctRequest = [CTRequestFactory healthRequestWithConfig:self.config];
+        NSString *healthURL = [NSString stringWithFormat:@"https://%@/%@",self.domainFactory.redirectDomain, kHEALTH_URL_598];
+        CTRequest *ctRequest = [CTRequestFactory healthRequestWithConfig:self.config url:healthURL];
         [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
             
             if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                 NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-                NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]initWithURL:httpResponse.URL statusCode:503 HTTPVersion:nil headerFields:nil];
                 if (httpResponse.statusCode == 200) {
                     CleverTapLogStaticDebug(@"Server Status: 200 OK");
                     taskBlock();
@@ -2674,13 +2663,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 else if (httpResponse.statusCode == 503) {
                     // SERVICE UNAVAILABLE.
                     CleverTapLogStaticDebug(@"Server Error: %@", @"HTTP 503 Service Unavailable");
-                    [self persistOrClearQueues];
+                    self.isServerOnline = NO;
                 }
                 else if (httpResponse.statusCode == 598) {
                     CleverTapLogStaticDebug(@"Server Error: %@", @"HTTP 598 Network read timeout error");
+                    self.isServerOnline = YES;
+                    [self scheduleQueueFlush];
                 }
             } else {
-               
+                
             }
             dispatch_semaphore_signal(semaphore);
         }];
@@ -2696,21 +2687,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)sendQueues {
     if ([self isMuted] || _offline || [self allQueuesEmpty]) return;
     
-    // CHECK THE SERVER STATUS VIA /health
-//    [self runSerialAsync:^{
-//        [self checkServerHealthWithCompletion:^{
-            // SERVER IS UP. SEND QUEUES
-    
-        [self runSerialAsync:^{
-            if (self.isServerOnline) {
-                [self sendQueue:self->_profileQueue];
-                [self sendQueue:self->_eventsQueue];
-                [self sendQueue:self->_notificationsQueue];
-            }
-        }];
-    
-//        }];
-//    }];
+    // SERVER IS UP. SEND QUEUES
+    [self runSerialAsync:^{
+        if (self.isServerOnline) {
+            [self sendQueue:self->_profileQueue];
+            [self sendQueue:self->_eventsQueue];
+            [self sendQueue:self->_notificationsQueue];
+        }
+    }];
 }
 
 - (void)inflateQueuesAsync {
@@ -2869,7 +2853,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             __block BOOL success = NO;
             __block NSData *responseData;
-            
             __block BOOL redirect = NO;
             
             // Need to simulate a synchronous request
@@ -2881,13 +2864,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 
                 if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-                    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]initWithURL:httpResponse.URL statusCode:300 HTTPVersion:nil headerFields:nil];
                     
                     success = (httpResponse.statusCode == 200);
                     NSIndexSet *migrationStatusCodes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(300, 99)];
                     
                     // STATUS CODE: 200
                     if (success) {
+                        self.isServerOnline = YES;
                         if (queue == self->_notificationsQueue) {
                             redirect = [self updateStateFromResponseHeadersShouldRedirectForNotif: httpResponse.allHeaderFields];
                         } else {
@@ -2897,19 +2880,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     }
                     // STATUS CODE: 300-399
                     else if ([migrationStatusCodes containsIndex:httpResponse.statusCode]) {
-                       // ACCOUNT HAS MIGRATED. DO HANDSHAKE
+                        // ACCOUNT HAS MIGRATED. DO HANDSHAKE
                         [self.domainFactory clearRedirectDomain];
                         [self doHandshakeAsyncWithCompletion:^{
-//                            [self sendQueue:queue];
-                            [self checkServerHealthWithCompletion:^{
-                                [self runSerialAsync:^{
-                                    [self sendQueue:queue];
-                                }];
+                            [self runSerialAsync:^{
+                                [self sendQueue:queue];
                             }];
                         }];
                     }
-                    else if (response.statusCode == 503) {
+                    else if (httpResponse.statusCode == 503) {
                         // SERVER OUTAGE. CHECK SERVER STATUS
+                        [self.retryManager incrementFailsCounter];
                         [self checkServerHealthWithCompletion:^{
                             [self runSerialAsync:^{
                                 [self sendQueue:queue];
@@ -2917,11 +2898,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         }];
                     }
                     else if (httpResponse.statusCode == 598) {
-                        
+                        [self.retryManager incrementFailsCounter];
+                        [self checkServerHealthWithCompletion:^{
+                            [self runSerialAsync:^{
+                                [self sendQueue:queue];
+                            }];
+                        }];
                     }
-//                    else {
-//                        CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
-//                    }
                 }
                 
                 dispatch_semaphore_signal(semaphore);
@@ -2935,12 +2918,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }];
             [self.requestSender send:ctRequest];
             dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-            
-            if (!success) {
-                // TODO: STOP RETRY EVERY ONE SECOND
-                [self scheduleQueueFlush];
-                [self handleSendQueueFail];
-            }
             
             if (!success || redirect) {
                 // error so return without removing events from the queue or parsing the response
@@ -2960,7 +2937,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
     }
 }
-
 
 #pragma mark Response Handling
 
@@ -3188,16 +3164,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 
             } else {
                 CleverTapLogInternal(self.config.logLevel, @"%@: either the JSON response was nil or it wasn't of type NSDictionary", self);
-                [self handleSendQueueFail];
+                [self.retryManager incrementFailsCounter];
             }
         }
         @catch (NSException *e) {
             CleverTapLogInternal(self.config.logLevel, @"%@: Failed to parse the response as a JSON object. Reason: %@", self, e.debugDescription);
-            [self handleSendQueueFail];
+            [self.retryManager incrementFailsCounter];
         }
     } else {
         CleverTapLogInternal(self.config.logLevel, @"%@: Expected a JSON object as the response, but received none", self);
-        [self handleSendQueueFail];
+        [self.retryManager incrementFailsCounter];
     }
 }
 
@@ -5094,7 +5070,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                 if (sharedApplication == nil) {
                                     return;
                                 }
-
+                                
                                 [sharedApplication registerForRemoteNotifications];
                             }];
                         } else {
@@ -5146,7 +5122,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogDebug(self.config.logLevel, @"%@: Unable to retrieve URL from OpenSettingsURL string", self);
         return;
     }
-
+    
     [[self class] runSyncMainQueue:^{
         [self openURL:url forModule:@"PushPermission"];
     }];
@@ -5187,7 +5163,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     }
 }
-    
+
 - (void)syncVariables:(BOOL)isProduction {
     if (isProduction) {
 #if DEBUG
@@ -5274,87 +5250,87 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (CTVar *)defineVar:(NSString *)name withDouble:(double)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithDouble:defaultValue]
-                         kind:CT_KIND_FLOAT];
+                             with:[NSNumber numberWithDouble:defaultValue]
+                             kind:CT_KIND_FLOAT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withCGFloat:(CGFloat)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithDouble:defaultValue]
-                         kind:CT_KIND_FLOAT];
+                             with:[NSNumber numberWithDouble:defaultValue]
+                             kind:CT_KIND_FLOAT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withShort:(short)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithShort:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithShort:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withChar:(char)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithChar:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithChar:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withBool:(BOOL)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithBool:defaultValue]
-                         kind:CT_KIND_BOOLEAN];
+                             with:[NSNumber numberWithBool:defaultValue]
+                             kind:CT_KIND_BOOLEAN];
 }
 
 - (CTVar *)defineVar:(NSString *)name withInteger:(NSInteger)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithInteger:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithInteger:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withLong:(long)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithLong:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithLong:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withLongLong:(long long)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithLongLong:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithLongLong:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedChar:(unsigned char)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithUnsignedChar:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithUnsignedChar:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedInt:(unsigned int)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithUnsignedInt:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithUnsignedInt:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedInteger:(NSUInteger)defaultValue
 {
     return [self.variables define:name
-                         with:[NSNumber numberWithUnsignedInteger:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithUnsignedInteger:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedLong:(unsigned long)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithUnsignedLong:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithUnsignedLong:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedLongLong:(unsigned long long)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithUnsignedLongLong:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithUnsignedLongLong:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withUnsignedShort:(unsigned short)defaultValue {
     return [self.variables define:name
-                         with:[NSNumber numberWithUnsignedShort:defaultValue]
-                         kind:CT_KIND_INT];
+                             with:[NSNumber numberWithUnsignedShort:defaultValue]
+                             kind:CT_KIND_INT];
 }
 
 - (CTVar *)defineVar:(NSString *)name withString:(NSString *)defaultValue {

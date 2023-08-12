@@ -2,8 +2,13 @@
 
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
+extern NSString *const kURL_A1;
+extern NSString *const kURL_A2;
+extern NSString *const kURL_A3;
 extern NSString *const kHANDSHAKE_URL;
 extern NSString *const kHEALTH_URL;
+extern NSString *const kHEALTH_URL_503;
+extern NSString *const kHEALTH_URL_598;
 extern NSString *CT_KIND_INT;
 extern NSString *CT_KIND_FLOAT;
 extern NSString *CT_KIND_STRING;
@@ -64,6 +69,7 @@ extern NSString *CT_PE_DEFAULT_VALUE;
 #define CLTAP_ERROR_KEY @"wzrk_error"
 #define CLTAP_WZRK_FETCH_EVENT @"wzrk_fetch"
 #define CLTAP_PUSH_DELAY_SECONDS 1
+#define CLTAP_MAX_DELAY 1000
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_INAPP_SESSION_MAX @"imc_max"

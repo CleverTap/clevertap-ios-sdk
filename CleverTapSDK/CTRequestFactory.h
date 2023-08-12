@@ -15,7 +15,7 @@
 + (CTRequest *_Nonnull)helloRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config;
 + (CTRequest *_Nonnull)eventRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url;
 + (CTRequest *_Nonnull)syncVarsRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url;
-+ (CTRequest *_Nonnull)healthRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config;
++ (CTRequest *_Nonnull)healthRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config url:(NSString *_Nonnull)url;
 @end
 
 
