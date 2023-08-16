@@ -10,6 +10,11 @@ All notable changes to this project will be documented in this file.
 - Adds support for custom KV pairs common to all inbox messages in AppInbox.
 - Adds sample SwiftUIStarter app to support CleverTap iOS SDK for SwiftUI, added steps to track screen views in SwiftUI. Refer to [SwiftUI doc](/docs/SwiftUI.md) for more details.
 
+### [Version 5.1.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.2) (July 28, 2023)
+
+#### Fixed
+- Fixed a bug where the App Inbox would appear empty.
+
 ### [Version 5.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.1) (July 13, 2023)
 
 #### Fixed
