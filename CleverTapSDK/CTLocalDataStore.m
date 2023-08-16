@@ -814,8 +814,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 
 - (NSMutableDictionary *)decryptPIIDataIfEncrypted:(NSMutableDictionary *)profile {
     NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
-    if (self.config.aesCrypt && self.config.encryptionLevel == CleverTapEncryptionMedium) {
-        // If Encyption is Medium, store the local profile data in decrypted values.
+    if (self.config.aesCrypt) {
+        // Always store the local profile data in decrypted values.
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
                 NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
@@ -836,15 +836,15 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     for (NSString *key in profile) {
         if ([_piiKeys containsObject:key] && self.config.aesCrypt) {
             NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-            NSString *encryptedString;
+            NSString *cryptedString;
             if (self.config.encryptionLevel == CleverTapEncryptionMedium) {
-                encryptedString = [self.config.aesCrypt getEncryptedString:value];
+                cryptedString = [self.config.aesCrypt getEncryptedString:value];
             } else if (self.config.encryptionLevel == CleverTapEncryptionNone) {
-                encryptedString = [self.config.aesCrypt getDecryptedString:value];
+                cryptedString = [self.config.aesCrypt getDecryptedString:value];
             } else {
-                encryptedString = value;
+                cryptedString = value;
             }
-            updatedProfile[key] = encryptedString;
+            updatedProfile[key] = cryptedString;
         } else {
             updatedProfile[key] = profile[key];
         }

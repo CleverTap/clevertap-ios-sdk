@@ -81,7 +81,10 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
         NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:identifier options:kNilOptions];
         NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
         if (decryptedData && decryptedData.length > 0) {
-            decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
+            NSString *utf8EncodedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
+            if (utf8EncodedString) {
+                decryptedString = utf8EncodedString;
+            }
         }
     } @catch (NSException *e) {
         CleverTapLogStaticInternal(@"Error: %@ while decrypting the string: %@", e.debugDescription, identifier);

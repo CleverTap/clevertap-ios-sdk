@@ -45,7 +45,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CLEVERTAP_ENCRYPTION_LEVEL</key>
+	<key>CleverTapEncryptionLevel</key>
 	<string>1</string>
 </dict>
 </plist>
