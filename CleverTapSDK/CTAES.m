@@ -2,6 +2,7 @@
 #import "CTAES.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
+#import "CTUtils.h"
 
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
@@ -26,15 +27,14 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (void)updateEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
     _encryptionLevel = encryptionLevel;
-    long lastEncryptionLevel = [CTPreferences getIntForKey:[self getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID] withResetValue:0];
+    long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID] withResetValue:0];
     if (lastEncryptionLevel != _encryptionLevel) {
-        [CTPreferences putInt:_encryptionLevel forKey:[self getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID]];
         [self updatePreferencesValues];
     }
 }
 
 - (void)updatePreferencesValues {
-    NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
+    NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[CTUtils getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
     if (cachedGUIDS) {
         NSMutableDictionary *newCache = [NSMutableDictionary new];
         if (_encryptionLevel == CleverTapEncryptionNone) {
@@ -54,7 +54,7 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
                 newCache[cacheKey] = value;
             }];
         }
-        [CTPreferences putObject:newCache forKey:[self getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
+        [CTPreferences putObject:newCache forKey:[CTUtils getKeyWithSuffix:kCacheGUIDS accountID:_accountID]];
     }
 }
 
@@ -142,11 +142,6 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     }
     
     return [NSData dataWithBytesNoCopy:output length:outputMovedSize];
-}
-
-- (NSString *)getKeyWithSuffix:(NSString *)suffix
-                     accountID:(NSString *)accountID {
-    return [NSString stringWithFormat:@"%@:%@", accountID, suffix];
 }
 
 - (NSString *)getCachedKey:(NSString *)value {

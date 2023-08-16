@@ -7,4 +7,5 @@
 + (double)toTwoPlaces:(double)x;
 + (BOOL)isNullOrEmpty:(id)obj;
 + (NSString *)jsonObjectToString:(id)object;
++ (NSString *)getKeyWithSuffix:(NSString *)suffix accountID:(NSString *)accountID;
 @end
