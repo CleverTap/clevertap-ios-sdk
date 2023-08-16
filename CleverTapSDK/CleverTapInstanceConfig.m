@@ -2,6 +2,7 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTPlistInfo.h"
 #import "CTConstants.h"
+#import "CTAES.h"
 
 @implementation CleverTapInstanceConfig
 
@@ -25,6 +26,8 @@
     [coder encodeBool: _isCreatedPostAppLaunched forKey:@"isCreatedPostAppLaunched"];
     [coder encodeBool: _beta forKey:@"beta"];
     [coder encodeBool: _wv_init forKey:@"wv_init"];
+    [coder encodeBool: _encryptionLevel forKey:@"encryptionLevel"];
+    [coder encodeBool: _aesCrypt forKey:@"aesCrypt"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -47,6 +50,8 @@
         _isCreatedPostAppLaunched = [coder decodeBoolForKey:@"isCreatedPostAppLaunched"];
         _beta = [coder decodeBoolForKey:@"beta"];
         _wv_init = [coder decodeBoolForKey:@"wv_init"];
+        _encryptionLevel = [coder decodeIntForKey:@"encryptionLevel"];
+        _aesCrypt = [coder decodeObjectForKey:@"aesCrypt"];
     }
     return self;
 }
@@ -176,6 +181,8 @@
     copy.disableIDFV = self.disableIDFV;
     copy.identityKeys = self.identityKeys;
     copy.beta = self.beta;
+    copy.encryptionLevel = self.encryptionLevel;
+    copy.aesCrypt = self.aesCrypt;
     return copy;
 }
 
@@ -197,6 +204,10 @@
     _enablePersonalization = YES;
     _logLevel = 0;
     _beta = plist.beta;
+    _encryptionLevel = isDefault ? plist.encryptionLevel : CleverTapEncryptionNone;
+    if (isDefault) {
+        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
+    }
 }
 
 - (void) checkIfAvailableAccountId:(NSString *)accountId
@@ -207,6 +218,15 @@
     
     if (accountToken.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountToken is empty");
+    }
+}
+
+- (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
+    if (!_isDefaultInstance) {
+        _encryptionLevel = encryptionLevel;
+        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:_isDefaultInstance];
+    } else {
+        CleverTapLogStaticInfo("CleverTap Encryption level for default instance can't be updated from setEncryptionLevel method");
     }
 }
 @end

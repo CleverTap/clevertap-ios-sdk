@@ -162,6 +162,8 @@
 		32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2629FA278C00956058 /* CTUriHelperTest.m */; };
 		32790957299CC099001FE140 /* CTUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790956299CC099001FE140 /* CTUtilsTest.m */; };
 		32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790958299F4B29001FE140 /* CTDeviceInfoTest.m */; };
+		4803951B2A7ABAD200C4D254 /* CTAES.m in Sources */ = {isa = PBXBuildFile; fileRef = 480395192A7ABAD200C4D254 /* CTAES.m */; };
+		4803951C2A7ABAD200C4D254 /* CTAES.h in Headers */ = {isa = PBXBuildFile; fileRef = 4803951A2A7ABAD200C4D254 /* CTAES.h */; };
 		4808030E292EB4FB00C06E2F /* CleverTap+PushPermission.h in Headers */ = {isa = PBXBuildFile; fileRef = 4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */; };
 		48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 4808030F292EB50D00C06E2F /* CTLocalInApp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		48080312292EB50D00C06E2F /* CTLocalInApp.m in Sources */ = {isa = PBXBuildFile; fileRef = 48080310292EB50D00C06E2F /* CTLocalInApp.m */; };
@@ -613,6 +615,8 @@
 		32790956299CC099001FE140 /* CTUtilsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUtilsTest.m; sourceTree = "<group>"; };
 		32790958299F4B29001FE140 /* CTDeviceInfoTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDeviceInfoTest.m; sourceTree = "<group>"; };
 		37D3A7E5589257CFA37243C3 /* libPods-shared-CleverTapSDKUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-shared-CleverTapSDKUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		480395192A7ABAD200C4D254 /* CTAES.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAES.m; sourceTree = "<group>"; };
+		4803951A2A7ABAD200C4D254 /* CTAES.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAES.h; sourceTree = "<group>"; };
 		4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+PushPermission.h"; sourceTree = "<group>"; };
 		4808030F292EB50D00C06E2F /* CTLocalInApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTLocalInApp.h; sourceTree = "<group>"; };
 		48080310292EB50D00C06E2F /* CTLocalInApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTLocalInApp.m; sourceTree = "<group>"; };
@@ -1222,6 +1226,8 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				4803951A2A7ABAD200C4D254 /* CTAES.h */,
+				480395192A7ABAD200C4D254 /* CTAES.m */,
 				4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */,
 				4E838C4429A0C94B00ED0875 /* CleverTap+CTVar.h */,
 				4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */,
@@ -1518,6 +1524,7 @@
 				07B94550219EA39000D4C542 /* CleverTap+Inbox.h in Headers */,
 				071EB4F9217F6427008F0FAB /* CTNotificationButton.h in Headers */,
 				48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */,
+				4803951C2A7ABAD200C4D254 /* CTAES.h in Headers */,
 				D0213D4D207D905800FE5740 /* CleverTapTrackedViewController.h in Headers */,
 				4E25E3C5278887A70008C888 /* CTFlexibleIdentityRepo.h in Headers */,
 				071EB512217F6427008F0FAB /* CTInAppHTMLViewController.h in Headers */,
@@ -2019,6 +2026,7 @@
 				07B9454D219EA34300D4C542 /* Inbox.xcdatamodeld in Sources */,
 				D0213D51207D905800FE5740 /* CleverTapUTMDetail.m in Sources */,
 				D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */,
+				4803951B2A7ABAD200C4D254 /* CTAES.m in Sources */,
 				D032F3A92093EC9700F98D74 /* CTValidationResult.m in Sources */,
 				071EB501217F6427008F0FAB /* CTFooterViewController.m in Sources */,
 				D0A84ADD209136D500191B1F /* CTLogger.m in Sources */,

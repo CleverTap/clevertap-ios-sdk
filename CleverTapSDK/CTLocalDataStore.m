@@ -7,12 +7,16 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTLoginInfoProvider.h"
+#import "CTAES.h"
+#import "CTPreferences.h"
+#import "CTUtils.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
 NSString* const kWR_KEY_EVENTS = @"local_events_cache";
 NSString* const kLocalCacheLastSync = @"local_cache_last_sync";
 NSString* const kLocalCacheExpiry = @"local_cache_expiry";
+NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 @interface CTLocalDataStore() {
     NSMutableDictionary *localProfileUpdateExpiryStore;
@@ -23,6 +27,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+@property (nonatomic, strong) NSArray *piiKeys;
 
 @end
 
@@ -36,6 +41,7 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
         lastProfilePersistenceTime = 0;
+        _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
                 self->localProfileForSession = [self _inflateLocalProfile];
@@ -624,7 +630,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     if (!_profile) {
         _profile = [NSMutableDictionary dictionary];
     }
-    return _profile;
+    NSMutableDictionary *updatedProfile = [self decryptPIIDataIfEncrypted:_profile];
+    return updatedProfile;
 }
 
 - (void)persistLocalProfileIfRequired {
@@ -656,7 +663,8 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
             self->lastProfilePersistenceTime = @([[[NSDate alloc] init] timeIntervalSince1970]);
         }
         
-        [CTPreferences archiveObject:_profile forFileName:[self profileFileName]];
+        NSMutableDictionary *updatedProfile = [self cryptValuesIfNeeded:_profile];
+        [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName]];
     }];
 }
 
@@ -804,6 +812,44 @@ NSString* const kLocalCacheExpiry = @"local_cache_expiry";
     [self addPropertyFromStoreIfExists:@"tz" profile:profile storageKeys:@[CLTAP_SYS_TZ]];
     [self addPropertyFromStoreIfExists:@"Carrier" profile:profile storageKeys:@[CLTAP_SYS_CARRIER]];
     [self addPropertyFromStoreIfExists:@"cc" profile:profile storageKeys:@[CLTAP_SYS_CC]];
+    return profile;
+}
+
+- (NSMutableDictionary *)decryptPIIDataIfEncrypted:(NSMutableDictionary *)profile {
+    long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CT_ENCRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
+    [CTPreferences putInt:self.config.encryptionLevel forKey:[CTUtils getKeyWithSuffix:CT_ENCRYPTION_KEY accountID:self.config.accountId]];
+    if (lastEncryptionLevel == CleverTapEncryptionMedium && self.config.aesCrypt) {
+        // Always store the local profile data in decrypted values.
+        NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+        for (NSString *key in profile) {
+            if ([_piiKeys containsObject:key]) {
+                NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
+                NSString *decryptedString = [self.config.aesCrypt getDecryptedString:value];
+                updatedProfile[key] = decryptedString;
+            } else {
+                updatedProfile[key] = profile[key];
+            }
+        }
+        return updatedProfile;
+    }
+    
+    return profile;
+}
+
+- (NSMutableDictionary *)cryptValuesIfNeeded:(NSMutableDictionary *)profile {
+    if (self.config.encryptionLevel == CleverTapEncryptionMedium && self.config.aesCrypt) {
+        NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+        for (NSString *key in profile) {
+            if ([_piiKeys containsObject:key]) {
+                NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
+                updatedProfile[key] = [self.config.aesCrypt getEncryptedString:value];
+            } else {
+                updatedProfile[key] = profile[key];
+            }
+        }
+        return updatedProfile;
+    }
+
     return profile;
 }
 

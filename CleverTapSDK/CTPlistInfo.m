@@ -90,6 +90,9 @@ static NSArray *registeredURLSchemes;
         // Fetch IDFV Flag from INFO.PLIST
         NSString *disableIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_IDFV_LABEL];
         _disableIDFV = (disableIDFV && [disableIDFV isEqualToString:@"1"]);
+        
+        NSString *encryptionLevel = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_LEVEL];
+        [self setEncryption:encryptionLevel];
     }
     return self;
 }
@@ -112,4 +115,16 @@ static NSArray *registeredURLSchemes;
     _proxyDomain = proxyDomain;
     _spikyProxyDomain = spikyProxyDomain;
 }
+
+- (void)setEncryption:(NSString *)encryptionLevel {
+    if (encryptionLevel && [encryptionLevel isEqualToString:@"0"]) {
+        _encryptionLevel = CleverTapEncryptionNone;
+    } else if (encryptionLevel && [encryptionLevel isEqualToString:@"1"]) {
+        _encryptionLevel = CleverTapEncryptionMedium;
+    } else {
+        _encryptionLevel = CleverTapEncryptionNone;
+        CleverTapLogStaticInternal(@"Supported encryption levels are only 0 and 1. Setting it to 0 by default");
+    }
+}
+
 @end
