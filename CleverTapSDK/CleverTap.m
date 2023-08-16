@@ -1880,6 +1880,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
         return;
     }
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
+        return;
+    }
     if (notification.error) {
         CleverTapLogInternal(self.config.logLevel, @"%@: unable to process inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
         return;
@@ -1891,13 +1895,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)displayNotification:(CTInAppNotification*)notification {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
+        return;
+    }
     if (![NSThread isMainThread]) {
         [[self class] runSyncMainQueue:^{
             [self displayNotification:notification];
         }];
         return;
     }
-    
     if (!self.isAppForeground) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, not displaying in-app: %@", self, notification.jsonDescription);
         return;
