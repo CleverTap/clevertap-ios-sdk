@@ -13,6 +13,6 @@
  */
 - (NSString *)getDecryptedString:(NSString *)identifier;
 
-- (instancetype)initWithAccountID:(NSString *)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel;
+- (instancetype)initWithAccountID:(NSString *)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel isDefaultInstance:(BOOL)isDefaultInstance;
 
 @end

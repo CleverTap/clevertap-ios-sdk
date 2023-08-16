@@ -206,7 +206,7 @@
     _beta = plist.beta;
     _encryptionLevel = isDefault ? plist.encryptionLevel : CleverTapEncryptionNone;
     if (isDefault) {
-        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
+        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
     }
 }
 
@@ -224,7 +224,9 @@
 - (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
     if (!_isDefaultInstance) {
         _encryptionLevel = encryptionLevel;
-        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel];
+        _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:_isDefaultInstance];
+    } else {
+        CleverTapLogStaticInfo("CleverTap Encryption level for default instance can't be updated from setEncryptionLevel method");
     }
 }
 @end

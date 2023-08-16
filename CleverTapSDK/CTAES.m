@@ -12,14 +12,17 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 @interface CTAES () {}
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
+@property (nonatomic, assign) BOOL isDefaultInstance;
 @end
 
 @implementation CTAES
 
 - (instancetype)initWithAccountID:(NSString *)accountID
-                  encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
+                  encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel
+                isDefaultInstance:(BOOL)isDefaultInstance {
     if (self = [super init]) {
         _accountID = accountID;
+        _isDefaultInstance = isDefaultInstance;
         [self updateEncryptionLevel:encryptionLevel];
     }
     return self;
@@ -29,7 +32,12 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     _encryptionLevel = encryptionLevel;
     long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID] withResetValue:0];
     if (lastEncryptionLevel != _encryptionLevel) {
+        CleverTapLogStaticInternal(@"CleverTap Encryption level changed for account: %@ to: %d", _accountID, _encryptionLevel);
         [self updatePreferencesValues];
+        if (!_isDefaultInstance) {
+            // For Default instance, we are updating this after updating Local DB values on App Launch.
+            [CTPreferences putInt:_encryptionLevel forKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID]];
+        }
     }
 }
 

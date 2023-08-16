@@ -16,7 +16,7 @@ Different instances can have different encryption levels. To set an encryption l
 // Objective-C
 
 CleverTapInstanceConfig *ctConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:@"ADDITIONAL_CLEVERTAP_ACCOUNT_ID" accountToken:@"ADDITIONAL_CLEVERTAP_ACCOUNT_TOKEN"];
-ctConfig.encryptionLevel = CleverTapEncryptionMedium;
+[ctConfig setEncryptionLevel:CleverTapEncryptionMedium];
 CleverTap *additionalCleverTapInstance = [CleverTap instanceWithConfig:ctConfig];
 ```
 
