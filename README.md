@@ -75,6 +75,7 @@ CleverTap iOS SDK supports creating remote config variables, refer [Remote Confi
 * A [demo application](/ObjCStarter) showing the integration of our SDK in Objective-C language.
 * A [demo application](/SwiftStarter) showing the integration of our SDK in Swift language.
 * A [demo application](/SPMStarter) showing the installation of our SDK via Swift Package Manager.
+* A [demo application](/SwiftUIStarter) showing the installation of our SDK in Swift UI Application.
 
 ## 🆕 Change Log
 

@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 5.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.0) (August 16, 2023)
+
+#### Added
+- Adds support for encryption of PII data wiz. Email, Identity, Name and Phone. 
+  Please refer to [Encryption.md](/docs/Encryption.md) file to read more on how to
+  enable/disable encryption.
+- Adds support for custom KV pairs common to all inbox messages in AppInbox.
+- Adds sample SwiftUIStarter app to support CleverTap iOS SDK for SwiftUI, added steps to track screen views in SwiftUI. Refer to [SwiftUI doc](/docs/SwiftUI.md) for more details.
+
 ### [Version 5.1.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.1.2) (July 28, 2023)
 
 #### Fixed

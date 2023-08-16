@@ -85,4 +85,9 @@
     }
 }
 
++ (NSString *)getKeyWithSuffix:(NSString *)suffix
+                     accountID:(NSString *)accountID {
+    return [NSString stringWithFormat:@"%@:%@", accountID, suffix];
+}
+
 @end
