@@ -1020,6 +1020,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         header[@"regURLs"] = registeredURLSchemes;
     }
     
+    if ([CleverTap getDebugLevel] == 3){
+        header[@"debug"] = @YES;
+    }
+    
     @try {
         NSDictionary *arp = [self getARP];
         if (arp && [arp count] > 0) {
