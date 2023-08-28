@@ -26,8 +26,8 @@
     [coder encodeBool: _isCreatedPostAppLaunched forKey:@"isCreatedPostAppLaunched"];
     [coder encodeBool: _beta forKey:@"beta"];
     [coder encodeBool: _wv_init forKey:@"wv_init"];
-    [coder encodeBool: _encryptionLevel forKey:@"encryptionLevel"];
-    [coder encodeBool: _aesCrypt forKey:@"aesCrypt"];
+    [coder encodeInt: _encryptionLevel forKey:@"encryptionLevel"];
+    [coder encodeObject: _aesCrypt forKey:@"aesCrypt"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {

@@ -82,6 +82,8 @@ static NSArray *sslCertNames;
 
 #import "NSDictionary+Extensions.h"
 
+#import "CTAES.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -702,7 +704,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
     if (!_instances || [_instances count] <= 0) {
-        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofType:[CleverTapInstanceConfig class] removeFile:NO];
+        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofTypes:allowedClasses removeFile:NO];
         return [CleverTap instanceWithConfig:config];
     }
     
