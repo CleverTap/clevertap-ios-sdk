@@ -26,8 +26,8 @@
     return NO;
 }
 
-- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:details andItems:items];
+- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"Charged" eventProperties:details andItems:items];
 
     // Events in the array are OR-ed
     for (NSDictionary *triggerObject in whenTriggers) {
@@ -86,6 +86,17 @@
     switch (op) {
         case CTTriggerOperatorLessThan:
             return [[expected numberValue] compare:[actual numberValue]] == NSOrderedDescending;
+        case CTTriggerOperatorEquals:
+            if ([expected stringValue]) {
+                return [[expected stringValue] isEqualToString:[actual stringValue]];
+            }
+            if ([expected numberValue]) {
+                NSNumber *actualNumber = [actual numberValue];
+                if (!actualNumber) {
+                    actualNumber = [NSNumber numberWithDouble:[[actual stringValue] doubleValue]];
+                }
+                return [[expected numberValue] compare:actualNumber] == NSOrderedSame;
+            }
         default:
             return NO; // TODO: Implement all cases as per the backed evaluation and remove this line
     }

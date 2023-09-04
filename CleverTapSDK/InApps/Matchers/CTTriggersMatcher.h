@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties;
 
-- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items;
+- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items;
 
 @end
 
