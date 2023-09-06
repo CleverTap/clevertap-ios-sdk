@@ -1218,6 +1218,17 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @method
  
  @abstract
+ Updates a user locale after session start.
+ 
+ @discussion
+ Call this to method to set locale
+ */
++ (void)setLocale:(NSLocale * _Nonnull)locale;
+
+/*!
+ @method
+ 
+ @abstract
  Store the users location for geofences on the default shared CleverTap instance.
  
  @discussion

@@ -87,6 +87,7 @@ static NSArray *sslCertNames;
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static NSMutableDictionary *auxiliarySdkVersions;
+static NSLocale *_locale;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -1134,6 +1135,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [auxiliarySdkVersions enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
             [evtData setObject:value forKey:key];
         }];
+    }
+    
+    if (_locale){
+        evtData[@"locale"] = [_locale localeIdentifier];
+    }else{
+        evtData[@"locale"] = [self.deviceInfo.systemLocale localeIdentifier];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -3915,6 +3922,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         auxiliarySdkVersions = [NSMutableDictionary new];
     }
     auxiliarySdkVersions[name] = @(version);
+}
+
++ (void)setLocale:(NSLocale *)locale
+{
+    _locale = locale;
 }
 
 + (void)setDebugLevel:(int)level {
