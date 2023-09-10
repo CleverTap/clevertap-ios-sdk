@@ -39,10 +39,10 @@
 - (void)recordImpression:(NSString *)campaignId {
     
     // Record session impressions
-    @synchronized ([self sessionImpressions]) {
-        int existing = [[self sessionImpressions][campaignId] intValue];
+    @synchronized (self.sessionImpressions) {
+        int existing = [self.sessionImpressions[campaignId] intValue];
         existing++;
-        [self sessionImpressions][campaignId] = @(existing);
+        self.sessionImpressions[campaignId] = @(existing);
     }
     
     NSNumber *now = @([[NSDate date] timeIntervalSince1970]);
@@ -50,14 +50,14 @@
 }
 
 - (NSInteger)perSessionTotal {
-    @synchronized ([self sessionImpressions]) {
-        return [[self sessionImpressions] count];
+    @synchronized (self.sessionImpressions) {
+        return [self.sessionImpressions count];
     }
 }
 
 - (NSInteger)perSession:(NSString *)campaignId {
-    @synchronized ([self sessionImpressions]) {
-        return [[self sessionImpressions][campaignId] intValue];
+    @synchronized (self.sessionImpressions) {
+        return [self.sessionImpressions[campaignId] intValue];
     }
 }
 
@@ -136,19 +136,19 @@
 // Store impressions
 
 - (NSMutableArray *)getImpressions:(NSString *)campaignId {
-    NSMutableArray *campaignImpressions = [self impressions][campaignId];
+    NSMutableArray *campaignImpressions = self.impressions[campaignId];
     if (campaignImpressions) {
         return campaignImpressions;
     }
 
     NSArray *savedImpressions = [CTPreferences getObjectForKey:[self getImpressionKey:campaignId]];
     if (savedImpressions) {
-        [self impressions][campaignId] = [savedImpressions mutableCopy];
+        self.impressions[campaignId] = [savedImpressions mutableCopy];
     } else {
-        [self impressions][campaignId] = [NSMutableArray new];
+        self.impressions[campaignId] = [NSMutableArray new];
     }
     
-    return [self impressions][campaignId];
+    return self.impressions[campaignId];
 }
 
 - (void)addImpression:(NSString *)campaignId timestamp:(NSNumber *)timestamp {

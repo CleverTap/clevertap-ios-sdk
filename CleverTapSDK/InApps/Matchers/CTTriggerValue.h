@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithValue:(id)value;
 
+@property (nonatomic, strong, readonly) id value;
 @property (nonatomic, strong, readonly) NSString *stringValue;
 @property (nonatomic, strong, readonly) NSNumber *numberValue;
 @property (nonatomic, strong, readonly) NSArray *arrayValue;

@@ -10,6 +10,8 @@
 #import "CTEventAdapter.h"
 #import "CTTriggerAdapter.h"
 #import "CTTriggerValue.h"
+#import "CTConstants.h"
+#import "CTTriggerEvaluator.h"
 
 @implementation CTTriggersMatcher
 
@@ -50,8 +52,14 @@
         CTTriggerCondition *condition = [trigger propertyAtIndex:i];
         
         CTTriggerValue *eventValue = [event propertyValueNamed:condition.propertyName];
-        BOOL matched = [self evaluate:condition.op
-                             expected:condition.value actual:eventValue];
+        BOOL matched;
+        @try {
+            matched = [CTTriggerEvaluator evaluate:condition.op
+                                 expected:condition.value actual:eventValue];
+        }
+        @catch (NSException *exception) {
+            CleverTapLogStaticDebug(@"Error matching triggers for event named %@. Reason: %@", event.eventName, exception.reason);
+        }
         if (!matched) {
             return NO;
         }
@@ -63,7 +71,7 @@
         for (NSUInteger i = 0; i < itemsCount; i++) {
             CTTriggerCondition *itemCondition = [trigger itemAtIndex:i];
             CTTriggerValue *eventValues = [event itemValueNamed:itemCondition.propertyName];
-            BOOL matched = [self evaluate:itemCondition.op
+            BOOL matched = [CTTriggerEvaluator evaluate:itemCondition.op
                                  expected:itemCondition.value actual:eventValues];
             if (!matched) {
                 return NO;
@@ -73,33 +81,4 @@
 
     return YES;
 }
-
-- (BOOL)evaluate:(CTTriggerOperator)op expected:(CTTriggerValue *)expected actual:(CTTriggerValue * __nullable)actual {
-    if (actual == nil) {
-        if (op == CTTriggerOperatorNotSet) {
-            return YES;
-        } else {
-            return NO;
-        }
-    }
-
-    switch (op) {
-        case CTTriggerOperatorLessThan:
-            return [[expected numberValue] compare:[actual numberValue]] == NSOrderedDescending;
-        case CTTriggerOperatorEquals:
-            if ([expected stringValue]) {
-                return [[expected stringValue] isEqualToString:[actual stringValue]];
-            }
-            if ([expected numberValue]) {
-                NSNumber *actualNumber = [actual numberValue];
-                if (!actualNumber) {
-                    actualNumber = [NSNumber numberWithDouble:[[actual stringValue] doubleValue]];
-                }
-                return [[expected numberValue] compare:actualNumber] == NSOrderedSame;
-            }
-        default:
-            return NO; // TODO: Implement all cases as per the backed evaluation and remove this line
-    }
-}
-
 @end

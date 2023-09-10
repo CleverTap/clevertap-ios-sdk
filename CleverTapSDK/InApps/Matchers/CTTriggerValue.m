@@ -10,6 +10,7 @@
 
 @interface CTTriggerValue()
 
+@property (nonatomic, strong) id value;
 @property (nonatomic, strong) NSString *stringValue;
 @property (nonatomic, strong) NSNumber *numberValue;
 @property (nonatomic, strong) NSArray *arrayValue;
@@ -20,6 +21,7 @@
 
 - (instancetype)initWithValue:(id)value {
     if (self = [super init]) {
+        self.value = value;
         if ([value isKindOfClass:[NSString class]]) {
             self.stringValue = value;
         } else if ([value isKindOfClass:[NSNumber class]]) {
