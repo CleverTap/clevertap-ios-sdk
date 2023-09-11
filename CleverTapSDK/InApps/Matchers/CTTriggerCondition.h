@@ -12,22 +12,22 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, CTTriggerOperator){
-    CTTriggerOperatorContains,
-    CTTriggerOperatorNotContains,
-    CTTriggerOperatorLessThan,
-    CTTriggerOperatorGreaterThan,
-    CTTriggerOperatorBetween,
-    CTTriggerOperatorEquals,
-    CTTriggerOperatorNotEquals,
-    CTTriggerOperatorSet, // Exists
-    CTTriggerOperatorNotSet, // Not exists
+    CTTriggerOperatorGreaterThan = 0,
+    CTTriggerOperatorEquals = 1,
+    CTTriggerOperatorLessThan = 2,
+    CTTriggerOperatorContains = 3,
+    CTTriggerOperatorBetween = 4,
+    CTTriggerOperatorNotEquals = 15,
+    CTTriggerOperatorSet = 26, // Exists
+    CTTriggerOperatorNotSet = 27, // Not exists
+    CTTriggerOperatorNotContains = 28,
 };
 
 @interface CTTriggerCondition : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithProperyName:(NSString *)propertyName
-                        andOperator:(NSString *)op
+                        andOperator:(NSUInteger)op
                            andValue:(CTTriggerValue *)value NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, strong, readonly) NSString *propertyName;

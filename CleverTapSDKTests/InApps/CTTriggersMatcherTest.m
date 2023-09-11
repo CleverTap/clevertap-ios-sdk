@@ -24,22 +24,22 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @150
                 },
                 @{
                     @"propertyName": @"prop2",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @200
                 },
                 @{
                     @"propertyName": @"prop3",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @150
                 },
                 @{
                     @"propertyName": @"prop4",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @"CleverTap"
                 }
             ]
@@ -65,7 +65,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"set"
+                    @"operator": @26
                 }
             ]
         }
@@ -87,7 +87,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"not_set"
+                    @"operator": @27
                 }
             ]
         }
@@ -109,7 +109,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"not_equals",
+                    @"operator": @15,
                     @"value": @150
                 }
             ]
@@ -132,7 +132,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"less_than",
+                    @"operator": @2,
                     @"value": @240
                 }
             ]
@@ -155,7 +155,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"greater_than",
+                    @"operator": @0,
                     @"value": @150
                 }
             ]
@@ -178,7 +178,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"between",
+                    @"operator": @4,
                     @"value": @[@100,@240]
                 }
             ]
@@ -201,7 +201,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"between",
+                    @"operator": @4,
                     @"value": @[@100,@240,@330,@"test"]
                 }
             ]
@@ -224,7 +224,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"between",
+                    @"operator": @4,
                     @"value": @[]
                 }
             ]
@@ -247,7 +247,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"contains",
+                    @"operator": @3,
                     @"value": @"clever"
                 }
             ]
@@ -270,7 +270,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"contains",
+                    @"operator": @3,
                     @"value": @[@"clever", @"test"]
                 }
             ]
@@ -293,7 +293,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"contains",
+                    @"operator": @3,
                     @"value": @[]
                 }
             ]
@@ -316,7 +316,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"contains",
+                    @"operator": @3,
                     @"value": @"clever"
                 }
             ]
@@ -339,7 +339,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"not_contains",
+                    @"operator": @28,
                     @"value": @[@"testing", @"test"]
                 }
             ]
@@ -362,7 +362,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"not_contains",
+                    @"operator": @28,
                     @"value": @[@"testing", @"test"]
                 }
             ]
@@ -385,7 +385,7 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"not_contains",
+                    @"operator": @28,
                     @"value": @"test"
                 }
             ]
@@ -411,13 +411,13 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @150
                 }],
             @"itemProperties": @[
                 @{
                     @"propertyName": @"product_name",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @"product 1"
                 }]
         }
@@ -449,13 +449,13 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @150
                 }],
             @"itemProperties": @[
                 @{
                     @"propertyName": @"product_name",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @[@"product 1", @"product 2"]
                 }]
         }
@@ -487,13 +487,13 @@
             @"eventProperties": @[
                 @{
                     @"propertyName": @"prop1",
-                    @"operator": @"equals",
+                    @"operator": @1,
                     @"value": @150
                 }],
             @"itemProperties": @[
                 @{
                     @"propertyName": @"product_name",
-                    @"operator": @"contains",
+                    @"operator": @3,
                     @"value": @[@"product 1", @"product 2"]
                 }]
         }

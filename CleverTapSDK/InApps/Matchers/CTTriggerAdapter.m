@@ -7,6 +7,7 @@
 //
 
 #import "CTTriggerAdapter.h"
+#import "CTConstants.h"
 
 @interface CTTriggerAdapter()
 
@@ -47,8 +48,16 @@
 - (CTTriggerCondition * _Nonnull)triggerConditionFromJSON:(NSDictionary *)property {
     CTTriggerValue *value = [[CTTriggerValue alloc] initWithValue:property[@"value"]];
     
+    NSUInteger operator = CTTriggerOperatorEquals;
+    NSNumber *op = property[@"operator"];
+    if([op respondsToSelector:@selector(unsignedIntegerValue)]) {
+        operator = [op unsignedIntegerValue];
+    } else {
+        CleverTapLogStaticDebug(@"Cannot parse operator: %@.", property[@"operator"]);
+    }
+    
     return [[CTTriggerCondition alloc] initWithProperyName:property[@"propertyName"]
-                                             andOperator:property[@"operator"]
+                                             andOperator:operator
                                                 andValue:value];
 }
 
