@@ -34,7 +34,7 @@
     // Events in the array are OR-ed
     for (NSDictionary *triggerObject in whenTriggers) {
         CTTriggerAdapter *trigger = [[CTTriggerAdapter alloc] initWithJSON:triggerObject];
-        if ([self match:trigger event:event]) {
+        if ([self matchCharged:trigger event:event]) {
             return YES;
         }
     }
@@ -65,6 +65,15 @@
         }
     }
 
+    return YES;
+}
+
+- (BOOL)matchCharged:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
+    BOOL eventPropertiesMatched = [self match:trigger event:event];
+    if (!eventPropertiesMatched) {
+        return NO;
+    }
+    
     // Property conditions for items are AND-ed (chargedEvent only)
     NSUInteger itemsCount = [trigger itemsCount];
     if (itemsCount > 0) {
@@ -78,7 +87,8 @@
             }
         }
     }
-
+    
     return YES;
 }
+
 @end

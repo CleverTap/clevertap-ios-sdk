@@ -58,46 +58,6 @@
     XCTAssertTrue(match);
 }
 
-- (void)testMatchChargedEvent {
-    
-    NSArray *whenTriggers = @[
-        @{
-            @"eventName": @"Charged",
-            @"eventProperties": @[
-                @{
-                    @"propertyName": @"prop1",
-                    @"operator": @"equals",
-                    @"value": @150
-                }],
-            @"itemProperties": @[
-                @{
-                    @"propertyName": @"prop1",
-                    @"operator": @"equals",
-                    @"value": @150
-                }]
-        }
-    ];
-    
-    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
-    
-    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
-        @"prop3": @3,
-        @"prop4": @4
-    } items:@[
-        @{
-            @"product_name": @"product 1",
-            @"price": @5.99
-        },
-        @{
-            @"product_name": @"product 2",
-            @"price": @5.50
-        }
-    ]];
-    
-    // TODO: do a proper charged test
-    XCTAssertFalse(match);
-}
-
 - (void)testMatchSet {
     NSArray *whenTriggers = @[
         @{
@@ -395,6 +355,29 @@
     XCTAssertTrue(match);
 }
 
+- (void)testMatchNotContainsArrayFromTriggerArray {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @"not_contains",
+                    @"value": @[@"testing", @"test"]
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@"clevertap", @"yes"]
+    }];
+    
+    XCTAssertTrue(match);
+}
+
 - (void)testMatchNotContainsString {
     NSArray *whenTriggers = @[
         @{
@@ -414,6 +397,122 @@
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
         @"prop1": @"clevertap"
     }];
+    
+    XCTAssertTrue(match);
+}
+
+#pragma mark Charged Event
+
+- (void)testMatchChargedEvent {
+    
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @"equals",
+                    @"value": @150
+                }],
+            @"itemProperties": @[
+                @{
+                    @"propertyName": @"product_name",
+                    @"operator": @"equals",
+                    @"value": @"product 1"
+                }]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
+        @"prop1": @150,
+    } items:@[
+        @{
+            @"product_name": @"product 1",
+            @"price": @5.99
+        },
+        @{
+            @"product_name": @"product 2",
+            @"price": @5.50
+        }
+    ]];
+    
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchChargedEventItemArrayEquals {
+    
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @"equals",
+                    @"value": @150
+                }],
+            @"itemProperties": @[
+                @{
+                    @"propertyName": @"product_name",
+                    @"operator": @"equals",
+                    @"value": @[@"product 1", @"product 2"]
+                }]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
+        @"prop1": @150,
+    } items:@[
+        @{
+            @"product_name": @"product 1",
+            @"price": @5.99
+        },
+        @{
+            @"product_name": @"product 2",
+            @"price": @5.50
+        }
+    ]];
+    
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchChargedEventItemArrayContains {
+    
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @"equals",
+                    @"value": @150
+                }],
+            @"itemProperties": @[
+                @{
+                    @"propertyName": @"product_name",
+                    @"operator": @"contains",
+                    @"value": @[@"product 1", @"product 2"]
+                }]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
+        @"prop1": @150,
+    } items:@[
+        @{
+            @"product_name": @"product 1",
+            @"price": @5.99
+        },
+        @{
+            @"product_name": @"product 2",
+            @"price": @5.50
+        }
+    ]];
     
     XCTAssertTrue(match);
 }

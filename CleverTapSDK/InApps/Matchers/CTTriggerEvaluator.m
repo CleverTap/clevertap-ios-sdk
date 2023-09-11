@@ -42,7 +42,14 @@
 }
 
 + (BOOL)expected:(CTTriggerValue *)expected equalsActual:(CTTriggerValue * __nullable)actual {
-    if ([expected stringValue]) {
+    if ([expected stringValue] && [actual isArray]) {
+        for (NSString *actualString in [actual arrayValue]) {
+            if ([actualString isEqualToString:[expected stringValue]]) {
+                return YES;
+            }
+        }
+    }
+    if ([expected stringValue] && [actual stringValue]) {
         return [[expected stringValue] isEqualToString:[actual stringValue]];
     }
     if ([expected numberValue]) {
@@ -52,7 +59,7 @@
         }
         return [[expected numberValue] compare:actualNumber] == NSOrderedSame;
     }
-    if ([expected arrayValue]) {
+    if ([expected isArray] && [actual isArray]) {
         // USING SETS SINCE THE ORDER OF ITEMS MIGHT BE DIFFERENT
         NSCountedSet *expectedSet = [NSCountedSet setWithArray:[expected arrayValue]];
         NSCountedSet *actualSet = [NSCountedSet setWithArray:[actual arrayValue]];
@@ -65,10 +72,19 @@
     if ([expected stringValue] && [actual stringValue]) {
         return [[actual stringValue] containsString:[expected stringValue]];
     }
-    if ([expected isArray]) {
+    if ([expected isArray] && [actual stringValue]) {
         for (NSString *expectedString in [expected arrayValue]) {
             if ([[actual stringValue] containsString:expectedString]) {
                 return YES;
+            }
+        }
+    }
+    if ([expected isArray] && [actual isArray]) {
+        for (NSString *expectedString in [expected arrayValue]) {
+            for (NSString *actualString in [actual arrayValue]) {
+                if ([actualString containsString:expectedString]) {
+                    return YES;
+                }
             }
         }
     }
