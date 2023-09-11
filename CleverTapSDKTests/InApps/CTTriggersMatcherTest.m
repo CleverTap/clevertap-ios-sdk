@@ -179,7 +179,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @4,
-                    @"value": @[@100,@240]
+                    @"value": @[@100, @240]
                 }
             ]
         }
@@ -202,7 +202,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @4,
-                    @"value": @[@100,@240,@330,@"test"]
+                    @"value": @[@100, @240, @330, @"test"]
                 }
             ]
         }
@@ -399,6 +399,27 @@
     }];
     
     XCTAssertTrue(match);
+}
+
+- (void)testMatchEventWithoutProps {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"clevertap"
+    }];
+    
+    BOOL matchNoProps = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{}];
+    
+    XCTAssertTrue(match);
+    XCTAssertTrue(matchNoProps);
 }
 
 #pragma mark Charged Event
