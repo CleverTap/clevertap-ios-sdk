@@ -46,6 +46,7 @@
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
 #endif
+#import "CTBatchSentDelegate.h"
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
@@ -246,6 +247,8 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
 #endif
+
+@property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -1059,6 +1062,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (!_config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
         [self.inAppFCManager attachToHeader:header];
+        
+        // TODO: add inapps_eval
     }
 #endif
     return header;
@@ -2857,6 +2862,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             if (!success) {
                 [self scheduleQueueFlush];
                 [self handleSendQueueFail];
+                
+                [self invokeBatchSentDelegate:batchWithHeader withSuccess:NO];
             }
             
             if (!success || redirect) {
@@ -2869,11 +2876,30 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             [self parseResponse:responseData];
             
+            [self invokeBatchSentDelegate:batchWithHeader withSuccess:YES];
+
             CleverTapLogDebug(self.config.logLevel,@"%@: Successfully sent %lu events", self, (unsigned long)[batch count]);
             
         } @catch (NSException *e) {
             CleverTapLogDebug(self.config.logLevel, @"%@: An error occurred while sending the queue: %@", self, e.debugDescription);
             break;
+        }
+    }
+}
+
+- (void)invokeBatchSentDelegate:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
+    if (self.batchSentDelegate) {
+        if ([self.batchSentDelegate respondsToSelector:@selector(onBatchSent: withSuccess:)]) {
+            [self.batchSentDelegate onBatchSent:batchWithHeader withSuccess:success];
+        }
+        if ([self.batchSentDelegate respondsToSelector:@selector(onAppLaunchedWithSuccess:)]) {
+            // find the event with evtName == "App Launched"
+            for (NSDictionary *event in batchWithHeader) {
+                if ([event[@"evtName"] isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
+                    [self.batchSentDelegate onAppLaunchedWithSuccess:success];
+                    return;
+                }
+            }
         }
     }
 }
