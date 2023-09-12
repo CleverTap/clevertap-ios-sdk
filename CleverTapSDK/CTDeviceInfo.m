@@ -423,14 +423,25 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString *)carrier {
     if (!_carrier) {
-        _carrier = [self getCarrier].carrierName ?: @"";
+        if (@available(iOS 16.0, *)) {
+            // CTCarrier is deprecated above iOS version 16 with no replacements so carrierName will be empty.
+            _carrier = @"";
+        } else {
+            _carrier = [self getCarrier].carrierName ?: @"";
+        }
     }
     return _carrier;
 }
 
 - (NSString *)countryCode {
     if (!_countryCode) {
-        _countryCode =  [self getCarrier].isoCountryCode ?: @"";
+        if (@available(iOS 16.0, *)) {
+            // CTCarrier is deprecated above iOS version 16 with no replacements so used NSLocale to get isoCountryCode.
+            NSLocale *currentLocale = [NSLocale currentLocale];
+            _countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
+        } else {
+            _countryCode =  [self getCarrier].isoCountryCode ?: @"";
+        }
     }
     return _countryCode;
 }
