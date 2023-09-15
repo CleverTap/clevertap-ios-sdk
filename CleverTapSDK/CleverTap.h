@@ -26,6 +26,8 @@
 @protocol CleverTapInAppNotificationDelegate;
 #endif
 
+@protocol CTBatchSentDelegate;
+
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
 @class CleverTapInstanceConfig;
@@ -1383,6 +1385,9 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param name The name of the variable or the group.
  */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
+
+// TODO: move to private header
+- (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
 
 @end
 

@@ -133,7 +133,7 @@
     return count;
 }
 
-// Store impressions
+#pragma mark Store Impressions
 
 - (NSMutableArray *)getImpressions:(NSString *)campaignId {
     NSMutableArray *campaignImpressions = self.impressions[campaignId];

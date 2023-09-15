@@ -9,6 +9,7 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
+#import "CleverTap.h"
 
 @interface CTInAppEvaluationManager()
 
@@ -16,9 +17,17 @@
 - (void)evaluateClientSide:(CTEventAdapter *)event;
 - (NSArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 
+// TODO: Can we use NSMutableSet?
+@property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
+@property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
+@property BOOL hasAppLaunchedFailed;
+
 @end
 
 @implementation CTInAppEvaluationManager
+
+// TODO: init
+// TODO: set delegate
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
     if (![eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
@@ -41,25 +50,136 @@
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{}];
-    [self evaluate:event withInApps:appLaunchedNotifs];
-    // TODO: handle supressed inapps
-    // TODO: eligibleInapps.sort().first().display();
+    NSMutableArray *eligibleInApps = [[self evaluate:event withInApps:appLaunchedNotifs] mutableCopy];
+    [self sortByPriority:eligibleInApps];
+    if (eligibleInApps.count > 0) {
+        // TODO: handle supressed inapps
+        // TODO: eligibleInapps.sort().first().display();
+    }
 }
 
 - (void)evaluateClientSide:(CTEventAdapter *)event {
     // [self evaluate:event withInApps:[store clientSideNotifs]];
-    // TODO: add to meta inapp_evals : eligibleInapps.addToMeta();
+    NSMutableArray *eligibleInApps = [[self evaluate:event withInApps:@[]] mutableCopy];
+    [self sortByPriority:eligibleInApps];
+    if (eligibleInApps.count > 0) {
+        NSDictionary *inApp = eligibleInApps[0];
+        if ([self shouldSuppress:inApp]) {
+            [self suppress:inApp];
+            return;
+        }
+        
+        // TODO: calculate TTL field and put it in the json based on ttlOffset parameter
+        // TODO: eligibleInapps.sort().first().display();
+    }
 }
 
 - (void)evaluateServerSide:(CTEventAdapter *)event {
     // [self evaluate:event withInApps:[store serverSideNotifs]];
-    // TODO: handle supressed inapps
-    // TODO: calculate TTL field and put it in the json based on ttlOffset parameter
-    // TODO: eligibleInapps.sort().first().display();
+    // TODO: add to meta inapp_evals : eligibleInapps.addToMeta();
+    NSArray *eligibleInApps = [self evaluate:event withInApps:@[]];
+    [self addToMeta:eligibleInApps];
 }
 
 - (NSArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
+    // TODO: whenTriggers
+    // TODO: record trigger
+    // TODO: whenLimits
     return @[]; // returns eligible inapps
+}
+
+- (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
+    if (success) {
+        NSDictionary *header = batchWithHeader[0];
+        [self removeSentEvaluatedServerSideInAppIds:header];
+        [self removeSentSuppressedClientSideInApps:header];
+    }
+}
+
+- (void)onAppLaunchedWithSuccess:(BOOL)success {
+    // Handle multiple failures where request is retried
+    if (!self.hasAppLaunchedFailed) {
+        [self evaluateOnAppLaunchedClientSide];
+    }
+    self.hasAppLaunchedFailed = !success;
+}
+
+- (void)removeSentEvaluatedServerSideInAppIds:(NSDictionary *)header {
+    NSArray *inapps_eval = header[@"inapps_eval"];
+    if (inapps_eval) {
+        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, inapps_eval.count-1)];
+    }
+}
+
+- (void)removeSentSuppressedClientSideInApps:(NSDictionary *)header {
+    NSArray *suppresed_inapps = header[@"suppresed_inapps"];
+    if (suppresed_inapps) {
+        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, suppresed_inapps.count-1)];
+    }
+}
+
+- (void)addToMeta:(NSArray<NSDictionary *> *)inApps {
+    for (NSDictionary *inApp in inApps) {
+        NSString *campaignId = inApp[@"ti"];
+        if (campaignId) {
+            [self.evaluatedServerSideInAppIds addObject:campaignId];
+        }
+    }
+}
+
+- (BOOL)shouldSuppress:(NSDictionary *)inApp {
+    return [inApp[@"suppressed"] boolValue];
+}
+
+- (void)suppress:(NSDictionary *)inApp {
+    NSString *ti = inApp[@"ti"];
+    NSString *wzrk_id = [self generateWzrkId:ti];
+    NSString *pivot = inApp[@"wzrk_pivot"] ? inApp[@"wzrk_pivot"] : @"wzrk_default";
+    NSNumber *cgId = inApp[@"wzrk_cgId"];
+
+    [self.suppressedClientSideInApps addObject:@{
+        @"wzrk_id": wzrk_id,
+        @"wzrk_pivot": pivot,
+        @"wzrk_cgId": cgId
+    }];
+}
+
+- (void)sortByPriority:(NSMutableArray *)inApps {
+    NSNumber *(^priority)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
+        NSNumber *priority = inApp[@"priority"];
+        if (priority) {
+            return priority;
+        }
+        return @(1);
+    };
+    
+    [inApps sortUsingComparator:^(NSDictionary *inAppA, NSDictionary *inAppB) {
+        NSNumber *priorityA = priority(inAppA);
+        NSNumber *priorityB = priority(inAppB);
+        // TODO: sort by creation date if priority is same
+        return [priorityA compare:priorityB];
+    }];
+}
+
+- (NSString *)generateWzrkId:(NSString *)ti {
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyyMMdd"];
+    NSString *date = [dateFormatter stringFromDate:[NSDate date]];
+    NSString *wzrk_id = [NSString stringWithFormat:@"%@_%@", ti, date];
+    return wzrk_id;
+}
+
+- (void)updateTTL:(NSMutableDictionary *)inApp {
+    NSNumber *offset = inApp[@"wzrk_ttl_offset"];
+    if (offset) {
+        NSInteger now = [[NSDate date] timeIntervalSince1970];
+        NSInteger ttl = now + [offset longValue];
+        [inApp setObject:[NSNumber numberWithLong:ttl] forKey:@"wzrk_ttl"];
+    } else {
+        // Remove TTL, since it cannot be calculated based on the TTL offset
+        // The deafult TTL will be set in CTInAppNotification
+        [inApp removeObjectForKey:@"wzrk_ttl"];
+    }
 }
 
 @end

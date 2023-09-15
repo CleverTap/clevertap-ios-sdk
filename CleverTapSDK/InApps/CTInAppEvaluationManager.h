@@ -7,10 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CTBatchSentDelegate.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTInAppEvaluationManager : NSObject
+@interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate>
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;
