@@ -28,6 +28,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSInteger)perWeek:(NSString *)campaignId weeks:(NSInteger)weeks;
 
+- (NSMutableArray *)getImpressions:(NSString *)campaignId;
+
+- (void)removeImpressions:(NSString *)campaignId;
+
 @end
 
 NS_ASSUME_NONNULL_END

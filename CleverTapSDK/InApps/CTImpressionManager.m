@@ -157,6 +157,11 @@
     [CTPreferences putObject:impressions forKey:[self getImpressionKey:campaignId]];
 }
 
+- (void)removeImpressions:(NSString *)campaignId {
+    [CTPreferences removeObjectForKey:[self getImpressionKey:campaignId]];
+}
+
+
 - (NSString *)getImpressionKey:(NSString *)campaignId {
     return [NSString stringWithFormat:@"%@_%@", @"_impressions", campaignId];
 }
