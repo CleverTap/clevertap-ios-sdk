@@ -150,7 +150,7 @@
     return data;
 }
 
-+ (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)filename config: (CleverTapInstanceConfig *_Nonnull)config {
++ (BOOL)archiveObject:(id)object forFileName:(NSString *)filename config: (CleverTapInstanceConfig *)config {
     
     NSString *filePath = [self filePathfromFileName:filename];
     NSError *archiveError = nil;
