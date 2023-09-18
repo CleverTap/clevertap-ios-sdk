@@ -150,7 +150,7 @@
     return data;
 }
 
-+ (BOOL)archiveObject:(id)object forFileName:(NSString *)filename {
++ (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)filename config: (CleverTapInstanceConfig *_Nonnull)config {
     
     NSString *filePath = [self filePathfromFileName:filename];
     NSError *archiveError = nil;
@@ -161,7 +161,8 @@
     
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
-        success = [data writeToFile:filePath options:NSDataWritingFileProtectionComplete error:&writeError];
+        NSDataWritingOptions fileProtectionOption = config.enableFileProtection ? NSDataWritingFileProtectionComplete : NSDataWritingAtomic;
+        success = [data writeToFile:filePath options:fileProtectionOption error:&writeError];
         if (archiveError) {
             CleverTapLogStaticInternal(@"%@ failed to archive data at %@: %@", self, filePath, archiveError);
         }

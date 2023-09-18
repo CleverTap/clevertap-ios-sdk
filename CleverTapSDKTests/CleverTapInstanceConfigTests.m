@@ -32,7 +32,7 @@
     [config setUseCustomCleverTapId:YES];
     [config setIdentityKeys:@[@"Email"]];
 
-    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
 
     CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofType:[CleverTapInstanceConfig class] removeFile:YES];
     
@@ -54,7 +54,7 @@
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token"
                                                                              proxyDomain:@"proxy" spikyProxyDomain:@"spikyProxy"];
 
-    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
 
     CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofType:[CleverTapInstanceConfig class] removeFile:YES];
     
