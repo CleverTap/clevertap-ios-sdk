@@ -161,7 +161,7 @@
     [CTPreferences removeObjectForKey:[self getImpressionKey:campaignId]];
 }
 
-
+// TODO: make impressions per instance and per device id?
 - (NSString *)getImpressionKey:(NSString *)campaignId {
     return [NSString stringWithFormat:@"%@_%@", @"_impressions", campaignId];
 }
