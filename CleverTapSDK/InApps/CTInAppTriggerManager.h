@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSUInteger)getTriggers:(NSString *)campaignId;
 - (void)incrementTrigger:(NSString *)campaignId;
+- (void)removeTriggers:(NSString *)campaignId;
 
 @end
 
