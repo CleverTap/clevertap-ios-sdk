@@ -289,6 +289,7 @@
 		6A4427C82AB05CF00098866F /* CTInAppTriggerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427C62AB05CF00098866F /* CTInAppTriggerManager.h */; };
 		6A4427C92AB05CF00098866F /* CTInAppTriggerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */; };
 		6A4427CB2AB100ED0098866F /* CTBatchSentDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427CA2AB100ED0098866F /* CTBatchSentDelegate.h */; };
+		6A4427CD2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */; };
 		6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */; };
 		6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */; };
 		6A775C3329BE78C7007790E0 /* CTVariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A775C3129BE78C7007790E0 /* CTVariables.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -728,6 +729,7 @@
 		6A4427C62AB05CF00098866F /* CTInAppTriggerManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppTriggerManager.h; sourceTree = "<group>"; };
 		6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppTriggerManager.m; sourceTree = "<group>"; };
 		6A4427CA2AB100ED0098866F /* CTBatchSentDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTBatchSentDelegate.h; sourceTree = "<group>"; };
+		6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppEvaluationManagerTest.m; sourceTree = "<group>"; };
 		6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDictionaryExtensionsTest.m; sourceTree = "<group>"; };
 		6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCTTest.m; sourceTree = "<group>"; };
 		6A775C3129BE78C7007790E0 /* CTVariables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTVariables.h; sourceTree = "<group>"; };
@@ -1176,6 +1178,7 @@
 			children = (
 				6A4427C42AA6515A0098866F /* CTTriggersMatcherTest.m */,
 				4EFC642A2AB44CF900F01414 /* CTLimitsMatcherTest.m */,
+				6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2052,6 +2055,7 @@
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
 				6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */,
 				4E1F155227692A11009387AE /* CleverTap+Tests.m in Sources */,
+				6A4427CD2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

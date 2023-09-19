@@ -8,10 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "CTBatchSentDelegate.h"
+#import "CleverTap.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate>
+- (instancetype)initWithCleverTap:(CleverTap *)instance;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;

@@ -9,7 +9,6 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
-#import "CleverTap.h"
 
 @interface CTInAppEvaluationManager()
 
@@ -28,6 +27,15 @@
 
 // TODO: init
 // TODO: set delegate
+
+- (instancetype)initWithCleverTap:(CleverTap *)instance {
+    if (self = [super init]) {
+        [instance setBatchSentDelegate:self];
+        self.evaluatedServerSideInAppIds = [NSMutableArray new];
+        self.suppressedClientSideInApps = [NSMutableArray new];
+    }
+    return self;
+}
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
     if (![eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
@@ -63,13 +71,13 @@
     NSMutableArray *eligibleInApps = [[self evaluate:event withInApps:@[]] mutableCopy];
     [self sortByPriority:eligibleInApps];
     if (eligibleInApps.count > 0) {
-        NSDictionary *inApp = eligibleInApps[0];
+        NSMutableDictionary *inApp = eligibleInApps[0];
         if ([self shouldSuppress:inApp]) {
             [self suppress:inApp];
             return;
         }
+        [self updateTTL:inApp];
         
-        // TODO: calculate TTL field and put it in the json based on ttlOffset parameter
         // TODO: eligibleInapps.sort().first().display();
     }
 }
@@ -153,12 +161,30 @@
         return @(1);
     };
     
-    [inApps sortUsingComparator:^(NSDictionary *inAppA, NSDictionary *inAppB) {
+    NSNumber *(^ti)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
+        NSNumber *ti = inApp[@"ti"];
+        if (ti) {
+            return ti;
+        }
+        return [NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]];
+    };
+    
+    // Sort by priority descending since 100 is highest priority and 1 is lowest
+    NSSortDescriptor* sortByPriorityDescriptor = [NSSortDescriptor sortDescriptorWithKey:nil ascending:NO comparator:^NSComparisonResult(NSDictionary *inAppA, NSDictionary *inAppB) {
         NSNumber *priorityA = priority(inAppA);
         NSNumber *priorityB = priority(inAppB);
-        // TODO: sort by creation date if priority is same
-        return [priorityA compare:priorityB];
+        NSComparisonResult comparison = [priorityA compare:priorityB];
+        return  comparison;
     }];
+    
+    // Sort by the earliest created, ascending order of the timestamps
+    NSSortDescriptor* sortByTimestampDescriptor = [NSSortDescriptor sortDescriptorWithKey:nil ascending:YES comparator:^NSComparisonResult(NSDictionary *inAppA, NSDictionary *inAppB) {
+        // If priority is the same, display the earliest created
+        return [ti(inAppA) compare:ti(inAppB)];
+    }];
+
+    // Sort by priority then by timestamp if priority is same
+    [inApps sortUsingDescriptors:@[sortByPriorityDescriptor, sortByTimestampDescriptor]];
 }
 
 - (NSString *)generateWzrkId:(NSString *)ti {
