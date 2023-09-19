@@ -27,4 +27,8 @@
     return [NSString stringWithFormat:@"%@_%@", @"_triggers", campaignId];
 }
 
+- (void)removeTriggers:(NSString *)campaignId {
+    [CTPreferences removeObjectForKey:[self getTriggersKey:campaignId]];
+}
+
 @end
