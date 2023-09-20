@@ -4,6 +4,8 @@
 #import "CTInAppNotification.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
+#import "CTInAppFCManager+Legacy.h"
+#import "CTImpressionManager.h"
 
 // Per session
 //  1. Show only 10 inapps per session
@@ -28,145 +30,69 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 @interface CTInAppFCManager (){}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (atomic, copy) NSString *guid;
+@property (atomic, copy) NSString *deviceId;
 
 @property (atomic, strong) NSMutableDictionary *dismissedThisSession;
 @property (atomic, strong) NSMutableDictionary *shownThisSession;
 @property (atomic, strong) NSNumber *shownThisSessionCount;
 
+@property (atomic, strong) CTImpressionManager *impressionManager;
+
+// id: [todayCount, lifetimeCount]
+@property (atomic, strong) NSMutableDictionary *inAppCounts;
+
 @end
 
 @implementation CTInAppFCManager
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config guid:(NSString *)guid {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId {
     if (self = [super init]) {
         _config = config;
         _dismissedThisSession = [NSMutableDictionary new];
         _shownThisSession = [NSMutableDictionary new];
         _shownThisSessionCount = @0;
-        _guid = guid;
+        _deviceId = deviceId;
+        
+        _impressionManager = [CTImpressionManager new];
+        
+        _inAppCounts = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+        if (_inAppCounts == nil) {
+            _inAppCounts = [NSMutableDictionary new];
+        }
+        
+        [self migratePreferenceKeys];
         [self checkUpdateDailyLimits];
     }
     return self;
 }
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, self.guid];
+    return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, self.deviceId];
 }
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"CTInAppFCManager.%@", self.config.accountId];
+    return [NSString stringWithFormat:@"CTInAppFCManager:%@:%@", self.config.accountId, self.deviceId];
 }
 
 - (void)checkUpdateDailyLimits {
-    [self migratePreferenceKeys];
-    NSDateFormatter *f = [NSDateFormatter new];
-    f.dateFormat = @"yyyyMMdd";
-    NSString *today = [f stringFromDate:[NSDate date]];
-    NSString *lastUpdate = nil;
-    if (self.config.isDefaultInstance) {
-        lastUpdate = [CTPreferences getStringForKey:[self storageKeyWithSuffix:@"ict_date"] withResetValue:[CTPreferences getStringForKey:@"ict_date" withResetValue:@"20140428"]];
-    } else {
-        lastUpdate = [CTPreferences getStringForKey:[self storageKeyWithSuffix:@"ict_date"] withResetValue:@"20140428"];
-    }
-    if (![today isEqualToString:lastUpdate]) {
-        // Dates have changed
-        [CTPreferences putString:today forKey:[self storageKeyWithSuffix:@"ict_date"]];
-        
-        // Reset today count
-        [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
-        
-        // Reset the counts for each inapp
-        NSMutableDictionary *countsContainer = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
-        if (countsContainer) {
-            NSArray *keys = [countsContainer allKeys];
-            for (int i = 0; i < keys.count; ++i) {
-                NSMutableArray *counts = [countsContainer[keys[(NSUInteger) i]] mutableCopy];
-                if (!counts || [counts count] != 2) {
-                    [countsContainer removeObjectForKey:keys[(NSUInteger) i]];
-                    continue;
-                }
-                // protocol: todayCount, lifetimeCount
-                counts[0] = @0;
-                countsContainer[keys[(NSUInteger) i]] = counts;
-            }
-            [CTPreferences putObject:countsContainer forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
-        }
+    NSString *today = [self todaysFormattedDate];
+    if ([self shouldResetDailyCounters:today]) {
+        [self resetDailyCounters:today];
     }
 }
 
-- (void)migratePreferenceKeys {
-    //Move old key value pair data to new keys and delete old keys
-    [self lastUpdateKeyChanges];
-    [self countShownTodayKeyChanges];
-    [self countPerInAppKeyChanges];
-    [self countPerInAppKeyChangesForDefaultConfig];
-}
-
-- (NSString *)oldStorageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, suffix];
-}
-
-- (void)lastUpdateKeyChanges {
-    // Last update key changes
-    NSString *localLastUpdateKey = [self oldStorageKeyWithSuffix:@"ict_date"];
-    NSString *localLastUpdateTime = [CTPreferences getStringForKey: localLastUpdateKey withResetValue:nil] ;
-    
-    //Store value in new key and delete old key
-    if (localLastUpdateTime != nil) {
-        [CTPreferences putString:localLastUpdateTime forKey:[self storageKeyWithSuffix:@"ict_date"]];
-        [CTPreferences removeObjectForKey: localLastUpdateKey];
-    }
-    
-}
-
-- (void)countShownTodayKeyChanges {
-    NSString *localCountShownKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY];
-    //Check value exist otherwise fetch call will reset it reset value
-    if ([CTPreferences getObjectForKey:localCountShownKey] == nil || ![[CTPreferences getObjectForKey:localCountShownKey] isKindOfClass:[NSNumber class]]) {
-        return;
-    }
-    
-    int localCountShown = (int) [CTPreferences getIntForKey:localCountShownKey withResetValue:0] ;
-    //Store value in new key and delete old key
-    [CTPreferences putInt:localCountShown forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
-    [CTPreferences removeObjectForKey: localCountShownKey];
-}
-
-- (void)countPerInAppKeyChanges {
-    // Count For InApp key changes
-    NSString *localInAppKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_PER_INAPP];
-    NSDictionary *localInApp = [CTPreferences getObjectForKey: localInAppKey];
-    
-    //Store value in new key and delete Old key
-    if (localInApp != nil) {
-        [CTPreferences putObject:localInApp forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
-        [CTPreferences removeObjectForKey: localInAppKey];
-    }
-}
-
-- (void)countPerInAppKeyChangesForDefaultConfig {
-    // Count For InApp key changes
-    NSDictionary *defaultDictionary = [CTPreferences getObjectForKey:kKEY_COUNTS_PER_INAPP];
-    
-    //Store value in new key and delete old key
-    if (defaultDictionary != nil) {
-        [CTPreferences putObject:defaultDictionary forKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.guid]];
-        [CTPreferences removeObjectForKey:kKEY_COUNTS_PER_INAPP];
-    }
-}
-
+// TODO: create a new instance of the manager?
 - (void)changeUserWithGuid:(NSString *)guid {
     self.dismissedThisSession = [NSMutableDictionary new];
     self.shownThisSession = [NSMutableDictionary new];
     self.shownThisSessionCount = @0;
-    _guid = guid;
+    _deviceId = guid;
 }
 
 - (NSArray *)getInAppCountsFromPersistentStore:(NSObject *)inappID {
     NSDictionary *countsContainer = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
     if (self.config.isDefaultInstance && !countsContainer) {
-        countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.guid]];
+        countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.deviceId]];
     }
     if (!countsContainer) {
         countsContainer = @{};
@@ -189,7 +115,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     
     NSDictionary *_countsContainer = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
     if (self.config.isDefaultInstance && !_countsContainer) {
-        _countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.guid]];
+        _countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.deviceId]];
     }
     NSMutableDictionary *countsContainer = _countsContainer ? [_countsContainer mutableCopy] : [NSMutableDictionary new];
     countsContainer[inappID] = counts;
@@ -199,20 +125,23 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 - (BOOL)hasSessionCapacityMaxedOut:(CTInAppNotification *)inapp {
     if (!inapp.Id) return false;
     
+    
+    
+    // TODO: dismissedThisSession should be removed
     // 1. Has this been dismissed?
     if (self.dismissedThisSession[inapp.Id]) return true;
     
     // 2. Has the session max count for this inapp been breached?
-    int maxPerSession = inapp.maxPerSession >= 0 ? inapp.maxPerSession : 1000;
-    if (self.shownThisSession[inapp.Id]) {
-        if (((NSNumber *) self.shownThisSession[inapp.Id]).intValue >= maxPerSession) {
-            return true;
-        }
+    int inAppMaxPerSession = inapp.maxPerSession >= 0 ? inapp.maxPerSession : 1000;
+    int inAppPerSession = (int)[self.impressionManager perSession:inapp.Id];
+    if (inAppPerSession >= inAppMaxPerSession) {
+        return YES;
     }
     
     // 3. Have we shown enough of in-apps this session?
     int globalSessionMax = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SESSION_MAX] withResetValue:1];
-    if (self.shownThisSessionCount.intValue >= globalSessionMax) return true;
+    int shownThisSession = (int) [[self impressionManager] perSessionTotal];
+    if (shownThisSession >= globalSessionMax) return true;
     
     // Session capacity has not been breached
     return false;
@@ -312,7 +241,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
         NSMutableArray *arr = [NSMutableArray new];
         NSDictionary *countsContainer = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
         if (self.config.isDefaultInstance && !countsContainer) {
-            countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.guid]];
+            countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.deviceId]];
         }
         NSArray *keys = [countsContainer allKeys];
         for (int i = 0; i < keys.count; ++i) {
@@ -333,7 +262,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     @try {
         NSDictionary *_countsContainer = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
         if (self.config.isDefaultInstance && !_countsContainer) {
-            _countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.guid]];
+            _countsContainer = [CTPreferences getObjectForKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.deviceId]];
         }
         NSMutableDictionary *countsContainer = _countsContainer ? [_countsContainer mutableCopy] : [NSMutableDictionary new];
         if (!countsContainer) return;
@@ -347,6 +276,48 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to purge out stale in-app counts - %@", self, e.debugDescription);
     }
+}
+
+- (NSString *)todaysFormattedDate {
+    NSDateFormatter *formatter = [NSDateFormatter new];
+    formatter.dateFormat = @"yyyyMMdd";
+    return [formatter stringFromDate:[NSDate date]];
+}
+
+- (BOOL)shouldResetDailyCounters:(NSString *)today {
+    NSString *lastUpdate = [CTPreferences getStringForKey:[self storageKeyWithSuffix:@"ict_date"] withResetValue:@"20140428"];
+    return ![today isEqualToString:lastUpdate];
+}
+
+- (void)resetDailyCounters:(NSString *)today {
+    // Dates have changed
+    [CTPreferences putString:today forKey:[self storageKeyWithSuffix:@"ict_date"]];
+    
+    // Reset today count
+    [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
+    
+    // Reset the counts for each inapp
+    @synchronized (self.inAppCounts) {
+        NSArray *keys = [self.inAppCounts allKeys];
+        for (int i = 0; i < keys.count; ++i) {
+            NSMutableArray *counts = [self.inAppCounts[keys[i]] mutableCopy];
+            if (!counts || [counts count] != 2) {
+                [self.inAppCounts removeObjectForKey:keys[i]];
+                continue;
+            }
+            // protocol: todayCount, lifetimeCount
+            counts[0] = @0;
+            self.inAppCounts[keys[i]] = counts;
+        }
+        [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+    }
+}
+
+- (void)recordImpression {
+    // record impression for limits
+    // record impression for session
+    // record impression for day
+    // record impression in tlc counts
 }
 
 @end

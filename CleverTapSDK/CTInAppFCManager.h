@@ -3,9 +3,19 @@
 @class CleverTapInstanceConfig;
 @class CTInAppNotification;
 
+// Storage keys
+extern NSString* const kKEY_COUNTS_PER_INAPP;
+extern NSString* const kKEY_COUNTS_SHOWN_TODAY;
+extern NSString* const kKEY_MAX_PER_DAY;
+
 @interface CTInAppFCManager : NSObject
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config guid:(NSString *)guid;
+@property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
+@property (atomic, copy, readonly) NSString *deviceId;
+
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId;
+
+- (NSString *)storageKeyWithSuffix: (NSString *)suffix;
 
 - (void)checkUpdateDailyLimits;
 

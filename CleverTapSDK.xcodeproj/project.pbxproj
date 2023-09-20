@@ -290,6 +290,8 @@
 		6A4427C92AB05CF00098866F /* CTInAppTriggerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */; };
 		6A4427CB2AB100ED0098866F /* CTBatchSentDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427CA2AB100ED0098866F /* CTBatchSentDelegate.h */; };
 		6A4427CD2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */; };
+		6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427CE2AB9D8C30098866F /* CTInAppFCManager+Legacy.h */; };
+		6A4427D12AB9D8C30098866F /* CTInAppFCManager+Legacy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427CF2AB9D8C30098866F /* CTInAppFCManager+Legacy.m */; };
 		6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */; };
 		6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */; };
 		6A775C3329BE78C7007790E0 /* CTVariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A775C3129BE78C7007790E0 /* CTVariables.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -730,6 +732,8 @@
 		6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppTriggerManager.m; sourceTree = "<group>"; };
 		6A4427CA2AB100ED0098866F /* CTBatchSentDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTBatchSentDelegate.h; sourceTree = "<group>"; };
 		6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppEvaluationManagerTest.m; sourceTree = "<group>"; };
+		6A4427CE2AB9D8C30098866F /* CTInAppFCManager+Legacy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTInAppFCManager+Legacy.h"; sourceTree = "<group>"; };
+		6A4427CF2AB9D8C30098866F /* CTInAppFCManager+Legacy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTInAppFCManager+Legacy.m"; sourceTree = "<group>"; };
 		6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDictionaryExtensionsTest.m; sourceTree = "<group>"; };
 		6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCTTest.m; sourceTree = "<group>"; };
 		6A775C3129BE78C7007790E0 /* CTVariables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTVariables.h; sourceTree = "<group>"; };
@@ -952,6 +956,8 @@
 				6A3EBD2C2AA06EB300CE97D4 /* CTInAppEvaluationManager.m */,
 				6A4427C62AB05CF00098866F /* CTInAppTriggerManager.h */,
 				6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */,
+				6A4427CE2AB9D8C30098866F /* CTInAppFCManager+Legacy.h */,
+				6A4427CF2AB9D8C30098866F /* CTInAppFCManager+Legacy.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -1564,6 +1570,7 @@
 				D0213D4C207D905800FE5740 /* CleverTapSyncDelegate.h in Headers */,
 				07B94546219EA34300D4C542 /* CTMessageMO+CoreDataProperties.h in Headers */,
 				D01651B22097B42C00660178 /* CTValidator.h in Headers */,
+				6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */,
 				D0A84ADC209136D500191B1F /* CTLogger.h in Headers */,
 				4E41FD98294F46510001FBED /* CTVarCache.h in Headers */,
 				07B94541219EA34300D4C542 /* CleverTapInboxViewControllerPrivate.h in Headers */,
@@ -2124,6 +2131,7 @@
 				D0A6626E20801E7F00B403F3 /* CTDeviceInfo.m in Sources */,
 				0797133A21A309720011C9A3 /* CTCarouselImageView.m in Sources */,
 				072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */,
+				6A4427D12AB9D8C30098866F /* CTInAppFCManager+Legacy.m in Sources */,
 				6A3EBD332AA0703A00CE97D4 /* CTEventAdapter.m in Sources */,
 				0796FB6A21AE5B6300FC380D /* CTCarouselImageMessageCell.m in Sources */,
 				4E6383D9296DE9A8001E83E3 /* CTRequestSender.m in Sources */,
