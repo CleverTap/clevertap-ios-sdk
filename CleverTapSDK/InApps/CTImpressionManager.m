@@ -82,8 +82,21 @@
 - (NSInteger)perDay:(NSString *)campaignId days:(NSInteger)days {
     NSInteger now = (NSInteger)[[NSDate date] timeIntervalSince1970];
     // TODO: use Calendar?
-    NSInteger offsetSeconds = days * 24 * 60 * 60;
-    return [self getImpressionCount:campaignId timestampStart:now - offsetSeconds];
+//    NSInteger offsetSeconds = days * 24 * 60 * 60;
+//    return [self getImpressionCount:campaignId timestampStart:now - offsetSeconds];
+    
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    calendar.locale = self.locale;
+    
+    NSDate *currentDate = [NSDate date];
+    
+    NSDateComponents *components = [calendar components:NSCalendarUnitDay fromDate:currentDate];
+    components.day -= days;
+
+    NSDate *startOfWeek = [calendar dateFromComponents:components];
+    NSTimeInterval timestamp = [startOfWeek timeIntervalSince1970];
+    
+    return [self getImpressionCount:campaignId timestampStart:(NSInteger)timestamp];
 }
 
 - (NSInteger)perWeek:(NSString *)campaignId weeks:(NSInteger)weeks {
@@ -95,7 +108,7 @@
     
     NSDate *currentDate = [NSDate date];
     
-    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekday | NSCalendarUnitDay fromDate:currentDate];
+    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekday | NSCalendarUnitDay | NSCalendarUnitWeekOfYear fromDate:currentDate];
     
     // Calculate the number of days to subtract to reach the starting day of the week
     NSInteger daysToSubtract = (components.weekday - firstWeekday + 7) % 7;
