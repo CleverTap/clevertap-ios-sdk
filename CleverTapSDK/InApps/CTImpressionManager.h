@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)removeImpressions:(NSString *)campaignId;
 
+- (void)resetSession;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -1757,7 +1757,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!notification || [notification count] <= 0 || !notification[@"wzrk_inapp"]) return NO;
     
     @try {
-        [self.inAppFCManager resetSession];
+        // TODO: impression manager resetSession
+        //[self.inAppFCManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received in-app notification from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_inapp"];
@@ -2369,7 +2370,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self clearWzrkParams];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (![[self class] runningInsideAppExtension]) {
-        [self.inAppFCManager resetSession];
+        // TODO: impression manager resetSession
+        //[self.inAppFCManager resetSession];
     }
 #endif
 }

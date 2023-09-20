@@ -23,8 +23,6 @@ extern NSString* const kKEY_MAX_PER_DAY;
 
 - (void)didDismiss:(CTInAppNotification *)inapp;
 
-- (void)resetSession;
-
 - (void)changeUserWithGuid:(NSString *)guid;
 
 - (void)didShow:(CTInAppNotification *)inapp;

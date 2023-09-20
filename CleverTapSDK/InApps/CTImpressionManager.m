@@ -37,7 +37,6 @@
 }
 
 - (void)recordImpression:(NSString *)campaignId {
-    
     // Record session impressions
     @synchronized (self.sessionImpressions) {
         int existing = [self.sessionImpressions[campaignId] intValue];
@@ -80,11 +79,6 @@
 }
 
 - (NSInteger)perDay:(NSString *)campaignId days:(NSInteger)days {
-    NSInteger now = (NSInteger)[[NSDate date] timeIntervalSince1970];
-    // TODO: use Calendar?
-//    NSInteger offsetSeconds = days * 24 * 60 * 60;
-//    return [self getImpressionCount:campaignId timestampStart:now - offsetSeconds];
-    
     NSCalendar *calendar = [NSCalendar currentCalendar];
     calendar.locale = self.locale;
     
@@ -144,6 +138,10 @@
     }
 
     return count;
+}
+
+- (void)resetSession {
+    [self setSessionImpressions:[NSMutableDictionary new]];
 }
 
 #pragma mark Store Impressions
