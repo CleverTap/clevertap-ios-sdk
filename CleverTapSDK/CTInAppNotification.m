@@ -79,7 +79,11 @@
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
             self.campaignId = (NSString*) jsonObject[@"wzrk_id"];
-            self.excludeFromCaps = [jsonObject[@"efc"] boolValue];
+            if (jsonObject[@"excludeGlobalFCaps"] != nil) {
+                self.excludeFromCaps = [jsonObject[@"excludeGlobalFCaps"] boolValue];
+            } else {
+                self.excludeFromCaps = [jsonObject[@"efc"] boolValue];
+            }
             self.totalLifetimeCount = jsonObject[@"tlc"] ? [jsonObject[@"tlc"] intValue] : -1;
             self.totalDailyCount = jsonObject[@"tdc"] ? [jsonObject[@"tdc"] intValue] : -1;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
