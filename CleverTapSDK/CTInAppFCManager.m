@@ -32,8 +32,6 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (atomic, copy) NSString *deviceId;
 
-@property (atomic, strong) NSMutableDictionary *dismissedThisSession;
-
 @property (atomic, strong) CTImpressionManager *impressionManager;
 
 // id: [todayCount, lifetimeCount]
@@ -46,12 +44,11 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId {
     if (self = [super init]) {
         _config = config;
-        _dismissedThisSession = [NSMutableDictionary new];
         _deviceId = deviceId;
         
         _impressionManager = [CTImpressionManager new];
         
-        _inAppCounts = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+        _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
         if (_inAppCounts == nil) {
             _inAppCounts = [NSMutableDictionary new];
         }
@@ -80,25 +77,20 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 // TODO: use new counts
 // TODO: create a new instance of the manager?
 - (void)changeUserWithGuid:(NSString *)guid {
-    self.dismissedThisSession = [NSMutableDictionary new];
     _deviceId = guid;
 }
 
 - (BOOL)hasSessionCapacityMaxedOut:(CTInAppNotification *)inapp {
     if (!inapp.Id) return false;
     
-    // TODO: dismissedThisSession should be removed
-    // 1. Has this been dismissed?
-    if (self.dismissedThisSession[inapp.Id]) return true;
-    
-    // 2. Has the session max count for this inapp been breached?
+    // 1. Has the session max count for this inapp been breached?
     int inAppMaxPerSession = inapp.maxPerSession >= 0 ? inapp.maxPerSession : 1000;
     int inAppPerSession = (int)[self.impressionManager perSession:inapp.Id];
     if (inAppPerSession >= inAppMaxPerSession) {
         return YES;
     }
     
-    // 3. Have we shown enough of in-apps this session?
+    // 2. Have we shown enough of in-apps this session?
     int globalSessionMax = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SESSION_MAX] withResetValue:1];
     int shownThisSession = (int) [[self impressionManager] perSessionTotal];
     if (shownThisSession >= globalSessionMax) return true;
@@ -157,11 +149,6 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
         return true;
     }
     return false;
-}
-
-- (void)didDismiss:(CTInAppNotification *)inapp {
-    if (!inapp.Id) return;
-    self.dismissedThisSession[inapp.Id] = @TRUE;
 }
 
 - (void)didShow:(CTInAppNotification *)inapp {
