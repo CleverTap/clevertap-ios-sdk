@@ -25,11 +25,11 @@ extern NSString* const kKEY_MAX_PER_DAY;
 
 - (void)didShow:(CTInAppNotification *)inapp;
 
-- (void)updateLimitsPerDay:(int)perDay andPerSession:(int)perSession;
+- (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
 
 - (void)attachToHeader:(NSMutableDictionary *)header;
 
-- (void)processResponse:(NSDictionary *)response;
+- (void)removeStaleInAppCounts:(NSArray *)staleInApps;
 
 - (BOOL)hasLifetimeCapacityMaxedOut:(CTInAppNotification *)dictionary;
 

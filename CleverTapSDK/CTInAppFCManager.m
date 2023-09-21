@@ -46,6 +46,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
         _config = config;
         _deviceId = deviceId;
         
+        // TODO: init properly
         _impressionManager = [CTImpressionManager new];
         
         _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
@@ -64,7 +65,7 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 }
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"CTInAppFCManager:%@:%@", self.config.accountId, self.deviceId];
+    return [NSString stringWithFormat:@"%@:%@:%@", self.class, self.config.accountId, self.deviceId];
 }
 
 - (void)checkUpdateDailyLimits {
@@ -112,18 +113,9 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     if (!inapp.Id) return false;
     
     // 1. Has the daily count maxed out globally?
-    int shownTodayCount = 0;
-    if (self.config.isDefaultInstance) {
-        shownTodayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:[CTPreferences getIntForKey:kKEY_COUNTS_SHOWN_TODAY withResetValue:0]];
-    } else {
-        shownTodayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0];
-    }
-    int maxPerDayCount = 1;
-    if (self.config.isDefaultInstance) {
-        maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:[CTPreferences getIntForKey:kKEY_MAX_PER_DAY withResetValue:1]];
-    } else {
-        maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:1];
-    }
+    int shownTodayCount = (int) [CTPreferences getIntForKey:
+                                 [self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0];
+    int maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:1];
     if (shownTodayCount >= maxPerDayCount) return true;
     
     // 2. Has the daily count been maxed out for this inapp?
@@ -153,22 +145,17 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 
 - (void)didShow:(CTInAppNotification *)inapp {
     if (!inapp.Id) return;
-    
     [self recordImpression:inapp.Id];
 }
 
-- (void)updateLimitsPerDay:(int)perDay andPerSession:(int)perSession {
+- (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession {
     [CTPreferences putInt:perDay forKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY]];
     [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SESSION_MAX]];
 }
 
 - (void)attachToHeader:(NSMutableDictionary *)header {
     @try {
-        if (self.config.isDefaultInstance) {
-            header[@"imp"] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:[CTPreferences getIntForKey:kKEY_COUNTS_SHOWN_TODAY withResetValue:0]]);
-        } else {
-            header[@"imp"] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0]);
-        }
+        header[@"imp"] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0]);
 
         NSMutableArray *arr = [NSMutableArray new];
         NSArray *keys = [self.inAppCounts allKeys];
@@ -186,13 +173,12 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     }
 }
 
-- (void)processResponse:(NSDictionary *)response {
-    NSArray *stale = response[@"inapp_stale"];
-    if ([stale isKindOfClass:[NSArray class]]) {
+- (void)removeStaleInAppCounts:(NSArray *)staleInApps {
+    if ([staleInApps isKindOfClass:[NSArray class]]) {
         @try {
             @synchronized (self.inAppCounts) {
-                for (int i = 0; i < [stale count]; i++) {
-                    NSString *key = [NSString stringWithFormat:@"%@", stale[i]];
+                for (int i = 0; i < [staleInApps count]; i++) {
+                    NSString *key = [NSString stringWithFormat:@"%@", staleInApps[i]];
                     [self.inAppCounts removeObjectForKey:key];
                     CleverTapLogInternal(self.config.logLevel, @"%@: Purged inapp counts with key %@", self, key);
                 }
@@ -253,11 +239,14 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     @synchronized (self.inAppCounts) {
         NSMutableArray *counts = [self.inAppCounts[inAppId] mutableCopy];
         if (!counts) {
-            counts = [[NSMutableArray alloc] initWithCapacity:2];
+            counts = [[NSMutableArray alloc] initWithObjects:@1, @1, nil];
+        } else {
+            // protocol: todayCount, lifetimeCount
+            counts[0] = @([counts[0] intValue] + 1);
+            counts[1] = @([counts[1] intValue] + 1);
         }
-        // protocol: todayCount, lifetimeCount
-        counts[0] = @([counts[0] intValue] + 1);
-        counts[1] = @([counts[1] intValue] + 1);
+        
+        self.inAppCounts[inAppId] = counts;
         [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
     }
 }

@@ -681,7 +681,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         if (!_config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
             _notificationQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.notificationQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
             dispatch_queue_set_specific(_notificationQueue, kNotificationQueueKey, (__bridge void *)self, NULL);
-            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config guid: [self.deviceInfo.deviceId copy]];
+            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config deviceId:[self.deviceInfo.deviceId copy]];
         }
 #endif
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -2933,7 +2933,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     if (perDay == nil) {
                         perDay = @10;
                     }
-                    [self.inAppFCManager updateLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
+                    [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
                     
                     NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
                     
@@ -2974,7 +2974,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             }
                             // Handle inapp_stale
                             @try {
-                                [self.inAppFCManager processResponse:jsonResp];
+                                NSArray *stale = jsonResp[@"inapp_stale"];
+                                [self.inAppFCManager removeStaleInAppCounts:stale];
                             } @catch (NSException *ex) {
                                 CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)
                             }
