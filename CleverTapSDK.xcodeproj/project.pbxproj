@@ -292,6 +292,8 @@
 		6A4427CD2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */; };
 		6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427CE2AB9D8C30098866F /* CTInAppFCManager+Legacy.h */; };
 		6A4427D12AB9D8C30098866F /* CTInAppFCManager+Legacy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427CF2AB9D8C30098866F /* CTInAppFCManager+Legacy.m */; };
+		6A4427D82ABCE5EB0098866F /* CTInAppStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427D62ABCE5EB0098866F /* CTInAppStore.h */; };
+		6A4427D92ABCE5EB0098866F /* CTInAppStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427D72ABCE5EB0098866F /* CTInAppStore.m */; };
 		6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */; };
 		6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */; };
 		6A775C3329BE78C7007790E0 /* CTVariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A775C3129BE78C7007790E0 /* CTVariables.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -734,6 +736,8 @@
 		6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppEvaluationManagerTest.m; sourceTree = "<group>"; };
 		6A4427CE2AB9D8C30098866F /* CTInAppFCManager+Legacy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTInAppFCManager+Legacy.h"; sourceTree = "<group>"; };
 		6A4427CF2AB9D8C30098866F /* CTInAppFCManager+Legacy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTInAppFCManager+Legacy.m"; sourceTree = "<group>"; };
+		6A4427D62ABCE5EB0098866F /* CTInAppStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppStore.h; sourceTree = "<group>"; };
+		6A4427D72ABCE5EB0098866F /* CTInAppStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppStore.m; sourceTree = "<group>"; };
 		6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDictionaryExtensionsTest.m; sourceTree = "<group>"; };
 		6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCTTest.m; sourceTree = "<group>"; };
 		6A775C3129BE78C7007790E0 /* CTVariables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTVariables.h; sourceTree = "<group>"; };
@@ -958,6 +962,8 @@
 				6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */,
 				6A4427CE2AB9D8C30098866F /* CTInAppFCManager+Legacy.h */,
 				6A4427CF2AB9D8C30098866F /* CTInAppFCManager+Legacy.m */,
+				6A4427D62ABCE5EB0098866F /* CTInAppStore.h */,
+				6A4427D72ABCE5EB0098866F /* CTInAppStore.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -1586,6 +1592,7 @@
 				D01651B62097B81400660178 /* CTKnownProfileFields.h in Headers */,
 				6A4427BD2AA394ED0098866F /* CTTriggersMatcher.h in Headers */,
 				071EB4D7217F6427008F0FAB /* CTCoverViewController.h in Headers */,
+				6A4427D82ABCE5EB0098866F /* CTInAppStore.h in Headers */,
 				D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */,
 				078C63A922420321001FDDB8 /* CleverTapJSInterface.h in Headers */,
 				D033FB83208FE51200B4390F /* CTUtils.h in Headers */,
@@ -2101,6 +2108,7 @@
 				6A4427C22AA39AC30098866F /* CTLimitsMatcher.m in Sources */,
 				071EB4F5217F6427008F0FAB /* CTInAppHTMLViewController.m in Sources */,
 				D01651AF2097B38400660178 /* CTEventBuilder.m in Sources */,
+				6A4427D92ABCE5EB0098866F /* CTInAppStore.m in Sources */,
 				D020C929209006AD0073F61E /* CTUriHelper.m in Sources */,
 				07B9454C219EA34300D4C542 /* CTMessageMO.m in Sources */,
 				D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */,
