@@ -991,6 +991,18 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param delegate     an object conforming to the CleverTapInAppNotificationDelegate Protocol
  */
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
+
+/*!
+ @method
+ 
+ @abstract
+ Forces inapps to update from the server.
+ 
+ @discussion
+ Forces inapps to update from the server.
+ */
+- (void)fetchInapps;
+
 #endif
 
 /*!

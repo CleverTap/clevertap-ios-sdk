@@ -4106,6 +4106,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _inAppNotificationDelegate;
 }
 
+- (void)fetchInapps {
+    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @5}} withType:CleverTapEventTypeFetch];
+}
 
 #pragma mark - Event API
 
