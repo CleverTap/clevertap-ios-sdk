@@ -43,8 +43,15 @@
 
 + (BOOL)expected:(CTTriggerValue *)expected equalsActual:(CTTriggerValue * __nullable)actual {
     if ([expected stringValue] && [actual isArray]) {
-        for (NSString *actualString in [actual arrayValue]) {
-            if ([actualString isEqualToString:[expected stringValue]]) {
+        for (id actualValue in [actual arrayValue]) {
+            if ([actualValue isKindOfClass:[NSString class]] && [actualValue isEqualToString:[expected stringValue]]) {
+                return YES;
+            }
+        }
+    }
+    if ([expected numberValue] && [actual isArray]) {
+        for (id actualValue in [actual arrayValue]) {
+            if ([actualValue isKindOfClass:[NSNumber class]] && [[expected numberValue] compare:actualValue] == NSOrderedSame) {
                 return YES;
             }
         }
