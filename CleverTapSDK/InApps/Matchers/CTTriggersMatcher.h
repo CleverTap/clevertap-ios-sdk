@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CTEventAdapter.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTTriggersMatcher : NSObject
+
+- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers event:(CTEventAdapter *)event;
 
 - (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties;
 

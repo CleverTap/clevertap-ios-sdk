@@ -262,8 +262,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID {
     @try {
         [deviceIDLock lock];
-        self.deviceId = newDeviceID;
+        // deviceId getter uses the value from CTPreferences,
+        // persist first and then set the property, so KVO works
         [CTPreferences putString:newDeviceID forKey:[self deviceIdStorageKey]];
+        self.deviceId = newDeviceID;
     } @finally {
         [deviceIDLock unlock];
     }

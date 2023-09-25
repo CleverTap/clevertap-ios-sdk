@@ -7,7 +7,6 @@
 //
 
 #import "CTTriggersMatcher.h"
-#import "CTEventAdapter.h"
 #import "CTTriggerAdapter.h"
 #import "CTTriggerValue.h"
 #import "CTConstants.h"
@@ -15,6 +14,22 @@
 
 @implementation CTTriggersMatcher
 
+- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers event:(CTEventAdapter *)event {
+    // Events in the array are OR-ed
+    for (NSDictionary *triggerObject in whenTriggers) {
+        CTTriggerAdapter *trigger = [[CTTriggerAdapter alloc] initWithJSON:triggerObject];
+        if ([event.eventName isEqualToString:@"Charged"]) {
+            if ([self matchCharged:trigger event:event]) {
+                return YES;
+            }
+        } else if ([self match:trigger event:event]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+// TODO: remove this method?
 - (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties];
 
@@ -28,6 +43,7 @@
     return NO;
 }
 
+// TODO: remove this method?
 - (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"Charged" eventProperties:details andItems:items];
 

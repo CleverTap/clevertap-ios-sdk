@@ -11,6 +11,9 @@
 
 @interface CTImpressionManager()
 
+@property (nonatomic, strong) NSString *accountId;
+@property (nonatomic, strong) NSString *deviceId;
+
 @property (nonatomic, strong) NSMutableDictionary *sessionImpressions;
 @property (nonatomic, strong) NSMutableDictionary *impressions;
 
@@ -32,6 +35,8 @@
         _sessionImpressions = [NSMutableDictionary new];
         _impressions = [NSMutableDictionary new];
         _locale = locale;
+        
+
     }
     return self;
 }
@@ -174,7 +179,7 @@
 
 // TODO: make impressions per instance and per device id?
 - (NSString *)getImpressionKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@_%@", @"_impressions", campaignId];
+    return [NSString stringWithFormat:@"%@_%@_%@_%@", self.accountId, self.deviceId, @"impressions", campaignId];
 }
 
 @end

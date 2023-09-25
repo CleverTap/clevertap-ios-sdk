@@ -9,32 +9,73 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
+#import "CTInAppStore.h"
+#import "CTTriggersMatcher.h"
+#import "CTLimitsMatcher.h"
+#import "CTInAppTriggerManager.h"
 
 @interface CTInAppEvaluationManager()
 
 - (void)evaluateServerSide:(CTEventAdapter *)event;
 - (void)evaluateClientSide:(CTEventAdapter *)event;
-- (NSArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
+- (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 
-// TODO: Can we use NSMutableSet?
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
+
+@property (nonatomic, strong) CTInAppStore *inAppStore;
+@property (nonatomic, strong) CleverTap *instance;
+@property (nonatomic, strong) CTTriggersMatcher *triggersMatcher;
+@property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
+@property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
+@property (nonatomic, strong) CTImpressionManager *impressionManager;
 
 @end
 
 @implementation CTInAppEvaluationManager
 
 // TODO: init
-// TODO: set delegate
+
+static void *deviceIdContext = &deviceIdContext;
+static void *sessionIdContext = &sessionIdContext;
 
 - (instancetype)initWithCleverTap:(CleverTap *)instance {
     if (self = [super init]) {
-        [instance setBatchSentDelegate:self];
+        self.instance = instance;
+        [self.instance setBatchSentDelegate:self];
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
+        
+        self.inAppStore = [CTInAppStore new];
+        self.triggersMatcher = [CTTriggersMatcher new];
+        self.limitsMatcher = [CTLimitsMatcher new];
+        self.triggerManager = [CTInAppTriggerManager new];
+        self.impressionManager = [CTImpressionManager new];
+        
+        // TODO: decide whether to use KVO to observe deviceId and session changes
+        [self.instance addObserver:self forKeyPath:@"deviceInfo.deviceId" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:deviceIdContext];
+        [self.instance addObserver:self forKeyPath:@"sessionId" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:sessionIdContext];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [self.instance removeObserver:self forKeyPath:@"deviceInfo.deviceId" context:deviceIdContext];
+    [self.instance removeObserver:self forKeyPath:@"sessionId" context:sessionIdContext];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (context == deviceIdContext && [keyPath isEqualToString:@"deviceInfo.deviceId"]) {
+        NSLog(@"[KVO] deviceId updated: %@", change);
+    } else if (context == sessionIdContext) {
+        if ([change[NSKeyValueChangeNewKey] isEqual:@0]) {
+            // reset session
+            NSLog(@"[KVO] sessionId set to 0: %@", change);
+        }
+    }
 }
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
@@ -58,7 +99,7 @@
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{}];
-    NSMutableArray *eligibleInApps = [[self evaluate:event withInApps:appLaunchedNotifs] mutableCopy];
+    NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     [self sortByPriority:eligibleInApps];
     if (eligibleInApps.count > 0) {
         // TODO: handle supressed inapps
@@ -67,8 +108,7 @@
 }
 
 - (void)evaluateClientSide:(CTEventAdapter *)event {
-    // [self evaluate:event withInApps:[store clientSideNotifs]];
-    NSMutableArray *eligibleInApps = [[self evaluate:event withInApps:@[]] mutableCopy];
+    NSMutableArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.clientSideInApps];
     [self sortByPriority:eligibleInApps];
     if (eligibleInApps.count > 0) {
         NSMutableDictionary *inApp = eligibleInApps[0];
@@ -83,17 +123,32 @@
 }
 
 - (void)evaluateServerSide:(CTEventAdapter *)event {
-    // [self evaluate:event withInApps:[store serverSideNotifs]];
     // TODO: add to meta inapp_evals : eligibleInapps.addToMeta();
-    NSArray *eligibleInApps = [self evaluate:event withInApps:@[]];
+    NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
     [self addToMeta:eligibleInApps];
 }
 
-- (NSArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
-    // TODO: whenTriggers
-    // TODO: record trigger
-    // TODO: whenLimits
-    return @[]; // returns eligible inapps
+- (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
+    NSMutableArray *eligibleInApps = [NSMutableArray new];
+    for (NSDictionary *inApp in inApps) {
+        NSString *campaignId = inApp[@"ti"];
+        // Match trigger
+        NSArray *whenTriggers = inApp[@"whenTriggers"];
+        BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
+        if (!matchesTrigger) continue;
+        
+        // In-app matches the trigger, increment trigger count
+        [self.triggerManager incrementTrigger:campaignId];
+        
+        // Match limits
+        NSArray *whenLimits = inApp[@"whenLimits"];
+        BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId withImpressionManager:self.impressionManager];
+        if (matchesLimits) {
+            [eligibleInApps addObject:inApp];
+        }
+    }
+    
+    return eligibleInApps;
 }
 
 - (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success {

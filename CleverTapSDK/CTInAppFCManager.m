@@ -133,6 +133,9 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     if (!key) {
         return true;
     }
+    // TODO: evaluate whenLimits again (without Nth triggers)
+    // in case queue was paused and multiple messages were added in the meantime
+    
     // Exclude from all caps?
     if (inapp.excludeFromCaps) return true;
     if (![self hasSessionCapacityMaxedOut:inapp]
