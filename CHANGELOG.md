@@ -6,8 +6,7 @@ All notable changes to this project will be documented in this file.
 #### Added
 - Adds support to enable `NSFileProtectionComplete` to secure App’s document directory.
 - Adds support for Integration Debugger to show errors and events on the dashboard when `debugLevel` is set to 3.
-- Adds supports to send `locale` lanugage and country code data using NSLocale.
-- Adds public API `setLocale` to set custom locale.
+- Adds support to send `locale` - lanugage and country data using NSLocale and Adds public API `setLocale` to set custom locale, for LP Parity.
 
 #### Changed
 - Updated logic to retrieve country code using NSLocale above iOS 16 as `CTCarrier` is deprecated above iOS 16 with no replacements, see [apple doc](https://developer.apple.com/documentation/coretelephony/ctcarrier)
