@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ### [Version 5.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.1) (September 27, 2023)
 
 #### Added
-- Adds support for `NSFileProtectionComplete` to secure App’s document directory.
+- Adds support to enable `NSFileProtectionComplete` to secure App’s document directory.
 - Adds support for Integration Debugger to show errors and events on the dashboard when `debugLevel` is set to 3.
 - Adds supports to send `locale` lanugage and country code data using NSLocale.
 - Adds public API `setLocale` to set custom locale.
@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file.
 
 #### Fixed
 - Fixes a crash in iOS 17/Xcode 15 related to alert inapps.
-- Fixes failing `test_clevertap_instance_nscoding` testcase.
+- Fixes a failing `test_clevertap_instance_nscoding` test case.
 
 ### [Version 5.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.0) (August 16, 2023)
 
