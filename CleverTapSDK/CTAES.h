@@ -15,4 +15,8 @@
 
 - (instancetype)initWithAccountID:(NSString *)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel isDefaultInstance:(BOOL)isDefaultInstance;
 
+- (NSString *)getEncryptedBase64String:(id)objectToEncrypt;
+
+- (instancetype)initWithAccountID:(NSString *)accountID;
+
 @end

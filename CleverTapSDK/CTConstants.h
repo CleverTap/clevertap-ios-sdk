@@ -87,6 +87,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
+#define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
+#define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
 #define CLTAP_GEOFENCES_JSON_RESPONSE_KEY @"geofences"
 #define CLTAP_PE_VARS_RESPONSE_KEY @"vars"
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"

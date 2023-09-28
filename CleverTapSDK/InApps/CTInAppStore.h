@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CleverTapInstanceConfig.h"
+#import "CTDeviceInfo.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo:(CTDeviceInfo *)deviceInfo;
 - (NSArray *)clientSideInApps;
 - (NSArray *)serverSideInApps;
 

@@ -40,14 +40,14 @@
 static void *deviceIdContext = &deviceIdContext;
 static void *sessionIdContext = &sessionIdContext;
 
-- (instancetype)initWithCleverTap:(CleverTap *)instance {
+- (instancetype)initWithCleverTap:(CleverTap *)instance deviceInfo:(CTDeviceInfo *)deviceInfo {
     if (self = [super init]) {
         self.instance = instance;
         [self.instance setBatchSentDelegate:self];
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
-        self.inAppStore = [CTInAppStore new];
+        self.inAppStore = [[CTInAppStore alloc]initWithConfig:instance.config deviceInfo:deviceInfo];
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = [CTInAppTriggerManager new];

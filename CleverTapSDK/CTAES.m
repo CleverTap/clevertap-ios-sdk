@@ -1,5 +1,5 @@
-#import <CommonCrypto/CommonCryptor.h>
 #import "CTAES.h"
+#import <CommonCrypto/CommonCryptor.h>
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
@@ -24,6 +24,13 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
         _accountID = accountID;
         _isDefaultInstance = isDefaultInstance;
         [self updateEncryptionLevel:encryptionLevel];
+    }
+    return self;
+}
+
+- (instancetype)initWithAccountID:(NSString *)accountID {
+    if (self = [super init]) {
+        _accountID = accountID;
     }
     return self;
 }
@@ -173,6 +180,20 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 - (NSString *)generateKeyPassword {
     NSString *keyPassword = [NSString stringWithFormat:@"%@%@%@",kCRYPT_KEY_PREFIX, _accountID, kCRYPT_KEY_SUFFIX];
     return keyPassword;
+}
+
+- (NSString *)getEncryptedBase64String:(id)objectToEncrypt {
+    @try {
+        NSData *dataValue = [objectToEncrypt dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *encryptedData = [self convertData:dataValue withOperation:kCCEncrypt];
+        if (encryptedData) {
+            return [encryptedData base64EncodedStringWithOptions:kNilOptions];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error: %@ while encrypting object: %@", e.debugDescription, objectToEncrypt);
+        return nil;
+    }
+    return nil;
 }
 
 @end
