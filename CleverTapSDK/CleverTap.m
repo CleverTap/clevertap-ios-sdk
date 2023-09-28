@@ -87,7 +87,6 @@ static NSArray *sslCertNames;
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static NSMutableDictionary *auxiliarySdkVersions;
-static NSLocale *_locale;
 
 static NSRecursiveLock *instanceLock;
 static const int kMaxBatchSize = 49;
@@ -256,6 +255,8 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) NSString *gfSDKVersion;
 
 @property (nonatomic, strong) CTVariables *variables;
+
+@property (nonatomic, strong) NSLocale *locale;
 
 - (instancetype)init __unavailable;
 
