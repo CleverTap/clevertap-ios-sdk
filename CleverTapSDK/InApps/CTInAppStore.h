@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "CleverTapInstanceConfig.h"
 #import "CTDeviceInfo.h"
+#import "CTAES.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

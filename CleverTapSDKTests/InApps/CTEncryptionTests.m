@@ -6,21 +6,21 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
-@class CTAES;
-#import <XCTest/XCTest.h>
-
-@interface CTEncryptionTests : XCTestCase
-
-@end
+#import "CTEncryptionTests.h"
+#import "CTInAppStore.h"
 
 @implementation CTEncryptionTests
 
-- (void)testExample {
-//        NSError *error;
-//        NSArray *objectToEncrypt = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:[[NSBundle mainBundle]pathForResource:@"inapp_interstitial" ofType:@"json"]] options:kNilOptions error:&error];
-//    
-//    CTAES *ctAES = [[CTAES alloc]initWithAccountID:@"test"];
-//        NSString *encryptedString = [ctAES getEncryptedBase64String:objectToEncrypt];
+- (void)testInAppEncryption {
+    
+    NSError *error;
+    NSArray *objectToEncrypt = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfFile:[[NSBundle bundleForClass:[self class]]pathForResource:@"inapp_interstitial" ofType:@"json"]] options:kNilOptions error:&error];
+    CTAES *ctAES = [[CTAES alloc]initWithAccountID:@"test"];
+    NSString *encryptedString = [ctAES getEncryptedBase64String:objectToEncrypt];
+ 
+    NSArray *decryptedObject = [ctAES getDecryptedObject:encryptedString];
+    
+    XCTAssertEqualObjects(objectToEncrypt, decryptedObject);
 }
 
 @end

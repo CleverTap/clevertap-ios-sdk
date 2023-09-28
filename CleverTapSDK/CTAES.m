@@ -184,13 +184,27 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (NSString *)getEncryptedBase64String:(id)objectToEncrypt {
     @try {
-        NSData *dataValue = [objectToEncrypt dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *dataValue = [NSKeyedArchiver archivedDataWithRootObject:objectToEncrypt];
         NSData *encryptedData = [self convertData:dataValue withOperation:kCCEncrypt];
         if (encryptedData) {
             return [encryptedData base64EncodedStringWithOptions:kNilOptions];
         }
     } @catch (NSException *e) {
         CleverTapLogStaticInternal(@"Error: %@ while encrypting object: %@", e.debugDescription, objectToEncrypt);
+        return nil;
+    }
+    return nil;
+}
+
+- (id)getDecryptedObject:(NSString *)encryptedString {
+    @try {
+        NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:encryptedString options:kNilOptions];
+        NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
+        if (decryptedData && decryptedData.length > 0) {
+            return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error: %@ while decrypting string: %@", e.debugDescription, encryptedString);
         return nil;
     }
     return nil;

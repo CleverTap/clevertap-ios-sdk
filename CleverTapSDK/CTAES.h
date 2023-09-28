@@ -17,6 +17,8 @@
 
 - (NSString *)getEncryptedBase64String:(id)objectToEncrypt;
 
+- (id)getDecryptedObject:(NSString *)encryptedString;
+
 - (instancetype)initWithAccountID:(NSString *)accountID;
 
 @end

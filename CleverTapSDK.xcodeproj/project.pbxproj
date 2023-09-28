@@ -186,7 +186,6 @@
 		4E1F156627709304009387AE /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
 		4E1F156827709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
 		4E1F156927709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
-		4E1F74332AC560ED00AD1169 /* CTEncryptionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F74322AC560ED00AD1169 /* CTEncryptionTests.m */; };
 		4E25E3C1278887A70008C888 /* CTIdentityRepo.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE42275D00E80074A774 /* CTIdentityRepo.h */; };
 		4E25E3C2278887A70008C888 /* CTIdentityRepoFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE57275D31910074A774 /* CTIdentityRepoFactory.h */; };
 		4E25E3C3278887A70008C888 /* CTFlexibleIdentityRepo.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE4C275D08C50074A774 /* CTFlexibleIdentityRepo.m */; };
@@ -205,6 +204,7 @@
 		4E25E3D02788889E0008C888 /* CTLoginInfoProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE39275CB7670074A774 /* CTLoginInfoProvider.h */; };
 		4E25E3D12788889F0008C888 /* CTLoginInfoProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE3A275CB7670074A774 /* CTLoginInfoProvider.m */; };
 		4E25E3D22788889F0008C888 /* CTLoginInfoProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE39275CB7670074A774 /* CTLoginInfoProvider.h */; };
+		4E2CF1442AC56D8F00441E8B /* CTEncryptionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */; };
 		4E41FD8A294F441D0001FBED /* CTVar.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E41FD89294F441D0001FBED /* CTVar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E41FD8B294F44200001FBED /* CTVar.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E41FD89294F441D0001FBED /* CTVar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E41FD92294F46510001FBED /* CTVar-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E41FD8C294F46500001FBED /* CTVar-Internal.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -661,7 +661,8 @@
 		4E1F1561277090D6009387AE /* inapp_alert.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_alert.json; sourceTree = "<group>"; };
 		4E1F156427709304009387AE /* inapp_interstitial.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_interstitial.json; sourceTree = "<group>"; };
 		4E1F156727709848009387AE /* app_inbox.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = app_inbox.json; sourceTree = "<group>"; };
-		4E1F74322AC560ED00AD1169 /* CTEncryptionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEncryptionTests.m; sourceTree = "<group>"; };
+		4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTEncryptionTests.h; sourceTree = "<group>"; };
+		4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEncryptionTests.m; sourceTree = "<group>"; };
 		4E41FD89294F441D0001FBED /* CTVar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTVar.h; sourceTree = "<group>"; };
 		4E41FD8C294F46500001FBED /* CTVar-Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CTVar-Internal.h"; sourceTree = "<group>"; };
 		4E41FD8D294F46500001FBED /* CTVar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTVar.m; sourceTree = "<group>"; };
@@ -1191,7 +1192,8 @@
 				6A4427C42AA6515A0098866F /* CTTriggersMatcherTest.m */,
 				4EFC642A2AB44CF900F01414 /* CTLimitsMatcherTest.m */,
 				6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */,
-				4E1F74322AC560ED00AD1169 /* CTEncryptionTests.m */,
+				4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */,
+				4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2063,11 +2065,11 @@
 				4EF1CF9E29B076A300E3CB6A /* CTVarCache+Tests.m in Sources */,
 				6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */,
 				32790957299CC099001FE140 /* CTUtilsTest.m in Sources */,
-				4E1F74332AC560ED00AD1169 /* CTEncryptionTests.m in Sources */,
 				6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */,
 				4EF1CF9E29B076A300E3CB6A /* CTVarCache+Tests.m in Sources */,
 				32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */,
 				6A4427C52AA6515A0098866F /* CTTriggersMatcherTest.m in Sources */,
+				4E2CF1442AC56D8F00441E8B /* CTEncryptionTests.m in Sources */,
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
 				6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */,
 				4E1F155227692A11009387AE /* CleverTap+Tests.m in Sources */,
