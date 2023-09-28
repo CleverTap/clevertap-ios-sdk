@@ -1223,7 +1223,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @discussion
  Call this to method to set locale
  */
-+ (void)setLocale:(NSLocale * _Nonnull)locale;
+- (void)setLocale:(NSLocale * _Nonnull)locale;
 
 /*!
  @method

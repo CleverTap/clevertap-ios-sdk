@@ -3924,7 +3924,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     auxiliarySdkVersions[name] = @(version);
 }
 
-+ (void)setLocale:(NSLocale *)locale
+- (void)setLocale:(NSLocale *)locale
 {
     _locale = locale;
 }
