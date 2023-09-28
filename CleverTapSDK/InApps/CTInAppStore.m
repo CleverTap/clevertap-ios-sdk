@@ -17,6 +17,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @interface CTInAppStore()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+@property (nonatomic, strong) CTAES *ctAES;
 @end
 
 @implementation CTInAppStore
@@ -28,6 +29,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     self = [super init];
     if (self) {
         self.config = config;
+        self.ctAES = [[CTAES alloc]initWithAccountID:self.config.accountId];
     }
     return self;
 }
@@ -50,20 +52,14 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
-- (NSMutableArray *)clientSideInApps {
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
-    return [[CTPreferences getObjectForKey:storageKey]mutableCopy];
-}
-
-- (NSMutableArray *)serverSideInApps {
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
-    return [[CTPreferences getObjectForKey:storageKey]mutableCopy];
-}
-
 - (void)removeClientSideInApps {
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
+    [CTPreferences removeObjectForKey:storageKey];
 }
 
 - (void)removeServerSideInApps {
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
+    [CTPreferences removeObjectForKey:storageKey];
 }
 
 // TODO: DECIDE ON STORAGE METHODS
@@ -79,21 +75,41 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 //    [CTPreferences putObject:clientSideInApps forKey:storageKey];
 //}
 
+//- (NSMutableArray *)clientSideInApps {
+//    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
+//    return [[CTPreferences getObjectForKey:storageKey]mutableCopy];
+//}
+//
+//- (NSMutableArray *)serverSideInApps {
+//    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
+//    return [[CTPreferences getObjectForKey:storageKey]mutableCopy];
+//}
+
 // ENCRYPTION STORAGE
 - (void)storeClientSideInApps:(NSArray *)clientSideInApps {
-    CTAES *ctAES = [[CTAES alloc]initWithAccountID:self.config.accountId];
-    NSString *encryptedString = [ctAES getEncryptedBase64String:clientSideInApps];
+    NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
     
     NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
     [CTPreferences putString:encryptedString forKey:storageKey];
 }
 
 - (void)storeServerSideInApps:(NSArray *)serverSideInApps {
-    CTAES *ctAES = [[CTAES alloc]initWithAccountID:self.config.accountId];
-    NSString *encryptedString = [ctAES getEncryptedBase64String:serverSideInApps];
+    NSString *encryptedString = [self.ctAES getEncryptedBase64String:serverSideInApps];
     
     NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
     [CTPreferences putString:encryptedString forKey:storageKey];
+}
+
+- (NSMutableArray *)clientSideInApps {
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
+    NSString *encryptedString = [[CTPreferences getObjectForKey:storageKey]mutableCopy];
+    return [self.ctAES getDecryptedObject:encryptedString];
+}
+
+- (NSMutableArray *)serverSideInApps {
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
+    NSString *encryptedString = [[CTPreferences getObjectForKey:storageKey]mutableCopy];
+    return [self.ctAES getDecryptedObject:encryptedString];
 }
 
 @end
