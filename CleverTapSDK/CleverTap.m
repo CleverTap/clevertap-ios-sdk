@@ -256,6 +256,8 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 
 @property (nonatomic, strong) CTVariables *variables;
 
+@property (nonatomic, strong) NSLocale *locale;
+
 - (instancetype)init __unavailable;
 
 @end
@@ -1139,6 +1141,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [auxiliarySdkVersions enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
             [evtData setObject:value forKey:key];
         }];
+    }
+    
+    if (_locale){
+        evtData[@"locale"] = [_locale localeIdentifier];
+    }else{
+        evtData[@"locale"] = [self.deviceInfo.systemLocale localeIdentifier];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -3920,6 +3928,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         auxiliarySdkVersions = [NSMutableDictionary new];
     }
     auxiliarySdkVersions[name] = @(version);
+}
+
+- (void)setLocale:(NSLocale *)locale
+{
+    _locale = locale;
 }
 
 + (void)setDebugLevel:(int)level {

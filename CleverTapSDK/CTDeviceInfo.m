@@ -40,6 +40,7 @@ static NSString *_timeZone;
 static NSString *_radio;
 static NSString *_deviceWidth;
 static NSString *_deviceHeight;
+static NSLocale *_systemLocale;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 SCNetworkReachabilityRef _reachability;
@@ -490,6 +491,27 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (int)getLocalInAppCount {
     self.localInAppCount = (int) [CTPreferences getIntForKey:kCLTAP_LOCAL_INAPP_COUNT withResetValue:0];
     return self.localInAppCount;
+}
+
+- (NSLocale *)systemLocale {
+    if (!_systemLocale) {
+        NSLocale *currentLocale = [NSLocale currentLocale];
+        
+        NSString *language = [[NSLocale preferredLanguages] objectAtIndex:0];
+        if (!language || [language  isEqualToString:@""] ){
+            language = @"xx";
+        }
+        
+        NSString *country = [currentLocale objectForKey:NSLocaleCountryCode];
+        if (!country || [country  isEqualToString:@""]){
+            country = @"XX";
+        }
+        
+        NSString *currentLocaleString = [NSString stringWithFormat:@"%@_%@",
+                                         language,country];
+        _systemLocale = [[NSLocale alloc] initWithLocaleIdentifier:currentLocaleString];
+    }
+    return _systemLocale;
 }
 
 @end
