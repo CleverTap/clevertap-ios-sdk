@@ -26,6 +26,7 @@
 @property (assign, readonly) BOOL wifi;
 @property (assign, readonly) BOOL enableFileProtection;
 @property (strong, readonly) NSMutableArray<CTValidationResult*>* validationErrors;
+@property (strong, readonly) NSLocale *systemLocale;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config andCleverTapID:(NSString *)cleverTapID;
 - (void)forceUpdateDeviceID:(NSString *)newDeviceID;

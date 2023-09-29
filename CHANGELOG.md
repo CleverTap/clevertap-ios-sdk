@@ -1,6 +1,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 5.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.1) (September 29, 2023)
+
+#### Added
+- Adds support to enable `NSFileProtectionComplete` to secure App’s document directory.
+- Adds support for Integration Debugger to show errors and events on the dashboard when `debugLevel` is set to 3.
+- Adds support to send `locale` - lanugage and country data using NSLocale and Adds public API `setLocale` to set custom locale, for LP Parity.
+
+#### Changed
+- Updated logic to retrieve country code using NSLocale above iOS 16 as `CTCarrier` is deprecated above iOS 16 with no replacements, see [apple doc](https://developer.apple.com/documentation/coretelephony/ctcarrier)
+- Updated logic to not send carrier name above iOS 16 in `CTCarrier` field.
+
+#### Fixed
+- Fixes a crash in iOS 17/Xcode 15 related to alert inapps.
+- Fixes a failing `test_clevertap_instance_nscoding` test case.
+
 ### [Version 5.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.0) (August 16, 2023)
 
 #### Added

@@ -82,6 +82,8 @@ static NSArray *sslCertNames;
 
 #import "NSDictionary+Extensions.h"
 
+#import "CTAES.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -255,6 +257,8 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) NSString *gfSDKVersion;
 
 @property (nonatomic, strong) CTVariables *variables;
+
+@property (nonatomic, strong) NSLocale *locale;
 
 - (instancetype)init __unavailable;
 
@@ -702,7 +706,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
     if (!_instances || [_instances count] <= 0) {
-        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofType:[CleverTapInstanceConfig class] removeFile:NO];
+        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofTypes:allowedClasses removeFile:NO];
         return [CleverTap instanceWithConfig:config];
     }
     
@@ -1020,6 +1025,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         header[@"regURLs"] = registeredURLSchemes;
     }
     
+    // Adds debug flag to show errors and events on the dashboard - integration-debugger when dubug level is set to 3
+    if ([CleverTap getDebugLevel] == 3){
+        header[@"debug"] = @YES;
+    }
+    
     @try {
         NSDictionary *arp = [self getARP];
         if (arp && [arp count] > 0) {
@@ -1093,7 +1103,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     evtData[@"Make"] = self.deviceInfo.manufacturer;
     evtData[@"OS Version"] = self.deviceInfo.osVersion;
     
-    if (self.deviceInfo.carrier) {
+    if (self.deviceInfo.carrier && ![self.deviceInfo.carrier isEqualToString:@""]) {
         evtData[@"Carrier"] = self.deviceInfo.carrier;
     }
     
@@ -1134,6 +1144,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [auxiliarySdkVersions enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
             [evtData setObject:value forKey:key];
         }];
+    }
+    
+    if (_locale){
+        evtData[@"locale"] = [_locale localeIdentifier];
+    }else{
+        evtData[@"locale"] = [self.deviceInfo.systemLocale localeIdentifier];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -3915,6 +3931,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         auxiliarySdkVersions = [NSMutableDictionary new];
     }
     auxiliarySdkVersions[name] = @(version);
+}
+
+- (void)setLocale:(NSLocale *)locale
+{
+    _locale = locale;
 }
 
 + (void)setDebugLevel:(int)level {
