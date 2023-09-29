@@ -1098,7 +1098,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     evtData[@"Make"] = self.deviceInfo.manufacturer;
     evtData[@"OS Version"] = self.deviceInfo.osVersion;
     
-    if (self.deviceInfo.carrier) {
+    if (self.deviceInfo.carrier && ![self.deviceInfo.carrier isEqualToString:@""]) {
         evtData[@"Carrier"] = self.deviceInfo.carrier;
     }
     
