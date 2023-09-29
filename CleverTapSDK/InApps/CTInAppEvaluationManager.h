@@ -8,12 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "CTBatchSentDelegate.h"
+#import "CTAttachToHeaderDelegate.h"
 #import "CleverTap.h"
 #import "CTDeviceInfo.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate>
+@interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToHeaderDelegate>
 - (instancetype)initWithCleverTap:(CleverTap *)instance deviceInfo:(CTDeviceInfo *)deviceInfo;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;

@@ -156,26 +156,6 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SESSION_MAX]];
 }
 
-- (void)attachToHeader:(NSMutableDictionary *)header {
-    @try {
-        header[@"imp"] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0]);
-
-        NSMutableArray *arr = [NSMutableArray new];
-        NSArray *keys = [self.inAppCounts allKeys];
-        for (NSUInteger i = 0; i < keys.count; ++i) {
-            NSArray *counts = self.inAppCounts[keys[i]];
-            if (counts.count == 2) {
-                // tlc: [[targetID, todayCount, lifetime]]
-                [arr addObject:@[keys[i], counts[0], counts[1]]];
-            }
-        }
-        
-        header[@"tlc"] = arr;
-    } @catch (NSException *e) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach FC to header: %@", self, e.debugDescription);
-    }
-}
-
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps {
     if ([staleInApps isKindOfClass:[NSArray class]]) {
         @try {
@@ -257,6 +237,28 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 - (void)incrementShownToday {
     int shownToday = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0];
     [CTPreferences putInt:shownToday + 1 forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
+}
+
+- (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {
+    NSMutableDictionary *header = [NSMutableDictionary new];
+    @try {
+        header[@"imp"] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0]);
+
+        NSMutableArray *arr = [NSMutableArray new];
+        NSArray *keys = [self.inAppCounts allKeys];
+        for (NSUInteger i = 0; i < keys.count; ++i) {
+            NSArray *counts = self.inAppCounts[keys[i]];
+            if (counts.count == 2) {
+                // tlc: [[targetID, todayCount, lifetime]]
+                [arr addObject:@[keys[i], counts[0], counts[1]]];
+            }
+        }
+        
+        header[@"tlc"] = arr;
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach FC to header: %@", self, e.debugDescription);
+    }
+    return header;
 }
 
 @end

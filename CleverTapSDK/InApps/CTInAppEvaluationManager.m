@@ -43,7 +43,6 @@ static void *sessionIdContext = &sessionIdContext;
 - (instancetype)initWithCleverTap:(CleverTap *)instance deviceInfo:(CTDeviceInfo *)deviceInfo {
     if (self = [super init]) {
         self.instance = instance;
-        [self.instance setBatchSentDelegate:self];
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
@@ -52,6 +51,9 @@ static void *sessionIdContext = &sessionIdContext;
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = [CTInAppTriggerManager new];
         self.impressionManager = [CTImpressionManager new];
+        
+        [self.instance setBatchSentDelegate:self];
+        [self.instance addBatchHeaderDelegate:self];
         
         // TODO: decide whether to use KVO to observe deviceId and session changes
         [self.instance addObserver:self forKeyPath:@"deviceInfo.deviceId" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:deviceIdContext];
@@ -101,31 +103,40 @@ static void *sessionIdContext = &sessionIdContext;
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{}];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     [self sortByPriority:eligibleInApps];
-    if (eligibleInApps.count > 0) {
-        // TODO: handle supressed inapps
-        // TODO: eligibleInapps.sort().first().display();
+    for (NSDictionary *inApp in eligibleInApps) {
+        if (![self shouldSuppress:inApp]) {
+            [self.instance _addInAppNotificationsToQueue:@[inApp]];
+            break;
+        }
+        
+        [self suppress:inApp];
     }
 }
 
 - (void)evaluateClientSide:(CTEventAdapter *)event {
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.clientSideInApps];
     [self sortByPriority:eligibleInApps];
-    if (eligibleInApps.count > 0) {
-        NSMutableDictionary *inApp = eligibleInApps[0];
-        if ([self shouldSuppress:inApp]) {
-            [self suppress:inApp];
-            return;
+    
+    for (NSDictionary *inApp in eligibleInApps) {
+        if (![self shouldSuppress:inApp]) {
+            NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
+            [self updateTTL:mutableInApp];
+            [self.instance _addInAppNotificationsToQueue:@[mutableInApp]];
+            break;
         }
-        [self updateTTL:inApp];
         
-        // TODO: eligibleInapps.sort().first().display();
+        [self suppress:inApp];
     }
 }
 
 - (void)evaluateServerSide:(CTEventAdapter *)event {
-    // TODO: add to meta inapp_evals : eligibleInapps.addToMeta();
     NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
-    [self addToMeta:eligibleInApps];
+    for (NSDictionary *inApp in eligibleInApps) {
+        NSString *campaignId = inApp[@"ti"];
+        if (campaignId) {
+            [self.evaluatedServerSideInAppIds addObject:campaignId];
+        }
+    }
 }
 
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
@@ -160,7 +171,7 @@ static void *sessionIdContext = &sessionIdContext;
 }
 
 - (void)onAppLaunchedWithSuccess:(BOOL)success {
-    // Handle multiple failures where request is retried
+    // Handle multiple failures when request is retried
     if (!self.hasAppLaunchedFailed) {
         [self evaluateOnAppLaunchedClientSide];
     }
@@ -170,23 +181,14 @@ static void *sessionIdContext = &sessionIdContext;
 - (void)removeSentEvaluatedServerSideInAppIds:(NSDictionary *)header {
     NSArray *inapps_eval = header[@"inapps_eval"];
     if (inapps_eval) {
-        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, inapps_eval.count-1)];
+        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, inapps_eval.count)];
     }
 }
 
 - (void)removeSentSuppressedClientSideInApps:(NSDictionary *)header {
-    NSArray *suppresed_inapps = header[@"suppresed_inapps"];
+    NSArray *suppresed_inapps = header[@"inapps_suppressed"];
     if (suppresed_inapps) {
-        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, suppresed_inapps.count-1)];
-    }
-}
-
-- (void)addToMeta:(NSArray<NSDictionary *> *)inApps {
-    for (NSDictionary *inApp in inApps) {
-        NSString *campaignId = inApp[@"ti"];
-        if (campaignId) {
-            [self.evaluatedServerSideInAppIds addObject:campaignId];
-        }
+        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, suppresed_inapps.count)];
     }
 }
 
@@ -210,7 +212,7 @@ static void *sessionIdContext = &sessionIdContext;
 - (void)sortByPriority:(NSMutableArray *)inApps {
     NSNumber *(^priority)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
         NSNumber *priority = inApp[@"priority"];
-        if (priority) {
+        if (priority != nil) {
             return priority;
         }
         return @(1);
@@ -218,7 +220,7 @@ static void *sessionIdContext = &sessionIdContext;
     
     NSNumber *(^ti)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
         NSNumber *ti = inApp[@"ti"];
-        if (ti) {
+        if (ti != nil) {
             return ti;
         }
         return [NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]];
@@ -252,7 +254,7 @@ static void *sessionIdContext = &sessionIdContext;
 
 - (void)updateTTL:(NSMutableDictionary *)inApp {
     NSNumber *offset = inApp[@"wzrk_ttl_offset"];
-    if (offset) {
+    if (offset != nil) {
         NSInteger now = [[NSDate date] timeIntervalSince1970];
         NSInteger ttl = now + [offset longValue];
         [inApp setObject:[NSNumber numberWithLong:ttl] forKey:@"wzrk_ttl"];
@@ -261,6 +263,18 @@ static void *sessionIdContext = &sessionIdContext;
         // The deafult TTL will be set in CTInAppNotification
         [inApp removeObjectForKey:@"wzrk_ttl"];
     }
+}
+
+- (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {
+    NSMutableDictionary *header = [NSMutableDictionary new];
+    if ([self.evaluatedServerSideInAppIds count] > 0) {
+        header[@"inapps_eval"] = self.evaluatedServerSideInAppIds;
+    }
+    if ([self.suppressedClientSideInApps count] > 0) {
+        header[@"inapps_suppressed"] = self.suppressedClientSideInApps;
+    }
+    
+    return header;
 }
 
 @end

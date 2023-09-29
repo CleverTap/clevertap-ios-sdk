@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "CTAttachToHeaderDelegate.h"
 
 @class CleverTapInstanceConfig;
 @class CTInAppNotification;
@@ -8,7 +9,7 @@ extern NSString* const kKEY_COUNTS_PER_INAPP;
 extern NSString* const kKEY_COUNTS_SHOWN_TODAY;
 extern NSString* const kKEY_MAX_PER_DAY;
 
-@interface CTInAppFCManager : NSObject
+@interface CTInAppFCManager : NSObject <CTAttachToHeaderDelegate>
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 @property (atomic, copy, readonly) NSString *deviceId;
@@ -26,8 +27,6 @@ extern NSString* const kKEY_MAX_PER_DAY;
 - (void)didShow:(CTInAppNotification *)inapp;
 
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
-
-- (void)attachToHeader:(NSMutableDictionary *)header;
 
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps;
 

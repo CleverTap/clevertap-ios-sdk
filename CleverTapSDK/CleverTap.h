@@ -27,6 +27,7 @@
 #endif
 
 @protocol CTBatchSentDelegate;
+@protocol CTAttachToHeaderDelegate;
 
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
@@ -1400,7 +1401,12 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 // TODO: move to private header
 - (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
+- (void)_addInAppNotificationsToQueue:(NSArray * _Nonnull)inappNotifs;
+- (void)addBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
+- (void)removeBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
 
+- (void)runOnNotificationQueue:(void (^)(void))taskBlock;
+- (void)_showNotificationIfAvailable;
 @end
 
 #pragma clang diagnostic pop

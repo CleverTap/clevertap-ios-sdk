@@ -46,7 +46,12 @@
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
 #endif
+
+
+
 #import "CTBatchSentDelegate.h"
+#import "CTInAppEvaluationManager.h"
+#import "CTAttachToHeaderDelegate.h"
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
@@ -258,6 +263,13 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, strong) NSString *gfSDKVersion;
 
 @property (nonatomic, strong) CTVariables *variables;
+
+
+// TODO: organize
+@property (nonatomic, strong) CTInAppEvaluationManager *inAppEvaluationManager;
+@property (nonatomic, strong) NSHashTable *batchHeaderDelegates;
+
+
 
 - (instancetype)init __unavailable;
 
@@ -696,6 +708,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // Initialise Variables
         self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
         
+        
+        self.batchHeaderDelegates = [NSHashTable weakObjectsHashTable];
+        
+        
+        self.inAppEvaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo];
+
+        
         [self notifyUserProfileInitialized];
     }
     
@@ -1059,9 +1078,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     } @catch (NSException *ex) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach wzrk_ref to batch header", self);
     }
+    
+    @try {
+        NSDictionary *additionalHeaders = [self invokeAttachToHeaderDelegates];
+        // receiving dictionary header keys will be overridden in case of same keys
+        [header addEntriesFromDictionary:additionalHeaders];
+    } @catch (NSException *exception) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach headers from delegates", self);
+    }
+    
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (!_config.analyticsOnly && ![[self class] runningInsideAppExtension]) {
-        [self.inAppFCManager attachToHeader:header];
+        //[self.inAppFCManager attachToHeader:header];
         
         // TODO: add inapps_eval
     }
@@ -1724,6 +1752,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 #pragma mark Private Method
+
+- (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
+    @try {
+        NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]]];
+        for (int i = 0; i < [inappNotifs count]; i++) {
+            @try {
+                NSMutableDictionary *inappNotif = [[NSMutableDictionary alloc] initWithDictionary:inappNotifs[i]];
+                [inapps addObject:inappNotif];
+            } @catch (NSException *e) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+            }
+        }
+        // Commit all the changes
+        [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
+        
+        // Fire the first notification, if any
+        [self runOnNotificationQueue:^{
+            [self _showNotificationIfAvailable];
+        }];
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
+    }
+}
 
 - (void)_showInAppNotificationIfAny {
     if ([[self class] runningInsideAppExtension]){
@@ -2619,6 +2670,19 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [CTUtils jsonObjectToString:mutableEvent]);
         
+        // TODO: or evaluate here?
+        // Evaluate the event only if it will be processed
+        [self runSerialAsync:^{
+            NSString *eventName = event[@"evtName"];
+            NSDictionary *eventData = event[@"evtData"];
+            if ([eventName isEqualToString:@"Charged"]) {
+                NSArray *items = eventData[@"Items"];
+                [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
+            } else {
+                [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
+            }
+        }];
+        
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];
         } else {
@@ -2907,6 +2971,25 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
+- (void)addBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
+    [self.batchHeaderDelegates addObject:delegate];
+}
+
+- (void)removeBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
+    [self.batchHeaderDelegates removeObject:delegate];
+}
+
+- (NSDictionary<NSString *, id> *)invokeAttachToHeaderDelegates {
+    NSMutableDictionary<NSString *, id> *header = [NSMutableDictionary dictionary];
+    for (id<CTAttachToHeaderDelegate> delegate in self.batchHeaderDelegates) {
+        NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreation];
+        if (additionalHeader) {
+            [header addEntriesFromDictionary:additionalHeader];
+        }
+    }
+    return [header copy];
+}
+
 #pragma mark Response Handling
 
 - (void)parseResponse:(NSData *)responseData {
@@ -2952,26 +3035,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         // Add all the new notifications to the queue
                         if (inappNotifs && [inappNotifs count] > 0) {
                             CleverTapLogInternal(self.config.logLevel, @"%@: Processing new InApps: %@", self, inappNotifs);
-                            @try {
-                                NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]]];
-                                for (int i = 0; i < [inappNotifs count]; i++) {
-                                    @try {
-                                        NSMutableDictionary *inappNotif = [[NSMutableDictionary alloc] initWithDictionary:inappNotifs[(NSUInteger) i]];
-                                        [inapps addObject:inappNotif];
-                                    } @catch (NSException *e) {
-                                        CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
-                                    }
-                                }
-                                // Commit all the changes
-                                [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
-                                
-                                // Fire the first notification, if any
-                                [self runOnNotificationQueue:^{
-                                    [self _showNotificationIfAvailable];
-                                }];
-                            } @catch (NSException *e) {
-                                CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
-                            }
+                            [self _addInAppNotificationsToQueue:inappNotifs];
                             // Handle inapp_stale
                             @try {
                                 NSArray *stale = jsonResp[@"inapp_stale"];
@@ -3692,6 +3756,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self runSerialAsync:^{
         [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
+                // TODO: evaluate here?
+                [self.inAppEvaluationManager evaluateOnChargedEvent:chargeDetails andItems:items];
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
