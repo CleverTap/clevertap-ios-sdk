@@ -24,6 +24,7 @@
 @property (atomic, readonly) NSString *fallbackDeviceId;
 @property (atomic, readwrite) NSString *library;
 @property (assign, readonly) BOOL wifi;
+@property (assign, readonly) BOOL enableFileProtection;
 @property (strong, readonly) NSMutableArray<CTValidationResult*>* validationErrors;
 @property (strong, readonly) NSLocale *systemLocale;
 

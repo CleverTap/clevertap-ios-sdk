@@ -209,7 +209,8 @@
         NSError *writeError = nil;
         NSString *fileName = [self dataArchiveFileName];
         NSString *filePath = [CTPreferences filePathfromFileName:fileName];
-        [diffsData writeToFile:filePath options:NSDataWritingAtomic error:&writeError];
+        NSDataWritingOptions fileProtectionOption = _config.enableFileProtection ? NSDataWritingFileProtectionComplete : NSDataWritingAtomic;
+        [diffsData writeToFile:filePath options:fileProtectionOption error:&writeError];
         if (writeError) {
             CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
         }

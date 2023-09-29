@@ -21,7 +21,7 @@
 
 + (id _Nullable)unarchiveFromFile:(NSString *_Nonnull)filename ofTypes:(nonnull NSSet<Class> *)classes removeFile:(BOOL)remove;
 
-+ (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)fileName;
++ (BOOL)archiveObject:(id _Nonnull)object forFileName:(NSString *_Nonnull)fileName config: (CleverTapInstanceConfig *_Nonnull)config;
 
 + (NSString *_Nonnull)storageKeyWithSuffix: (NSString *_Nonnull)suffix config: (CleverTapInstanceConfig *_Nonnull)config;
 

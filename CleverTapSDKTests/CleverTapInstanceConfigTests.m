@@ -34,7 +34,7 @@
     [config setIdentityKeys:@[@"Email"]];
     [config setEncryptionLevel:CleverTapEncryptionMedium];
 
-    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
 
     NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
     CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofTypes:allowedClasses removeFile:YES];
@@ -58,7 +58,7 @@
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token"
                                                                              proxyDomain:@"proxy" spikyProxyDomain:@"spikyProxy"];
 
-    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+    [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
 
     NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
     CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofTypes:allowedClasses removeFile:YES];
