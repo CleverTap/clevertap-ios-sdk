@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 5.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.1) (September 27, 2023)
+### [Version 5.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.1) (September 29, 2023)
 
 #### Added
 - Adds support to enable `NSFileProtectionComplete` to secure App’s document directory.
