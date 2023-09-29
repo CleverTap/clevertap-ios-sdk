@@ -11,6 +11,7 @@
 
 #import "CleverTapInstanceConfig.h"
 #import "CTPreferences.h"
+#import "CTAES.h"
 
 @interface CleverTapInstanceConfig (Tests)
 + (NSString*)dataArchiveFileNameWithAccountId:(NSString*)accountId;
@@ -31,10 +32,12 @@
     [config setAnalyticsOnly:YES];
     [config setUseCustomCleverTapId:YES];
     [config setIdentityKeys:@[@"Email"]];
+    [config setEncryptionLevel:CleverTapEncryptionMedium];
 
     [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
 
-    CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofType:[CleverTapInstanceConfig class] removeFile:YES];
+    NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+    CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofTypes:allowedClasses removeFile:YES];
     
     XCTAssertNotNil(cachedConfig);
     XCTAssertEqualObjects([cachedConfig accountId], [config accountId]);
@@ -48,6 +51,7 @@
     XCTAssertEqual([cachedConfig useCustomCleverTapId], [config useCustomCleverTapId]);
     XCTAssertEqualObjects([cachedConfig identityKeys], [config identityKeys]);
     XCTAssertEqual([cachedConfig logLevel], [config logLevel]);
+    XCTAssertEqual([cachedConfig encryptionLevel], [config encryptionLevel]);
 }
 
 - (void)test_clevertap_instance_nscoding_proxy {
@@ -56,7 +60,8 @@
 
     [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
 
-    CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofType:[CleverTapInstanceConfig class] removeFile:YES];
+    NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+    CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofTypes:allowedClasses removeFile:YES];
     
     XCTAssertNotNil(cachedConfig);
     XCTAssertEqualObjects([cachedConfig accountId], [config accountId]);
