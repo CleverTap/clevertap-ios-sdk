@@ -26,8 +26,9 @@
     [coder encodeBool: _isCreatedPostAppLaunched forKey:@"isCreatedPostAppLaunched"];
     [coder encodeBool: _beta forKey:@"beta"];
     [coder encodeBool: _wv_init forKey:@"wv_init"];
-    [coder encodeBool: _encryptionLevel forKey:@"encryptionLevel"];
-    [coder encodeBool: _aesCrypt forKey:@"aesCrypt"];
+    [coder encodeInt: _encryptionLevel forKey:@"encryptionLevel"];
+    [coder encodeObject: _aesCrypt forKey:@"aesCrypt"];
+    [coder encodeBool:_enableFileProtection forKey:@"enableFileProtection"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -52,6 +53,7 @@
         _wv_init = [coder decodeBoolForKey:@"wv_init"];
         _encryptionLevel = [coder decodeIntForKey:@"encryptionLevel"];
         _aesCrypt = [coder decodeObjectForKey:@"aesCrypt"];
+        _enableFileProtection = [coder decodeBoolForKey:@"enableFileProtection"];
     }
     return self;
 }
@@ -183,6 +185,7 @@
     copy.beta = self.beta;
     copy.encryptionLevel = self.encryptionLevel;
     copy.aesCrypt = self.aesCrypt;
+    copy.enableFileProtection = self.enableFileProtection;
     return copy;
 }
 
@@ -205,6 +208,7 @@
     _logLevel = 0;
     _beta = plist.beta;
     _encryptionLevel = isDefault ? plist.encryptionLevel : CleverTapEncryptionNone;
+    _enableFileProtection = isDefault ? plist.enableFileProtection : NO;
     if (isDefault) {
         _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
     }
@@ -227,6 +231,14 @@
         _aesCrypt = [[CTAES alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:_isDefaultInstance];
     } else {
         CleverTapLogStaticInfo("CleverTap Encryption level for default instance can't be updated from setEncryptionLevel method");
+    }
+}
+
+- (void)setEnableFileProtection:(BOOL)enableFileProtection {
+    if (!_isDefaultInstance) {
+        _enableFileProtection = enableFileProtection;
+    } else {
+        CleverTapLogStaticInfo("CleverTap enable file protection for default instance can't be updated from setEnableFileProtection method");
     }
 }
 @end

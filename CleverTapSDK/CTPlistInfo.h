@@ -13,6 +13,7 @@
 @property (nonatomic, assign, readonly) BOOL useCustomCleverTapId;
 @property (nonatomic, assign, readonly) BOOL beta;
 @property (nonatomic, assign, readonly) BOOL disableIDFV;
+@property (nonatomic, assign) BOOL enableFileProtection;
 @property (nonatomic, readonly) CleverTapEncryptionLevel encryptionLevel;
 
 + (instancetype _Nullable)sharedInstance;

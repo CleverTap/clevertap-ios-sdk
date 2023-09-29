@@ -91,6 +91,9 @@ static NSArray *registeredURLSchemes;
         NSString *disableIDFV = [CTPlistInfo getMetaDataForAttribute:CLTAP_DISABLE_IDFV_LABEL];
         _disableIDFV = (disableIDFV && [disableIDFV isEqualToString:@"1"]);
         
+        NSString *enableFileProtection = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENABLE_FILE_PROTECTION];
+        _enableFileProtection = (enableFileProtection && [enableFileProtection isEqualToString:@"1"]);
+        
         NSString *encryptionLevel = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_LEVEL];
         [self setEncryption:encryptionLevel];
     }
