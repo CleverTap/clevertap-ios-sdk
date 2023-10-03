@@ -251,6 +251,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (nonatomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
+@property(strong, nonatomic, nullable) CleverTapFetchInappsBlock fetchInappsBlock;
 #endif
 
 @property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
@@ -2920,6 +2921,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
                 [[self variables] handleVariablesError];
+                // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
+                self.fetchInappsBlock(NO);
+                
                 dispatch_semaphore_signal(semaphore);
             }];
             [self.requestSender send:ctRequest];
@@ -3044,6 +3048,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                 CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)
                             }
                         }
+                        
+                        // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
+                        self.fetchInappsBlock(YES);
                     }
                 }
 #endif
@@ -4172,7 +4179,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _inAppNotificationDelegate;
 }
 
-- (void)fetchInapps {
+- (void)fetchInApps:(CleverTapFetchInappsBlock _Nullable)block {
+    self.fetchInappsBlock = block;
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @5}} withType:CleverTapEventTypeFetch];
 }
 
