@@ -19,6 +19,6 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 + (void)notfityTestAppLaunch;
 - (NSDictionary*)getBatchHeader;
 - (void)pushValidationResults:(NSArray<CTValidationResult *> * _Nonnull )results;
-- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type;
+//- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type;
 
 @end

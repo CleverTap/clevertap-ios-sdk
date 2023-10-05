@@ -1,4 +1,5 @@
 #import "CTUtils.h"
+#import "CTConstants.h"
 
 @implementation CTUtils
 
@@ -107,6 +108,60 @@
     }
     @catch (NSException *exception) {
         return @"";
+    }
+}
+
++ (UIApplication *)getSharedApplication {
+    Class UIApplicationClass = NSClassFromString(@"UIApplication");
+    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+        return [UIApplication performSelector:@selector(sharedApplication)];
+    }
+    return nil;
+}
+
++ (BOOL)runningInsideAppExtension {
+    return [CTUtils getSharedApplication] == nil;
+}
+
++ (void)runSyncMainQueue:(void (^)(void))block {
+   if ([NSThread isMainThread]) {
+       block();
+   } else {
+       dispatch_sync(dispatch_get_main_queue(), block);
+   }
+}
+
++ (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
+    UIApplication *sharedApplication = [CTUtils getSharedApplication];
+    if (sharedApplication == nil) {
+        return;
+    }
+    CleverTapLogStaticDebug(@"%@: firing deep link: %@", module, ctaURL);
+    id dlURL;
+    if (@available(iOS 10.0, *)) {
+        if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+            NSMethodSignature *signature = [UIApplication
+                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+            NSInvocation *invocation = [NSInvocation
+                                        invocationWithMethodSignature:signature];
+            [invocation setTarget:sharedApplication];
+            [invocation setSelector:@selector(openURL:options:completionHandler:)];
+            NSDictionary *options = @{};
+            id completionHandler = nil;
+            dlURL = ctaURL;
+            [invocation setArgument:&dlURL atIndex:2];
+            [invocation setArgument:&options atIndex:3];
+            [invocation setArgument:&completionHandler atIndex:4];
+            [invocation invoke];
+        } else {
+            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+            }
+        }
+    } else {
+        if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+            [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+        }
     }
 }
 

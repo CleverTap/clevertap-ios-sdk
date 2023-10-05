@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface CTUtils : NSObject
 
@@ -9,4 +10,8 @@
 + (double)toTwoPlaces:(double)x;
 + (BOOL)isNullOrEmpty:(id)obj;
 + (NSString *)jsonObjectToString:(id)object;
++ (UIApplication *)getSharedApplication;
++ (BOOL)runningInsideAppExtension;
++ (void)runSyncMainQueue:(void (^)(void))block;
++ (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module;
 @end
