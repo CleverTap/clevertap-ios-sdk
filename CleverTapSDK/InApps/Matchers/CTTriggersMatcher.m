@@ -29,34 +29,6 @@
     return NO;
 }
 
-// TODO: remove this method?
-- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties];
-
-    // Events in the array are OR-ed
-    for (NSDictionary *triggerObject in whenTriggers) {
-        CTTriggerAdapter *trigger = [[CTTriggerAdapter alloc] initWithJSON:triggerObject];
-        if ([self match:trigger event:event]) {
-            return YES;
-        }
-    }
-    return NO;
-}
-
-// TODO: remove this method?
-- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"Charged" eventProperties:details andItems:items];
-
-    // Events in the array are OR-ed
-    for (NSDictionary *triggerObject in whenTriggers) {
-        CTTriggerAdapter *trigger = [[CTTriggerAdapter alloc] initWithJSON:triggerObject];
-        if ([self matchCharged:trigger event:event]) {
-            return YES;
-        }
-    }
-    return NO;
-}
-
 - (BOOL)match:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
     if (![[event eventName] isEqualToString:[trigger eventName]]) {
         return NO;
