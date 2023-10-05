@@ -6,6 +6,7 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTInAppFCManager+Legacy.h"
 #import "CTImpressionManager.h"
+#import "CTInAppEvaluationManager.h"
 
 // Per session
 //  1. Show only 10 inapps per session
@@ -33,6 +34,8 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 @property (atomic, copy) NSString *deviceId;
 
 @property (atomic, strong) CTImpressionManager *impressionManager;
+@property (atomic, strong) CTInAppEvaluationManager *evaluationManager;
+
 
 // id: [todayCount, lifetimeCount]
 @property (atomic, strong) NSMutableDictionary *inAppCounts;
@@ -41,13 +44,12 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 
 @implementation CTInAppFCManager
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager {
     if (self = [super init]) {
         _config = config;
         _deviceId = deviceId;
-        
-        // TODO: init properly
-        _impressionManager = [CTImpressionManager new];
+        _impressionManager = impressionManager;
+        _evaluationManager = evaluationManager;
         
         _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
         if (_inAppCounts == nil) {
@@ -133,8 +135,12 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     if (!key) {
         return true;
     }
-    // TODO: evaluate whenLimits again (without Nth triggers)
-    // in case queue was paused and multiple messages were added in the meantime
+    // Evaluate freqency limits again (without Nth triggers)
+    // in case queue the message was added multiple times before being displayed
+    // or queue was paused and the message was added multiple times in the meantime
+    if (![self.evaluationManager evaluateInAppFrequencyLimits:inapp]) {
+        return false;
+    }
     
     // Exclude from all caps?
     if (inapp.excludeFromCaps) return true;

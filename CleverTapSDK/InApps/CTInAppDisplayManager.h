@@ -25,6 +25,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> _Nullable inAppNotificationDelegate;
 @property (nonatomic, assign, readonly) CleverTapInAppRenderingStatus inAppRenderingStatus;
 
+- (instancetype)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
                              deviceInfo:(CTDeviceInfo* _Nonnull)deviceInfo
                             inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager;

@@ -3,6 +3,8 @@
 
 @class CleverTapInstanceConfig;
 @class CTInAppNotification;
+@class CTInAppEvaluationManager;
+@class CTImpressionManager;
 
 // Storage keys
 extern NSString* const kKEY_COUNTS_PER_INAPP;
@@ -14,7 +16,9 @@ extern NSString* const kKEY_MAX_PER_DAY;
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 @property (atomic, copy, readonly) NSString *deviceId;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                      deviceId:(NSString *)deviceId
+             evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager;
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix;
 

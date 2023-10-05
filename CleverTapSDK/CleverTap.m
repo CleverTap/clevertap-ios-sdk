@@ -686,9 +686,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self initNetworking];
         [self inflateQueuesAsync];
         [self addObservers];
+        self.batchHeaderDelegates = [NSHashTable weakObjectsHashTable];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            _inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config deviceId:[self.deviceInfo.deviceId copy]];
+            CTImpressionManager *impressionManager = [CTImpressionManager new];
+            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo impressionManager:impressionManager];
+            
+            // Requires inAppEvaluationManager to be initialized
+            CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config deviceId:[_deviceInfo.deviceId copy] evaluationManager:evaluationManager impressionManager:impressionManager];
+            
+            // Requires inAppFCManager to be initialized
+            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo inAppFCManager:inAppFCManager];
+            
+            self.inAppEvaluationManager = evaluationManager;
+            self.inAppDisplayManager = displayManager;
+            self.inAppFCManager = inAppFCManager;
         }
 #endif
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -702,15 +714,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         // Initialise Variables
         self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
-        
-        
-        self.batchHeaderDelegates = [NSHashTable weakObjectsHashTable];
-        
-        self.inAppDisplayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo inAppFCManager:self.inAppFCManager];
-
-        
-        self.inAppEvaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo];
-
         
         [self notifyUserProfileInitialized];
     }

@@ -14,6 +14,7 @@
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
 #import "CTInAppDisplayManager.h"
+#import "CTInAppNotification.h"
 
 @interface CTInAppEvaluationManager()
 
@@ -36,12 +37,12 @@
 
 @implementation CTInAppEvaluationManager
 
-// TODO: init
-
 static void *deviceIdContext = &deviceIdContext;
 static void *sessionIdContext = &sessionIdContext;
 
-- (instancetype)initWithCleverTap:(CleverTap *)instance deviceInfo:(CTDeviceInfo *)deviceInfo {
+- (instancetype)initWithCleverTap:(CleverTap *)instance
+                       deviceInfo:(CTDeviceInfo *)deviceInfo
+                impressionManager:(CTImpressionManager *)impressionManager {
     if (self = [super init]) {
         self.instance = instance;
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
@@ -51,7 +52,7 @@ static void *sessionIdContext = &sessionIdContext;
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = [CTInAppTriggerManager new];
-        self.impressionManager = [CTImpressionManager new];
+        self.impressionManager = impressionManager;
         
         [self.instance setBatchSentDelegate:self];
         [self.instance addBatchHeaderDelegate:self];
@@ -161,6 +162,16 @@ static void *sessionIdContext = &sessionIdContext;
     }
     
     return eligibleInApps;
+}
+
+- (BOOL)evaluateInAppFrequencyLimits:(CTInAppNotification *)inApp {
+    if (inApp.jsonDescription && inApp.jsonDescription[@"frequencyLimits"]) {
+        // Match frequency limits
+        NSArray *frequencyLimits = inApp.jsonDescription[@"frequencyLimits"];
+        BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:frequencyLimits forCampaignId:inApp.Id withImpressionManager:self.impressionManager];
+        return matchesLimits;
+    }
+    return YES;
 }
 
 - (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
