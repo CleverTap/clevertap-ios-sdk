@@ -1,5 +1,5 @@
-
 #import "CTUIUtils.h"
+#import "CTConstants.h"
 
 #define CTSPMBundlePath @"/CleverTapSDK_CleverTapSDK.bundle/"
 
@@ -112,6 +112,44 @@
                     alpha:alpha];
     
     return color;
+}
+
++ (BOOL)runningInsideAppExtension {
+    return [[self class] getSharedApplication] == nil;
+}
+
++ (void)openURL:(NSURL *)ctaURL forModule:(NSString *)ctModule {
+    UIApplication *sharedApplication = [[self class] getSharedApplication];
+    if (sharedApplication == nil) {
+        return;
+    }
+    CleverTapLogStaticDebug(@"%@: firing deep link: %@", ctModule, ctaURL);
+    id dlURL;
+    if (@available(iOS 10.0, *)) {
+        if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+            NSMethodSignature *signature = [UIApplication
+                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+            NSInvocation *invocation = [NSInvocation
+                                        invocationWithMethodSignature:signature];
+            [invocation setTarget:sharedApplication];
+            [invocation setSelector:@selector(openURL:options:completionHandler:)];
+            NSDictionary *options = @{};
+            id completionHandler = nil;
+            dlURL = ctaURL;
+            [invocation setArgument:&dlURL atIndex:2];
+            [invocation setArgument:&options atIndex:3];
+            [invocation setArgument:&completionHandler atIndex:4];
+            [invocation invoke];
+        } else {
+            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+            }
+        }
+    } else {
+        if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
+            [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
+        }
+    }
 }
 
 @end

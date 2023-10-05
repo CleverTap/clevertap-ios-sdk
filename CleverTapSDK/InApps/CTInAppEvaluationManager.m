@@ -13,6 +13,7 @@
 #import "CTTriggersMatcher.h"
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
+#import "CTInAppDisplayManager.h"
 
 @interface CTInAppEvaluationManager()
 
@@ -25,7 +26,7 @@
 @property BOOL hasAppLaunchedFailed;
 
 @property (nonatomic, strong) CTInAppStore *inAppStore;
-@property (nonatomic, strong) CleverTap *instance;
+@property (nonatomic, weak) CleverTap *instance;
 @property (nonatomic, strong) CTTriggersMatcher *triggersMatcher;
 @property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
 @property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
@@ -105,7 +106,7 @@ static void *sessionIdContext = &sessionIdContext;
     [self sortByPriority:eligibleInApps];
     for (NSDictionary *inApp in eligibleInApps) {
         if (![self shouldSuppress:inApp]) {
-            [self.instance _addInAppNotificationsToQueue:@[inApp]];
+            [self.instance.inAppDisplayManager _addInAppNotificationsToQueue:@[inApp]];
             break;
         }
         
@@ -121,7 +122,7 @@ static void *sessionIdContext = &sessionIdContext;
         if (![self shouldSuppress:inApp]) {
             NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
             [self updateTTL:mutableInApp];
-            [self.instance _addInAppNotificationsToQueue:@[mutableInApp]];
+            [self.instance.inAppDisplayManager _addInAppNotificationsToQueue:@[mutableInApp]];
             break;
         }
         

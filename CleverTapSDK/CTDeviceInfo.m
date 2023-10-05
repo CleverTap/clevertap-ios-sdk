@@ -473,6 +473,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 #endif
 
+// TODO: check what are those here
 - (void)incrementLocalInAppCount {
     self.localInAppCount = self.localInAppCount + 1;
     [CTPreferences putInt:self.localInAppCount forKey:kCLTAP_LOCAL_INAPP_COUNT];

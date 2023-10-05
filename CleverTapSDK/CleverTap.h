@@ -34,6 +34,9 @@
 @class CleverTapInstanceConfig;
 @class CleverTapFeatureFlags;
 @class CleverTapProductConfig;
+
+@class CTInAppNotification;
+@class CTInAppDisplayManager;
 #import "CTVar.h"
 
 #pragma clang diagnostic push
@@ -1404,13 +1407,23 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
 // TODO: move to private header
+@property (nonatomic, strong, readonly) CTInAppDisplayManager *inAppDisplayManager;
+
 - (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
-- (void)_addInAppNotificationsToQueue:(NSArray * _Nonnull)inappNotifs;
 - (void)addBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
 - (void)removeBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
 
-- (void)runOnNotificationQueue:(void (^)(void))taskBlock;
-- (void)_showNotificationIfAvailable;
+
+@property (nonatomic, assign, readonly) BOOL isAppForeground;
+
+- (id <CleverTapURLDelegate> _Nullable)urlDelegate;
+- (void)recordInAppNotificationStateEvent:(BOOL)clicked
+                          forNotification:(CTInAppNotification *)notification andQueryParameters:(NSDictionary *)params;
+
+- (void)notifyPushPermissionResponse:(BOOL)accepted;
+
+- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
+                                     andSkipSettingsAlert:(BOOL)skipSettingsAlert;
 @end
 
 #pragma clang diagnostic pop
