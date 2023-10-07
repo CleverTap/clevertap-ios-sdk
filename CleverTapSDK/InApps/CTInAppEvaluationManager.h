@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToHeaderDelegate>
 
-- (instancetype)init NS_UNAVAILABLE;
+//- (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithCleverTap:(CleverTap *)instance
                        deviceInfo:(CTDeviceInfo *)deviceInfo
                 impressionManager:(CTImpressionManager *)impressionManager;

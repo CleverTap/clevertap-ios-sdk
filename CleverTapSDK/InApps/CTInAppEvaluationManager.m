@@ -26,12 +26,12 @@
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
 
-@property (nonatomic, strong) CTInAppStore *inAppStore;
 @property (nonatomic, weak) CleverTap *instance;
+@property (nonatomic, weak) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTTriggersMatcher *triggersMatcher;
 @property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
 @property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
-@property (nonatomic, strong) CTImpressionManager *impressionManager;
+@property (nonatomic, strong) CTInAppStore *inAppStore;
 
 @end
 
@@ -48,38 +48,16 @@ static void *sessionIdContext = &sessionIdContext;
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
-        self.inAppStore = [[CTInAppStore alloc]initWithConfig:instance.config deviceInfo:deviceInfo];
+        self.inAppStore = [[CTInAppStore alloc] initWithConfig:instance.config deviceInfo:deviceInfo];
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = [CTInAppTriggerManager new];
         self.impressionManager = impressionManager;
         
         [self.instance setBatchSentDelegate:self];
-        [self.instance addBatchHeaderDelegate:self];
-        
-        // TODO: decide whether to use KVO to observe deviceId and session changes
-        [self.instance addObserver:self forKeyPath:@"deviceInfo.deviceId" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:deviceIdContext];
-        [self.instance addObserver:self forKeyPath:@"sessionId" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:sessionIdContext];
+        [self.instance addAttachToHeaderDelegate:self];
     }
     return self;
-}
-
-- (void)dealloc
-{
-    [self.instance removeObserver:self forKeyPath:@"deviceInfo.deviceId" context:deviceIdContext];
-    [self.instance removeObserver:self forKeyPath:@"sessionId" context:sessionIdContext];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    if (context == deviceIdContext && [keyPath isEqualToString:@"deviceInfo.deviceId"]) {
-        NSLog(@"[KVO] deviceId updated: %@", change);
-    } else if (context == sessionIdContext) {
-        if ([change[NSKeyValueChangeNewKey] isEqual:@0]) {
-            // reset session
-            NSLog(@"[KVO] sessionId set to 0: %@", change);
-        }
-    }
 }
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {

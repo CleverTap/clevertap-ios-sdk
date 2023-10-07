@@ -27,6 +27,7 @@
 NSString* const kKEY_COUNTS_PER_INAPP = @"counts_per_inapp";
 NSString* const kKEY_COUNTS_SHOWN_TODAY = @"istc_inapp";
 NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
+NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
 
 @interface CTInAppFCManager (){}
 
@@ -34,32 +35,40 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 @property (atomic, copy) NSString *deviceId;
 
 @property (atomic, strong) CTImpressionManager *impressionManager;
-@property (atomic, strong) CTInAppEvaluationManager *evaluationManager;
-
+@property (atomic, weak) CTInAppEvaluationManager *evaluationManager;
 
 // id: [todayCount, lifetimeCount]
 @property (atomic, strong) NSMutableDictionary *inAppCounts;
+
+@property (assign, readwrite) int localInAppCount;
 
 @end
 
 @implementation CTInAppFCManager
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager {
+- (instancetype)initWithInstance:(CleverTap *)instance
+                      deviceId:(NSString *)deviceId
+             evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager {
     if (self = [super init]) {
-        _config = config;
+        _config = instance.config;
         _deviceId = deviceId;
         _impressionManager = impressionManager;
         _evaluationManager = evaluationManager;
         
-        _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
-        if (_inAppCounts == nil) {
-            _inAppCounts = [NSMutableDictionary new];
-        }
-        
+        [instance addAttachToHeaderDelegate:self];
         [self migratePreferenceKeys];
+        // Init in-app counts after migrating the preference keys
+        [self initInAppCounts];
         [self checkUpdateDailyLimits];
     }
     return self;
+}
+
+- (void)initInAppCounts {
+    _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
+    if (_inAppCounts == nil) {
+        _inAppCounts = [NSMutableDictionary new];
+    }
 }
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix {
@@ -70,17 +79,18 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
     return [NSString stringWithFormat:@"%@:%@:%@", self.class, self.config.accountId, self.deviceId];
 }
 
+#pragma mark Switch User Delegate
+- (void)deviceIdDidChange:(NSString *)newDeviceId {
+    self.deviceId = newDeviceId;
+    [self migratePreferenceKeys];
+    [self initInAppCounts];
+}
+
 - (void)checkUpdateDailyLimits {
     NSString *today = [self todaysFormattedDate];
     if ([self shouldResetDailyCounters:today]) {
         [self resetDailyCounters:today];
     }
-}
-
-// TODO: use new counts
-// TODO: create a new instance of the manager?
-- (void)changeUserWithGuid:(NSString *)guid {
-    _deviceId = guid;
 }
 
 - (BOOL)hasSessionCapacityMaxedOut:(CTInAppNotification *)inapp {
@@ -243,6 +253,16 @@ NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
 - (void)incrementShownToday {
     int shownToday = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0];
     [CTPreferences putInt:shownToday + 1 forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
+}
+
+- (void)incrementLocalInAppCount {
+    self.localInAppCount = self.localInAppCount + 1;
+    [CTPreferences putInt:self.localInAppCount forKey:kCLTAP_LOCAL_INAPP_COUNT];
+}
+
+- (int)getLocalInAppCount {
+    self.localInAppCount = (int) [CTPreferences getIntForKey:kCLTAP_LOCAL_INAPP_COUNT withResetValue:0];
+    return self.localInAppCount;
 }
 
 - (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {

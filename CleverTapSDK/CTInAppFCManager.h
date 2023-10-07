@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "CTAttachToHeaderDelegate.h"
 
+@class CleverTap;
 @class CleverTapInstanceConfig;
 @class CTInAppNotification;
 @class CTInAppEvaluationManager;
@@ -15,27 +16,20 @@ extern NSString* const kKEY_MAX_PER_DAY;
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 @property (atomic, copy, readonly) NSString *deviceId;
+@property (assign, readonly) int localInAppCount;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+- (instancetype)initWithInstance:(CleverTap *)instance
                       deviceId:(NSString *)deviceId
-             evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager;
+               evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager;
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix;
-
 - (void)checkUpdateDailyLimits;
-
 - (BOOL)canShow:(CTInAppNotification *)inapp;
-
-- (void)changeUserWithGuid:(NSString *)guid;
-
+- (void)incrementLocalInAppCount;
 - (void)didShow:(CTInAppNotification *)inapp;
-
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
-
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps;
-
 - (BOOL)hasLifetimeCapacityMaxedOut:(CTInAppNotification *)dictionary;
-
 - (BOOL)hasDailyCapacityMaxedOut:(CTInAppNotification *)dictionary;
 
 @end

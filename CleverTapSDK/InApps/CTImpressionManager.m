@@ -23,20 +23,20 @@
 
 @implementation CTImpressionManager
 
-- (id)init
-{
-    self = [self init:[NSLocale currentLocale]];
+- (instancetype)initWithCleverTap:(CleverTap *)instance deviceId:(NSString *)deviceId {
+    if (self = [super init]) {
+        return [self initWithCleverTap:instance deviceId:deviceId locale:[NSLocale currentLocale]];
+    }
     return self;
 }
 
-- (id)init:(NSLocale *)locale
-{
+- (instancetype)initWithCleverTap:(CleverTap *)instance deviceId:(NSString *)deviceId locale:(NSLocale *)locale {
     if (self = [super init]) {
-        _sessionImpressions = [NSMutableDictionary new];
-        _impressions = [NSMutableDictionary new];
-        _locale = locale;
+        self.accountId = [instance getAccountID];
+        self.deviceId = deviceId;
+        self.locale = locale;
         
-
+        [instance addSwitchUserDelegate:self];
     }
     return self;
 }
@@ -149,6 +149,17 @@
     [self setSessionImpressions:[NSMutableDictionary new]];
 }
 
+#pragma mark Switch User Delegate
+- (void)sessionDidReset {
+    [self resetSession];
+}
+
+- (void)deviceIdDidChange:(NSString *)newDeviceId {
+    self.deviceId = newDeviceId;
+    [self resetSession];
+    [self setImpressions:[NSMutableDictionary new]];
+}
+
 #pragma mark Store Impressions
 
 - (NSMutableArray *)getImpressions:(NSString *)campaignId {
@@ -177,7 +188,6 @@
     [CTPreferences removeObjectForKey:[self getImpressionKey:campaignId]];
 }
 
-// TODO: make impressions per instance and per device id?
 - (NSString *)getImpressionKey:(NSString *)campaignId {
     return [NSString stringWithFormat:@"%@_%@_%@_%@", self.accountId, self.deviceId, @"impressions", campaignId];
 }

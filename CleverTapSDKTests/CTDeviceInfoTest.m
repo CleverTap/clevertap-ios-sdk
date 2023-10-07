@@ -84,17 +84,18 @@
     XCTAssertFalse([_classObject isErrorDeviceID]);
 }
 
-- (void)test_incrementLocalInAppCount{
-    int inAppCount = [_classObject getLocalInAppCount];
-    [_classObject incrementLocalInAppCount];
-    
-    XCTAssertEqual(inAppCount+1, [_classObject getLocalInAppCount]);
-}
-
-- (void)test_getLocalInAppCount{
-    int inAppCount = [_classObject getLocalInAppCount];
-    [_classObject incrementLocalInAppCount];
-
-    XCTAssertEqual(inAppCount+1, [_classObject getLocalInAppCount]);
-}
+// TODO: move to CTInAppFCManager
+//- (void)test_incrementLocalInAppCount{
+//    int inAppCount = [_classObject getLocalInAppCount];
+//    [_classObject incrementLocalInAppCount];
+//
+//    XCTAssertEqual(inAppCount+1, [_classObject getLocalInAppCount]);
+//}
+//
+//- (void)test_getLocalInAppCount{
+//    int inAppCount = [_classObject getLocalInAppCount];
+//    [_classObject incrementLocalInAppCount];
+//
+//    XCTAssertEqual(inAppCount+1, [_classObject getLocalInAppCount]);
+//}
 @end

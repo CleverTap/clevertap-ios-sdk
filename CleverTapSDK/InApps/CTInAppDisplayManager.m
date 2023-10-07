@@ -51,8 +51,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 @property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
-@property (nonatomic, strong) CTDeviceInfo* deviceInfo;
-
 @property (nonatomic, weak) CleverTap* instance;
 
 @end
@@ -60,16 +58,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 @implementation CTInAppDisplayManager
 
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
-                                deviceInfo:(CTDeviceInfo* _Nonnull)deviceInfo
                             inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager {
     if ((self = [super init])) {
-        self.instance = instance;
-        self.config = instance.config;
-        self.deviceInfo = deviceInfo;
-        self.inAppFCManager = inAppFCManager;
-        
         _notificationQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.notificationQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_notificationQueue, kNotificationQueueKey, (__bridge void *)self, NULL);
+        
+        self.instance = instance;
+        self.config = instance.config;
+        self.inAppFCManager = inAppFCManager;
     }
     return self;
 }
@@ -320,7 +316,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
         // Update local in-app count only if it is from local push primer.
         if (notification.isLocalInApp && !notification.isPushSettingsSoftAlert) {
-            [self.deviceInfo incrementLocalInAppCount];
+            [self.inAppFCManager incrementLocalInAppCount];
         }
     }
     if (errorString) {
@@ -443,7 +439,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     @try {
         // TODO: impression manager resetSession
-        //[self.inAppFCManager resetSession];
+//        [self.inAppFCManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received in-app notification from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_inapp"];

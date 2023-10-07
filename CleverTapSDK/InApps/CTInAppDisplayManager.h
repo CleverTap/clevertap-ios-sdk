@@ -27,7 +27,6 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
-                             deviceInfo:(CTDeviceInfo* _Nonnull)deviceInfo
                             inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager;
 
 - (void)prepareNotificationForDisplay:(NSDictionary* _Nonnull)jsonObj;

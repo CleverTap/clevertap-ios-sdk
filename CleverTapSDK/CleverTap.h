@@ -28,6 +28,7 @@
 
 @protocol CTBatchSentDelegate;
 @protocol CTAttachToHeaderDelegate;
+@protocol CTSwitchUserDelegate;
 
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
@@ -1410,9 +1411,12 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 @property (nonatomic, strong, readonly) CTInAppDisplayManager *inAppDisplayManager;
 
 - (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
-- (void)addBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
-- (void)removeBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
+- (void)addAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
+- (void)removeAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
 
+- (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
+
+- (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
 
 @property (nonatomic, assign, readonly) BOOL isAppForeground;
 

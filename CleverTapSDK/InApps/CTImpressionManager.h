@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "CTSwitchUserDelegate.h"
+@class CleverTap;
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTImpressionManager : NSObject
+@interface CTImpressionManager : NSObject <CTSwitchUserDelegate>
+
+- (instancetype)initWithCleverTap:(CleverTap *)instance deviceId:(NSString *)deviceId;
 
 - (void)recordImpression:(NSString *)campaignId;
 

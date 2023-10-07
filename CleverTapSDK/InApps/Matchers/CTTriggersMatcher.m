@@ -29,6 +29,18 @@
     return NO;
 }
 
+- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties];
+
+    return [self matchEventWhenTriggers:whenTriggers event:event];
+}
+
+- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"Charged" eventProperties:details andItems:items];
+
+    return [self matchEventWhenTriggers:whenTriggers event:event];
+}
+
 - (BOOL)match:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
     if (![[event eventName] isEqualToString:[trigger eventName]]) {
         return NO;

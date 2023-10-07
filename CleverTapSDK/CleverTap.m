@@ -53,6 +53,7 @@
 #import "CTBatchSentDelegate.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTAttachToHeaderDelegate.h"
+#import "CTSwitchUserDelegate.h"
 #import "CTInAppDisplayManager.h"
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -262,7 +263,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 // TODO: organize
 @property (nonatomic, strong) CTInAppEvaluationManager *inAppEvaluationManager;
-@property (nonatomic, strong) NSHashTable *batchHeaderDelegates;
+@property (nonatomic, strong) NSHashTable *attachToHeaderDelegates;
+@property (nonatomic, strong) NSHashTable *switchUserDelegates;
 
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
 
@@ -653,6 +655,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (instancetype)initWithConfig:(CleverTapInstanceConfig*)config andCleverTapID:(NSString *)cleverTapID {
     self = [super init];
     if (self) {
+        self.attachToHeaderDelegates = [NSHashTable weakObjectsHashTable];
+        self.switchUserDelegates = [NSHashTable weakObjectsHashTable];
         _config = [config copy];
         if (_config.analyticsOnly) {
             CleverTapLogDebug(_config.logLevel, @"%@ is configured as analytics only!", self);
@@ -686,17 +690,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self initNetworking];
         [self inflateQueuesAsync];
         [self addObservers];
-        self.batchHeaderDelegates = [NSHashTable weakObjectsHashTable];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            CTImpressionManager *impressionManager = [CTImpressionManager new];
+            CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithCleverTap:self deviceId:self.deviceInfo.deviceId];
             CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo impressionManager:impressionManager];
             
             // Requires inAppEvaluationManager to be initialized
-            CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config deviceId:[_deviceInfo.deviceId copy] evaluationManager:evaluationManager impressionManager:impressionManager];
+            CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithInstance:self deviceId:[_deviceInfo.deviceId copy] evaluationManager:evaluationManager impressionManager:impressionManager];
             
             // Requires inAppFCManager to be initialized
-            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo inAppFCManager:inAppFCManager];
+            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self inAppFCManager:inAppFCManager];
             
             self.inAppEvaluationManager = evaluationManager;
             self.inAppDisplayManager = displayManager;
@@ -1162,8 +1165,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (spikyProxyDomain != nil && spikyProxyDomain.length > 0) {
         evtData[@"spikyProxyDomain"] = self.config.spikyProxyDomain;
     }
-    // Add Local in-app count to event data.
-    evtData[@"LIAMC"] = @([self.deviceInfo getLocalInAppCount]);
+    // Add Local in-app count to event data, used for Push Primer
+    evtData[@"LIAMC"] = @([self.inAppFCManager localInAppCount]);
     
     if (self.config.wv_init) {
         evtData[@"wv_init"] = @(YES);
@@ -2031,6 +2034,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (![CTUIUtils runningInsideAppExtension]) {
         // TODO: impression manager resetSession
         //[self.inAppFCManager resetSession];
+        [self invokeSwitchUserDelegatesOnResetSession];
     }
 #endif
 }
@@ -2582,23 +2586,47 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 
-- (void)addBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
-    [self.batchHeaderDelegates addObject:delegate];
+- (void)addAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
+    [self.attachToHeaderDelegates addObject:delegate];
 }
 
-- (void)removeBatchHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
-    [self.batchHeaderDelegates removeObject:delegate];
+- (void)removeAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
+    [self.attachToHeaderDelegates removeObject:delegate];
 }
 
 - (NSDictionary<NSString *, id> *)invokeAttachToHeaderDelegates {
     NSMutableDictionary<NSString *, id> *header = [NSMutableDictionary dictionary];
-    for (id<CTAttachToHeaderDelegate> delegate in self.batchHeaderDelegates) {
+    for (id<CTAttachToHeaderDelegate> delegate in self.attachToHeaderDelegates) {
         NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreation];
         if (additionalHeader) {
             [header addEntriesFromDictionary:additionalHeader];
         }
     }
     return [header copy];
+}
+
+- (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
+    [self.switchUserDelegates addObject:delegate];
+}
+
+- (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
+    [self.switchUserDelegates addObject:delegate];
+}
+
+- (void)invokeSwitchUserDelegatesOnResetSession {
+    for (id<CTSwitchUserDelegate> delegate in self.switchUserDelegates) {
+        if (delegate && [delegate respondsToSelector:@selector(sessionDidReset)]) {
+            [delegate sessionDidReset];
+        }
+    }
+}
+
+- (void)invokeSwitchUserDelegatesOnDeviceChange:(NSString *)newDeviceId {
+    for (id<CTSwitchUserDelegate> delegate in self.switchUserDelegates) {
+        if (delegate && [delegate respondsToSelector:@selector(deviceIdDidChange:)]) {
+            [delegate deviceIdDidChange:newDeviceId];
+        }
+    }
 }
 
 #pragma mark Response Handling
@@ -2986,7 +3014,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (![CTUIUtils runningInsideAppExtension]) {
-            [self.inAppFCManager changeUserWithGuid: self.deviceInfo.deviceId];
+            //[self.inAppFCManager changeUserWithGuid: self.deviceInfo.deviceId];
+            
+            [self invokeSwitchUserDelegatesOnDeviceChange:self.deviceInfo.deviceId];
         }
 #endif
         
