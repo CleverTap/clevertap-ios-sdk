@@ -8,6 +8,8 @@
 
 #import "CTImpressionManager.h"
 #import "CTPreferences.h"
+#import "CTPushPrimerManager.h"
+#import "CleverTapInternal.h"
 
 @interface CTImpressionManager()
 

@@ -11,6 +11,7 @@
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CleverTap.h"
+#import "CTPushPrimerManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,7 +21,9 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
     CleverTapInAppResume,
 };
 
-@interface CTInAppDisplayManager : NSObject
+@interface CTInAppDisplayManager : NSObject {
+    CTPushPrimerManager *pushPrimerManager;
+}
 
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> _Nullable inAppNotificationDelegate;
 @property (nonatomic, assign, readonly) CleverTapInAppRenderingStatus inAppRenderingStatus;
@@ -39,6 +42,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 - (void)_discardInAppNotifications;
 - (void)_resumeInAppNotifications;
 - (void)_showInAppNotificationIfAny;
+- (void)setPushPrimerManager:(CTPushPrimerManager* _Nonnull)pushPrimerManagerObj;
 
 @end
 

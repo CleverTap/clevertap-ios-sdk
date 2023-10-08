@@ -197,6 +197,7 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 }
 
 - (id)getDecryptedObject:(NSString *)encryptedString {
+    if (!encryptedString) return nil;
     @try {
         NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:encryptedString options:kNilOptions];
         NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];

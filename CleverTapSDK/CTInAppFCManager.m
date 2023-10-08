@@ -7,6 +7,7 @@
 #import "CTInAppFCManager+Legacy.h"
 #import "CTImpressionManager.h"
 #import "CTInAppEvaluationManager.h"
+#import "CleverTapInternal.h"
 
 // Per session
 //  1. Show only 10 inapps per session

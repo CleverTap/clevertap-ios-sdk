@@ -1407,27 +1407,6 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
-// TODO: move to private header
-@property (nonatomic, strong, readonly) CTInAppDisplayManager *inAppDisplayManager;
-
-- (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
-- (void)addAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
-- (void)removeAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate;
-
-- (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
-
-- (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
-
-@property (nonatomic, assign, readonly) BOOL isAppForeground;
-
-- (id <CleverTapURLDelegate> _Nullable)urlDelegate;
-- (void)recordInAppNotificationStateEvent:(BOOL)clicked
-                          forNotification:(CTInAppNotification *)notification andQueryParameters:(NSDictionary *)params;
-
-- (void)notifyPushPermissionResponse:(BOOL)accepted;
-
-- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
-                                     andSkipSettingsAlert:(BOOL)skipSettingsAlert;
 @end
 
 #pragma clang diagnostic pop

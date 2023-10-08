@@ -5,7 +5,7 @@
 //  Created by Nikola Zagorchev on 3.10.23.
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
-
+#import "CleverTapInternal.h"
 #import "CTInAppDisplayManager.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
@@ -68,6 +68,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.inAppFCManager = inAppFCManager;
     }
     return self;
+}
+
+- (void)setPushPrimerManager:(CTPushPrimerManager*)pushPrimerManagerObj {
+    pushPrimerManager = pushPrimerManagerObj;
 }
 
 #pragma mark - CleverTapInAppNotificationDelegate
@@ -419,13 +423,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
            fromViewController:(CTInAppDisplayViewController *)controller
        withFallbackToSettings:(BOOL)isFallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: InApp Push Primer Accepted:", self);
-    [self.instance promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
                                        andSkipSettingsAlert:notification.skipSettingsAlert];
     
 }
 
 - (void)inAppPushPrimerDidDismissed {
-    [self.instance notifyPushPermissionResponse:NO];
+    [pushPrimerManager notifyPushPermissionResponse:NO];
 }
 
 #pragma mark - Handle InApp test from Push

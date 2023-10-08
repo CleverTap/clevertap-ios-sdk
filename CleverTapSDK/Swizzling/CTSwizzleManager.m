@@ -7,6 +7,7 @@
 
 #import "CTSwizzleManager.h"
 #import "CTUtils.h"
+#import "CTUIUtils.h"
 #import <objc/runtime.h>
 #import <UserNotifications/UserNotifications.h>
 #import "CTSwizzle.h"
@@ -16,16 +17,10 @@
 
 @implementation CTSwizzleManager
 
-//static NSMutableDictionary<NSString*, CleverTap*> *_instances;
-
-//+ (void)setInstances:(NSMutableDictionary<NSString*, CleverTap*> *)instances {
-//    _instances = instances;
-//}
-
 + (void)swizzleAppDelegate {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        UIApplication *sharedApplication = [CTUtils getSharedApplication];
+        UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
         if (sharedApplication == nil) {
             return;
         }
