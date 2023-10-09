@@ -221,8 +221,6 @@
 }
 
 - (void)recordImpression:(NSString *)inAppId {
-    // TODO: check for day change here?
-    
     // Record impression for limits
     // Record impression for session
     [self.impressionManager recordImpression:inAppId];
