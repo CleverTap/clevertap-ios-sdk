@@ -49,16 +49,10 @@
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
 #import "CTPushPrimerManager.h"
-#endif
-
-
-
-#import "CTBatchSentDelegate.h"
-#import "CTInAppEvaluationManager.h"
-#import "CTAttachToHeaderDelegate.h"
-#import "CTSwitchUserDelegate.h"
 #import "CTInAppDisplayManager.h"
 #import "CleverTap+InAppsResponseHandler.h"
+#import "CTInAppEvaluationManager.h"
+#endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
@@ -75,6 +69,10 @@ static NSArray *sslCertNames;
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
 #endif
+
+#import "CTBatchSentDelegate.h"
+#import "CTAttachToHeaderDelegate.h"
+#import "CTSwitchUserDelegate.h"
 
 #import "CleverTap+FeatureFlags.h"
 #import "CleverTapFeatureFlagsPrivate.h"
@@ -196,7 +194,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, assign) NSTimeInterval lastAppLaunchedTime;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
-@property (nonatomic, strong, readwrite) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
 
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
@@ -207,6 +204,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) CTRequestSender *requestSender;
 @property (nonatomic, assign) NSTimeInterval lastMutedTs;
 @property (nonatomic, assign) int sendQueueFails;
+
+@property (nonatomic, assign, readwrite) BOOL isAppForeground;
 
 @property (nonatomic, assign) BOOL pushedAPNSId;
 @property (atomic, assign) BOOL currentUserOptedOut;
@@ -238,13 +237,22 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, weak) id <CleverTapPushNotificationDelegate> pushNotificationDelegate;
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> inAppNotificationDelegate;
 @property (nonatomic, weak) id <CleverTapDomainDelegate> domainDelegate;
+
+@property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
+@property (nonatomic, strong) NSHashTable *attachToHeaderDelegates;
+@property (nonatomic, strong) NSHashTable *switchUserDelegates;
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
 @property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (atomic, strong) CTPushPrimerManager *pushPrimerManager;
-#endif
 
-@property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
+@property (nonatomic, strong, readwrite) CTInAppFCManager *inAppFCManager;
+@property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
+@property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
+@property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
+@property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
+#endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
 
@@ -254,18 +262,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) NSString *gfSDKVersion;
 
 @property (nonatomic, strong) CTVariables *variables;
-
-
-// TODO: organize
-@property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
-@property (nonatomic, strong) NSHashTable *attachToHeaderDelegates;
-@property (nonatomic, strong) NSHashTable *switchUserDelegates;
-
-@property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
-@property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
-@property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
-@property (nonatomic, assign, readwrite) BOOL isAppForeground;
-
 
 - (instancetype)init __unavailable;
 
@@ -428,8 +424,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             instance = [[self alloc] initWithConfig:config andCleverTapID:cleverTapID];
             _instances[config.accountId] = instance;
             [instance recordDeviceErrors];
-            //Set resume status for inApp notifications to handle it on device level
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+            // Set resume status for inApp notifications to handle it on device level
             [instance.inAppDisplayManager _resumeInAppNotifications];
+#endif
         }
     } else {
         if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
@@ -478,7 +476,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self addObservers];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
             CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithCleverTap:self deviceId:self.deviceInfo.deviceId];
             CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo impressionManager:impressionManager];
             
@@ -492,6 +489,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             self.inAppDisplayManager = displayManager;
             self.inAppFCManager = inAppFCManager;
             self.impressionManager = impressionManager;
+            self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
             
             self.pushPrimerManager = [[CTPushPrimerManager alloc]initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
             [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
@@ -953,8 +951,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (spikyProxyDomain != nil && spikyProxyDomain.length > 0) {
         evtData[@"spikyProxyDomain"] = self.config.spikyProxyDomain;
     }
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     // Add Local in-app count to event data, used for Push Primer
     evtData[@"LIAMC"] = @([self.inAppFCManager localInAppCount]);
+#endif
     
     if (self.config.wv_init) {
         evtData[@"wv_init"] = @(YES);
@@ -1353,15 +1354,17 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 testPayload[key] = notification[key];
             }
         }
+#if !CLEVERTAP_NO_INAPP_SUPPORT
         if ([self.inAppDisplayManager didHandleInAppTestFromPushNotificaton:testPayload]) {
             return YES;
         }
+#endif
 #if !CLEVERTAP_NO_INBOX_SUPPORT
-        else if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
+        if ([self didHandleInboxMessageTestFromPushNotificaton:testPayload]) {
             return YES;
         }
 #endif
-        else if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
+        if ([self didHandleDisplayUnitTestFromPushNotificaton:testPayload]) {
             return YES;
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: unable to handle test payload in the push notification: %@", self, notification);
@@ -2048,6 +2051,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [CTUtils jsonObjectToString:mutableEvent]);
         
+#if !CLEVERTAP_NO_INAPP_SUPPORT
         // TODO: or evaluate here?
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
@@ -2060,6 +2064,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
             }
         }];
+#endif
         
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];
@@ -2741,14 +2746,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         [self recordDeviceErrors];
-        
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-        if (![CTUIUtils runningInsideAppExtension]) {
-            //[self.inAppFCManager changeUserWithGuid: self.deviceInfo.deviceId];
-            
-            [self invokeSwitchUserDelegatesOnDeviceChange:self.deviceInfo.deviceId];
-        }
-#endif
+        [self invokeSwitchUserDelegatesOnDeviceChange:self.deviceInfo.deviceId];
         
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
         
@@ -3133,7 +3131,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 // TODO: evaluate here?
+#if !CLEVERTAP_NO_INAPP_SUPPORT
                 [self.inAppEvaluationManager evaluateOnChargedEvent:chargeDetails andItems:items];
+#endif
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
