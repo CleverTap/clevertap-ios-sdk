@@ -59,6 +59,9 @@ extern NSString *const kHANDSHAKE_URL;
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
+#define CLTAP_NOTIFICATION_PIVOT @"wzrk_pivot"
+#define CLTAP_NOTIFICATION_PIVOT_DEFAULT @"wzrk_default"
+#define CLTAP_NOTIFICATION_CONTROL_GROUP_ID @"wzrk_cgId"
 #define CLTAP_WZRK_PREFIX @"wzrk_"
 #define CLTAP_NOTIFICATION_TAG_SECONDARY @"wzrk_"
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
@@ -110,6 +113,19 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
 #define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
+
+#define CLTAP_INAPP_ID @"ti"
+#define CLTAP_INAPP_TTL @"wzrk_ttl"
+#define CLTAP_INAPP_CS_TTL_OFFSET @"wzrk_ttl_offset"
+#define CLTAP_INAPP_PRIORITY @"priority"
+#define CLTAP_INAPP_IS_SUPPRESSED @"suppressed"
+
+// whenTriggers
+#define CLTAP_INAPP_TRIGGERS @"whenTriggers"
+
+// whenLimits
+#define CLTAP_INAPP_FC_LIMITS @"frequencyLimits"
+#define CLTAP_INAPP_OCCURRENCE_LIMITS @"occurrenceLimits"
 
 #define CLTAP_INAPP_DATA_TAG @"html"
 #define CLTAP_INAPP_X_PERCENT @"xp"

@@ -78,7 +78,7 @@
         @try {
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
-            self.campaignId = (NSString*) jsonObject[@"wzrk_id"];
+            self.campaignId = (NSString*) jsonObject[CLTAP_NOTIFICATION_ID_TAG];
             if (jsonObject[@"excludeGlobalFCaps"] != nil) {
                 self.excludeFromCaps = [jsonObject[@"excludeGlobalFCaps"] boolValue];
             } else {
@@ -91,8 +91,8 @@
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
             self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
             
-            if (jsonObject[@"ti"]) {
-                self.Id = [NSString stringWithFormat:@"%@", jsonObject[@"ti"]];
+            if (jsonObject[CLTAP_INAPP_ID]) {
+                self.Id = [NSString stringWithFormat:@"%@", jsonObject[CLTAP_INAPP_ID]];
             }
             NSString *type = (NSString*) jsonObject[@"type"];
             if (!type || [type isEqualToString:@"custom-html"]) {
@@ -104,7 +104,7 @@
                 self.error = @"Unknown InApp Type";
             }
         
-            NSUInteger timeToLive = [jsonObject[@"wzrk_ttl"] longValue];
+            NSUInteger timeToLive = [jsonObject[CLTAP_INAPP_TTL] longValue];
             if (timeToLive) {
                 _timeToLive = timeToLive;
             } else {

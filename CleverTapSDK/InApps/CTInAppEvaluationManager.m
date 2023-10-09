@@ -110,7 +110,7 @@
 - (void)evaluateServerSide:(CTEventAdapter *)event {
     NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
     for (NSDictionary *inApp in eligibleInApps) {
-        NSString *campaignId = inApp[@"ti"];
+        NSString *campaignId = inApp[CLTAP_INAPP_ID];
         if (campaignId) {
             [self.evaluatedServerSideInAppIds addObject:campaignId];
         }
@@ -120,9 +120,9 @@
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
     for (NSDictionary *inApp in inApps) {
-        NSString *campaignId = inApp[@"ti"];
+        NSString *campaignId = inApp[CLTAP_INAPP_ID];
         // Match trigger
-        NSArray *whenTriggers = inApp[@"whenTriggers"];
+        NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
         if (!matchesTrigger) continue;
         
@@ -141,9 +141,9 @@
 }
 
 - (BOOL)evaluateInAppFrequencyLimits:(CTInAppNotification *)inApp {
-    if (inApp.jsonDescription && inApp.jsonDescription[@"frequencyLimits"]) {
+    if (inApp.jsonDescription && inApp.jsonDescription[CLTAP_INAPP_FC_LIMITS]) {
         // Match frequency limits
-        NSArray *frequencyLimits = inApp.jsonDescription[@"frequencyLimits"];
+        NSArray *frequencyLimits = inApp.jsonDescription[CLTAP_INAPP_FC_LIMITS];
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:frequencyLimits forCampaignId:inApp.Id withImpressionManager:self.impressionManager];
         return matchesLimits;
     }
@@ -181,25 +181,25 @@
 }
 
 - (BOOL)shouldSuppress:(NSDictionary *)inApp {
-    return [inApp[@"suppressed"] boolValue];
+    return [inApp[CLTAP_INAPP_IS_SUPPRESSED] boolValue];
 }
 
 - (void)suppress:(NSDictionary *)inApp {
-    NSString *ti = inApp[@"ti"];
+    NSString *ti = inApp[CLTAP_INAPP_ID];
     NSString *wzrk_id = [self generateWzrkId:ti];
-    NSString *pivot = inApp[@"wzrk_pivot"] ? inApp[@"wzrk_pivot"] : @"wzrk_default";
-    NSNumber *cgId = inApp[@"wzrk_cgId"];
+    NSString *pivot = inApp[CLTAP_NOTIFICATION_PIVOT] ? inApp[CLTAP_NOTIFICATION_PIVOT] : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
+    NSNumber *cgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
 
     [self.suppressedClientSideInApps addObject:@{
-        @"wzrk_id": wzrk_id,
-        @"wzrk_pivot": pivot,
-        @"wzrk_cgId": cgId
+        CLTAP_NOTIFICATION_ID_TAG: wzrk_id,
+        CLTAP_NOTIFICATION_PIVOT: pivot,
+        CLTAP_NOTIFICATION_CONTROL_GROUP_ID: cgId
     }];
 }
 
 - (void)sortByPriority:(NSMutableArray *)inApps {
     NSNumber *(^priority)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
-        NSNumber *priority = inApp[@"priority"];
+        NSNumber *priority = inApp[CLTAP_INAPP_PRIORITY];
         if (priority != nil) {
             return priority;
         }
@@ -207,7 +207,7 @@
     };
     
     NSNumber *(^ti)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
-        NSNumber *ti = inApp[@"ti"];
+        NSNumber *ti = inApp[CLTAP_INAPP_ID];
         if (ti != nil) {
             return ti;
         }
@@ -241,15 +241,15 @@
 }
 
 - (void)updateTTL:(NSMutableDictionary *)inApp {
-    NSNumber *offset = inApp[@"wzrk_ttl_offset"];
+    NSNumber *offset = inApp[CLTAP_INAPP_CS_TTL_OFFSET];
     if (offset != nil) {
         NSInteger now = [[NSDate date] timeIntervalSince1970];
         NSInteger ttl = now + [offset longValue];
-        [inApp setObject:[NSNumber numberWithLong:ttl] forKey:@"wzrk_ttl"];
+        [inApp setObject:[NSNumber numberWithLong:ttl] forKey:CLTAP_INAPP_TTL];
     } else {
         // Remove TTL, since it cannot be calculated based on the TTL offset
         // The deafult TTL will be set in CTInAppNotification
-        [inApp removeObjectForKey:@"wzrk_ttl"];
+        [inApp removeObjectForKey:CLTAP_INAPP_TTL];
     }
 }
 
