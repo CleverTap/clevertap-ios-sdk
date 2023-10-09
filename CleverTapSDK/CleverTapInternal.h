@@ -2,6 +2,7 @@
 #import "CleverTap.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppFCManager.h"
+#import "CTInAppStore.h"
 
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypePage,
@@ -18,6 +19,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 @property (nonatomic, strong, readonly) CTInAppDisplayManager * _Nullable inAppDisplayManager;
 @property (nonatomic, strong, readonly) CTInAppEvaluationManager * _Nullable inAppEvaluationManager;
 @property (nonatomic, strong, readonly) CTInAppFCManager * _Nullable inAppFCManager;
+@property (nonatomic, strong, readonly) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, assign, readonly) BOOL isAppForeground;
 @property(strong, nonatomic, nullable) CleverTapFetchInappsBlock fetchInappsBlock;
 

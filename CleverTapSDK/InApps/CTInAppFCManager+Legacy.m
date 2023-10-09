@@ -8,12 +8,7 @@
 
 #import "CTInAppFCManager+Legacy.h"
 #import "CTPreferences.h"
-
-// TODO: move to one place only
-// Storage keys
-//NSString* const kKEY_COUNTS_PER_INAPP = @"counts_per_inapp";
-//NSString* const kKEY_COUNTS_SHOWN_TODAY = @"istc_inapp";
-//NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
+#import "CTConstants.h"
 
 @implementation CTInAppFCManager(Legacy)
 
@@ -31,19 +26,19 @@
 
 - (void)lastUpdateKeyChanges {
     // Last update key changes
-    NSString *localLastUpdateKey = [self oldStorageKeyWithSuffix:@"ict_date"];
+    NSString *localLastUpdateKey = [self oldStorageKeyWithSuffix:CLTAP_PREFS_INAPP_LAST_DATE_KEY];
     NSString *localLastUpdateTime = [CTPreferences getStringForKey:localLastUpdateKey withResetValue:nil];
     
     // Store value in new key and delete old key
     if (localLastUpdateTime != nil) {
-        [CTPreferences putString:localLastUpdateTime forKey:[self storageKeyWithSuffix:@"ict_date"]];
+        [CTPreferences putString:localLastUpdateTime forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_LAST_DATE_KEY]];
         [CTPreferences removeObjectForKey: localLastUpdateKey];
     }
     
 }
 
 - (void)countShownTodayKeyChanges {
-    NSString *localCountShownKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY];
+    NSString *localCountShownKey = [self oldStorageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY];
     //Check value exist otherwise fetch call will reset it reset value
     if ([CTPreferences getObjectForKey:localCountShownKey] == nil || ![[CTPreferences getObjectForKey:localCountShownKey] isKindOfClass:[NSNumber class]]) {
         return;
@@ -51,30 +46,30 @@
     
     int localCountShown = (int) [CTPreferences getIntForKey:localCountShownKey withResetValue:0] ;
     //Store value in new key and delete old key
-    [CTPreferences putInt:localCountShown forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
+    [CTPreferences putInt:localCountShown forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY]];
     [CTPreferences removeObjectForKey: localCountShownKey];
 }
 
 - (void)countPerInAppKeyChanges {
     // Count For InApp key changes
-    NSString *localInAppKey = [self oldStorageKeyWithSuffix:kKEY_COUNTS_PER_INAPP];
+    NSString *localInAppKey = [self oldStorageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY];
     NSDictionary *localInApp = [CTPreferences getObjectForKey: localInAppKey];
     
     //Store value in new key and delete Old key
     if (localInApp != nil) {
-        [CTPreferences putObject:localInApp forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+        [CTPreferences putObject:localInApp forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY]];
         [CTPreferences removeObjectForKey: localInAppKey];
     }
 }
 
 - (void)countPerInAppKeyChangesForDefaultConfig {
     // Count For InApp key changes
-    NSDictionary *defaultDictionary = [CTPreferences getObjectForKey:kKEY_COUNTS_PER_INAPP];
+    NSDictionary *defaultDictionary = [CTPreferences getObjectForKey:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY];
     
     //Store value in new key and delete old key
     if (defaultDictionary != nil) {
-        [CTPreferences putObject:defaultDictionary forKey:[NSString stringWithFormat:@"%@:%@", kKEY_COUNTS_PER_INAPP, self.deviceId]];
-        [CTPreferences removeObjectForKey:kKEY_COUNTS_PER_INAPP];
+        [CTPreferences putObject:defaultDictionary forKey:[NSString stringWithFormat:@"%@:%@", CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY, self.deviceId]];
+        [CTPreferences removeObjectForKey:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY];
     }
 }
 

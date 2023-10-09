@@ -19,36 +19,34 @@
 - (void)handleInAppResponse:(NSDictionary *)jsonResp {
     if (!self.config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         // Parse global limits
-        NSNumber *perSession = jsonResp[@"imc"];
+        NSNumber *perSession = jsonResp[CLTAP_INAPP_GLOBAL_CAP_SESSION_JSON_RESPONSE_KEY];
         if (perSession == nil) {
             perSession = @10;
         }
-        NSNumber *perDay = jsonResp[@"imp"];
+        NSNumber *perDay = jsonResp[CLTAP_INAPP_GLOBAL_CAP_DAY_JSON_RESPONSE_KEY];
         if (perDay == nil) {
             perDay = @10;
         }
         [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
         
         // Parse SS notifications
-        NSArray *ssInAppNotifs = jsonResp[@"inapp_notifs_ss"];
+        NSArray *ssInAppNotifs = jsonResp[CLTAP_INAPP_SS_JSON_RESPONSE_KEY];
         if (ssInAppNotifs) {
             // TODO: save to in-app store
         }
         
         // Parse CS notifications
-        NSArray *csInAppNotifs = jsonResp[@"inapp_notifs_cs"];
+        NSArray *csInAppNotifs = jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY];
         if (csInAppNotifs) {
             // TODO: save to in-app store
         }
         
-        // Parse In-app Mode
-        NSString *mode = jsonResp[@"inapp_delivery_mode"];
-        if (mode) {
-            // TODO: set to in-app store
-        }
+        // Parse in-app Mode
+        NSString *mode = jsonResp[CLTAP_INAPP_MODE_JSON_RESPONSE_KEY];
+        // TODO: set to in-app store
         
         // Parse SS App Launched notifications
-        NSArray *inAppNotifsAppLaunched = jsonResp[@"inapp_notifs_applaunched"];
+        NSArray *inAppNotifsAppLaunched = jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
         if (inAppNotifsAppLaunched) {
             @try {
                 [self.inAppEvaluationManager evaluateOnAppLaunchedServerSide:inAppNotifsAppLaunched];
@@ -57,9 +55,9 @@
             }
         }
         
-        // Handle inapp_stale
+        // Handle stale in-apps
         @try {
-            NSArray *stale = jsonResp[@"inapp_stale"];
+            NSArray *stale = jsonResp[CLTAP_INAPP_STALE_JSON_RESPONSE_KEY];
             [self.inAppFCManager removeStaleInAppCounts:stale];
         } @catch (NSException *ex) {
             CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)

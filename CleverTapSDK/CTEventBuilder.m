@@ -9,8 +9,6 @@
 #import "CleverTap+Inbox.h"
 #import "CleverTap+DisplayUnit.h"
 
-NSString *const kCHARGED_EVENT = @"Charged";
-
 @implementation CTEventBuilder
 
 + (NSMutableDictionary *)getErrorObject:(CTValidationResult *)vr {
@@ -261,7 +259,7 @@ NSString *const kCHARGED_EVENT = @"Charged";
         }
         evtData[@"Items"] = jsonItemsArray;
         
-        chargedEvent[@"evtName"] = kCHARGED_EVENT;
+        chargedEvent[@"evtName"] = CLTAP_CHARGED_EVENT;
         chargedEvent[@"evtData"] = evtData;
         completion(chargedEvent, errors);
     } @catch (NSException *e) {

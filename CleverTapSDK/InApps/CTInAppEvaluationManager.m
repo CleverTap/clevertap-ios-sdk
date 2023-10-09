@@ -38,9 +38,6 @@
 
 @implementation CTInAppEvaluationManager
 
-static void *deviceIdContext = &deviceIdContext;
-static void *sessionIdContext = &sessionIdContext;
-
 - (instancetype)initWithCleverTap:(CleverTap *)instance
                        deviceInfo:(CTDeviceInfo *)deviceInfo
                 impressionManager:(CTImpressionManager *)impressionManager {
@@ -70,7 +67,7 @@ static void *sessionIdContext = &sessionIdContext;
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"Charged" eventProperties:chargeDetails andItems:items];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:chargeDetails andItems:items];
     [self evaluateServerSide:event];
     [self evaluateClientSide:event];
 }
@@ -170,14 +167,14 @@ static void *sessionIdContext = &sessionIdContext;
 }
 
 - (void)removeSentEvaluatedServerSideInAppIds:(NSDictionary *)header {
-    NSArray *inapps_eval = header[@"inapps_eval"];
+    NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_META_KEY];
     if (inapps_eval) {
         [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, inapps_eval.count)];
     }
 }
 
 - (void)removeSentSuppressedClientSideInApps:(NSDictionary *)header {
-    NSArray *suppresed_inapps = header[@"inapps_suppressed"];
+    NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
     if (suppresed_inapps) {
         [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, suppresed_inapps.count)];
     }
@@ -237,7 +234,7 @@ static void *sessionIdContext = &sessionIdContext;
 
 - (NSString *)generateWzrkId:(NSString *)ti {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyyMMdd"];
+    [dateFormatter setDateFormat:CLTAP_DATE_FORMAT];
     NSString *date = [dateFormatter stringFromDate:[NSDate date]];
     NSString *wzrk_id = [NSString stringWithFormat:@"%@_%@", ti, date];
     return wzrk_id;
@@ -259,10 +256,10 @@ static void *sessionIdContext = &sessionIdContext;
 - (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {
     NSMutableDictionary *header = [NSMutableDictionary new];
     if ([self.evaluatedServerSideInAppIds count] > 0) {
-        header[@"inapps_eval"] = self.evaluatedServerSideInAppIds;
+        header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;
     }
     if ([self.suppressedClientSideInApps count] > 0) {
-        header[@"inapps_suppressed"] = self.suppressedClientSideInApps;
+        header[CLTAP_INAPP_SUPPRESSED_META_KEY] = self.suppressedClientSideInApps;
     }
     
     return header;

@@ -24,12 +24,6 @@
 // Exclude support
 //  1. Show inapp X regardless of any of the above (but respect the close button per session case)
 
-// Storage keys
-NSString* const kKEY_COUNTS_PER_INAPP = @"counts_per_inapp";
-NSString* const kKEY_COUNTS_SHOWN_TODAY = @"istc_inapp";
-NSString* const kKEY_MAX_PER_DAY = @"istmcd_inapp";
-NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
-
 @interface CTInAppFCManager (){}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -66,7 +60,7 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
 }
 
 - (void)initInAppCounts {
-    _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]] mutableCopy];
+    _inAppCounts = [[CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY]] mutableCopy];
     if (_inAppCounts == nil) {
         _inAppCounts = [NSMutableDictionary new];
     }
@@ -105,7 +99,7 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
     }
     
     // 2. Have we shown enough of in-apps this session?
-    int globalSessionMax = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SESSION_MAX] withResetValue:1];
+    int globalSessionMax = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_SESSION_MAX_KEY] withResetValue:1];
     int shownThisSession = (int) [[self impressionManager] perSessionTotal];
     if (shownThisSession >= globalSessionMax) return true;
     
@@ -127,8 +121,8 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
     
     // 1. Has the daily count maxed out globally?
     int shownTodayCount = (int) [CTPreferences getIntForKey:
-                                 [self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0];
-    int maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY] withResetValue:1];
+                                 [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
+    int maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY] withResetValue:1];
     if (shownTodayCount >= maxPerDayCount) return true;
     
     // 2. Has the daily count been maxed out for this inapp?
@@ -169,8 +163,8 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
 }
 
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession {
-    [CTPreferences putInt:perDay forKey:[self storageKeyWithSuffix:kKEY_MAX_PER_DAY]];
-    [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SESSION_MAX]];
+    [CTPreferences putInt:perDay forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY]];
+    [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_SESSION_MAX_KEY]];
 }
 
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps {
@@ -182,7 +176,7 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
                     [self.inAppCounts removeObjectForKey:key];
                     CleverTapLogInternal(self.config.logLevel, @"%@: Purged inapp counts with key %@", self, key);
                 }
-                [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+                [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY]];
             }
         } @catch (NSException *e) {
             CleverTapLogInternal(self.config.logLevel, @"%@: Failed to purge out stale in-app counts - %@", self, e.debugDescription);
@@ -192,21 +186,21 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
 
 - (NSString *)todaysFormattedDate {
     NSDateFormatter *formatter = [NSDateFormatter new];
-    formatter.dateFormat = @"yyyyMMdd";
+    [formatter setDateFormat:CLTAP_DATE_FORMAT];
     return [formatter stringFromDate:[NSDate date]];
 }
 
 - (BOOL)shouldResetDailyCounters:(NSString *)today {
-    NSString *lastUpdate = [CTPreferences getStringForKey:[self storageKeyWithSuffix:@"ict_date"] withResetValue:@"20140428"];
+    NSString *lastUpdate = [CTPreferences getStringForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_LAST_DATE_KEY] withResetValue:@"20140428"];
     return ![today isEqualToString:lastUpdate];
 }
 
 - (void)resetDailyCounters:(NSString *)today {
     // Dates have changed
-    [CTPreferences putString:today forKey:[self storageKeyWithSuffix:@"ict_date"]];
+    [CTPreferences putString:today forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_LAST_DATE_KEY]];
     
     // Reset today count
-    [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
+    [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY]];
     
     // Reset the counts for each inapp
     @synchronized (self.inAppCounts) {
@@ -221,7 +215,7 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
             counts[0] = @0;
             self.inAppCounts[keys[i]] = counts;
         }
-        [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+        [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY]];
     }
 }
 
@@ -247,29 +241,29 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
         }
         
         self.inAppCounts[inAppId] = counts;
-        [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:kKEY_COUNTS_PER_INAPP]];
+        [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY]];
     }
 }
 
 - (void)incrementShownToday {
-    int shownToday = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0];
-    [CTPreferences putInt:shownToday + 1 forKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY]];
+    int shownToday = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
+    [CTPreferences putInt:shownToday + 1 forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY]];
 }
 
 - (void)incrementLocalInAppCount {
     self.localInAppCount = self.localInAppCount + 1;
-    [CTPreferences putInt:self.localInAppCount forKey:kCLTAP_LOCAL_INAPP_COUNT];
+    [CTPreferences putInt:self.localInAppCount forKey:CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY];
 }
 
 - (int)getLocalInAppCount {
-    self.localInAppCount = (int) [CTPreferences getIntForKey:kCLTAP_LOCAL_INAPP_COUNT withResetValue:0];
+    self.localInAppCount = (int) [CTPreferences getIntForKey:CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY withResetValue:0];
     return self.localInAppCount;
 }
 
 - (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
-        header[@"imp"] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:kKEY_COUNTS_SHOWN_TODAY] withResetValue:0]);
+        header[CLTAP_INAPP_SHOWN_TODAY_META_KEY] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0]);
 
         NSMutableArray *arr = [NSMutableArray new];
         NSArray *keys = [self.inAppCounts allKeys];
@@ -281,7 +275,7 @@ NSString *const kCLTAP_LOCAL_INAPP_COUNT = @"local_in_app_count";
             }
         }
         
-        header[@"tlc"] = arr;
+        header[CLTAP_INAPP_COUNTS_META_KEY] = arr;
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach FC to header: %@", self, e.debugDescription);
     }

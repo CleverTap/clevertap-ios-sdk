@@ -18,7 +18,7 @@
     // Events in the array are OR-ed
     for (NSDictionary *triggerObject in whenTriggers) {
         CTTriggerAdapter *trigger = [[CTTriggerAdapter alloc] initWithJSON:triggerObject];
-        if ([event.eventName isEqualToString:@"Charged"]) {
+        if ([event.eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
             if ([self matchCharged:trigger event:event]) {
                 return YES;
             }
@@ -36,7 +36,7 @@
 }
 
 - (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"Charged" eventProperties:details andItems:items];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:details andItems:items];
 
     return [self matchEventWhenTriggers:whenTriggers event:event];
 }

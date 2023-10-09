@@ -7,11 +7,6 @@
 @class CTInAppEvaluationManager;
 @class CTImpressionManager;
 
-// Storage keys
-extern NSString* const kKEY_COUNTS_PER_INAPP;
-extern NSString* const kKEY_COUNTS_SHOWN_TODAY;
-extern NSString* const kKEY_MAX_PER_DAY;
-
 @interface CTInAppFCManager : NSObject <CTAttachToHeaderDelegate>
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
