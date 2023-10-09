@@ -43,7 +43,7 @@
         
         // Parse in-app Mode
         NSString *mode = jsonResp[CLTAP_INAPP_MODE_JSON_RESPONSE_KEY];
-        // TODO: set to in-app store
+        [self.inAppStore setMode:mode];
         
         // Parse SS App Launched notifications
         NSArray *inAppNotifsAppLaunched = jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];

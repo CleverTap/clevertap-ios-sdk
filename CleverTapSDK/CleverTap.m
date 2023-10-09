@@ -262,6 +262,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) NSHashTable *switchUserDelegates;
 
 @property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
+@property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, assign, readwrite) BOOL isAppForeground;
 
 
@@ -476,6 +477,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self addObservers];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
+            self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
             CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithCleverTap:self deviceId:self.deviceInfo.deviceId];
             CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo impressionManager:impressionManager];
             
