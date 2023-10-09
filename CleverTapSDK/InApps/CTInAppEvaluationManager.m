@@ -130,7 +130,11 @@
         [self.triggerManager incrementTrigger:campaignId];
         
         // Match limits
-        NSArray *whenLimits = inApp[@"whenLimits"];
+        NSArray *frequencyLimits = inApp[CLTAP_INAPP_FC_LIMITS];
+        NSArray *occurrenceLimits = inApp[CLTAP_INAPP_OCCURRENCE_LIMITS];
+        NSMutableArray *whenLimits = [[NSMutableArray alloc] init];
+        [whenLimits addObjectsFromArray:frequencyLimits];
+        [whenLimits addObjectsFromArray:occurrenceLimits];
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId withImpressionManager:self.impressionManager];
         if (matchesLimits) {
             [eligibleInApps addObject:inApp];
