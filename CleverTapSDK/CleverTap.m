@@ -58,6 +58,7 @@
 #import "CTAttachToHeaderDelegate.h"
 #import "CTSwitchUserDelegate.h"
 #import "CTInAppDisplayManager.h"
+#import "CleverTap+InAppsResponseHandler.h"
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
 #import "CTInboxController.h"
@@ -195,9 +196,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, assign) NSTimeInterval lastAppLaunchedTime;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
-@property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
+@property (nonatomic, strong, readwrite) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
-//@property (nonatomic, assign) BOOL isAppForeground;
 
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
 @property (nonatomic, strong) NSMutableArray *profileQueue;
@@ -240,7 +240,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
-@property(strong, nonatomic, nullable) CleverTapFetchInappsBlock fetchInappsBlock;
+//@property(strong, nonatomic, nullable) CleverTapFetchInappsBlock fetchInappsBlock;
 @property (atomic, strong) CTPushPrimerManager *pushPrimerManager;
 #endif
 
@@ -257,12 +257,12 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 
 // TODO: organize
-@property (nonatomic, strong) CTInAppEvaluationManager *inAppEvaluationManager;
+@property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
 @property (nonatomic, strong) NSHashTable *attachToHeaderDelegates;
 @property (nonatomic, strong) NSHashTable *switchUserDelegates;
 
-//@property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
-
+@property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
+@property (nonatomic, assign, readwrite) BOOL isAppForeground;
 
 
 - (instancetype)init __unavailable;
@@ -2421,50 +2421,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 }
                 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-                if (!self.config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-                    NSNumber *perSession = jsonResp[@"imc"];
-                    if (perSession == nil) {
-                        perSession = @10;
-                    }
-                    NSNumber *perDay = jsonResp[@"imp"];
-                    if (perDay == nil) {
-                        perDay = @10;
-                    }
-                    [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
-                    
-                    NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
-                    
-                    if (self.inAppDisplayManager.inAppRenderingStatus == CleverTapInAppDiscard) {
-                        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
-                        return;
-                    }
-                    if (inappsJSON) {
-                        NSMutableArray *inappNotifs;
-                        @try {
-                            inappNotifs = [[NSMutableArray alloc] initWithArray:inappsJSON];
-                        } @catch (NSException *e) {
-                            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing InApps JSON: %@", self, e.debugDescription);
-                        }
-                        
-                        // Add all the new notifications to the queue
-                        if (inappNotifs && [inappNotifs count] > 0) {
-                            CleverTapLogInternal(self.config.logLevel, @"%@: Processing new InApps: %@", self, inappNotifs);
-                            [self.inAppDisplayManager _addInAppNotificationsToQueue:inappNotifs];
-                            // Handle inapp_stale
-                            @try {
-                                NSArray *stale = jsonResp[@"inapp_stale"];
-                                [self.inAppFCManager removeStaleInAppCounts:stale];
-                            } @catch (NSException *ex) {
-                                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)
-                            }
-                        }
-                        
-                        // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
-                        if (self.fetchInappsBlock) {
-                            self.fetchInappsBlock(YES);
-                        }
-                    }
-                }
+                [self handleInAppResponse:jsonResp];
 #endif
                 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -2629,7 +2586,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self handleSendQueueFail];
     }
 }
-
 
 #pragma mark Profile Handling Private
 
