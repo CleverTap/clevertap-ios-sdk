@@ -29,7 +29,7 @@
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (atomic, copy) NSString *deviceId;
 
-@property (atomic, strong) CTImpressionManager *impressionManager;
+@property (atomic, weak) CTImpressionManager *impressionManager;
 @property (atomic, weak) CTInAppEvaluationManager *evaluationManager;
 
 // id: [todayCount, lifetimeCount]
@@ -50,6 +50,7 @@
         _impressionManager = impressionManager;
         _evaluationManager = evaluationManager;
         
+        [instance addSwitchUserDelegate:self];
         [instance addAttachToHeaderDelegate:self];
         [self migratePreferenceKeys];
         // Init in-app counts after migrating the preference keys

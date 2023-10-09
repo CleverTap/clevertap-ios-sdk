@@ -83,12 +83,6 @@
                 CleverTapLogInternal(self.config.logLevel, @"%@: Processing new InApps: %@", self, inappNotifs);
                 [self.inAppDisplayManager _addInAppNotificationsToQueue:inappNotifs];
             }
-            
-            // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
-            if (self.fetchInappsBlock) {
-                self.fetchInappsBlock(YES);
-                self.fetchInappsBlock = nil;
-            }
         }
     }
 }

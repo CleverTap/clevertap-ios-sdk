@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "CTAttachToHeaderDelegate.h"
+#import "CTSwitchUserDelegate.h"
 
 @class CleverTap;
 @class CleverTapInstanceConfig;
@@ -7,7 +8,7 @@
 @class CTInAppEvaluationManager;
 @class CTImpressionManager;
 
-@interface CTInAppFCManager : NSObject <CTAttachToHeaderDelegate>
+@interface CTInAppFCManager : NSObject <CTAttachToHeaderDelegate, CTSwitchUserDelegate>
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 @property (atomic, copy, readonly) NSString *deviceId;

@@ -66,7 +66,7 @@ typedef NS_ENUM(int, CleverTapEncryptionLevel) {
     CleverTapEncryptionMedium = 1
 };
 
-typedef void (^CleverTapFetchInappsBlock)(BOOL success);
+typedef void (^CleverTapFetchInAppsBlock)(BOOL success);
 
 @interface CleverTap : NSObject
 
@@ -1010,7 +1010,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  
  @param block a callback with a boolean flag whether the update was successful.
  */
-- (void)fetchInApps:(CleverTapFetchInappsBlock _Nullable)block;
+- (void)fetchInApps:(CleverTapFetchInAppsBlock _Nullable)block;
 
 #endif
 

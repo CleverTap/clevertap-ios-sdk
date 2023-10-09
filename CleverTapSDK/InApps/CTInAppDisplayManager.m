@@ -442,8 +442,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (!notification || [notification count] <= 0 || !notification[@"wzrk_inapp"]) return NO;
     
     @try {
-        // TODO: impression manager resetSession
-//        [self.inAppFCManager resetSession];
+        [self.instance.impressionManager resetSession];
         CleverTapLogDebug(self.config.logLevel, @"%@: Received in-app notification from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_inapp"];

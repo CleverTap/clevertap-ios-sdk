@@ -240,7 +240,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
-//@property(strong, nonatomic, nullable) CleverTapFetchInappsBlock fetchInappsBlock;
+@property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (atomic, strong) CTPushPrimerManager *pushPrimerManager;
 #endif
 
@@ -262,6 +262,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) NSHashTable *switchUserDelegates;
 
 @property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
+@property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, assign, readwrite) BOOL isAppForeground;
 
@@ -490,6 +491,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             self.inAppEvaluationManager = evaluationManager;
             self.inAppDisplayManager = displayManager;
             self.inAppFCManager = inAppFCManager;
+            self.impressionManager = impressionManager;
             
             self.pushPrimerManager = [[CTPushPrimerManager alloc]initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
             [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
@@ -863,13 +865,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach headers from delegates", self);
     }
     
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-    if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-        //[self.inAppFCManager attachToHeader:header];
-        
-        // TODO: add inapps_eval
-    }
-#endif
     return header;
 }
 
@@ -1807,13 +1802,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self clearMedium];
     [self clearCampaign];
     [self clearWzrkParams];
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-    if (![CTUIUtils runningInsideAppExtension]) {
-        // TODO: impression manager resetSession
-        //[self.inAppFCManager resetSession];
-        [self invokeSwitchUserDelegatesOnResetSession];
-    }
-#endif
+    [self invokeSwitchUserDelegatesOnResetSession];
 }
 
 - (void)setSessionId:(long)sessionId {
@@ -2310,7 +2299,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 }
                 [[self variables] handleVariablesError];
                 // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
-                self.fetchInappsBlock(NO);
+                if (self.fetchInAppsBlock) {
+                    self.fetchInAppsBlock(NO);
+                    self.fetchInAppsBlock = nil;
+                }
                 
                 dispatch_semaphore_signal(semaphore);
             }];
@@ -2424,6 +2416,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
                 [self handleInAppResponse:jsonResp];
+                // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
+                if (self.fetchInAppsBlock) {
+                    self.fetchInAppsBlock(YES);
+                    self.fetchInAppsBlock = nil;
+                }
 #endif
                 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -3543,8 +3540,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return self.inAppDisplayManager.inAppNotificationDelegate;
 }
 
-- (void)fetchInApps:(CleverTapFetchInappsBlock _Nullable)block {
-    self.fetchInappsBlock = block;
+- (void)fetchInApps:(CleverTapFetchInAppsBlock _Nullable)block {
+    self.fetchInAppsBlock = block;
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @5}} withType:CleverTapEventTypeFetch];
 }
 
