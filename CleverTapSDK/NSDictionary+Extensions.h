@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Uses NSJSONSerialization. NSDate values will be removed from the result.
  * @return the NSString JSON representation using UTF8 encoding.
  */
-- (NSString *)toJsonString;
+- (NSString * _Nullable)toJsonString;
 
 /**
  * Executes the block on each dictionary value and returns a new NSDictionary.

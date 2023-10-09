@@ -23,8 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
                   eventProperties:(NSDictionary *)eventProperties
                          andItems:(NSArray<NSDictionary *> *)items;
 
-- (CTTriggerValue *)propertyValueNamed:(NSString *)name;
-- (CTTriggerValue *)itemValueNamed:(NSString *)name;
+- (CTTriggerValue * _Nullable)propertyValueNamed:(NSString *)name;
+- (CTTriggerValue * _Nullable)itemValueNamed:(NSString *)name;
 
 @end
 

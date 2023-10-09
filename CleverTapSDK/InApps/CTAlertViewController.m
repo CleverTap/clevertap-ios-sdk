@@ -9,6 +9,7 @@
 @implementation CTAlertViewController
 
 - (instancetype)initWithNotification:(CTInAppNotification *)notification {
+    self = [super initWithNotification:notification];
     if (self) {
         self.notification = notification;
     }

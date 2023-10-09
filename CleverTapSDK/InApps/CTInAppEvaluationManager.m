@@ -15,6 +15,7 @@
 #import "CTInAppTriggerManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
+#import "CleverTapInternal.h"
 
 @interface CTInAppEvaluationManager()
 

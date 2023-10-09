@@ -21,8 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSInteger propertyCount;
 @property (nonatomic, readonly) NSInteger itemsCount;
 
-- (CTTriggerCondition *)propertyAtIndex:(NSInteger)index;
-- (CTTriggerCondition *)itemAtIndex:(NSInteger)index;
+- (CTTriggerCondition * _Nullable)propertyAtIndex:(NSInteger)index;
+- (CTTriggerCondition * _Nullable)itemAtIndex:(NSInteger)index;
 
 @end
 
