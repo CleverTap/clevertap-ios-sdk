@@ -44,12 +44,12 @@ static CTInAppDisplayViewController *currentDisplayController;
 static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControllers;
 
 @interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate> {
-    dispatch_queue_t _notificationQueue;
 }
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 
+@property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, weak) CleverTap* instance;
 
@@ -58,11 +58,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 @implementation CTInAppDisplayManager
 
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
-                            inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager {
+                            inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager dispatchQueueManager:(CTDispatchQueueManager* _Nonnull)dispatchQueueManager {
     if ((self = [super init])) {
-        _notificationQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.notificationQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
-        dispatch_queue_set_specific(_notificationQueue, kNotificationQueueKey, (__bridge void *)self, NULL);
-        
+        self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
@@ -93,20 +91,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return _inAppNotificationDelegate;
 }
 
-#pragma mark - NotificationQueue
-- (void)runOnNotificationQueue:(void (^)(void))taskBlock {
-    if ([self inNotificationQueue]) {
-        taskBlock();
-    } else {
-        dispatch_async(_notificationQueue, taskBlock);
-    }
-}
-
-- (BOOL)inNotificationQueue {
-    CTInAppDisplayManager *currentQueue = (__bridge id) dispatch_get_specific(kNotificationQueueKey);
-    return currentQueue == self;
-}
-
 #pragma mark - InApp Notifications Queue
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
@@ -124,7 +108,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
 
         // Fire the first notification, if any
-        [self runOnNotificationQueue:^{
+        [self.dispatchQueueManager runOnNotificationQueue:^{
             [self _showNotificationIfAvailable];
         }];
     } @catch (NSException *e) {
@@ -138,7 +122,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     if (!self.config.analyticsOnly) {
-        [self runOnNotificationQueue:^{
+        [self.dispatchQueueManager runOnNotificationQueue:^{
             [self _showNotificationIfAvailable];
         }];
     }
@@ -204,7 +188,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
 
-    [self runOnNotificationQueue:^{
+    [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
         __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
         if (notification.error) {

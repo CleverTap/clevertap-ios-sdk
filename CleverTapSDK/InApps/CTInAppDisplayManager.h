@@ -30,7 +30,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
-                            inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager;
+                            inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager dispatchQueueManager:(CTDispatchQueueManager* _Nonnull)dispatchQueueManager;
 
 - (void)prepareNotificationForDisplay:(NSDictionary* _Nonnull)jsonObj;
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary* _Nullable)notification;

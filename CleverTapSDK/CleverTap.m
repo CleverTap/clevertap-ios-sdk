@@ -483,7 +483,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithInstance:self deviceId:[_deviceInfo.deviceId copy] evaluationManager:evaluationManager impressionManager:impressionManager];
             
             // Requires inAppFCManager to be initialized
-            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self inAppFCManager:inAppFCManager];
+            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self inAppFCManager:inAppFCManager dispatchQueueManager:self.dispatchQueueManager];
             
             self.inAppEvaluationManager = evaluationManager;
             self.inAppDisplayManager = displayManager;
