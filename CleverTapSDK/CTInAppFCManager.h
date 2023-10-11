@@ -27,5 +27,6 @@
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps;
 - (BOOL)hasLifetimeCapacityMaxedOut:(CTInAppNotification *)dictionary;
 - (BOOL)hasDailyCapacityMaxedOut:(CTInAppNotification *)dictionary;
-
+- (int)getLocalInAppCount;
+- (void)incrementLocalInAppCount;
 @end

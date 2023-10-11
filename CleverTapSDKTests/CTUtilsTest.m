@@ -48,7 +48,6 @@
 
 - (void)test_urlEncodeString_withNilString{
     NSString *urlString = [CTUtils urlEncodeString:nil];
-    // TODO: urlEncodeString crashes when sent nil input, add nil check
     XCTAssertNil(urlString, @"Nil string should return nil");
 }
 
@@ -85,7 +84,6 @@
 
 - (void)test_deviceTokenStringFromData{
     NSData *data = [NSData dataWithBytes:"dummy token" length:11];
-    //TODO: check for empty and nil data input
     NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
     
     XCTAssertNotNil(tokenString);
@@ -97,5 +95,16 @@
     XCTAssertEqual(result, 10.199999999999999);
 }
 
+- (void)test_deviceTokenStringFromNilData {
+    NSString *tokenString = [CTUtils deviceTokenStringFromData:nil];
+    XCTAssertNil(tokenString);
+}
+
+- (void)test_deviceTokenStringFromEmptyData {
+    NSData *data = [NSData data];
+    NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
+    
+    XCTAssertNil(tokenString);
+}
 
 @end

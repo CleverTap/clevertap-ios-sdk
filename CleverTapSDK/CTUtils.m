@@ -39,6 +39,7 @@
 }
 
 + (NSString *)deviceTokenStringFromData:(NSData *)tokenData {
+    if (!tokenData || tokenData.length == 0) return nil;
     const unsigned *tokenBytes = [tokenData bytes];
     NSString *hexToken = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
                           ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
