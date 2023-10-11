@@ -32,13 +32,13 @@
         // Parse SS notifications
         NSArray *ssInAppNotifs = jsonResp[CLTAP_INAPP_SS_JSON_RESPONSE_KEY];
         if (ssInAppNotifs) {
-            // TODO: save to in-app store
+            [self.inAppStore storeServerSideInApps:ssInAppNotifs];
         }
         
         // Parse CS notifications
         NSArray *csInAppNotifs = jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY];
         if (csInAppNotifs) {
-            // TODO: save to in-app store
+            [self.inAppStore storeServerSideInApps:csInAppNotifs];
         }
         
         // Parse in-app Mode

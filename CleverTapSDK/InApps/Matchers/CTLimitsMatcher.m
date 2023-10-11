@@ -62,24 +62,16 @@
             }
             break;
         case CTLimitTypeOnEvery: {
-//            NSInteger triggerCount = [manager getImpressions:campaignId].count;
             CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
             NSInteger triggerCount = [inAppTriggerManager getTriggers:campaignId];
-            // TODO: VERIFY IF WE NEED TO ADD 1 TO TRIGGER COUNT, IF THE IMPRESSION HAS BEEN ALREADY RECORDED FROM ELSEWHERE
-//            NSInteger currentTriggerCount = triggerCount + 1;
-//            if (currentTriggerCount % limit.limit) {
             if (triggerCount % limit.limit == 0) {
                 return YES;
             }
             break;
         }
         case CTLimitTypeOnExactly: {
-//            NSInteger triggerCount = [manager getImpressions:campaignId].count;
             CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
             NSInteger triggerCount = [inAppTriggerManager getTriggers:campaignId];
-            // TODO: VERIFY IF WE NEED TO ADD 1 TO TRIGGER COUNT, IF THE IMPRESSION HAS BEEN ALREADY RECORDED FROM ELSEWHERE
-//            NSInteger currentTriggerCount = triggerCount + 1;
-//            if (currentTriggerCount == limit.limit) {
             if (triggerCount == limit.limit) {
                 return YES;
             }

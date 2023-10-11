@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo:(CTDeviceInfo *)deviceInfo;
 - (NSArray *)clientSideInApps;
 - (NSArray *)serverSideInApps;
+- (void)storeClientSideInApps:(NSArray *)clientSideInApps;
+- (void)storeServerSideInApps:(NSArray *)serverSideInApps;
 
 @end
 
