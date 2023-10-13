@@ -11,10 +11,41 @@
 #import "CTInAppTriggerManager.h"
 
 @interface CTLimitsMatcherTest : XCTestCase
-
+@property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
+@property (nonatomic, strong) CTImpressionManager *impressionManager;
+@property (nonatomic, strong) CTInAppTriggerManager *inAppTriggerManager;
+@property (nonatomic, strong) NSString *testCampaignId;
 @end
 
 @implementation CTLimitsMatcherTest
+
+- (void)setUp {
+    [super setUp];
+    self.testCampaignId = @"testCampaignId";
+    self.limitsMatcher = [[CTLimitsMatcher alloc] init];
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId" delegateManager:[CTDelegateManager new]];
+    self.inAppTriggerManager = [[CTInAppTriggerManager alloc]initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"];
+}
+
+- (void)tearDown {
+    [super tearDown];
+    [self.inAppTriggerManager removeTriggers:self.testCampaignId];
+    [self.impressionManager removeImpressions:self.testCampaignId];
+    
+    
+    
+    [self removeAllKeysWithPrefix:[NSUserDefaults standardUserDefaults] withPrefix:@"WizRockettestAccountId_testDeviceId_impressions"];
+    [self removeAllKeysWithPrefix:[NSUserDefaults standardUserDefaults] withPrefix:@"WizRockettestAccountId_testDeviceId_triggers"];
+}
+
+- (void)removeAllKeysWithPrefix:(NSUserDefaults *)userDefaults withPrefix:(NSString *)prefix {
+    NSDictionary *userDefaultsDictionary = [userDefaults dictionaryRepresentation];
+    for (NSString *key in userDefaultsDictionary) {
+        if ([key hasPrefix:prefix]) {
+            [userDefaults removeObjectForKey:key];
+        }
+    }
+}
 
 - (void)testMatchOnExactlyLessThanLimit {
     
@@ -25,17 +56,9 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-//    [impressionManager removeImpressions:testCampaignId];
-//    [impressionManager recordImpression:testCampaignId];
+    [self.inAppTriggerManager incrementTrigger:self.testCampaignId];
     
-    CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
-    [inAppTriggerManager removeTriggers:testCampaignId];
-    [inAppTriggerManager incrementTrigger:testCampaignId];
-    
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertFalse(match);
 }
@@ -49,19 +72,13 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-//    [impressionManager removeImpressions:testCampaignId];
-    CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
-    [inAppTriggerManager removeTriggers:testCampaignId];
-    
     for (int i = 0; i < 6; i++) {
-//        [impressionManager recordImpression:testCampaignId];
-        [inAppTriggerManager incrementTrigger:testCampaignId];
+        [self.inAppTriggerManager incrementTrigger:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits
+                                       forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager
+                                   andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertTrue(match);
 }
@@ -75,19 +92,11 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-//    [impressionManager removeImpressions:testCampaignId];
-    CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
-    [inAppTriggerManager removeTriggers:testCampaignId];
-    
     for (int i = 0; i < 12; i++) {
-//        [impressionManager recordImpression:testCampaignId];
-        [inAppTriggerManager incrementTrigger:testCampaignId];
+        [self.inAppTriggerManager incrementTrigger:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertTrue(match);
 }
@@ -101,20 +110,11 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-//    [impressionManager removeImpressions:testCampaignId];
-    
-    CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
-    [inAppTriggerManager removeTriggers:testCampaignId];
-    
     for (int i = 0; i < 2; i++) {
-//        [impressionManager recordImpression:testCampaignId];
-        [inAppTriggerManager incrementTrigger:testCampaignId];
+        [self.inAppTriggerManager incrementTrigger:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertFalse(match);
 }
@@ -128,12 +128,7 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-    [impressionManager removeImpressions:testCampaignId];
-    
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertTrue(match);
 }
@@ -147,16 +142,11 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-    [impressionManager removeImpressions:testCampaignId];
-    
     for (int i = 0; i < 7; i++) {
-        [impressionManager recordImpression:testCampaignId];
+        [self.impressionManager recordImpression:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertFalse(match);
 }
@@ -170,13 +160,9 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-    [impressionManager removeImpressions:testCampaignId];
-    [impressionManager recordImpression:testCampaignId];
+    [self.impressionManager recordImpression:self.testCampaignId];
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertTrue(match);
 }
@@ -190,16 +176,11 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-    [impressionManager removeImpressions:testCampaignId];
-    
     for (int i = 0; i < 7; i++) {
-        [impressionManager recordImpression:testCampaignId];
+        [self.impressionManager recordImpression:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertFalse(match);
 }
@@ -214,16 +195,11 @@
         }
     ];
     
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-    [impressionManager removeImpressions:testCampaignId];
-    
     for (int i = 0; i < 2; i++) {
-        [impressionManager recordImpression:testCampaignId];
+        [self.impressionManager recordImpression:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertTrue(match);
 }
@@ -237,17 +213,12 @@
             @"frequency": @12
         }
     ];
-    
-    NSString *testCampaignId = @"testCampaignId";
-    CTLimitsMatcher *limitMatcher = [[CTLimitsMatcher alloc] init];
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc]init];
-    [impressionManager removeImpressions:testCampaignId];
-    
+
     for (int i = 0; i < 7; i++) {
-        [impressionManager recordImpression:testCampaignId];
+        [self.impressionManager recordImpression:self.testCampaignId];
     }
     
-    BOOL match = [limitMatcher matchWhenLimits:whenLimits forCampaignId:testCampaignId withImpressionManager:impressionManager];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertFalse(match);
 }

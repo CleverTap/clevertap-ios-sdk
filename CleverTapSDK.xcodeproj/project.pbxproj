@@ -204,7 +204,6 @@
 		4E25E3D02788889E0008C888 /* CTLoginInfoProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE39275CB7670074A774 /* CTLoginInfoProvider.h */; };
 		4E25E3D12788889F0008C888 /* CTLoginInfoProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE3A275CB7670074A774 /* CTLoginInfoProvider.m */; };
 		4E25E3D22788889F0008C888 /* CTLoginInfoProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE39275CB7670074A774 /* CTLoginInfoProvider.h */; };
-		4E2BFB992AD69A1500DEB247 /* CTInAppFCManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E2BFB982AD69A1500DEB247 /* CTInAppFCManagerTests.m */; };
 		4E2BFB9C2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E2BFB9B2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m */; };
 		4E2CF1442AC56D8F00441E8B /* CTEncryptionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */; };
 		4E41FD8A294F441D0001FBED /* CTVar.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E41FD89294F441D0001FBED /* CTVar.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -343,6 +342,7 @@
 		6BF5A59F2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A59D2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m */; };
 		6BF5A5A12AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF5A5A02AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h */; };
 		6BF5A5A22AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF5A5A02AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h */; };
+		6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
 		D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -698,7 +698,6 @@
 		4E1F1561277090D6009387AE /* inapp_alert.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_alert.json; sourceTree = "<group>"; };
 		4E1F156427709304009387AE /* inapp_interstitial.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_interstitial.json; sourceTree = "<group>"; };
 		4E1F156727709848009387AE /* app_inbox.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = app_inbox.json; sourceTree = "<group>"; };
-		4E2BFB982AD69A1500DEB247 /* CTInAppFCManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManagerTests.m; sourceTree = "<group>"; };
 		4E2BFB9A2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+XCTestCase_Tests.h"; sourceTree = "<group>"; };
 		4E2BFB9B2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+XCTestCase_Tests.m"; sourceTree = "<group>"; };
 		4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTEncryptionTests.h; sourceTree = "<group>"; };
@@ -806,6 +805,7 @@
 		6BF5A59A2AD0318A00CDED20 /* CTSwitchUserDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CTSwitchUserDelegate.h; path = CleverTapSDK/CTSwitchUserDelegate.h; sourceTree = SOURCE_ROOT; };
 		6BF5A59D2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CleverTap+InAppsResponseHandler.m"; sourceTree = "<group>"; };
 		6BF5A5A02AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppsResponseHandler.h"; sourceTree = "<group>"; };
+		6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManagerTest.m; sourceTree = "<group>"; };
 		882781CB8111369724E05697 /* Pods-shared-CleverTapSDKTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.debug.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
@@ -1263,7 +1263,7 @@
 				6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */,
 				4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */,
 				4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */,
-				4E2BFB982AD69A1500DEB247 /* CTInAppFCManagerTests.m */,
+				6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2163,11 +2163,11 @@
 				4E1F155B276B662C009387AE /* EventDetail.m in Sources */,
 				4EFC642B2AB44CF900F01414 /* CTLimitsMatcherTest.m in Sources */,
 				4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */,
+				6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */,
 				6A7BB8DC29E47CFF00651584 /* CTVarTest.m in Sources */,
 				6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */,
 				6A2E0B9529D49D0200FCEA5F /* CTVariables+Tests.m in Sources */,
 				6A2E0B9829D49D5100FCEA5F /* CTVarCacheMock.m in Sources */,
-				4E2BFB992AD69A1500DEB247 /* CTInAppFCManagerTests.m in Sources */,
 				4EAF05022A495DD5009D9D61 /* CleverTapInstanceTests.m in Sources */,
 				6A2E0B9329D0A5CF00FCEA5F /* CTVariablesTest.m in Sources */,
 				D02AC2DB276044F70031C1BE /* CleverTapSDKTests.m in Sources */,
