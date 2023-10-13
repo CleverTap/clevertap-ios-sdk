@@ -9,7 +9,26 @@
 #import "CTInAppTriggerManager.h"
 #import "CTPreferences.h"
 
+@interface CTInAppTriggerManager()
+
+@property (nonatomic, strong) NSString *accountId;
+@property (nonatomic, strong) NSString *deviceId;
+
+@end
+
 @implementation CTInAppTriggerManager
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId {
+    self = [super init];
+    if (self) {
+        self.accountId = accountId;
+        self.deviceId = deviceId;
+    }
+    
+    return self;
+}
+
 
 - (NSUInteger)getTriggers:(NSString *)campaignId {
     NSUInteger savedTriggers = [CTPreferences getIntForKey:[self getTriggersKey:campaignId] withResetValue:0];
@@ -23,12 +42,12 @@
     [CTPreferences putInt:savedTriggers forKey:[self getTriggersKey:campaignId]];
 }
 
-- (NSString *)getTriggersKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@_%@", @"_triggers", campaignId];
-}
-
 - (void)removeTriggers:(NSString *)campaignId {
     [CTPreferences removeObjectForKey:[self getTriggersKey:campaignId]];
+}
+
+- (NSString *)getTriggersKey:(NSString *)campaignId {
+    return [NSString stringWithFormat:@"%@_%@_%@_%@", self.accountId, self.deviceId, @"triggers", campaignId];
 }
 
 @end

@@ -8,26 +8,26 @@
 
 #import <Foundation/Foundation.h>
 #import "CTBatchSentDelegate.h"
-#import "CTAttachToHeaderDelegate.h"
-#import "CleverTap.h"
+#import "CTAttachToBatchHeaderDelegate.h"
 #import "CTDeviceInfo.h"
+#import "CTDelegateManager.h"
 #import "CTImpressionManager.h"
+#import "CTInAppDisplayManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToHeaderDelegate>
+@interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToBatchHeaderDelegate>
 
-//- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithCleverTap:(CleverTap *)instance
+- (instancetype)initWithAccountId:(NSString *)accountId
                        deviceInfo:(CTDeviceInfo *)deviceInfo
-                impressionManager:(CTImpressionManager *)impressionManager;
+                   delegateManager:(CTDelegateManager *)delegateManager
+                impressionManager:(CTImpressionManager *)impressionManager
+              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;
 - (void)evaluateOnAppLaunchedClientSide;
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs;
-
-- (BOOL)evaluateInAppFrequencyLimits:(CTInAppNotification *)inApp;
 
 @end
 

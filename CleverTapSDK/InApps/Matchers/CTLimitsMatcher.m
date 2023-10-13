@@ -7,15 +7,18 @@
 //
 
 #import "CTLimitsMatcher.h"
-#import "CTInAppTriggerManager.h"
 
 @implementation CTLimitsMatcher
 
-- (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)manager {
+- (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(CTInAppTriggerManager *)triggerManager {
+    // TODO: is campaignId int or string
+//    if ([campaignId length] == 0) {
+//        return NO;
+//    }
     
     for (NSDictionary *limitJSON in whenLimits) {
         CTLimitAdapter *limitAdapter = [[CTLimitAdapter alloc] initWithJSON:limitJSON];
-        BOOL matched = [self matchLimit:limitAdapter forCampaignId:campaignId withImpressionManager:manager];
+        BOOL matched = [self matchLimit:limitAdapter forCampaignId:campaignId withImpressionManager:impressionManager andTriggerManager:triggerManager];
         if (!matched) {
             return NO;
         }
@@ -23,55 +26,57 @@
     return YES;
 }
 
-- (BOOL)matchLimit:(CTLimitAdapter *)limit forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)manager {
+
+- (BOOL)matchLimit:(CTLimitAdapter *)limit
+     forCampaignId:(NSString *)campaignId
+withImpressionManager:(CTImpressionManager *)impressionManager
+ andTriggerManager:(CTInAppTriggerManager *)triggerManager {
     
     switch ([limit limitType]) {
         case CTLimitTypeSession:
-            if ([manager perSession:campaignId] < limit.limit) {
+            if ([impressionManager perSession:campaignId] < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeSeconds:
-            if ([manager perSecond:campaignId seconds:limit.frequency] < limit.limit) {
+            if ([impressionManager perSecond:campaignId seconds:limit.frequency] < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeMinutes:
-            if ([manager perMinute:campaignId minutes:limit.frequency] < limit.limit) {
+            if ([impressionManager perMinute:campaignId minutes:limit.frequency] < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeHours:
-            if ([manager perHour:campaignId hours:limit.frequency] < limit.limit) {
+            if ([impressionManager perHour:campaignId hours:limit.frequency] < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeDays:
-            if ([manager perDay:campaignId days:limit.frequency] < limit.limit) {
+            if ([impressionManager perDay:campaignId days:limit.frequency] < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeWeeks:
-            if ([manager perWeek:campaignId weeks:limit.frequency] < limit.limit) {
+            if ([impressionManager perWeek:campaignId weeks:limit.frequency] < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeEver:
-            if ([manager getImpressions:campaignId].count < limit.limit) {
+            if ([impressionManager getImpressions:campaignId].count < limit.limit) {
                 return YES;
             }
             break;
         case CTLimitTypeOnEvery: {
-            CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
-            NSInteger triggerCount = [inAppTriggerManager getTriggers:campaignId];
+            NSInteger triggerCount = [triggerManager getTriggers:campaignId];
             if (triggerCount % limit.limit == 0) {
                 return YES;
             }
             break;
         }
         case CTLimitTypeOnExactly: {
-            CTInAppTriggerManager *inAppTriggerManager = [[CTInAppTriggerManager alloc]init];
-            NSInteger triggerCount = [inAppTriggerManager getTriggers:campaignId];
+            NSInteger triggerCount = [triggerManager getTriggers:campaignId];
             if (triggerCount == limit.limit) {
                 return YES;
             }

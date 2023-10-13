@@ -22,16 +22,19 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 };
 
 @interface CTInAppDisplayManager : NSObject {
-    CTPushPrimerManager *pushPrimerManager;
+    __weak CTPushPrimerManager *pushPrimerManager;
 }
 
 @property (atomic, weak) id <CleverTapInAppNotificationDelegate> _Nullable inAppNotificationDelegate;
 @property (nonatomic, assign, readonly) CleverTapInAppRenderingStatus inAppRenderingStatus;
 
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
-                            inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager dispatchQueueManager:(CTDispatchQueueManager* _Nonnull)dispatchQueueManager;
+- (instancetype _Nonnull)initWithCleverTap:(CleverTap * _Nonnull)instance
+                            dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
+                            inAppFCManager:(CTInAppFCManager *)inAppFCManager
+                         impressionManager:(CTImpressionManager *)impressionManager;
 
+- (void)setPushPrimerManager:(CTPushPrimerManager* _Nonnull)pushPrimerManagerObj;
 - (void)prepareNotificationForDisplay:(NSDictionary* _Nonnull)jsonObj;
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary* _Nullable)notification;
 - (void)clearInApps;
@@ -42,7 +45,6 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 - (void)_discardInAppNotifications;
 - (void)_resumeInAppNotifications;
 - (void)_showInAppNotificationIfAny;
-- (void)setPushPrimerManager:(CTPushPrimerManager* _Nonnull)pushPrimerManagerObj;
 
 @end
 

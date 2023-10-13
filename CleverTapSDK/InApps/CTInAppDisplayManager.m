@@ -50,6 +50,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 @property (nonatomic, assign) CleverTapInAppRenderingStatus inAppRenderingStatus;
 
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
+
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, weak) CleverTap* instance;
 
@@ -57,18 +58,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 @implementation CTInAppDisplayManager
 
-- (instancetype _Nonnull)initWithCleverTap:(CleverTap* _Nonnull)instance
-                            inAppFCManager:(CTInAppFCManager* _Nonnull)inAppFCManager dispatchQueueManager:(CTDispatchQueueManager* _Nonnull)dispatchQueueManager {
+- (instancetype _Nonnull)initWithCleverTap:(CleverTap * _Nonnull)instance
+                            dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
+                            inAppFCManager:(CTInAppFCManager *)inAppFCManager
+                         impressionManager:(CTImpressionManager *)impressionManager {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
-        self.inAppFCManager = inAppFCManager;
+        self.inAppFCManager = instance.inAppFCManager;
     }
     return self;
 }
 
-- (void)setPushPrimerManager:(CTPushPrimerManager*)pushPrimerManagerObj {
+- (void)setPushPrimerManager:(CTPushPrimerManager *)pushPrimerManagerObj {
     pushPrimerManager = pushPrimerManagerObj;
 }
 

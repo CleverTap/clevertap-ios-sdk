@@ -6,54 +6,56 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
-#import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
 #import "CTInAppStore.h"
 #import "CTTriggersMatcher.h"
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
-#import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
 #import "CleverTapInternal.h"
 
 @interface CTInAppEvaluationManager()
 
-- (void)evaluateServerSide:(CTEventAdapter *)event;
-- (void)evaluateClientSide:(CTEventAdapter *)event;
-- (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
-
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
 
-@property (nonatomic, weak) CleverTap *instance;
-@property (nonatomic, weak) CTImpressionManager *impressionManager;
+@property (nonatomic, strong) CTImpressionManager *impressionManager;
+@property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
+
 @property (nonatomic, strong) CTTriggersMatcher *triggersMatcher;
 @property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
 @property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
 @property (nonatomic, strong) CTInAppStore *inAppStore;
 
+- (void)evaluateServerSide:(CTEventAdapter *)event;
+- (void)evaluateClientSide:(CTEventAdapter *)event;
+- (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
+
 @end
 
 @implementation CTInAppEvaluationManager
 
-- (instancetype)initWithCleverTap:(CleverTap *)instance
+- (instancetype)initWithAccountId:(NSString *)accountId
                        deviceInfo:(CTDeviceInfo *)deviceInfo
-                impressionManager:(CTImpressionManager *)impressionManager {
+                   delegateManager:(CTDelegateManager *)delegateManager
+                impressionManager:(CTImpressionManager *)impressionManager
+              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager {
     if (self = [super init]) {
-        self.instance = instance;
+        self.impressionManager = impressionManager;
+        self.inAppDisplayManager = inAppDisplayManager;
+        
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
-        self.inAppStore = [[CTInAppStore alloc] initWithConfig:instance.config deviceInfo:deviceInfo];
+        self.inAppStore = [[CTInAppStore alloc] initWithAccountId:accountId deviceInfo:deviceInfo];
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
-        self.triggerManager = [CTInAppTriggerManager new];
-        self.impressionManager = impressionManager;
-        
-        [self.instance setBatchSentDelegate:self];
-        [self.instance addAttachToHeaderDelegate:self];
+        self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
+
+        [delegateManager addBatchSentDelegate:self];
+        [delegateManager addAttachToHeaderDelegate:self];
     }
     return self;
 }
@@ -83,7 +85,7 @@
     [self sortByPriority:eligibleInApps];
     for (NSDictionary *inApp in eligibleInApps) {
         if (![self shouldSuppress:inApp]) {
-            [self.instance.inAppDisplayManager _addInAppNotificationsToQueue:@[inApp]];
+            [self.inAppDisplayManager _addInAppNotificationsToQueue:@[inApp]];
             break;
         }
         
@@ -99,7 +101,7 @@
         if (![self shouldSuppress:inApp]) {
             NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
             [self updateTTL:mutableInApp];
-            [self.instance.inAppDisplayManager _addInAppNotificationsToQueue:@[mutableInApp]];
+            [self.inAppDisplayManager _addInAppNotificationsToQueue:@[mutableInApp]];
             break;
         }
         
@@ -135,23 +137,14 @@
         NSMutableArray *whenLimits = [[NSMutableArray alloc] init];
         [whenLimits addObjectsFromArray:frequencyLimits];
         [whenLimits addObjectsFromArray:occurrenceLimits];
-        BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId withImpressionManager:self.impressionManager];
+        BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId
+                                           withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
         if (matchesLimits) {
             [eligibleInApps addObject:inApp];
         }
     }
     
     return eligibleInApps;
-}
-
-- (BOOL)evaluateInAppFrequencyLimits:(CTInAppNotification *)inApp {
-    if (inApp.jsonDescription && inApp.jsonDescription[CLTAP_INAPP_FC_LIMITS]) {
-        // Match frequency limits
-        NSArray *frequencyLimits = inApp.jsonDescription[CLTAP_INAPP_FC_LIMITS];
-        BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:frequencyLimits forCampaignId:inApp.Id withImpressionManager:self.impressionManager];
-        return matchesLimits;
-    }
-    return YES;
 }
 
 - (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
@@ -257,7 +250,7 @@
     }
 }
 
-- (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {
+- (BatchHeaderKeyPathValues)onBatchHeaderCreation {
     NSMutableDictionary *header = [NSMutableDictionary new];
     if ([self.evaluatedServerSideInAppIds count] > 0) {
         header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;

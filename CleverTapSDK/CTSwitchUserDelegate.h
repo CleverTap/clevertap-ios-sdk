@@ -10,11 +10,9 @@
 #define CTSwitchUserDelegate_h
 
 @protocol CTSwitchUserDelegate <NSObject>
-@optional
+
 - (void)deviceIdDidChange:(NSString *)newDeviceId;
 
-@optional
-- (void)sessionDidReset;
 @end
 
 #endif /* CTSwitchUserDelegate_h */

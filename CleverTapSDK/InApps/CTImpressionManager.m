@@ -25,25 +25,38 @@
 
 @implementation CTImpressionManager
 
-- (instancetype)initWithCleverTap:(CleverTap *)instance deviceId:(NSString *)deviceId {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTDelegateManager *)delegateManager {
     if (self = [super init]) {
-        return [self initWithCleverTap:instance deviceId:deviceId locale:[NSLocale currentLocale]];
+        return [self initWithAccountId:accountId deviceId:deviceId delegateManager:delegateManager locale:[NSLocale currentLocale]];
     }
     return self;
 }
 
-- (instancetype)initWithCleverTap:(CleverTap *)instance deviceId:(NSString *)deviceId locale:(NSLocale *)locale {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTDelegateManager *)delegateManager
+                           locale:(NSLocale *)locale {
     if (self = [super init]) {
-        self.accountId = [instance getAccountID];
+        self.accountId = accountId;
         self.deviceId = deviceId;
         self.locale = locale;
         
-        [instance addSwitchUserDelegate:self];
+        self.sessionImpressions = [NSMutableDictionary new];
+        self.impressions = [NSMutableDictionary new];
+        
+        [delegateManager addSwitchUserDelegate:self];
     }
     return self;
 }
 
 - (void)recordImpression:(NSString *)campaignId {
+    // TODO: check if campaignId comes as string or number
+    if ([campaignId length] == 0) {
+        return;
+    }
+    
     // Record session impressions
     @synchronized (self.sessionImpressions) {
         int existing = [self.sessionImpressions[campaignId] intValue];
@@ -182,6 +195,9 @@
 
 - (void)addImpression:(NSString *)campaignId timestamp:(NSNumber *)timestamp {
     NSMutableArray *impressions = [self getImpressions:campaignId];
+    if (!impressions) {
+        impressions = [NSMutableArray new];
+    }
     [impressions addObject:timestamp];
     [CTPreferences putObject:impressions forKey:[self getImpressionKey:campaignId]];
 }

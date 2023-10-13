@@ -27,7 +27,7 @@
 #endif
 
 @protocol CTBatchSentDelegate;
-@protocol CTAttachToHeaderDelegate;
+@protocol CTAttachToBatchHeaderDelegate;
 @protocol CTSwitchUserDelegate;
 
 @class CleverTapEventDetail;
@@ -37,7 +37,6 @@
 @class CleverTapProductConfig;
 
 @class CTInAppNotification;
-@class CTInAppDisplayManager;
 #import "CTVar.h"
 
 #pragma clang diagnostic push

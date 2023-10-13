@@ -1,8 +1,9 @@
 //
 //  CTDispatchQueueManager.m
-//  Pods
+//  CleverTapSDK
 //
 //  Created by Akash Malhotra on 03/07/23.
+//  Copyright © 2023 CleverTap. All rights reserved.
 //
 
 #import "CTDispatchQueueManager.h"

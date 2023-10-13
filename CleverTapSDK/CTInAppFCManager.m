@@ -8,6 +8,8 @@
 #import "CTImpressionManager.h"
 #import "CTInAppEvaluationManager.h"
 #import "CleverTapInternal.h"
+#import "CTDelegateManager.h"
+#import "CTLimitsMatcher.h"
 
 // Per session
 //  1. Show only 10 inapps per session
@@ -29,8 +31,10 @@
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (atomic, copy) NSString *deviceId;
 
-@property (atomic, weak) CTImpressionManager *impressionManager;
-@property (atomic, weak) CTInAppEvaluationManager *evaluationManager;
+@property (atomic, strong) CTImpressionManager *impressionManager;
+
+@property (atomic, strong) CTLimitsMatcher *limitsMatcher;
+@property (atomic, strong) CTInAppTriggerManager *triggerManager;
 
 // id: [todayCount, lifetimeCount]
 @property (atomic, strong) NSMutableDictionary *inAppCounts;
@@ -41,17 +45,20 @@
 
 @implementation CTInAppFCManager
 
-- (instancetype)initWithInstance:(CleverTap *)instance
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                 delegateManager:(CTDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
-             evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager {
+               impressionManager:(CTImpressionManager *)impressionManager {
     if (self = [super init]) {
-        _config = instance.config;
+        _config = config;
         _deviceId = deviceId;
         _impressionManager = impressionManager;
-        _evaluationManager = evaluationManager;
+        _limitsMatcher = [[CTLimitsMatcher alloc] init];
+        _triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:config.accountId deviceId:deviceId];
         
-        [instance addSwitchUserDelegate:self];
-        [instance addAttachToHeaderDelegate:self];
+        [delegateManager addSwitchUserDelegate:self];
+        [delegateManager addAttachToHeaderDelegate:self];
+        
         [self migratePreferenceKeys];
         // Init in-app counts after migrating the preference keys
         [self initInAppCounts];
@@ -136,15 +143,27 @@
     return false;
 }
 
+- (BOOL)hasInAppFrequencyLimitsMaxedOut:(CTInAppNotification *)inApp {
+    if (inApp.jsonDescription && inApp.jsonDescription[CLTAP_INAPP_FC_LIMITS]) {
+        // Match frequency limits
+        NSArray *frequencyLimits = inApp.jsonDescription[CLTAP_INAPP_FC_LIMITS];
+        BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:frequencyLimits forCampaignId:inApp.Id
+                                           withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
+        return !matchesLimits;
+    }
+    return NO;
+}
+
 - (BOOL)canShow:(CTInAppNotification *)inapp {
     NSString *key = inapp.Id;
     if (!key) {
         return true;
     }
-    // Evaluate freqency limits again (without Nth triggers)
-    // in case queue the message was added multiple times before being displayed
+    
+    // Evaluate frequency limits again (without Nth triggers)
+    // in case the message was added multiple times before being displayed,
     // or queue was paused and the message was added multiple times in the meantime
-    if (![self.evaluationManager evaluateInAppFrequencyLimits:inapp]) {
+    if ([self hasInAppFrequencyLimitsMaxedOut:inapp]) {
         return false;
     }
     
@@ -259,7 +278,7 @@
     return self.localInAppCount;
 }
 
-- (nonnull NSDictionary<NSString *,id> *)onBatchHeaderCreation {
+- (BatchHeaderKeyPathValues)onBatchHeaderCreation {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
         header[CLTAP_INAPP_SHOWN_TODAY_META_KEY] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0]);
@@ -273,6 +292,8 @@
                 [arr addObject:@[keys[i], counts[0], counts[1]]];
             }
         }
+        
+        header[@"af.LIAMC"] = @([self localInAppCount]);
         
         header[CLTAP_INAPP_COUNTS_META_KEY] = arr;
     } @catch (NSException *e) {

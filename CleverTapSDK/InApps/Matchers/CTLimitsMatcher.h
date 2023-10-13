@@ -9,12 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "CTImpressionManager.h"
 #import "CTLimitAdapter.h"
+#import "CTInAppTriggerManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTLimitsMatcher : NSObject
 
-- (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)manager;
+- (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId
+  withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(CTInAppTriggerManager *)triggerManager;
 
 @end
 

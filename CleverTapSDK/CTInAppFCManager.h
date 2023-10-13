@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CTAttachToHeaderDelegate.h"
+#import "CTAttachToBatchHeaderDelegate.h"
 #import "CTSwitchUserDelegate.h"
 
 @class CleverTap;
@@ -7,21 +7,22 @@
 @class CTInAppNotification;
 @class CTInAppEvaluationManager;
 @class CTImpressionManager;
+@class CTDelegateManager;
 
-@interface CTInAppFCManager : NSObject <CTAttachToHeaderDelegate, CTSwitchUserDelegate>
+@interface CTInAppFCManager : NSObject <CTAttachToBatchHeaderDelegate, CTSwitchUserDelegate>
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
 @property (atomic, copy, readonly) NSString *deviceId;
 @property (assign, readonly) int localInAppCount;
 
-- (instancetype)initWithInstance:(CleverTap *)instance
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                 delegateManager:(CTDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
-               evaluationManager: (CTInAppEvaluationManager *)evaluationManager impressionManager:(CTImpressionManager *)impressionManager;
+             impressionManager:(CTImpressionManager *)impressionManager;
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix;
 - (void)checkUpdateDailyLimits;
 - (BOOL)canShow:(CTInAppNotification *)inapp;
-- (void)incrementLocalInAppCount;
 - (void)didShow:(CTInAppNotification *)inapp;
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
 - (void)removeStaleInAppCounts:(NSArray *)staleInApps;

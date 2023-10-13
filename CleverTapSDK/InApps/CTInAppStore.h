@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo:(CTDeviceInfo *)deviceInfo;
+- (instancetype)initWithAccountId:(NSString *)accountId deviceInfo:(CTDeviceInfo *)deviceInfo;
 - (NSArray *)clientSideInApps;
 - (NSArray *)serverSideInApps;
 - (void)storeClientSideInApps:(NSArray *)clientSideInApps;

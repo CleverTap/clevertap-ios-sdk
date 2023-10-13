@@ -1,5 +1,5 @@
 //
-//  CTAttachToHeaderDelegate.h
+//  CTAttachToBatchHeaderDelegate.h
 //  CleverTapSDK
 //
 //  Created by Nikola Zagorchev on 29.09.23.
@@ -10,9 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol CTAttachToHeaderDelegate <NSObject>
+typedef NSDictionary<NSString *, id> * _Nonnull BatchHeaderKeyPathValues;
 
-- (NSDictionary<NSString *, id> *)onBatchHeaderCreation;
+@protocol CTAttachToBatchHeaderDelegate <NSObject>
+
+- (BatchHeaderKeyPathValues)onBatchHeaderCreation;
 
 @end
 

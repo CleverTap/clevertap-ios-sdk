@@ -1,8 +1,9 @@
 //
 //  CTPushPrimerManager.m
-//  Pods
+//  CleverTapSDK
 //
 //  Created by Akash Malhotra on 04/07/23.
+//  Copyright © 2023 CleverTap. All rights reserved.
 //
 
 #import "CTPushPrimerManager.h"

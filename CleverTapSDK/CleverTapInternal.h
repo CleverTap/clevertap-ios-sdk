@@ -4,6 +4,10 @@
 #import "CTInAppFCManager.h"
 #import "CTInAppStore.h"
 
+@class CTInAppDisplayManager;
+
+@interface CleverTap (Internal)
+
 typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypePage,
     CleverTapEventTypePing,
@@ -13,8 +17,6 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeNotificationViewed,
     CleverTapEventTypeFetch,
 };
-
-@interface CleverTap (Internal)
 
 @property (nonatomic, strong, readonly) CTInAppDisplayManager * _Nullable inAppDisplayManager;
 @property (nonatomic, strong, readonly) CTInAppEvaluationManager * _Nullable inAppEvaluationManager;
@@ -32,8 +34,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 
 - (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
 
-- (void)addAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate> _Nonnull)delegate;
-- (void)removeAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate> _Nonnull)delegate;
+- (void)addAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate> _Nonnull)delegate;
+- (void)removeAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate> _Nonnull)delegate;
 
 - (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate> _Nonnull)delegate;
 - (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate> _Nonnull)delegate;

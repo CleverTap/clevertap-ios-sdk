@@ -31,6 +31,7 @@
 #import "CTInAppDisplayViewController.h"
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
+#import "CTDelegateManager.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CleverTapJSInterface.h"
@@ -71,7 +72,7 @@ static NSArray *sslCertNames;
 #endif
 
 #import "CTBatchSentDelegate.h"
-#import "CTAttachToHeaderDelegate.h"
+#import "CTAttachToBatchHeaderDelegate.h"
 #import "CTSwitchUserDelegate.h"
 
 #import "CleverTap+FeatureFlags.h"
@@ -239,8 +240,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 
 @property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
-@property (nonatomic, strong) NSHashTable *attachToHeaderDelegates;
-@property (nonatomic, strong) NSHashTable *switchUserDelegates;
+@property (nonatomic, strong, readwrite) CTDelegateManager *delegateManager;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
@@ -440,8 +440,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (instancetype)initWithConfig:(CleverTapInstanceConfig*)config andCleverTapID:(NSString *)cleverTapID {
     self = [super init];
     if (self) {
-        self.attachToHeaderDelegates = [NSHashTable weakObjectsHashTable];
-        self.switchUserDelegates = [NSHashTable weakObjectsHashTable];
         _config = [config copy];
         if (_config.analyticsOnly) {
             CleverTapLogDebug(_config.logLevel, @"%@ is configured as analytics only!", self);
@@ -460,6 +458,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo];
         
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
+        self.delegateManager = [[CTDelegateManager alloc] init];
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
@@ -476,22 +475,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self addObservers];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithCleverTap:self deviceId:self.deviceInfo.deviceId];
-            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithCleverTap:self deviceInfo:self.deviceInfo impressionManager:impressionManager];
+            self.inAppStore = [[CTInAppStore alloc] initWithAccountId:self.config.accountId deviceInfo:self.deviceInfo];
             
-            // Requires inAppEvaluationManager to be initialized
-            CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithInstance:self deviceId:[_deviceInfo.deviceId copy] evaluationManager:evaluationManager impressionManager:impressionManager];
+            CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager];
             
-            // Requires inAppFCManager to be initialized
-            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self inAppFCManager:inAppFCManager dispatchQueueManager:self.dispatchQueueManager];
+            CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager];
             
-            self.inAppEvaluationManager = evaluationManager;
-            self.inAppDisplayManager = displayManager;
+            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self dispatchQueueManager:self.dispatchQueueManager inAppFCManager:inAppFCManager impressionManager:impressionManager];
+            
+            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceInfo:self.deviceInfo delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager];
+            
             self.inAppFCManager = inAppFCManager;
             self.impressionManager = impressionManager;
-            self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
+            self.inAppEvaluationManager = evaluationManager;
+            self.inAppDisplayManager = displayManager;
             
-            self.pushPrimerManager = [[CTPushPrimerManager alloc]initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
+            self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
             [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
         }
 #endif
@@ -856,9 +855,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     @try {
-        NSDictionary *additionalHeaders = [self invokeAttachToHeaderDelegates];
-        // receiving dictionary header keys will be overridden in case of same keys
-        [header addEntriesFromDictionary:additionalHeaders];
+        NSDictionary *additionalHeaders = [[self delegateManager] notifyAttachToHeaderDelegatesAndCollectKeyPathValues];
+        for (NSString *keyPath in additionalHeaders) {
+            if (![header valueForKeyPath:keyPath]) {
+                [header setValue:additionalHeaders[keyPath] forKeyPath:keyPath];
+            }
+        }
     } @catch (NSException *exception) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach headers from delegates", self);
     }
@@ -951,11 +953,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if (spikyProxyDomain != nil && spikyProxyDomain.length > 0) {
         evtData[@"spikyProxyDomain"] = self.config.spikyProxyDomain;
     }
-    
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-    // Add Local in-app count to event data, used for Push Primer
-    evtData[@"LIAMC"] = @([self.inAppFCManager localInAppCount]);
-#endif
     
     if (self.config.wv_init) {
         evtData[@"wv_init"] = @(YES);
@@ -1786,6 +1783,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)resetSession {
     if ([CTUIUtils runningInsideAppExtension]) return;
     self.appLaunchProcessed = NO;
+    [self resetSessionData];
+    [self clearUTMDetails];
+    [self clearWzrkParams];
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    [[self impressionManager] resetSession];
+#endif
+}
+
+- (void)resetSessionData {
     long lastSessionID = 0;
     long lastSessionEnd = 0;
     if (self.config.isDefaultInstance) {
@@ -1801,11 +1807,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [CTPreferences removeObjectForKey:kSessionId];
     [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config]];
     self.screenCount = 1;
+}
+
+- (void)clearUTMDetails {
     [self clearSource];
     [self clearMedium];
     [self clearCampaign];
-    [self clearWzrkParams];
-    [self invokeSwitchUserDelegatesOnResetSession];
 }
 
 - (void)setSessionId:(long)sessionId {
@@ -2318,7 +2325,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                 [self scheduleQueueFlush];
                 [self handleSendQueueFail];
                 
-                [self invokeBatchSentDelegate:batchWithHeader withSuccess:NO];
+                [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:NO];
             }
             
             if (!success || redirect) {
@@ -2331,74 +2338,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             [self parseResponse:responseData];
             
-            [self invokeBatchSentDelegate:batchWithHeader withSuccess:YES];
+            [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES];
 
             CleverTapLogDebug(self.config.logLevel,@"%@: Successfully sent %lu events", self, (unsigned long)[batch count]);
             
         } @catch (NSException *e) {
             CleverTapLogDebug(self.config.logLevel, @"%@: An error occurred while sending the queue: %@", self, e.debugDescription);
             break;
-        }
-    }
-}
-
-- (void)invokeBatchSentDelegate:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
-    if (self.batchSentDelegate) {
-        if ([self.batchSentDelegate respondsToSelector:@selector(onBatchSent: withSuccess:)]) {
-            [self.batchSentDelegate onBatchSent:batchWithHeader withSuccess:success];
-        }
-        if ([self.batchSentDelegate respondsToSelector:@selector(onAppLaunchedWithSuccess:)]) {
-            // find the event with evtName == "App Launched"
-            for (NSDictionary *event in batchWithHeader) {
-                if ([event[@"evtName"] isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-                    [self.batchSentDelegate onAppLaunchedWithSuccess:success];
-                    return;
-                }
-            }
-        }
-    }
-}
-
-
-- (void)addAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
-    [self.attachToHeaderDelegates addObject:delegate];
-}
-
-- (void)removeAttachToHeaderDelegate:(id<CTAttachToHeaderDelegate>)delegate {
-    [self.attachToHeaderDelegates removeObject:delegate];
-}
-
-- (NSDictionary<NSString *, id> *)invokeAttachToHeaderDelegates {
-    NSMutableDictionary<NSString *, id> *header = [NSMutableDictionary dictionary];
-    for (id<CTAttachToHeaderDelegate> delegate in self.attachToHeaderDelegates) {
-        NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreation];
-        if (additionalHeader) {
-            [header addEntriesFromDictionary:additionalHeader];
-        }
-    }
-    return [header copy];
-}
-
-- (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
-    [self.switchUserDelegates addObject:delegate];
-}
-
-- (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
-    [self.switchUserDelegates addObject:delegate];
-}
-
-- (void)invokeSwitchUserDelegatesOnResetSession {
-    for (id<CTSwitchUserDelegate> delegate in self.switchUserDelegates) {
-        if (delegate && [delegate respondsToSelector:@selector(sessionDidReset)]) {
-            [delegate sessionDidReset];
-        }
-    }
-}
-
-- (void)invokeSwitchUserDelegatesOnDeviceChange:(NSString *)newDeviceId {
-    for (id<CTSwitchUserDelegate> delegate in self.switchUserDelegates) {
-        if (delegate && [delegate respondsToSelector:@selector(deviceIdDidChange:)]) {
-            [delegate deviceIdDidChange:newDeviceId];
         }
     }
 }
@@ -2746,7 +2692,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         
         [self recordDeviceErrors];
-        [self invokeSwitchUserDelegatesOnDeviceChange:self.deviceInfo.deviceId];
+        [[self delegateManager] notifyDelegatesDeviceIdDidChange:self.deviceInfo.deviceId];
         
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
         
