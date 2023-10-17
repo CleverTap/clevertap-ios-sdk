@@ -15,7 +15,7 @@ NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";
 
 @interface CTInAppStore()
-@property (nonatomic, strong) CleverTapInstanceConfig *config;
+@property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTAES *ctAES;
 @end
@@ -24,12 +24,12 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 @synthesize mode = _mode;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo:(CTDeviceInfo *)deviceInfo
+- (instancetype)initWithAccountId:(NSString *)accountId deviceInfo:(CTDeviceInfo *)deviceInfo
 {
     self = [super init];
     if (self) {
-        self.config = config;
-        self.ctAES = [[CTAES alloc]initWithAccountID:self.config.accountId];
+        self.accountId = accountId;
+        self.ctAES = [[CTAES alloc] initWithAccountID:accountId];
     }
     return self;
 }
@@ -53,12 +53,12 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 }
 
 - (void)removeClientSideInApps {
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
     [CTPreferences removeObjectForKey:storageKey];
 }
 
 - (void)removeServerSideInApps {
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
     [CTPreferences removeObjectForKey:storageKey];
 }
 
@@ -89,27 +89,34 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 - (void)storeClientSideInApps:(NSArray *)clientSideInApps {
     NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
     
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
     [CTPreferences putString:encryptedString forKey:storageKey];
 }
 
 - (void)storeServerSideInApps:(NSArray *)serverSideInApps {
     NSString *encryptedString = [self.ctAES getEncryptedBase64String:serverSideInApps];
     
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
     [CTPreferences putString:encryptedString forKey:storageKey];
 }
 
 - (NSMutableArray *)clientSideInApps {
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
-    NSString *encryptedString = [[CTPreferences getObjectForKey:storageKey]mutableCopy];
-    return [self.ctAES getDecryptedObject:encryptedString];
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_CS];
+    NSString *encryptedString = [[CTPreferences getObjectForKey:storageKey] mutableCopy];
+    if (encryptedString) {
+        return [self.ctAES getDecryptedObject:encryptedString];
+    }
+    return [NSMutableArray new];
 }
 
 - (NSMutableArray *)serverSideInApps {
-    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.config.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
-    NSString *encryptedString = [[CTPreferences getObjectForKey:storageKey]mutableCopy];
-    return [self.ctAES getDecryptedObject:encryptedString];
+    NSString *storageKey = [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceInfo.deviceId, CLTAP_PREFS_INAPP_KEY_SS];
+    NSString *encryptedString = [[CTPreferences getObjectForKey:storageKey] mutableCopy];
+    if (encryptedString) {
+        return [self.ctAES getDecryptedObject:encryptedString];
+    }
+    return [NSMutableArray new];
+
 }
 
 @end
