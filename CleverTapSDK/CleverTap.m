@@ -32,6 +32,7 @@
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
 #import "CTDelegateManager.h"
+#import "CTSessionManager.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CleverTapJSInterface.h"
@@ -125,10 +126,6 @@ NSString *const kMultiUserPrefix = @"mt_";
 
 NSString *const kNetworkInfoReportingKey = @"NetworkInfo";
 
-NSString *const kLastSessionPing = @"last_session_ping";
-NSString *const kLastSessionTime = @"lastSessionTime";
-NSString *const kSessionId = @"sessionId";
-
 NSString *const kWR_KEY_PERSONALISATION_ENABLED = @"boolPersonalisationEnabled";
 NSString *const CleverTapProfileDidInitializeNotification = CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION;
 NSString *const CleverTapProfileDidChangeNotification = CLTAP_PROFILE_DID_CHANGE_NOTIFICATION;
@@ -212,26 +209,16 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, assign) BOOL currentUserOptedOut;
 @property (atomic, assign) BOOL offline;
 @property (atomic, assign) BOOL enableNetworkInfoReporting;
-@property (atomic, assign) BOOL appLaunchProcessed;
 @property (atomic, assign) BOOL initialEventsPushed;
 @property (atomic, assign) CLLocationCoordinate2D userSetLocation;
 @property (nonatomic, assign) double lastLocationPingTime;
 
-@property (nonatomic, assign) long minSessionSeconds;
-@property (atomic, assign) long sessionId;
-@property (atomic, assign) int screenCount;
-@property (atomic, assign) BOOL firstSession;
-@property (atomic, assign) BOOL firstRequestInSession;
-@property (atomic, assign) int lastSessionLengthSeconds;
-
-@property (atomic, retain) NSString *source;
-@property (atomic, retain) NSString *medium;
-@property (atomic, retain) NSString *campaign;
 @property (atomic, retain) NSDictionary *wzrkParams;
 @property (atomic, retain) NSDictionary *lastUTMFields;
 @property (atomic, strong) NSString *currentViewControllerName;
 
 @property (atomic, strong) CTValidationResultStack *validationResultStack;
+@property (nonatomic, strong) CTSessionManager *sessionManager;
 
 @property (atomic, weak) id <CleverTapSyncDelegate> syncDelegate;
 @property (atomic, weak) id <CleverTapURLDelegate> urlDelegate;
@@ -269,10 +256,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @implementation CleverTap
 
-@synthesize sessionId=_sessionId;
-@synthesize source=_source;
-@synthesize medium=_medium;
-@synthesize campaign=_campaign;
 @synthesize wzrkParams=_wzrkParams;
 @synthesize syncDelegate=_syncDelegate;
 @synthesize urlDelegate=_urlDelegate;
@@ -280,7 +263,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @synthesize inAppNotificationDelegate=_inAppNotificationDelegate;
 @synthesize userSetLocation=_userSetLocation;
 @synthesize offline=_offline;
-@synthesize firstRequestInSession=_firstRequestInSession;
 @synthesize geofenceLocation=_geofenceLocation;
 @synthesize domainDelegate=_domainDelegate;
 
@@ -463,7 +445,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = emptyLocation;
-        self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
         
         // save config to defaults
         [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
@@ -489,6 +470,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             self.impressionManager = impressionManager;
             self.inAppEvaluationManager = evaluationManager;
             self.inAppDisplayManager = displayManager;
+
+            self.sessionManager = [[CTSessionManager alloc]initWithConfig:self.config impressionManager:self.impressionManager inAppDisplayManager:self.inAppDisplayManager];
             
             self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
             [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
@@ -803,8 +786,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     header[@"ddnd"] = @([self getStoredDeviceToken].length <= 0);
     
-    header[@"frs"] = @(_firstRequestInSession);
-    _firstRequestInSession = NO;
+    header[@"frs"] = @(self.sessionManager.firstRequestInSession);
+    self.sessionManager.firstRequestInSession = NO;
     
     int lastTS = [self getLastRequestTimeStamp];
     header[@"l_ts"] = @(lastTS);
@@ -828,14 +811,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     @try {
         NSMutableDictionary *ref = [NSMutableDictionary new];
-        if (self.source != nil) {
-            ref[@"us"] = self.source;
+        if (self.sessionManager.source != nil) {
+            ref[@"us"] = self.sessionManager.source;
         }
-        if (self.medium != nil) {
-            ref[@"um"] = self.medium;
+        if (self.sessionManager.medium != nil) {
+            ref[@"um"] = self.sessionManager.medium;
         }
-        if (self.campaign != nil) {
-            ref[@"uc"] = self.campaign;
+        if (self.sessionManager.campaign != nil) {
+            ref[@"uc"] = self.sessionManager.campaign;
         }
         if ([ref count] > 0) {
             header[@"ref"] = ref;
@@ -1109,7 +1092,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_appEnteredForeground {
     if ([CTUIUtils runningInsideAppExtension]) return;
-    [self updateSessionStateOnLaunch];
+    [self.sessionManager updateSessionStateOnLaunch];
     if (!self.isAppForeground) {
         [self recordAppLaunched:@"appEnteredForeground"];
         [self scheduleQueueFlush];
@@ -1141,7 +1124,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     @try {
         [self persistOrClearQueues];
-        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+        [self.sessionManager updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
         finishTaskHandler();
     }
     @catch (NSException *exception) {
@@ -1154,7 +1137,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     if ([CTUIUtils runningInsideAppExtension]) return;
     
-    if (self.appLaunchProcessed) {
+    if (self.sessionManager.appLaunchProcessed) {
         CleverTapLogInternal(self.config.logLevel, @"%@: App Launched already processed", self);
         return;
     }
@@ -1162,7 +1145,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     // Load Vars from cache before App Launched
     [self.variables.varCache loadDiffs];
     
-    self.appLaunchProcessed = YES;
+    self.sessionManager.appLaunchProcessed = YES;
     
     if (self.config.disableAppLaunchedEvent) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Dropping App Launched event - reporting disabled in instance configuration", self);
@@ -1438,9 +1421,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     if ([referrer count] == 0) {
         return;
     }
-    [self setSource:referrer[@"us"]];
-    [self setMedium:referrer[@"um"]];
-    [self setCampaign:referrer[@"uc"]];
+    [self.sessionManager setSource:referrer[@"us"]];
+    [self.sessionManager setMedium:referrer[@"um"]];
+    [self.sessionManager setCampaign:referrer[@"uc"]];
     [referrer setValue:@(install) forKey:@"install"];
     self.lastUTMFields = [[NSMutableDictionary alloc] initWithDictionary:referrer];
     [self recordPageEventWithExtras:self.lastUTMFields];
@@ -1728,181 +1711,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self clearFirstRequestTimestamp];
 }
 
-
-#pragma mark - Session and Related Handling
-
-- (void)createSessionIfNeeded {
-    if ([CTUIUtils runningInsideAppExtension] || [self inCurrentSession]) {
-        return;
-    }
-    [self resetSession];
-    [self createSession];
-}
-
-- (void)updateSessionStateOnLaunch {
-    if (![self inCurrentSession]) {
-        [self resetSession];
-        [self createSession];
-        return;
-    }
-    CleverTapLogInternal(self.config.logLevel, @"%@: have current session: %lu", self, self.sessionId);
-    long now = (long) [[NSDate date] timeIntervalSince1970];
-    if (![self isSessionTimedOut:now]) {
-        [self updateSessionTime:now];
-        return;
-    }
-    CleverTapLogInternal(self.config.logLevel, @"%@: Session timeout reached", self);
-    [self resetSession];
-    [self createSession];
-}
-
-- (BOOL)inCurrentSession {
-    return self.sessionId > 0;
-}
-
-- (BOOL)isSessionTimedOut:(long)currentTS {
-    long lastSessionTime = [self lastSessionTime];
-    return (lastSessionTime > 0 && (currentTS - lastSessionTime > self.minSessionSeconds));
-}
-
-- (long)lastSessionTime {
-    return (long)[CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config] withResetValue:0];
-}
-
-- (void)updateSessionTime:(long)ts {
-    if (![self inCurrentSession]) return;
-    CleverTapLogInternal(self.config.logLevel, @"%@: updating session time: %lu", self, ts);
-    [CTPreferences putInt:ts forKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config]];
-}
-
-- (void)createFirstRequestInSession {
-    self.firstRequestInSession = YES;
-    [CTValidator setDiscardedEvents:nil];
-}
-
-- (void)resetSession {
-    if ([CTUIUtils runningInsideAppExtension]) return;
-    self.appLaunchProcessed = NO;
-    [self resetSessionData];
-    [self clearUTMDetails];
-    [self clearWzrkParams];
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-    [[self impressionManager] resetSession];
-#endif
-}
-
-- (void)resetSessionData {
-    long lastSessionID = 0;
-    long lastSessionEnd = 0;
-    if (self.config.isDefaultInstance) {
-        lastSessionID = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config] withResetValue:[CTPreferences getIntForKey:kSessionId withResetValue:0]];
-        lastSessionEnd = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config] withResetValue:[CTPreferences getIntForKey:kLastSessionPing withResetValue:0]];
-    } else {
-        lastSessionID = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config] withResetValue:0];
-        lastSessionEnd = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: self.config] withResetValue:0];
-    }
-    self.lastSessionLengthSeconds = (lastSessionID > 0 && lastSessionEnd > 0) ? (int)(lastSessionEnd - lastSessionID) : 0;
-    self.sessionId = 0;
-    [self updateSessionTime:0];
-    [CTPreferences removeObjectForKey:kSessionId];
-    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config]];
-    self.screenCount = 1;
-}
-
-- (void)clearUTMDetails {
-    [self clearSource];
-    [self clearMedium];
-    [self clearCampaign];
-}
-
-- (void)setSessionId:(long)sessionId {
-    _sessionId = sessionId;
-    [CTPreferences putInt:self.sessionId forKey:[CTPreferences storageKeyWithSuffix:kSessionId config: self.config]];
-}
-
-- (long)sessionId {
-    return _sessionId;
-}
-
-- (void)createSession {
-    self.sessionId = (long) [[NSDate date] timeIntervalSince1970];
-    [self updateSessionTime:self.sessionId];
-    [self createFirstRequestInSession];
-    if (self.config.isDefaultInstance) {
-        self.firstSession = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:@"firstTime" config: self.config] withResetValue:[CTPreferences getIntForKey:@"firstTime" withResetValue:0]] == 0;
-    } else {
-        self.firstSession = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:@"firstTime" config: self.config] withResetValue:0] == 0;
-    }
-    [CTPreferences putInt:1 forKey:[CTPreferences storageKeyWithSuffix:@"firstTime" config: self.config]];
-    CleverTapLogInternal(self.config.logLevel, @"%@: session created with ID: %lu", self, self.sessionId);
-    CleverTapLogInternal(self.config.logLevel, @"%@: previous session length: %d seconds", self, self.lastSessionLengthSeconds);
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-    if (![CTUIUtils runningInsideAppExtension]) {
-        [self.inAppDisplayManager clearInApps];
-    }
-#endif
-}
-
-- (void)setFirstRequestInSession:(BOOL)firstRequestInSession {
-    _firstRequestInSession = firstRequestInSession;
-}
-
-- (BOOL)firstRequestInSession {
-    return _firstRequestInSession;
-}
-
-- (NSString*)source {
-    return _source;
-}
-// only set if not already set for this session
-- (void)setSource:(NSString *)source {
-    if (_source == nil) {
-        _source = source;
-    }
-}
-- (void)clearSource {
-    _source = nil;
-}
-
-- (NSString*)medium{
-    return _medium;
-}
-// only set them if not already set during the session
-- (void)setMedium:(NSString *)medium {
-    if (_medium == nil) {
-        _medium = medium;
-    }
-}
-- (void)clearMedium {
-    _medium = nil;
-}
-
-- (NSString*)campaign {
-    return _campaign;
-}
-// only set them if not already set during the session
-- (void)setCampaign:(NSString *)campaign {
-    if (_campaign == nil) {
-        _campaign = campaign;
-    }
-}
-- (void)clearCampaign {
-    _campaign = nil;
-}
-
-- (NSDictionary*)wzrkParams{
-    return _wzrkParams;
-}
-// only set them if not already set during the session
-- (void)setWzrkParams:(NSDictionary *)params {
-    if (_wzrkParams == nil) {
-        _wzrkParams = params;
-    }
-}
-- (void)clearWzrkParams {
-    _wzrkParams = nil;
-}
-
 #pragma mark - Queues/Persistence/Dispatch Handling
 
 - (BOOL)shouldDeferProcessingEvent: (NSDictionary *)event withType:(CleverTapEventType)type {
@@ -1911,7 +1719,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return NO;
     }
     
-    return (type == CleverTapEventTypeRaised && !self.appLaunchProcessed);
+    return (type == CleverTapEventTypeRaised && !self.sessionManager.appLaunchProcessed);
 }
 
 - (BOOL)_shouldDropEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
@@ -1955,10 +1763,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self processEvent:event withType:type];
         }];
     } else {
-        [self createSessionIfNeeded];
+        [self.sessionManager createSessionIfNeeded];
         [self pushInitialEventsIfNeeded];
         [self.dispatchQueueManager runSerialAsync:^{
-            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+            [self.sessionManager updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
             [self processEvent:event withType:type];
         }];
     }
@@ -2012,11 +1820,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         mutableEvent[@"type"] = type;
         mutableEvent[@"ep"] = @((int) [[NSDate date] timeIntervalSince1970]);
-        mutableEvent[@"s"] = @(self.sessionId);
-        int screenCount = self.screenCount == 0 ? 1 : self.screenCount;
+        mutableEvent[@"s"] = @(self.sessionManager.sessionId);
+        int screenCount = self.sessionManager.screenCount == 0 ? 1 : self.sessionManager.screenCount;
         mutableEvent[@"pg"] = @(screenCount);
-        mutableEvent[@"lsl"] = @(self.lastSessionLengthSeconds);
-        mutableEvent[@"f"] = @(self.firstSession);
+        mutableEvent[@"lsl"] = @(self.sessionManager.lastSessionLengthSeconds);
+        mutableEvent[@"f"] = @(self.sessionManager.firstSession);
         mutableEvent[@"n"] = self.currentViewControllerName ? self.currentViewControllerName : @"_bg";
         
         if (eventType == CleverTapEventTypePing && _geofenceLocation) {
@@ -2681,7 +2489,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // clear old profile data
         [self.localDataStore changeUser];
         
-        [self resetSession];
+        [self.sessionManager resetSession];
         
         if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
@@ -3116,11 +2924,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     CleverTapLogInternal(self.config.logLevel, @"%@: screen changed: %@", self, screenName);
-    if (self.currentViewControllerName == nil && self.screenCount == 1) {
-        self.screenCount--;
+    if (self.currentViewControllerName == nil && self.sessionManager.screenCount == 1) {
+        self.sessionManager.screenCount--;
     }
     self.currentViewControllerName = screenName;
-    self.screenCount++;
+    self.sessionManager.screenCount++;
     
     [self recordPageEventWithExtras:nil];
 }
@@ -3196,15 +3004,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #pragma mark - Session API
 
 - (NSTimeInterval)sessionGetTimeElapsed {
-    long current = self.sessionId;
+    long current = self.sessionManager.sessionId;
     return (int) [[[NSDate alloc] init] timeIntervalSince1970] - current;
 }
 
 - (CleverTapUTMDetail *)sessionGetUTMDetails {
     CleverTapUTMDetail *d = [[CleverTapUTMDetail alloc] init];
-    d.source = self.source;
-    d.medium = self.medium;
-    d.campaign = self.campaign;
+    d.source = self.sessionManager.source;
+    d.medium = self.sessionManager.medium;
+    d.campaign = self.sessionManager.campaign;
     return d;
 }
 
@@ -3213,7 +3021,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (int)userGetScreenCount {
-    return self.screenCount;
+    return self.sessionManager.screenCount;
 }
 
 - (NSTimeInterval)userGetPreviousVisitTime {

@@ -4,6 +4,10 @@ NSString *const kCTApiDomain = @"clevertap-prod.com";
 NSString *const kCTNotifViewedApiDomain = @"spiky.clevertap-prod.com";
 NSString *const kHANDSHAKE_URL = @"https://clevertap-prod.com/hello";
 
+NSString *const kLastSessionPing = @"last_session_ping";
+NSString *const kLastSessionTime = @"lastSessionTime";
+NSString *const kSessionId = @"sessionId";
+
 NSString *CT_KIND_INT = @"integer";
 NSString *CT_KIND_FLOAT = @"float";
 NSString *CT_KIND_STRING = @"string";

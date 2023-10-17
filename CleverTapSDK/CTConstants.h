@@ -4,6 +4,10 @@ extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
 extern NSString *const kHANDSHAKE_URL;
 
+extern NSString *const kLastSessionPing;
+extern NSString *const kLastSessionTime;
+extern NSString *const kSessionId;
+
 #define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogInternal(level, fmt, ...) if (level > 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }

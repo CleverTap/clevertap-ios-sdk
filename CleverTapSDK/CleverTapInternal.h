@@ -3,6 +3,7 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppStore.h"
+#import "CTSessionManager.h"
 
 @class CTInAppDisplayManager;
 
@@ -24,6 +25,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 @property (nonatomic, strong, readonly) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, strong, readonly) CTImpressionManager * _Nullable impressionManager;
 @property (nonatomic, assign, readonly) BOOL isAppForeground;
+@property (nonatomic, strong, readonly) CTDeviceInfo * _Nonnull deviceInfo;
+@property (atomic, strong, readonly) CTSessionManager * _Nonnull sessionManager;
 
 + (NSMutableDictionary<NSString *, CleverTap *> * _Nullable)getInstances;
 

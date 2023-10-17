@@ -269,7 +269,13 @@
 		4EAF05022A495DD5009D9D61 /* CleverTapInstanceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F154E27691CA0009387AE /* CleverTapInstanceTests.m */; };
 		4EB4C8BE2AAD91AC00B7F045 /* CTTriggerEvaluator.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EB4C8BC2AAD91AC00B7F045 /* CTTriggerEvaluator.h */; };
 		4EB4C8BF2AAD91AC00B7F045 /* CTTriggerEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */; };
+		4ECD88312ADC8A05003885CE /* CTSessionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */; };
 		4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */; };
+		4EEF4A3A2ADD05B600F090EB /* CTSessionManager+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EEF4A392ADD05B600F090EB /* CTSessionManager+Tests.m */; };
+		4EF0D5452AD84BCA0044C48F /* CTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */; };
+		4EF0D5462AD84BCA0044C48F /* CTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */; };
+		4EF0D5472AD84BCA0044C48F /* CTSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF0D5442AD84BCA0044C48F /* CTSessionManager.m */; };
+		4EF0D5482AD84BCA0044C48F /* CTSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF0D5442AD84BCA0044C48F /* CTSessionManager.m */; };
 		4EF1CF9E29B076A300E3CB6A /* CTVarCache+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF1CF9D29B076A300E3CB6A /* CTVarCache+Tests.m */; };
 		4EFC642B2AB44CF900F01414 /* CTLimitsMatcherTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EFC642A2AB44CF900F01414 /* CTLimitsMatcherTest.m */; };
 		55BC2486DE562AE8CF4F77C4 /* libPods-shared-CleverTapSDKTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EC3B716CFCA79A3703457CEC /* libPods-shared-CleverTapSDKTests.a */; };
@@ -745,8 +751,13 @@
 		4EB4C8BC2AAD91AC00B7F045 /* CTTriggerEvaluator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTTriggerEvaluator.h; sourceTree = "<group>"; };
 		4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTriggerEvaluator.m; sourceTree = "<group>"; };
 		4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityManagementTests.m; sourceTree = "<group>"; };
+		4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSessionManagerTests.m; sourceTree = "<group>"; };
 		4EDCDE4D278AC4DF0065E699 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTVarCacheTest.m; sourceTree = "<group>"; };
+		4EEF4A382ADD05B600F090EB /* CTSessionManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTSessionManager+Tests.h"; sourceTree = "<group>"; };
+		4EEF4A392ADD05B600F090EB /* CTSessionManager+Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTSessionManager+Tests.m"; sourceTree = "<group>"; };
+		4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSessionManager.h; sourceTree = "<group>"; };
+		4EF0D5442AD84BCA0044C48F /* CTSessionManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSessionManager.m; sourceTree = "<group>"; };
 		4EF1CF9C29B076A300E3CB6A /* CTVarCache+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTVarCache+Tests.h"; sourceTree = "<group>"; };
 		4EF1CF9D29B076A300E3CB6A /* CTVarCache+Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTVarCache+Tests.m"; sourceTree = "<group>"; };
 		4EFC642A2AB44CF900F01414 /* CTLimitsMatcherTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLimitsMatcherTest.m; sourceTree = "<group>"; };
@@ -1232,6 +1243,15 @@
 			path = Swizzling;
 			sourceTree = "<group>";
 		};
+		4EF0D5422AD84BAA0044C48F /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */,
+				4EF0D5442AD84BCA0044C48F /* CTSessionManager.m */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
 		6A3EBD2F2AA0701D00CE97D4 /* Matchers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1300,6 +1320,8 @@
 				D02AC2E8276402CF0031C1BE /* CleverTap+Tests.m */,
 				4E2BFB9A2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.h */,
 				4E2BFB9B2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m */,
+				4EEF4A382ADD05B600F090EB /* CTSessionManager+Tests.h */,
+				4EEF4A392ADD05B600F090EB /* CTSessionManager+Tests.m */,
 				D02AC2DA276044F70031C1BE /* CleverTapSDKTests.m */,
 				4E1F154E27691CA0009387AE /* CleverTapInstanceTests.m */,
 				4E1F155027692042009387AE /* EventTests.m */,
@@ -1314,6 +1336,7 @@
 				32394C2629FA278C00956058 /* CTUriHelperTest.m */,
 				6A59D20C2A334B8500531F9D /* NSDictionaryExtensionsTest.m */,
 				6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */,
+				4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -1411,6 +1434,7 @@
 				4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */,
 				4E838C4429A0C94B00ED0875 /* CleverTap+CTVar.h */,
 				4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */,
+				4EF0D5422AD84BAA0044C48F /* Session */,
 				4E8B81632AD2ADAE00714BB4 /* Swizzling */,
 				4E41FD88294F43E70001FBED /* ProductExperiences */,
 				D0BD7598241760A30006EE55 /* ProductConfig */,
@@ -1630,6 +1654,7 @@
 				4EA64A27296C115E001D9B22 /* CTRequestFactory.h in Headers */,
 				6BF5A5992ACEE22100CDED20 /* CleverTapJSInterfacePrivate.h in Headers */,
 				D014B8F420E2FACA001E0780 /* CTSwizzle.h in Headers */,
+				4EF0D5462AD84BCA0044C48F /* CTSessionManager.h in Headers */,
 				6A775C3429BE78C7007790E0 /* CTVariables.h in Headers */,
 				D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */,
 				4E41FD99294F46510001FBED /* CTVarCache.h in Headers */,
@@ -1673,6 +1698,7 @@
 				071EB4D3217F6427008F0FAB /* CTAVPlayerViewController.h in Headers */,
 				07B9454A219EA34300D4C542 /* CTUserMO+CoreDataProperties.h in Headers */,
 				6B535FB62AD56C60002A2663 /* CTDelegateManager.h in Headers */,
+				4EF0D5452AD84BCA0044C48F /* CTSessionManager.h in Headers */,
 				D0213D4C207D905800FE5740 /* CleverTapSyncDelegate.h in Headers */,
 				07B94546219EA34300D4C542 /* CTMessageMO+CoreDataProperties.h in Headers */,
 				D01651B22097B42C00660178 /* CTValidator.h in Headers */,
@@ -2126,6 +2152,7 @@
 				4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
 				4E25E3CE278887A80008C888 /* CTIdentityRepoFactory.m in Sources */,
 				49C189A0243B08860003E4D4 /* CTProductConfigController.m in Sources */,
+				4EF0D5482AD84BCA0044C48F /* CTSessionManager.m in Sources */,
 				D014B8F720E2FADA001E0780 /* CTConstants.m in Sources */,
 				D014B90720E2FB67001E0780 /* CTKnownProfileFields.m in Sources */,
 				D014B8E020E2F9E6001E0780 /* CleverTap.m in Sources */,
@@ -2182,6 +2209,8 @@
 				6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */,
 				4EF1CF9E29B076A300E3CB6A /* CTVarCache+Tests.m in Sources */,
 				32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */,
+				4ECD88312ADC8A05003885CE /* CTSessionManagerTests.m in Sources */,
+				4EEF4A3A2ADD05B600F090EB /* CTSessionManager+Tests.m in Sources */,
 				6A4427C52AA6515A0098866F /* CTTriggersMatcherTest.m in Sources */,
 				4E2CF1442AC56D8F00441E8B /* CTEncryptionTests.m in Sources */,
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
@@ -2316,6 +2345,7 @@
 				4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */,
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
 				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
+				4EF0D5472AD84BCA0044C48F /* CTSessionManager.m in Sources */,
 				4EB4C8BF2AAD91AC00B7F045 /* CTTriggerEvaluator.m in Sources */,
 				0701E9652372DE9C0034AAC2 /* CleverTapDisplayUnit.m in Sources */,
 				072F9E3E21B1368000BC6313 /* CTInboxIconMessageCell.m in Sources */,
