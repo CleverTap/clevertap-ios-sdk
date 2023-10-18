@@ -16,7 +16,7 @@
 #import <OCMock/OCMock.h>
 
 @interface CTSessionManagerTests : XCTestCase
-@property (nonatomic, strong) CTSessionManager *classObject;
+//@property (nonatomic, strong) CTSessionManager *classObject;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CleverTap *instance;
 @end
@@ -34,39 +34,38 @@
     CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"test" deviceId:@"test" delegateManager:delegateManager];
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config delegateManager:[CTDelegateManager new] deviceId:@"test" impressionManager:impressionManager];
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:_instance dispatchQueueManager:[CTDispatchQueueManager new] inAppFCManager:inAppFCManager impressionManager:impressionManager];
-//    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:@"test" deviceInfo:_instance.deviceInfo delegateManager:delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager];
     
-    
-    _classObject = [[CTSessionManager alloc]initWithConfig:_config impressionManager:impressionManager inAppDisplayManager:displayManager];
+//    _classObject = [[CTSessionManager alloc]initWithConfig:_config impressionManager:impressionManager inAppDisplayManager:displayManager];
+//    [_classObject createSession];
+    [_instance.sessionManager createSession];
 }
 
 - (void)tearDown {
-    [_classObject resetSession];
-    _classObject = nil;
+    [_instance.sessionManager resetSession];
+//    _classObject = nil;
     _config = nil;
     _instance = nil;
 }
 
 - (void)testSessionId {
-    [_classObject createSession];
-    XCTAssertGreaterThan(_classObject.sessionId, 0);
+    XCTAssertGreaterThan(_instance.sessionManager.sessionId, 0);
 }
 
 - (void)testSessionTime {
-    [_classObject createSession];
     long lastSessionEnd = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLastSessionTime config: _config] withResetValue:0];
     XCTAssertGreaterThan(lastSessionEnd, 0);
 }
 
 - (void)testFirstRequestInSession {
-    [_classObject createSession];
-    XCTAssertTrue(_classObject.firstRequestInSession);
+    XCTAssertTrue(_instance.sessionManager.firstRequestInSession);
 }
 
-- (void)testScreenCount {
-    int screenCount = _instance.sessionManager.screenCount;
-    [_instance recordScreenView:@"test"];
-    XCTAssertEqual(screenCount + 1, _instance.sessionManager.screenCount);
+- (void)testSourceMediumCampaign {
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"install_referrer_status" config: self.config]];
+    [_instance pushInstallReferrerSource:@"source" medium:@"medium" campaign:@"campaign"];
+    XCTAssertEqualObjects(_instance.sessionManager.source, @"source");
+    XCTAssertEqualObjects(_instance.sessionManager.medium, @"medium");
+    XCTAssertEqualObjects(_instance.sessionManager.campaign, @"campaign");
 }
 
 @end
