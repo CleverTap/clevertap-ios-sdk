@@ -66,7 +66,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
-        self.inAppFCManager = instance.inAppFCManager;
+        self.inAppFCManager = inAppFCManager;
     }
     return self;
 }
