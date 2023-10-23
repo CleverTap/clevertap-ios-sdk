@@ -132,7 +132,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_suspendInAppNotifications {
-    if ([[self class] runningInsideAppExtension]) {
+    if ([CTUIUtils runningInsideAppExtension]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: suspendInAppNotifications is a no-op in an app extension.", self);
         return;
     }
@@ -143,7 +143,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_discardInAppNotifications {
-    if ([[self class] runningInsideAppExtension]) {
+    if ([CTUIUtils runningInsideAppExtension]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
         return;
     }
