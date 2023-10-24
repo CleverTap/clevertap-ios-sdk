@@ -38,7 +38,7 @@
         // Parse CS notifications
         NSArray *csInAppNotifs = jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY];
         if (csInAppNotifs) {
-            [self.inAppStore storeServerSideInApps:csInAppNotifs];
+            [self.inAppStore storeClientSideInApps:csInAppNotifs];
         }
         
         // Parse in-app Mode
