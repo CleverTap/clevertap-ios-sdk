@@ -336,6 +336,13 @@
 		6B535FB72AD56C60002A2663 /* CTDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTDelegateManager.h */; };
 		6B535FB82AD56C60002A2663 /* CTDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTDelegateManager.m */; };
 		6B535FB92AD56C60002A2663 /* CTDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTDelegateManager.m */; };
+		6BEEC2C62AE9B02100BD4EC5 /* CTSystemClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */; };
+		6BEEC2C72AE9B02100BD4EC5 /* CTSystemClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */; };
+		6BEEC2C82AE9B02100BD4EC5 /* CTSystemClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */; };
+		6BEEC2C92AE9B02100BD4EC5 /* CTSystemClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */; };
+		6BEEC2CB2AEBDF5800BD4EC5 /* CTClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2CA2AEBDF5800BD4EC5 /* CTClock.h */; };
+		6BEEC2CC2AEBDF5800BD4EC5 /* CTClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2CA2AEBDF5800BD4EC5 /* CTClock.h */; };
+		6BEEC2CE2AEC49F100BD4EC5 /* CTImpressionManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BEEC2CD2AEC49F100BD4EC5 /* CTImpressionManagerTest.m */; };
 		6BF5A5912ACC854800CDED20 /* CTInAppDisplayManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF5A58F2ACC854800CDED20 /* CTInAppDisplayManager.h */; };
 		6BF5A5932ACC854800CDED20 /* CTInAppDisplayManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A5902ACC854800CDED20 /* CTInAppDisplayManager.m */; };
 		6BF5A5952ACEA54800CDED20 /* CTInAppDisplayManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A5902ACC854800CDED20 /* CTInAppDisplayManager.m */; };
@@ -810,6 +817,10 @@
 		6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCT.m; sourceTree = "<group>"; };
 		6B535FB42AD56C60002A2663 /* CTDelegateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDelegateManager.h; sourceTree = "<group>"; };
 		6B535FB52AD56C60002A2663 /* CTDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDelegateManager.m; sourceTree = "<group>"; };
+		6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemClock.h; sourceTree = "<group>"; };
+		6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemClock.m; sourceTree = "<group>"; };
+		6BEEC2CA2AEBDF5800BD4EC5 /* CTClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTClock.h; sourceTree = "<group>"; };
+		6BEEC2CD2AEC49F100BD4EC5 /* CTImpressionManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImpressionManagerTest.m; sourceTree = "<group>"; };
 		6BF5A58F2ACC854800CDED20 /* CTInAppDisplayManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayManager.h; sourceTree = "<group>"; };
 		6BF5A5902ACC854800CDED20 /* CTInAppDisplayManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppDisplayManager.m; sourceTree = "<group>"; };
 		6BF5A5972ACEE22100CDED20 /* CleverTapJSInterfacePrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapJSInterfacePrivate.h; sourceTree = "<group>"; };
@@ -1284,6 +1295,7 @@
 				4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */,
 				4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */,
 				6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */,
+				6BEEC2CD2AEC49F100BD4EC5 /* CTImpressionManagerTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -1546,6 +1558,9 @@
 				6A6591642AC70D07005FDE57 /* CTAttachToBatchHeaderDelegate.h */,
 				6B535FB42AD56C60002A2663 /* CTDelegateManager.h */,
 				6B535FB52AD56C60002A2663 /* CTDelegateManager.m */,
+				6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */,
+				6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */,
+				6BEEC2CA2AEBDF5800BD4EC5 /* CTClock.h */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -1645,6 +1660,7 @@
 				49E2B18824237DCB00AD704B /* CleverTapFeatureFlagsPrivate.h in Headers */,
 				071EB525217F6C8F008F0FAB /* CTUIUtils.h in Headers */,
 				D014B8FE20E2FB3B001E0780 /* CTLogger.h in Headers */,
+				6BEEC2CC2AEBDF5800BD4EC5 /* CTClock.h in Headers */,
 				4EA64A2D296C1190001D9B22 /* CTRequest.h in Headers */,
 				D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */,
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
@@ -1657,6 +1673,7 @@
 				4EF0D5462AD84BCA0044C48F /* CTSessionManager.h in Headers */,
 				6A775C3429BE78C7007790E0 /* CTVariables.h in Headers */,
 				D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */,
+				6BEEC2C72AE9B02100BD4EC5 /* CTSystemClock.h in Headers */,
 				4E41FD99294F46510001FBED /* CTVarCache.h in Headers */,
 				D014B8F220E2FABC001E0780 /* CTDeviceInfo.h in Headers */,
 				D014B90A20E2FB74001E0780 /* CTProfileBuilder.h in Headers */,
@@ -1705,6 +1722,7 @@
 				6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */,
 				D0A84ADC209136D500191B1F /* CTLogger.h in Headers */,
 				4E41FD98294F46510001FBED /* CTVarCache.h in Headers */,
+				6BEEC2CB2AEBDF5800BD4EC5 /* CTClock.h in Headers */,
 				4E8B816B2AD2B2FD00714BB4 /* CleverTapInternal.h in Headers */,
 				07B94541219EA34300D4C542 /* CleverTapInboxViewControllerPrivate.h in Headers */,
 				071EB4EE217F6427008F0FAB /* CTAlertViewController.h in Headers */,
@@ -1757,6 +1775,7 @@
 				D032F3A82093EC9700F98D74 /* CTValidationResult.h in Headers */,
 				0796FB6921AE5B6300FC380D /* CTCarouselImageMessageCell.h in Headers */,
 				6A3EBD2D2AA06EB300CE97D4 /* CTInAppEvaluationManager.h in Headers */,
+				6BEEC2C62AE9B02100BD4EC5 /* CTSystemClock.h in Headers */,
 				D020C928209006AD0073F61E /* CTUriHelper.h in Headers */,
 				D0596EFA208A6A9000A80753 /* CTSwizzle.h in Headers */,
 				071EB508217F6427008F0FAB /* CTBaseHeaderFooterViewController.h in Headers */,
@@ -2147,6 +2166,7 @@
 				D014B90120E2FB4C001E0780 /* CTValidationResult.m in Sources */,
 				4E25E3CB278887A80008C888 /* CTLegacyIdentityRepo.m in Sources */,
 				4E25E3CA278887A80008C888 /* CTFlexibleIdentityRepo.m in Sources */,
+				6BEEC2C92AE9B02100BD4EC5 /* CTSystemClock.m in Sources */,
 				D014B91F20E2FBDF001E0780 /* CTPinnedNSURLSessionDelegate.m in Sources */,
 				D014B90520E2FB5F001E0780 /* CTValidator.m in Sources */,
 				4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
@@ -2201,6 +2221,7 @@
 				32394C2129FA264B00956058 /* CTPreferencesTest.m in Sources */,
 				32394C1F29FA251E00956058 /* CTEventBuilderTest.m in Sources */,
 				D02AC2EB2767F4590031C1BE /* BaseTestCase.m in Sources */,
+				6BEEC2CE2AEC49F100BD4EC5 /* CTImpressionManagerTest.m in Sources */,
 				6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */,
 				4EF1CF9E29B076A300E3CB6A /* CTVarCache+Tests.m in Sources */,
 				4E2BFB9C2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m in Sources */,
@@ -2288,6 +2309,7 @@
 				6BF5A59E2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m in Sources */,
 				072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */,
 				6A4427D12AB9D8C30098866F /* CTInAppFCManager+Legacy.m in Sources */,
+				6BEEC2C82AE9B02100BD4EC5 /* CTSystemClock.m in Sources */,
 				6A3EBD332AA0703A00CE97D4 /* CTEventAdapter.m in Sources */,
 				4E8B81712AD2BB8A00714BB4 /* CTDispatchQueueManager.m in Sources */,
 				0796FB6A21AE5B6300FC380D /* CTCarouselImageMessageCell.m in Sources */,

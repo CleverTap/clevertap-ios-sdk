@@ -10,6 +10,7 @@
 #import "CTPreferences.h"
 #import "CTPushPrimerManager.h"
 #import "CleverTapInternal.h"
+#import "CTSystemClock.h"
 
 @interface CTImpressionManager()
 
@@ -19,17 +20,22 @@
 @property (nonatomic, strong) NSMutableDictionary *sessionImpressions;
 @property (nonatomic, strong) NSMutableDictionary *impressions;
 
-@property NSLocale *locale;
+@property (nonatomic, strong) NSLocale *locale;
+@property (nonatomic, strong) id <CTClock> clock;
 
 @end
 
 @implementation CTImpressionManager
-
+// TODO: abstract the current timestamp
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTDelegateManager *)delegateManager {
     if (self = [super init]) {
-        return [self initWithAccountId:accountId deviceId:deviceId delegateManager:delegateManager locale:[NSLocale currentLocale]];
+        return [self initWithAccountId:accountId
+                              deviceId:deviceId
+                       delegateManager:delegateManager
+                                 clock:[[CTSystemClock alloc] init]
+                                locale:[NSLocale currentLocale]];
     }
     return self;
 }
@@ -37,10 +43,13 @@
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTDelegateManager *)delegateManager
+                            clock:(id <CTClock>)clock
                            locale:(NSLocale *)locale {
     if (self = [super init]) {
         self.accountId = accountId;
         self.deviceId = deviceId;
+        
+        self.clock = clock;
         self.locale = locale;
         
         self.sessionImpressions = [NSMutableDictionary new];
@@ -64,7 +73,7 @@
         self.sessionImpressions[campaignId] = @(existing);
     }
     
-    NSNumber *now = @([[NSDate date] timeIntervalSince1970]);
+    NSNumber *now = [self.clock timeIntervalSince1970];
     [self addImpression:campaignId timestamp:now];
 }
 
@@ -81,28 +90,28 @@
 }
 
 - (NSInteger)perSecond:(NSString *)campaignId seconds:(NSInteger)seconds {
-    NSNumber *now = @([[NSDate date] timeIntervalSince1970]);
+    NSNumber *now = [self.clock timeIntervalSince1970];
     NSInteger timestampStart = [now integerValue] - seconds;
     return [self getImpressionCount:campaignId timestampStart:timestampStart];
 }
 
 - (NSInteger)perMinute:(NSString *)campaignId minutes:(NSInteger)minutes {
-    NSInteger now = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    NSInteger now = [[self.clock timeIntervalSince1970] integerValue];
     NSInteger offsetSeconds = minutes * 60;
     return [self getImpressionCount:campaignId timestampStart:now - offsetSeconds];
 }
 
 - (NSInteger)perHour:(NSString *)campaignId hours:(NSInteger)hours {
-    NSInteger now = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    NSInteger now = [[self.clock timeIntervalSince1970] integerValue];
     NSInteger offsetSeconds = hours * 60 * 60;
     return [self getImpressionCount:campaignId timestampStart:now - offsetSeconds];
 }
 
 - (NSInteger)perDay:(NSString *)campaignId days:(NSInteger)days {
     NSCalendar *calendar = [NSCalendar currentCalendar];
-    calendar.locale = self.locale;
+    [calendar setLocale:self.locale];
     
-    NSDate *currentDate = [NSDate date];
+    NSDate *currentDate = [self.clock currentDate];
     
     NSDateComponents *components = [calendar components:NSCalendarUnitDay fromDate:currentDate];
     components.day -= days;
@@ -115,12 +124,12 @@
 
 - (NSInteger)perWeek:(NSString *)campaignId weeks:(NSInteger)weeks {
     NSCalendar *calendar = [NSCalendar currentCalendar];
-    calendar.locale = self.locale;
+    [calendar setLocale:self.locale];
     
     // Get the first weekday based on the user's locale
     NSInteger firstWeekday = [calendar firstWeekday];
     
-    NSDate *currentDate = [NSDate date];
+    NSDate *currentDate = [self.clock currentDate];
     
     NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekday | NSCalendarUnitDay | NSCalendarUnitWeekOfYear fromDate:currentDate];
     
@@ -203,6 +212,7 @@
 }
 
 - (void)removeImpressions:(NSString *)campaignId {
+    [self.impressions removeObjectForKey:campaignId];
     [CTPreferences removeObjectForKey:[self getImpressionKey:campaignId]];
 }
 

@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "CTSwitchUserDelegate.h"
 #import "CTDelegateManager.h"
-@class CleverTap;
+#import "CTClock.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTImpressionManager : NSObject <CTSwitchUserDelegate>
@@ -21,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTDelegateManager *)delegateManager
+                            clock:(id <CTClock>)clock
                            locale:(NSLocale *)locale;
 
 - (void)recordImpression:(NSString *)campaignId;
