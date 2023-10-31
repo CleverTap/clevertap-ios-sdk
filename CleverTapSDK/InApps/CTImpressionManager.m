@@ -19,6 +19,7 @@
 
 @property (nonatomic, strong) NSMutableDictionary *sessionImpressions;
 @property (nonatomic, strong) NSMutableDictionary *impressions;
+@property (nonatomic, assign) int sessionImpressionsTotal;
 
 @property (nonatomic, strong) NSLocale *locale;
 @property (nonatomic, strong) id <CTClock> clock;
@@ -54,6 +55,7 @@
         
         self.sessionImpressions = [NSMutableDictionary new];
         self.impressions = [NSMutableDictionary new];
+        self.sessionImpressionsTotal = 0;
         
         [delegateManager addSwitchUserDelegate:self];
     }
@@ -66,6 +68,7 @@
         return;
     }
     
+    self.sessionImpressionsTotal++;
     // Record session impressions
     @synchronized (self.sessionImpressions) {
         int existing = [self.sessionImpressions[campaignId] intValue];
@@ -78,9 +81,7 @@
 }
 
 - (NSInteger)perSessionTotal {
-    @synchronized (self.sessionImpressions) {
-        return [self.sessionImpressions count];
-    }
+    return self.sessionImpressionsTotal;
 }
 
 - (NSInteger)perSession:(NSString *)campaignId {
@@ -108,16 +109,21 @@
 }
 
 - (NSInteger)perDay:(NSString *)campaignId days:(NSInteger)days {
+    
     NSCalendar *calendar = [NSCalendar currentCalendar];
     [calendar setLocale:self.locale];
-    
+
     NSDate *currentDate = [self.clock currentDate];
     
-    NSDateComponents *components = [calendar components:NSCalendarUnitDay fromDate:currentDate];
-    components.day -= days;
+    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:currentDate];
+        [components setHour:0];
+        [components setMinute:0];
+        [components setSecond:0];
+        [components setNanosecond:0];
+        [components setDay:components.day - (days - 1)];
 
-    NSDate *startOfWeek = [calendar dateFromComponents:components];
-    NSTimeInterval timestamp = [startOfWeek timeIntervalSince1970];
+    NSDate *startOfDay = [calendar dateFromComponents:components];
+    NSTimeInterval timestamp = [startOfDay timeIntervalSince1970];
     
     return [self getImpressionCount:campaignId timestampStart:(NSInteger)timestamp];
 }
@@ -131,20 +137,21 @@
     
     NSDate *currentDate = [self.clock currentDate];
     
-    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekday | NSCalendarUnitDay | NSCalendarUnitWeekOfYear fromDate:currentDate];
-    
-    // Calculate the number of days to subtract to reach the starting day of the week
-    NSInteger daysToSubtract = (components.weekday - firstWeekday + 7) % 7;
-    
-    components.day -= daysToSubtract;
-    
-    // Move back the number of weeks
-    if (weeks > 1) {
-        components.weekOfYear -= weeks;
+    // Subtract the number of weeks from the current date
+    if (weeks == 1) {
+        weeks = 0;
     }
     
-    NSDate *startOfWeek = [calendar dateFromComponents:components];
-    NSTimeInterval timestamp = [startOfWeek timeIntervalSince1970];
+    NSDate *startOfWeek = [calendar dateByAddingUnit:NSCalendarUnitWeekOfYear value:-weeks toDate:currentDate options:0];
+    
+    // Get the components of the start of the week
+    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekday | NSCalendarUnitDay | NSCalendarUnitWeekOfYear fromDate:startOfWeek];
+    
+    // Correct the components to represent the start of the week
+    NSInteger daysToSubtract = (components.weekday - firstWeekday + 7) % 7;
+    components.day -= daysToSubtract;
+    
+    NSTimeInterval timestamp = [[calendar dateFromComponents:components] timeIntervalSince1970];
     
     return [self getImpressionCount:campaignId timestampStart:(NSInteger)timestamp];
 }
@@ -171,6 +178,7 @@
 
 - (void)resetSession {
     [self setSessionImpressions:[NSMutableDictionary new]];
+    self.sessionImpressionsTotal = 0;
 }
 
 #pragma mark Switch User Delegate
