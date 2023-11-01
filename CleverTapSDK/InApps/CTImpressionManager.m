@@ -27,7 +27,7 @@
 @end
 
 @implementation CTImpressionManager
-// TODO: abstract the current timestamp
+
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTDelegateManager *)delegateManager {
@@ -138,10 +138,7 @@
     NSDate *currentDate = [self.clock currentDate];
     
     // Subtract the number of weeks from the current date
-    if (weeks == 1) {
-        weeks = 0;
-    }
-    
+    weeks -= 1; // Start from current week
     NSDate *startOfWeek = [calendar dateByAddingUnit:NSCalendarUnitWeekOfYear value:-weeks toDate:currentDate options:0];
     
     // Get the components of the start of the week
@@ -151,7 +148,8 @@
     NSInteger daysToSubtract = (components.weekday - firstWeekday + 7) % 7;
     components.day -= daysToSubtract;
     
-    NSTimeInterval timestamp = [[calendar dateFromComponents:components] timeIntervalSince1970];
+    NSDate *startDate = [calendar dateFromComponents:components];
+    NSTimeInterval timestamp = [startDate timeIntervalSince1970];
     
     return [self getImpressionCount:campaignId timestampStart:(NSInteger)timestamp];
 }

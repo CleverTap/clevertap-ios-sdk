@@ -12,6 +12,14 @@
 #import "CTDelegateManager.h"
 #import "CTClockMock.h"
 
+// Use fixed date and time
+// Do not set a timezone to the formatter,
+// the CTImpressionManager Calendar uses the current timezone
+NSString * const DATE_STRING = @"2023-10-26 19:00:00"; // Thursday
+NSString * const DATE_FORMAT = @"yyyy-MM-dd HH:mm:ss";
+// Use locale where first day of the week is 1 (Sunday)
+NSString * const LOCALE = @"en_US_POSIX";
+
 @interface CTImpressionManager(Tests)
 - (NSInteger)getImpressionCount:(NSString *)campaignId;
 @end
@@ -32,24 +40,21 @@
     // Initialize the CTDelegateManager for testing
     CTDelegateManager *delegateManager = [[CTDelegateManager alloc] init];
     
-    // Use fixed date and time
-    // Do not set a timezone to the formatter,
-    // the CTImpressionManager Calendar uses the current timezone
-    NSString *dateString = @"2023-10-26 19:00:00"; // Thursday
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-
-    NSDate *date = [dateFormatter dateFromString:dateString];
-
+    [dateFormatter setDateFormat:DATE_FORMAT];
+    
+    NSDate *date = [dateFormatter dateFromString:DATE_STRING];
+    
     CTClockMock *mockClock = [[CTClockMock alloc] initWithCurrentDate:date];
     self.mockClock = mockClock;
     
     // Use locale where first day of the week is 1 (Sunday)
-    NSLocale *locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+    NSLocale *locale = [NSLocale localeWithLocaleIdentifier:LOCALE];
     self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountID"
                                                                    deviceId:@"testDeviceID"
                                                             delegateManager:delegateManager
-                                                                      clock:mockClock locale:locale];
+                                                                      clock:mockClock
+                                                                     locale:locale];
 }
 
 - (void)tearDown {
@@ -80,6 +85,21 @@
     XCTAssertEqual([self.impressionManager perHour:self.testCampaignId hours:1], 1);
     XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 1);
     XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:1], 1);
+    
+    [self.impressionManager recordImpression:self.testCampaignId];
+    
+    XCTAssertEqual([self.impressionManager perSecond:self.testCampaignId seconds:1], 2);
+    XCTAssertEqual([self.impressionManager perMinute:self.testCampaignId minutes:1], 2);
+    XCTAssertEqual([self.impressionManager perHour:self.testCampaignId hours:1], 2);
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 2);
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:1], 2);
+    
+    NSString *anotherCampaignId = [NSString stringWithFormat:@"%@_2", self.testCampaignId];
+    XCTAssertEqual([self.impressionManager perSecond:anotherCampaignId seconds:1], 0);
+    XCTAssertEqual([self.impressionManager perMinute:anotherCampaignId minutes:1], 0);
+    XCTAssertEqual([self.impressionManager perHour:anotherCampaignId hours:1], 0);
+    XCTAssertEqual([self.impressionManager perDay:anotherCampaignId days:1], 0);
+    XCTAssertEqual([self.impressionManager perWeek:anotherCampaignId weeks:1], 0);
 }
 
 - (void)testImpressionStorage {
@@ -93,7 +113,7 @@
     XCTAssertEqual([self.impressionManager getImpressionCount:self.testCampaignId], 0);
 }
 
-- (void)testPerSecondWithMockClock {
+- (void)testPerSecond {
     [self.impressionManager recordImpression:self.testCampaignId];
     NSDate *initialDate = self.mockClock.currentDate;
     
@@ -108,9 +128,9 @@
     XCTAssertEqual([self.impressionManager perSecond:self.testCampaignId seconds:12], 1);
 }
 
-- (void)testPerMinuteWithMockClock {
+- (void)testPerMinute {
     [self.impressionManager recordImpression:self.testCampaignId];
-
+    
     NSDate *initialDate = self.mockClock.currentDate;
     
     // Advance the clock by 30 seconds
@@ -134,7 +154,7 @@
     XCTAssertEqual([self.impressionManager perMinute:self.testCampaignId minutes:60], 1);
 }
 
-- (void)testPerHourWithMockClock {
+- (void)testPerHour {
     [self.impressionManager recordImpression:self.testCampaignId];
     
     NSDate *initialDate = self.mockClock.currentDate;
@@ -142,7 +162,7 @@
     // Advance the clock by 30 mins
     self.mockClock.currentDate = [initialDate dateByAddingTimeInterval:30 * 60];
     XCTAssertEqual([self.impressionManager perHour:self.testCampaignId hours:1], 1);
-
+    
     // Advance the clock by 1 hour
     self.mockClock.currentDate = [initialDate dateByAddingTimeInterval:60 * 60];
     XCTAssertEqual([self.impressionManager perHour:self.testCampaignId hours:1], 1);
@@ -164,9 +184,9 @@
     XCTAssertEqual([self.impressionManager perHour:self.testCampaignId hours:25], 1);
 }
 
-- (void)testPerDayWithMockClock {
+- (void)testPerDay {
     [self.impressionManager recordImpression:self.testCampaignId];
-
+    
     NSDate *initialDate = self.mockClock.currentDate;
     // Advance the clock by 2 hours
     self.mockClock.currentDate = [initialDate dateByAddingTimeInterval:2 * 60 * 60];
@@ -189,9 +209,39 @@
     XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 0);
 }
 
-- (void)testPerWeekWithMockClock {
+- (void)testPerMultipleDays {
+    NSDate *initialDate = self.mockClock.currentDate;
     [self.impressionManager recordImpression:self.testCampaignId];
+    
+    // Advance the clock by 2 hours
+    self.mockClock.currentDate = [initialDate dateByAddingTimeInterval:2 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 2);
+    
+    // Advance the clock by 5 hours - the day changes
+    self.mockClock.currentDate = [initialDate dateByAddingTimeInterval:5 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    
+    // Check with clock advanced 5 hours - into the next day
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 1);
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:2], 3);
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:7], 3);
+    
+    // Advance the clock by 24 + 5 hours - 2 days ahead
+    self.mockClock.currentDate = [initialDate dateByAddingTimeInterval:(24 + 5) * 60 * 60];
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 0);
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:2], 1);
+    
+    // Check with clock advanced 2 days
+    [self.impressionManager recordImpression:self.testCampaignId];
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:1], 1);
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:2], 2);
+    XCTAssertEqual([self.impressionManager perDay:self.testCampaignId days:3], 4);
+}
 
+- (void)testPerWeek {
+    [self.impressionManager recordImpression:self.testCampaignId];
+    
     NSDate *startDate = self.mockClock.currentDate;
     // Advance the clock by 2 days
     self.mockClock.currentDate = [startDate dateByAddingTimeInterval:2 * 24 * 60 * 60];
@@ -221,6 +271,49 @@
     // Advance the clock by 1 week and test per 2 weeks
     self.mockClock.currentDate = [startDate dateByAddingTimeInterval:7 * 24 * 60 * 60];
     XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:2], 1);
+}
+
+- (void)testPerMultipleWeeks {
+    NSDate *startDate = self.mockClock.currentDate;
+    
+    // 2023-10-26 19:00:00
+    [self.impressionManager recordImpression:self.testCampaignId];
+    // Advance the clock by 2 days
+    // 2023-10-28 19:00:00
+    self.mockClock.currentDate = [startDate dateByAddingTimeInterval:2 * 24 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:1], 2);
+    
+    // Advance the clock by 2 days and 5 hours - goes into Sunday which is the start of the next week
+    // 2023-10-29 00:00:00
+    self.mockClock.currentDate = [startDate dateByAddingTimeInterval:2 * 24 * 60 * 60 + 5 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:1], 1);
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:2], 3);
+    
+    // Advance the clock by 1 week
+    // 2023-11-02 19:00:00
+    self.mockClock.currentDate = [startDate dateByAddingTimeInterval:7 * 24 * 60 * 60];
+    // Last 1 week - current week
+    // 2023-10-30 19:00:00
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:1], 1);
+    // Last 2 Weeks - start of current week minus 7 days
+    // 2023-10-22 00:00:00
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:2], 3);
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:4], 3);
+    
+    // Advance the clock by 2 weeks
+    // 2023-11-09 19:00:00
+    self.mockClock.currentDate = [startDate dateByAddingTimeInterval:2 * 7 * 24 * 60 * 60];
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:1], 0);
+    // Last 2 Weeks - start of current week minus 7 days
+    // 2023-10-30 00:00:00
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:2], 1);
+    // Last 3 Weeks - start of current week minus 14 days
+    // 2023-10-22 00:00:00
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:3], 3);
+    XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:4], 3);
 }
 
 @end
