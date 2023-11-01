@@ -9,12 +9,16 @@
 #import <XCTest/XCTest.h>
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
+#import "CTClockMock.h"
 
 @interface CTLimitsMatcherTest : XCTestCase
+
 @property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppTriggerManager *inAppTriggerManager;
+@property (nonatomic, strong) CTClockMock *mockClock;
 @property (nonatomic, strong) NSString *testCampaignId;
+
 @end
 
 @implementation CTLimitsMatcherTest
@@ -23,7 +27,10 @@
     [super setUp];
     self.testCampaignId = @"testCampaignId";
     self.limitsMatcher = [[CTLimitsMatcher alloc] init];
-    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId" delegateManager:[CTMultiDelegateManager new]];
+    CTClockMock *mockClock = [[CTClockMock alloc] initWithCurrentDate:[NSDate date]];
+    self.mockClock = mockClock;
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"
+                                                            delegateManager:[CTMultiDelegateManager new] clock:mockClock locale:[NSLocale currentLocale]];
     self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"];
 }
 
@@ -197,6 +204,110 @@
     BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
     
     XCTAssertFalse(match);
+}
+
+- (void)testMatchMinutes {
+    NSArray *whenLimits = @[
+        @{
+            @"type": @"minutes",
+            @"limit": @3,
+            @"frequency": @10
+        }
+    ];
+    
+    for (int i = 0; i < 2; i++) {
+        [self.impressionManager recordImpression:self.testCampaignId];
+    }
+    
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertFalse(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60 + 1];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchHours {
+    NSArray *whenLimits = @[
+        @{
+            @"type": @"hours",
+            @"limit": @3,
+            @"frequency": @2
+        }
+    ];
+
+    for (int i = 0; i < 2; i++) {
+        [self.impressionManager recordImpression:self.testCampaignId];
+    }
+    
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:1 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertFalse(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:1 * 60 * 60 + 1];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchDays {
+    NSArray *whenLimits = @[
+        @{
+            @"type": @"days",
+            @"limit": @3,
+            @"frequency": @2
+        }
+    ];
+
+    for (int i = 0; i < 2; i++) {
+        [self.impressionManager recordImpression:self.testCampaignId];
+    }
+    
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:24 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertFalse(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:24 * 60 * 60 + 1];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchWeeks {
+    NSArray *whenLimits = @[
+        @{
+            @"type": @"weeks",
+            @"limit": @3,
+            @"frequency": @2
+        }
+    ];
+
+    for (int i = 0; i < 2; i++) {
+        [self.impressionManager recordImpression:self.testCampaignId];
+    }
+    
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:7 * 24 * 60 * 60];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertFalse(match);
+    
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:7 * 24 * 60 * 60 + 1];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
 }
 
 @end
