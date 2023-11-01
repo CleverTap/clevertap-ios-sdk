@@ -112,7 +112,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     @try {
         // For App Launched events, force a dsync true
         NSString *eventType = event[@"type"];
-        if ([@"event" isEqualToString:eventType] && [CLTAP_APP_LAUNCHED_EVENT isEqualToString:event[@"evtName"]]) {
+        if ([@"event" isEqualToString:eventType] && [CLTAP_APP_LAUNCHED_EVENT isEqualToString:event[CLTAP_EVENT_NAME]]) {
             event[@"dsync"] = @YES;
             return;
         }
@@ -169,9 +169,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
  and set the last time to now.
  */
 - (void)persistEvent:(NSDictionary *)event  {
-    if (!event || !event[@"evtName"]) return;
+    if (!event || !event[CLTAP_EVENT_NAME]) return;
     [self runOnBackgroundQueue:^{
-        NSString *eventName = event[@"evtName"];
+        NSString *eventName = event[CLTAP_EVENT_NAME];
         NSDictionary *s = [self getStoredEvents];
         if (!s) s = @{};
         NSTimeInterval now = [[[NSDate alloc] init] timeIntervalSince1970];

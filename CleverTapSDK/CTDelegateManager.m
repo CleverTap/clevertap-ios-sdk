@@ -84,7 +84,7 @@
             if (isAppLaunched == nil) {
                 // Find the event with evtName == "App Launched"
                 for (NSDictionary *event in batchWithHeader) {
-                    if ([event[@"evtName"] isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
+                    if ([event[CLTAP_EVENT_NAME] isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
                         isAppLaunched = [NSNumber numberWithBool:YES];
                         break;
                     }

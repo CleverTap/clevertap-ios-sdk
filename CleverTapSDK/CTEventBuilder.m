@@ -130,8 +130,8 @@
             }
             actions[key] = value;
         }
-        event[@"evtName"] = eventName;
-        event[@"evtData"] = actions;
+        event[CLTAP_EVENT_NAME] = eventName;
+        event[CLTAP_EVENT_DATA] = actions;
         completion(event, errors);
     } @catch (NSException *e) {
         completion(nil, errors);
@@ -257,10 +257,10 @@
                 [jsonItemsArray addObject:itemDetails];
             }
         }
-        evtData[@"Items"] = jsonItemsArray;
+        evtData[CLTAP_CHARGED_EVENT_ITEMS] = jsonItemsArray;
         
-        chargedEvent[@"evtName"] = CLTAP_CHARGED_EVENT;
-        chargedEvent[@"evtData"] = evtData;
+        chargedEvent[CLTAP_EVENT_NAME] = CLTAP_CHARGED_EVENT;
+        chargedEvent[CLTAP_EVENT_DATA] = evtData;
         completion(chargedEvent, errors);
     } @catch (NSException *e) {
         completion(nil, errors);
@@ -291,8 +291,8 @@
             notif[key] = value;
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         CleverTapLogStaticDebug(@"Unable to build push notification clicked event: %@", e.debugDescription);
@@ -325,8 +325,8 @@
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Notification does not have any wzrk_* field");
         }
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -358,8 +358,8 @@
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Inbox Message does not have any wzrk_* field");
         }
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -387,8 +387,8 @@
             notif[key] = value;
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -412,8 +412,8 @@
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Geofence does not have any field");
         }
-        event[@"evtName"] = entered ? CLTAP_GEOFENCE_ENTERED_EVENT_NAME : CLTAP_GEOFENCE_EXITED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = entered ? CLTAP_GEOFENCE_ENTERED_EVENT_NAME : CLTAP_GEOFENCE_EXITED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -453,8 +453,8 @@
             default: break;
         }
         if (signedCallEvent) {
-            eventDic[@"evtName"] = signedCallEvent;
-            eventDic[@"evtData"] = notif;
+            eventDic[CLTAP_EVENT_NAME] = signedCallEvent;
+            eventDic[CLTAP_EVENT_DATA] = notif;
             completion(eventDic, errors);
         } else {
             CTValidationResult *error = [[CTValidationResult alloc] init];

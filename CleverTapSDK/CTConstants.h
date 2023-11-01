@@ -49,6 +49,9 @@ extern NSString *const kSessionId;
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_CHARGED_EVENT @"Charged"
+#define CLTAP_EVENT_NAME @"evtName"
+#define CLTAP_EVENT_DATA @"evtData"
+#define CLTAP_CHARGED_EVENT_ITEMS @"Items"
 #define CLTAP_ERROR_KEY @"wzrk_error"
 #define CLTAP_WZRK_FETCH_EVENT @"wzrk_fetch"
 #define CLTAP_PUSH_DELAY_SECONDS 1

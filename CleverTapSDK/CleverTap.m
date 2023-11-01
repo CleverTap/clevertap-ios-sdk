@@ -1155,8 +1155,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     CleverTapLogInternal(self.config.logLevel, @"%@: recording App Launched event from: %@", self, caller);
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
-    event[@"evtName"] = CLTAP_APP_LAUNCHED_EVENT;
-    event[@"evtData"] = [self generateAppFields];
+    event[CLTAP_EVENT_NAME] = CLTAP_APP_LAUNCHED_EVENT;
+    event[CLTAP_EVENT_DATA] = [self generateAppFields];
     
     if (self.lastUTMFields) {
         [event addEntriesFromDictionary:self.lastUTMFields];
@@ -1311,7 +1311,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             [self.dispatchQueueManager runSerialAsync:^{
                 [CTEventBuilder buildPushNotificationEvent:YES forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                     if (event) {
-                        self.wzrkParams = [event[@"evtData"] copy];
+                        self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
                         [self queueEvent:event withType:CleverTapEventTypeRaised];
                     };
                     if (errors) {
@@ -1499,7 +1499,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [CTEventBuilder buildInAppNotificationStateEvent:clicked forNotification:notification andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 if (clicked) {
-                    self.wzrkParams = [event[@"evtData"] copy];
+                    self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
                 }
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
@@ -1870,10 +1870,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         // TODO: or evaluate here?
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
-            NSString *eventName = event[@"evtName"];
-            NSDictionary *eventData = event[@"evtData"];
+            NSString *eventName = event[CLTAP_EVENT_NAME];
+            NSDictionary *eventData = event[CLTAP_EVENT_DATA];
             if ([eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
-                NSArray *items = eventData[@"Items"];
+                NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
                 [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
             } else {
                 [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
@@ -2948,7 +2948,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.dispatchQueueManager runSerialAsync:^{
             [CTEventBuilder buildPushNotificationEvent:clicked forNotification:notification completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
                 if (event) {
-                    self.wzrkParams = [event[@"evtData"] copy];
+                    self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
                     [self queueEvent:event withType: clicked ? CleverTapEventTypeRaised : CleverTapEventTypeNotificationViewed];
                 };
                 if (errors) {
@@ -3296,7 +3296,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)fetchInApps:(CleverTapFetchInAppsBlock _Nullable)block {
     self.fetchInAppsBlock = block;
-    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @5}} withType:CleverTapEventTypeFetch];
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @5}} withType:CleverTapEventTypeFetch];
 }
 
 #pragma mark - Event API
@@ -3636,7 +3636,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 if (clicked) {
-                    self.wzrkParams = [event[@"evtData"] copy];
+                    self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
                 }
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
@@ -3851,7 +3851,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.dispatchQueueManager runSerialAsync:^{
         [CTEventBuilder buildDisplayViewStateEvent:NO forDisplayUnit:displayUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
+                self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
@@ -3869,7 +3869,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self.dispatchQueueManager runSerialAsync:^{
         [CTEventBuilder buildDisplayViewStateEvent:YES forDisplayUnit:displayUnit andQueryParameters:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
-                self.wzrkParams = [event[@"evtData"] copy];
+                self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             };
             if (errors) {
@@ -3930,7 +3930,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)fetchFeatureFlags {
-    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @1}} withType:CleverTapEventTypeFetch];
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @1}} withType:CleverTapEventTypeFetch];
 }
 
 - (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue {
@@ -4018,7 +4018,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)fetchProductConfig {
-    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @0}} withType:CleverTapEventTypeFetch];
 }
 
 - (void)activateProductConfig {
@@ -4274,7 +4274,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)fetchVariables:(CleverTapFetchVariablesBlock)block {
     [[self variables] setFetchVariablesBlock:block];
-    [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @4}} withType:CleverTapEventTypeFetch];
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @4}} withType:CleverTapEventTypeFetch];
 }
 
 - (CTVar * _Nullable)getVariable:(NSString * _Nonnull)name {
