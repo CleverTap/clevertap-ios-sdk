@@ -63,8 +63,7 @@
 }
 
 - (void)recordImpression:(NSString *)campaignId {
-    // TODO: check if campaignId comes as string or number
-    if ([campaignId length] == 0) {
+    if (![campaignId isKindOfClass:[NSString class]] || [campaignId length] == 0) {
         return;
     }
     

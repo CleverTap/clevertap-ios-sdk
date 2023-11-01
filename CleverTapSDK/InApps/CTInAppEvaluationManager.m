@@ -112,7 +112,7 @@
 - (void)evaluateServerSide:(CTEventAdapter *)event {
     NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
     for (NSDictionary *inApp in eligibleInApps) {
-        NSString *campaignId = inApp[CLTAP_INAPP_ID];
+        NSString *campaignId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
         if (campaignId) {
             [self.evaluatedServerSideInAppIds addObject:campaignId];
         }
@@ -122,7 +122,7 @@
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
     for (NSDictionary *inApp in inApps) {
-        NSString *campaignId = inApp[CLTAP_INAPP_ID];
+        NSString *campaignId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
         // Match trigger
         NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
@@ -182,7 +182,7 @@
 }
 
 - (void)suppress:(NSDictionary *)inApp {
-    NSString *ti = inApp[CLTAP_INAPP_ID];
+    NSString *ti = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
     NSString *wzrk_id = [self generateWzrkId:ti];
     NSString *pivot = inApp[CLTAP_NOTIFICATION_PIVOT] ? inApp[CLTAP_NOTIFICATION_PIVOT] : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
     NSNumber *cgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];

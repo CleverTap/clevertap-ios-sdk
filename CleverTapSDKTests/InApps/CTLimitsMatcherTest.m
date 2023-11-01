@@ -24,31 +24,16 @@
     self.testCampaignId = @"testCampaignId";
     self.limitsMatcher = [[CTLimitsMatcher alloc] init];
     self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId" delegateManager:[CTMultiDelegateManager new]];
-    self.inAppTriggerManager = [[CTInAppTriggerManager alloc]initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"];
+    self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"];
 }
 
 - (void)tearDown {
     [super tearDown];
     [self.inAppTriggerManager removeTriggers:self.testCampaignId];
     [self.impressionManager removeImpressions:self.testCampaignId];
-    
-    
-    
-    [self removeAllKeysWithPrefix:[NSUserDefaults standardUserDefaults] withPrefix:@"WizRockettestAccountId_testDeviceId_impressions"];
-    [self removeAllKeysWithPrefix:[NSUserDefaults standardUserDefaults] withPrefix:@"WizRockettestAccountId_testDeviceId_triggers"];
-}
-
-- (void)removeAllKeysWithPrefix:(NSUserDefaults *)userDefaults withPrefix:(NSString *)prefix {
-    NSDictionary *userDefaultsDictionary = [userDefaults dictionaryRepresentation];
-    for (NSString *key in userDefaultsDictionary) {
-        if ([key hasPrefix:prefix]) {
-            [userDefaults removeObjectForKey:key];
-        }
-    }
 }
 
 - (void)testMatchOnExactlyLessThanLimit {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"onExactly",
@@ -64,7 +49,6 @@
 }
 
 - (void)testMatchOnExactly {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"onExactly",
@@ -84,7 +68,6 @@
 }
 
 - (void)testMatchOnEvery {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"onEvery",
@@ -102,7 +85,6 @@
 }
 
 - (void)testMatchOnEveryIntermediate {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"onEvery",
@@ -120,7 +102,6 @@
 }
 
 - (void)testMatchEver {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"ever",
@@ -134,7 +115,6 @@
 }
 
 - (void)testMatchEverLimitExceeded {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"ever",
@@ -152,7 +132,6 @@
 }
 
 - (void)testMatchSession {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"session",
@@ -168,7 +147,6 @@
 }
 
 - (void)testMatchSessionLimitExceeded {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"session",
@@ -186,7 +164,6 @@
 }
 
 - (void)testMatchSeconds {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"seconds",
@@ -205,7 +182,6 @@
 }
 
 - (void)testMatchSecondsLimitExceeded {
-    
     NSArray *whenLimits = @[
         @{
             @"type": @"seconds",

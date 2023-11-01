@@ -11,10 +11,9 @@
 @implementation CTLimitsMatcher
 
 - (BOOL)matchWhenLimits:(NSArray *)whenLimits forCampaignId:(NSString *)campaignId withImpressionManager:(CTImpressionManager *)impressionManager andTriggerManager:(CTInAppTriggerManager *)triggerManager {
-    // TODO: is campaignId int or string
-//    if ([campaignId length] == 0) {
-//        return NO;
-//    }
+    if (![campaignId isKindOfClass:[NSString class]] || [campaignId length] == 0) {
+        return NO;
+    }
     
     for (NSDictionary *limitJSON in whenLimits) {
         CTLimitAdapter *limitAdapter = [[CTLimitAdapter alloc] initWithJSON:limitJSON];
