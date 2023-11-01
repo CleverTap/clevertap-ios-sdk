@@ -1,5 +1,5 @@
 //
-//  CTDelegateManager.h
+//  CTMultiDelegateManager.h
 //  CleverTapSDK
 //
 //  Created by Nikola Zagorchev on 10.10.23.

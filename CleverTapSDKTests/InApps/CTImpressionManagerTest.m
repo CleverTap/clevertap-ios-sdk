@@ -37,9 +37,8 @@ NSString * const LOCALE = @"en_US_POSIX";
 - (void)setUp {
     [super setUp];
     self.testCampaignId = @"testCampaignId";
-    // Initialize the CTDelegateManager for testing
-    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
-    
+
+    // Configure the date and clock
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:DATE_FORMAT];
     
@@ -50,6 +49,8 @@ NSString * const LOCALE = @"en_US_POSIX";
     
     // Use locale where first day of the week is 1 (Sunday)
     NSLocale *locale = [NSLocale localeWithLocaleIdentifier:LOCALE];
+    
+    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountID"
                                                                    deviceId:@"testDeviceID"
                                                             delegateManager:delegateManager
