@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "CTImpressionManager.h"
-#import "CTDelegateManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTClockMock.h"
 
 // Use fixed date and time
@@ -38,7 +38,7 @@ NSString * const LOCALE = @"en_US_POSIX";
     [super setUp];
     self.testCampaignId = @"testCampaignId";
     // Initialize the CTDelegateManager for testing
-    CTDelegateManager *delegateManager = [[CTDelegateManager alloc] init];
+    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:DATE_FORMAT];

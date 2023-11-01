@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CTSwitchUserDelegate.h"
-#import "CTDelegateManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTClock.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -17,11 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
-                  delegateManager:(CTDelegateManager *)delegateManager;
+                  delegateManager:(CTMultiDelegateManager *)delegateManager;
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
-                  delegateManager:(CTDelegateManager *)delegateManager
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
                             clock:(id <CTClock>)clock
                            locale:(NSLocale *)locale;
 

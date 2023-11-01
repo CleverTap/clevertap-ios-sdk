@@ -6,10 +6,11 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
-#import "CTDelegateManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTConstants.h"
+#import "CTBatchSentDelegateHelper.h"
 
-@interface CTDelegateManager ()
+@interface CTMultiDelegateManager ()
 
 @property (nonatomic, strong) NSHashTable<id<CTAttachToBatchHeaderDelegate>> *attachToHeaderDelegates;
 @property (nonatomic, strong) NSHashTable<id<CTSwitchUserDelegate>> *switchUserDelegates;
@@ -17,20 +18,19 @@
 
 @end
 
-// TODO: rename to CTMultiDelegateManager
-@implementation CTDelegateManager
+@implementation CTMultiDelegateManager
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         _attachToHeaderDelegates = [NSHashTable weakObjectsHashTable];
         _switchUserDelegates = [NSHashTable weakObjectsHashTable];
-        _switchUserDelegates = [NSHashTable weakObjectsHashTable];
-
+        _batchSentDelegates = [NSHashTable weakObjectsHashTable];
     }
     return self;
 }
 
+#pragma mark CTAttachToBatchHeaderDelegate
 - (void)addAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate>)delegate {
     [self.attachToHeaderDelegates addObject:delegate];
 }
@@ -50,6 +50,7 @@
     return [header copy];
 }
 
+#pragma mark CTSwitchUserDelegate
 - (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
     [self.switchUserDelegates addObject:delegate];
 }
@@ -66,6 +67,7 @@
     }
 }
 
+#pragma mark CTBatchSentDelegate
 - (void)addBatchSentDelegate:(id<CTBatchSentDelegate>)delegate {
     [self.batchSentDelegates addObject:delegate];
 }
@@ -82,13 +84,8 @@
         }
         if ([batchSentDelegate respondsToSelector:@selector(onAppLaunchedWithSuccess:)]) {
             if (isAppLaunched == nil) {
-                // Find the event with evtName == "App Launched"
-                for (NSDictionary *event in batchWithHeader) {
-                    if ([event[CLTAP_EVENT_NAME] isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-                        isAppLaunched = [NSNumber numberWithBool:YES];
-                        break;
-                    }
-                }
+                // Check once for the batch
+                isAppLaunched = [NSNumber numberWithBool:[CTBatchSentDelegateHelper isBatchWithAppLaunched:batchWithHeader]];
             }
             if ([isAppLaunched boolValue]) {
                 [batchSentDelegate onAppLaunchedWithSuccess:success];

@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTDelegateManager : NSObject
+@interface CTMultiDelegateManager : NSObject
 
 - (void)addAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate>)delegate;
 - (void)removeAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate>)delegate;

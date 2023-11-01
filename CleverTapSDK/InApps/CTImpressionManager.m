@@ -30,7 +30,7 @@
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
-                  delegateManager:(CTDelegateManager *)delegateManager {
+                  delegateManager:(CTMultiDelegateManager *)delegateManager {
     if (self = [super init]) {
         return [self initWithAccountId:accountId
                               deviceId:deviceId
@@ -43,7 +43,7 @@
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
-                  delegateManager:(CTDelegateManager *)delegateManager
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
                             clock:(id <CTClock>)clock
                            locale:(NSLocale *)locale {
     if (self = [super init]) {

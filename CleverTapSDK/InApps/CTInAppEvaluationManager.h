@@ -10,7 +10,7 @@
 #import "CTBatchSentDelegate.h"
 #import "CTAttachToBatchHeaderDelegate.h"
 #import "CTDeviceInfo.h"
-#import "CTDelegateManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTImpressionManager.h"
 #import "CTInAppDisplayManager.h"
 
@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                        deviceInfo:(CTDeviceInfo *)deviceInfo
-                   delegateManager:(CTDelegateManager *)delegateManager
+                   delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager;
 

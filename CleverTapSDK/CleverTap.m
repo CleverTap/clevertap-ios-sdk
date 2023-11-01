@@ -31,7 +31,7 @@
 #import "CTInAppDisplayViewController.h"
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
-#import "CTDelegateManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTSessionManager.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -227,7 +227,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, weak) id <CleverTapDomainDelegate> domainDelegate;
 
 @property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
-@property (nonatomic, strong, readwrite) CTDelegateManager *delegateManager;
+@property (nonatomic, strong, readwrite) CTMultiDelegateManager *delegateManager;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
@@ -440,7 +440,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo];
         
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
-        self.delegateManager = [[CTDelegateManager alloc] init];
+        self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];

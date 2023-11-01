@@ -39,7 +39,7 @@
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                        deviceInfo:(CTDeviceInfo *)deviceInfo
-                   delegateManager:(CTDelegateManager *)delegateManager
+                   delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager {
     if (self = [super init]) {

@@ -8,7 +8,7 @@
 #import "CTImpressionManager.h"
 #import "CTInAppEvaluationManager.h"
 #import "CleverTapInternal.h"
-#import "CTDelegateManager.h"
+#import "CTMultiDelegateManager.h"
 #import "CTLimitsMatcher.h"
 
 // Per session
@@ -46,7 +46,7 @@
 @implementation CTInAppFCManager
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                 delegateManager:(CTDelegateManager *)delegateManager
+                 delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
                impressionManager:(CTImpressionManager *)impressionManager {
     if (self = [super init]) {

@@ -21,8 +21,8 @@
 
 - (void)setUp {
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"accountId" accountToken:@"accountToken"];
-    CTImpressionManager *im = [[CTImpressionManager alloc] initWithAccountId:config.accountId deviceId:@"device" delegateManager:[CTDelegateManager new]];
-    self.inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:config delegateManager:[CTDelegateManager new] deviceId:@"device" impressionManager:im];
+    CTImpressionManager *im = [[CTImpressionManager alloc] initWithAccountId:config.accountId deviceId:@"device" delegateManager:[CTMultiDelegateManager new]];
+    self.inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:config delegateManager:[CTMultiDelegateManager new] deviceId:@"device" impressionManager:im];
 }
 
 - (void)test_localInAppCount {

@@ -7,7 +7,7 @@
 @class CTInAppNotification;
 @class CTInAppEvaluationManager;
 @class CTImpressionManager;
-@class CTDelegateManager;
+@class CTMultiDelegateManager;
 
 @interface CTInAppFCManager : NSObject <CTAttachToBatchHeaderDelegate, CTSwitchUserDelegate>
 
@@ -16,7 +16,7 @@
 @property (assign, readonly) int localInAppCount;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                 delegateManager:(CTDelegateManager *)delegateManager
+                 delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
              impressionManager:(CTImpressionManager *)impressionManager;
 

@@ -23,7 +23,7 @@
     [super setUp];
     self.testCampaignId = @"testCampaignId";
     self.limitsMatcher = [[CTLimitsMatcher alloc] init];
-    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId" delegateManager:[CTDelegateManager new]];
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId" delegateManager:[CTMultiDelegateManager new]];
     self.inAppTriggerManager = [[CTInAppTriggerManager alloc]initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"];
 }
 

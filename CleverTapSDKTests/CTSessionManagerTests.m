@@ -29,10 +29,10 @@
     
     _config = [[CleverTapInstanceConfig alloc]initWithAccountId:@"test" accountToken:@"test"];
     _instance = [CleverTap instanceWithConfig:_config];
-    CTDelegateManager *delegateManager = [CTDelegateManager new];
+    CTMultiDelegateManager *delegateManager = [CTMultiDelegateManager new];
     
     CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"test" deviceId:@"test" delegateManager:delegateManager];
-    CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config delegateManager:[CTDelegateManager new] deviceId:@"test" impressionManager:impressionManager];
+    CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config delegateManager:[CTMultiDelegateManager new] deviceId:@"test" impressionManager:impressionManager];
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:_instance dispatchQueueManager:[CTDispatchQueueManager new] inAppFCManager:inAppFCManager impressionManager:impressionManager];
     
 //    _classObject = [[CTSessionManager alloc]initWithConfig:_config impressionManager:impressionManager inAppDisplayManager:displayManager];
