@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
-- (instancetype)initWithAccountId:(NSString *)accountId deviceInfo:(CTDeviceInfo *)deviceInfo;
+- (instancetype)initWithAccountId:(NSString *)accountId deviceId:(NSString *)deviceId;
 - (NSArray *)clientSideInApps;
 - (NSArray *)serverSideInApps;
 - (void)storeClientSideInApps:(NSArray *)clientSideInApps;

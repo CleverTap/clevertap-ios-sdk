@@ -456,7 +456,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self addObservers];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            self.inAppStore = [[CTInAppStore alloc] initWithAccountId:self.config.accountId deviceInfo:self.deviceInfo];
+            self.inAppStore = [[CTInAppStore alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId];
             
             CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager];
             

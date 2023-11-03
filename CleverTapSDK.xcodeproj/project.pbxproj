@@ -340,6 +340,7 @@
 		6BD334EB2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */; };
 		6BD334EC2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */; };
 		6BD334ED2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */; };
+		6BD334F02AF545C80099E33E /* CTInAppStoreTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334EF2AF545C70099E33E /* CTInAppStoreTest.m */; };
 		6BEEC2C62AE9B02100BD4EC5 /* CTSystemClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */; };
 		6BEEC2C72AE9B02100BD4EC5 /* CTSystemClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */; };
 		6BEEC2C82AE9B02100BD4EC5 /* CTSystemClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */; };
@@ -824,6 +825,7 @@
 		6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManager.m; sourceTree = "<group>"; };
 		6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTBatchSentDelegateHelper.h; sourceTree = "<group>"; };
 		6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTBatchSentDelegateHelper.m; sourceTree = "<group>"; };
+		6BD334EF2AF545C70099E33E /* CTInAppStoreTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppStoreTest.m; sourceTree = "<group>"; };
 		6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemClock.h; sourceTree = "<group>"; };
 		6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemClock.m; sourceTree = "<group>"; };
 		6BEEC2CA2AEBDF5800BD4EC5 /* CTClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTClock.h; sourceTree = "<group>"; };
@@ -1307,6 +1309,7 @@
 				6BEEC2CD2AEC49F100BD4EC5 /* CTImpressionManagerTest.m */,
 				6BEEC2CF2AF1A3A900BD4EC5 /* CTClockMock.h */,
 				6BEEC2D02AF1A3A900BD4EC5 /* CTClockMock.m */,
+				6BD334EF2AF545C70099E33E /* CTInAppStoreTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2235,6 +2238,7 @@
 				6A2E0B9329D0A5CF00FCEA5F /* CTVariablesTest.m in Sources */,
 				D02AC2DB276044F70031C1BE /* CleverTapSDKTests.m in Sources */,
 				32394C2129FA264B00956058 /* CTPreferencesTest.m in Sources */,
+				6BD334F02AF545C80099E33E /* CTInAppStoreTest.m in Sources */,
 				32394C1F29FA251E00956058 /* CTEventBuilderTest.m in Sources */,
 				D02AC2EB2767F4590031C1BE /* BaseTestCase.m in Sources */,
 				6BEEC2CE2AEC49F100BD4EC5 /* CTImpressionManagerTest.m in Sources */,
