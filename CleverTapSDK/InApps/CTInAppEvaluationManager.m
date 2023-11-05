@@ -21,6 +21,9 @@
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
 
+// TODO: set the location
+@property (nonatomic, assign) CLLocationCoordinate2D location;
+
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
 
@@ -49,7 +52,7 @@
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
-        self.inAppStore = [[CTInAppStore alloc] initWithAccountId:accountId deviceInfo:deviceInfo];
+        self.inAppStore = [[CTInAppStore alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
@@ -62,25 +65,25 @@
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
     if (![eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties];
+        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
         [self evaluateServerSide:event];
         [self evaluateClientSide:event];
     }
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:chargeDetails andItems:items];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:chargeDetails location:self.location andItems:items];
     [self evaluateServerSide:event];
     [self evaluateClientSide:event];
 }
 
 - (void)evaluateOnAppLaunchedClientSide {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{}];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{} andLocation:self.location];
     [self evaluateClientSide:event];
 }
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{}];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{} andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     [self sortByPriority:eligibleInApps];
     for (NSDictionary *inApp in eligibleInApps) {

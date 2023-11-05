@@ -13,25 +13,29 @@
 @property (nonatomic, strong) NSString *eventName;
 @property (nonatomic, strong) NSDictionary *eventProperties;
 @property (nonatomic, strong) NSArray<NSDictionary *> *items;
+@property (nonatomic, assign) CLLocationCoordinate2D location;
 
 @end
 
 @implementation CTEventAdapter
 
 - (instancetype)initWithEventName:(NSString *)eventName
-                  eventProperties:(NSDictionary *)eventProperties {
+                  eventProperties:(NSDictionary *)eventProperties
+                      andLocation:(CLLocationCoordinate2D)location{
     if (self = [super init]) {
-        self = [self initWithEventName:eventName eventProperties:eventProperties andItems:@[]];
+        self = [self initWithEventName:eventName eventProperties:eventProperties location:location andItems:@[]];
     }
     return self;
 }
 
 - (instancetype)initWithEventName:(NSString *)eventName
-    eventProperties:(NSDictionary *)eventProperties
-           andItems:(NSArray<NSDictionary *> *)items {
+                  eventProperties:(NSDictionary *)eventProperties
+                         location:(CLLocationCoordinate2D)location
+                         andItems:(NSArray<NSDictionary *> *)items {
     if (self = [super init]) {
         self.eventName = eventName;
         self.eventProperties = eventProperties;
+        self.location = location;
         self.items = items;
     }
     return self;

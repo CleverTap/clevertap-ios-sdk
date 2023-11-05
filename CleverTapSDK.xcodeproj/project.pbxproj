@@ -341,6 +341,10 @@
 		6BD334EC2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */; };
 		6BD334ED2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */; };
 		6BD334F02AF545C80099E33E /* CTInAppStoreTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334EF2AF545C70099E33E /* CTInAppStoreTest.m */; };
+		6BD334F32AF7FC660099E33E /* CTTriggerRadius.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BD334F12AF7FC660099E33E /* CTTriggerRadius.h */; };
+		6BD334F42AF7FC660099E33E /* CTTriggerRadius.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BD334F12AF7FC660099E33E /* CTTriggerRadius.h */; };
+		6BD334F52AF7FC660099E33E /* CTTriggerRadius.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334F22AF7FC660099E33E /* CTTriggerRadius.m */; };
+		6BD334F62AF7FC660099E33E /* CTTriggerRadius.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334F22AF7FC660099E33E /* CTTriggerRadius.m */; };
 		6BEEC2C62AE9B02100BD4EC5 /* CTSystemClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */; };
 		6BEEC2C72AE9B02100BD4EC5 /* CTSystemClock.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */; };
 		6BEEC2C82AE9B02100BD4EC5 /* CTSystemClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */; };
@@ -826,6 +830,8 @@
 		6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTBatchSentDelegateHelper.h; sourceTree = "<group>"; };
 		6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTBatchSentDelegateHelper.m; sourceTree = "<group>"; };
 		6BD334EF2AF545C70099E33E /* CTInAppStoreTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppStoreTest.m; sourceTree = "<group>"; };
+		6BD334F12AF7FC660099E33E /* CTTriggerRadius.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTTriggerRadius.h; sourceTree = "<group>"; };
+		6BD334F22AF7FC660099E33E /* CTTriggerRadius.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTriggerRadius.m; sourceTree = "<group>"; };
 		6BEEC2C42AE9B02100BD4EC5 /* CTSystemClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemClock.h; sourceTree = "<group>"; };
 		6BEEC2C52AE9B02100BD4EC5 /* CTSystemClock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemClock.m; sourceTree = "<group>"; };
 		6BEEC2CA2AEBDF5800BD4EC5 /* CTClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTClock.h; sourceTree = "<group>"; };
@@ -1293,6 +1299,8 @@
 				6A4427C02AA39AC30098866F /* CTLimitsMatcher.m */,
 				4EB4C8BC2AAD91AC00B7F045 /* CTTriggerEvaluator.h */,
 				4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */,
+				6BD334F12AF7FC660099E33E /* CTTriggerRadius.h */,
+				6BD334F22AF7FC660099E33E /* CTTriggerRadius.m */,
 			);
 			path = Matchers;
 			sourceTree = "<group>";
@@ -1662,6 +1670,7 @@
 				D014B8EB20E2FA94001E0780 /* CleverTapSyncDelegate.h in Headers */,
 				4E49AE54275D24570074A774 /* CTValidationResultStack.h in Headers */,
 				07BF465D217F7C88002E166D /* CTInAppDisplayViewControllerPrivate.h in Headers */,
+				6BD334F42AF7FC660099E33E /* CTTriggerRadius.h in Headers */,
 				6A4427D22ABB3AF60098866F /* CTInAppFCManager+Legacy.h in Headers */,
 				4E838C41299F419900ED0875 /* ContentMerger.h in Headers */,
 				D0BD75A82417694F0006EE55 /* CTFeatureFlagsController.h in Headers */,
@@ -1749,6 +1758,7 @@
 				071EB4FE217F6427008F0FAB /* CTDismissButton.h in Headers */,
 				071EB511217F6427008F0FAB /* CTUIUtils.h in Headers */,
 				6BF5A5A12AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h in Headers */,
+				6BD334F32AF7FC660099E33E /* CTTriggerRadius.h in Headers */,
 				D01651AE2097B38400660178 /* CTEventBuilder.h in Headers */,
 				072F9E3D21B1368000BC6313 /* CTInboxIconMessageCell.h in Headers */,
 				4EA64A26296C115E001D9B22 /* CTRequestFactory.h in Headers */,
@@ -2212,6 +2222,7 @@
 				4EA64A29296C115E001D9B22 /* CTRequestFactory.m in Sources */,
 				D014B8FF20E2FB40001E0780 /* CTLogger.m in Sources */,
 				6B535FB92AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */,
+				6BD334F62AF7FC660099E33E /* CTTriggerRadius.m in Sources */,
 				6A4427D52ABB3B1D0098866F /* CTInAppEvaluationManager.m in Sources */,
 				D014B8FD20E2FB18001E0780 /* CTPreferences.m in Sources */,
 				4E49AE56275D24570074A774 /* CTValidationResultStack.m in Sources */,
@@ -2332,6 +2343,7 @@
 				072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */,
 				6A4427D12AB9D8C30098866F /* CTInAppFCManager+Legacy.m in Sources */,
 				6BEEC2C82AE9B02100BD4EC5 /* CTSystemClock.m in Sources */,
+				6BD334F52AF7FC660099E33E /* CTTriggerRadius.m in Sources */,
 				6A3EBD332AA0703A00CE97D4 /* CTEventAdapter.m in Sources */,
 				4E8B81712AD2BB8A00714BB4 /* CTDispatchQueueManager.m in Sources */,
 				0796FB6A21AE5B6300FC380D /* CTCarouselImageMessageCell.m in Sources */,

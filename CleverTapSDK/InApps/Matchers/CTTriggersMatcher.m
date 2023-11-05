@@ -29,17 +29,17 @@
     return NO;
 }
 
-- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties];
-
-    return [self matchEventWhenTriggers:whenTriggers event:event];
-}
-
-- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:details andItems:items];
-
-    return [self matchEventWhenTriggers:whenTriggers event:event];
-}
+//- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
+//    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties];
+//
+//    return [self matchEventWhenTriggers:whenTriggers event:event];
+//}
+//
+//- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
+//    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:details andItems:items];
+//
+//    return [self matchEventWhenTriggers:whenTriggers event:event];
+//}
 
 - (BOOL)match:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
     if (![[event eventName] isEqualToString:[trigger eventName]]) {
@@ -63,6 +63,26 @@
         if (!matched) {
             return NO;
         }
+    }
+    
+    // GeoRadius conditions are OR-ed
+    NSUInteger geoRadiusCount = [trigger geoRadiusCount];
+    for (NSUInteger i = 0; i < geoRadiusCount; i++) {
+        CTTriggerRadius *triggerRadius = [trigger geoRadiusAtIndex:i];
+        CLLocationCoordinate2D expected = CLLocationCoordinate2DMake([triggerRadius.latitude doubleValue],
+                                                                     [triggerRadius.longitude doubleValue]);
+        
+        BOOL matched;
+        @try {
+            matched = [CTTriggerEvaluator evaluateDistance:triggerRadius.radius expected:expected actual:[event location]];
+        }
+        @catch (NSException *exception) {
+            CleverTapLogStaticDebug(@"Error matching triggers for event named %@. Reason: %@", event.eventName, exception.reason);
+        }
+        if (!matched) {
+            return NO;
+        }
+        
     }
 
     return YES;

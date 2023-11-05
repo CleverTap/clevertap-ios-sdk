@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CTTriggerCondition.h"
+#import "CTTriggerRadius.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,9 +21,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSInteger propertyCount;
 @property (nonatomic, readonly) NSInteger itemsCount;
+@property (nonatomic, readonly) NSInteger geoRadiusCount;
 
 - (CTTriggerCondition * _Nullable)propertyAtIndex:(NSInteger)index;
 - (CTTriggerCondition * _Nullable)itemAtIndex:(NSInteger)index;
+- (CTTriggerRadius * _Nullable)geoRadiusAtIndex: (NSInteger)index;
 
 @end
 

@@ -16,6 +16,8 @@
 @property (nonatomic, strong) NSArray *properties;
 @property (nonatomic, strong) NSArray *items;
 
+@property (nonatomic, strong) NSArray *geoRadius;
+
 @end
 
 @implementation CTTriggerAdapter
@@ -25,6 +27,7 @@
         self.eventName = triggerJSON[@"eventName"];
         self.properties = triggerJSON[@"eventProperties"];
         self.items = triggerJSON[@"itemProperties"];
+        self.geoRadius = triggerJSON[@"geoRadius"];
     }
     return self;
 }
@@ -43,6 +46,14 @@
     }
     
     return self.items.count;
+}
+
+- (NSInteger)geoRadiusCount {
+    if (self.geoRadius == nil) {
+        return 0;
+    }
+    
+    return self.geoRadius.count;
 }
 
 - (CTTriggerCondition * _Nonnull)triggerConditionFromJSON:(NSDictionary *)property {
@@ -77,7 +88,20 @@
     NSDictionary *item = self.items[index];
     
     return [self triggerConditionFromJSON:item];
+}
 
+- (CTTriggerRadius *)geoRadiusAtIndex: (NSInteger)index {
+    if (self.geoRadius == nil) {
+        return nil;
+    }
+    NSDictionary *item = self.items[index];
+    
+    CTTriggerRadius *triggerRadius = [[CTTriggerRadius alloc] init];
+    triggerRadius.latitude = item[@"lat"];
+    triggerRadius.longitude = item[@"lng"];
+    triggerRadius.radius = item[@"r"];
+    
+    return triggerRadius;
 }
 
 @end
