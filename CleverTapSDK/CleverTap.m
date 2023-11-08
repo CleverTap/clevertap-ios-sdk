@@ -1873,10 +1873,10 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.dispatchQueueManager runSerialAsync:^{
             NSString *eventName = event[CLTAP_EVENT_NAME];
             NSDictionary *eventData = event[CLTAP_EVENT_DATA];
-            if ([eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+            if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
                 NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
                 [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
-            } else {
+            } else if (eventName) {
                 [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
             }
         }];
