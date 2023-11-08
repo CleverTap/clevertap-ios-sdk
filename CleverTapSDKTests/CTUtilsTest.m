@@ -107,4 +107,26 @@
     XCTAssertNil(tokenString);
 }
 
+- (void)test_haversineDistance {
+    NSString* (^decimalPoints)(double) = ^(double number) {
+        return [NSString stringWithFormat:@"%.02f", number];
+    };
+    
+    CLLocationCoordinate2D nebraska = CLLocationCoordinate2DMake(41.507483, -99.436554);
+    CLLocationCoordinate2D kansas = CLLocationCoordinate2DMake(38.504048, -98.315949);
+    
+    double distanceNK = [CTUtils haversineDistance:nebraska coordinateB:kansas];
+    double expectedDistanceNK = 347.72;
+    XCTAssertEqualObjects(decimalPoints(distanceNK), decimalPoints(expectedDistanceNK));
+
+    CLLocationCoordinate2D mumbai = CLLocationCoordinate2DMake(19.07609, 72.877426);
+    CLLocationCoordinate2D sofia = CLLocationCoordinate2DMake(42.698334, 23.319941);
+    
+    double distanceMS = [CTUtils haversineDistance:mumbai coordinateB:sofia];
+    double expectedDistanceMS = 5317.06;
+    XCTAssertEqualObjects(decimalPoints(distanceMS), decimalPoints(expectedDistanceMS));
+    
+    XCTAssertEqual([CTUtils haversineDistance:nebraska coordinateB:nebraska], 0);
+}
+
 @end

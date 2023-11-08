@@ -6,8 +6,8 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
-#include <math.h>
 #import "CTTriggerEvaluator.h"
+#import "CTUtils.h"
 
 @implementation CTTriggerEvaluator
 
@@ -117,22 +117,7 @@
 }
 
 + (BOOL)evaluateDistance:(NSNumber *)radius expected:(CLLocationCoordinate2D)expected actual:(CLLocationCoordinate2D)actual {
-    double RAD_CONVERT = M_PI / 180;
-    double EARTH_DIAMETER = 2 * 6378.2;
-    double phi1 = expected.latitude * RAD_CONVERT;
-    double phi2 = actual.latitude * RAD_CONVERT;
-    
-    double delta_phi = (actual.latitude - expected.latitude) * RAD_CONVERT;
-    double delta_lambda = (actual.longitude - actual.longitude) * RAD_CONVERT;
-    
-    double sin_phi = sin(delta_phi / 2);
-    double sin_lambda = sin(delta_lambda / 2);
-    
-    double a = sin_phi * sin_phi + cos(phi1) * cos(phi2) * sin_lambda * sin_lambda;
-    
-    // haversine distance
-    double distance = EARTH_DIAMETER * atan2(sqrt(a), sqrt(1 - a));
-    
+    double distance = [CTUtils haversineDistance:expected coordinateB:actual];
     return distance <= [radius doubleValue];
 }
 

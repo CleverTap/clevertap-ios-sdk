@@ -9,6 +9,30 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "CTTriggersMatcher.h"
+#import "CTEventAdapter.h"
+#import "CTConstants.h"
+#import "CTTriggerEvaluator.h"
+
+@interface CTTriggersMatcher (Tests)
+- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties;
+- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items;
+@end
+
+@implementation CTTriggersMatcher (Tests)
+
+- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
+
+    return [self matchEventWhenTriggers:whenTriggers event:event];
+}
+
+- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:details location:kCLLocationCoordinate2DInvalid andItems:items];
+
+    return [self matchEventWhenTriggers:whenTriggers event:event];
+}
+
+@end
 
 @interface CTTriggersMatcherTest : XCTestCase
 
@@ -741,6 +765,31 @@
             @"price": @5.50
         }
     ]];
+    
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchEventWithGeoRadius {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"geoRadius": @[
+                @{
+                    @"lat": @19.07609,
+                    @"lng": @72.877426,
+                    @"rad": @2
+                }]
+        }
+    ];
+    
+    // Distance ~1km
+    CLLocationCoordinate2D location = CLLocationCoordinate2DMake(19.08609, 72.877426);
+    
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:location];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:event];
     
     XCTAssertTrue(match);
 }

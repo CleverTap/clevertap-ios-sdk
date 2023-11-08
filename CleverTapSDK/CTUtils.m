@@ -1,3 +1,4 @@
+#include <math.h>
 #import "CTUtils.h"
 
 @implementation CTUtils
@@ -97,6 +98,30 @@
    } else {
        dispatch_sync(dispatch_get_main_queue(), block);
    }
+}
+
++ (double)haversineDistance:(CLLocationCoordinate2D)coordinateA coordinateB:(CLLocationCoordinate2D)coordinateB {
+    // The Earth radius ranges from a maximum of about 6378 km (equatorial)
+    // to a minimum of about 6357 km (polar).
+    // A globally-average value is usually considered to be 6371 km (6371e3).
+    // This method uses 6378.2 km as the radius since this is the value
+    // used by the backend and calculations should produce the same result.
+    double EARTH_DIAMETER = 2 * 6378.2;
+    
+    double RAD_CONVERT = M_PI / 180;
+    double phi1 = coordinateA.latitude * RAD_CONVERT;
+    double phi2 = coordinateB.latitude * RAD_CONVERT;
+    
+    double delta_phi = (coordinateB.latitude - coordinateA.latitude) * RAD_CONVERT;
+    double delta_lambda = (coordinateB.longitude - coordinateA.longitude) * RAD_CONVERT;
+    
+    double sin_phi = sin(delta_phi / 2);
+    double sin_lambda = sin(delta_lambda / 2);
+    
+    double a = sin_phi * sin_phi + cos(phi1) * cos(phi2) * sin_lambda * sin_lambda;
+    // Distance in km
+    double distance = EARTH_DIAMETER * atan2(sqrt(a), sqrt(1 - a));
+    return distance;
 }
 
 @end

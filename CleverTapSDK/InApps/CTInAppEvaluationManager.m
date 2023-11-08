@@ -21,9 +21,6 @@
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
 
-// TODO: set the location
-@property (nonatomic, assign) CLLocationCoordinate2D location;
-
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
 

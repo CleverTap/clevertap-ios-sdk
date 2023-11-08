@@ -29,23 +29,23 @@
     return NO;
 }
 
-//- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
-//    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties];
-//
-//    return [self matchEventWhenTriggers:whenTriggers event:event];
-//}
-//
-//- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
-//    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:details andItems:items];
-//
-//    return [self matchEventWhenTriggers:whenTriggers event:event];
-//}
-
 - (BOOL)match:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
     if (![[event eventName] isEqualToString:[trigger eventName]]) {
         return NO;
     }
+    
+    if (![self matchProperties:event trigger:trigger]) {
+        return NO;
+    }
+    
+    if (![self matchGeoRadius:event trigger:trigger]) {
+        return NO;
+    }
+    
+    return YES;
+}
 
+- (BOOL)matchProperties:(CTEventAdapter *)event trigger:(CTTriggerAdapter *)trigger {
     // Property conditions are AND-ed
     NSUInteger propCount = [trigger propertyCount];
     for (NSUInteger i = 0; i < propCount; i++) {
@@ -55,7 +55,7 @@
         BOOL matched;
         @try {
             matched = [CTTriggerEvaluator evaluate:condition.op
-                                 expected:condition.value actual:eventValue];
+                                          expected:condition.value actual:eventValue];
         }
         @catch (NSException *exception) {
             CleverTapLogStaticDebug(@"Error matching triggers for event named %@. Reason: %@", event.eventName, exception.reason);
@@ -64,28 +64,31 @@
             return NO;
         }
     }
-    
-    // GeoRadius conditions are OR-ed
-    NSUInteger geoRadiusCount = [trigger geoRadiusCount];
-    for (NSUInteger i = 0; i < geoRadiusCount; i++) {
-        CTTriggerRadius *triggerRadius = [trigger geoRadiusAtIndex:i];
-        CLLocationCoordinate2D expected = CLLocationCoordinate2DMake([triggerRadius.latitude doubleValue],
-                                                                     [triggerRadius.longitude doubleValue]);
-        
-        BOOL matched;
-        @try {
-            matched = [CTTriggerEvaluator evaluateDistance:triggerRadius.radius expected:expected actual:[event location]];
-        }
-        @catch (NSException *exception) {
-            CleverTapLogStaticDebug(@"Error matching triggers for event named %@. Reason: %@", event.eventName, exception.reason);
-        }
-        if (!matched) {
-            return NO;
-        }
-        
-    }
-
     return YES;
+}
+
+- (BOOL)matchGeoRadius:(CTEventAdapter *)event trigger:(CTTriggerAdapter *)trigger {
+    NSUInteger geoRadiusCount = [trigger geoRadiusCount];
+    if (geoRadiusCount == 0)
+        return YES;
+    
+    if (CLLocationCoordinate2DIsValid([event location])) {
+        // GeoRadius conditions are OR-ed
+        for (NSUInteger i = 0; i < geoRadiusCount; i++) {
+            CTTriggerRadius *triggerRadius = [trigger geoRadiusAtIndex:i];
+            CLLocationCoordinate2D expected = CLLocationCoordinate2DMake([triggerRadius.latitude doubleValue],
+                                                                         [triggerRadius.longitude doubleValue]);
+            @try {
+                if ([CTTriggerEvaluator evaluateDistance:triggerRadius.radius expected:expected actual:[event location]]) {
+                    return YES;
+                }
+            }
+            @catch (NSException *exception) {
+                CleverTapLogStaticDebug(@"Error matching triggers for event named %@. Reason: %@", event.eventName, exception.reason);
+            }
+        }
+    }
+    return NO;
 }
 
 - (BOOL)matchCharged:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
@@ -107,7 +110,6 @@
             }
         }
     }
-    
     return YES;
 }
 

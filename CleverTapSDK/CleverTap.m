@@ -280,7 +280,6 @@ static CTPlistInfo *_plistInfo;
 static NSMutableDictionary<NSString*, CleverTap*> *_instances;
 static CleverTapInstanceConfig *_defaultInstanceConfig;
 static BOOL sharedInstanceErrorLogged;
-static CLLocationCoordinate2D emptyLocation = {-1000.0, -1000.0}; // custom empty definition; will fail the CLLocationCoordinate2DIsValid test
 
 // static here as we may have multiple instances handling inapps
 static CTInAppDisplayViewController *currentDisplayController;
@@ -444,7 +443,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
-        self.userSetLocation = emptyLocation;
+        self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
         // save config to defaults
         [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
@@ -469,6 +468,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             self.inAppFCManager = inAppFCManager;
             self.impressionManager = impressionManager;
             self.inAppEvaluationManager = evaluationManager;
+            self.inAppEvaluationManager.location = self.userSetLocation;
             self.inAppDisplayManager = displayManager;
 
             self.sessionManager = [[CTSessionManager alloc]initWithConfig:self.config impressionManager:self.impressionManager inAppDisplayManager:self.inAppDisplayManager];
@@ -606,6 +606,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)setUserSetLocation:(CLLocationCoordinate2D)location {
     _userSetLocation = location;
+    [self.inAppEvaluationManager setLocation:location];
     if (!self.isAppForeground) return;
     // if in foreground, queue the ping event to transmit location update to server
     // min 10 second interval between location pings

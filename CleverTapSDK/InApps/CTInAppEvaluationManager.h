@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToBatchHeaderDelegate>
 
+@property (nonatomic, assign) CLLocationCoordinate2D location;
+
 - (instancetype)initWithAccountId:(NSString *)accountId
                        deviceInfo:(CTDeviceInfo *)deviceInfo
                    delegateManager:(CTMultiDelegateManager *)delegateManager
