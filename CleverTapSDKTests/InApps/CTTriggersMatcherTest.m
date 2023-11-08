@@ -782,16 +782,51 @@
         }
     ];
     
-    // Distance ~1km
-    CLLocationCoordinate2D location = CLLocationCoordinate2DMake(19.08609, 72.877426);
+    // Distance ~1.1km
+    CLLocationCoordinate2D location1km = CLLocationCoordinate2DMake(19.08609, 72.877426);
     
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:location];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:location1km];
     
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
     
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:event];
-    
     XCTAssertTrue(match);
+    
+    // Distance ~2.2km
+    CLLocationCoordinate2D location2km = CLLocationCoordinate2DMake(19.09609, 72.877426);
+    event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:location2km];
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:event];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchEventWithGeoRadiusButNotParams {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"value": @150
+                }],
+            @"geoRadius": @[
+                @{
+                    @"lat": @19.07609,
+                    @"lng": @72.877426,
+                    @"rad": @2
+                }]
+        }
+    ];
+    
+    // Distance ~1.1km
+    CLLocationCoordinate2D location1km = CLLocationCoordinate2DMake(19.08609, 72.877426);
+    
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{@"prop1": @151} andLocation:location1km];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:event];
+    XCTAssertFalse(match);
 }
 
 @end
