@@ -4,8 +4,7 @@
 @implementation CTUtils
 
 + (NSString *)urlEncodeString:(NSString*)s {
-    
-    if (!s) return nil;    
+    if (!s) return nil;
     NSMutableString *output = [NSMutableString string];
     const unsigned char *source = (const unsigned char *) [s UTF8String];
     int sourceLen = (int) strlen((const char *) source);
@@ -93,11 +92,11 @@
 }
 
 + (void)runSyncMainQueue:(void (^)(void))block {
-   if ([NSThread isMainThread]) {
-       block();
-   } else {
-       dispatch_sync(dispatch_get_main_queue(), block);
-   }
+    if ([NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), block);
+    }
 }
 
 + (double)haversineDistance:(CLLocationCoordinate2D)coordinateA coordinateB:(CLLocationCoordinate2D)coordinateB {
@@ -122,6 +121,25 @@
     // Distance in km
     double distance = EARTH_DIAMETER * atan2(sqrt(a), sqrt(1 - a));
     return distance;
+}
+
++ (NSNumber * _Nullable)numberFromString:(NSString * _Nullable)string {
+    return [CTUtils numberFromString:string withLocale:nil];
+}
+
++ (NSNumber * _Nullable)numberFromString:(NSString * _Nullable)string withLocale:(NSLocale * _Nullable)locale {
+    if (string) {
+        NSScanner *scanner = [NSScanner scannerWithString:string];
+        if (locale) {
+            [scanner setLocale:[NSLocale currentLocale]];
+        }
+        
+        double d = 0;
+        if ([scanner scanDouble:&d] && [scanner isAtEnd]) {
+            return @(d);
+        }
+    }
+    return nil;
 }
 
 @end

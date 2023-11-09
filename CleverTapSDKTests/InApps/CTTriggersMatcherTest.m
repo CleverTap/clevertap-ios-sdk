@@ -82,6 +82,112 @@
     XCTAssertTrue(match);
 }
 
+- (void)testMatchEqualsNumbers {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"value": @150
+                },
+                @{
+                    @"propertyName": @"prop2",
+                    @"operator": @1,
+                    @"value": @"200"
+                },
+                @{
+                    @"propertyName": @"prop3",
+                    @"operator": @1,
+                    @"value": @[@150, @"200", @0.55]
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @150,
+        @"prop2": @200,
+        @"prop3": @200
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"150",
+        @"prop2": @200,
+        @"prop3": @"150"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@150, @"200"],
+        @"prop2": @[@150, @200],
+        @"prop3": @[@"200"]
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"150.00",
+        @"prop2": @[@200.00],
+        @"prop3": @[@"0.55"]
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"150.00",
+        @"prop2": @[@200],
+        @"prop3": @[@"0.56"]
+    }];
+    XCTAssertFalse(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@150],
+        @"prop2": @"200",
+        @"prop3": @[@"56"]
+    }];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchEqualsDouble {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"value": @(150.95)
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @150.950
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"150.950"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@150, @"150.95"]
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"150.96"
+    }];
+    XCTAssertFalse(match);
+}
+
 - (void)testMatchSet {
     NSArray *whenTriggers = @[
         @{
@@ -149,7 +255,7 @@
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedStringVSActualArray {
+- (void)testMatchEqualsExtectedStringWithActualArray {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -166,13 +272,51 @@
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
     
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
-        @"prop1": @[@"test",@"test2"]
+        @"prop1": @[@"test", @"test2"]
     }];
     
     XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@"test1", @"test2"]
+    }];
+    
+    XCTAssertFalse(match);
 }
 
-- (void)testMatchEqualsExtectedNumberVSActualArray {
+- (void)testMatchEqualsExtectedArrayWithActualString {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"value": @[@"test", @"test1"]
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@"test"]
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@"test1"]
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @[@"test2"]
+    }];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchEqualsExtectedNumberWithActualArray {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -189,13 +333,13 @@
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
     
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
-        @"prop1": @[@"test",@150]
+        @"prop1": @[@"test", @150]
     }];
     
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedStringVSActualString {
+- (void)testMatchEqualsExtectedStringWithActualString {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -218,7 +362,7 @@
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedNumberVSActualNumbericalString {
+- (void)testMatchEqualsExtectedNumberWithActualNumbericalString {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -241,7 +385,7 @@
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedNumberVSActualString {
+- (void)testMatchEqualsExtectedNumberWithActualString {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -264,7 +408,7 @@
     XCTAssertFalse(match);
 }
 
-- (void)testMatchEqualsExtectedDoubleVSActualDouble {
+- (void)testMatchEqualsExtectedDoubleWithActualDouble {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -287,7 +431,7 @@
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedDoubleVSActualDoubleString {
+- (void)testMatchEqualsExtectedDoubleWithActualDoubleString {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -310,7 +454,7 @@
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedArrayVSActualArray {
+- (void)testMatchEqualsExtectedArrayWithActualArray {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -318,7 +462,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @[@"test",@"test2",@"test3"]
+                    @"value": @[@"test", @"test2", @"test3"]
                 }
             ]
         }
@@ -327,13 +471,13 @@
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
     
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
-        @"prop1": @[@"test2",@"test3",@"test"]
+        @"prop1": @[@"test2", @"test3", @"test"]
     }];
     
     XCTAssertTrue(match);
 }
 
-- (void)testMatchEqualsExtectedArrayVSActualArrayNumber {
+- (void)testMatchEqualsExtectedArrayWithActualArrayNumber {
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -341,7 +485,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @[@1,@2,@3]
+                    @"value": @[@1, @2, @3]
                 }
             ]
         }
@@ -350,7 +494,7 @@
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
     
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
-        @"prop1": @[@3,@1,@2]
+        @"prop1": @[@3, @1, @2]
     }];
     
     XCTAssertTrue(match);
@@ -377,6 +521,40 @@
     }];
     
     XCTAssertTrue(match);
+    
+    BOOL matchNoProp = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+    }];
+    
+    XCTAssertFalse(matchNoProp);
+}
+
+- (void)testMatchLessThanWithString {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @2,
+                    @"value": @240
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"-120"
+    }];
+    
+    XCTAssertTrue(match);
+    
+    BOOL matchNaN = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"asd"
+    }];
+    
+    XCTAssertFalse(matchNaN);
 }
 
 - (void)testMatchGreaterThan {
@@ -400,6 +578,40 @@
     }];
     
     XCTAssertTrue(match);
+    
+    BOOL matchNoProp = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+    }];
+    
+    XCTAssertFalse(matchNoProp);
+}
+
+- (void)testMatchGreaterThanWithString {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @0,
+                    @"value": @150
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"240"
+    }];
+    
+    XCTAssertTrue(match);
+    
+    BOOL matchNaN = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"asd"
+    }];
+    
+    XCTAssertFalse(matchNaN);
 }
 
 - (void)testMatchBetween {
@@ -423,6 +635,35 @@
     }];
     
     XCTAssertTrue(match);
+}
+
+- (void)testMatchBetweenWithString {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @4,
+                    @"value": @[@100, @240]
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"150"
+    }];
+    
+    XCTAssertTrue(match);
+    
+    BOOL matchNan = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"a150"
+    }];
+    
+    XCTAssertFalse(matchNan);
 }
 
 - (void)testMatchBetweenArrayMoreThan2 {

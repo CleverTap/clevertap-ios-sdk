@@ -129,4 +129,51 @@
     XCTAssertEqual([CTUtils haversineDistance:nebraska coordinateB:nebraska], 0);
 }
 
+- (void)test_numberFromString {
+    XCTAssertNil([CTUtils numberFromString:@"asd"]);
+    
+    XCTAssertNil([CTUtils numberFromString:@"123asd"]);
+    
+    XCTAssertNil([CTUtils numberFromString:@"12.3.asd"]);
+    
+    XCTAssertNil([CTUtils numberFromString:@"asd10"]);
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@" 5 "], @(5));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"5 "], @(5));
+    
+    XCTAssertNil([CTUtils numberFromString:@"12,3"]);
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"010"], @(10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"0.10"], @(0.10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@".10"], @(0.10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"010.10"], @(10.10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-0"], @(0));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-06"], @(-6));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"12.3"], @(12.3));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-12.3"], @(-12.3));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"10"], @(10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-10"], @(-10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"0"], @(0));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"0.0"], @(0.0));
+}
+
+- (void)test_numberFromStringWithLocale {
+    NSLocale *locale = [NSLocale localeWithLocaleIdentifier:@"bg_BG"];
+    XCTAssertEqualObjects([CTUtils numberFromString:@"12,3" withLocale:locale], @(12.3));
+    
+    XCTAssertNil([CTUtils numberFromString:@"12.3" withLocale:locale]);
+}
+
 @end
