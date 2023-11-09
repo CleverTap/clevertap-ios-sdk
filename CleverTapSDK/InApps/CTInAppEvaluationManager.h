@@ -18,11 +18,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToBatchHeaderDelegate>
 
-- (instancetype)initWithAccountId:(NSString *)accountId
-                       deviceInfo:(CTDeviceInfo *)deviceInfo
-                   delegateManager:(CTMultiDelegateManager *)delegateManager
-                impressionManager:(CTImpressionManager *)impressionManager
-              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                    deviceInfo:(CTDeviceInfo *)deviceInfo
+               delegateManager:(CTMultiDelegateManager *)delegateManager
+             impressionManager:(CTImpressionManager *)impressionManager
+           inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;

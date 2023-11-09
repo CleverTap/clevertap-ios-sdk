@@ -456,7 +456,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self addObservers];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            self.inAppStore = [[CTInAppStore alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId];
+            self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceId:self.deviceInfo.deviceId];
             
             CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager];
             
@@ -464,7 +464,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             
             CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self dispatchQueueManager:self.dispatchQueueManager inAppFCManager:inAppFCManager impressionManager:impressionManager];
             
-            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceInfo:self.deviceInfo delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager];
+            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithConfig:self.config deviceInfo:self.deviceInfo delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager];
             
             self.inAppFCManager = inAppFCManager;
             self.impressionManager = impressionManager;

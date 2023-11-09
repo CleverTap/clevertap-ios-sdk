@@ -10,14 +10,17 @@
 #import "CTPreferences.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfigPrivate.h"
+#import "CTInAppImagePrefetchManager.h"
 
 NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";
 
 @interface CTInAppStore()
 
+@property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
+@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
 @property (nonatomic, strong) CTAES *ctAES;
 
 @property (nonatomic, strong) NSArray *clientSideInApps;
@@ -29,13 +32,16 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 @synthesize mode = _mode;
 
-- (instancetype)initWithAccountId:(NSString *)accountId deviceId:(NSString *)deviceId
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                      deviceId:(NSString *)deviceId
 {
     self = [super init];
     if (self) {
-        self.accountId = accountId;
-        self.ctAES = [[CTAES alloc] initWithAccountID:accountId];
+        self.config = config;
+        self.accountId = self.config.accountId;
+        self.ctAES = [[CTAES alloc] initWithAccountID:self.accountId];
         self.deviceId = deviceId;
+        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
     }
     return self;
 }
@@ -64,6 +70,9 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 - (void)removeClientSideInApps {
     @synchronized (self) {
+        // Clear the CS images stored in disk cache
+        [self.imagePrefetchManager clearDiskImages];
+
         _clientSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences removeObjectForKey:storageKey];
@@ -84,6 +93,9 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = clientSideInApps;
         
+        // Preload CS inApp images to disk cache
+        [self.imagePrefetchManager preloadClientSideInAppImages:_clientSideInApps];
+
         NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences putString:encryptedString forKey:storageKey];

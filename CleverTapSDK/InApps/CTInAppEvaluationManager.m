@@ -17,6 +17,7 @@
 
 @interface CTInAppEvaluationManager()
 
+@property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
@@ -40,22 +41,23 @@
 
 @implementation CTInAppEvaluationManager
 
-- (instancetype)initWithAccountId:(NSString *)accountId
-                       deviceInfo:(CTDeviceInfo *)deviceInfo
-                   delegateManager:(CTMultiDelegateManager *)delegateManager
-                impressionManager:(CTImpressionManager *)impressionManager
-              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                    deviceInfo:(CTDeviceInfo *)deviceInfo
+               delegateManager:(CTMultiDelegateManager *)delegateManager
+             impressionManager:(CTImpressionManager *)impressionManager
+           inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager {
     if (self = [super init]) {
+        self.config = config;
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
         
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
-        self.inAppStore = [[CTInAppStore alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
+        self.inAppStore = [[CTInAppStore alloc] initWithConfig:config deviceId:deviceInfo.deviceId];
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
-        self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
+        self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:config.accountId deviceId:deviceInfo.deviceId];
 
         [delegateManager addBatchSentDelegate:self];
         [delegateManager addAttachToHeaderDelegate:self];
