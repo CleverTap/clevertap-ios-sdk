@@ -664,7 +664,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }
         
         NSMutableDictionary *updatedProfile = [self cryptValuesIfNeeded:_profile];
-        [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName] config:_config];
+        [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName] config:self->_config];
     }];
 }
 

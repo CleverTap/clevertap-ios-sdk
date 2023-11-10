@@ -1690,9 +1690,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         } else if ([object isKindOfClass:[NSDictionary class]]) {
             notification = object;
         }
-    } else if ([object isKindOfClass:[UILocalNotification class]]) {
+    }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    else if ([object isKindOfClass:[UILocalNotification class]]) {
         notification = [((UILocalNotification *) object) userInfo];
-    } else if ([object isKindOfClass:[NSDictionary class]]) {
+    }
+#pragma clang diagnostic pop
+    else if ([object isKindOfClass:[NSDictionary class]]) {
         notification = object;
     }
     return notification;
@@ -4711,6 +4716,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)setFeatureFlagsDelegate:(id<CleverTapFeatureFlagsDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapFeatureFlagsDelegate)]) {
         _featureFlagsDelegate = delegate;
@@ -4728,6 +4735,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.featureFlagsDelegate ctFeatureFlagsUpdated];
     }
 }
+#pragma clang diagnostic pop
 
 - (void)fetchFeatureFlags {
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @1}} withType:CleverTapEventTypeFetch];
@@ -4787,6 +4795,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return nil;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapProductConfigDelegate)]) {
         _productConfigDelegate = delegate;
@@ -4816,6 +4826,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self.productConfigDelegate ctProductConfigInitialized];
     }
 }
+#pragma clang diagnostic pop
 
 - (void)fetchProductConfig {
     [self queueEvent:@{@"evtName": CLTAP_WZRK_FETCH_EVENT, @"evtData" : @{@"t": @0}} withType:CleverTapEventTypeFetch];

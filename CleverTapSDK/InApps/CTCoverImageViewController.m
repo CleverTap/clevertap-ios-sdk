@@ -32,7 +32,10 @@
     if (@available(iOS 11.0, *)) {
         topLength = self.view.safeAreaInsets.top;
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         topLength = self.topLayoutGuide.length;
+#pragma clang diagnostic pop
     }
     [[NSLayoutConstraint constraintWithItem: self.closeButton
                                   attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationGreaterThanOrEqual
