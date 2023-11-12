@@ -12,7 +12,20 @@
 @implementation CTTriggerEvaluator
 
 + (BOOL)evaluate:(CTTriggerOperator)op expected:(CTTriggerValue *)expected actual:(CTTriggerValue * __nullable)actual {
+    if ([actual isArray]) {
+        for (id val in [actual arrayValue]) {
+            CTTriggerValue *actualElementValue = [[CTTriggerValue alloc] initWithValue:val];
+            if ([self evaluate:op expected:expected basicActual:actualElementValue]) {
+                return YES;
+            }
+        }
+        return NO;
+    }
     
+    return [self evaluate:op expected:expected basicActual:actual];
+}
+
++ (BOOL)evaluate:(CTTriggerOperator)op expected:(CTTriggerValue *)expected basicActual:(CTTriggerValue * __nullable)actual {
     if (actual == nil) {
         if (op == CTTriggerOperatorNotSet) {
             return YES;
@@ -20,6 +33,8 @@
             return NO;
         }
     }
+    
+    // actual is not nil
     switch (op) {
         case CTTriggerOperatorSet:
             return YES;
@@ -38,7 +53,7 @@
         case CTTriggerOperatorNotContains:
             return ![CTTriggerEvaluator actual:actual containsExpected:expected];
         default:
-            return NO; // TODO: Implement all cases as per the backed evaluation and remove this line
+            return NO;
     }
 }
 
@@ -55,10 +70,10 @@
     return nil;
 }
 
-+ (BOOL)isEqualsStringOrNumber:(id)a with:(id)b {
++ (BOOL)equalsStringOrNumber:(id)a with:(id)b {
     if ([a isKindOfClass:[NSString class]]) {
         if ([b isKindOfClass:[NSString class]]) {
-            return [a isEqualToString:b];
+            return [[self cleanString:a] isEqualToString:[self cleanString:b]];
         } else if ([b isKindOfClass:[NSNumber class]]) {
             NSNumber *aNumber = [CTUtils numberFromString:a];
             if (aNumber && [aNumber compare:b] == NSOrderedSame) {
@@ -80,21 +95,28 @@
     return NO;
 }
 
++ (NSString *)cleanString:(NSString *)string {
+    NSCharacterSet *whitespaceAndNewline = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    return [[string lowercaseString] stringByTrimmingCharactersInSet:whitespaceAndNewline];
+}
+
 + (BOOL)expected:(CTTriggerValue *)expected isLessThan:(CTTriggerValue * __nullable)actual {
-    if ([expected numberValue]) {
-        NSNumber *actualNumber = [self numberFromTriggerValue:actual];
-        if (actualNumber) {
-            return [[expected numberValue] compare:actualNumber] == NSOrderedDescending;
-        }
-    }
-    return NO;
+    return [self expected:expected compareTo:actual withComparisonResult:NSOrderedDescending];
 }
 
 + (BOOL)expected:(CTTriggerValue *)expected isGreaterThan:(CTTriggerValue * __nullable)actual {
-    if ([expected numberValue]) {
+    return [self expected:expected compareTo:actual withComparisonResult:NSOrderedAscending];
+}
+
++ (BOOL)expected:(CTTriggerValue *)expected compareTo:(CTTriggerValue * __nullable)actual withComparisonResult:(NSComparisonResult)comparison {
+    NSNumber *expectedNumber = [expected numberValue];
+    if ([expected isArray] && [[expected arrayValue] count] == 1 && [[expected arrayValue][0] isKindOfClass:[NSNumber class]]) {
+        expectedNumber = [expected arrayValue][0];
+    }
+    if (expectedNumber) {
         NSNumber *actualNumber = [self numberFromTriggerValue:actual];
         if (actualNumber) {
-            return [[expected numberValue] compare:actualNumber] == NSOrderedAscending;
+            return [expectedNumber compare:actualNumber] == comparison;
         }
     }
     return NO;
@@ -102,38 +124,11 @@
 
 + (BOOL)expected:(CTTriggerValue *)expected equalsActual:(CTTriggerValue * __nullable)actual {
     if (![expected isArray] && ![actual isArray]) {
-        return [self isEqualsStringOrNumber:[expected value] with:[actual value]];
+        return [self equalsStringOrNumber:[expected value] with:[actual value]];
     }
-    
-    if ([expected stringValue] && [actual isArray]) {
-        for (id actualValue in [actual arrayValue]) {
-            if ([self isEqualsStringOrNumber:[expected value] with:actualValue]) {
-                return YES;
-            }
-        }
-    }
-    
-    if ([expected numberValue] && [actual isArray]) {
-        for (id actualValue in [actual arrayValue]) {
-            if ([self isEqualsStringOrNumber:[expected value] with:actualValue]) {
-                return YES;
-            }
-        }
-    }
-
-    if ([expected isArray] && [actual isArray]) {
-        for (id expectedValue in [expected arrayValue]) {
-            for (id actualValue in [actual arrayValue]) {
-                if ([self isEqualsStringOrNumber:expectedValue with:actualValue]) {
-                    return YES;
-                }
-            }
-        }
-    }
-    
     if ([expected isArray] && ![actual isArray]) {
         for (id expectedValue in [expected arrayValue]) {
-            if ([self isEqualsStringOrNumber:expectedValue with:[actual value]]) {
+            if ([self equalsStringOrNumber:expectedValue with:[actual value]]) {
                 return YES;
             }
         }
@@ -144,27 +139,11 @@
 
 + (BOOL)actual:(CTTriggerValue *)actual containsExpected:(CTTriggerValue * __nullable)expected {
     if ([expected stringValue] && [actual stringValue]) {
-        return [[actual stringValue] containsString:[expected stringValue]];
+        return [[self cleanString:[actual stringValue]] containsString:[self cleanString:[expected stringValue]]];
     }
     if ([expected isArray] && [actual stringValue]) {
         for (NSString *expectedString in [expected arrayValue]) {
-            if ([[actual stringValue] containsString:expectedString]) {
-                return YES;
-            }
-        }
-    }
-    if ([expected isArray] && [actual isArray]) {
-        for (NSString *expectedString in [expected arrayValue]) {
-            for (NSString *actualString in [actual arrayValue]) {
-                if ([actualString containsString:expectedString]) {
-                    return YES;
-                }
-            }
-        }
-    }
-    if ([expected stringValue] && [actual isArray]) {
-        for (NSString *actualString in [actual arrayValue]) {
-            if ([actualString containsString:[expected stringValue]]) {
+            if ([[self cleanString:[actual stringValue]] containsString:[self cleanString:expectedString]]) {
                 return YES;
             }
         }
@@ -179,7 +158,8 @@
         double valueTo = [triggerRange[1] doubleValue];
         NSNumber *actualNumber = [self numberFromTriggerValue:actual];
         if (actualNumber) {
-            return (valueFrom <= [actualNumber doubleValue] <= valueTo);
+            // this comparison can return <nil> instead of false, check both sides using &&
+            return (valueFrom <= [actualNumber doubleValue]) && ([actualNumber doubleValue] <= valueTo);
         }
     }
     return NO;
