@@ -52,6 +52,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
 
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
+@property (nonatomic, strong) CTInAppStore *inAppStore;
+
 @property (nonatomic, weak) CleverTap* instance;
 
 @end
@@ -61,7 +63,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap * _Nonnull)instance
                             dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
-                         impressionManager:(CTImpressionManager *)impressionManager {
+                         impressionManager:(CTImpressionManager *)impressionManager
+                                inAppStore:(CTInAppStore *)inAppStore {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
@@ -98,17 +101,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
-        NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]]];
-        for (int i = 0; i < [inappNotifs count]; i++) {
-            @try {
-                NSMutableDictionary *inappNotif = [[NSMutableDictionary alloc] initWithDictionary:inappNotifs[i]];
-                [inapps addObject:inappNotif];
-            } @catch (NSException *e) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
-            }
-        }
-        // Commit all the changes
-        [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
+        [self.inAppStore enqueueInApps:inappNotifs];
 
         // Fire the first notification, if any
         [self.dispatchQueueManager runOnNotificationQueue:^{
@@ -173,13 +166,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 
     @try {
-        NSMutableArray *inapps = [[NSMutableArray alloc] initWithArray:[CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]]];
-        if ([inapps count] < 1) {
-            return;
+        NSDictionary *inApp = [self.inAppStore peekInApp];
+        if (inApp) {
+            // Prepare the in-app for display
+            [self prepareNotificationForDisplay:inApp];
+            // Remove in-app after prepare
+            [self.inAppStore dequeInApp];
         }
-        [self prepareNotificationForDisplay:inapps[0]];
-        [inapps removeObjectAtIndex:0];
-        [CTPreferences putObject:inapps forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
     }
@@ -326,11 +319,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }
         [self.inAppNotificationDelegate inAppNotificationDismissedWithExtras:notification.customExtras andActionExtras:extras];
     }
-}
-
-- (void)clearInApps {
-    CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending InApp notifications", self);
-    [CTPreferences putObject:[[NSArray alloc] init] forKey:[CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config]];
 }
 
 #pragma mark - InAppDisplayController static

@@ -41,7 +41,8 @@
                        deviceInfo:(CTDeviceInfo *)deviceInfo
                    delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
-              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager {
+              inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
+                       inAppStore:(CTInAppStore *)inAppStore {
     if (self = [super init]) {
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
@@ -49,7 +50,7 @@
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
         
-        self.inAppStore = [[CTInAppStore alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
+        self.inAppStore = inAppStore;
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];

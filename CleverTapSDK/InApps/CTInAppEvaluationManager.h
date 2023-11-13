@@ -13,6 +13,7 @@
 #import "CTMultiDelegateManager.h"
 #import "CTImpressionManager.h"
 #import "CTInAppDisplayManager.h"
+#import "CTInAppStore.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,7 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
                        deviceInfo:(CTDeviceInfo *)deviceInfo
                    delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
-              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager;
+              inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
+                       inAppStore:(CTInAppStore *)inAppStore;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;

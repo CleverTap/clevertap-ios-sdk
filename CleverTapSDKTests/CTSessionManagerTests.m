@@ -33,7 +33,7 @@
     
     CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"test" deviceId:@"test" delegateManager:delegateManager];
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config delegateManager:[CTMultiDelegateManager new] deviceId:@"test" impressionManager:impressionManager];
-    CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:_instance dispatchQueueManager:[CTDispatchQueueManager new] inAppFCManager:inAppFCManager impressionManager:impressionManager];
+    CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:_config deviceId:@"test"];
     
 //    _classObject = [[CTSessionManager alloc]initWithConfig:_config impressionManager:impressionManager inAppDisplayManager:displayManager];
 //    [_classObject createSession];

@@ -17,7 +17,7 @@
 @interface CTSessionManager()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
-@property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
+@property (nonatomic, strong) CTInAppStore *inAppStore;
 @end
 
 @implementation CTSessionManager
@@ -28,12 +28,12 @@
 @synthesize wzrkParams=_wzrkParams;
 @synthesize firstRequestInSession=_firstRequestInSession;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppStore:(CTInAppStore *)inAppStore {
     if ((self = [super init])) {
         self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
         self.config = config;
         self.impressionManager = impressionManager;
-        self.inAppDisplayManager = inAppDisplayManager;
+        self.inAppStore = inAppStore;
     }
     return self;
 }
@@ -139,7 +139,7 @@
     CleverTapLogInternal(self.config.logLevel, @"%@: previous session length: %d seconds", self, self.lastSessionLengthSeconds);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (![CTUIUtils runningInsideAppExtension]) {
-        [self.inAppDisplayManager clearInApps];
+        [self.inAppStore clearInApps];
     }
 #endif
 }

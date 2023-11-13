@@ -455,15 +455,18 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self addObservers];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            self.inAppStore = [[CTInAppStore alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId];
+            CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceId:self.deviceInfo.deviceId];
+            self.inAppStore = inAppStore;
             
             CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager];
             
             CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager];
             
-            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self dispatchQueueManager:self.dispatchQueueManager inAppFCManager:inAppFCManager impressionManager:impressionManager];
+            CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self
+                                                                                dispatchQueueManager:self.dispatchQueueManager inAppFCManager:inAppFCManager
+                                                                                   impressionManager:impressionManager inAppStore:inAppStore];
             
-            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceInfo:self.deviceInfo delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager];
+            CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceInfo:self.deviceInfo delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore];
             
             self.inAppFCManager = inAppFCManager;
             self.impressionManager = impressionManager;
@@ -471,7 +474,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             self.inAppEvaluationManager.location = self.userSetLocation;
             self.inAppDisplayManager = displayManager;
 
-            self.sessionManager = [[CTSessionManager alloc]initWithConfig:self.config impressionManager:self.impressionManager inAppDisplayManager:self.inAppDisplayManager];
+            self.sessionManager = [[CTSessionManager alloc]initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore];
             
             self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
             [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
