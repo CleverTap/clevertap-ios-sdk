@@ -225,9 +225,8 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [NSArray new];
 }
 
-// TODO: use same key format as for inapp_notifs
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceId, suffix];
+    return [NSString stringWithFormat:@"%@:%@_%@", self.accountId, self.deviceId, suffix];
 }
 
 #pragma mark CTSwitchUserDelegate

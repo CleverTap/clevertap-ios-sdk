@@ -19,6 +19,8 @@
 
 - (void)removeClientSideInApps;
 - (void)removeServerSideInApps;
+
+- (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 @end
 
 @interface CTInAppStoreTest : XCTestCase
@@ -113,11 +115,11 @@
 }
 
 - (NSString *)storageKeyCS {
-    return [NSString stringWithFormat:@"%@_%@_%@", @"testAccountID", @"testDeviceID", @"inapp_notifs_cs"];
+    return [self.store storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
 }
 
 - (NSString *)storageKeySS {
-    return [NSString stringWithFormat:@"%@_%@_%@", @"testAccountID", @"testDeviceID", @"inapp_notifs_ss"];
+    return [self.store storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
 }
 
 - (void)testStoreClientSideInApps {

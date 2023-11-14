@@ -47,7 +47,7 @@
 }
 
 - (NSString *)getTriggersKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@_%@_%@_%@", self.accountId, self.deviceId, @"triggers", campaignId];
+    return [NSString stringWithFormat:@"%@:%@_%@_%@", self.accountId, self.deviceId, @"triggers", campaignId];
 }
 
 @end
