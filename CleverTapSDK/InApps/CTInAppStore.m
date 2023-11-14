@@ -89,17 +89,21 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 }
 
 - (void)enqueueInApps:(NSArray *)inAppNotifs {
-    NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
-    for (int i = 0; i < [inAppNotifs count]; i++) {
-        @try {
-            NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
-            [inAppsQueue addObject:inAppNotif];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+    if (!inAppNotifs) return;
+    
+    @synchronized(self) {
+        NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
+        for (int i = 0; i < [inAppNotifs count]; i++) {
+            @try {
+                NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
+                [inAppsQueue addObject:inAppNotif];
+            } @catch (NSException *e) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+            }
         }
+        // Commit all the changes
+        [self storeInApps:inAppsQueue];
     }
-    // Commit all the changes
-    [self storeInApps:inAppsQueue];
 }
 
 - (NSDictionary *)peekInApp {

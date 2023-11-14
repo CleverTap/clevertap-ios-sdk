@@ -12,27 +12,23 @@
 #import "CTAES.h"
 #import "CTSwitchUserDelegate.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
 @interface CTInAppStore : NSObject <CTSwitchUserDelegate>
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId;
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config deviceId:(NSString * _Nonnull)deviceId;
 
-- (NSArray *)clientSideInApps;
-- (NSArray *)serverSideInApps;
-- (void)storeClientSideInApps:(NSArray *)clientSideInApps;
-- (void)storeServerSideInApps:(NSArray *)serverSideInApps;
+- (NSArray * _Nonnull)clientSideInApps;
+- (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;
 
-// TODO: add nullability
+- (NSArray * _Nonnull)serverSideInApps;
+- (void)storeServerSideInApps:(NSArray * _Nullable)serverSideInApps;
+
 - (void)clearInApps;
-- (void)storeInApps:(NSArray *)inApps;
-- (NSArray *)inAppsQueue;
-- (void)enqueueInApps:(NSArray *)inAppNotifs;
-- (NSDictionary *)peekInApp;
-- (NSDictionary *)dequeInApp;
+- (NSArray * _Nonnull)inAppsQueue;
+- (void)storeInApps:(NSArray * _Nullable)inApps;
+- (void)enqueueInApps:(NSArray * _Nullable)inAppNotifs;
+- (NSDictionary * _Nullable)peekInApp;
+- (NSDictionary * _Nullable)dequeInApp;
 
 @end
-
-NS_ASSUME_NONNULL_END
