@@ -278,7 +278,7 @@
     return self.localInAppCount;
 }
 
-- (BatchHeaderKeyPathValues)onBatchHeaderCreation {
+- (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
         header[CLTAP_INAPP_SHOWN_TODAY_META_KEY] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0]);
