@@ -310,4 +310,61 @@
     XCTAssertTrue(match);
 }
 
+- (void)testMatchMultiple {
+    NSArray *whenLimits = @[
+        @{
+            @"type": @"onExactly",
+            @"limit": @1
+        },
+        @{
+            @"type": @"days",
+            @"limit": @3,
+            @"frequency": @1
+        },
+        @{
+            @"type": @"session",
+            @"limit": @6
+        }
+    ];
+    
+    [self.inAppTriggerManager incrementTrigger:self.testCampaignId];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    for (int i = 0; i < 2; i++) {
+        [self.impressionManager recordImpression:self.testCampaignId];
+    }
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    // Impressions per day no longer match
+    [self.impressionManager recordImpression:self.testCampaignId];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertFalse(match);
+    
+    // Reset impressions and increment trigger, so it will not match
+    [self.impressionManager removeImpressions:self.testCampaignId];
+    [self.inAppTriggerManager incrementTrigger:self.testCampaignId];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchEmpty {
+    NSArray *whenLimits = @[
+        @{
+        }
+    ];
+    BOOL match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    whenLimits = @[
+    ];
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+    
+    whenLimits = nil;
+    match = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:self.testCampaignId withImpressionManager:self.impressionManager andTriggerManager:self.inAppTriggerManager];
+    XCTAssertTrue(match);
+}
+
 @end

@@ -30,6 +30,7 @@ typedef NS_ENUM(NSUInteger, CTLimitType){
 - (CTLimitType)limitType;
 - (NSInteger)limit;
 - (NSInteger)frequency;
+- (BOOL)isEmpty;
 
 @end
 

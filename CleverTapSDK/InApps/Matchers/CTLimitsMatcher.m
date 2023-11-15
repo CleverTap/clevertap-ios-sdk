@@ -17,6 +17,9 @@
     
     for (NSDictionary *limitJSON in whenLimits) {
         CTLimitAdapter *limitAdapter = [[CTLimitAdapter alloc] initWithJSON:limitJSON];
+        if ([limitAdapter isEmpty]) {
+            continue;
+        }
         BOOL matched = [self matchLimit:limitAdapter forCampaignId:campaignId withImpressionManager:impressionManager andTriggerManager:triggerManager];
         if (!matched) {
             return NO;
