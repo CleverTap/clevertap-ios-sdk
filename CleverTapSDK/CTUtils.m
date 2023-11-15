@@ -131,7 +131,7 @@
     if (string) {
         NSScanner *scanner = [NSScanner scannerWithString:string];
         if (locale) {
-            [scanner setLocale:[NSLocale currentLocale]];
+            [scanner setLocale:locale];
         }
         
         double d = 0;
