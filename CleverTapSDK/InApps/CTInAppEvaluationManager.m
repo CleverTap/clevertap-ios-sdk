@@ -6,14 +6,16 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
+#import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
 #import "CTInAppStore.h"
 #import "CTTriggersMatcher.h"
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
+#import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
-#import "CleverTapInternal.h"
+#import "CTUtils.h"
 
 @interface CTInAppEvaluationManager()
 
@@ -113,7 +115,7 @@
 - (void)evaluateServerSide:(CTEventAdapter *)event {
     NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
     for (NSDictionary *inApp in eligibleInApps) {
-        NSString *campaignId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        NSString *campaignId = [CTInAppNotification inAppId:inApp];
         if (campaignId) {
             [self.evaluatedServerSideInAppIds addObject:campaignId];
         }
@@ -123,7 +125,10 @@
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
     for (NSDictionary *inApp in inApps) {
-        NSString *campaignId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        NSString *campaignId = [CTInAppNotification inAppId:inApp];
+        if (!campaignId) {
+            continue;
+        }
         // Match trigger
         NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
@@ -183,7 +188,8 @@
 }
 
 - (void)suppress:(NSDictionary *)inApp {
-    NSString *ti = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+    NSString *ti = [CTInAppNotification inAppId:inApp];
+    if (!ti) return;
     NSString *wzrk_id = [self generateWzrkId:ti];
     NSString *pivot = inApp[CLTAP_NOTIFICATION_PIVOT] ? inApp[CLTAP_NOTIFICATION_PIVOT] : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
     NSNumber *cgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
@@ -205,9 +211,12 @@
     };
     
     NSNumber *(^ti)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
-        NSNumber *ti = inApp[CLTAP_INAPP_ID];
-        if (ti != nil) {
+        id ti = inApp[CLTAP_INAPP_ID];
+        if (ti && [ti isKindOfClass:[NSNumber class]]) {
             return ti;
+        } else if (ti && [ti isKindOfClass:[NSString class]]) {
+            ti = [CTUtils numberFromString:ti];
+            if (ti) return ti;
         }
         return [NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]];
     };

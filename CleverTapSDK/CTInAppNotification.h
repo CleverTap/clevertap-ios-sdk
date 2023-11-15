@@ -63,5 +63,6 @@
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler;
 
++ (NSString * _Nullable)inAppId:(NSDictionary * _Nullable)inApp;
 
 @end

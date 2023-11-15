@@ -90,9 +90,9 @@
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
             self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
-            
-            if (jsonObject[CLTAP_INAPP_ID]) {
-                self.Id = [NSString stringWithFormat:@"%@", jsonObject[CLTAP_INAPP_ID]];
+            NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
+            if (inAppId) {
+                self.Id = inAppId;
             }
             NSString *type = (NSString*) jsonObject[@"type"];
             if (!type || [type isEqualToString:@"custom-html"]) {
@@ -411,6 +411,16 @@
         }
     }
     return FALSE;
+}
+
++ (NSString * _Nullable)inAppId:(NSDictionary * _Nullable)inApp {
+    if (inApp && inApp[CLTAP_INAPP_ID]) {
+        NSString *inAppId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        if ([inAppId length] > 0) {
+            return inAppId;
+        }
+    }
+    return nil;
 }
 
 @end
