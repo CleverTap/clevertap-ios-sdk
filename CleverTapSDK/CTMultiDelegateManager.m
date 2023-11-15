@@ -39,10 +39,10 @@
     [self.attachToHeaderDelegates removeObject:delegate];
 }
 
-- (BatchHeaderKeyPathValues)notifyAttachToHeaderDelegatesAndCollectKeyPathValues {
+- (BatchHeaderKeyPathValues)notifyAttachToHeaderDelegatesAndCollectKeyPathValues:(CTQueueType)queueType {
     NSMutableDictionary<NSString *, id> *header = [NSMutableDictionary dictionary];
     for (id<CTAttachToBatchHeaderDelegate> delegate in self.attachToHeaderDelegates) {
-        NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreation];
+        NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreationForQueue:queueType];
         if (additionalHeader) {
             [header addEntriesFromDictionary:additionalHeader];
         }

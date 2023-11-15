@@ -246,12 +246,18 @@
         [inApp setObject:[NSNumber numberWithLong:ttl] forKey:CLTAP_INAPP_TTL];
     } else {
         // Remove TTL, since it cannot be calculated based on the TTL offset
-        // The deafult TTL will be set in CTInAppNotification
+        // The default TTL will be set in CTInAppNotification
         [inApp removeObjectForKey:CLTAP_INAPP_TTL];
     }
 }
 
-- (BatchHeaderKeyPathValues)onBatchHeaderCreation {
+- (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
+    // Evaluation is done for events only at the moment,
+    // send the evaluated and suppressed ids in that queue header
+    if (queueType != CTQueueTypeEvents) {
+        return [NSMutableDictionary new];
+    }
+    
     NSMutableDictionary *header = [NSMutableDictionary new];
     if ([self.evaluatedServerSideInAppIds count] > 0) {
         header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;

@@ -780,7 +780,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     return endpointUrl;
 }
 
-- (NSDictionary *)batchHeader {
+- (NSDictionary *)batchHeaderForQueue:(CTQueueType)queueType {
     NSDictionary *appFields = [self generateAppFields];
     NSMutableDictionary *header = [@{@"type" : @"meta", @"af" : appFields} mutableCopy];
     
@@ -842,7 +842,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
     
     @try {
-        NSDictionary *additionalHeaders = [[self delegateManager] notifyAttachToHeaderDelegatesAndCollectKeyPathValues];
+        NSDictionary *additionalHeaders = [[self delegateManager] notifyAttachToHeaderDelegatesAndCollectKeyPathValues:queueType];
         for (NSString *keyPath in additionalHeaders) {
             if (![header valueForKeyPath:keyPath]) {
                 [header setValue:additionalHeaders[keyPath] forKeyPath:keyPath];
@@ -1927,9 +1927,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)sendQueues {
     if ([self isMuted] || _offline) return;
-    [self sendQueue:_profileQueue];
-    [self sendQueue:_eventsQueue];
-    [self sendQueue:_notificationsQueue];
+    [self sendQueue:_profileQueue ofType:CTQueueTypeProfile];
+    [self sendQueue:_eventsQueue ofType:CTQueueTypeEvents];
+    [self sendQueue:_notificationsQueue ofType:CTQueueTypeNotifications];
 }
 
 - (void)inflateQueuesAsync {
@@ -2043,7 +2043,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 # pragma mark - Request/Response handling
 
-- (void)sendQueue:(NSMutableArray *)queue {
+- (void)sendQueue:(NSMutableArray *)queue ofType:(CTQueueType)queueType {
     if (queue == nil || ((int) [queue count]) <= 0) {
         CleverTapLogInternal(self.config.logLevel, @"%@: No events in the queue", self);
         return;
@@ -2061,7 +2061,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
-    NSDictionary *header = [self batchHeader];
+    NSDictionary *header = [self batchHeaderForQueue:queueType];
     
     int originalCount = (int) [queue count];
     float numBatches = (float) ceil((float) originalCount / kMaxBatchSize);
@@ -4241,13 +4241,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_syncVars {
-    NSDictionary *meta = [self batchHeader];
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
     NSDictionary *varsPayload = [[self variables] varsPayload];
     NSArray *payload = @[meta,varsPayload];
     
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     
-    NSString *url = [NSString stringWithFormat:@"https://%@/%@",self.domainFactory.redirectDomain, CT_PE_DEFINE_VARS_ENDPOINT];
+    NSString *url = [NSString stringWithFormat:@"https://%@/%@", self.domainFactory.redirectDomain, CT_PE_DEFINE_VARS_ENDPOINT];
     CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:url];
     
     [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
