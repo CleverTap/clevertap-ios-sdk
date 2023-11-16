@@ -726,7 +726,6 @@
 		4E1F156727709848009387AE /* app_inbox.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = app_inbox.json; sourceTree = "<group>"; };
 		4E2BFB9A2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+XCTestCase_Tests.h"; sourceTree = "<group>"; };
 		4E2BFB9B2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+XCTestCase_Tests.m"; sourceTree = "<group>"; };
-		4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTEncryptionTests.h; sourceTree = "<group>"; };
 		4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEncryptionTests.m; sourceTree = "<group>"; };
 		4E41FD89294F441D0001FBED /* CTVar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTVar.h; sourceTree = "<group>"; };
 		4E41FD8C294F46500001FBED /* CTVar-Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CTVar-Internal.h"; sourceTree = "<group>"; };
@@ -1317,8 +1316,6 @@
 				6A4427C42AA6515A0098866F /* CTTriggersMatcherTest.m */,
 				4EFC642A2AB44CF900F01414 /* CTLimitsMatcherTest.m */,
 				6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */,
-				4E2CF1422AC56D8F00441E8B /* CTEncryptionTests.h */,
-				4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */,
 				6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */,
 				6BEEC2CD2AEC49F100BD4EC5 /* CTImpressionManagerTest.m */,
 				6BEEC2CF2AF1A3A900BD4EC5 /* CTClockMock.h */,
@@ -1350,6 +1347,7 @@
 		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */,
 				6A4427C32AA6513C0098866F /* InApps */,
 				6A7BB8DE29E60BE900651584 /* ProductExperiences */,
 				4EDCDE4D278AC4DF0065E699 /* Info.plist */,
