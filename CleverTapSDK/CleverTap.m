@@ -1294,7 +1294,12 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
     if ([self isMuted]) return;
-    [self persistQueues];
+    @try {
+        [self persistOrClearQueues];
+    }
+    @catch (NSException *exception) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
+    }
 }
 
 - (void)_appEnteredForegroundWithLaunchingOptions:(NSDictionary *)launchOptions {
