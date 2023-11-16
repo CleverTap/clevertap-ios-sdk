@@ -12,6 +12,8 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTImpressionManager.h"
 #import "CTInAppFCManager.h"
+#import "CTInAppTriggerManager.h"
+#import "InAppHelper.h"
 
 @interface CTInAppFCManagerTest : XCTestCase
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
@@ -20,9 +22,8 @@
 @implementation CTInAppFCManagerTest
 
 - (void)setUp {
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"accountId" accountToken:@"accountToken"];
-    CTImpressionManager *im = [[CTImpressionManager alloc] initWithAccountId:config.accountId deviceId:@"device" delegateManager:[CTMultiDelegateManager new]];
-    self.inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:config delegateManager:[CTMultiDelegateManager new] deviceId:@"device" impressionManager:im];
+    InAppHelper *helper = [InAppHelper new];
+    self.inAppFCManager = helper.inAppFCManager;
 }
 
 - (void)test_localInAppCount {

@@ -29,6 +29,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) CTInAppStore *inAppStore;
 @property (nonatomic, strong) CTInAppTriggerManager *inAppTriggerManager;
 
+- (NSString *)accountId;
+- (NSString *)accountToken;
+- (NSString *)deviceId;
+- (NSString *)campaignId;
+
 @end
 
 NS_ASSUME_NONNULL_END

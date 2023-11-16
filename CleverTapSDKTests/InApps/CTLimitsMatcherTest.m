@@ -10,6 +10,7 @@
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
 #import "CTClockMock.h"
+#import "InAppHelper.h"
 
 @interface CTLimitsMatcherTest : XCTestCase
 
@@ -25,13 +26,15 @@
 
 - (void)setUp {
     [super setUp];
-    self.testCampaignId = @"testCampaignId";
+    InAppHelper *helper = [InAppHelper new];
+    self.testCampaignId = [helper campaignId];
     self.limitsMatcher = [[CTLimitsMatcher alloc] init];
     CTClockMock *mockClock = [[CTClockMock alloc] initWithCurrentDate:[NSDate date]];
     self.mockClock = mockClock;
-    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"
-                                                            delegateManager:[CTMultiDelegateManager new] clock:mockClock locale:[NSLocale currentLocale]];
-    self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceId"];
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:helper.accountId deviceId:helper.deviceId
+                                                            delegateManager:helper.delegateManager
+                                                                      clock:mockClock locale:[NSLocale currentLocale]];
+    self.inAppTriggerManager = helper.inAppTriggerManager;
 }
 
 - (void)tearDown {
