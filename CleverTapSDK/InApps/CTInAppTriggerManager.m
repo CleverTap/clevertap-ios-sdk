@@ -8,6 +8,7 @@
 
 #import "CTInAppTriggerManager.h"
 #import "CTPreferences.h"
+#import "CTMultiDelegateManager.h"
 
 @interface CTInAppTriggerManager()
 
@@ -19,16 +20,16 @@
 @implementation CTInAppTriggerManager
 
 - (instancetype)initWithAccountId:(NSString *)accountId
-                         deviceId:(NSString *)deviceId {
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager {
     self = [super init];
     if (self) {
         self.accountId = accountId;
         self.deviceId = deviceId;
+        [delegateManager addSwitchUserDelegate:self];
     }
-    
     return self;
 }
-
 
 - (NSUInteger)getTriggers:(NSString *)campaignId {
     NSUInteger savedTriggers = [CTPreferences getIntForKey:[self getTriggersKey:campaignId] withResetValue:0];
@@ -48,6 +49,10 @@
 
 - (NSString *)getTriggersKey:(NSString *)campaignId {
     return [NSString stringWithFormat:@"%@:%@_%@_%@", self.accountId, self.deviceId, @"triggers", campaignId];
+}
+
+- (void)deviceIdDidChange:(NSString *)newDeviceId { 
+    self.deviceId = newDeviceId;
 }
 
 @end

@@ -48,13 +48,14 @@
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
-               impressionManager:(CTImpressionManager *)impressionManager {
+               impressionManager:(CTImpressionManager *)impressionManager
+           inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager {
     if (self = [super init]) {
         _config = config;
         _deviceId = deviceId;
         _impressionManager = impressionManager;
         _limitsMatcher = [[CTLimitsMatcher alloc] init];
-        _triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:config.accountId deviceId:deviceId];
+        _triggerManager = inAppTriggerManager;
         
         [delegateManager addSwitchUserDelegate:self];
         [delegateManager addAttachToHeaderDelegate:self];
@@ -74,7 +75,7 @@
     }
 }
 
-- (NSString *)storageKeyWithSuffix: (NSString *)suffix {
+- (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, self.deviceId];
 }
 

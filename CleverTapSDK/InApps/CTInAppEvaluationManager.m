@@ -6,6 +6,7 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
+#import <CoreLocation/CoreLocation.h>
 #import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
@@ -40,11 +41,11 @@
 @implementation CTInAppEvaluationManager
 
 - (instancetype)initWithAccountId:(NSString *)accountId
-                       deviceInfo:(CTDeviceInfo *)deviceInfo
                    delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
-                       inAppStore:(CTInAppStore *)inAppStore {
+                       inAppStore:(CTInAppStore *)inAppStore
+              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager {
     if (self = [super init]) {
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
@@ -55,7 +56,7 @@
         self.inAppStore = inAppStore;
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
-        self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:accountId deviceId:deviceInfo.deviceId];
+        self.triggerManager = inAppTriggerManager;
 
         [delegateManager addBatchSentDelegate:self];
         [delegateManager addAttachToHeaderDelegate:self];
