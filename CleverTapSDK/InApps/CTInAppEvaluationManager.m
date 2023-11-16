@@ -194,12 +194,14 @@
     NSString *wzrk_id = [self generateWzrkId:ti];
     NSString *pivot = inApp[CLTAP_NOTIFICATION_PIVOT] ? inApp[CLTAP_NOTIFICATION_PIVOT] : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
     NSNumber *cgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
-
-    [self.suppressedClientSideInApps addObject:@{
-        CLTAP_NOTIFICATION_ID_TAG: wzrk_id,
-        CLTAP_NOTIFICATION_PIVOT: pivot,
-        CLTAP_NOTIFICATION_CONTROL_GROUP_ID: cgId
-    }];
+    
+    NSMutableDictionary *suppressedInAppMeta = [NSMutableDictionary new];
+    suppressedInAppMeta[CLTAP_NOTIFICATION_ID_TAG] = wzrk_id;
+    suppressedInAppMeta[CLTAP_NOTIFICATION_PIVOT] = pivot;
+    if (cgId) {
+        suppressedInAppMeta[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = cgId;
+    }
+    [self.suppressedClientSideInApps addObject:suppressedInAppMeta];
 }
 
 - (void)sortByPriority:(NSMutableArray *)inApps {
