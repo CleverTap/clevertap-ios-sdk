@@ -107,7 +107,10 @@
                 CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
             }
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+#pragma clang diagnostic pop
             CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
         }
     }
@@ -137,7 +140,10 @@
                 CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
             }
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+#pragma clang diagnostic pop
             CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
         }
     }
@@ -170,7 +176,10 @@
             CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
         }
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         success = [NSKeyedArchiver archiveRootObject:object toFile:filePath];
+#pragma clang diagnostic pop
         if (!success) {
             CleverTapLogStaticInternal(@"%@ failed to archive data to %@: %@", self, filePath, object);
         }

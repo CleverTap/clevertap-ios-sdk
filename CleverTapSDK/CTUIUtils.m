@@ -76,7 +76,10 @@
     } else if (@available(iOS 13.0, *)) {
         orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
+#pragma clang diagnostic pop
     }
     BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
     return landscape;
