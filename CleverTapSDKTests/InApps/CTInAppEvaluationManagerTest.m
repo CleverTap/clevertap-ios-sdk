@@ -17,25 +17,8 @@
 #import "CTMultiDelegateManager.h"
 #import "InAppHelper.h"
 #import "CTConstants.h"
-
-@interface CTInAppStore(Tests)
-@property (nonatomic, strong) NSArray *serverSideInApps;
-@property (nonatomic, strong) NSArray *clientSideInApps;
-@end
-
-@interface CTInAppEvaluationManager(Test)
-@property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
-@property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
-@property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
-@property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
-- (void)sortByPriority:(NSMutableArray *)inApps;
-- (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
-- (BOOL)shouldSuppress:(NSDictionary *)inApp;
-- (void)suppress:(NSDictionary *)inApp;
-- (NSString *)generateWzrkId:(NSString *)ti;
-- (void)updateTTL:(NSMutableDictionary *)inApp;
-- (void)onAppLaunchedWithSuccess:(BOOL)success;
-@end
+#import "CTInAppStore+Tests.h"
+#import "CTInAppEvaluationManager+Tests.h"
 
 @interface CTInAppDisplayManagerMock : CTInAppDisplayManager
 @property (nonatomic, strong) NSMutableArray *inappNotifs;

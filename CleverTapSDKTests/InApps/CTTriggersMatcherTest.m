@@ -10,29 +10,8 @@
 #import <XCTest/XCTest.h>
 #import "CTTriggersMatcher.h"
 #import "CTEventAdapter.h"
-#import "CTConstants.h"
 #import "CTTriggerEvaluator.h"
-
-@interface CTTriggersMatcher (Tests)
-- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties;
-- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items;
-@end
-
-@implementation CTTriggersMatcher (Tests)
-
-- (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers eventName:(NSString *)eventName eventProperties:(NSDictionary *)eventProperties {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
-
-    return [self matchEventWhenTriggers:whenTriggers event:event];
-}
-
-- (BOOL)matchChargedEventWhenTriggers:(NSArray *)whenTriggers details:(NSDictionary *)details items:(NSArray<NSDictionary *> *)items {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:details location:kCLLocationCoordinate2DInvalid andItems:items];
-
-    return [self matchEventWhenTriggers:whenTriggers event:event];
-}
-
-@end
+#import "CTTriggersMatcher+Tests.h"
 
 @interface CTTriggersMatcherTest : XCTestCase
 

@@ -12,16 +12,7 @@
 #import "CTPreferences.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
-
-@interface CTInAppStore(Tests)
-@property (nonatomic, strong) NSArray *serverSideInApps;
-@property (nonatomic, strong) NSArray *clientSideInApps;
-
-- (void)removeClientSideInApps;
-- (void)removeServerSideInApps;
-
-- (NSString *)storageKeyWithSuffix:(NSString *)suffix;
-@end
+#import "CTInAppStore+Tests.h"
 
 @interface CTInAppStoreTest : XCTestCase
 @property (nonatomic, strong) CTInAppStore *store;
