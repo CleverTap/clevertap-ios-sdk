@@ -118,7 +118,10 @@
     for (NSDictionary *inApp in eligibleInApps) {
         NSString *campaignId = [CTInAppNotification inAppId:inApp];
         if (campaignId) {
-            [self.evaluatedServerSideInAppIds addObject:campaignId];
+            NSNumber *cid = [CTUtils numberFromString:campaignId];
+            if (cid) {
+                [self.evaluatedServerSideInAppIds addObject:cid];
+            }
         }
     }
 }
