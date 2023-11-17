@@ -1359,9 +1359,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
     
     @try {
-        [self persistOrClearQueues];
-        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-        finishTaskHandler();
+        [self runSerialAsync:^{
+            if (![self isMuted]) {
+                [self persistOrClearQueues];
+            }
+            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+            finishTaskHandler();
+        }];
     }
     @catch (NSException *exception) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
