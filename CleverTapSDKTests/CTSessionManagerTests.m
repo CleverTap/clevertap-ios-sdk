@@ -27,16 +27,8 @@
     id utils = OCMClassMock([CTUIUtils class]);
     OCMStub([utils runningInsideAppExtension]).andReturn(NO);
     
-    _config = [[CleverTapInstanceConfig alloc]initWithAccountId:@"test" accountToken:@"test"];
+    _config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"test" accountToken:@"test"];
     _instance = [CleverTap instanceWithConfig:_config];
-    CTMultiDelegateManager *delegateManager = [CTMultiDelegateManager new];
-    
-    CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"test" deviceId:@"test" delegateManager:delegateManager];
-    CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:_config delegateManager:[CTMultiDelegateManager new] deviceId:@"test" impressionManager:impressionManager];
-    CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:_config deviceId:@"test"];
-    
-//    _classObject = [[CTSessionManager alloc]initWithConfig:_config impressionManager:impressionManager inAppDisplayManager:displayManager];
-//    [_classObject createSession];
     [_instance.sessionManager createSession];
 }
 
