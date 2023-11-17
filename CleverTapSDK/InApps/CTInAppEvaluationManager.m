@@ -175,15 +175,17 @@
 
 - (void)removeSentEvaluatedServerSideInAppIds:(NSDictionary *)header {
     NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_META_KEY];
-    if (inapps_eval) {
-        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, inapps_eval.count)];
+    if (inapps_eval && [inapps_eval count] > 0) {
+        NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIds.count ?  self.evaluatedServerSideInAppIds.count : inapps_eval.count;
+        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, len)];
     }
 }
 
 - (void)removeSentSuppressedClientSideInApps:(NSDictionary *)header {
     NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
-    if (suppresed_inapps) {
-        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, suppresed_inapps.count)];
+    if (suppresed_inapps && [suppresed_inapps count] > 0) {
+        NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInApps.count ?  self.suppressedClientSideInApps.count : suppresed_inapps.count;
+        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, len)];
     }
 }
 
