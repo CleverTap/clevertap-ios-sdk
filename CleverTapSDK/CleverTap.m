@@ -2752,12 +2752,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (void)persistQueues {
-    [self runSerialAsync:^{
-        [self persistOrClearQueues];
-    }];
-}
-
 - (void)persistEventsQueue {
     NSString *fileName = [self eventsFileName];
     NSMutableArray *eventsCopy;
