@@ -11,9 +11,13 @@
 
 @interface CTInAppFCManager(Tests)
 @property (atomic, strong) CTImpressionManager *impressionManager;
+@property (atomic, strong) NSMutableDictionary *inAppCounts;
 - (int)globalSessionMax;
-- (int)shownThisSession;
 - (BOOL)hasSessionCapacityMaxedOut:(CTInAppNotification *)inapp;
+- (void)recordImpression:(NSString *)inAppId;
+- (void)resetDailyCounters:(NSString *)today;
+- (NSString *)todaysFormattedDate;
+- (int)shownTodayCount;
 @end
 
 #endif /* CTInAppFCManager_Tests_h */

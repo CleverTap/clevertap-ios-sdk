@@ -10,6 +10,9 @@
 #define CTImpressionManager_Tests_h
 
 @interface CTImpressionManager(Tests)
+@property (nonatomic, strong) NSMutableDictionary *sessionImpressions;
+@property (nonatomic, strong) NSMutableDictionary *impressions;
+@property (nonatomic, assign) int sessionImpressionsTotal;
 - (NSInteger)getImpressionCount:(NSString *)campaignId;
 @end
 

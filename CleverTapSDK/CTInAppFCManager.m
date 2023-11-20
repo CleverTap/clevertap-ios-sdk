@@ -46,9 +46,9 @@
 @implementation CTInAppFCManager
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                 delegateManager:(CTMultiDelegateManager *)delegateManager
+               delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
-               impressionManager:(CTImpressionManager *)impressionManager
+             impressionManager:(CTImpressionManager *)impressionManager
            inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager {
     if (self = [super init]) {
         _config = config;
@@ -97,23 +97,36 @@
     }
 }
 
+- (int)globalSessionMax {
+    return (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_SESSION_MAX_KEY] withResetValue:1];
+}
+
+- (int)maxPerDayCount {
+    return (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY] withResetValue:1];
+}
+
+- (int)shownTodayCount {
+    return (int) [CTPreferences getIntForKey:
+                  [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
+}
+
 - (BOOL)hasSessionCapacityMaxedOut:(CTInAppNotification *)inapp {
-    if (!inapp.Id) return false;
-    
+    if (!inapp.Id) return NO;
+     
     // 1. Has the session max count for this inapp been breached?
     int inAppMaxPerSession = inapp.maxPerSession >= 0 ? inapp.maxPerSession : 1000;
     int inAppPerSession = (int)[self.impressionManager perSession:inapp.Id];
-    if (inAppPerSession >= inAppMaxPerSession) {
+    if (inAppPerSession > 0 && inAppPerSession >= inAppMaxPerSession) {
         return YES;
     }
     
     // 2. Have we shown enough of in-apps this session?
-    int globalSessionMax = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_SESSION_MAX_KEY] withResetValue:1];
+    int globalSessionMax = [self globalSessionMax];
     int shownThisSession = (int) [[self impressionManager] perSessionTotal];
-    if (shownThisSession >= globalSessionMax) return true;
+    if (shownThisSession >= globalSessionMax) return YES;
     
     // Session capacity has not been breached
-    return false;
+    return NO;
 }
 
 - (BOOL)hasLifetimeCapacityMaxedOut:(CTInAppNotification *)inapp {
@@ -126,22 +139,21 @@
 }
 
 - (BOOL)hasDailyCapacityMaxedOut:(CTInAppNotification *)inapp {
-    if (!inapp.Id) return false;
+    if (!inapp.Id) return NO;
     
     // 1. Has the daily count maxed out globally?
-    int shownTodayCount = (int) [CTPreferences getIntForKey:
-                                 [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
-    int maxPerDayCount = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY] withResetValue:1];
-    if (shownTodayCount >= maxPerDayCount) return true;
+    int shownTodayCount = [self shownTodayCount];
+    int maxPerDayCount = [self maxPerDayCount];
+    if (shownTodayCount >= maxPerDayCount) return YES;
     
     // 2. Has the daily count been maxed out for this inapp?
     int maxPerDay = inapp.totalDailyCount;
-    if (maxPerDay == -1) return false;
+    if (maxPerDay == -1) return NO;
     
     NSArray *counts = self.inAppCounts[inapp.Id];
-    if ([counts[0] intValue] >= maxPerDay) return true;
+    if ([counts[0] intValue] >= maxPerDay) return YES;
     
-    return false;
+    return NO;
 }
 
 - (BOOL)hasInAppFrequencyLimitsMaxedOut:(CTInAppNotification *)inApp {
@@ -265,7 +277,7 @@
 }
 
 - (void)incrementShownToday {
-    int shownToday = (int) [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
+    int shownToday = [self shownTodayCount];
     [CTPreferences putInt:shownToday + 1 forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY]];
 }
 
@@ -278,11 +290,11 @@
     self.localInAppCount = (int) [CTPreferences getIntForKey:CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY withResetValue:0];
     return self.localInAppCount;
 }
-
+// TODO: add pragma marks
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
-        header[CLTAP_INAPP_SHOWN_TODAY_META_KEY] = @([CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY] withResetValue:0]);
+        header[CLTAP_INAPP_SHOWN_TODAY_META_KEY] = @([self shownTodayCount]);
 
         NSMutableArray *arr = [NSMutableArray new];
         NSArray *keys = [self.inAppCounts allKeys];
