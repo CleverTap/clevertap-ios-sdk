@@ -90,7 +90,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     localProfileUpdateExpiryStore = [NSMutableDictionary new];
     localProfileForSession = [NSMutableDictionary dictionary];
     // this will remove the old profile from the file system
-    [self _persistLocalProfileAsync];
+    [self _persistLocalProfileAsyncWithCompletion:nil];
     [self clearStoredEvents];
 }
 
@@ -645,12 +645,12 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             }
         }
         if (shouldPersist) {
-            [self _persistLocalProfileAsync];
+            [self _persistLocalProfileAsyncWithCompletion:nil];
         }
     }];
 }
 
-- (void)_persistLocalProfileAsync {
+- (void)_persistLocalProfileAsyncWithCompletion:(void (^ _Nullable )(void))taskBlock {
     [self runOnBackgroundQueue:^{
         NSMutableDictionary *_profile;
         
@@ -666,6 +666,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         
         NSMutableDictionary *updatedProfile = [self cryptValuesIfNeeded:_profile];
         [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName] config:self->_config];
+        if (taskBlock) {
+            taskBlock();
+        }
     }];
 }
 
@@ -683,8 +686,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
     
     @try {
-        [self _persistLocalProfileAsync];
-        finishTaskHandler();
+        [self _persistLocalProfileAsyncWithCompletion:finishTaskHandler];
     }
     @catch (NSException *exception) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
