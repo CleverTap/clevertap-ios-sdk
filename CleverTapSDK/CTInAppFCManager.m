@@ -90,6 +90,7 @@
     [self initInAppCounts];
 }
 
+#pragma mark Session, Daily and Global limits
 - (void)checkUpdateDailyLimits {
     NSString *today = [self todaysFormattedDate];
     if ([self shouldResetDailyCounters:today]) {
@@ -290,7 +291,8 @@
     self.localInAppCount = (int) [CTPreferences getIntForKey:CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY withResetValue:0];
     return self.localInAppCount;
 }
-// TODO: add pragma marks
+
+#pragma mark AttachToBatchHeader delegate
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
     @try {
