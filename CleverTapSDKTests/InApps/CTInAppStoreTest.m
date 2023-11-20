@@ -13,6 +13,7 @@
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppStore+Tests.h"
+#import "InAppHelper.h"
 
 @interface CTInAppStoreTest : XCTestCase
 @property (nonatomic, strong) CTInAppStore *store;
@@ -25,10 +26,10 @@
 
 - (void)setUp {
     [super setUp];
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountID" accountToken:@"testAccountToken"];
-    self.config = config;
-    self.store = [[CTInAppStore alloc] initWithConfig:config deviceId:@"testDeviceID"];
-    self.ctAES = [[CTAES alloc] initWithAccountID:@"testAccountID"];
+    InAppHelper *helper = [[InAppHelper alloc] init];
+    self.config = helper.config;
+    self.store = helper.inAppStore;
+    self.ctAES = [[CTAES alloc] initWithAccountID:helper.accountId];
     self.inApps = @[
         @{
             @"ti": @1698073146,
@@ -102,7 +103,7 @@
 }
 
 - (NSString *)storageKeyInAppNotifs {
-    return [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+    return [self.store storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
 }
 
 - (NSString *)storageKeyCS {
@@ -277,7 +278,7 @@
     XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyCS]]);
 }
 
-- (void)test1 {
+- (void)testInAppsQueue {
     NSArray *inApps = @[
         @{
             @"ti": @1
@@ -314,6 +315,32 @@
     XCTAssertEqual([[self.store inAppsQueue] count], 0);
     inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
     XCTAssertEqual([inAppsFromStorage count], 0);
+}
+
+- (void)testInAppsQueueMigration {
+    NSArray *inApps = @[
+        @{
+            @"ti": @1
+        },
+        @{
+            @"ti": @2
+        },
+        @{
+            @"ti": @3
+        }
+    ];
+
+    XCTAssertEqual([[self.store inAppsQueue] count], 0);
+    NSString *oldKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+    [CTPreferences putObject:inApps forKey:oldKey];
+
+    [self.store migrateInAppQueueKeys];
+    XCTAssertEqual([[self.store inAppsQueue] count], 3);
+    NSArray *inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
+    XCTAssertEqual([inAppsFromStorage count], 3);
+    
+    NSArray *inAppsFromStorageUsingOldKey = [CTPreferences getObjectForKey:oldKey];
+    XCTAssertNil(inAppsFromStorageUsingOldKey);
 }
 
 @end

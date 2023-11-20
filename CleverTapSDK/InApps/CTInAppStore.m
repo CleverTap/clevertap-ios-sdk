@@ -39,16 +39,34 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.accountId = config.accountId;
         self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
         self.deviceId = deviceId;
+        
+        [self migrateInAppQueueKeys];
     }
     return self;
 }
 
 #pragma mark In-App Notifs Queue
+- (void)migrateInAppQueueKeys {
+    @synchronized(self) {
+        NSString *storageKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+        id data = [CTPreferences getObjectForKey:storageKey];
+        if (data) {
+            if ([data isKindOfClass:[NSArray class]]) {
+                _inAppsQueue = data;
+                NSString *encryptedString = [self.ctAES getEncryptedBase64String:data];
+                NSString *newStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
+                [CTPreferences putString:encryptedString forKey:newStorageKey];
+            }
+            [CTPreferences removeObjectForKey:storageKey];
+        }
+    }
+}
+
 - (void)clearInApps {
     @synchronized (self) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending InApp notifications", self);
         _inAppsQueue = [NSArray new];
-        NSString *storageKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences removeObjectForKey:storageKey];
     }
 }
@@ -60,7 +78,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         _inAppsQueue = inApps;
         
         NSString *encryptedString = [self.ctAES getEncryptedBase64String:inApps];
-        NSString *storageKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
 }
@@ -69,15 +87,13 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized(self) {
         if (_inAppsQueue) return _inAppsQueue;
         
-        NSString *storageKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         id data = [CTPreferences getObjectForKey:storageKey];
         if ([data isKindOfClass:[NSString class]]) {
             NSArray *arr = [self.ctAES getDecryptedObject:data];
             if (arr) {
                 _inAppsQueue = arr;
             }
-        } else if ([data isKindOfClass:[NSArray class]]) {
-            _inAppsQueue = data;
         }
         
         if (!_inAppsQueue) {

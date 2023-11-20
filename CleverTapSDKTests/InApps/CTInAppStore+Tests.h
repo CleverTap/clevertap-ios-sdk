@@ -15,6 +15,7 @@
 
 - (void)removeClientSideInApps;
 - (void)removeServerSideInApps;
+- (void)migrateInAppQueueKeys;
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 @end
