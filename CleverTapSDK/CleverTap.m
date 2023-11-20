@@ -1294,11 +1294,26 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
     if ([self isMuted]) return;
+
+    UIApplication *application = [[self class]getSharedApplication];
+    UIBackgroundTaskIdentifier __block backgroundTask;
+    
+    void (^finishTaskHandler)(void) = ^(){
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [application endBackgroundTask:backgroundTask];
+            backgroundTask = UIBackgroundTaskInvalid;
+        });
+    };
+    backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
     @try {
-        [self persistOrClearQueues];
+        [self runSerialAsync:^{
+            [self persistOrClearQueues];
+            finishTaskHandler();
+        }];
     }
     @catch (NSException *exception) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
+        finishTaskHandler();
     }
 }
 
