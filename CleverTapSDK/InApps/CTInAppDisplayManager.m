@@ -70,6 +70,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
+        self.inAppStore = inAppStore;
     }
     return self;
 }
