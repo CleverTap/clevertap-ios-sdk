@@ -57,7 +57,7 @@
 }
 
 - (CTTriggerCondition * _Nonnull)triggerConditionFromJSON:(NSDictionary *)property {
-    CTTriggerValue *value = [[CTTriggerValue alloc] initWithValue:property[@"value"]];
+    CTTriggerValue *value = [[CTTriggerValue alloc] initWithValue:property[@"propertyValue"]];
     
     NSUInteger operator = CTTriggerOperatorEquals;
     NSNumber *op = property[@"operator"];

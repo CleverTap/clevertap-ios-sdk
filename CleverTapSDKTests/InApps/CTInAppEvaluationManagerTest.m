@@ -220,7 +220,7 @@
                     @{
                         @"propertyName": @"key",
                         @"operator": @1,
-                        @"value": @"value"
+                        @"propertyValue": @"value"
                     }]
             }],
             @"frequencyLimits": @[
@@ -243,7 +243,7 @@
                     @{
                         @"propertyName": @"key",
                         @"operator": @1,
-                        @"value": @"value"
+                        @"propertyValue": @"value"
                     }]
             }]
         },

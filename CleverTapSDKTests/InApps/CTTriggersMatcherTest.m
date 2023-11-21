@@ -28,32 +28,32 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @0,
-                    @"value": @150
+                    @"propertyValue": @150
                 },
                 @{
                     @"propertyName": @"prop2",
                     @"operator": @1,
-                    @"value": @"Equals"
+                    @"propertyValue": @"Equals"
                 },
                 @{
                     @"propertyName": @"prop3",
                     @"operator": @2,
-                    @"value": @150
+                    @"propertyValue": @150
                 },
                 @{
                     @"propertyName": @"prop4",
                     @"operator": @3,
-                    @"value": @"Contains"
+                    @"propertyValue": @"Contains"
                 },
                 @{
                     @"propertyName": @"prop5",
                     @"operator": @4,
-                    @"value": @[@1, @3]
+                    @"propertyValue": @[@1, @3]
                 },
                 @{
                     @"propertyName": @"prop6",
                     @"operator": @15,
-                    @"value": @"NotEquals"
+                    @"propertyValue": @"NotEquals"
                 },
                 @{
                     @"propertyName": @"prop7",
@@ -66,7 +66,7 @@
                 @{
                     @"propertyName": @"prop9",
                     @"operator": @28,
-                    @"value": @"NotContains"
+                    @"propertyValue": @"NotContains"
                 }
             ]
         }
@@ -134,7 +134,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @"test"
+                    @"propertyValue": @"test"
                 }],
         }
     ];
@@ -155,13 +155,13 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }],
             @"itemProperties": @[
                 @{
                     @"propertyName": @"product_name",
                     @"operator": @1,
-                    @"value": @"product 1"
+                    @"propertyValue": @"product 1"
                 }]
         }
     ];
@@ -192,7 +192,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }],
             @"itemProperties": @[]
         }
@@ -205,7 +205,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }]
         }
     ];
@@ -260,13 +260,13 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }],
             @"itemProperties": @[
                 @{
                     @"propertyName": @"product_name",
                     @"operator": @1,
-                    @"value": @[@"product 1", @"product 2"]
+                    @"propertyValue": @[@"product 1", @"product 2"]
                 }]
         }
     ];
@@ -298,13 +298,13 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }],
             @"itemProperties": @[
                 @{
                     @"propertyName": @"product_name",
                     @"operator": @3,
-                    @"value": @[@"product 1", @"product 2"]
+                    @"propertyValue": @[@"product 1", @"product 2"]
                 }]
         }
     ];
@@ -338,22 +338,22 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 },
                 @{
                     @"propertyName": @"prop2",
                     @"operator": @1,
-                    @"value": @200
+                    @"propertyValue": @200
                 },
                 @{
                     @"propertyName": @"prop3",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 },
                 @{
                     @"propertyName": @"prop4",
                     @"operator": @1,
-                    @"value": @"CleverTap"
+                    @"propertyValue": @"CleverTap"
                 }
             ]
         }
@@ -379,17 +379,17 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 },
                 @{
                     @"propertyName": @"prop2",
                     @"operator": @1,
-                    @"value": @"200"
+                    @"propertyValue": @"200"
                 },
                 @{
                     @"propertyName": @"prop3",
                     @"operator": @1,
-                    @"value": @[@150, @"200", @0.55]
+                    @"propertyValue": @[@150, @"200", @0.55]
                 }
             ]
         }
@@ -448,17 +448,17 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 },
                 @{
                     @"propertyName": @"prop2",
                     @"operator": @1,
-                    @"value": @"200"
+                    @"propertyValue": @"200"
                 },
                 @{
                     @"propertyName": @"prop3",
                     @"operator": @1,
-                    @"value": @[@150, @"200", @0.55]
+                    @"propertyValue": @[@150, @"200", @0.55]
                 }
             ]
         }
@@ -505,7 +505,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @(150.95)
+                    @"propertyValue": @(150.95)
                 }
             ]
         }
@@ -537,7 +537,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @"test"
+                    @"propertyValue": @"test"
                 }
             ]
         }
@@ -566,7 +566,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @[@"test", @"test1"]
+                    @"propertyValue": @[@"test", @"test1"]
                 }
             ]
         }
@@ -598,7 +598,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }
             ]
         }
@@ -621,7 +621,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @"test"
+                    @"propertyValue": @"test"
                 }
             ]
         }
@@ -663,7 +663,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }
             ]
         }
@@ -685,7 +685,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150.99
+                    @"propertyValue": @150.99
                 }
             ]
         }
@@ -708,7 +708,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150.99
+                    @"propertyValue": @150.99
                 }
             ]
         }
@@ -731,7 +731,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @[@"test", @"test2", @"test3"]
+                    @"propertyValue": @[@"test", @"test2", @"test3"]
                 }
             ]
         }
@@ -754,7 +754,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @[@1, @2, @3]
+                    @"propertyValue": @[@1, @2, @3]
                 }
             ]
         }
@@ -889,7 +889,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @15,
-                    @"value": @150
+                    @"propertyValue": @150
                 }
             ]
         }
@@ -916,7 +916,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @15,
-                    @"value": @[@150, @240]
+                    @"propertyValue": @[@150, @240]
                 }
             ]
         }
@@ -945,7 +945,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @2,
-                    @"value": @240
+                    @"propertyValue": @240
                 }
             ]
         }
@@ -973,7 +973,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @2,
-                    @"value": @240
+                    @"propertyValue": @240
                 }
             ]
         }
@@ -1002,7 +1002,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @2,
-                    @"value": @[@240]
+                    @"propertyValue": @[@240]
                 }
             ]
         }
@@ -1027,7 +1027,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @2,
-                    @"value": @[@240, @500]
+                    @"propertyValue": @[@240, @500]
                 }
             ]
         }
@@ -1048,7 +1048,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @0,
-                    @"value": @150
+                    @"propertyValue": @150
                 }
             ]
         }
@@ -1076,7 +1076,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @0,
-                    @"value": @150
+                    @"propertyValue": @150
                 }
             ]
         }
@@ -1105,7 +1105,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @0,
-                    @"value": @[@240]
+                    @"propertyValue": @[@240]
                 }
             ]
         }
@@ -1130,7 +1130,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @0,
-                    @"value": @[@240, @500]
+                    @"propertyValue": @[@240, @500]
                 }
             ]
         }
@@ -1151,7 +1151,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @4,
-                    @"value": @[@100, @240]
+                    @"propertyValue": @[@100, @240]
                 }
             ]
         }
@@ -1204,7 +1204,7 @@
                 @{
                     @"propertyName": @"item1",
                     @"operator": @4,
-                    @"value": @[@100, @240]
+                    @"propertyValue": @[@100, @240]
                 }
             ]
         }
@@ -1241,7 +1241,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @4,
-                    @"value": @[@100, @240, @330, @"test"]
+                    @"propertyValue": @[@100, @240, @330, @"test"]
                 }
             ]
         }
@@ -1264,7 +1264,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @4,
-                    @"value": @[]
+                    @"propertyValue": @[]
                 }
             ]
         }
@@ -1288,7 +1288,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @3,
-                    @"value": @"clever"
+                    @"propertyValue": @"clever"
                 }
             ]
         }
@@ -1315,7 +1315,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @3,
-                    @"value": @[@"clever", @"test"]
+                    @"propertyValue": @[@"clever", @"test"]
                 }
             ]
         }
@@ -1338,7 +1338,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @3,
-                    @"value": @[]
+                    @"propertyValue": @[]
                 }
             ]
         }
@@ -1361,7 +1361,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @3,
-                    @"value": @"clever"
+                    @"propertyValue": @"clever"
                 }
             ]
         }
@@ -1385,7 +1385,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @28,
-                    @"value": @[@"testing", @"test"]
+                    @"propertyValue": @[@"testing", @"test"]
                 }
             ]
         }
@@ -1418,7 +1418,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @28,
-                    @"value": @[@"testing", @"test"]
+                    @"propertyValue": @[@"testing", @"test"]
                 }
             ]
         }
@@ -1441,7 +1441,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @28,
-                    @"value": @"test"
+                    @"propertyValue": @"test"
                 }
             ]
         }
@@ -1495,7 +1495,7 @@
                 @{
                     @"propertyName": @"prop1",
                     @"operator": @1,
-                    @"value": @150
+                    @"propertyValue": @150
                 }],
             @"geoRadius": @[
                 @{
