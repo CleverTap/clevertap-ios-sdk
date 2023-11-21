@@ -1,6 +1,7 @@
 
 #import "CleverTap.h"
 #import "CTUtils.h"
+#import "CTUIUtils.h"
 #import "CTLogger.h"
 #import "CTSwizzle.h"
 #import "CTConstants.h"
@@ -360,7 +361,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)swizzleAppDelegate {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        UIApplication *sharedApplication = [self getSharedApplication];
+        UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
         if (sharedApplication == nil) {
             return;
         }
@@ -785,16 +786,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-+ (UIApplication *)getSharedApplication {
-    Class UIApplicationClass = NSClassFromString(@"UIApplication");
-    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
-        return [UIApplication performSelector:@selector(sharedApplication)];
-    }
-    return nil;
-}
-
 + (BOOL)runningInsideAppExtension {
-    return [self getSharedApplication] == nil;
+    return [CTUIUtils getSharedApplication] == nil;
 }
 
 - (void)addObservers {
@@ -1294,7 +1287,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
     if ([self isMuted]) return;
-    [self persistQueues];
+    [self persistOrClearQueues];
 }
 
 - (void)_appEnteredForegroundWithLaunchingOptions:(NSDictionary *)launchOptions {
@@ -1341,7 +1334,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 - (void)_appEnteredBackground {
     self.isAppForeground = NO;
     
-    UIApplication *application = [[self class]getSharedApplication];
+    UIApplication *application = [CTUIUtils getSharedApplication];
     UIBackgroundTaskIdentifier __block backgroundTask;
     
     void (^finishTaskHandler)(void) = ^(){
@@ -1354,9 +1347,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
     
     @try {
-        [self persistOrClearQueues];
-        [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-        finishTaskHandler();
+        [self runSerialAsync:^{
+            if (![self isMuted]) {
+                [self persistOrClearQueues];
+            }
+            [self updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+            finishTaskHandler();
+        }];
     }
     @catch (NSException *exception) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
@@ -1522,7 +1519,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     
     dispatch_async(dispatch_get_main_queue(), ^{
         // determine application state
-        UIApplication *application = [[self class] getSharedApplication];
+        UIApplication *application = [CTUIUtils getSharedApplication];
         if (application != nil) {
             BOOL inForeground = !(application.applicationState == UIApplicationStateInactive || application.applicationState == UIApplicationStateBackground);
             
@@ -1601,7 +1598,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)_checkAndFireDeepLinkForNotification:(NSDictionary *)notification {
-    UIApplication *application = [[self class] getSharedApplication];
+    UIApplication *application = [CTUIUtils getSharedApplication];
     if (application != nil) {
         @try {
             __block NSURL *dlURL = [self urlForNotification: notification];
@@ -2088,7 +2085,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
 
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
-    UIApplication *sharedApplication = [[self class] getSharedApplication];
+    UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     if (sharedApplication == nil) {
         return;
     }
@@ -2733,12 +2730,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self persistEventsQueue];
         [self persistNotificationsQueue];
     }
-}
-
-- (void)persistQueues {
-    [self runSerialAsync:^{
-        [self persistOrClearQueues];
-    }];
 }
 
 - (void)persistEventsQueue {
@@ -4326,7 +4317,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)dismissAppInbox {
     [[self class] runSyncMainQueue:^{
-        UIApplication *application = [[self class] getSharedApplication];
+        UIApplication *application = [CTUIUtils getSharedApplication];
         UIWindow *window = [[application delegate] window];
         UIViewController *presentedViewcontoller = [[window rootViewController] presentedViewController];
         if ([presentedViewcontoller isKindOfClass:[UINavigationController class]]) {
@@ -5028,7 +5019,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                         
                         if (!error) {
                             [[self class] runSyncMainQueue: ^{
-                                UIApplication *sharedApplication = [[self class] getSharedApplication];
+                                UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
                                 if (sharedApplication == nil) {
                                     return;
                                 }

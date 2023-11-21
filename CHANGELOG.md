@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 5.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.2) (November 21, 2023)
+
+#### Fixed
+- Mitigates a potential crash when apps would go to the background.
+
 ### [Version 5.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.1) (September 29, 2023)
 
 #### Added
