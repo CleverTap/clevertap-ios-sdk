@@ -428,7 +428,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             // CTCarrier is deprecated above iOS version 16 with no replacements so carrierName will be empty.
             _carrier = @"";
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             _carrier = [self getCarrier].carrierName ?: @"";
+#pragma clang diagnostic pop
         }
     }
     return _carrier;
@@ -441,7 +444,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             NSLocale *currentLocale = [NSLocale currentLocale];
             _countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             _countryCode =  [self getCarrier].isoCountryCode ?: @"";
+#pragma clang diagnostic pop
         }
     }
     return _countryCode;
@@ -455,14 +461,18 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     return _radio;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (CTCarrier *)getCarrier {
     if (@available(iOS 12.0, *)) {
         NSString *providerKey = _networkInfo.serviceSubscriberCellularProviders.allKeys.lastObject;
         return _networkInfo.serviceSubscriberCellularProviders[providerKey];
     } else {
+
         return _networkInfo.subscriberCellularProvider;
     }
 }
+#pragma clang diagnostic pop
 
 - (NSString *)getCurrentRadioAccessTechnology {
     __block NSString *radioValue;
@@ -474,7 +484,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             }
         }];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         NSString *radio = _networkInfo.currentRadioAccessTechnology;
+#pragma clang diagnostic pop
         if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
             radioValue = [radio substringFromIndex:23];
         }

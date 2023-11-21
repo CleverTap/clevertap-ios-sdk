@@ -13,7 +13,8 @@ __attribute__((deprecated("This protocol method has been deprecated and will be 
 @end
 
 @interface CleverTap(ProductConfig)
-@property (atomic, strong, readonly, nonnull) CleverTapProductConfig *productConfig;
+@property (atomic, strong, readonly, nonnull) CleverTapProductConfig *productConfig
+__attribute__((deprecated("This property has been deprecated and will be removed in the future versions of this SDK.")));
 @end
 
 
