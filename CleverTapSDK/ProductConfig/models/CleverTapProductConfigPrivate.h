@@ -4,7 +4,10 @@
 @protocol CleverTapPrivateProductConfigDelegate <NSObject>
 @required
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @property (atomic, weak) id<CleverTapProductConfigDelegate> _Nullable productConfigDelegate;
+#pragma clang diagnostic pop
 
 - (void)fetchProductConfig;
 

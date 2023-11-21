@@ -4,7 +4,10 @@
 @protocol CleverTapPrivateFeatureFlagsDelegate <NSObject>
 @required
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @property (atomic, weak) id<CleverTapFeatureFlagsDelegate> _Nullable featureFlagsDelegate;
+#pragma clang diagnostic pop
 
 - (BOOL)getFeatureFlag:(NSString* _Nonnull)key withDefaultValue:(BOOL)defaultValue;
 

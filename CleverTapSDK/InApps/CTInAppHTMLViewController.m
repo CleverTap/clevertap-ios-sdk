@@ -152,7 +152,10 @@ typedef enum {
     if (@available(iOS 13.0, *)) {
         statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         statusBarFrameHeight = [[CTUIUtils getSharedApplication] statusBarFrame].size.height;
+#pragma clang diagnostic pop
     }
     CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? statusBarFrameHeight : 0.0;
     
