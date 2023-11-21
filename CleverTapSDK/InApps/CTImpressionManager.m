@@ -212,7 +212,8 @@
     if (!impressions) {
         impressions = [NSMutableArray new];
     }
-    [impressions addObject:timestamp];
+    NSInteger val = [timestamp integerValue];
+    [impressions addObject:[NSNumber numberWithLong:val]];
     [CTPreferences putObject:impressions forKey:[self getImpressionKey:campaignId]];
 }
 
