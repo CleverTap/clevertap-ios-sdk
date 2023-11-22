@@ -7,6 +7,8 @@
 //
 
 #import "CTEventAdapter.h"
+#import "CTConstants.h"
+#import "CTCampaignType.h"
 
 @interface CTEventAdapter()
 
@@ -42,10 +44,36 @@
 }
 
 - (CTTriggerValue *)propertyValueNamed:(NSString *)name {
-    if (self.eventProperties[name] == nil) {
-        return nil;
+    id propertyValue = [self getActualPropertyValue:name];
+    if (propertyValue) {
+        return [[CTTriggerValue alloc] initWithValue:propertyValue];
     }
-    return [[CTTriggerValue alloc] initWithValue:self.eventProperties[name]];
+    return nil;
+}
+
+- (id)getActualPropertyValue:(NSString *)propertyName {
+    id value = self.eventProperties[propertyName];
+    if (value == nil) {
+        if ([propertyName isEqualToString:CLTAP_PROP_CAMPAIGN_ID]) {
+            value = self.eventProperties[CLTAP_PROP_WZRK_ID];
+        } else if ([propertyName isEqualToString:CLTAP_PROP_WZRK_ID]) {
+            value = self.eventProperties[CLTAP_PROP_CAMPAIGN_ID];
+        } else if ([propertyName isEqualToString:CLTAP_PROP_VARIANT]) {
+            value = self.eventProperties[CLTAP_PROP_WZRK_PIVOT];
+        } else if ([propertyName isEqualToString:CLTAP_PROP_WZRK_PIVOT]) {
+            value = self.eventProperties[CLTAP_PROP_VARIANT];
+        }
+    } else if ([propertyName isEqualToString:CLTAP_PROP_CAMPAIGN_TYPE] && self.eventProperties[CLTAP_PROP_WZRK_ID]) {
+        // TODO: Check if this is needed. Currently the SDK does not set Campaign type property, so operators on it will never match
+        // This is an actual system event (Notification Viewed/Clicked) which contains Campaign
+        // Type set from LP being extra safe here as Campaign type can be part of other events
+        // as well.
+        NSInteger ordinal = [CTCampaignTypeHelper campaignTypeOrdinal:[value lowercaseString]];
+        if (ordinal != -1) {
+            value = @(ordinal);
+        }
+    }
+    return value;
 }
 
 - (CTTriggerValue *)itemValueNamed:(NSString *)name {

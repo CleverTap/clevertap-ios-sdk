@@ -121,6 +121,12 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
 #define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
 
+#define CLTAP_PROP_CAMPAIGN_ID @"Campaign id"
+#define CLTAP_PROP_WZRK_ID @"wzrk_id"
+#define CLTAP_PROP_VARIANT @"Variant"
+#define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
+#define CLTAP_PROP_CAMPAIGN_TYPE @"Campaign type"
+
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"
 #define CLTAP_INAPP_CS_TTL_OFFSET @"wzrk_ttl_offset"
