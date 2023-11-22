@@ -3,6 +3,7 @@
 #import "CleverTapInternal.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
+#import "CTSwizzle.h"
 #import "CTLogger.h"
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
@@ -334,6 +335,29 @@ static BOOL sharedInstanceErrorLogged;
     [CTSwizzleManager swizzleAppDelegate];
     CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
     return instance;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+#if !defined(CLEVERTAP_TVOS)
+    if ([keyPath isEqualToString:@"delegate"]) {
+        if (@available(iOS 10.0, *)) {
+            Class cls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
+            if (class_getInstanceMethod(cls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
+                SEL sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
+                if (sel) {
+                    __block NSInvocation *invocation = nil;
+                    invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
+                        [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
+                        [invocation setArgument:&center atIndex:2];
+                        [invocation setArgument:&response atIndex:3];
+                        [invocation setArgument:&completion atIndex:4];
+                        [invocation invokeWithTarget:obj];
+                    } error:nil];
+                }
+            }
+        }
+    }
+#endif
 }
 
 #pragma mark - Instance Lifecycle
