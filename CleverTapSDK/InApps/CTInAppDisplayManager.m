@@ -60,6 +60,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 @implementation CTInAppDisplayManager
 
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        pendingNotificationControllers = [NSMutableArray new];
+    });
+}
+
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap * _Nonnull)instance
                             dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager

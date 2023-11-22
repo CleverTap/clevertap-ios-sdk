@@ -282,11 +282,6 @@ static NSMutableDictionary<NSString*, CleverTap*> *_instances;
 static CleverTapInstanceConfig *_defaultInstanceConfig;
 static BOOL sharedInstanceErrorLogged;
 
-// static here as we may have multiple instances handling inapps
-static CTInAppDisplayViewController *currentDisplayController;
-static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControllers;
-
-
 #pragma mark - Lifecycle
 
 + (void)load {
@@ -299,7 +294,6 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         instanceLock = [NSRecursiveLock new];
         _instances = [NSMutableDictionary new];
         _plistInfo = [CTPlistInfo sharedInstance];
-        pendingNotificationControllers = [NSMutableArray new];
 #if CLEVERTAP_SSL_PINNING
         // Only pin anchor/CA certificates
         sslCertNames = @[@"AmazonRootCA1"];
