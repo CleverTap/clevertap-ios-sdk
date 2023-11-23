@@ -79,13 +79,14 @@
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
             self.campaignId = (NSString*) jsonObject[CLTAP_NOTIFICATION_ID_TAG];
-            if (jsonObject[@"excludeGlobalFCaps"] != nil) {
-                self.excludeFromCaps = [jsonObject[@"excludeGlobalFCaps"] boolValue];
+            if (jsonObject[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil) {
+                self.excludeFromCaps = [jsonObject[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];
             } else {
-                self.excludeFromCaps = [jsonObject[@"efc"] boolValue];
+                self.excludeFromCaps = [jsonObject[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue];
             }
-            self.totalLifetimeCount = jsonObject[@"tlc"] ? [jsonObject[@"tlc"] intValue] : -1;
-            self.totalDailyCount = jsonObject[@"tdc"] ? [jsonObject[@"tdc"] intValue] : -1;
+            self.maxPerSession = jsonObject[CLTAP_INAPP_MAX_PER_SESSION] ? [jsonObject[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
+            self.totalLifetimeCount = jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] intValue] : -1;
+            self.totalDailyCount = jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] intValue] : -1;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
@@ -273,7 +274,7 @@
         self.widthPercent = displayParams[CLTAP_INAPP_X_PERCENT] ? [displayParams[CLTAP_INAPP_X_PERCENT] floatValue] : 0.0;
         self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
         self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
-        self.maxPerSession = displayParams[@"mdc"] ? [displayParams[@"mdc"] intValue] : -1;
+        self.maxPerSession = displayParams[CLTAP_INAPP_MAX_PER_SESSION] ? [displayParams[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
     }
 }
 

@@ -132,6 +132,11 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_CS_TTL_OFFSET @"wzrk_ttl_offset"
 #define CLTAP_INAPP_PRIORITY @"priority"
 #define CLTAP_INAPP_IS_SUPPRESSED @"suppressed"
+#define CLTAP_INAPP_MAX_PER_SESSION @"mdc"
+#define CLTAP_INAPP_TOTAL_DAILY_COUNT @"tdc"
+#define CLTAP_INAPP_TOTAL_LIFETIME_COUNT @"tlc"
+#define CLTAP_INAPP_EXCLUDE_FROM_CAPS @"efc"
+#define CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS @"excludeGlobalFCaps"
 
 // whenTriggers
 #define CLTAP_INAPP_TRIGGERS @"whenTriggers"

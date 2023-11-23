@@ -146,6 +146,23 @@
 
 - (void)testSessionCapacityMaxedOutGlobal {
     NSDictionary *inApp = @{
+        @"ti": @1
+    };
+    self.inAppFCManager.globalSessionMax = 5;
+    
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    XCTAssertEqual(-1, notif.maxPerSession);
+    // Record 4 impressions
+    [self recordImpressions:4];
+    XCTAssertFalse([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
+    
+    // Record 1 more = 5
+    [self recordImpressions:1];
+    XCTAssertTrue([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
+}
+
+- (void)testSessionCapacityMaxedOutGlobalLegacy {
+    NSDictionary *inApp = @{
         @"ti": @1,
         @"w": @{
             @"dk": @NO,
@@ -160,6 +177,7 @@
         }
     };
     self.inAppFCManager.globalSessionMax = 5;
+    
     CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
     XCTAssertEqual(1000, notif.maxPerSession);
     // Record 4 impressions
@@ -174,7 +192,7 @@
 - (void)testSessionCapacityMaxedOutInApp {
     // Testing in-app capacity only
     // Set sessionImpressions directly to keep sessionImpressionsTotal value
-    self.inAppFCManager.globalSessionMax = 1000;
+    self.inAppFCManager.globalSessionMax = 2000;
     self.inAppFCManager.impressionManager.sessionImpressionsTotal = 0;
     
     NSDictionary *inApp = @{
@@ -182,38 +200,58 @@
     };
     CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
     self.inAppFCManager.impressionManager.sessionImpressions = [@{} mutableCopy];
-    // InApp session max will be 0
-    XCTAssertEqual(0, notif.maxPerSession);
+    // InApp session max will default to -1 on notification level
+    XCTAssertEqual(-1, notif.maxPerSession);
     XCTAssertFalse([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
     
     self.inAppFCManager.impressionManager.sessionImpressions = [@{
         @"1": @2
     } mutableCopy];
+    XCTAssertFalse([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
+    
+    // It will default to 1000 in InAppFCManager
+    self.inAppFCManager.impressionManager.sessionImpressions = [@{
+        @"1": @1000
+    } mutableCopy];
     XCTAssertTrue([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
     
     NSDictionary *inAppMdc1000 = @{
         @"ti": @1,
-        @"w": @{
-            @"dk": @NO,
-            @"sc": @YES,
-            @"pos": @"c",
-            @"xp": @90,
-            @"yp": @85,
-            @"mdc": @1000
-        },
-        @"d": @{
-            @"html": @""
-        }
+        @"mdc": @1
     };
     notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc1000];
-    XCTAssertEqual(1000, notif.maxPerSession);
+    XCTAssertEqual(1, notif.maxPerSession);
+    
     self.inAppFCManager.impressionManager.sessionImpressions = [@{} mutableCopy];
     XCTAssertFalse([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
     
     self.inAppFCManager.impressionManager.sessionImpressions = [@{
-        @"1": @5
+        @"1": @1
+    } mutableCopy];
+    XCTAssertTrue([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
+    
+    NSDictionary *inAppMdc3 = @{
+        @"ti": @1,
+        @"mdc": @3
+    };
+    notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3];
+    XCTAssertEqual(3, notif.maxPerSession);
+    self.inAppFCManager.impressionManager.sessionImpressions = [@{
+        @"1": @2
     } mutableCopy];
     XCTAssertFalse([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
+    
+    self.inAppFCManager.impressionManager.sessionImpressions = [@{
+        @"1": @3
+    } mutableCopy];
+    XCTAssertTrue([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
+}
+
+- (void)testSessionCapacityMaxedOutInAppLegacy {
+    // Testing in-app capacity only
+    // Set sessionImpressions directly to keep sessionImpressionsTotal value
+    self.inAppFCManager.globalSessionMax = 2000;
+    self.inAppFCManager.impressionManager.sessionImpressionsTotal = 0;
     
     NSDictionary *inAppMdc3 = @{
         @"ti": @1,
@@ -229,7 +267,7 @@
             @"html": @""
         }
     };
-    notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3];
     XCTAssertEqual(3, notif.maxPerSession);
     self.inAppFCManager.impressionManager.sessionImpressions = [@{
         @"1": @2
