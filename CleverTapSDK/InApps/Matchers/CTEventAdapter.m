@@ -10,6 +10,8 @@
 #import "CTConstants.h"
 #import "CTCampaignType.h"
 
+static NSDictionary<NSString*, NSString*> *systemPropToKey;
+
 @interface CTEventAdapter()
 
 @property (nonatomic, strong) NSString *eventName;
@@ -20,6 +22,35 @@
 @end
 
 @implementation CTEventAdapter
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        systemPropToKey = @{
+            @"CT App Version": @"Version",
+            @"ct_app_version": @"Version",
+            @"CT Latitude": @"Latitute",
+            @"ct_latitude": @"Latitute",
+            @"CT Longitude": @"Longitude",
+            @"ct_longitude": @"Longitude",
+            @"CT OS Version": @"OS Version",
+            @"ct_os_version": @"OS Version",
+            @"CT SDK Version": @"SDK Version",
+            @"ct_sdk_version": @"SDK Version",
+            @"CT Network Carrier": @"Carrier",
+            @"ct_network_carrier": @"Carrier",
+            @"CT Network Type": @"Radio",
+            @"ct_network_type": @"Radio",
+            @"CT Connected To WiFi": @"wifi",
+            @"ct_connected_to_wifi": @"wifi",
+            @"CT Bluetooth Version": @"BluetoothVersion",
+            @"ct_bluetooth_version": @"BluetoothVersion",
+            @"CT Bluetooth Enabled": @"BluetoothEnabled",
+            @"ct_bluetooth_enabled": @"BluetoothEnabled",
+            @"CT App Name": @"appnId"
+        };
+    });
+}
 
 - (instancetype)initWithEventName:(NSString *)eventName
                   eventProperties:(NSDictionary *)eventProperties
@@ -62,6 +93,9 @@
             value = self.eventProperties[CLTAP_PROP_WZRK_PIVOT];
         } else if ([propertyName isEqualToString:CLTAP_PROP_WZRK_PIVOT]) {
             value = self.eventProperties[CLTAP_PROP_VARIANT];
+        } else if (systemPropToKey[propertyName]) {
+            // Map App Fields
+            value = self.eventProperties[systemPropToKey[propertyName]];
         }
     } else if ([propertyName isEqualToString:CLTAP_PROP_CAMPAIGN_TYPE] && self.eventProperties[CLTAP_PROP_WZRK_ID]) {
         // TODO: Check if this is needed. Currently the SDK does not set Campaign type property, so operators on it will never match

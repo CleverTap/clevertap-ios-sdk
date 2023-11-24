@@ -23,6 +23,7 @@
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
+@property (nonatomic, strong) NSDictionary *appLaunchedProperties;
 
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
@@ -65,11 +66,14 @@
 }
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
-    if (![eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
-        [self evaluateServerSide:event];
-        [self evaluateClientSide:event];
+    if ([eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
+        self.appLaunchedProperties = properties ? properties : @{};
+        return;
     }
+    
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
+    [self evaluateServerSide:event];
+    [self evaluateClientSide:event];
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
@@ -79,12 +83,12 @@
 }
 
 - (void)evaluateOnAppLaunchedClientSide {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{} andLocation:self.location];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     [self evaluateClientSide:event];
 }
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{} andLocation:self.location];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     [self sortByPriority:eligibleInApps];
     for (NSDictionary *inApp in eligibleInApps) {
