@@ -1894,18 +1894,9 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [CTUtils jsonObjectToString:mutableEvent]);
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-        // TODO: or evaluate here?
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
-            NSString *eventName = event[CLTAP_EVENT_NAME];
-            NSMutableDictionary *eventData = event[CLTAP_EVENT_DATA];
-            [eventData addEntriesFromDictionary:[self generateAppFields]];
-            if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
-                NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
-                [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
-            } else if (eventName) {
-                [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
-            }
+            [self evaluateOnEvent:event];
         }];
 #endif
         
@@ -1919,6 +1910,21 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Processing event failed with a exception: %@", self, e.debugDescription);
     }
 }
+
+- (void)evaluateOnEvent:(NSDictionary *)event {
+    NSString *eventName = event[CLTAP_EVENT_NAME];
+    // Add the system properties for evaluation
+    NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
+    // Add the event properties last, so custom properties are not overriden
+    [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
+    if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+        NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
+        [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
+    } else if (eventName) {
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
+    }
+}
+
 - (void)scheduleQueueFlush {
     CleverTapLogInternal(self.config.logLevel, @"%@: scheduling delayed queue flush", self);
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -2912,10 +2918,6 @@ static BOOL sharedInstanceErrorLogged;
     [self.dispatchQueueManager runSerialAsync:^{
         [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
-                // TODO: evaluate here?
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-                [self.inAppEvaluationManager evaluateOnChargedEvent:chargeDetails andItems:items];
-#endif
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {
