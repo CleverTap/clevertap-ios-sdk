@@ -29,6 +29,6 @@
 - (void)storeInApps:(NSArray * _Nullable)inApps;
 - (void)enqueueInApps:(NSArray * _Nullable)inAppNotifs;
 - (NSDictionary * _Nullable)peekInApp;
-- (NSDictionary * _Nullable)dequeInApp;
+- (NSDictionary * _Nullable)dequeueInApp;
 
 @end

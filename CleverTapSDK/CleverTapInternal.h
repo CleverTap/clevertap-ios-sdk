@@ -35,12 +35,4 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 
 - (id <CleverTapURLDelegate> _Nullable)urlDelegate;
 
-- (void)setBatchSentDelegate:(id <CTBatchSentDelegate> _Nullable)delegate;
-
-- (void)addAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate> _Nonnull)delegate;
-- (void)removeAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate> _Nonnull)delegate;
-
-- (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate> _Nonnull)delegate;
-- (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate> _Nonnull)delegate;
-
 @end

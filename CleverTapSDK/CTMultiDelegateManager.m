@@ -56,7 +56,7 @@
 }
 
 - (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
-    [self.switchUserDelegates addObject:delegate];
+    [self.switchUserDelegates removeObject:delegate];
 }
 
 - (void)notifyDelegatesDeviceIdDidChange:(NSString *)newDeviceId {
@@ -73,7 +73,7 @@
 }
 
 - (void)removeBatchSentDelegate:(id<CTBatchSentDelegate>)delegate {
-    [self.batchSentDelegates addObject:delegate];
+    [self.batchSentDelegates removeObject:delegate];
 }
 
 - (void)notifyDelegatesBatchDidSend:(NSArray *)batchWithHeader withSuccess:(BOOL)success {

@@ -179,7 +179,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             // Prepare the in-app for display
             [self prepareNotificationForDisplay:inApp];
             // Remove in-app after prepare
-            [self.inAppStore dequeInApp];
+            [self.inAppStore dequeueInApp];
         }
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);

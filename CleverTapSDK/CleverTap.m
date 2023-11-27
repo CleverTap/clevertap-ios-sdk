@@ -187,7 +187,6 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 #import <UserNotifications/UserNotifications.h>
 
 @interface CleverTap () <UIApplicationDelegate> {
-    dispatch_queue_t _serialQueue;
 }
 
 @property (nonatomic, strong, readwrite) CleverTapInstanceConfig *config;

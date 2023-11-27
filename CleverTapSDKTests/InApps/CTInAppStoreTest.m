@@ -299,7 +299,7 @@
     NSArray *inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
     XCTAssertEqual([inAppsFromStorage count], 3);
     
-    NSDictionary *dequed = [self.store dequeInApp];
+    NSDictionary *dequed = [self.store dequeueInApp];
     XCTAssertEqualObjects(dequed, inApps[0]);
     XCTAssertEqual([[self.store inAppsQueue] count], 2);
     
@@ -310,8 +310,8 @@
     inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
     XCTAssertEqual([inAppsFromStorage count], 2);
 
-    [self.store dequeInApp];
-    [self.store dequeInApp];
+    [self.store dequeueInApp];
+    [self.store dequeueInApp];
     XCTAssertEqual([[self.store inAppsQueue] count], 0);
     inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
     XCTAssertEqual([inAppsFromStorage count], 0);

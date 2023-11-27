@@ -51,7 +51,9 @@
     return [NSString stringWithFormat:@"%@:%@_%@_%@", self.accountId, self.deviceId, @"triggers", campaignId];
 }
 
-- (void)deviceIdDidChange:(NSString *)newDeviceId { 
+#pragma mark Switch User Delegate
+
+- (void)deviceIdDidChange:(NSString *)newDeviceId {
     self.deviceId = newDeviceId;
 }
 

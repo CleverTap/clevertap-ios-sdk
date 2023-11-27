@@ -29,8 +29,8 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
         systemPropToKey = @{
             @"CT App Version": @"Version",
             @"ct_app_version": @"Version",
-            @"CT Latitude": @"Latitute",
-            @"ct_latitude": @"Latitute",
+            @"CT Latitude": @"Latitude",
+            @"ct_latitude": @"Latitude",
             @"CT Longitude": @"Longitude",
             @"ct_longitude": @"Longitude",
             @"CT OS Version": @"OS Version",

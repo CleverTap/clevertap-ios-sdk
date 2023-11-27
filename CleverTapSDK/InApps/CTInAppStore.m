@@ -132,7 +132,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
-- (NSDictionary *)dequeInApp {
+- (NSDictionary *)dequeueInApp {
     @synchronized(self) {
         NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
         NSDictionary *inApp = nil;
