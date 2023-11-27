@@ -889,34 +889,34 @@ static BOOL sharedInstanceErrorLogged;
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"Version"] = self.deviceInfo.appVersion;
+    evtData[CLTAP_APP_VERSION] = self.deviceInfo.appVersion;
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
     
-    evtData[@"SDK Version"] = @([self.deviceInfo.sdkVersion integerValue]);
+    evtData[CLTAP_SDK_VERSION] = @([self.deviceInfo.sdkVersion integerValue]);
     
     if (self.deviceInfo.model) {
         evtData[@"Model"] = self.deviceInfo.model;
     }
     
     if (CLLocationCoordinate2DIsValid(self.userSetLocation)) {
-        evtData[@"Latitude"] = @(self.userSetLocation.latitude);
-        evtData[@"Longitude"] = @(self.userSetLocation.longitude);
+        evtData[CLTAP_LATITUDE] = @(self.userSetLocation.latitude);
+        evtData[CLTAP_LONGITUDE] = @(self.userSetLocation.longitude);
     }
     
     evtData[@"Make"] = self.deviceInfo.manufacturer;
-    evtData[@"OS Version"] = self.deviceInfo.osVersion;
+    evtData[CLTAP_OS_VERSION] = self.deviceInfo.osVersion;
     
     if (self.deviceInfo.carrier) {
-        evtData[@"Carrier"] = self.deviceInfo.carrier;
+        evtData[CLTAP_CARRIER] = self.deviceInfo.carrier;
     }
     
     evtData[@"useIP"] = @(self.enableNetworkInfoReporting);
     if (self.enableNetworkInfoReporting) {
         if (self.deviceInfo.radio != nil) {
-            evtData[@"Radio"] = self.deviceInfo.radio;
+            evtData[CLTAP_NETWORK_TYPE] = self.deviceInfo.radio;
         }
-        evtData[@"wifi"] = @(self.deviceInfo.wifi);
+        evtData[CLTAP_CONNECTED_TO_WIFI] = @(self.deviceInfo.wifi);
     }
     
     evtData[@"ifaA"] = @NO;

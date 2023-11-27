@@ -75,6 +75,18 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 
+#pragma mark Constants for App fields
+#define CLTAP_APP_VERSION @"Version"
+#define CLTAP_LATITUDE @"Latitude"
+#define CLTAP_LONGITUDE @"Longitude"
+#define CLTAP_OS_VERSION @"OS Version"
+#define CLTAP_SDK_VERSION @"SDK Version"
+#define CLTAP_CARRIER @"Carrier"
+#define CLTAP_NETWORK_TYPE @"Radio"
+#define CLTAP_CONNECTED_TO_WIFI @"wifi"
+#define CLTAP_BLUETOOTH_VERSION @"BluetoothVersion"
+#define CLTAP_BLUETOOTH_ENABLED @"BluetoothEnabled"
+
 #pragma mark Constants for PE Variables
 extern NSString *CT_KIND_INT;
 extern NSString *CT_KIND_FLOAT;
