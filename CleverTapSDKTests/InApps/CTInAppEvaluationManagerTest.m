@@ -385,11 +385,24 @@
 }
 
 - (void)testEvaluateOnAppLaunchedWithSuccess {
+    NSDictionary *props = @{
+        CLTAP_SDK_VERSION: @60000,
+        CLTAP_OS_VERSION: @17.1
+    };
+    [self.evaluationManager evaluateOnEvent:CLTAP_APP_LAUNCHED_EVENT withProps:props];
+    XCTAssertEqualObjects(props, self.evaluationManager.appLaunchedProperties);
+    
     NSArray *inApps = @[
         @{
             @"ti": @1,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT,
+                @"eventProperties": @[
+                    @{
+                        @"propertyName": CLTAP_SDK_VERSION,
+                        @"operator": @1,
+                        @"propertyValue": @60000
+                    }]
             }]
         }];
     self.helper.inAppStore.clientSideInApps = inApps;
@@ -403,7 +416,7 @@
         @{
             @"ti": @1,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT
             }]
         }];
     self.helper.inAppStore.clientSideInApps = inApps;
@@ -439,13 +452,13 @@
         @{
             @"ti": @1,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT
             }]
         },
         @{
             @"ti": @2,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT
             }]
         }];
     self.helper.inAppStore.clientSideInApps = inApps;
@@ -455,26 +468,26 @@
     XCTAssertEqualObjects((@[inApps[0]]), self.mockDisplayManager.inappNotifs);
 }
 
-- (void)testEvaluateOnAppLaunchedServerSide {
+- (void)testEvaluateOnAppLaunchedServerSideSuppressed {
     NSArray *inApps = @[
         @{
             @"ti": @1,
             @"suppressed": @YES,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT
             }]
         },
         @{
             @"ti": @2,
             @"suppressed": @YES,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT
             }]
         },
         @{
             @"ti": @3,
             @"whenTriggers": @[@{
-                @"eventName": @"App Launched"
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT
             }]
         }];
     
@@ -482,6 +495,32 @@
     // Suppress all until an in-app can be displayed
     XCTAssertEqualObjects((@[inApps[2]]), self.mockDisplayManager.inappNotifs);
     XCTAssertEqual(2, [self.evaluationManager.suppressedClientSideInApps count]);
+}
+
+- (void)testEvaluateOnAppLaunchedServerSide {
+    NSDictionary *props = @{
+        CLTAP_SDK_VERSION: @60000,
+        CLTAP_OS_VERSION: @17.1
+    };
+    [self.evaluationManager evaluateOnEvent:CLTAP_APP_LAUNCHED_EVENT withProps:props];
+    XCTAssertEqualObjects(props, self.evaluationManager.appLaunchedProperties);
+    
+    NSArray *inApps = @[
+        @{
+            @"ti": @1,
+            @"whenTriggers": @[@{
+                @"eventName": CLTAP_APP_LAUNCHED_EVENT,
+                @"eventProperties": @[
+                    @{
+                        @"propertyName": CLTAP_SDK_VERSION,
+                        @"operator": @1,
+                        @"propertyValue": @60000
+                    }]
+            }]
+        }];
+    
+    [self.evaluationManager evaluateOnAppLaunchedServerSide:inApps];
+    XCTAssertEqualObjects((@[inApps[0]]), self.mockDisplayManager.inappNotifs);
 }
 
 - (void)testOnBatchHeaderCreation {
