@@ -335,10 +335,6 @@
 		6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
 		6B535FB82AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */; };
 		6B535FB92AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */; };
-		6B585F112B0E627F00B4765A /* CTCampaignType.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B585F0F2B0E627F00B4765A /* CTCampaignType.h */; };
-		6B585F122B0E627F00B4765A /* CTCampaignType.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B585F0F2B0E627F00B4765A /* CTCampaignType.h */; };
-		6B585F132B0E627F00B4765A /* CTCampaignType.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B585F102B0E627F00B4765A /* CTCampaignType.m */; };
-		6B585F142B0E627F00B4765A /* CTCampaignType.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B585F102B0E627F00B4765A /* CTCampaignType.m */; };
 		6BA3B2DB2B03E926004E834B /* CTQueueType.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BA3B2DA2B03E926004E834B /* CTQueueType.h */; };
 		6BA3B2DC2B03E926004E834B /* CTQueueType.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BA3B2DA2B03E926004E834B /* CTQueueType.h */; };
 		6BA3B2E12B05411C004E834B /* InAppHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BA3B2E02B05411C004E834B /* InAppHelper.m */; };
@@ -832,8 +828,6 @@
 		6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCT.m; sourceTree = "<group>"; };
 		6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTMultiDelegateManager.h; sourceTree = "<group>"; };
 		6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManager.m; sourceTree = "<group>"; };
-		6B585F0F2B0E627F00B4765A /* CTCampaignType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTCampaignType.h; sourceTree = "<group>"; };
-		6B585F102B0E627F00B4765A /* CTCampaignType.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCampaignType.m; sourceTree = "<group>"; };
 		6BA3B2DA2B03E926004E834B /* CTQueueType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTQueueType.h; sourceTree = "<group>"; };
 		6BA3B2DF2B05411C004E834B /* InAppHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InAppHelper.h; sourceTree = "<group>"; };
 		6BA3B2E02B05411C004E834B /* InAppHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InAppHelper.m; sourceTree = "<group>"; };
@@ -1608,8 +1602,6 @@
 				6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */,
 				6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */,
 				6BA3B2DA2B03E926004E834B /* CTQueueType.h */,
-				6B585F0F2B0E627F00B4765A /* CTCampaignType.h */,
-				6B585F102B0E627F00B4765A /* CTCampaignType.m */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -1687,7 +1679,6 @@
 				4E25E3D22788889F0008C888 /* CTLoginInfoProvider.h in Headers */,
 				D0BD75AF241769E40006EE55 /* CleverTap+ProductConfig.h in Headers */,
 				D014B8F020E2FAB1001E0780 /* CTPlistInfo.h in Headers */,
-				6B585F122B0E627F00B4765A /* CTCampaignType.h in Headers */,
 				6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */,
 				4E8B81702AD2BB8A00714BB4 /* CTDispatchQueueManager.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
@@ -1796,7 +1787,6 @@
 				6A4427D82ABCE5EB0098866F /* CTInAppStore.h in Headers */,
 				D0047B0E2098E2F00019C6FD /* CTProfileBuilder.h in Headers */,
 				078C63A922420321001FDDB8 /* CleverTapJSInterface.h in Headers */,
-				6B585F112B0E627F00B4765A /* CTCampaignType.h in Headers */,
 				D033FB83208FE51200B4390F /* CTUtils.h in Headers */,
 				4EB4C8BE2AAD91AC00B7F045 /* CTTriggerEvaluator.h in Headers */,
 				57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */,
@@ -2248,7 +2238,6 @@
 				D014B90320E2FB55001E0780 /* CTEventBuilder.m in Sources */,
 				4E8B81722AD2BB8A00714BB4 /* CTDispatchQueueManager.m in Sources */,
 				D014B8FB20E2FB0E001E0780 /* CTUriHelper.m in Sources */,
-				6B585F142B0E627F00B4765A /* CTCampaignType.m in Sources */,
 				4EA64A29296C115E001D9B22 /* CTRequestFactory.m in Sources */,
 				D014B8FF20E2FB40001E0780 /* CTLogger.m in Sources */,
 				6B535FB92AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */,
@@ -2350,7 +2339,6 @@
 				D079742A21FE2F2300773602 /* CTVideoThumbnailGenerator.m in Sources */,
 				071EB4C9217F6427008F0FAB /* CTHeaderViewController.m in Sources */,
 				6A3EBD3B2AA0713100CE97D4 /* CTTriggerValue.m in Sources */,
-				6B585F132B0E627F00B4765A /* CTCampaignType.m in Sources */,
 				4E25E3C7278887A70008C888 /* CTIdentityRepoFactory.m in Sources */,
 				4E41FD94294F46510001FBED /* CTVar.m in Sources */,
 				071EB505217F6427008F0FAB /* CTCoverViewController.m in Sources */,

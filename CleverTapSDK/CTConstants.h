@@ -137,7 +137,6 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_WZRK_ID @"wzrk_id"
 #define CLTAP_PROP_VARIANT @"Variant"
 #define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
-#define CLTAP_PROP_CAMPAIGN_TYPE @"Campaign type"
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"

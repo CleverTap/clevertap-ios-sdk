@@ -8,7 +8,6 @@
 
 #import "CTEventAdapter.h"
 #import "CTConstants.h"
-#import "CTCampaignType.h"
 
 static NSDictionary<NSString*, NSString*> *systemPropToKey;
 
@@ -96,15 +95,6 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
         } else if (systemPropToKey[propertyName]) {
             // Map App Fields
             value = self.eventProperties[systemPropToKey[propertyName]];
-        }
-    } else if ([propertyName isEqualToString:CLTAP_PROP_CAMPAIGN_TYPE] && self.eventProperties[CLTAP_PROP_WZRK_ID]) {
-        // TODO: Check if this is needed. Currently the SDK does not set Campaign type property, so operators on it will never match
-        // This is an actual system event (Notification Viewed/Clicked) which contains Campaign
-        // Type set from LP being extra safe here as Campaign type can be part of other events
-        // as well.
-        NSInteger ordinal = [CTCampaignTypeHelper campaignTypeOrdinal:[value lowercaseString]];
-        if (ordinal != -1) {
-            value = @(ordinal);
         }
     }
     return value;
