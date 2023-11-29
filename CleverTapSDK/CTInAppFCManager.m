@@ -83,13 +83,6 @@
     return [NSString stringWithFormat:@"%@:%@:%@", self.class, self.config.accountId, self.deviceId];
 }
 
-#pragma mark Switch User Delegate
-- (void)deviceIdDidChange:(NSString *)newDeviceId {
-    self.deviceId = newDeviceId;
-    [self migratePreferenceKeys];
-    [self initInAppCounts];
-}
-
 #pragma mark Session, Daily and Global limits
 - (void)checkUpdateDailyLimits {
     NSString *today = [self todaysFormattedDate];
@@ -290,6 +283,13 @@
 - (int)getLocalInAppCount {
     self.localInAppCount = (int) [CTPreferences getIntForKey:CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY withResetValue:0];
     return self.localInAppCount;
+}
+
+#pragma mark Switch User Delegate
+- (void)deviceIdDidChange:(NSString *)newDeviceId {
+    self.deviceId = newDeviceId;
+    [self migratePreferenceKeys];
+    [self initInAppCounts];
 }
 
 #pragma mark AttachToBatchHeader delegate

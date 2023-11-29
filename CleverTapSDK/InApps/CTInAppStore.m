@@ -9,7 +9,8 @@
 #import "CTInAppStore.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
-#import "CleverTapInstanceConfigPrivate.h"
+#import "CTAES.h"
+#import "CleverTapInstanceConfig.h"
 
 NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";

@@ -14,6 +14,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppStore+Tests.h"
 #import "InAppHelper.h"
+#import "CTAES.h"
 
 @interface CTInAppStoreTest : XCTestCase
 @property (nonatomic, strong) CTInAppStore *store;

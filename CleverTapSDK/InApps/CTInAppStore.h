@@ -7,10 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CleverTapInstanceConfig.h"
-#import "CTDeviceInfo.h"
-#import "CTAES.h"
 #import "CTSwitchUserDelegate.h"
+
+@class CleverTapInstanceConfig;
 
 @interface CTInAppStore : NSObject <CTSwitchUserDelegate>
 

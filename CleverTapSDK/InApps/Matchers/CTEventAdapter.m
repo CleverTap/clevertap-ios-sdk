@@ -25,6 +25,7 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        // System property new and legacy keys to App Fields key
         systemPropToKey = @{
             @"CT App Version": CLTAP_APP_VERSION,
             @"ct_app_version": CLTAP_APP_VERSION,

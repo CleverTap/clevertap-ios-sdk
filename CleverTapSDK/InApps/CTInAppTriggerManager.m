@@ -31,6 +31,7 @@
     return self;
 }
 
+#pragma mark Manage Triggers
 - (NSUInteger)getTriggers:(NSString *)campaignId {
     NSUInteger savedTriggers = [CTPreferences getIntForKey:[self getTriggersKey:campaignId] withResetValue:0];
     
