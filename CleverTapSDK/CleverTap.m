@@ -2152,11 +2152,7 @@ static BOOL sharedInstanceErrorLogged;
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
                 [[self variables] handleVariablesError];
-                // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
-                if (self.fetchInAppsBlock) {
-                    self.fetchInAppsBlock(NO);
-                    self.fetchInAppsBlock = nil;
-                }
+                [self triggerFetchInApps:NO];
                 
                 dispatch_semaphore_signal(semaphore);
             }];
@@ -2209,11 +2205,6 @@ static BOOL sharedInstanceErrorLogged;
                 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
                 [self handleInAppResponse:jsonResp];
-                // TODO: RIGHT PLACE TO CALL FETCH_INAPPS BLOCK?
-                if (self.fetchInAppsBlock) {
-                    self.fetchInAppsBlock(YES);
-                    self.fetchInAppsBlock = nil;
-                }
 #endif
                 
 #if !CLEVERTAP_NO_INBOX_SUPPORT

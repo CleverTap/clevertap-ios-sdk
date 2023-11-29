@@ -12,6 +12,7 @@
 @interface CleverTap(InAppsResponseHandler)
 
 - (void)handleInAppResponse:(NSDictionary *)jsonResp;
+- (void)triggerFetchInApps:(BOOL)success;
 
 @end
 

@@ -19,6 +19,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
     CleverTapEventTypeFetch,
 };
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+@property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (nonatomic, strong, readonly) CTInAppDisplayManager * _Nullable inAppDisplayManager;
 @property (nonatomic, strong, readonly) CTInAppEvaluationManager * _Nullable inAppEvaluationManager;
 @property (nonatomic, strong, readonly) CTInAppFCManager * _Nullable inAppFCManager;
@@ -27,6 +29,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 @property (nonatomic, assign, readonly) BOOL isAppForeground;
 @property (nonatomic, strong, readonly) CTDeviceInfo * _Nonnull deviceInfo;
 @property (atomic, strong, readonly) CTSessionManager * _Nonnull sessionManager;
+#endif
 
 + (NSMutableDictionary<NSString *, CleverTap *> * _Nullable)getInstances;
 
