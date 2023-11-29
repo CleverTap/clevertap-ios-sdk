@@ -889,34 +889,34 @@ static BOOL sharedInstanceErrorLogged;
 
 - (NSDictionary *)generateAppFields {
     NSMutableDictionary *evtData = [NSMutableDictionary new];
-    evtData[@"Version"] = self.deviceInfo.appVersion;
+    evtData[CLTAP_APP_VERSION] = self.deviceInfo.appVersion;
     
     evtData[@"Build"] = self.deviceInfo.appBuild;
     
-    evtData[@"SDK Version"] = @([self.deviceInfo.sdkVersion integerValue]);
+    evtData[CLTAP_SDK_VERSION] = @([self.deviceInfo.sdkVersion integerValue]);
     
     if (self.deviceInfo.model) {
         evtData[@"Model"] = self.deviceInfo.model;
     }
     
     if (CLLocationCoordinate2DIsValid(self.userSetLocation)) {
-        evtData[@"Latitude"] = @(self.userSetLocation.latitude);
-        evtData[@"Longitude"] = @(self.userSetLocation.longitude);
+        evtData[CLTAP_LATITUDE] = @(self.userSetLocation.latitude);
+        evtData[CLTAP_LONGITUDE] = @(self.userSetLocation.longitude);
     }
     
     evtData[@"Make"] = self.deviceInfo.manufacturer;
-    evtData[@"OS Version"] = self.deviceInfo.osVersion;
+    evtData[CLTAP_OS_VERSION] = self.deviceInfo.osVersion;
     
     if (self.deviceInfo.carrier) {
-        evtData[@"Carrier"] = self.deviceInfo.carrier;
+        evtData[CLTAP_CARRIER] = self.deviceInfo.carrier;
     }
     
     evtData[@"useIP"] = @(self.enableNetworkInfoReporting);
     if (self.enableNetworkInfoReporting) {
         if (self.deviceInfo.radio != nil) {
-            evtData[@"Radio"] = self.deviceInfo.radio;
+            evtData[CLTAP_NETWORK_TYPE] = self.deviceInfo.radio;
         }
-        evtData[@"wifi"] = @(self.deviceInfo.wifi);
+        evtData[CLTAP_CONNECTED_TO_WIFI] = @(self.deviceInfo.wifi);
     }
     
     evtData[@"ifaA"] = @NO;
@@ -1894,18 +1894,9 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [CTUtils jsonObjectToString:mutableEvent]);
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-        // TODO: or evaluate here?
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
-            NSString *eventName = event[CLTAP_EVENT_NAME];
-            NSMutableDictionary *eventData = event[CLTAP_EVENT_DATA];
-            [eventData addEntriesFromDictionary:[self generateAppFields]];
-            if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
-                NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
-                [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
-            } else if (eventName) {
-                [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
-            }
+            [self evaluateOnEvent:event];
         }];
 #endif
         
@@ -1919,6 +1910,21 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Processing event failed with a exception: %@", self, e.debugDescription);
     }
 }
+
+- (void)evaluateOnEvent:(NSDictionary *)event {
+    NSString *eventName = event[CLTAP_EVENT_NAME];
+    // Add the system properties for evaluation
+    NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
+    // Add the event properties last, so custom properties are not overriden
+    [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
+    if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+        NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
+        [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
+    } else if (eventName) {
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
+    }
+}
+
 - (void)scheduleQueueFlush {
     CleverTapLogInternal(self.config.logLevel, @"%@: scheduling delayed queue flush", self);
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -2912,10 +2918,6 @@ static BOOL sharedInstanceErrorLogged;
     [self.dispatchQueueManager runSerialAsync:^{
         [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
-                // TODO: evaluate here?
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-                [self.inAppEvaluationManager evaluateOnChargedEvent:chargeDetails andItems:items];
-#endif
                 [self queueEvent:event withType:CleverTapEventTypeRaised];
             }
             if (errors) {

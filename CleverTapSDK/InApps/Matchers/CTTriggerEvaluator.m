@@ -138,12 +138,28 @@
 }
 
 + (BOOL)actual:(CTTriggerValue *)actual containsExpected:(CTTriggerValue * __nullable)expected {
-    if ([expected stringValue] && [actual stringValue]) {
-        return [[self cleanString:[actual stringValue]] containsString:[self cleanString:[expected stringValue]]];
+    NSString *actualValue = [actual stringValue];
+    NSString *expectedValue = [expected stringValue];
+    
+    if ([actual numberValue]) {
+        actualValue = [[actual numberValue] stringValue];
     }
-    if ([expected isArray] && [actual stringValue]) {
-        for (NSString *expectedString in [expected arrayValue]) {
-            if ([[self cleanString:[actual stringValue]] containsString:[self cleanString:expectedString]]) {
+    if ([expected numberValue]) {
+        expectedValue = [[expected numberValue] stringValue];
+    }
+    
+    if (actualValue && expectedValue) {
+        return [[self cleanString:actualValue] containsString:[self cleanString:expectedValue]];
+    }
+    if ([expected isArray] && actualValue) {
+        for (id expectedElement in [expected arrayValue]) {
+            NSString *expectedString;
+            if ([expectedElement isKindOfClass:[NSString class]]) {
+                expectedString = expectedElement;
+            } else if ([expectedElement isKindOfClass:[NSNumber class]]) {
+                expectedString = [expectedElement stringValue];
+            }
+            if (expectedString && [[self cleanString:actualValue] containsString:[self cleanString:expectedString]]) {
                 return YES;
             }
         }

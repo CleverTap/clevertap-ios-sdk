@@ -12,6 +12,7 @@
 #import "CTEventAdapter.h"
 #import "CTTriggerEvaluator.h"
 #import "CTTriggersMatcher+Tests.h"
+#import "CTConstants.h"
 
 @interface CTTriggersMatcherTest : XCTestCase
 
@@ -1307,6 +1308,38 @@
     XCTAssertFalse(match);
 }
 
+- (void)testMatchContainsNumber {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @3,
+                    @"propertyValue": @1234
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"1234567"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @1234567
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @123
+    }];
+    XCTAssertFalse(match);
+}
+
 - (void)testMatchContainsArray {
     NSArray *whenTriggers = @[
         @{
@@ -1327,6 +1360,33 @@
         @"prop1": @"clevertap"
     }];
     
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchContainsArrayNumber {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @3,
+                    @"propertyValue": @[@1234, @"45678"]
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"123456"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @456789
+    }];
     XCTAssertTrue(match);
 }
 
@@ -1454,6 +1514,122 @@
     }];
     
     XCTAssertTrue(match);
+}
+#pragma mark System and Notification properties
+- (void)testMatchSystemProperties {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"CT SDK Version",
+                    @"operator": @1,
+                    @"propertyValue": @60000
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        CLTAP_SDK_VERSION: @60000
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+    }];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchSystemPropertiesCurrentAndLegacy {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"CT SDK Version",
+                    @"operator": @1,
+                    @"propertyValue": @60000
+                },
+                @{
+                    @"propertyName": @"ct_sdk_version",
+                    @"operator": @1,
+                    @"propertyValue": @60000
+                },
+                @{
+                    @"propertyName": @"CT App Version",
+                    @"operator": @1,
+                    @"propertyValue": @"6.0.0"
+                },
+                @{
+                    @"propertyName": @"ct_app_version",
+                    @"operator": @1,
+                    @"propertyValue": @"6.0.0"
+                },
+                @{
+                    @"propertyName": @"ct_os_version",
+                    @"operator": @1,
+                    @"propertyValue": @"17.1.1"
+                },
+                @{
+                    @"propertyName": @"CT OS Version",
+                    @"operator": @1,
+                    @"propertyValue": @"17.1.1"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        CLTAP_SDK_VERSION: @60000,
+        CLTAP_APP_VERSION: @"6.0.0",
+        CLTAP_OS_VERSION: @"17.1.1"
+    }];
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchNotificationProperties {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Notification Viewed",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": CLTAP_PROP_CAMPAIGN_ID,
+                    @"operator": @3,
+                    @"propertyValue": @1701172437
+                },
+                @{
+                    @"propertyName": CLTAP_PROP_WZRK_ID,
+                    @"operator": @3,
+                    @"propertyValue": @1701172437
+                },
+                @{
+                    @"propertyName": CLTAP_PROP_VARIANT,
+                    @"operator": @1,
+                    @"propertyValue": CLTAP_NOTIFICATION_PIVOT_DEFAULT
+                },
+                @{
+                    @"propertyName": CLTAP_PROP_WZRK_PIVOT,
+                    @"operator": @1,
+                    @"propertyValue": CLTAP_NOTIFICATION_PIVOT_DEFAULT
+                },
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"Notification Viewed" eventProperties:@{
+        CLTAP_PROP_WZRK_ID: @"1701172437_20231128",
+        CLTAP_PROP_WZRK_PIVOT: CLTAP_NOTIFICATION_PIVOT_DEFAULT
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+    }];
+    XCTAssertFalse(match);
 }
 
 #pragma mark GeoRadius

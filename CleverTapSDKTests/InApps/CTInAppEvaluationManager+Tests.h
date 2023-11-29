@@ -14,6 +14,7 @@
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
+@property (nonatomic, strong) NSDictionary *appLaunchedProperties;
 - (void)sortByPriority:(NSMutableArray *)inApps;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 - (BOOL)shouldSuppress:(NSDictionary *)inApp;
