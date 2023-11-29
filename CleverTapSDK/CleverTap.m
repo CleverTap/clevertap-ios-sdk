@@ -97,6 +97,8 @@ static NSArray *sslCertNames;
 
 #import "NSDictionary+Extensions.h"
 
+#import "CTAES.h"
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -251,6 +253,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong) CTVariables *variables;
 
+@property (nonatomic, strong) NSLocale *locale;
+
 - (instancetype)init __unavailable;
 
 @end
@@ -393,11 +397,11 @@ static BOOL sharedInstanceErrorLogged;
         }
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        
+        _defaultInstanceConfig.enableFileProtection = _plistInfo.enableFileProtection;
         NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
         NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
         NSString *spikyProxyDomainLog = (!_plistInfo.spikyProxyDomain || _plistInfo.spikyProxyDomain.length < 1) ? @"" : _plistInfo.spikyProxyDomain;
-        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog);
+        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@ %@: %d", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog, CLTAP_ENABLE_FILE_PROTECTION, _plistInfo.enableFileProtection);
     }
     return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
     } @finally {
@@ -464,7 +468,7 @@ static BOOL sharedInstanceErrorLogged;
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
         // save config to defaults
-        [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId]];
+        [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
         
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
@@ -524,7 +528,8 @@ static BOOL sharedInstanceErrorLogged;
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
     if (!_instances || [_instances count] <= 0) {
-        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofType:[CleverTapInstanceConfig class] removeFile:NO];
+        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+        CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofTypes:allowedClasses removeFile:NO];
         return [CleverTap instanceWithConfig:config];
     }
     
@@ -827,6 +832,11 @@ static BOOL sharedInstanceErrorLogged;
         header[@"regURLs"] = registeredURLSchemes;
     }
     
+    // Adds debug flag to show errors and events on the dashboard - integration-debugger when dubug level is set to 3
+    if ([CleverTap getDebugLevel] == 3){
+        header[@"debug"] = @YES;
+    }
+    
     @try {
         NSDictionary *arp = [self getARP];
         if (arp && [arp count] > 0) {
@@ -907,7 +917,7 @@ static BOOL sharedInstanceErrorLogged;
     evtData[@"Make"] = self.deviceInfo.manufacturer;
     evtData[CLTAP_OS_VERSION] = self.deviceInfo.osVersion;
     
-    if (self.deviceInfo.carrier) {
+    if (self.deviceInfo.carrier && ![self.deviceInfo.carrier isEqualToString:@""]) {
         evtData[CLTAP_CARRIER] = self.deviceInfo.carrier;
     }
     
@@ -948,6 +958,12 @@ static BOOL sharedInstanceErrorLogged;
         [auxiliarySdkVersions enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
             [evtData setObject:value forKey:key];
         }];
+    }
+    
+    if (_locale){
+        evtData[@"locale"] = [_locale localeIdentifier];
+    }else{
+        evtData[@"locale"] = [self.deviceInfo.systemLocale localeIdentifier];
     }
     
     #if CLEVERTAP_SSL_PINNING
@@ -1090,7 +1106,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
     if ([self isMuted]) return;
-    [self persistQueues];
+    [self persistOrClearQueues];
 }
 
 - (void)_appEnteredForegroundWithLaunchingOptions:(NSDictionary *)launchOptions {
@@ -1150,9 +1166,13 @@ static BOOL sharedInstanceErrorLogged;
     backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
     
     @try {
-        [self persistOrClearQueues];
-        [self.sessionManager updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-        finishTaskHandler();
+        [self.dispatchQueueManager runSerialAsync:^{
+            if (![self isMuted]) {
+                [self persistOrClearQueues];
+            }
+            [self.sessionManager updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
+            finishTaskHandler();
+        }];
     }
     @catch (NSException *exception) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
@@ -1488,9 +1508,14 @@ static BOOL sharedInstanceErrorLogged;
         } else if ([object isKindOfClass:[NSDictionary class]]) {
             notification = object;
         }
-    } else if ([object isKindOfClass:[UILocalNotification class]]) {
+    }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    else if ([object isKindOfClass:[UILocalNotification class]]) {
         notification = [((UILocalNotification *) object) userInfo];
-    } else if ([object isKindOfClass:[NSDictionary class]]) {
+    }
+#pragma clang diagnostic pop
+    else if ([object isKindOfClass:[NSDictionary class]]) {
         notification = object;
     }
     return notification;
@@ -2022,19 +2047,13 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)persistQueues {
-    [self.dispatchQueueManager runSerialAsync:^{
-        [self persistOrClearQueues];
-    }];
-}
-
 - (void)persistEventsQueue {
     NSString *fileName = [self eventsFileName];
     NSMutableArray *eventsCopy;
     @synchronized (self) {
         eventsCopy = [NSMutableArray arrayWithArray:[self.eventsQueue copy]];
     }
-    [CTPreferences archiveObject:eventsCopy forFileName:fileName];
+    [CTPreferences archiveObject:eventsCopy forFileName:fileName config:_config];
 }
 
 - (void)persistProfileQueue {
@@ -2043,7 +2062,7 @@ static BOOL sharedInstanceErrorLogged;
     @synchronized (self) {
         profileEventsCopy = [NSMutableArray arrayWithArray:[self.profileQueue copy]];
     }
-    [CTPreferences archiveObject:profileEventsCopy forFileName:fileName];
+    [CTPreferences archiveObject:profileEventsCopy forFileName:fileName config:_config];
 }
 
 - (void)persistNotificationsQueue {
@@ -2052,7 +2071,7 @@ static BOOL sharedInstanceErrorLogged;
     @synchronized (self) {
         notificationsCopy = [NSMutableArray arrayWithArray:[self.notificationsQueue copy]];
     }
-    [CTPreferences archiveObject:notificationsCopy forFileName:fileName];
+    [CTPreferences archiveObject:notificationsCopy forFileName:fileName config:_config];
 }
 
 - (NSString *)fileNameForQueue:(NSString *)queueName {
@@ -3163,6 +3182,11 @@ static BOOL sharedInstanceErrorLogged;
     auxiliarySdkVersions[name] = @(version);
 }
 
+- (void)setLocale:(NSLocale *)locale
+{
+    _locale = locale;
+}
+
 + (void)setDebugLevel:(int)level {
     [CTLogger setDebugLevel:level];
     if (_defaultInstanceConfig) {
@@ -3932,6 +3956,8 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)setFeatureFlagsDelegate:(id<CleverTapFeatureFlagsDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapFeatureFlagsDelegate)]) {
         _featureFlagsDelegate = delegate;
@@ -3949,6 +3975,7 @@ static BOOL sharedInstanceErrorLogged;
         [self.featureFlagsDelegate ctFeatureFlagsUpdated];
     }
 }
+#pragma clang diagnostic pop
 
 - (void)fetchFeatureFlags {
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @1}} withType:CleverTapEventTypeFetch];
@@ -4008,6 +4035,8 @@ static BOOL sharedInstanceErrorLogged;
     return nil;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate {
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapProductConfigDelegate)]) {
         _productConfigDelegate = delegate;
@@ -4037,6 +4066,7 @@ static BOOL sharedInstanceErrorLogged;
         [self.productConfigDelegate ctProductConfigInitialized];
     }
 }
+#pragma clang diagnostic pop
 
 - (void)fetchProductConfig {
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @0}} withType:CleverTapEventTypeFetch];

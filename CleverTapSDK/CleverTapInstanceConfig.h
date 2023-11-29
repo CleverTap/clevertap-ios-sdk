@@ -15,6 +15,7 @@
 @property (nonatomic, assign) BOOL enablePersonalization;
 @property (nonatomic, assign) BOOL useCustomCleverTapId;
 @property (nonatomic, assign) BOOL disableIDFV;
+@property (nonatomic, assign) BOOL enableFileProtection;
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 @property (nonatomic, strong, nullable) NSArray *identityKeys;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
@@ -54,4 +55,5 @@
  @param encryptionLevel  the encryption level to set
  */
 - (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel;
+- (void)setEnableFileProtection:(BOOL)enableFileProtection;
 @end

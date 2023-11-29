@@ -30,6 +30,7 @@ extern NSString *const kSessionId;
 #define CLTAP_DISABLE_APP_LAUNCH_LABEL @"CleverTapDisableAppLaunched"
 #define CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapUseCustomId"
 #define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
+#define CLTAP_ENABLE_FILE_PROTECTION @"CleverTapEnableFileProtection"
 #define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"

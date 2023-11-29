@@ -398,7 +398,10 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
     if (@available(iOS 13.0, *)) {
         activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+#pragma clang diagnostic pop
     }
     activityIndicatorView.center = CGPointMake(activityView.bounds.size.width / 2, activityView.bounds.size.height / 2);
     [activityView addSubview:activityIndicatorView];
