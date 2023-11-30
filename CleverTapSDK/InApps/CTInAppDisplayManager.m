@@ -497,7 +497,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     NSString *html = [self imageInterstitialHtml];
     if (html && content) {
         NSArray *parts = [html componentsSeparatedByString:CLTAP_INAPP_HTML_SPLIT];
-        return [NSString stringWithFormat:@"%@'%@'%@", parts[0], content, parts[1]];
+        if ([parts count] == 2) {
+            return [NSString stringWithFormat:@"%@'%@'%@", parts[0], content, parts[1]];
+        }
     }
     return nil;
 }
