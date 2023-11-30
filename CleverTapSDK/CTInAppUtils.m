@@ -1,6 +1,7 @@
 
 #import <UIKit/UIKit.h>
 #import "CTInAppUtils.h"
+#import "CTConstants.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTUIUtils.h"
 #endif
@@ -12,7 +13,7 @@ static NSDictionary *_inAppTypeMap;
 + (CTInAppType)inAppTypeFromString:(NSString*)type {
     if (_inAppTypeMap == nil) {
         _inAppTypeMap = @{
-            @"custom-html": @(CTInAppTypeHTML),
+            CLTAP_INAPP_HTML_TYPE: @(CTInAppTypeHTML),
             @"interstitial": @(CTInAppTypeInterstitial),
             @"cover": @(CTInAppTypeCover),
             @"header-template": @(CTInAppTypeHeader),

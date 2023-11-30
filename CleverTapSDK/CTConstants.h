@@ -171,6 +171,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_NOTIF_DARKEN_SCREEN @"dk"
 #define CLTAP_INAPP_NOTIF_SHOW_CLOSE @"sc"
 
+#define CLTAP_INAPP_HTML_TYPE @"custom-html"
+#define CLTAP_INAPP_HTML_SPLIT @"\"##Vars##\""
+
 #pragma mark Constants for persisting Facebook data
 #define CLTAP_FB_NAME @"fbName"
 #define CLTAP_FB_ID @"fbId"
