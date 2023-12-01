@@ -87,6 +87,7 @@
         }
         for (int i = 0; i < [eventActionsAllKeys count]; i++) {
             NSString *key = eventActionsAllKeys[(NSUInteger) i];
+            id value = eventActions[key];
             vr = [CTValidator cleanObjectKey:key];
             if ([vr object] == nil || [((NSString *) [vr object]) isEqualToString:@""]) {
                 [errors addObject:[CTValidationResult resultWithErrorCode:512 andMessage:[NSString stringWithFormat:@"Invalid event property key: %@", key]]];
@@ -95,7 +96,6 @@
                 continue;
             }
             key = (NSString *) [vr object];
-            id value = eventActions[key];
             // Check for an error
             if ([vr errorCode] != 0) {
                 event[CLTAP_ERROR_KEY] = [self getErrorObject:vr];

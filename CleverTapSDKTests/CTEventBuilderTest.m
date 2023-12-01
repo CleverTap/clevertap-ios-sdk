@@ -105,6 +105,38 @@
     }];
 }
 
+- (void)test_build_withObjectForCleaningEventActionsKey {
+    NSString *eventName = @"TestEventName";
+    NSDictionary *eventActions = @{@"key   ": @"value1"};
+
+    [CTEventBuilder build:eventName withEventActions:eventActions completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"TestEventName");
+        XCTAssertEqualObjects(event[@"evtData"], @{ @"key": @"value1" });
+        XCTAssertEqual(errors.count, 0);
+    }];
+}
+
+- (void)test_build_withObjectForCleaningEventActionsKeyAndValue {
+    NSString *eventName = @"TestEventName";
+    NSDictionary *eventActions = @{
+        @"   some key   ": @" value 1 ",
+        @"another   key ": @"   val1   "
+    };
+
+    [CTEventBuilder build:eventName withEventActions:eventActions completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"TestEventName");
+        XCTAssertEqualObjects(event[@"evtData"], (@{
+            @"some key": @"value 1",
+            @"another   key": @"val1"
+        }));
+        XCTAssertEqual(errors.count, 0);
+    }];
+}
+
 - (void)test_build_withObjectForCleaningEventActionsKey_ResultEmpty {
     NSString *eventName = @"Test.Event:Name$";
     NSDictionary *eventActions = @{@" . : $": @"value1"};
@@ -118,7 +150,7 @@
     }];
 }
 
-- (void)test_build_withObjectForCleaningEventActionsValue_ResultEmpty {
+- (void)test_build_withObjectForCleaningEventActionsValue {
     NSString *eventName = @"Test.Event:Name$";
     NSDictionary *eventActions = @{@" key1$": @" . : $"};
 
@@ -126,8 +158,8 @@
 
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"TestEventName");
-        XCTAssertEqualObjects(event[@"evtData"], @{});
-        XCTAssertEqual(errors.count, 1);
+        XCTAssertEqualObjects(event[@"evtData"], @{ @"key1": @". : $" });
+        XCTAssertEqual(errors.count, 0);
     }];
 }
 
@@ -191,6 +223,27 @@
     
     [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNil(event);
+        XCTAssertEqual(errors.count, 0);
+    }];
+}
+
+- (void)test_buildChargedEventWithDetailsAndItems {
+    NSDictionary *chargeDetails = @{@"  charge 1   ": @" value 1", @"charge2 ": @" value2"};
+    NSDictionary *item1 = @{@"item 1  ": @"value    1   "};
+    NSDictionary *item2 = @{@"  item2": @"value2    "};
+
+    NSArray *items = @[item1, item2];
+    
+    [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"Charged");
+        XCTAssertEqual([event[@"evtData"] count], 3);
+        XCTAssertEqualObjects(event[@"evtData"][@"Items"], (@[@{@"item 1": @"value    1"}, @{@"item2": @"value2"}]));
+        
+        NSString *value1 = event[@"evtData"][@"charge 1"];
+        XCTAssertEqualObjects(value1, @"value 1");
+        NSString *value2 = event[@"evtData"][@"charge2"];
+        XCTAssertEqualObjects(value2, @"value2");
         XCTAssertEqual(errors.count, 0);
     }];
 }
