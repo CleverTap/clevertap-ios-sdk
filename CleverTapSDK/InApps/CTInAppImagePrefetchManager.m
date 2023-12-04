@@ -6,8 +6,6 @@
 @interface CTInAppImagePrefetchManager()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
-@property (nonatomic, strong) SDWebImageContext *sdWebImageContext;
 @property (nonatomic, strong) SDWebImagePrefetcher *sdWebImagePrefetcher;
 @property (nonatomic, strong) SDImageCache *sdImageCache;
 
@@ -51,8 +49,6 @@
 #pragma mark - Private
 
 - (void)setup {
-    self.sdWebImageOptions = (SDWebImageRetryFailed);
-    self.sdWebImageContext = @{SDWebImageContextStoreCacheType : @(SDImageCacheTypeDisk)};
     self.sdWebImagePrefetcher = [SDWebImagePrefetcher sharedImagePrefetcher];
     self.sdImageCache = [SDImageCache sharedImageCache];
 }
@@ -60,12 +56,7 @@
 - (void)prefetchURLs:(NSArray<NSURL *> *)mediaURLs {
     if (mediaURLs.count == 0) return;
 
-    [self.sdWebImagePrefetcher prefetchURLs:mediaURLs
-                                    options:self.sdWebImageOptions
-                                    context:self.sdWebImageContext
-                                   progress:^(NSUInteger noOfFinishedUrls, NSUInteger noOfTotalUrls) {}
-                                  completed:^(NSUInteger noOfFinishedUrls, NSUInteger noOfSkippedUrls) {}
-    ];
+    [self.sdWebImagePrefetcher prefetchURLs:mediaURLs];
 }
 
 - (NSArray<NSURL *> *)getImageURLs:(NSArray *)csInAppNotifs {
@@ -75,7 +66,6 @@
         if (media) {
             NSString *contentType = media[@"content_type"];
             NSString *mediaUrl = media[@"url"];
-            NSString *mediaKey = media[@"key"];
             if (mediaUrl && mediaUrl.length > 0) {
                 // Preload contentType with image/jpeg or image/gif
                 if ([contentType hasPrefix:@"image"]) {
