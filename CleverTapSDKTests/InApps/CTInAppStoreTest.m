@@ -29,7 +29,8 @@
 
 - (void)setUp {
     [super setUp];
-    self.store = [[CTInAppStore alloc] initWithAccountId:@"testAccountID" deviceId:@"testDeviceID"];
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"accountId" accountToken:@"accountToken"];
+    self.store = [[CTInAppStore alloc] initWithConfig:config deviceId:@"testDeviceID"];
     self.ctAES = [[CTAES alloc] initWithAccountID:@"testAccountID"];
     self.inApps = @[
         @{
