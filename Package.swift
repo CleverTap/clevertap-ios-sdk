@@ -30,6 +30,7 @@ let package = Package(
             ],
             resources: [
                 .copy("AmazonRootCA1.cer"),
+                .copy("PrivacyInfo.xcprivacy"),
                 .process("InApps/resources"),
                 .process("Inbox/resources")
             ],
