@@ -64,18 +64,33 @@
     for (NSDictionary *jsonInApp in csInAppNotifs) {
         NSDictionary *media = (NSDictionary*) jsonInApp[@"media"];
         if (media) {
-            NSString *contentType = media[@"content_type"];
-            NSString *mediaUrl = media[@"url"];
-            if (mediaUrl && mediaUrl.length > 0) {
-                // Preload contentType with image/jpeg or image/gif
-                if ([contentType hasPrefix:@"image"]) {
-                    NSURL *imageURL = [NSURL URLWithString:mediaUrl];
-                    [mediaURLs addObject:imageURL];
-                }
+            NSURL *imageURL = [self getURLFromDictionary:media];
+            if (imageURL) {
+                [mediaURLs addObject:imageURL];
+            }
+        }
+        NSDictionary *mediaLandscape = (NSDictionary*) jsonInApp[@"mediaLandscape"];
+        if (mediaLandscape) {
+            NSURL *imageURL = [self getURLFromDictionary:mediaLandscape];
+            if (imageURL) {
+                [mediaURLs addObject:imageURL];
             }
         }
     }
     return mediaURLs;
+}
+
+- (NSURL *)getURLFromDictionary:(NSDictionary *)media {
+    NSString *contentType = media[@"content_type"];
+    NSString *mediaUrl = media[@"url"];
+    if (mediaUrl && mediaUrl.length > 0) {
+        // Preload contentType with image/jpeg or image/gif
+        if ([contentType hasPrefix:@"image"]) {
+            NSURL *imageURL = [NSURL URLWithString:mediaUrl];
+            return imageURL;
+        }
+    }
+    return nil;
 }
 
 @end
