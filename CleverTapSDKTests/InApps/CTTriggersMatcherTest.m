@@ -253,7 +253,6 @@
 }
 
 - (void)testMatchChargedEventItemArrayEquals {
-    
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"Charged",
@@ -291,7 +290,6 @@
 }
 
 - (void)testMatchChargedEventItemArrayContains {
-    
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"Charged",
@@ -331,7 +329,6 @@
 #pragma mark Equals
 
 - (void)testMatchEqualsPrimitives {
-    
     NSArray *whenTriggers = @[
         @{
             @"eventName": @"event1",
@@ -367,6 +364,110 @@
         @"prop2": @200,
         @"prop3": @"150",
         @"prop4": @"CleverTap"
+    }];
+    
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchEqualsBoolean {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"propertyValue": @"true"
+                },
+                @{
+                    @"propertyName": @"prop2",
+                    @"operator": @1,
+                    @"propertyValue": @"false"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @(YES),
+        @"prop2": @(NO)
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @(true),
+        @"prop2": @(false)
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @(1),
+        @"prop2": @(0)
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @(NO),
+        @"prop2": @(YES)
+    }];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchEqualsBooleanString {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"propertyValue": @"true"
+                },
+                @{
+                    @"propertyName": @"prop2",
+                    @"operator": @1,
+                    @"propertyValue": @"false"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"true",
+        @"prop2": @"false"
+    }];
+    
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchEqualsBooleanCaseInsensitive {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"propertyValue": @"True"
+                },
+                @{
+                    @"propertyName": @"prop2",
+                    @"operator": @1,
+                    @"propertyValue": @"False"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @(YES),
+        @"prop2": @(NO)
     }];
     
     XCTAssertTrue(match);
@@ -1304,6 +1405,33 @@
     
     match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
         @"prop1": @"cle"
+    }];
+    XCTAssertFalse(match);
+}
+
+- (void)testMatchContainsStringBool {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @3,
+                    @"propertyValue": @"true"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"this is true"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop1": @"this is false"
     }];
     XCTAssertFalse(match);
 }

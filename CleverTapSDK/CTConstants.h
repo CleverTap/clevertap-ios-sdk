@@ -150,6 +150,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_EXCLUDE_FROM_CAPS @"efc"
 #define CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS @"excludeGlobalFCaps"
 
+#define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
+#define CLTAP_TRIGGER_BOOL_STRING_NO @"false"
+
 // whenTriggers
 #define CLTAP_INAPP_TRIGGERS @"whenTriggers"
 
