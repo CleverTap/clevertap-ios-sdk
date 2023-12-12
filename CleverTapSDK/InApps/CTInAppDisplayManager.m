@@ -35,6 +35,7 @@
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
+#import "CTInAppImagePrefetchManager.h"
 #endif
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
@@ -53,6 +54,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 @property (nonatomic, strong) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, weak) CleverTap* instance;
+@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
 
 @end
 
@@ -67,6 +69,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
+        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
     }
     return self;
 }
@@ -193,7 +196,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
-        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
+        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj imagePrefetchManager:self.imagePrefetchManager];
         if (notification.error) {
             CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
             return;
