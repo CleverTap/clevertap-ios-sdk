@@ -7,22 +7,28 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreLocation/CoreLocation.h>
 #import "CTBatchSentDelegate.h"
 #import "CTAttachToBatchHeaderDelegate.h"
-#import "CTDeviceInfo.h"
-#import "CTMultiDelegateManager.h"
-#import "CTImpressionManager.h"
-#import "CTInAppDisplayManager.h"
+
+@class CTMultiDelegateManager;
+@class CTImpressionManager;
+@class CTInAppDisplayManager;
+@class CTInAppStore;
+@class CTInAppTriggerManager;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInAppEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToBatchHeaderDelegate>
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                    deviceInfo:(CTDeviceInfo *)deviceInfo
-               delegateManager:(CTMultiDelegateManager *)delegateManager
-             impressionManager:(CTImpressionManager *)impressionManager
-           inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager;
+@property (nonatomic, assign) CLLocationCoordinate2D location;
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
+                impressionManager:(CTImpressionManager *)impressionManager
+              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager
+                       inAppStore:(CTInAppStore *)inAppStore
+              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;

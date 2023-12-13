@@ -39,10 +39,10 @@
     [self.attachToHeaderDelegates removeObject:delegate];
 }
 
-- (BatchHeaderKeyPathValues)notifyAttachToHeaderDelegatesAndCollectKeyPathValues {
+- (BatchHeaderKeyPathValues)notifyAttachToHeaderDelegatesAndCollectKeyPathValues:(CTQueueType)queueType {
     NSMutableDictionary<NSString *, id> *header = [NSMutableDictionary dictionary];
     for (id<CTAttachToBatchHeaderDelegate> delegate in self.attachToHeaderDelegates) {
-        NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreation];
+        NSDictionary<NSString *, id> *additionalHeader = [delegate onBatchHeaderCreationForQueue:queueType];
         if (additionalHeader) {
             [header addEntriesFromDictionary:additionalHeader];
         }
@@ -56,7 +56,7 @@
 }
 
 - (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
-    [self.switchUserDelegates addObject:delegate];
+    [self.switchUserDelegates removeObject:delegate];
 }
 
 - (void)notifyDelegatesDeviceIdDidChange:(NSString *)newDeviceId {
@@ -73,7 +73,7 @@
 }
 
 - (void)removeBatchSentDelegate:(id<CTBatchSentDelegate>)delegate {
-    [self.batchSentDelegates addObject:delegate];
+    [self.batchSentDelegates removeObject:delegate];
 }
 
 - (void)notifyDelegatesBatchDidSend:(NSArray *)batchWithHeader withSuccess:(BOOL)success {

@@ -10,7 +10,7 @@ __attribute__((deprecated("This protocol method has been deprecated and will be 
 
 @interface CleverTap (FeatureFlags)
 @property (atomic, strong, readonly, nonnull) CleverTapFeatureFlags *featureFlags
-__attribute__((deprecated("This property has been deprecated and will be removed in the future versions of this SDK.")));;
+__attribute__((deprecated("This property has been deprecated and will be removed in the future versions of this SDK.")));
 @end
 
 @interface CleverTapFeatureFlags : NSObject

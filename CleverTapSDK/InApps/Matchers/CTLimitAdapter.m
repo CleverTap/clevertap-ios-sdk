@@ -57,4 +57,11 @@
     return [frequency integerValue];
 }
 
+- (BOOL)isEmpty {
+    if (self.limitJSON && [self.limitJSON count] > 0) {
+        return NO;
+    }
+    return YES;
+}
+
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CTQueueType.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,7 +15,7 @@ typedef NSDictionary<NSString *, id> * _Nonnull BatchHeaderKeyPathValues;
 
 @protocol CTAttachToBatchHeaderDelegate <NSObject>
 
-- (BatchHeaderKeyPathValues)onBatchHeaderCreation;
+- (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType;
 
 @end
 

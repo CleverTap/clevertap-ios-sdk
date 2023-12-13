@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
         ctConfig.logLevel = .off
         ctConfig.disableIDFV = true
+        ctConfig.enableFileProtection = false
         let cleverTapAdditionalInstance = CleverTap.instance(with: ctConfig)
         NSLog("additional CleverTap instance created for accountID: %@", cleverTapAdditionalInstance.config.accountId)
         

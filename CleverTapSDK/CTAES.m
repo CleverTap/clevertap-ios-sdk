@@ -35,6 +35,25 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     return self;
 }
 
+- (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
+    if (self = [super init]) {
+        _accountID = [coder decodeObjectForKey:@"accountID"];
+        _isDefaultInstance = [coder decodeBoolForKey:@"isDefaultInstance"];
+        _encryptionLevel = [coder decodeIntForKey:@"encryptionLevel"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject: _accountID forKey:@"accountID"];
+    [coder encodeBool: _isDefaultInstance forKey:@"isDefaultInstance"];
+    [coder encodeInt: _encryptionLevel forKey:@"encryptionLevel"];
+}
+
++ (BOOL)supportsSecureCoding {
+   return YES;
+}
+
 - (void)updateEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
     _encryptionLevel = encryptionLevel;
     long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID] withResetValue:0];

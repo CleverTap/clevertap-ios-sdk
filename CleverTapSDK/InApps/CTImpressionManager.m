@@ -8,7 +8,6 @@
 
 #import "CTImpressionManager.h"
 #import "CTPreferences.h"
-#import "CTPushPrimerManager.h"
 #import "CleverTapInternal.h"
 #import "CTSystemClock.h"
 
@@ -62,6 +61,7 @@
     return self;
 }
 
+#pragma mark Manage Impressions
 - (void)recordImpression:(NSString *)campaignId {
     if (![campaignId isKindOfClass:[NSString class]] || [campaignId length] == 0) {
         return;
@@ -179,10 +179,6 @@
 }
 
 #pragma mark Switch User Delegate
-- (void)sessionDidReset {
-    [self resetSession];
-}
-
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     self.deviceId = newDeviceId;
     [self resetSession];
@@ -190,7 +186,6 @@
 }
 
 #pragma mark Store Impressions
-
 - (NSMutableArray *)getImpressions:(NSString *)campaignId {
     NSMutableArray *campaignImpressions = self.impressions[campaignId];
     if (campaignImpressions) {
@@ -212,7 +207,8 @@
     if (!impressions) {
         impressions = [NSMutableArray new];
     }
-    [impressions addObject:timestamp];
+    NSInteger val = [timestamp integerValue];
+    [impressions addObject:[NSNumber numberWithLong:val]];
     [CTPreferences putObject:impressions forKey:[self getImpressionKey:campaignId]];
 }
 
@@ -222,7 +218,7 @@
 }
 
 - (NSString *)getImpressionKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@_%@_%@_%@", self.accountId, self.deviceId, @"impressions", campaignId];
+    return [NSString stringWithFormat:@"%@:%@_%@_%@", self.accountId, self.deviceId, @"impressions", campaignId];
 }
 
 @end

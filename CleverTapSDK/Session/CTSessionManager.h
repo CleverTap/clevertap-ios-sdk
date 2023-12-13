@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, retain, nullable) NSDictionary *wzrkParams;
 
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppStore:(CTInAppStore *)inAppStore;
 - (void)updateSessionStateOnLaunch;
 - (void)updateSessionTime:(long)ts;
 - (void)createSessionIfNeeded;

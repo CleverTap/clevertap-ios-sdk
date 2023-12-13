@@ -10,6 +10,7 @@
 #import "CTAES.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
+#import "CTUIUtils.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -89,7 +90,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     localProfileUpdateExpiryStore = [NSMutableDictionary new];
     localProfileForSession = [NSMutableDictionary dictionary];
     // this will remove the old profile from the file system
-    [self _persistLocalProfileAsync];
+    [self _persistLocalProfileAsyncWithCompletion:nil];
     [self clearStoredEvents];
 }
 
@@ -97,11 +98,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 #pragma mark - UIApplication State and Events
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
-    [self _persistLocalProfileAsync];
+    [self _persistLocalProfileInBackground];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
-    [self _persistLocalProfileAsync];
+    [self _persistLocalProfileInBackground];
 }
 
 /*!
@@ -644,12 +645,12 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             }
         }
         if (shouldPersist) {
-            [self _persistLocalProfileAsync];
+            [self _persistLocalProfileAsyncWithCompletion:nil];
         }
     }];
 }
 
-- (void)_persistLocalProfileAsync {
+- (void)_persistLocalProfileAsyncWithCompletion:(void (^ _Nullable )(void))taskBlock {
     [self runOnBackgroundQueue:^{
         NSMutableDictionary *_profile;
         
@@ -664,8 +665,33 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }
         
         NSMutableDictionary *updatedProfile = [self cryptValuesIfNeeded:_profile];
-        [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName]];
+        [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName] config:self->_config];
+        if (taskBlock) {
+            taskBlock();
+        }
     }];
+}
+
+- (void)_persistLocalProfileInBackground {
+    UIApplication *application = [CTUIUtils getSharedApplication];
+    UIBackgroundTaskIdentifier __block backgroundTask;
+    
+    void (^finishTaskHandler)(void) = ^(){
+        dispatch_async(self->_backgroundQueue, ^{
+            [application endBackgroundTask:backgroundTask];
+            backgroundTask = UIBackgroundTaskInvalid;
+        });
+    };
+    // Start background task to make sure it runs when the app is in background.
+    backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
+    
+    @try {
+        [self _persistLocalProfileAsyncWithCompletion:finishTaskHandler];
+    }
+    @catch (NSException *exception) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
+        finishTaskHandler();
+    }
 }
 
 

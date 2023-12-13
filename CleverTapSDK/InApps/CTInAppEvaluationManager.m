@@ -6,24 +6,24 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 
+#import <CoreLocation/CoreLocation.h>
+#import "CTInAppEvaluationManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
 #import "CTInAppStore.h"
 #import "CTTriggersMatcher.h"
 #import "CTLimitsMatcher.h"
 #import "CTInAppTriggerManager.h"
+#import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
-#import "CleverTapInternal.h"
+#import "CTUtils.h"
 
 @interface CTInAppEvaluationManager()
 
-@property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property BOOL hasAppLaunchedFailed;
-
-// TODO: set the location
-@property (nonatomic, assign) CLLocationCoordinate2D location;
+@property (nonatomic, strong) NSDictionary *appLaunchedProperties;
 
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
@@ -41,23 +41,23 @@
 
 @implementation CTInAppEvaluationManager
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                    deviceInfo:(CTDeviceInfo *)deviceInfo
-               delegateManager:(CTMultiDelegateManager *)delegateManager
-             impressionManager:(CTImpressionManager *)impressionManager
-           inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
+                impressionManager:(CTImpressionManager *)impressionManager
+              inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
+                       inAppStore:(CTInAppStore *)inAppStore
+              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager {
     if (self = [super init]) {
-        self.config = config;
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
         
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         self.suppressedClientSideInApps = [NSMutableArray new];
-        
-        self.inAppStore = [[CTInAppStore alloc] initWithConfig:config deviceId:deviceInfo.deviceId];
+
+        self.inAppStore = inAppStore;
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
-        self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:config.accountId deviceId:deviceInfo.deviceId];
+        self.triggerManager = inAppTriggerManager;
 
         [delegateManager addBatchSentDelegate:self];
         [delegateManager addAttachToHeaderDelegate:self];
@@ -66,11 +66,14 @@
 }
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
-    if (![eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
-        [self evaluateServerSide:event];
-        [self evaluateClientSide:event];
+    if ([eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
+        self.appLaunchedProperties = properties ? properties : @{};
+        return;
     }
+    
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
+    [self evaluateServerSide:event];
+    [self evaluateClientSide:event];
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
@@ -80,12 +83,12 @@
 }
 
 - (void)evaluateOnAppLaunchedClientSide {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{} andLocation:self.location];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     [self evaluateClientSide:event];
 }
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
-    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:@{} andLocation:self.location];
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     [self sortByPriority:eligibleInApps];
     for (NSDictionary *inApp in eligibleInApps) {
@@ -117,9 +120,12 @@
 - (void)evaluateServerSide:(CTEventAdapter *)event {
     NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
     for (NSDictionary *inApp in eligibleInApps) {
-        NSString *campaignId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        NSString *campaignId = [CTInAppNotification inAppId:inApp];
         if (campaignId) {
-            [self.evaluatedServerSideInAppIds addObject:campaignId];
+            NSNumber *cid = [CTUtils numberFromString:campaignId];
+            if (cid) {
+                [self.evaluatedServerSideInAppIds addObject:cid];
+            }
         }
     }
 }
@@ -127,7 +133,10 @@
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
     for (NSDictionary *inApp in inApps) {
-        NSString *campaignId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        NSString *campaignId = [CTInAppNotification inAppId:inApp];
+        if (!campaignId) {
+            continue;
+        }
         // Match trigger
         NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
@@ -170,15 +179,17 @@
 
 - (void)removeSentEvaluatedServerSideInAppIds:(NSDictionary *)header {
     NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_META_KEY];
-    if (inapps_eval) {
-        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, inapps_eval.count)];
+    if (inapps_eval && [inapps_eval count] > 0) {
+        NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIds.count ?  self.evaluatedServerSideInAppIds.count : inapps_eval.count;
+        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, len)];
     }
 }
 
 - (void)removeSentSuppressedClientSideInApps:(NSDictionary *)header {
     NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
-    if (suppresed_inapps) {
-        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, suppresed_inapps.count)];
+    if (suppresed_inapps && [suppresed_inapps count] > 0) {
+        NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInApps.count ?  self.suppressedClientSideInApps.count : suppresed_inapps.count;
+        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, len)];
     }
 }
 
@@ -187,16 +198,19 @@
 }
 
 - (void)suppress:(NSDictionary *)inApp {
-    NSString *ti = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+    NSString *ti = [CTInAppNotification inAppId:inApp];
+    if (!ti) return;
     NSString *wzrk_id = [self generateWzrkId:ti];
     NSString *pivot = inApp[CLTAP_NOTIFICATION_PIVOT] ? inApp[CLTAP_NOTIFICATION_PIVOT] : CLTAP_NOTIFICATION_PIVOT_DEFAULT;
     NSNumber *cgId = inApp[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
-
-    [self.suppressedClientSideInApps addObject:@{
-        CLTAP_NOTIFICATION_ID_TAG: wzrk_id,
-        CLTAP_NOTIFICATION_PIVOT: pivot,
-        CLTAP_NOTIFICATION_CONTROL_GROUP_ID: cgId
-    }];
+    
+    NSMutableDictionary *suppressedInAppMeta = [NSMutableDictionary new];
+    suppressedInAppMeta[CLTAP_NOTIFICATION_ID_TAG] = wzrk_id;
+    suppressedInAppMeta[CLTAP_NOTIFICATION_PIVOT] = pivot;
+    if (cgId) {
+        suppressedInAppMeta[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = cgId;
+    }
+    [self.suppressedClientSideInApps addObject:suppressedInAppMeta];
 }
 
 - (void)sortByPriority:(NSMutableArray *)inApps {
@@ -209,9 +223,12 @@
     };
     
     NSNumber *(^ti)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
-        NSNumber *ti = inApp[CLTAP_INAPP_ID];
-        if (ti != nil) {
+        id ti = inApp[CLTAP_INAPP_ID];
+        if (ti && [ti isKindOfClass:[NSNumber class]]) {
             return ti;
+        } else if (ti && [ti isKindOfClass:[NSString class]]) {
+            ti = [CTUtils numberFromString:ti];
+            if (ti) return ti;
         }
         return [NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]];
     };
@@ -250,12 +267,18 @@
         [inApp setObject:[NSNumber numberWithLong:ttl] forKey:CLTAP_INAPP_TTL];
     } else {
         // Remove TTL, since it cannot be calculated based on the TTL offset
-        // The deafult TTL will be set in CTInAppNotification
+        // The default TTL will be set in CTInAppNotification
         [inApp removeObjectForKey:CLTAP_INAPP_TTL];
     }
 }
 
-- (BatchHeaderKeyPathValues)onBatchHeaderCreation {
+- (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
+    // Evaluation is done for events only at the moment,
+    // send the evaluated and suppressed ids in that queue header
+    if (queueType != CTQueueTypeEvents) {
+        return [NSMutableDictionary new];
+    }
+    
     NSMutableDictionary *header = [NSMutableDictionary new];
     if ([self.evaluatedServerSideInAppIds count] > 0) {
         header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;

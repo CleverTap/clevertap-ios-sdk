@@ -12,7 +12,6 @@
 #import <UserNotifications/UserNotifications.h>
 #import "CTSwizzle.h"
 #import "CleverTapInternal.h"
-
 #import "CTConstants.h"
 
 @implementation CTSwizzleManager
@@ -159,29 +158,6 @@
             [sharedApplication setDelegate:(__bridge id)CFRetain((__bridge CFTypeRef)appDelegate)];
         }
     });
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-#if !defined(CLEVERTAP_TVOS)
-    if ([keyPath isEqualToString:@"delegate"]) {
-        if (@available(iOS 10.0, *)) {
-            Class cls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
-            if (class_getInstanceMethod(cls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
-                SEL sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
-                if (sel) {
-                    __block NSInvocation *invocation = nil;
-                    invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
-                        [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
-                        [invocation setArgument:&center atIndex:2];
-                        [invocation setArgument:&response atIndex:3];
-                        [invocation setArgument:&completion atIndex:4];
-                        [invocation invokeWithTarget:obj];
-                    } error:nil];
-                }
-            }
-        }
-    }
-#endif
 }
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0

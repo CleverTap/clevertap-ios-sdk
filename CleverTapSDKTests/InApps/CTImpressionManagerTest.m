@@ -11,6 +11,7 @@
 #import "CTImpressionManager.h"
 #import "CTMultiDelegateManager.h"
 #import "CTClockMock.h"
+#import "CTImpressionManager+Tests.h"
 
 // Use fixed date and time
 // Do not set a timezone to the formatter,
@@ -19,10 +20,6 @@ NSString * const DATE_STRING = @"2023-10-26 19:00:00"; // Thursday
 NSString * const DATE_FORMAT = @"yyyy-MM-dd HH:mm:ss";
 // Use locale where first day of the week is 1 (Sunday)
 NSString * const LOCALE = @"en_US_POSIX";
-
-@interface CTImpressionManager(Tests)
-- (NSInteger)getImpressionCount:(NSString *)campaignId;
-@end
 
 @interface CTImpressionManagerTest : XCTestCase
 

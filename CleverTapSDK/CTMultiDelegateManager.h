@@ -10,6 +10,7 @@
 #import "CTAttachToBatchHeaderDelegate.h"
 #import "CTSwitchUserDelegate.h"
 #import "CTBatchSentDelegate.h"
+#import "CTQueueType.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate>)delegate;
 - (void)removeAttachToHeaderDelegate:(id<CTAttachToBatchHeaderDelegate>)delegate;
-- (BatchHeaderKeyPathValues)notifyAttachToHeaderDelegatesAndCollectKeyPathValues;
+- (BatchHeaderKeyPathValues)notifyAttachToHeaderDelegatesAndCollectKeyPathValues:(CTQueueType)queueType;
 
 - (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
 - (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;

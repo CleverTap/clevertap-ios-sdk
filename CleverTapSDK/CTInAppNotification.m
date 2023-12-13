@@ -85,20 +85,21 @@
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
             self.campaignId = (NSString*) jsonObject[CLTAP_NOTIFICATION_ID_TAG];
-            if (jsonObject[@"excludeGlobalFCaps"] != nil) {
-                self.excludeFromCaps = [jsonObject[@"excludeGlobalFCaps"] boolValue];
+            if (jsonObject[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil) {
+                self.excludeFromCaps = [jsonObject[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];
             } else {
-                self.excludeFromCaps = [jsonObject[@"efc"] boolValue];
+                self.excludeFromCaps = [jsonObject[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue];
             }
-            self.totalLifetimeCount = jsonObject[@"tlc"] ? [jsonObject[@"tlc"] intValue] : -1;
-            self.totalDailyCount = jsonObject[@"tdc"] ? [jsonObject[@"tdc"] intValue] : -1;
+            self.maxPerSession = jsonObject[CLTAP_INAPP_MAX_PER_SESSION] ? [jsonObject[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
+            self.totalLifetimeCount = jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] intValue] : -1;
+            self.totalDailyCount = jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] intValue] : -1;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
             self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
-            
-            if (jsonObject[CLTAP_INAPP_ID]) {
-                self.Id = [NSString stringWithFormat:@"%@", jsonObject[CLTAP_INAPP_ID]];
+            NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
+            if (inAppId) {
+                self.Id = inAppId;
             }
             NSString *type = (NSString*) jsonObject[@"type"];
             if (!type || [type isEqualToString:@"custom-html"]) {
@@ -279,7 +280,7 @@
         self.widthPercent = displayParams[CLTAP_INAPP_X_PERCENT] ? [displayParams[CLTAP_INAPP_X_PERCENT] floatValue] : 0.0;
         self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
         self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
-        self.maxPerSession = displayParams[@"mdc"] ? [displayParams[@"mdc"] intValue] : -1;
+        self.maxPerSession = displayParams[CLTAP_INAPP_MAX_PER_SESSION] ? [displayParams[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
     }
 }
 
@@ -435,6 +436,16 @@
     NSString *imageURLString = [imageURL absoluteString];
     UIImage *image = [self.imagePrefetchManager loadImageFromDisk:imageURLString];
     if (image) return image;
+    return nil;
+}
+
++ (NSString * _Nullable)inAppId:(NSDictionary * _Nullable)inApp {
+    if (inApp && inApp[CLTAP_INAPP_ID]) {
+        NSString *inAppId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        if ([inAppId length] > 0) {
+            return inAppId;
+        }
+    }
     return nil;
 }
 

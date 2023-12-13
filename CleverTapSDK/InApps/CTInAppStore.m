@@ -9,6 +9,8 @@
 #import "CTInAppStore.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
+#import "CTAES.h"
+#import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTInAppImagePrefetchManager.h"
 
@@ -23,6 +25,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
 @property (nonatomic, strong) CTAES *ctAES;
 
+@property (nonatomic, strong) NSArray *inAppsQueue;
 @property (nonatomic, strong) NSArray *clientSideInApps;
 @property (nonatomic, strong) NSArray *serverSideInApps;
 
@@ -38,14 +41,117 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     self = [super init];
     if (self) {
         self.config = config;
-        self.accountId = self.config.accountId;
-        self.ctAES = [[CTAES alloc] initWithAccountID:self.accountId];
+        self.accountId = config.accountId;
         self.deviceId = deviceId;
+        self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
         self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
+        
+        [self migrateInAppQueueKeys];
     }
     return self;
 }
 
+#pragma mark In-App Notifs Queue
+- (void)migrateInAppQueueKeys {
+    @synchronized(self) {
+        NSString *storageKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY config: self.config];
+        id data = [CTPreferences getObjectForKey:storageKey];
+        if (data) {
+            if ([data isKindOfClass:[NSArray class]]) {
+                _inAppsQueue = data;
+                NSString *encryptedString = [self.ctAES getEncryptedBase64String:data];
+                NSString *newStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
+                [CTPreferences putString:encryptedString forKey:newStorageKey];
+            }
+            [CTPreferences removeObjectForKey:storageKey];
+        }
+    }
+}
+
+- (void)clearInApps {
+    @synchronized (self) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending InApp notifications", self);
+        _inAppsQueue = [NSArray new];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
+        [CTPreferences removeObjectForKey:storageKey];
+    }
+}
+
+- (void)storeInApps:(NSArray *)inApps {
+    if (!inApps) return;
+    
+    @synchronized (self) {
+        _inAppsQueue = inApps;
+        
+        NSString *encryptedString = [self.ctAES getEncryptedBase64String:inApps];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
+        [CTPreferences putString:encryptedString forKey:storageKey];
+    }
+}
+
+- (NSArray *)inAppsQueue {
+    @synchronized(self) {
+        if (_inAppsQueue) return _inAppsQueue;
+        
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
+        id data = [CTPreferences getObjectForKey:storageKey];
+        if ([data isKindOfClass:[NSString class]]) {
+            NSArray *arr = [self.ctAES getDecryptedObject:data];
+            if (arr) {
+                _inAppsQueue = arr;
+            }
+        }
+        
+        if (!_inAppsQueue) {
+            _inAppsQueue = [NSArray new];
+        }
+
+        return _inAppsQueue;
+    }
+}
+
+- (void)enqueueInApps:(NSArray *)inAppNotifs {
+    if (!inAppNotifs) return;
+    
+    @synchronized(self) {
+        NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
+        for (int i = 0; i < [inAppNotifs count]; i++) {
+            @try {
+                NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
+                [inAppsQueue addObject:inAppNotif];
+            } @catch (NSException *e) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+            }
+        }
+        // Commit all the changes
+        [self storeInApps:inAppsQueue];
+    }
+}
+
+- (NSDictionary *)peekInApp {
+    @synchronized(self) {
+        NSArray *inApps = [self inAppsQueue];
+        if ([inApps count] > 0) {
+            return inApps[0];
+        }
+        return nil;
+    }
+}
+
+- (NSDictionary *)dequeueInApp {
+    @synchronized(self) {
+        NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
+        NSDictionary *inApp = nil;
+        if ([inAppsQueue count] > 0) {
+            inApp = inAppsQueue[0];
+            [inAppsQueue removeObjectAtIndex:0];
+            [self storeInApps:inAppsQueue];
+        }
+        return inApp;
+    }
+}
+
+#pragma mark In-App Mode
 - (NSString *)mode {
     @synchronized (self) {
         return _mode;
@@ -68,6 +174,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+#pragma mark Client-Side In-Apps
 - (void)removeClientSideInApps {
     @synchronized (self) {
         // Clear the CS images stored in disk cache
@@ -75,14 +182,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
         _clientSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
-        [CTPreferences removeObjectForKey:storageKey];
-    }
-}
-
-- (void)removeServerSideInApps {
-    @synchronized (self) {
-        _serverSideInApps = [NSArray new];
-        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
         [CTPreferences removeObjectForKey:storageKey];
     }
 }
@@ -102,6 +201,24 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+- (NSArray *)clientSideInApps {
+    @synchronized(self) {
+        if (_clientSideInApps) return _clientSideInApps;
+        
+        _clientSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS];
+        return _clientSideInApps;
+    }
+}
+
+#pragma mark Server-Side In-Apps
+- (void)removeServerSideInApps {
+    @synchronized (self) {
+        _serverSideInApps = [NSArray new];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
+        [CTPreferences removeObjectForKey:storageKey];
+    }
+}
+
 - (void)storeServerSideInApps:(NSArray *)serverSideInApps {
     if (!serverSideInApps) return;
     
@@ -114,15 +231,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
-- (NSArray *)clientSideInApps {
-    @synchronized(self) {
-        if (_clientSideInApps) return _clientSideInApps;
-        
-        _clientSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS];
-        return _clientSideInApps;
-    }
-}
-
 - (NSArray *)serverSideInApps {
     @synchronized(self) {
         if (_serverSideInApps) return _serverSideInApps;
@@ -132,6 +240,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+#pragma mark Utils
 - (NSArray *)decryptInAppsWithKeySuffix:(NSString *)keySuffix {
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
@@ -145,7 +254,16 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 }
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@_%@_%@", self.accountId, self.deviceId, suffix];
+    return [NSString stringWithFormat:@"%@:%@_%@", self.accountId, self.deviceId, suffix];
+}
+
+#pragma mark CTSwitchUserDelegate
+- (void)deviceIdDidChange:(NSString *)newDeviceId {
+    self.deviceId = newDeviceId;
+    // Set to nil to reload from cache
+    self.inAppsQueue = nil;
+    self.clientSideInApps = nil;
+    self.serverSideInApps = nil;
 }
 
 @end

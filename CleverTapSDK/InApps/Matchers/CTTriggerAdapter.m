@@ -57,7 +57,7 @@
 }
 
 - (CTTriggerCondition * _Nonnull)triggerConditionFromJSON:(NSDictionary *)property {
-    CTTriggerValue *value = [[CTTriggerValue alloc] initWithValue:property[@"value"]];
+    CTTriggerValue *value = [[CTTriggerValue alloc] initWithValue:property[@"propertyValue"]];
     
     NSUInteger operator = CTTriggerOperatorEquals;
     NSNumber *op = property[@"operator"];
@@ -94,12 +94,12 @@
     if (self.geoRadius == nil) {
         return nil;
     }
-    NSDictionary *item = self.items[index];
+    NSDictionary *item = self.geoRadius[index];
     
     CTTriggerRadius *triggerRadius = [[CTTriggerRadius alloc] init];
     triggerRadius.latitude = item[@"lat"];
     triggerRadius.longitude = item[@"lng"];
-    triggerRadius.radius = item[@"r"];
+    triggerRadius.radius = item[@"rad"];
     
     return triggerRadius;
 }

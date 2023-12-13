@@ -30,6 +30,7 @@ extern NSString *const kSessionId;
 #define CLTAP_DISABLE_APP_LAUNCH_LABEL @"CleverTapDisableAppLaunched"
 #define CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapUseCustomId"
 #define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
+#define CLTAP_ENABLE_FILE_PROTECTION @"CleverTapEnableFileProtection"
 #define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"
@@ -74,6 +75,18 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
+
+#pragma mark Constants for App fields
+#define CLTAP_APP_VERSION @"Version"
+#define CLTAP_LATITUDE @"Latitude"
+#define CLTAP_LONGITUDE @"Longitude"
+#define CLTAP_OS_VERSION @"OS Version"
+#define CLTAP_SDK_VERSION @"SDK Version"
+#define CLTAP_CARRIER @"Carrier"
+#define CLTAP_NETWORK_TYPE @"Radio"
+#define CLTAP_CONNECTED_TO_WIFI @"wifi"
+#define CLTAP_BLUETOOTH_VERSION @"BluetoothVersion"
+#define CLTAP_BLUETOOTH_ENABLED @"BluetoothEnabled"
 
 #pragma mark Constants for PE Variables
 extern NSString *CT_KIND_INT;
@@ -121,11 +134,24 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
 #define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
 
+#define CLTAP_PROP_CAMPAIGN_ID @"Campaign id"
+#define CLTAP_PROP_WZRK_ID @"wzrk_id"
+#define CLTAP_PROP_VARIANT @"Variant"
+#define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
+
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"
 #define CLTAP_INAPP_CS_TTL_OFFSET @"wzrk_ttl_offset"
 #define CLTAP_INAPP_PRIORITY @"priority"
 #define CLTAP_INAPP_IS_SUPPRESSED @"suppressed"
+#define CLTAP_INAPP_MAX_PER_SESSION @"mdc"
+#define CLTAP_INAPP_TOTAL_DAILY_COUNT @"tdc"
+#define CLTAP_INAPP_TOTAL_LIFETIME_COUNT @"tlc"
+#define CLTAP_INAPP_EXCLUDE_FROM_CAPS @"efc"
+#define CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS @"excludeGlobalFCaps"
+
+#define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
+#define CLTAP_TRIGGER_BOOL_STRING_NO @"false"
 
 // whenTriggers
 #define CLTAP_INAPP_TRIGGERS @"whenTriggers"

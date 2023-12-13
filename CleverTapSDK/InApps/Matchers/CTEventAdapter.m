@@ -7,6 +7,9 @@
 //
 
 #import "CTEventAdapter.h"
+#import "CTConstants.h"
+
+static NSDictionary<NSString*, NSString*> *systemPropToKey;
 
 @interface CTEventAdapter()
 
@@ -18,6 +21,36 @@
 @end
 
 @implementation CTEventAdapter
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        // System property new and legacy keys to App Fields key
+        systemPropToKey = @{
+            @"CT App Version": CLTAP_APP_VERSION,
+            @"ct_app_version": CLTAP_APP_VERSION,
+            @"CT Latitude": CLTAP_LATITUDE,
+            @"ct_latitude": CLTAP_LATITUDE,
+            @"CT Longitude": CLTAP_LONGITUDE,
+            @"ct_longitude": CLTAP_LONGITUDE,
+            @"CT OS Version": CLTAP_OS_VERSION,
+            @"ct_os_version": CLTAP_OS_VERSION,
+            @"CT SDK Version": CLTAP_SDK_VERSION,
+            @"ct_sdk_version": CLTAP_SDK_VERSION,
+            @"CT Network Carrier": CLTAP_CARRIER,
+            @"ct_network_carrier": CLTAP_CARRIER,
+            @"CT Network Type": CLTAP_NETWORK_TYPE,
+            @"ct_network_type": CLTAP_NETWORK_TYPE,
+            @"CT Connected To WiFi": CLTAP_CONNECTED_TO_WIFI,
+            @"ct_connected_to_wifi": CLTAP_CONNECTED_TO_WIFI,
+            @"CT Bluetooth Version": CLTAP_BLUETOOTH_VERSION,
+            @"ct_bluetooth_version": CLTAP_BLUETOOTH_VERSION,
+            @"CT Bluetooth Enabled": CLTAP_BLUETOOTH_ENABLED,
+            @"ct_bluetooth_enabled": CLTAP_BLUETOOTH_ENABLED,
+            @"CT App Name": @"appnId"
+        };
+    });
+}
 
 - (instancetype)initWithEventName:(NSString *)eventName
                   eventProperties:(NSDictionary *)eventProperties
@@ -42,10 +75,30 @@
 }
 
 - (CTTriggerValue *)propertyValueNamed:(NSString *)name {
-    if (self.eventProperties[name] == nil) {
-        return nil;
+    id propertyValue = [self getActualPropertyValue:name];
+    if (propertyValue) {
+        return [[CTTriggerValue alloc] initWithValue:propertyValue];
     }
-    return [[CTTriggerValue alloc] initWithValue:self.eventProperties[name]];
+    return nil;
+}
+
+- (id)getActualPropertyValue:(NSString *)propertyName {
+    id value = self.eventProperties[propertyName];
+    if (value == nil) {
+        if ([propertyName isEqualToString:CLTAP_PROP_CAMPAIGN_ID]) {
+            value = self.eventProperties[CLTAP_PROP_WZRK_ID];
+        } else if ([propertyName isEqualToString:CLTAP_PROP_WZRK_ID]) {
+            value = self.eventProperties[CLTAP_PROP_CAMPAIGN_ID];
+        } else if ([propertyName isEqualToString:CLTAP_PROP_VARIANT]) {
+            value = self.eventProperties[CLTAP_PROP_WZRK_PIVOT];
+        } else if ([propertyName isEqualToString:CLTAP_PROP_WZRK_PIVOT]) {
+            value = self.eventProperties[CLTAP_PROP_VARIANT];
+        } else if (systemPropToKey[propertyName]) {
+            // Map App Fields
+            value = self.eventProperties[systemPropToKey[propertyName]];
+        }
+    }
+    return value;
 }
 
 - (CTTriggerValue *)itemValueNamed:(NSString *)name {

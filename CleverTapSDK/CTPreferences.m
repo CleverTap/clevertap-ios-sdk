@@ -107,7 +107,10 @@
                 CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
             }
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+#pragma clang diagnostic pop
             CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
         }
     }
@@ -131,13 +134,16 @@
             if (newData == NULL) {
                 CleverTapLogStaticInternal(@"%@ file not found %@", self, filePath);
             } else {
-                // Allow NSString and NSSet unarchiving
-                NSSet *allowedClasses = [NSSet setWithObjects:cls, [NSArray class], [NSString class], nil];
+                // Allow NSString, NSDictionary, NSNumber and NSSet unarchiving
+                NSSet *allowedClasses = [NSSet setWithObjects:cls, [NSArray class], [NSString class], [NSDictionary class], [NSNumber class], nil];
                 data = [NSKeyedUnarchiver unarchivedObjectOfClasses:allowedClasses fromData:newData error:&error];
                 CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
             }
         } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+#pragma clang diagnostic pop
             CleverTapLogStaticInternal(@"%@ unarchived data from %@: %@", self, filePath, data);
         }
     }
@@ -150,7 +156,7 @@
     return data;
 }
 
-+ (BOOL)archiveObject:(id)object forFileName:(NSString *)filename {
++ (BOOL)archiveObject:(id)object forFileName:(NSString *)filename config: (CleverTapInstanceConfig *)config {
     
     NSString *filePath = [self filePathfromFileName:filename];
     NSError *archiveError = nil;
@@ -161,7 +167,8 @@
     
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
-        success = [data writeToFile:filePath options:NSDataWritingAtomic error:&writeError];
+        NSDataWritingOptions fileProtectionOption = config.enableFileProtection ? NSDataWritingFileProtectionComplete : NSDataWritingAtomic;
+        success = [data writeToFile:filePath options:fileProtectionOption error:&writeError];
         if (archiveError) {
             CleverTapLogStaticInternal(@"%@ failed to archive data at %@: %@", self, filePath, archiveError);
         }
@@ -169,7 +176,10 @@
             CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
         }
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         success = [NSKeyedArchiver archiveRootObject:object toFile:filePath];
+#pragma clang diagnostic pop
         if (!success) {
             CleverTapLogStaticInternal(@"%@ failed to archive data to %@: %@", self, filePath, object);
         }

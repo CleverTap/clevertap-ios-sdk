@@ -8,6 +8,7 @@
 @class CTInAppEvaluationManager;
 @class CTImpressionManager;
 @class CTMultiDelegateManager;
+@class CTInAppTriggerManager;
 
 @interface CTInAppFCManager : NSObject <CTAttachToBatchHeaderDelegate, CTSwitchUserDelegate>
 
@@ -18,7 +19,8 @@
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId
-             impressionManager:(CTImpressionManager *)impressionManager;
+               impressionManager:(CTImpressionManager *)impressionManager
+           inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager;
 
 - (NSString *)storageKeyWithSuffix: (NSString *)suffix;
 - (void)checkUpdateDailyLimits;

@@ -107,7 +107,7 @@ typedef void (^CTFeatureFlagsOperationBlock)(void);
 - (void)_archiveData:(NSArray*)data sync:(BOOL)sync {
     NSString *filePath = [self dataArchiveFileName];
     CTFeatureFlagsOperationBlock opBlock = ^{
-        [CTPreferences archiveObject:data forFileName:filePath];
+        [CTPreferences archiveObject:data forFileName:filePath config:self->_config];
     };
     if (sync) {
         opBlock();
