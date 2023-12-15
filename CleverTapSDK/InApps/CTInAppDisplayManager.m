@@ -438,21 +438,21 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                                                                         error:nil] mutableCopy];
         
         // Handle Image Interstitial InApp Test
-        if (inapp && [notification[@"wzrk_inapp_type"] isEqualToString:@"image-interstitial"]) {
-            NSString *config = [inapp valueForKeyPath:@"imageInterstitialConfig"];
+        if (inapp && [notification[CLTAP_INAPP_PREVIEW_TYPE] isEqualToString:CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE]) {
+            NSString *config = [inapp valueForKeyPath:CLTAP_INAPP_IMAGE_INTERSTITIAL_CONFIG];
             NSString *htmlContent = [self wrapImageInterstitialContent:[CTUtils jsonObjectToString:config]];
             if (config && htmlContent) {
                 inapp[@"type"] = CLTAP_INAPP_HTML_TYPE;
-                id data = inapp[@"d"];
+                id data = inapp[CLTAP_INAPP_DATA_TAG];
                 if (data && [data isKindOfClass:[NSDictionary class]]) {
                     data = [data mutableCopy];
                     // Update the html
-                    data[@"html"] = htmlContent;
+                    data[CLTAP_INAPP_HTML] = htmlContent;
                 } else {
                     // If data key is not present or it is not a dictionary,
                     // set it and overwrite it
-                    inapp[@"d"] = @{
-                        @"html": htmlContent
+                    inapp[CLTAP_INAPP_DATA_TAG] = @{
+                        CLTAP_INAPP_HTML: htmlContent
                     };
                 }
             } else {
@@ -486,7 +486,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (NSString *)imageInterstitialHtml {
     if (!_imageInterstitialHtml) {
-        NSString *path = [[CTInAppUtils bundle] pathForResource:@"image_interstitial" ofType:@"html"];
+        NSString *path = [[CTInAppUtils bundle] pathForResource:CLTAP_INAPP_IMAGE_INTERSTITIAL_HTML_NAME ofType:@"html"];
         NSData *data = [NSData dataWithContentsOfFile:path];
         _imageInterstitialHtml = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     }
