@@ -8,6 +8,7 @@
 
 #import "CTTriggerEvaluator.h"
 #import "CTUtils.h"
+#import "CTConstants.h"
 
 @implementation CTTriggerEvaluator
 
@@ -72,10 +73,16 @@
 
 + (BOOL)equalsStringOrNumber:(id)a with:(id)b {
     if ([a isKindOfClass:[NSString class]]) {
+        NSString *aClean = [self cleanString:a];
         if ([b isKindOfClass:[NSString class]]) {
-            return [[self cleanString:a] isEqualToString:[self cleanString:b]];
+            return [aClean isEqualToString:[self cleanString:b]];
         } else if ([b isKindOfClass:[NSNumber class]]) {
             NSNumber *aNumber = [CTUtils numberFromString:a];
+            if ([aClean isEqualToString:CLTAP_TRIGGER_BOOL_STRING_YES]) {
+                aNumber = @(YES);
+            } else if ([aClean isEqualToString:CLTAP_TRIGGER_BOOL_STRING_NO]) {
+                aNumber = @(NO);
+            }
             if (aNumber && [aNumber compare:b] == NSOrderedSame) {
                 return YES;
             }
