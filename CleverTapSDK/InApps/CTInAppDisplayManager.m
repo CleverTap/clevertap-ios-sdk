@@ -55,10 +55,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 @property (nonatomic, strong) CTInAppStore *inAppStore;
 
 @property (nonatomic, weak) CleverTap* instance;
+@property (nonatomic, strong, readonly) NSString *imageInterstitialHtml;
 
 @end
 
 @implementation CTInAppDisplayManager
+
+@synthesize imageInterstitialHtml = _imageInterstitialHtml;
 
 + (void)initialize {
     static dispatch_once_t onceToken;
@@ -430,9 +433,33 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         
         NSString *jsonString = notification[@"wzrk_inapp"];
         
-        NSDictionary *inapp = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
-                                                              options:0
-                                                                error:nil];
+        NSMutableDictionary *inapp = [[NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                                                                      options:0
+                                                                        error:nil] mutableCopy];
+        
+        // Handle Image Interstitial InApp Test
+        if (inapp && [notification[CLTAP_INAPP_PREVIEW_TYPE] isEqualToString:CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE]) {
+            NSString *config = [inapp valueForKeyPath:CLTAP_INAPP_IMAGE_INTERSTITIAL_CONFIG];
+            NSString *htmlContent = [self wrapImageInterstitialContent:[CTUtils jsonObjectToString:config]];
+            if (config && htmlContent) {
+                inapp[@"type"] = CLTAP_INAPP_HTML_TYPE;
+                id data = inapp[CLTAP_INAPP_DATA_TAG];
+                if (data && [data isKindOfClass:[NSDictionary class]]) {
+                    data = [data mutableCopy];
+                    // Update the html
+                    data[CLTAP_INAPP_HTML] = htmlContent;
+                } else {
+                    // If data key is not present or it is not a dictionary,
+                    // set it and overwrite it
+                    inapp[CLTAP_INAPP_DATA_TAG] = @{
+                        CLTAP_INAPP_HTML: htmlContent
+                    };
+                }
+            } else {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the image-interstitial notification", self);
+                return YES;
+            }
+        }
         
         if (inapp) {
             float delay = self.instance.isAppForeground ? 0.5 : 2.0;
@@ -456,5 +483,26 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 #endif
     return YES;
 }
+
+- (NSString *)imageInterstitialHtml {
+    if (!_imageInterstitialHtml) {
+        NSString *path = [[CTInAppUtils bundle] pathForResource:CLTAP_INAPP_IMAGE_INTERSTITIAL_HTML_NAME ofType:@"html"];
+        NSData *data = [NSData dataWithContentsOfFile:path];
+        _imageInterstitialHtml = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    }
+    return _imageInterstitialHtml;
+}
+
+- (NSString *)wrapImageInterstitialContent:(NSString *)content {
+    NSString *html = [self imageInterstitialHtml];
+    if (html && content) {
+        NSArray *parts = [html componentsSeparatedByString:CLTAP_INAPP_HTML_SPLIT];
+        if ([parts count] == 2) {
+            return [NSString stringWithFormat:@"%@'%@'%@", parts[0], content, parts[1]];
+        }
+    }
+    return nil;
+}
+
 @end
 
