@@ -22,6 +22,9 @@
 - (NSString *)generateWzrkId:(NSString *)ti;
 - (void)updateTTL:(NSMutableDictionary *)inApp;
 - (void)onAppLaunchedWithSuccess:(BOOL)success;
+- (void)saveEvaluatedServerSideInAppIds;
+- (void)saveSuppressedClientSideInApps;
+- (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 @end
 
 #endif /* CTInAppEvaluationManager_Tests_h */

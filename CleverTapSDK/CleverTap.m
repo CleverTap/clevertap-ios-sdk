@@ -511,7 +511,7 @@ static BOOL sharedInstanceErrorLogged;
                                                                         dispatchQueueManager:self.dispatchQueueManager inAppFCManager:inAppFCManager
                                                                            impressionManager:impressionManager inAppStore:inAppStore];
     
-    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
+    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
     
     self.inAppFCManager = inAppFCManager;
     self.impressionManager = impressionManager;

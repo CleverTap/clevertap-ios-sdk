@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CLLocationCoordinate2D location;
 
 - (instancetype)initWithAccountId:(NSString *)accountId
+                         deviceId:(NSString *)deviceId
                    delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager

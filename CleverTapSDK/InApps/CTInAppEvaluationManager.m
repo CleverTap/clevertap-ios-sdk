@@ -17,6 +17,7 @@
 #import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
 #import "CTUtils.h"
+#import "CTPreferences.h"
 
 @interface CTInAppEvaluationManager()
 
@@ -32,6 +33,8 @@
 @property (nonatomic, strong) CTLimitsMatcher *limitsMatcher;
 @property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
 @property (nonatomic, strong) CTInAppStore *inAppStore;
+@property (nonatomic, strong) NSString *accountId;
+@property (nonatomic, strong) NSString *deviceId;
 
 - (void)evaluateServerSide:(CTEventAdapter *)event;
 - (void)evaluateClientSide:(CTEventAdapter *)event;
@@ -42,18 +45,30 @@
 @implementation CTInAppEvaluationManager
 
 - (instancetype)initWithAccountId:(NSString *)accountId
+                       deviceId:(NSString *)deviceId
                    delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
                        inAppStore:(CTInAppStore *)inAppStore
               inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager {
     if (self = [super init]) {
+        self.accountId = accountId;
+        self.deviceId = deviceId;
         self.impressionManager = impressionManager;
         self.inAppDisplayManager = inAppDisplayManager;
         
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
-        self.suppressedClientSideInApps = [NSMutableArray new];
+        NSArray *savedEvaluatedServerSideInAppIds = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
+        if (savedEvaluatedServerSideInAppIds) {
+            self.evaluatedServerSideInAppIds = [savedEvaluatedServerSideInAppIds mutableCopy];
+        }
         
+        self.suppressedClientSideInApps = [NSMutableArray new];
+        NSArray *savedSuppressedClientSideInApps = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY]];
+        if (savedSuppressedClientSideInApps) {
+            self.suppressedClientSideInApps = [savedSuppressedClientSideInApps mutableCopy];
+        }
+
         self.inAppStore = inAppStore;
         self.triggersMatcher = [CTTriggersMatcher new];
         self.limitsMatcher = [CTLimitsMatcher new];
@@ -119,14 +134,19 @@
 
 - (void)evaluateServerSide:(CTEventAdapter *)event {
     NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
+    BOOL updated = NO;
     for (NSDictionary *inApp in eligibleInApps) {
         NSString *campaignId = [CTInAppNotification inAppId:inApp];
         if (campaignId) {
             NSNumber *cid = [CTUtils numberFromString:campaignId];
             if (cid) {
+                updated = YES;
                 [self.evaluatedServerSideInAppIds addObject:cid];
             }
         }
+    }
+    if (updated) {
+        [self saveEvaluatedServerSideInAppIds];
     }
 }
 
@@ -182,6 +202,7 @@
     if (inapps_eval && [inapps_eval count] > 0) {
         NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIds.count ?  self.evaluatedServerSideInAppIds.count : inapps_eval.count;
         [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, len)];
+        [self saveEvaluatedServerSideInAppIds];
     }
 }
 
@@ -190,6 +211,7 @@
     if (suppresed_inapps && [suppresed_inapps count] > 0) {
         NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInApps.count ?  self.suppressedClientSideInApps.count : suppresed_inapps.count;
         [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, len)];
+        [self saveSuppressedClientSideInApps];
     }
 }
 
@@ -211,6 +233,7 @@
         suppressedInAppMeta[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = cgId;
     }
     [self.suppressedClientSideInApps addObject:suppressedInAppMeta];
+    [self saveSuppressedClientSideInApps];
 }
 
 - (void)sortByPriority:(NSMutableArray *)inApps {
@@ -288,6 +311,22 @@
     }
     
     return header;
+}
+
+- (void)saveEvaluatedServerSideInAppIds {
+    [CTPreferences putObject:self.evaluatedServerSideInAppIds forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
+}
+
+- (void)saveSuppressedClientSideInApps {
+    [CTPreferences putObject:self.suppressedClientSideInApps forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY]];
+}
+
+- (NSString *)storageKeyWithSuffix:(NSString *)suffix {
+    return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, suffix, self.deviceId];
+}
+
+- (NSString*)description {
+    return [NSString stringWithFormat:@"%@:%@:%@", self.class, self.accountId, self.deviceId];
 }
 
 @end
