@@ -2,16 +2,78 @@ import UIKit
 import UserNotifications
 import CleverTapSDK
 import WatchConnectivity
+import CallKit
+import AVKit
+import AVFoundation
+import AudioToolbox
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate, CleverTapPushNotificationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate, CleverTapPushNotificationDelegate, CXProviderDelegate {
+    func providerDidReset(_ provider: CXProvider) {
+        print("diid reset")
+    }
+    
+    func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+        print("call started")
+        
+    }
 
+    func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+        print("call answered")
+        var player: AVAudioPlayer?
+        do {
+            //playbackRecord - session activation fail
+            try AVAudioSession.sharedInstance().setCategory(.playback)
+            try AVAudioSession.sharedInstance().setMode(.default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            /* The following line is required for the player to work on iOS 11. Change the file type accordingly */
+            let documentsDirectoryURL =  FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            
+            // lets create your destination file url
+            let destinationUrl = documentsDirectoryURL.appendingPathComponent(URL(string: "https://www.kozco.com/tech/LRMonoPhase4.mp3")!.lastPathComponent)
+            print(destinationUrl)
+            FileManager.default.fileExists(atPath: destinationUrl.path)
+            let customURL = Bundle.main.url(forResource: "outgoing_tone", withExtension: "mp3")
+            
+            player = try AVAudioPlayer(contentsOf: destinationUrl, fileTypeHint: AVFileType.mp3.rawValue)
+            player?.numberOfLoops = -1
+//            
+            
+            
+//            var player = AVPlayer()
+//            let playerItem = AVPlayerItem(url: URL(string: "https://www.kozco.com/tech/LRMonoPhase4.mp3")!)
+//            player = AVPlayer(playerItem: playerItem)
+//
+            player?.play()
+            print("playyy status")
+            
+        } catch let error {
+            print(error)
+        }
+        action.fulfill()
+    }
+    
     var window: UIWindow?
-
+    private var provider: CXProvider?
+    static var providerConfiguration: CXProviderConfiguration {
+        let providerConfiguration: CXProviderConfiguration!
+        if #available(iOS 14.0, *) {
+            providerConfiguration = CXProviderConfiguration()
+        } else {
+            providerConfiguration = CXProviderConfiguration(localizedName:"")
+        }
+        providerConfiguration.supportsVideo = false
+        providerConfiguration.maximumCallsPerCallGroup = 1
+        providerConfiguration.maximumCallGroups = 1
+        providerConfiguration.supportedHandleTypes = [.generic]
+        return providerConfiguration
+    }
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         // register for push notifications
         registerForPush()
+  
         
         // Configure and init the default shared CleverTap instance (add CleverTap Account ID and Account Token in your .plist file)
         CleverTap.autoIntegrate()
@@ -91,7 +153,64 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                      didReceiveRemoteNotification userInfo: [AnyHashable : Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         NSLog("%@: did receive remote notification completionhandler: %@", self.description, userInfo)
-        completionHandler(UIBackgroundFetchResult.noData)
+        let media = userInfo["media"] as? String
+        print("Media URL", media)
+        let update = CXCallUpdate()
+        update.remoteHandle = CXHandle(type: .generic, value: "context")
+        update.hasVideo = false
+        update.supportsGrouping = false
+        update.supportsUngrouping = false
+        update.supportsHolding = false
+        
+        provider = CXProvider(configuration: type(of: self).providerConfiguration)
+        provider?.setDelegate(self, queue: nil)
+//        let callUuidForBusyVoIP = UUID()
+//        provider?.reportNewIncomingCall(with: UUID(), update: update, completion: completion)
+//        self.window?.rootViewController?.present(UIAlertController(title: "hi", message: "mm", preferredStyle: .alert), animated: true)
+        
+
+        let documentsDirectoryURL =  FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        
+        // lets create your destination file url
+        let destinationUrl = documentsDirectoryURL.appendingPathComponent(URL(string: media!)!.lastPathComponent)
+        print(destinationUrl)
+        
+        URLSession.shared.downloadTask(with: URL(string: media!)!, completionHandler: { (location, response, error) -> Void in
+            guard let location = location, error == nil else { return }
+            do {
+                // after downloading your file you need to move it to your destination url
+                if FileManager.default.fileExists(atPath: destinationUrl.path) {
+                    try FileManager.default.removeItem(atPath: destinationUrl.path)
+                }
+                
+                try FileManager.default.moveItem(at: location, to: destinationUrl)
+                print("File moved to documents folder")
+                self.provider?.reportNewIncomingCall(with: UUID(), update: update, completion: { error in
+                    print("error")
+                    print(error)
+                    
+        //            var player = AVPlayer()
+        //            let playerItem = AVPlayerItem(url: URL(string: media!)!)
+        //            player = AVPlayer(playerItem: playerItem)
+                    
+                })
+            } catch let error as NSError {
+                print(error.localizedDescription)
+            }
+            completionHandler(UIBackgroundFetchResult.newData)
+        }).resume()
+     
+//        completionHandler(UIBackgroundFetchResult.noData)
+//        URLSession.shared.dataTask(with: URL(string: media!)!) { data, response, error in
+//            print(data)
+//            do {
+//                // after downloading your file you need to move it to your destination url
+//                try FileManager.default.moveItem(at: location, to: destinationUrl)
+//                print("File moved to documents folder")
+//            }
+//            completionHandler(.newData)
+//          }.resume()
+//        completionHandler(UIBackgroundFetchResult.noData)
     }
     
     func pushNotificationTapped(withCustomExtras customExtras: [AnyHashable : Any]!) {

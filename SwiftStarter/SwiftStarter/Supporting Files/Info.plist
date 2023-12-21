@@ -19,11 +19,21 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>CleverTapAccountID</key>
-	<string>RKW-R77-KW6Z</string>
+	<string>ZWW-WWW-WW4Z</string>
+	<key>CleverTapRegion</key>
+	<string>in1</string>
 	<key>CleverTapToken</key>
-	<string>aa2-032</string>
+	<string>000-001</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -1,8 +1,13 @@
 import UIKit
 import CleverTapSDK
 import UserNotifications
+import CallKit
 
-class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, CleverTapPushPermissionDelegate {
+class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, CleverTapPushPermissionDelegate, CXProviderDelegate {
+    func providerDidReset(_ provider: CXProvider) {
+        print("did reset")
+    }
+    
     
     @IBOutlet var tblEvent: UITableView!
     var eventList: [String] = [String]()
@@ -11,7 +16,20 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, Cl
         let ctConfig = CleverTapInstanceConfig.init(accountId: "R65-RR9-9R5Z", accountToken: "c22-562")
         return CleverTap.instance(with: ctConfig)
     }()
-    
+    private var provider: CXProvider?
+    static var providerConfiguration: CXProviderConfiguration {
+        let providerConfiguration: CXProviderConfiguration!
+        if #available(iOS 14.0, *) {
+            providerConfiguration = CXProviderConfiguration()
+        } else {
+            providerConfiguration = CXProviderConfiguration(localizedName:"")
+        }
+        providerConfiguration.supportsVideo = false
+        providerConfiguration.maximumCallsPerCallGroup = 1
+        providerConfiguration.maximumCallGroups = 1
+        providerConfiguration.supportedHandleTypes = [.generic]
+        return providerConfiguration
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -21,6 +39,8 @@ class ViewController: UIViewController, CleverTapInboxViewControllerDelegate, Cl
         registerAppInbox()
         initializeAppInbox()
         tblEvent.tableFooterView = UIView()
+        provider = CXProvider(configuration: type(of: self).providerConfiguration)
+        provider?.setDelegate(self, queue: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -140,7 +160,17 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     }
     
     func recordUserProfile() {
-        
+        let update = CXCallUpdate()
+        update.remoteHandle = CXHandle(type: .generic, value: "context")
+        update.hasVideo = false
+        update.supportsGrouping = false
+        update.supportsUngrouping = false
+        update.supportsHolding = false
+        provider?.reportNewIncomingCall(with: UUID(), update: update, completion: { error in
+            print("error")
+            print(error)
+        })
+        return
         // each of the below mentioned fields are optional
         // if set, these populate demographic information in the Dashboard
         let dob = NSDateComponents()
