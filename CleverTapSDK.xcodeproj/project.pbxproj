@@ -334,6 +334,8 @@
 		6AA1357A2A2E467800EFF2C1 /* NSDictionary+Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AA135772A2E467800EFF2C1 /* NSDictionary+Extensions.h */; };
 		6AA1357B2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */; };
 		6AA1357C2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */; };
+		6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
+		6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B535FB62AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
 		6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
 		6B535FB82AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */; };
@@ -832,6 +834,7 @@
 		6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Extensions.m"; sourceTree = "<group>"; };
 		6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LeanplumCT.h; sourceTree = "<group>"; };
 		6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCT.m; sourceTree = "<group>"; };
+		6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = image_interstitial.html; sourceTree = "<group>"; };
 		6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTMultiDelegateManager.h; sourceTree = "<group>"; };
 		6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManager.m; sourceTree = "<group>"; };
 		6BA3B2DA2B03E926004E834B /* CTQueueType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTQueueType.h; sourceTree = "<group>"; };
@@ -1250,6 +1253,7 @@
 				07D86D4622269638009EE610 /* CTHeaderViewController~ipadland.xib */,
 				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
 				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
+				6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */,
 			);
 			path = resources;
 			sourceTree = "<group>";
@@ -2030,6 +2034,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */,
 				4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2111,6 +2116,7 @@
 				070BB5CD21E70BC000428DEE /* ct_volume_off.png in Resources */,
 				4E64855B287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
 				07D0D09322240329000D5686 /* CTCoverImageViewController~iphoneland.xib in Resources */,
+				6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
 				07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,

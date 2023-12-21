@@ -122,6 +122,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_COUNTS_META_KEY @"tlc"
 #define CLTAP_INAPP_SS_EVAL_META_KEY @"inapps_eval"
 #define CLTAP_INAPP_SUPPRESSED_META_KEY @"inapps_suppressed"
+#define CLTAP_INAPP_SS_EVAL_STORAGE_KEY @"inapps_eval"
+#define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY @"inapps_suppressed"
 
 #define CLTAP_PREFS_INAPP_SESSION_MAX_KEY @"imc_max"
 #define CLTAP_PREFS_INAPP_LAST_DATE_KEY @"ict_date"
@@ -160,7 +162,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_FC_LIMITS @"frequencyLimits"
 #define CLTAP_INAPP_OCCURRENCE_LIMITS @"occurrenceLimits"
 
-#define CLTAP_INAPP_DATA_TAG @"html"
+#define CLTAP_INAPP_DATA_TAG @"d"
+#define CLTAP_INAPP_HTML @"html"
 #define CLTAP_INAPP_X_PERCENT @"xp"
 #define CLTAP_INAPP_Y_PERCENT @"yp"
 #define CLTAP_INAPP_X_DP @"xdp"
@@ -173,6 +176,14 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_POSITION_CENTER 'c'
 #define CLTAP_INAPP_NOTIF_DARKEN_SCREEN @"dk"
 #define CLTAP_INAPP_NOTIF_SHOW_CLOSE @"sc"
+
+#define CLTAP_INAPP_HTML_TYPE @"custom-html"
+
+#define CLTAP_INAPP_PREVIEW_TYPE @"wzrk_inapp_type"
+#define CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE @"image-interstitial"
+#define CLTAP_INAPP_IMAGE_INTERSTITIAL_CONFIG @"imageInterstitialConfig"
+#define CLTAP_INAPP_HTML_SPLIT @"\"##Vars##\""
+#define CLTAP_INAPP_IMAGE_INTERSTITIAL_HTML_NAME @"image_interstitial"
 
 #pragma mark Constants for persisting Facebook data
 #define CLTAP_FB_NAME @"fbName"

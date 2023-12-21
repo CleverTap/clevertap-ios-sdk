@@ -53,6 +53,7 @@
                                                    inAppTriggerManager:self.inAppTriggerManager];
         self.inAppDisplayManager = nil;
         self.inAppEvaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId
+                                                                                 deviceId:self.deviceId
                                                                           delegateManager:self.delegateManager
                                                                         impressionManager:self.impressionManager
                                                                       inAppDisplayManager:self.inAppDisplayManager

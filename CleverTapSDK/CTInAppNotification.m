@@ -102,7 +102,7 @@
                 self.Id = inAppId;
             }
             NSString *type = (NSString*) jsonObject[@"type"];
-            if (!type || [type isEqualToString:@"custom-html"]) {
+            if (!type || [type isEqualToString:CLTAP_INAPP_HTML_TYPE]) {
                 [self legacyConfigureFromJSON:jsonObject];
             } else {
                 [self configureFromJSON:jsonObject];
@@ -253,12 +253,12 @@
         NSString *html = (NSString*) data[@"html"];
         if (html) {
             self.html = html;
-            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+            self.inAppType = [CTInAppUtils inAppTypeFromString:CLTAP_INAPP_HTML_TYPE];
         }
         NSString *url = (NSString*) data[@"url"];
         if (url && url.length > 5) {
             self.url = url;
-            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+            self.inAppType = [CTInAppUtils inAppTypeFromString:CLTAP_INAPP_HTML_TYPE];
         } else {
             if (url) {
                 self.error = [NSString stringWithFormat:@"Invalid url: %@",url];

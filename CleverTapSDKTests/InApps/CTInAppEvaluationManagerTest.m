@@ -19,6 +19,7 @@
 #import "CTConstants.h"
 #import "CTInAppStore+Tests.h"
 #import "CTInAppEvaluationManager+Tests.h"
+#import "CTPreferences.h"
 
 @interface CTInAppDisplayManagerMock : CTInAppDisplayManager
 @property (nonatomic, strong) NSMutableArray *inappNotifs;
@@ -67,7 +68,19 @@
     for (int i = 1; i <= 4; i++) {
         [self.evaluationManager.triggerManager removeTriggers:[NSString stringWithFormat:@"%d", i]];
     }
+    self.evaluationManager.evaluatedServerSideInAppIds = [NSMutableArray new];
+    [self.evaluationManager saveEvaluatedServerSideInAppIds];
+    self.evaluationManager.suppressedClientSideInApps = [NSMutableArray new];
+    [self.evaluationManager saveSuppressedClientSideInApps];
     [super tearDown];
+}
+
+- (NSArray *)savedEvaluatedServerSideInAppIds {
+    return [CTPreferences getObjectForKey:[self.evaluationManager storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
+}
+
+- (NSArray *)savedSuppressedClientSideInApps {
+    return [CTPreferences getObjectForKey:[self.evaluationManager storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY]];
 }
 
 - (void)testSort {
@@ -321,8 +334,76 @@
     }];
     [self.evaluationManager evaluateOnEvent:@"event1" withProps:@{}];
     XCTAssertEqualObjects((@[@1, @2]), self.evaluationManager.evaluatedServerSideInAppIds);
+    XCTAssertEqualObjects((@[@1, @2]), [self savedEvaluatedServerSideInAppIds]);
     [self.evaluationManager evaluateOnEvent:@"event2" withProps:@{}];
     XCTAssertEqualObjects((@[@1, @2, @3]), self.evaluationManager.evaluatedServerSideInAppIds);
+    XCTAssertEqualObjects((@[@1, @2, @3]), [self savedEvaluatedServerSideInAppIds]);
+}
+
+- (void)testEvaluationManagerCaching {
+    // Test caching evaluated server-side in-app ids
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventName": @"event1"
+        }]
+    },
+    @{
+        @"ti": @2,
+        @"whenTriggers": @[@{
+            @"eventName": @"event1"
+        }]
+    },
+    @{
+        @"ti": @3,
+        @"whenTriggers": @[@{
+            @"eventName": @"event2"
+        }]
+    }];
+    [self.evaluationManager evaluateOnEvent:@"event1" withProps:@{}];
+    XCTAssertEqualObjects((@[@1, @2]), [self savedEvaluatedServerSideInAppIds]);
+    [self.evaluationManager evaluateOnEvent:@"event2" withProps:@{}];
+    XCTAssertEqualObjects((@[@1, @2, @3]), [self savedEvaluatedServerSideInAppIds]);
+    
+    // Test caching suppressed client-side in-apps
+    NSArray *inApps = @[
+        @{
+            @"ti": @1,
+            @"suppressed": @YES,
+            @"whenTriggers": @[@{
+                @"eventName": @"eventSuppress"
+            }]
+        }];
+    self.helper.inAppStore.clientSideInApps = inApps;
+    
+    [self.evaluationManager evaluateOnEvent:@"eventSuppress" withProps:@{}];
+    XCTAssertEqual(1, [self.evaluationManager.suppressedClientSideInApps count]);
+    XCTAssertEqualObjects(self.evaluationManager.suppressedClientSideInApps, [self savedSuppressedClientSideInApps]);
+    [self.evaluationManager evaluateOnEvent:@"eventSuppress" withProps:@{}];
+    XCTAssertEqual(2, [[self savedSuppressedClientSideInApps] count]);
+    XCTAssertEqualObjects(self.evaluationManager.suppressedClientSideInApps, [self savedSuppressedClientSideInApps]);
+    
+    // Create new instance, should load in-app ids from cache
+    self.evaluationManager = [[InAppHelper new] inAppEvaluationManager];
+    XCTAssertEqualObjects((@[@1, @2, @3]), [self savedEvaluatedServerSideInAppIds]);
+    XCTAssertEqualObjects(self.evaluationManager.suppressedClientSideInApps, [self savedSuppressedClientSideInApps]);
+    
+    // Remove date through batch sent updates the cache
+    NSArray *batchWithHeaderAll = @[
+        @{
+            CLTAP_INAPP_SS_EVAL_META_KEY: @[@1, @2],
+            CLTAP_INAPP_SUPPRESSED_META_KEY: @[@0]
+        }
+    ];
+    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES];
+    XCTAssertEqualObjects((@[@3]), [self savedEvaluatedServerSideInAppIds]);
+    XCTAssertEqual(1, [[self savedSuppressedClientSideInApps] count]);
+    
+    // Create new instance, should load in-app ids from cache
+    self.evaluationManager = [[InAppHelper new] inAppEvaluationManager];
+    XCTAssertEqualObjects((@[@3]), [self savedEvaluatedServerSideInAppIds]);
+    XCTAssertEqual(1, [[self savedSuppressedClientSideInApps] count]);
 }
 
 - (void)testEvaluateClientSide {
@@ -495,6 +576,7 @@
     // Suppress all until an in-app can be displayed
     XCTAssertEqualObjects((@[inApps[2]]), self.mockDisplayManager.inappNotifs);
     XCTAssertEqual(2, [self.evaluationManager.suppressedClientSideInApps count]);
+    XCTAssertEqualObjects(self.evaluationManager.suppressedClientSideInApps, [self savedSuppressedClientSideInApps]);
 }
 
 - (void)testEvaluateOnAppLaunchedServerSide {
