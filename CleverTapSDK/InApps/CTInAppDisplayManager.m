@@ -78,14 +78,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
-                                inAppStore:(CTInAppStore *)inAppStore {
+                                inAppStore:(CTInAppStore *)inAppStore
+                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
         self.inAppStore = inAppStore;
-        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
+        self.imagePrefetchManager = imagePrefetchManager;
     }
     return self;
 }

@@ -20,7 +20,7 @@
 
 - (void)setUp {
     InAppHelper *helper = [InAppHelper new];
-    self.prefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:helper.config];
+    self.prefetchManager = helper.imagePrefetchManager;
 }
 
 - (void)tearDown {

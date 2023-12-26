@@ -37,6 +37,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                       deviceId:(NSString *)deviceId
+          imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager
 {
     self = [super init];
     if (self) {
@@ -44,7 +45,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.accountId = config.accountId;
         self.deviceId = deviceId;
         self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
-        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
+        self.imagePrefetchManager = imagePrefetchManager;
         
         [self migrateInAppQueueKeys];
     }

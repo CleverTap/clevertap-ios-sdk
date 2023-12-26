@@ -40,7 +40,7 @@
     // Set to the reset values
     self.inAppFCManager.globalSessionMax = 1;
     self.inAppFCManager.maxPerDayCount = 1;
-    self.prefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:helper.config];
+    self.prefetchManager = helper.imagePrefetchManager;
 }
 
 - (void)tearDown {

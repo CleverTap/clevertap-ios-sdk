@@ -15,6 +15,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppTriggerManager.h"
+#import "CTInAppImagePrefetchManager.h"
 
 @implementation InAppHelper
 
@@ -39,11 +40,16 @@
     if (self) {
         self.delegateManager = [CTMultiDelegateManager new];
         self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:self.accountId accountToken:self.accountToken];
+        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config
+                                                                        delegateManager:self.delegateManager
+                                                                               deviceId:self.deviceId];
         self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.accountId
                                                                        deviceId:self.deviceId
                                                                 delegateManager:self.delegateManager];
-        self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceId:self.deviceId];
-        self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId 
+        self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
+                                                      deviceId:self.deviceId
+                                          imagePrefetchManager:self.imagePrefetchManager];
+        self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId
                                                                            deviceId:self.deviceId
                                                                     delegateManager:self.delegateManager];
         self.inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config

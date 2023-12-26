@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CTSwitchUserDelegate.h"
+#import "CTInAppImagePrefetchManager.h"
 
 @class CleverTapInstanceConfig;
 
@@ -15,7 +16,9 @@
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config deviceId:(NSString * _Nonnull)deviceId;
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config 
+                               deviceId:(NSString * _Nonnull)deviceId
+                   imagePrefetchManager:(CTInAppImagePrefetchManager * _Nonnull)imagePrefetchManager;
 
 - (NSArray * _Nonnull)clientSideInApps;
 - (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;
