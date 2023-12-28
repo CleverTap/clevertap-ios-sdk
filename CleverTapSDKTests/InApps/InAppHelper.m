@@ -47,8 +47,9 @@
                                                                        deviceId:self.deviceId
                                                                 delegateManager:self.delegateManager];
         self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
-                                                      deviceId:self.deviceId
-                                          imagePrefetchManager:self.imagePrefetchManager];
+                                                      delegateManager:self.delegateManager
+                                          imagePrefetchManager:self.imagePrefetchManager
+                                                      deviceId:self.deviceId];
         self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId
                                                                            deviceId:self.deviceId
                                                                     delegateManager:self.delegateManager];

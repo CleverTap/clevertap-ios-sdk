@@ -13,6 +13,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTInAppImagePrefetchManager.h"
+#import "CTMultiDelegateManager.h"
 
 NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";
@@ -36,9 +37,9 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @synthesize mode = _mode;
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                      deviceId:(NSString *)deviceId
+               delegateManager:(CTMultiDelegateManager *)delegateManager
           imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager
-{
+                      deviceId:(NSString *)deviceId {
     self = [super init];
     if (self) {
         self.config = config;
@@ -47,6 +48,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
         self.imagePrefetchManager = imagePrefetchManager;
         
+        [delegateManager addSwitchUserDelegate:self];
         [self migrateInAppQueueKeys];
     }
     return self;

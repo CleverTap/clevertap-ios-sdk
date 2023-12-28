@@ -504,7 +504,10 @@ static BOOL sharedInstanceErrorLogged;
     CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:self.deviceInfo.deviceId];
     self.imagePrefetchManager = imagePrefetchManager;
 
-    CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceId:self.deviceInfo.deviceId imagePrefetchManager:self.imagePrefetchManager];
+    CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
+                                                    delegateManager:self.delegateManager
+                                               imagePrefetchManager:self.imagePrefetchManager
+                                                           deviceId:self.deviceInfo.deviceId];
     self.inAppStore = inAppStore;
     
     CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager];

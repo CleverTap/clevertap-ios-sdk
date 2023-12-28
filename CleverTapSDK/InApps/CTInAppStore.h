@@ -11,14 +11,16 @@
 #import "CTInAppImagePrefetchManager.h"
 
 @class CleverTapInstanceConfig;
+@class CTMultiDelegateManager;
 
 @interface CTInAppStore : NSObject <CTSwitchUserDelegate>
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config 
-                               deviceId:(NSString * _Nonnull)deviceId
-                   imagePrefetchManager:(CTInAppImagePrefetchManager * _Nonnull)imagePrefetchManager;
+                        delegateManager:(CTMultiDelegateManager * _Nonnull)delegateManager
+                   imagePrefetchManager:(CTInAppImagePrefetchManager * _Nonnull)imagePrefetchManager
+                               deviceId:(NSString * _Nonnull)deviceId;
 
 - (NSArray * _Nonnull)clientSideInApps;
 - (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;
