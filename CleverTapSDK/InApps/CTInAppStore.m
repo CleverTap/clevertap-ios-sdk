@@ -11,6 +11,7 @@
 #import "CTConstants.h"
 #import "CTAES.h"
 #import "CleverTapInstanceConfig.h"
+#import "CTMultiDelegateManager.h"
 
 NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";
@@ -32,8 +33,8 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 @synthesize mode = _mode;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceId:(NSString *)deviceId
-{
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+               delegateManager:(CTMultiDelegateManager *)delegateManager deviceId:(NSString *)deviceId {
     self = [super init];
     if (self) {
         self.config = config;
@@ -41,6 +42,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
         self.deviceId = deviceId;
         
+        [delegateManager addSwitchUserDelegate:self];
         [self migrateInAppQueueKeys];
     }
     return self;

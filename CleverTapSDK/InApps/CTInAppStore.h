@@ -10,12 +10,15 @@
 #import "CTSwitchUserDelegate.h"
 
 @class CleverTapInstanceConfig;
+@class CTMultiDelegateManager;
 
 @interface CTInAppStore : NSObject <CTSwitchUserDelegate>
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config deviceId:(NSString * _Nonnull)deviceId;
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                        delegateManager:(CTMultiDelegateManager * _Nonnull)delegateManager
+                               deviceId:(NSString * _Nonnull)deviceId;
 
 - (NSArray * _Nonnull)clientSideInApps;
 - (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;

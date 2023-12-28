@@ -42,8 +42,8 @@
         self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.accountId
                                                                        deviceId:self.deviceId
                                                                 delegateManager:self.delegateManager];
-        self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceId:self.deviceId];
-        self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId 
+        self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:self.deviceId];
+        self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId
                                                                            deviceId:self.deviceId
                                                                     delegateManager:self.delegateManager];
         self.inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config
