@@ -1554,6 +1554,10 @@ static BOOL sharedInstanceErrorLogged;
     [self.inAppDisplayManager _showInAppNotificationIfAny];
 }
 
+- (void)clearInAppResources:(BOOL)expiredOnly {
+    [self.imagePrefetchManager _clearInAppResources:expiredOnly];
+}
+
 #pragma mark Private Method
 
 - (void)recordInAppNotificationStateEvent:(BOOL)clicked

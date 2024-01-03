@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)preloadClientSideInAppImages:(NSArray *)csInAppNotifs;
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL;
 - (void)clearDiskImages;
+- (void)_clearInAppResources:(BOOL)expiredOnly;
 
 @end
 

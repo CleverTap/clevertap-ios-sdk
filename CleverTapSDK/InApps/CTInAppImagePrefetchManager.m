@@ -60,21 +60,32 @@ static const NSInteger kDefaultInAppExpiryTime = 2 * 60 * 60 * 24 * 7; // 2 week
     // Steps:
     // Move all active image url to inactive and store it in preference.
     // Images will be deleted from Disk cache when expiration check is done.
+    // Check for expired images, if any delete them from disk cache.
+    [self addAllImageAssets];
 
-    NSMutableArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
-    NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
-    if (activeAssetsArray.count > 0) {
-        // Add both active and inactive array in `inactiveAssetSet`
-        NSMutableSet<NSString *> *inactiveAssetSet = [NSMutableSet new];
-        [inactiveAssetSet addObjectsFromArray:activeAssetsArray];
-        [inactiveAssetSet addObjectsFromArray:inactiveAssetsArray];
-        [CTPreferences putObject:[inactiveAssetSet allObjects]
-                          forKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
-
-        activeAssetsArray = [NSMutableArray new];
-        [CTPreferences putObject:activeAssetsArray
-                          forKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
+    if ([self.inactiveImageSet allObjects].count > 0) {
+        long lastDeletedTime = [self getLastDeletedTimestamp];
+        [self removeInactiveExpiredAssets:lastDeletedTime];
     }
+}
+
+- (void)_clearInAppResources:(BOOL)expiredOnly {
+    // When expiredOnly is true, delete inapp images from disk cache which are present in inactive set.
+    // When expiredOnly is false, delete all inapp images from disk cache for current user.
+    long lastDeletedTime;
+    if (expiredOnly) {
+        [self addInActiveImageAsset];
+        [self addActiveImageAsset];
+        lastDeletedTime = [self getLastDeletedTimestamp];
+    } else {
+        [self addAllImageAssets];
+        lastDeletedTime = ([self getLastDeletedTimestamp] - kDefaultInAppExpiryTime);
+    }
+
+    if ([self.inactiveImageSet allObjects].count > 0) {
+        [self removeInactiveExpiredAssets:lastDeletedTime];
+    }
+    
 }
 
 #pragma mark - Private
@@ -101,10 +112,7 @@ static const NSInteger kDefaultInAppExpiryTime = 2 * 60 * 60 * 24 * 7; // 2 week
     // 2. Check if new image url is present in inactiveImageSet
     // 3. If present move image url to activeImageSet, else download and add it to activeImageSet
     // 4. Check for expired images in inactiveImageSet when all images are downloaded
-    NSArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
-    NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
-    [self.inactiveImageSet addObjectsFromArray:activeAssetsArray];
-    [self.inactiveImageSet addObjectsFromArray:inactiveAssetsArray];
+    [self addAllImageAssets];
 
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -135,11 +143,12 @@ static const NSInteger kDefaultInAppExpiryTime = 2 * 60 * 60 * 24 * 7; // 2 week
     }
     dispatch_group_notify(group, concurrentQueue, ^{
         // This block will be executed when all images are prefetched.
-        [self removeInactiveExpiredAssets];
+        long lastDeletedTime = [self getLastDeletedTimestamp];
+        [self removeInactiveExpiredAssets:lastDeletedTime];
     });
 }
 
-- (void)removeInactiveExpiredAssets {
+- (void)removeInactiveExpiredAssets:(long)lastDeletedTime {
     // Remove the images which are in inactive asset set and over default expiration period.
     // Steps:
     // 1. Initially set the lastDeletedTime as current time(first time)
@@ -148,7 +157,6 @@ static const NSInteger kDefaultInAppExpiryTime = 2 * 60 * 60 * 24 * 7; // 2 week
     // 4. Update lastDeletedTime as currentTime and image assets in preference
     dispatch_group_t deleteGroup = dispatch_group_create();
     dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    long lastDeletedTime = [self getLastDeletedTimestamp];
     if (lastDeletedTime > 0) {
         long currentTime = (long) [[NSDate date] timeIntervalSince1970];
         if (currentTime - lastDeletedTime > self.inAppExpiryTime) {
@@ -225,6 +233,27 @@ static const NSInteger kDefaultInAppExpiryTime = 2 * 60 * 60 * 24 * 7; // 2 week
     long now = (long) [[NSDate date] timeIntervalSince1970];
     [CTPreferences putInt:now 
                    forKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
+}
+
+- (void)addAllImageAssets {
+    // Add both active and inactive array from preferences in `inactiveImageSet`
+    NSArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
+    NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
+    [self.inactiveImageSet addObjectsFromArray:activeAssetsArray];
+    [self.inactiveImageSet addObjectsFromArray:inactiveAssetsArray];
+    self.activeImageSet = [NSMutableSet new];
+}
+
+- (void)addInActiveImageAsset {
+    // Add only inactive array from preferences in `inactiveImageSet`
+    NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
+    [self.inactiveImageSet addObjectsFromArray:inactiveAssetsArray];
+}
+
+- (void)addActiveImageAsset {
+    // Add only active array from preferences in `activeImageSet`
+    NSArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
+    [self.activeImageSet addObjectsFromArray:activeAssetsArray];
 }
 
 - (void)updateImageAssetsInPreference {
