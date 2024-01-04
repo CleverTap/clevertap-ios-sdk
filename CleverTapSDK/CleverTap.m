@@ -499,7 +499,9 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)initializeInAppSupport {
-    CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config deviceId:self.deviceInfo.deviceId];
+    CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
+                                                           delegateManager:self.delegateManager
+                                                           deviceId:self.deviceInfo.deviceId];
     self.inAppStore = inAppStore;
     
     CTImpressionManager *impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager];
