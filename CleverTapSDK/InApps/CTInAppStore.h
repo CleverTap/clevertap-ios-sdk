@@ -16,6 +16,7 @@
 
 @property (nonatomic, strong, nullable) NSString *mode;
 
+- (instancetype _Nonnull)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config
                         delegateManager:(CTMultiDelegateManager * _Nonnull)delegateManager
                                deviceId:(NSString * _Nonnull)deviceId;
