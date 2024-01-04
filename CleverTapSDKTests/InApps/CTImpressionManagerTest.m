@@ -12,6 +12,7 @@
 #import "CTMultiDelegateManager.h"
 #import "CTClockMock.h"
 #import "CTImpressionManager+Tests.h"
+#import "CTMultiDelegateManager+Tests.h"
 
 // Use fixed date and time
 // Do not set a timezone to the formatter,
@@ -312,6 +313,49 @@ NSString * const LOCALE = @"en_US_POSIX";
     // 2023-10-22 00:00:00
     XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:3], 3);
     XCTAssertEqual([self.impressionManager perWeek:self.testCampaignId weeks:4], 3);
+}
+
+- (void)testSwitchUserDelegateAdded {
+    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
+    NSUInteger count = [[delegateManager switchUserDelegates] count];
+    
+    NSLocale *locale = [NSLocale localeWithLocaleIdentifier:LOCALE];
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountID"
+                                                                   deviceId:@"testDeviceID"
+                                                            delegateManager:delegateManager
+                                                                      clock:self.mockClock
+                                                                     locale:locale];
+    
+    XCTAssertEqual([[delegateManager switchUserDelegates] count], count + 1);
+}
+
+- (void)testSwitchUser {
+    NSString *firstDeviceId = @"testDeviceID";
+    NSString *secondDeviceId = @"newDeviceId";
+    
+    // Record impressions for first user
+    [self.impressionManager recordImpression:self.testCampaignId];
+    [self.impressionManager recordImpression:self.testCampaignId];
+    XCTAssertEqual([self.impressionManager getImpressionCount:self.testCampaignId], 2);
+    
+    // Switch to second user and record impressions
+    [self.impressionManager deviceIdDidChange:secondDeviceId];
+    XCTAssertEqual([self.impressionManager getImpressionCount:self.testCampaignId], 0);
+    [self.impressionManager recordImpression:self.testCampaignId];
+    XCTAssertEqual([self.impressionManager getImpressionCount:self.testCampaignId], 1);
+
+    // Switch to first user to ensure cached impressions for first user are loaded
+    [self.impressionManager deviceIdDidChange:firstDeviceId];
+    XCTAssertEqual([self.impressionManager getImpressionCount:self.testCampaignId], 2);
+
+    // Switch to second user to ensure cached impressions for second user are loaded
+    [self.impressionManager deviceIdDidChange:secondDeviceId];
+    XCTAssertEqual([self.impressionManager getImpressionCount:self.testCampaignId], 1);
+
+    // Clear in-apps for the second user
+    [self.impressionManager removeImpressions:self.testCampaignId];
+    // Switch back to first user to tear down
+    [self.impressionManager deviceIdDidChange:firstDeviceId];
 }
 
 @end

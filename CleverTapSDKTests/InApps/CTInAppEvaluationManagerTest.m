@@ -20,6 +20,7 @@
 #import "CTInAppStore+Tests.h"
 #import "CTInAppEvaluationManager+Tests.h"
 #import "CTPreferences.h"
+#import "CTMultiDelegateManager+Tests.h"
 
 @interface CTInAppDisplayManagerMock : CTInAppDisplayManager
 @property (nonatomic, strong) NSMutableArray *inappNotifs;
@@ -603,6 +604,17 @@
     
     [self.evaluationManager evaluateOnAppLaunchedServerSide:inApps];
     XCTAssertEqualObjects((@[inApps[0]]), self.mockDisplayManager.inappNotifs);
+}
+
+- (void)testDelegatesAdded {
+    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
+    NSUInteger batchHeaderDelegatesCount = [[delegateManager attachToHeaderDelegates] count];
+    NSUInteger batchSentDelegatesCount = [[delegateManager batchSentDelegates] count];
+
+    __unused CTInAppEvaluationManager *manager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.helper.accountId deviceId:self.helper.deviceId delegateManager:delegateManager impressionManager:self.helper.impressionManager inAppDisplayManager:self.helper.inAppDisplayManager inAppStore:self.helper.inAppStore inAppTriggerManager:self.helper.inAppTriggerManager];
+    
+    XCTAssertEqual([[delegateManager attachToHeaderDelegates] count], batchHeaderDelegatesCount + 1);
+    XCTAssertEqual([[delegateManager batchSentDelegates] count], batchSentDelegatesCount + 1);
 }
 
 - (void)testOnBatchHeaderCreation {
