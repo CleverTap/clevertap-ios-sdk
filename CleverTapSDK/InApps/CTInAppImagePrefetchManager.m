@@ -73,7 +73,7 @@ static const NSInteger kDefaultInAppExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 week
     long lastDeletedTime = [self getLastDeletedTimestamp];
     if (!expiredOnly) {
         [self moveAssetsToInactive];
-        lastDeletedTime = ([self getLastDeletedTimestamp] - kDefaultInAppExpiryTime);
+        lastDeletedTime = ([self getLastDeletedTimestamp] - (kDefaultInAppExpiryTime + 1));
     }
 
     if ([self.inactiveImageSet allObjects].count > 0) {
@@ -151,7 +151,7 @@ static const NSInteger kDefaultInAppExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 week
     // 4. Update lastDeletedTime as currentTime and image assets in preference
     dispatch_group_t deleteGroup = dispatch_group_create();
     dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    if (lastDeletedTime > 0 && [self.inactiveImageSet count] > 0) {
+    if (lastDeletedTime > 0) {
         long currentTime = (long) [[NSDate date] timeIntervalSince1970];
         if (currentTime - lastDeletedTime > self.inAppExpiryTime) {
             // Delete all inactive expired images.

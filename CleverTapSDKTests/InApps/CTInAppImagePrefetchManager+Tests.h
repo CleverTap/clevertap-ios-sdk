@@ -14,5 +14,7 @@
 - (void)prefetchURLs:(NSArray<NSString *> *)mediaURLs;
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 - (NSArray<NSString *> *)getImageURLs:(NSArray *)csInAppNotifs;
+- (void)removeInactiveExpiredAssets:(long)lastDeletedTime;
+- (long)getLastDeletedTimestamp;
 
 @end

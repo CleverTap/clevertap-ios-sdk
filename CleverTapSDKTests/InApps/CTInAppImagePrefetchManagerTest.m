@@ -22,7 +22,6 @@ NSString * const imageResourceType = @"png";
     [super setUp];
     InAppHelper *helper = [InAppHelper new];
     self.prefetchManager = helper.imagePrefetchManager;
-    
     // Stub the image download request
     [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         // Match requests with ct_test_image
@@ -39,7 +38,8 @@ NSString * const imageResourceType = @"png";
 - (void)tearDown {
     [super tearDown];
     [HTTPStubs removeAllStubs];
-    
+    [CTPreferences removeObjectForKey:[self.prefetchManager storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for cleanup"];
     [self.prefetchManager _clearImageAssets:NO];
     dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
@@ -51,7 +51,7 @@ NSString * const imageResourceType = @"png";
 }
 
 - (void)preloadImagesToDisk:(NSArray *)urls {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Image Preload to Disk Cache"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Preload images"];
     // Preload Images
     [self.prefetchManager prefetchURLs:urls];
     
@@ -75,8 +75,8 @@ NSString * const imageResourceType = @"png";
 - (void)setLastDeletedPastExpiry {
     // Expiration is 2 weeks
     // Set the last deleted timestamp to 15 days ago
-    long now = (long) [[NSDate date] timeIntervalSince1970] - (60 * 60 * 24 * (2 * 7 + 1));
-    [CTPreferences putInt:now
+    long ts = (long) [[NSDate date] timeIntervalSince1970] - (60 * 60 * 24 * (2 * 7 + 1));
+    [CTPreferences putInt:ts
                    forKey:[self.prefetchManager storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
 }
 
@@ -121,7 +121,7 @@ NSString * const imageResourceType = @"png";
     XCTAssertNotNil(image);
 }
 
-- (void)testPreloadingInAppImages {
+- (void)testPreloadClientSideInAppImages {
     NSArray *urls = [self generateImageURLs:2];
     NSArray *csInAppNotifs = @[
         @{
@@ -137,7 +137,7 @@ NSString * const imageResourceType = @"png";
             }
         }
     ];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Image Preload to Disk Cache"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Image preload to disk cache"];
     // Preload Images
     [self.prefetchManager preloadClientSideInAppImages:csInAppNotifs];
     
@@ -152,25 +152,29 @@ NSString * const imageResourceType = @"png";
     [self waitForExpectations:@[expectation] timeout:2.5];
 }
 
-- (void)testImagePresentInDiskCache3 {
+- (void)testPreloadImages {
+    // 1. Test preloading images adds to active assets
     NSArray *urls = [self generateImageURLs:3];
     // Load the images to disk, new images are directly added to the active set
     [self preloadImagesToDisk:@[urls[0], urls[1]]];
-    
+    XCTAssertEqual([[self.prefetchManager activeImageSet] count], 2);
+
+    // 2. Test preloading already present images removes them from inactive assets
     // Set the inactive URLs set
     NSMutableSet *urlsSet = [[NSMutableSet alloc] initWithArray:urls];
     [self.prefetchManager setInactiveImageSet:urlsSet];
     
-    //XCTestExpectation *expectation = [self expectationWithDescription:@"Image Preload to Disk Cache"];
     // Load the images to disk again, so the already saved ones are removed from the inactive set
     [self preloadImagesToDisk:@[urls[0], urls[1]]];
     
-    XCTAssertEqual([[self.prefetchManager activeImageSet] count], 2, @"Active images ");
+    XCTAssertEqual([[self.prefetchManager activeImageSet] count], 2);
     XCTAssertEqual([[self.prefetchManager inactiveImageSet] count], 1);
     
+    // 3. Test preloading images triggers remove of expired assets when expiration time has come
     [self setLastDeletedPastExpiry];
     [self preloadImagesToDisk:@[urls[0]]];
-    XCTAssertEqual([[self.prefetchManager activeImageSet] count], 0, @"number of active images");
+    // Active assets are moved to inactive to start expiration again
+    XCTAssertEqual([[self.prefetchManager activeImageSet] count], 0);
     XCTAssertEqual([[self.prefetchManager inactiveImageSet] count], 2);
 }
 
@@ -182,7 +186,7 @@ NSString * const imageResourceType = @"png";
     XCTAssertNotNil(image);
     
     [self.prefetchManager _clearImageAssets:NO];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear Disk Cache"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear all assets"];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
         UIImage *image = [self.prefetchManager loadImageFromDisk:urls[0]];
         XCTAssertNil(image);
@@ -202,7 +206,7 @@ NSString * const imageResourceType = @"png";
     
     [self setLastDeletedPastExpiry];
     [self.prefetchManager _clearImageAssets:YES];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear Disk Cache"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear inactive assets"];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
         UIImage *inactiveImage = [self.prefetchManager loadImageFromDisk:urls[0]];
         XCTAssertNil(inactiveImage);
@@ -226,7 +230,7 @@ NSString * const imageResourceType = @"png";
     
     [self setLastDeletedPastExpiry];
     [self.prefetchManager setImageAssetsInactiveAndClearExpired];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear Disk Cache"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear disk cache"];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
         XCTAssertEqual([[self.prefetchManager inactiveImageSet] count], 0);
         XCTAssertEqual([[self.prefetchManager activeImageSet] count], 0);
@@ -236,6 +240,56 @@ NSString * const imageResourceType = @"png";
     });
     
     [self waitForExpectations:@[expectation] timeout:2.5];
+}
+
+- (void)testRemoveInactiveExpiredAssetsUpdatesDeletedTs {
+    long ts = (long) [[NSDate date] timeIntervalSince1970] - (60 * 60 * 24 * (2 * 7 + 1));
+    [CTPreferences putInt:ts
+                   forKey:[self.prefetchManager storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
+    NSMutableSet *urlsSet = [[NSMutableSet alloc] initWithArray:[self generateImageURLs:4]];
+    [self.prefetchManager setActiveImageSet:urlsSet];
+    // Timestamp is expired, will trigger delete of expired assets
+    // There are no inactive assets to be removed
+    // Last deleted timestamp must be updated
+    // Active assets must be moved to inactive
+    XCTAssertEqual([[self.prefetchManager inactiveImageSet] count], 0);
+    [self.prefetchManager removeInactiveExpiredAssets:ts];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Remove expired assets"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
+        XCTAssertEqual([urlsSet count], [[self.prefetchManager inactiveImageSet] count]);
+        XCTAssertEqual(0, [[self.prefetchManager activeImageSet] count]);
+        XCTAssertNotEqual(ts, [self.prefetchManager getLastDeletedTimestamp]);
+        // Must be set to current timestamp (now and set timestamp might differ slightly)
+        XCTAssertTrue([[NSDate date] timeIntervalSince1970] - [self.prefetchManager getLastDeletedTimestamp] < 3);
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:1.5];
+}
+
+- (void)testRemoveInactiveExpiredAssetsNoop {
+    long ts = (long) [[NSDate date] timeIntervalSince1970] - (60 * 60 * 24 * 12); // 12 days
+    [CTPreferences putInt:ts
+                   forKey:[self.prefetchManager storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
+    NSArray *urls = [self generateImageURLs:5];
+    NSMutableSet *urlsSetActive = [[NSMutableSet alloc] initWithArray:@[urls[0], urls[1]]];
+    [self.prefetchManager setActiveImageSet:urlsSetActive];
+    NSMutableSet *urlsSetInactive = [[NSMutableSet alloc] initWithArray:@[urls[2], urls[3], urls[4]]];
+    [self.prefetchManager setInactiveImageSet:urlsSetInactive];
+    // Timestamp is not expired, will not trigger delete of expired assets
+    // No assets must be removed
+    // Active and Inactive assets must remain the same
+    // Delete timestamp must not change
+    [self.prefetchManager removeInactiveExpiredAssets:ts];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Remove expired assets"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
+        XCTAssertEqual(ts, [self.prefetchManager getLastDeletedTimestamp]);
+        XCTAssertEqual([urlsSetActive count], [[self.prefetchManager activeImageSet] count]);
+        XCTAssertEqual([urlsSetInactive count], [[self.prefetchManager inactiveImageSet] count]);
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:1.5];
 }
 
 @end
