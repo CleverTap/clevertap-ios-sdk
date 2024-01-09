@@ -30,12 +30,14 @@
 
 @interface CTInAppFCManagerTest : XCTestCase
 @property (nonatomic, strong) CTInAppFCManagerMock *inAppFCManager;
+@property (nonatomic, strong) InAppHelper *helper;
 @end
 
 @implementation CTInAppFCManagerTest
 
 - (void)setUp {
     InAppHelper *helper = [InAppHelper new];
+    self.helper = helper;
     self.inAppFCManager = [[CTInAppFCManagerMock alloc] initWithConfig:helper.config delegateManager:helper.delegateManager deviceId:helper.deviceId impressionManager:helper.impressionManager inAppTriggerManager:helper.inAppTriggerManager];
     // Set to the reset values
     self.inAppFCManager.globalSessionMax = 1;
@@ -105,6 +107,22 @@
 
     [self.inAppFCManager removeStaleInAppCounts:@[@1]];
     XCTAssertNil(self.inAppFCManager.inAppCounts[@"1"]);
+}
+
+- (void)testRemoveStaleInAppCountsRemovesTriggersAndImpressions {
+    NSDictionary *inApp = @{
+        @"ti": @1
+    };
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    [self.helper.inAppTriggerManager incrementTrigger:@"1"];
+    [self.inAppFCManager didShow:notif];
+    XCTAssertNotNil(self.inAppFCManager.inAppCounts[@"1"]);
+    XCTAssertEqual(1, [[self.helper.impressionManager getImpressions:@"1"] count]);
+
+    [self.inAppFCManager removeStaleInAppCounts:@[@1]];
+    XCTAssertNil(self.inAppFCManager.inAppCounts[@"1"]);
+    XCTAssertEqual(0, [[self.helper.impressionManager getImpressions:@"1"] count]);
+    XCTAssertEqual(0, [self.helper.inAppTriggerManager getTriggers:@"1"]);
 }
 
 - (void)testResetDailyCounters {

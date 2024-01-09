@@ -199,9 +199,12 @@
         @try {
             @synchronized (self.inAppCounts) {
                 for (int i = 0; i < [staleInApps count]; i++) {
-                    NSString *key = [NSString stringWithFormat:@"%@", staleInApps[i]];
-                    [self.inAppCounts removeObjectForKey:key];
-                    CleverTapLogInternal(self.config.logLevel, @"%@: Purged inapp counts with key %@", self, key);
+                    NSString *inAppId = [NSString stringWithFormat:@"%@", staleInApps[i]];
+                    // Remove stale in-app counts, triggers and impressions
+                    [self.inAppCounts removeObjectForKey:inAppId];
+                    [self.impressionManager removeImpressions:inAppId];
+                    [self.triggerManager removeTriggers:inAppId];
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Purged inapp counts, triggers, and impressions with key %@", self, inAppId);
                 }
                 [CTPreferences putObject:self.inAppCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_INAPP_COUNTS_PER_INAPP_KEY]];
             }
