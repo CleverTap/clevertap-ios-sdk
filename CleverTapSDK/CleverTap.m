@@ -516,7 +516,7 @@ static BOOL sharedInstanceErrorLogged;
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self
-                                                                        dispatchQueueManager:self.dispatchQueueManager 
+                                                                        dispatchQueueManager:self.dispatchQueueManager
                                                                               inAppFCManager:inAppFCManager
                                                                            impressionManager:impressionManager
                                                                                   inAppStore:inAppStore
@@ -1555,7 +1555,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)clearInAppResources:(BOOL)expiredOnly {
-    [self.imagePrefetchManager _clearInAppResources:expiredOnly];
+    [self.imagePrefetchManager _clearImageAssets:expiredOnly];
 }
 
 #pragma mark Private Method

@@ -14,8 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
                       deviceId:(NSString *)deviceId;
 - (void)preloadClientSideInAppImages:(NSArray *)csInAppNotifs;
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL;
-- (void)clearDiskImages;
-- (void)_clearInAppResources:(BOOL)expiredOnly;
+- (void)setImageAssetsInactiveAndClearExpired;
+- (void)_clearImageAssets:(BOOL)expiredOnly;
 
 @end
 

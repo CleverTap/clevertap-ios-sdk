@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
                          deviceId:(NSString *)deviceId
                    delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
-              inAppDisplayManager:(CTInAppDisplayManager *) inAppDisplayManager
+              inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
                        inAppStore:(CTInAppStore *)inAppStore
               inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager;
 

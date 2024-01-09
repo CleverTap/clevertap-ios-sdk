@@ -181,7 +181,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 - (void)removeClientSideInApps {
     @synchronized (self) {
         // Clear the CS images stored in disk cache
-        [self.imagePrefetchManager clearDiskImages];
+        [self.imagePrefetchManager setImageAssetsInactiveAndClearExpired];
 
         _clientSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];

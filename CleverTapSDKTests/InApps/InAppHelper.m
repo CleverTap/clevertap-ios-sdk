@@ -39,26 +39,35 @@
     self = [super init];
     if (self) {
         self.delegateManager = [CTMultiDelegateManager new];
+        
         self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:self.accountId accountToken:self.accountToken];
+        
         self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config
                                                                         delegateManager:self.delegateManager
                                                                                deviceId:self.deviceId];
+        
         self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.accountId
                                                                        deviceId:self.deviceId
                                                                 delegateManager:self.delegateManager];
+        
         self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
-                                                      delegateManager:self.delegateManager
+                                               delegateManager:self.delegateManager
                                           imagePrefetchManager:self.imagePrefetchManager
                                                       deviceId:self.deviceId];
+        
         self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId
                                                                            deviceId:self.deviceId
                                                                     delegateManager:self.delegateManager];
+        
         self.inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config
                                                        delegateManager:self.delegateManager
                                                               deviceId:self.deviceId
                                                      impressionManager:self.impressionManager
                                                    inAppTriggerManager:self.inAppTriggerManager];
+        
+        // Initialize when needed, requires CleverTap instance
         self.inAppDisplayManager = nil;
+        
         self.inAppEvaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId
                                                                                  deviceId:self.deviceId
                                                                           delegateManager:self.delegateManager
