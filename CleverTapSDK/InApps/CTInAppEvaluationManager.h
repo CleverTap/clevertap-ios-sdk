@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) CLLocationCoordinate2D location;
 
+- (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                    delegateManager:(CTMultiDelegateManager *)delegateManager

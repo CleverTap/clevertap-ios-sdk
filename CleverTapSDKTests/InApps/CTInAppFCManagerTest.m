@@ -18,6 +18,7 @@
 #import "CTInAppFCManager+Tests.h"
 #import "CTImpressionManager+Tests.h"
 #import "CTPreferences.h"
+#import "CTMultiDelegateManager+Tests.h"
 
 @interface CTInAppFCManagerMock : CTInAppFCManager
 @property (nonatomic, assign) int globalSessionMax;
@@ -30,12 +31,14 @@
 @interface CTInAppFCManagerTest : XCTestCase
 @property (nonatomic, strong) CTInAppFCManagerMock *inAppFCManager;
 @property (nonatomic, strong) CTInAppImagePrefetchManager *prefetchManager;
+@property (nonatomic, strong) InAppHelper *helper;
 @end
 
 @implementation CTInAppFCManagerTest
 
 - (void)setUp {
     InAppHelper *helper = [InAppHelper new];
+    self.helper = helper;
     self.inAppFCManager = [[CTInAppFCManagerMock alloc] initWithConfig:helper.config delegateManager:helper.delegateManager deviceId:helper.deviceId impressionManager:helper.impressionManager inAppTriggerManager:helper.inAppTriggerManager];
     // Set to the reset values
     self.inAppFCManager.globalSessionMax = 1;
@@ -108,6 +111,22 @@
     XCTAssertNil(self.inAppFCManager.inAppCounts[@"1"]);
 }
 
+- (void)testRemoveStaleInAppCountsRemovesTriggersAndImpressions {
+    NSDictionary *inApp = @{
+        @"ti": @1
+    };
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.helper.imagePrefetchManager];
+    [self.helper.inAppTriggerManager incrementTrigger:@"1"];
+    [self.inAppFCManager didShow:notif];
+    XCTAssertNotNil(self.inAppFCManager.inAppCounts[@"1"]);
+    XCTAssertEqual(1, [[self.helper.impressionManager getImpressions:@"1"] count]);
+
+    [self.inAppFCManager removeStaleInAppCounts:@[@1]];
+    XCTAssertNil(self.inAppFCManager.inAppCounts[@"1"]);
+    XCTAssertEqual(0, [[self.helper.impressionManager getImpressions:@"1"] count]);
+    XCTAssertEqual(0, [self.helper.inAppTriggerManager getTriggers:@"1"]);
+}
+
 - (void)testResetDailyCounters {
     [self.inAppFCManager recordImpression:@"1"];
     [self.inAppFCManager recordImpression:@"1"];
@@ -118,6 +137,18 @@
     XCTAssertEqualObjects(@2, self.inAppFCManager.inAppCounts[@"1"][1]);
     XCTAssertEqualObjects(@0, self.inAppFCManager.inAppCounts[@"2"][0]);
     XCTAssertEqualObjects(@1, self.inAppFCManager.inAppCounts[@"2"][1]);
+}
+
+- (void)testDelegatesAdded {
+    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
+    NSUInteger batchHeaderDelegatesCount = [[delegateManager attachToHeaderDelegates] count];
+    NSUInteger switchUserDelegatesCount = [[delegateManager switchUserDelegates] count];
+
+    InAppHelper *helper = [InAppHelper new];
+    __unused CTInAppFCManager *manager = [[CTInAppFCManagerMock alloc] initWithConfig:helper.config delegateManager:delegateManager deviceId:helper.deviceId impressionManager:helper.impressionManager inAppTriggerManager:helper.inAppTriggerManager];
+    
+    XCTAssertEqual([[delegateManager attachToHeaderDelegates] count], batchHeaderDelegatesCount + 1);
+    XCTAssertEqual([[delegateManager switchUserDelegates] count], switchUserDelegatesCount + 1);
 }
 
 - (void)testOnBatchHeaderCreationForQueue {
@@ -347,6 +378,37 @@
     // Record 1 more = 5
     [self recordImpressions:1];
     XCTAssertTrue([self.inAppFCManager hasDailyCapacityMaxedOut:notif]);
+}
+
+- (void)testSwitchUser {
+    NSString *firstDeviceId = self.inAppFCManager.deviceId;
+    NSString *secondDeviceId = @"newDeviceId";
+    
+    // Update in-app counts for first user
+    [self.inAppFCManager recordImpression:@"1"];
+    [self.inAppFCManager recordImpression:@"2"];
+    XCTAssertEqual([[self.inAppFCManager inAppCounts] count], 2);
+
+    // Switch to second user
+    [self.inAppFCManager deviceIdDidChange:secondDeviceId];
+    XCTAssertEqual([[self.inAppFCManager inAppCounts] count], 0);
+    [self.inAppFCManager recordImpression:@"1"];
+    XCTAssertEqual([[self.inAppFCManager inAppCounts] count], 1);
+
+    // Switch to first user to ensure cached in-apps for first user are loaded
+    [self.inAppFCManager deviceIdDidChange:firstDeviceId];
+    XCTAssertEqual([[self.inAppFCManager inAppCounts] count], 2);
+    
+    // Switch to second user to ensure cached in-apps for second user are loaded
+    [self.inAppFCManager deviceIdDidChange:secondDeviceId];
+    XCTAssertEqual([[self.inAppFCManager inAppCounts] count], 1);
+
+    // Clear in-apps for the second user
+    [self.inAppFCManager.impressionManager removeImpressions:@"1"];
+    [self.inAppFCManager.impressionManager removeImpressions:@"2"];
+    [self.inAppFCManager removeStaleInAppCounts: @[@1, @2]];
+    // Switch back to first user to tear down
+    [self.inAppFCManager deviceIdDidChange:firstDeviceId];
 }
 
 @end

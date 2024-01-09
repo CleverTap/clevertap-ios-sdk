@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTImpressionManager : NSObject <CTSwitchUserDelegate>
 
+- (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager;

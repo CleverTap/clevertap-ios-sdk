@@ -16,6 +16,7 @@
 @property (atomic, copy, readonly) NSString *deviceId;
 @property (assign, readonly) int localInAppCount;
 
+- (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId

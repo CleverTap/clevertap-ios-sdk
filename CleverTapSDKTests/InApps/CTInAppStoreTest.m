@@ -15,12 +15,16 @@
 #import "CTInAppStore+Tests.h"
 #import "InAppHelper.h"
 #import "CTAES.h"
+#import "CTMultiDelegateManager+Tests.h"
 
 @interface CTInAppStoreTest : XCTestCase
-@property (nonatomic, strong) CTInAppStore *store;
+@property (nonatomic, weak) CTInAppStore *store;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTAES *ctAES;
 @property (nonatomic, strong) NSArray *inApps;
+
+
+@property (nonatomic, strong) InAppHelper *helper;
 @end
 
 @implementation CTInAppStoreTest
@@ -29,6 +33,7 @@
     [super setUp];
 
     InAppHelper *helper = [[InAppHelper alloc] init];
+    self.helper = helper;
     self.config = helper.config;
     self.store = helper.inAppStore;
     self.ctAES = [[CTAES alloc] initWithAccountID:helper.accountId];
@@ -160,7 +165,7 @@
     [self.store storeServerSideInApps:newInApps];
     XCTAssertEqualObjects([self.store serverSideInApps], newInApps);
     XCTAssertEqualObjects([self inAppsFromStorage:[self storageKeySS]], newInApps);
-
+    
     // Force load from persistent storage
     [self setServerSideInAppsPropToNil];
     XCTAssertEqualObjects([self.store serverSideInApps], newInApps);
@@ -293,7 +298,7 @@
             @"ti": @3
         }
     ];
-
+    
     XCTAssertEqual([[self.store inAppsQueue] count], 0);
     XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyInAppNotifs]]);
     
@@ -312,12 +317,46 @@
     
     inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
     XCTAssertEqual([inAppsFromStorage count], 2);
-
+    
     [self.store dequeueInApp];
     [self.store dequeueInApp];
     XCTAssertEqual([[self.store inAppsQueue] count], 0);
     inAppsFromStorage = [self inAppsFromStorage:[self storageKeyInAppNotifs]];
     XCTAssertEqual([inAppsFromStorage count], 0);
+}
+
+- (void)testSwitchUserDelegateAdded {
+    CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
+    NSUInteger count = [[delegateManager switchUserDelegates] count];
+    __unused CTInAppStore *store = [[CTInAppStore alloc] initWithConfig:self.helper.config delegateManager:delegateManager imagePrefetchManager:self.helper.imagePrefetchManager deviceId:self.helper.deviceId];
+    
+    XCTAssertEqual([[delegateManager switchUserDelegates] count], count + 1);
+}
+
+- (void)testSwitchUser {
+    NSString *firstDeviceId = self.helper.deviceId;
+    NSString *secondDeviceId = @"newDeviceId";
+    
+    // Enqueue in-apps to first user
+    [self.store enqueueInApps:self.inApps];
+    // Switch to second user
+    [self.store deviceIdDidChange:secondDeviceId];
+    XCTAssertEqual([[self.store inAppsQueue] count], 0);
+    [self.store enqueueInApps:@[self.inApps[0]]];
+    XCTAssertEqual([[self.store inAppsQueue] count], 1);
+    
+    // Switch to first user to ensure cached in-apps for first user are loaded
+    [self.store deviceIdDidChange:firstDeviceId];
+    XCTAssertEqual([[self.store inAppsQueue] count], [self.inApps count]);
+    
+    // Switch to second user to ensure cached in-apps for second user are loaded
+    [self.store deviceIdDidChange:secondDeviceId];
+    XCTAssertEqual([[self.store inAppsQueue] count], 1);
+    
+    // Clear in-apps for the second user
+    [self.store clearInApps];
+    // Switch back to first user to tear down
+    [self.store deviceIdDidChange:firstDeviceId];
 }
 
 - (void)testInAppsQueueMigration {
