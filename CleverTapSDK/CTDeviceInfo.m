@@ -24,6 +24,7 @@ NSString *const kCLTAP_FALLBACK_DEVICE_ID_TAG = @"fallbackDeviceId";
 NSString *const kCLTAP_ERROR_PROFILE_PREFIX = @"-i";
 
 static BOOL _wifi;
+static BOOL _isOnline;
 
 static NSRecursiveLock *deviceIDLock;
 static NSString *_idfv;
@@ -83,7 +84,27 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 + (void)handleReachabilityUpdate:(SCNetworkReachabilityFlags)flags {
     _wifi = (flags & kSCNetworkReachabilityFlagsReachable) && !(flags & kSCNetworkReachabilityFlagsIsWWAN);
-    CleverTapLogStaticInternal(@"Updating wifi to: %@", @(_wifi));
+    _isOnline = [self isOnlineForFlags:flags];
+    CleverTapLogStaticInternal(@"Updating wifi to: %@ and isOnline to %@", @(_wifi), @(_isOnline));
+}
+
++ (BOOL)isOnlineForFlags:(SCNetworkReachabilityFlags)flags {
+    BOOL isReachable = (flags & kSCNetworkReachabilityFlagsReachable) != 0;
+    BOOL needsConnection = (flags & kSCNetworkReachabilityFlagsConnectionRequired) != 0;
+
+    // Check if it is a WWAN connection (e.g., cellular)
+    BOOL isWWAN = (flags & kSCNetworkReachabilityFlagsIsWWAN) != 0;
+    // Determine if the device is online based on the flags
+    if (isReachable && !needsConnection) {
+        if (isWWAN) {
+            // Device is online via WWAN (cellular)
+            return YES;
+        } else {
+            // Device is online via Wi-Fi or other wired connection
+            return YES;
+        }
+    }
+    return NO;
 }
 #endif
 
@@ -418,6 +439,10 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (BOOL)wifi {
     return _wifi;
+}
+
+- (BOOL)isOnline {
+    return _isOnline;
 }
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
