@@ -501,7 +501,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)initializeInAppSupport {
-    CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:self.deviceInfo.deviceId];
+    CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
     self.imagePrefetchManager = imagePrefetchManager;
 
     CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config

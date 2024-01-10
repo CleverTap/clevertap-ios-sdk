@@ -42,9 +42,7 @@
         
         self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:self.accountId accountToken:self.accountToken];
         
-        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config
-                                                                        delegateManager:self.delegateManager
-                                                                               deviceId:self.deviceId];
+        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
         
         self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.accountId
                                                                        deviceId:self.deviceId

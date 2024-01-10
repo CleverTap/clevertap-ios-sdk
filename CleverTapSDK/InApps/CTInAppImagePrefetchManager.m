@@ -10,7 +10,6 @@ static const NSInteger kDefaultInAppExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 week
 @interface CTInAppImagePrefetchManager()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, strong) NSString *deviceId;
 @property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
 @property (nonatomic, strong) SDWebImageContext *sdWebImageContext;
 @property (nonatomic, strong) SDWebImageManager *sdWebImageManager;
@@ -23,14 +22,10 @@ static const NSInteger kDefaultInAppExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 week
 
 @implementation CTInAppImagePrefetchManager
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-               delegateManager:(CTMultiDelegateManager *)delegateManager
-                      deviceId:(NSString *)deviceId {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
     self = [super init];
     if (self) {
         self.config = config;
-        self.deviceId = deviceId;
-        [delegateManager addSwitchUserDelegate:self];
 
         [self setup];
     }
@@ -215,7 +210,7 @@ static const NSInteger kDefaultInAppExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 week
 }
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@_%@", self.config.accountId, self.deviceId, suffix];
+    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, suffix];
 }
 
 - (long)getLastDeletedTimestamp {
@@ -254,16 +249,6 @@ static const NSInteger kDefaultInAppExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 week
                       forKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
     [CTPreferences putObject:[self.inactiveImageSet allObjects]
                       forKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
-}
-
-#pragma mark Switch User Delegate
-
-- (void)deviceIdDidChange:(NSString *)newDeviceId {
-    self.deviceId = newDeviceId;
-    self.activeImageSet = [NSMutableSet new];
-    self.inactiveImageSet = [NSMutableSet new];
-    [self addActiveImageAssets];
-    [self addInactiveImageAssets];
 }
 
 @end
