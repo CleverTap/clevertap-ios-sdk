@@ -1,5 +1,6 @@
 #include <math.h>
 #import "CTUtils.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 @implementation CTUtils
 
@@ -140,6 +141,23 @@
         }
     }
     return nil;
+}
+
++ (BOOL)isInternetAvailable {
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithName(NULL, "www.apple.com");
+
+    if (reachability != NULL) {
+        SCNetworkReachabilityFlags flags;
+        if (SCNetworkReachabilityGetFlags(reachability, &flags)) {
+            // Check if the internet is reachable
+            BOOL isReachable = (flags & kSCNetworkFlagsReachable) != 0;
+            BOOL needsConnection = (flags & kSCNetworkFlagsConnectionRequired) != 0;
+
+            return (isReachable && !needsConnection);
+        }
+    }
+
+    return NO;
 }
 
 @end

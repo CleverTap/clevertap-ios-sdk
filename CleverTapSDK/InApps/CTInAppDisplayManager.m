@@ -258,6 +258,13 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         [self _showInAppNotificationIfAny];  // auto try the next one
         return;
     }
+    
+    BOOL isHTMLType = (notification.inAppType == CTInAppTypeHTML);
+    BOOL isInternetAvailable = [CTUtils isInternetAvailable];
+    if (isHTMLType && !isInternetAvailable) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Not showing HTML InApp %@ due to no internet. An active internet connection is required to display the HTML InApp", self, notification.campaignId);
+        return;
+    }
 
     BOOL goFromDelegate = YES;
     if (self.inAppNotificationDelegate && [self.inAppNotificationDelegate respondsToSelector:@selector(shouldShowInAppNotificationWithExtras:)]) {
