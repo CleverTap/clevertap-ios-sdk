@@ -31,11 +31,13 @@
 
 - (void)setUp {
     [super setUp];
+
     InAppHelper *helper = [[InAppHelper alloc] init];
     self.helper = helper;
     self.config = helper.config;
     self.store = helper.inAppStore;
     self.ctAES = [[CTAES alloc] initWithAccountID:helper.accountId];
+
     self.inApps = @[
         @{
             @"ti": @1698073146,
@@ -326,7 +328,7 @@
 - (void)testSwitchUserDelegateAdded {
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     NSUInteger count = [[delegateManager switchUserDelegates] count];
-    __unused CTInAppStore *store = [[CTInAppStore alloc] initWithConfig:self.helper.config delegateManager:delegateManager deviceId:self.helper.deviceId];
+    __unused CTInAppStore *store = [[CTInAppStore alloc] initWithConfig:self.helper.config delegateManager:delegateManager imagePrefetchManager:self.helper.imagePrefetchManager deviceId:self.helper.deviceId];
     
     XCTAssertEqual([[delegateManager switchUserDelegates] count], count + 1);
 }

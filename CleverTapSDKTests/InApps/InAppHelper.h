@@ -15,6 +15,7 @@
 @class CleverTapInstanceConfig;
 @class CTMultiDelegateManager;
 @class CTInAppTriggerManager;
+@class CTInAppImagePrefetchManager;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppStore *inAppStore;
 @property (nonatomic, strong) CTInAppTriggerManager *inAppTriggerManager;
+@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
 
 - (NSString *)accountId;
 - (NSString *)accountToken;

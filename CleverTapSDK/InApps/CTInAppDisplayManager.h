@@ -13,6 +13,7 @@
 #import "CleverTap.h"
 #import "CTPushPrimerManager.h"
 #import "CTInAppStore.h"
+#import "CTInAppImagePrefetchManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -34,7 +35,8 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
                             dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
-                                inAppStore:(CTInAppStore *)inAppStore;
+                                inAppStore:(CTInAppStore *)inAppStore
+                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager;
 
 - (void)setPushPrimerManager:(CTPushPrimerManager* _Nonnull)pushPrimerManagerObj;
 - (void)prepareNotificationForDisplay:(NSDictionary* _Nonnull)jsonObj;

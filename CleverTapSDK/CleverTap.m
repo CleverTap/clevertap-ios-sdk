@@ -56,6 +56,7 @@
 #import "CleverTap+InAppsResponseHandler.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppTriggerManager.h"
+#import "CTInAppImagePrefetchManager.h"
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -241,6 +242,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
 @property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
+@property (nonatomic, strong, readwrite) CTInAppImagePrefetchManager *imagePrefetchManager;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 #endif
 
@@ -499,8 +501,12 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)initializeInAppSupport {
+    CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
+    self.imagePrefetchManager = imagePrefetchManager;
+
     CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
-                                                           delegateManager:self.delegateManager
+                                                    delegateManager:self.delegateManager
+                                               imagePrefetchManager:self.imagePrefetchManager
                                                            deviceId:self.deviceInfo.deviceId];
     self.inAppStore = inAppStore;
     
@@ -510,8 +516,11 @@ static BOOL sharedInstanceErrorLogged;
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self
-                                                                        dispatchQueueManager:self.dispatchQueueManager inAppFCManager:inAppFCManager
-                                                                           impressionManager:impressionManager inAppStore:inAppStore];
+                                                                        dispatchQueueManager:self.dispatchQueueManager
+                                                                              inAppFCManager:inAppFCManager
+                                                                           impressionManager:impressionManager
+                                                                                  inAppStore:inAppStore
+                                                                        imagePrefetchManager:self.imagePrefetchManager];
     
     CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
     
@@ -1543,6 +1552,10 @@ static BOOL sharedInstanceErrorLogged;
 - (void)resumeInAppNotifications {
     [self.inAppDisplayManager _resumeInAppNotifications];
     [self.inAppDisplayManager _showInAppNotificationIfAny];
+}
+
+- (void)clearInAppResources:(BOOL)expiredOnly {
+    [self.imagePrefetchManager _clearImageAssets:expiredOnly];
 }
 
 #pragma mark Private Method

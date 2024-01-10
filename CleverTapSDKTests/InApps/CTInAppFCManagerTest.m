@@ -30,6 +30,7 @@
 
 @interface CTInAppFCManagerTest : XCTestCase
 @property (nonatomic, strong) CTInAppFCManagerMock *inAppFCManager;
+@property (nonatomic, strong) CTInAppImagePrefetchManager *prefetchManager;
 @property (nonatomic, strong) InAppHelper *helper;
 @end
 
@@ -42,6 +43,7 @@
     // Set to the reset values
     self.inAppFCManager.globalSessionMax = 1;
     self.inAppFCManager.maxPerDayCount = 1;
+    self.prefetchManager = helper.imagePrefetchManager;
 }
 
 - (void)tearDown {
@@ -68,7 +70,7 @@
     NSDictionary *inApp = @{
         @"ti": @1
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     [self.inAppFCManager didShow:notif];
     XCTAssertEqual(1, [[self.inAppFCManager.impressionManager getImpressions:@"1"] count]);
     XCTAssertEqual(1, [self.inAppFCManager shownTodayCount]);
@@ -101,7 +103,7 @@
     NSDictionary *inApp = @{
         @"ti": @1
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     [self.inAppFCManager didShow:notif];
     XCTAssertNotNil(self.inAppFCManager.inAppCounts[@"1"]);
 
@@ -113,7 +115,7 @@
     NSDictionary *inApp = @{
         @"ti": @1
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.helper.imagePrefetchManager];
     [self.helper.inAppTriggerManager incrementTrigger:@"1"];
     [self.inAppFCManager didShow:notif];
     XCTAssertNotNil(self.inAppFCManager.inAppCounts[@"1"]);
@@ -181,7 +183,7 @@
     };
     self.inAppFCManager.globalSessionMax = 5;
     
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(-1, notif.maxPerSession);
     // Record 4 impressions
     [self recordImpressions:4];
@@ -209,7 +211,7 @@
     };
     self.inAppFCManager.globalSessionMax = 5;
     
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(1000, notif.maxPerSession);
     // Record 4 impressions
     [self recordImpressions:4];
@@ -229,7 +231,7 @@
     NSDictionary *inApp = @{
         @"ti": @1
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     self.inAppFCManager.impressionManager.sessionImpressions = [@{} mutableCopy];
     // InApp session max will default to -1 on notification level
     XCTAssertEqual(-1, notif.maxPerSession);
@@ -250,7 +252,7 @@
         @"ti": @1,
         @"mdc": @1
     };
-    notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc1000];
+    notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc1000 imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(1, notif.maxPerSession);
     
     self.inAppFCManager.impressionManager.sessionImpressions = [@{} mutableCopy];
@@ -265,7 +267,7 @@
         @"ti": @1,
         @"mdc": @3
     };
-    notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3];
+    notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3 imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(3, notif.maxPerSession);
     self.inAppFCManager.impressionManager.sessionImpressions = [@{
         @"1": @2
@@ -298,7 +300,7 @@
             @"html": @""
         }
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inAppMdc3 imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(3, notif.maxPerSession);
     self.inAppFCManager.impressionManager.sessionImpressions = [@{
         @"1": @2
@@ -316,7 +318,7 @@
         @"ti": @1,
         @"tlc": @5
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(5, notif.totalLifetimeCount);
     XCTAssertFalse([self.inAppFCManager hasLifetimeCapacityMaxedOut:notif]);
     
@@ -333,7 +335,7 @@
     NSDictionary *inApp = @{
         @"ti": @1
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(-1, notif.totalDailyCount);
     XCTAssertFalse([self.inAppFCManager hasDailyCapacityMaxedOut:notif]);
     // Max Default is 1
@@ -347,7 +349,7 @@
         @"ti": @1,
         @"tdc": @10
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(10, notif.totalDailyCount);
     XCTAssertFalse([self.inAppFCManager hasDailyCapacityMaxedOut:notif]);
     
@@ -366,7 +368,7 @@
         @"ti": @1,
         @"tdc": @5
     };
-    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp];
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
     XCTAssertEqual(5, notif.totalDailyCount);
     
     // Record 4 impressions
