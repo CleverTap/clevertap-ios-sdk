@@ -482,6 +482,10 @@ static BOOL sharedInstanceErrorLogged;
             [self initializeInAppSupport];
         }
 #endif
+#if defined(CLEVERTAP_TVOS)
+        self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config];
+#endif
+        
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
         if (now - initialAppEnteredForegroundTime > 5) {
             _config.isCreatedPostAppLaunched = YES;
@@ -499,7 +503,7 @@ static BOOL sharedInstanceErrorLogged;
     
     return self;
 }
-
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)initializeInAppSupport {
     CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
     self.imagePrefetchManager = imagePrefetchManager;
@@ -535,6 +539,7 @@ static BOOL sharedInstanceErrorLogged;
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
 }
+#endif
 
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
@@ -648,7 +653,9 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)setUserSetLocation:(CLLocationCoordinate2D)location {
     _userSetLocation = location;
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     [self.inAppEvaluationManager setLocation:location];
+#endif
     if (!self.isAppForeground) return;
     // if in foreground, queue the ping event to transmit location update to server
     // min 10 second interval between location pings
@@ -1536,7 +1543,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - InApp Notifications
 
 #pragma mark Public Method
-
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)showInAppNotificationIfAny {
     [self.inAppDisplayManager _showInAppNotificationIfAny];
 }
@@ -1557,6 +1564,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)clearInAppResources:(BOOL)expiredOnly {
     [self.imagePrefetchManager _clearImageAssets:expiredOnly];
 }
+#endif
 
 #pragma mark Private Method
 
@@ -1957,12 +1965,14 @@ static BOOL sharedInstanceErrorLogged;
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden
     [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
+#endif
 }
 
 - (void)scheduleQueueFlush {
@@ -2186,7 +2196,9 @@ static BOOL sharedInstanceErrorLogged;
                     CleverTapLogDebug(self.config.logLevel, @"%@: Network error while sending queue, will retry: %@", self, error.localizedDescription);
                 }
                 [[self variables] handleVariablesError];
+#if !CLEVERTAP_NO_INAPP_SUPPORT
                 [self triggerFetchInApps:NO];
+#endif
                 
                 dispatch_semaphore_signal(semaphore);
             }];
@@ -3345,7 +3357,7 @@ static BOOL sharedInstanceErrorLogged;
 
 
 #pragma mark CleverTap InApp Notification Delegate Implementation
-
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate>)delegate {
     [self.inAppDisplayManager setInAppNotificationDelegate:delegate];
 }
@@ -3358,6 +3370,7 @@ static BOOL sharedInstanceErrorLogged;
     self.fetchInAppsBlock = block;
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @5}} withType:CleverTapEventTypeFetch];
 }
+#endif
 
 #pragma mark - Event API
 

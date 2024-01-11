@@ -8,8 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "CleverTapInstanceConfig.h"
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppDisplayManager.h"
 #import "CTImpressionManager.h"
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -29,7 +31,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, retain, nullable) NSDictionary *wzrkParams;
 
 - (instancetype)init NS_UNAVAILABLE;
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppStore:(CTInAppStore *)inAppStore;
+#endif
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 - (void)updateSessionStateOnLaunch;
 - (void)updateSessionTime:(long)ts;
 - (void)createSessionIfNeeded;

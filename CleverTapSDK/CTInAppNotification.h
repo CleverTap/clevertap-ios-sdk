@@ -2,7 +2,9 @@
 #import <UIKit/UIKit.h>
 #import "CTInAppUtils.h"
 #import "CTNotificationButton.h"
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppImagePrefetchManager.h"
+#endif
 
 @interface CTInAppNotification : NSObject
 
@@ -62,8 +64,10 @@
 @property (nonatomic, readonly) BOOL skipSettingsAlert;
 
 - (instancetype)init __unavailable;
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (instancetype)initWithJSON:(NSDictionary*)json
         imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager;
+#endif
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler;
 
