@@ -23,6 +23,9 @@
 @interface CTInAppFCManagerMock : CTInAppFCManager
 @property (nonatomic, assign) int globalSessionMax;
 @property (nonatomic, assign) int maxPerDayCount;
+
+- (BOOL)hasInAppFrequencyLimitsMaxedOut:(CTInAppNotification *)inApp;
+
 @end
 
 @implementation CTInAppFCManagerMock
@@ -387,6 +390,64 @@
     // Record 1 more = 5
     [self recordImpressions:1];
     XCTAssertTrue([self.inAppFCManager hasDailyCapacityMaxedOut:notif]);
+}
+
+#pragma mark InApp Frequency Tests
+- (void)testHasInAppFrequencyLimitsMaxedOut {
+    NSDictionary *inApp = @{
+        @"ti": @1,
+        @"frequencyLimits": @[
+            @{
+                @"type": @"ever",
+                @"limit": @2
+            }
+        ]
+    };
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
+    
+    // 1 impression is in limit
+    [self.inAppFCManager.impressionManager recordImpression:notif.Id];
+    XCTAssertFalse([self.inAppFCManager hasInAppFrequencyLimitsMaxedOut:notif]);
+
+    // 2 impressions is not in limit
+    [self.inAppFCManager.impressionManager recordImpression:notif.Id];
+    XCTAssertTrue([self.inAppFCManager hasInAppFrequencyLimitsMaxedOut:notif]);
+}
+
+#pragma mark CanShow Tests
+- (void)testCanShowExcludeCaps {
+    NSDictionary *inApp = @{
+        @"ti": @1,
+        @"efc": @1,
+        @"tdc": @1
+    };
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
+    
+    [self.inAppFCManager recordImpression:notif.Id];
+    XCTAssertTrue([self.inAppFCManager canShow:notif]);
+}
+
+- (void)testCanShowExcludeGlobalCaps {
+    NSDictionary *inApp = @{
+        @"ti": @1,
+        @"excludeGlobalFCaps": @1,
+        @"tdc": @1
+    };
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
+    
+    [self.inAppFCManager recordImpression:notif.Id];
+    XCTAssertTrue([self.inAppFCManager canShow:notif]);
+}
+
+- (void)testCanShowMaxedOut {
+    NSDictionary *inApp = @{
+        @"ti": @1,
+        @"tdc": @1
+    };
+    CTInAppNotification *notif = [[CTInAppNotification alloc] initWithJSON:inApp imagePrefetchManager:self.prefetchManager];
+    
+    [self.inAppFCManager recordImpression:notif.Id];
+    XCTAssertFalse([self.inAppFCManager canShow:notif]);
 }
 
 #pragma mark Switch User Tests
