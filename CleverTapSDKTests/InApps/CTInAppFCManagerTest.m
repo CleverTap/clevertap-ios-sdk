@@ -36,6 +36,7 @@
 
 @implementation CTInAppFCManagerTest
 
+#pragma mark Setup
 - (void)setUp {
     InAppHelper *helper = [InAppHelper new];
     self.helper = helper;
@@ -59,6 +60,7 @@
     }
 }
 
+#pragma mark Tests
 - (void)testLocalInAppCount {
     int inAppCount = [self.inAppFCManager localInAppCount];
     [self.inAppFCManager incrementLocalInAppCount];
@@ -99,6 +101,7 @@
     XCTAssertEqualObjects(@1, self.inAppFCManager.inAppCounts[@"2"][1]);
 }
 
+#pragma mark Stale In-apps Tests
 - (void)testRemoveStaleInAppCounts {
     NSDictionary *inApp = @{
         @"ti": @1
@@ -127,6 +130,7 @@
     XCTAssertEqual(0, [self.helper.inAppTriggerManager getTriggers:@"1"]);
 }
 
+#pragma mark Daily Counters Tests
 - (void)testResetDailyCounters {
     [self.inAppFCManager recordImpression:@"1"];
     [self.inAppFCManager recordImpression:@"1"];
@@ -139,6 +143,7 @@
     XCTAssertEqualObjects(@1, self.inAppFCManager.inAppCounts[@"2"][1]);
 }
 
+#pragma mark Delegates Tests
 - (void)testDelegatesAdded {
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     NSUInteger batchHeaderDelegatesCount = [[delegateManager attachToHeaderDelegates] count];
@@ -151,6 +156,7 @@
     XCTAssertEqual([[delegateManager switchUserDelegates] count], switchUserDelegatesCount + 1);
 }
 
+#pragma mark OnBatchHeader Tests
 - (void)testOnBatchHeaderCreationForQueue {
     NSDictionary *expected = @{
         @"af.LIAMC": @0,
@@ -177,6 +183,7 @@
     XCTAssertTrue([expected isEqualToDictionary:actual]);
 }
 
+#pragma mark Session Capacity Tests
 - (void)testSessionCapacityMaxedOutGlobal {
     NSDictionary *inApp = @{
         @"ti": @1
@@ -313,6 +320,7 @@
     XCTAssertTrue([self.inAppFCManager hasSessionCapacityMaxedOut:notif]);
 }
 
+#pragma mark Lifetime Capacity Tests
 - (void)testLifetimeCapacityMaxedOut {
     NSDictionary *inApp = @{
         @"ti": @1,
@@ -331,6 +339,7 @@
     XCTAssertTrue([self.inAppFCManager hasLifetimeCapacityMaxedOut:notif]);
 }
 
+#pragma mark Daily Capacity Tests
 - (void)testDailyCapacityMaxedOutGlobalDefault {
     NSDictionary *inApp = @{
         @"ti": @1
@@ -380,9 +389,10 @@
     XCTAssertTrue([self.inAppFCManager hasDailyCapacityMaxedOut:notif]);
 }
 
+#pragma mark Switch User Tests
 - (void)testSwitchUser {
     NSString *firstDeviceId = self.inAppFCManager.deviceId;
-    NSString *secondDeviceId = @"newDeviceId";
+    NSString *secondDeviceId = [NSString stringWithFormat:@"%@_2", firstDeviceId];
     
     // Update in-app counts for first user
     [self.inAppFCManager recordImpression:@"1"];

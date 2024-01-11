@@ -13,6 +13,7 @@
 #import "CTClockMock.h"
 #import "CTImpressionManager+Tests.h"
 #import "CTMultiDelegateManager+Tests.h"
+#import "InAppHelper.h"
 
 // Use fixed date and time
 // Do not set a timezone to the formatter,
@@ -34,7 +35,7 @@ NSString * const LOCALE = @"en_US_POSIX";
 
 - (void)setUp {
     [super setUp];
-    self.testCampaignId = @"testCampaignId";
+    self.testCampaignId = CLTAP_TEST_CAMPAIGN_ID;
 
     // Configure the date and clock
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
@@ -49,8 +50,8 @@ NSString * const LOCALE = @"en_US_POSIX";
     NSLocale *locale = [NSLocale localeWithLocaleIdentifier:LOCALE];
     
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
-    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountID"
-                                                                   deviceId:@"testDeviceID"
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:CLTAP_TEST_ACCOUNT_ID
+                                                                   deviceId:CLTAP_TEST_DEVICE_ID
                                                             delegateManager:delegateManager
                                                                       clock:mockClock
                                                                      locale:locale];
@@ -320,8 +321,8 @@ NSString * const LOCALE = @"en_US_POSIX";
     NSUInteger count = [[delegateManager switchUserDelegates] count];
     
     NSLocale *locale = [NSLocale localeWithLocaleIdentifier:LOCALE];
-    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:@"testAccountID"
-                                                                   deviceId:@"testDeviceID"
+    self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:CLTAP_TEST_ACCOUNT_ID
+                                                                   deviceId:CLTAP_TEST_DEVICE_ID
                                                             delegateManager:delegateManager
                                                                       clock:self.mockClock
                                                                      locale:locale];
@@ -330,8 +331,8 @@ NSString * const LOCALE = @"en_US_POSIX";
 }
 
 - (void)testSwitchUser {
-    NSString *firstDeviceId = @"testDeviceID";
-    NSString *secondDeviceId = @"newDeviceId";
+    NSString *firstDeviceId = CLTAP_TEST_DEVICE_ID;
+    NSString *secondDeviceId = [NSString stringWithFormat:@"%@_2", firstDeviceId];
     
     // Record impressions for first user
     [self.impressionManager recordImpression:self.testCampaignId];

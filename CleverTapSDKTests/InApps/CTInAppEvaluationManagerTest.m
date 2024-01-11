@@ -55,6 +55,7 @@
 
 @implementation CTInAppEvaluationManagerTest
 
+#pragma mark Setup
 - (void)setUp {
     [super setUp];
     
@@ -85,6 +86,7 @@
     return [CTPreferences getObjectForKey:[self.evaluationManager storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY]];
 }
 
+#pragma mark Sort Tests
 - (void)testSort {
     NSMutableArray *inApps = [@[
         @{
@@ -224,6 +226,7 @@
     XCTAssertEqualObjects(inApps, expectedInApps);
 }
 
+#pragma mark Evaluate Tests
 - (void)testEvaluateWithInApps {
     NSArray *inApps = @[
         @{
@@ -607,6 +610,7 @@
     XCTAssertEqualObjects((@[inApps[0]]), self.mockDisplayManager.inappNotifs);
 }
 
+#pragma mark Delegates Tests
 - (void)testDelegatesAdded {
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     NSUInteger batchHeaderDelegatesCount = [[delegateManager attachToHeaderDelegates] count];
@@ -618,6 +622,7 @@
     XCTAssertEqual([[delegateManager batchSentDelegates] count], batchSentDelegatesCount + 1);
 }
 
+#pragma mark OnBatchHeader Tests
 - (void)testOnBatchHeaderCreation {
     self.evaluationManager.evaluatedServerSideInAppIds = [@[@1, @2, @3] mutableCopy];
     self.evaluationManager.suppressedClientSideInApps = [@[@4, @5, @6] mutableCopy];
@@ -682,6 +687,7 @@
     XCTAssertEqualObjects((@[]), self.evaluationManager.suppressedClientSideInApps);
 }
 
+#pragma mark Suppression Tests
 - (void)testShouldSuppress {
     NSDictionary *inApp = @{
         @"ti": @"1"
@@ -736,6 +742,7 @@
     XCTAssertEqualObjects(self.evaluationManager.suppressedClientSideInApps[1], suppressedInAppData);
 }
 
+#pragma mark Utils Tests
 - (void)testGenerateWzrkId {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:CLTAP_DATE_FORMAT];

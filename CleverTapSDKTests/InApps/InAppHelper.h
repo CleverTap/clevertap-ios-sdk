@@ -19,6 +19,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSString *const CLTAP_TEST_ACCOUNT_ID;
+extern NSString *const CLTAP_TEST_ACCOUNT_TOKEN;
+extern NSString *const CLTAP_TEST_DEVICE_ID;
+extern NSString *const CLTAP_TEST_CAMPAIGN_ID;
+
 @interface InAppHelper : NSObject
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;

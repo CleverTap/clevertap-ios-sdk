@@ -10,6 +10,7 @@
 #import <XCTest/XCTest.h>
 #import "CTInAppTriggerManager.h"
 #import "CTMultiDelegateManager+Tests.h"
+#import "InAppHelper.h"
 
 @interface CTInAppTriggerManagerTest : XCTestCase
 
@@ -18,17 +19,17 @@
 
 @end
 
-// Main functionality of persisting triggers is tested
+// NOTE: Main functionality of persisting triggers is tested
 // as part of the limits matcher
 @implementation CTInAppTriggerManagerTest
 
 - (void)setUp {
     [super setUp];
-    self.testCampaignId = @"testCampaignId";
+    self.testCampaignId = CLTAP_TEST_CAMPAIGN_ID;
 
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     
-    self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceID" delegateManager:delegateManager];
+    self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:CLTAP_TEST_ACCOUNT_ID deviceId:CLTAP_TEST_DEVICE_ID delegateManager:delegateManager];
 }
 
 - (void)tearDown {
@@ -40,14 +41,14 @@
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     NSUInteger count = [[delegateManager switchUserDelegates] count];
     
-    self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:@"testAccountId" deviceId:@"testDeviceID" delegateManager:delegateManager];
+    self.triggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:CLTAP_TEST_ACCOUNT_ID deviceId:CLTAP_TEST_DEVICE_ID delegateManager:delegateManager];
     
     XCTAssertEqual([[delegateManager switchUserDelegates] count], count + 1);
 }
 
 - (void)testSwitchUser {
-    NSString *firstDeviceId = @"testDeviceID";
-    NSString *secondDeviceId = @"newDeviceId";
+    NSString *firstDeviceId = CLTAP_TEST_DEVICE_ID;
+    NSString *secondDeviceId = [NSString stringWithFormat:@"%@_2", firstDeviceId];
     
     // Record triggers for first user
     [self.triggerManager incrementTrigger:self.testCampaignId];

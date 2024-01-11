@@ -18,17 +18,18 @@
 #import "CTMultiDelegateManager+Tests.h"
 
 @interface CTInAppStoreTest : XCTestCase
+
 @property (nonatomic, weak) CTInAppStore *store;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTAES *ctAES;
 @property (nonatomic, strong) NSArray *inApps;
-
-
 @property (nonatomic, strong) InAppHelper *helper;
+
 @end
 
 @implementation CTInAppStoreTest
 
+#pragma mark Setup
 - (void)setUp {
     [super setUp];
 
@@ -122,6 +123,7 @@
     return [self.store storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
 }
 
+#pragma mark Tests
 - (void)testStoreClientSideInApps {
     XCTAssertNil([CTPreferences getObjectForKey:[self storageKeyCS]]);
     [self.store storeClientSideInApps:self.inApps];
@@ -335,8 +337,7 @@
 
 - (void)testSwitchUser {
     NSString *firstDeviceId = self.helper.deviceId;
-    NSString *secondDeviceId = @"newDeviceId";
-    
+    NSString *secondDeviceId = [NSString stringWithFormat:@"%@_2", firstDeviceId];
     // Enqueue in-apps to first user
     [self.store enqueueInApps:self.inApps];
     // Switch to second user

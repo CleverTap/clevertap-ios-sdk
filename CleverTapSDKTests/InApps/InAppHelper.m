@@ -17,22 +17,27 @@
 #import "CTInAppTriggerManager.h"
 #import "CTInAppImagePrefetchManager.h"
 
+NSString *const CLTAP_TEST_ACCOUNT_ID = @"testAccountId";
+NSString *const CLTAP_TEST_ACCOUNT_TOKEN = @"testAccountToken";
+NSString *const CLTAP_TEST_DEVICE_ID = @"testDeviceId";
+NSString *const CLTAP_TEST_CAMPAIGN_ID = @"testCampaignId";
+
 @implementation InAppHelper
 
 - (NSString *)accountId {
-    return @"testAccountId";
+    return CLTAP_TEST_ACCOUNT_ID;
 }
 
 - (NSString *)accountToken {
-    return @"testAccountToken";
+    return CLTAP_TEST_ACCOUNT_TOKEN;
 }
 
 - (NSString *)deviceId {
-    return @"testDeviceId";
+    return CLTAP_TEST_DEVICE_ID;
 }
 
 - (NSString *)campaignId {
-    return @"testCampaignId";
+    return CLTAP_TEST_CAMPAIGN_ID;
 }
 
 - (instancetype)init {
@@ -63,8 +68,11 @@
                                                      impressionManager:self.impressionManager
                                                    inAppTriggerManager:self.inAppTriggerManager];
         
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
         // Initialize when needed, requires CleverTap instance
         self.inAppDisplayManager = nil;
+#pragma clang diagnostic pop
         
         self.inAppEvaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId
                                                                                  deviceId:self.deviceId
