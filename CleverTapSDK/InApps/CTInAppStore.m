@@ -257,7 +257,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 }
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@_%@", self.accountId, self.deviceId, suffix];
+    return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
 }
 
 #pragma mark CTSwitchUserDelegate

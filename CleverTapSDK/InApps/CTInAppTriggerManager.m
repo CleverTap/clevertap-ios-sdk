@@ -49,7 +49,7 @@
 }
 
 - (NSString *)getTriggersKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@:%@_%@_%@", self.accountId, self.deviceId, @"triggers", campaignId];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@", self.accountId, self.deviceId, @"triggers", campaignId];
 }
 
 #pragma mark Switch User Delegate

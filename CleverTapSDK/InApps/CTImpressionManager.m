@@ -218,7 +218,7 @@
 }
 
 - (NSString *)getImpressionKey:(NSString *)campaignId {
-    return [NSString stringWithFormat:@"%@:%@_%@_%@", self.accountId, self.deviceId, @"impressions", campaignId];
+    return [NSString stringWithFormat:@"%@:%@:%@:%@", self.accountId, self.deviceId, @"impressions", campaignId];
 }
 
 @end
