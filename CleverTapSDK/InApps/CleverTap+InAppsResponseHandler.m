@@ -18,6 +18,7 @@
 @implementation CleverTap(InAppsResponseHandler)
 
 - (void)handleInAppResponse:(NSDictionary *)jsonResp {
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     if (self.config.analyticsOnly || [CTUIUtils runningInsideAppExtension]) {
         return;
     }
@@ -104,6 +105,7 @@
         // Callback cannot be attached to an individual fetch request, only to the queue batch.
         self.fetchInAppsBlock = nil;
     }
+#endif
 }
 
 @end

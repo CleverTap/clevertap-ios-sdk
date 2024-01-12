@@ -5,9 +5,11 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
-#import "CTInAppNotification.h"
 #import "CleverTap+Inbox.h"
 #import "CleverTap+DisplayUnit.h"
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CTInAppNotification.h"
+#endif
 
 @implementation CTEventBuilder
 
@@ -309,6 +311,7 @@
                          forNotification:(CTInAppNotification *)notification
                       andQueryParameters:(NSDictionary *)params
                        completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     NSMutableDictionary *notif = [[NSMutableDictionary alloc] init];
     @try {
@@ -331,6 +334,9 @@
     } @catch (NSException *e) {
         completion(nil, nil);
     }
+#else
+        completion(nil, nil);
+#endif
 }
 
 /**

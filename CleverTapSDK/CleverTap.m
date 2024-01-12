@@ -27,15 +27,15 @@
 #import "CTValidationResult.h"
 #import "CTValidationResultStack.h"
 #import "CTIdentityRepoFactory.h"
-#import "CTInAppFCManager.h"
-#import "CTInAppNotification.h"
-#import "CTInAppDisplayViewController.h"
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
 #import "CTSessionManager.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CTInAppFCManager.h"
+#import "CTInAppNotification.h"
+#import "CTInAppDisplayViewController.h"
 #import "CleverTapJSInterface.h"
 #import "CTInAppHTMLViewController.h"
 #import "CTInterstitialViewController.h"
@@ -503,6 +503,7 @@ static BOOL sharedInstanceErrorLogged;
     
     return self;
 }
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)initializeInAppSupport {
     CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
@@ -3698,8 +3699,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings
                                        andSkipSettingsAlert:NO];
+#endif
 }
 
 - (void)recordInboxMessageStateEvent:(BOOL)clicked
