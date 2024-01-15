@@ -2,6 +2,9 @@
 #import <UIKit/UIKit.h>
 #import "CTInAppUtils.h"
 #import "CTNotificationButton.h"
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CTInAppImagePrefetchManager.h"
+#endif
 
 @interface CTInAppNotification : NSObject
 
@@ -25,6 +28,8 @@
 @property (nonatomic, assign, readonly) float width;
 @property (nonatomic, assign, readonly) float widthPercent;
 
+@property (nonatomic, readonly) UIImage *inAppImage;
+@property (nonatomic, readonly) UIImage *inAppImageLandscape;
 @property (nonatomic, readonly) NSData *image;
 @property (nonatomic, readonly) NSData *imageLandscape;
 @property (nonatomic, copy, readonly) NSString *contentType;
@@ -59,9 +64,13 @@
 @property (nonatomic, readonly) BOOL skipSettingsAlert;
 
 - (instancetype)init __unavailable;
-- (instancetype)initWithJSON:(NSDictionary*)json;
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (instancetype)initWithJSON:(NSDictionary*)json
+        imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager;
+#endif
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler;
 
++ (NSString * _Nullable)inAppId:(NSDictionary * _Nullable)inApp;
 
 @end

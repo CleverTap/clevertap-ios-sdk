@@ -117,12 +117,18 @@ static const CGFloat kSpacingConstant = 160.f;
     UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
     [self.imageView addGestureRecognizer:imageTapGesture];
     
-    if (self.notification.image && ![self deviceOrientationIsLandscape]) {
-        self.imageView.image = [UIImage imageWithData:self.notification.image];
-    }
-    
-    if (self.notification.imageLandscape && [self deviceOrientationIsLandscape]) {
-        self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
+    if (![self deviceOrientationIsLandscape]) {
+        if (self.notification.inAppImage) {
+            self.imageView.image = self.notification.inAppImage;
+        } else if (self.notification.image) {
+            self.imageView.image  = [UIImage imageWithData:self.notification.image];
+        }
+    } else {
+        if (self.notification.inAppImageLandscape) {
+            self.imageView.image = self.notification.inAppImageLandscape;
+        } else if (self.notification.imageLandscape) {
+            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
+        }
     }
 }
 

@@ -48,7 +48,6 @@
 
 - (void)test_urlEncodeString_withNilString{
     NSString *urlString = [CTUtils urlEncodeString:nil];
-    // TODO: urlEncodeString crashes when sent nil input, add nil check
     XCTAssertNil(urlString, @"Nil string should return nil");
 }
 
@@ -85,7 +84,6 @@
 
 - (void)test_deviceTokenStringFromData{
     NSData *data = [NSData dataWithBytes:"dummy token" length:11];
-    //TODO: check for empty and nil data input
     NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
     
     XCTAssertNotNil(tokenString);
@@ -97,5 +95,85 @@
     XCTAssertEqual(result, 10.199999999999999);
 }
 
+- (void)test_deviceTokenStringFromNilData {
+    NSString *tokenString = [CTUtils deviceTokenStringFromData:nil];
+    XCTAssertNil(tokenString);
+}
+
+- (void)test_deviceTokenStringFromEmptyData {
+    NSData *data = [NSData data];
+    NSString *tokenString = [CTUtils deviceTokenStringFromData:data];
+    
+    XCTAssertNil(tokenString);
+}
+
+- (void)test_haversineDistance {
+    NSString* (^decimalPoints)(double) = ^(double number) {
+        return [NSString stringWithFormat:@"%.02f", number];
+    };
+    
+    CLLocationCoordinate2D nebraska = CLLocationCoordinate2DMake(41.507483, -99.436554);
+    CLLocationCoordinate2D kansas = CLLocationCoordinate2DMake(38.504048, -98.315949);
+    
+    double distanceNK = [CTUtils haversineDistance:nebraska coordinateB:kansas];
+    double expectedDistanceNK = 347.72;
+    XCTAssertEqualObjects(decimalPoints(distanceNK), decimalPoints(expectedDistanceNK));
+
+    CLLocationCoordinate2D mumbai = CLLocationCoordinate2DMake(19.07609, 72.877426);
+    CLLocationCoordinate2D sofia = CLLocationCoordinate2DMake(42.698334, 23.319941);
+    
+    double distanceMS = [CTUtils haversineDistance:mumbai coordinateB:sofia];
+    double expectedDistanceMS = 5317.06;
+    XCTAssertEqualObjects(decimalPoints(distanceMS), decimalPoints(expectedDistanceMS));
+    
+    XCTAssertEqual([CTUtils haversineDistance:nebraska coordinateB:nebraska], 0);
+}
+
+- (void)test_numberFromString {
+    XCTAssertNil([CTUtils numberFromString:@"asd"]);
+    
+    XCTAssertNil([CTUtils numberFromString:@"123asd"]);
+    
+    XCTAssertNil([CTUtils numberFromString:@"12.3.asd"]);
+    
+    XCTAssertNil([CTUtils numberFromString:@"asd10"]);
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@" 5 "], @(5));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"5 "], @(5));
+    
+    XCTAssertNil([CTUtils numberFromString:@"12,3"]);
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"010"], @(10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"0.10"], @(0.10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@".10"], @(0.10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"010.10"], @(10.10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-0"], @(0));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-06"], @(-6));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"12.3"], @(12.3));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-12.3"], @(-12.3));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"10"], @(10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"-10"], @(-10));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"0"], @(0));
+    
+    XCTAssertEqualObjects([CTUtils numberFromString:@"0.0"], @(0.0));
+}
+
+- (void)test_numberFromStringWithLocale {
+    NSLocale *locale = [NSLocale localeWithLocaleIdentifier:@"bg_BG"];
+    XCTAssertEqualObjects([CTUtils numberFromString:@"12,3" withLocale:locale], @(12.3));
+    
+    XCTAssertNil([CTUtils numberFromString:@"12.3" withLocale:locale]);
+}
 
 @end
