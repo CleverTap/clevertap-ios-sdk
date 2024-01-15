@@ -408,12 +408,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     else if (ctaURL) {
         
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-        if (self.instance.urlDelegate && [self.instance.urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL: forChannel:)] && ![self.instance.urlDelegate shouldHandleCleverTapURL: ctaURL forChannel: CleverTapInAppNotification]) {
-            return;
+        if (self.instance.urlDelegate) {
+            // URL DELEGATE FOUND. OPEN DEEP LINKS ONLY IF USER ALLOWS IT
+            if ([self.instance.urlDelegate respondsToSelector: @selector(shouldHandleCleverTapURL: forChannel:)] && [self.instance.urlDelegate shouldHandleCleverTapURL: ctaURL forChannel: CleverTapInAppNotification]) {
+                [CTUtils runSyncMainQueue:^{
+                    [CTUIUtils openURL:ctaURL forModule:@"InApp"];
+                }];
+            }
         }
-        [CTUtils runSyncMainQueue:^{
-            [CTUIUtils openURL:ctaURL forModule:@"InApp"];
-        }];
+        else {
+            // OPEN DEEP LINKS BY DEFAULT
+            [CTUtils runSyncMainQueue:^{
+                [CTUIUtils openURL:ctaURL forModule:@"InApp"];
+            }];
+        }
 #endif
     }
     [controller hide:true];
