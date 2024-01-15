@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 #### Added
 - Adds support for client-side in-apps.
 
+#### Fixed
+- Fixes a bug where some in-apps were not being dismissed.
+
 ### [Version 5.2.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/5.2.2) (November 21, 2023)
 
 #### Fixed
