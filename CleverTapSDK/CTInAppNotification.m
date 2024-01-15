@@ -18,6 +18,8 @@
 @property (nonatomic, strong) NSURL *imageURL;
 @property (nonatomic, strong) NSURL *imageUrlLandscape;
 
+@property (nonatomic, readwrite, strong) UIImage *inAppImage;
+@property (nonatomic, readwrite, strong) UIImage *inAppImageLandscape;
 @property (nonatomic, readwrite, strong) NSData *image;
 @property (nonatomic, readwrite, strong) NSData *imageLandscape;
 @property (nonatomic, copy, readwrite) NSString *contentType;
@@ -64,6 +66,8 @@
 
 @property (nonatomic, readwrite) NSString *error;
 
+@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
+
 @end
 
 @implementation CTInAppNotification: NSObject
@@ -73,25 +77,32 @@
 @synthesize mediaIsAudio=_mediaIsAudio;
 @synthesize mediaIsVideo=_mediaIsVideo;
 
-- (instancetype)initWithJSON:(NSDictionary *)jsonObject {
+- (instancetype)initWithJSON:(NSDictionary *)jsonObject
+        imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
     if (self = [super init]) {
         @try {
+            self.imagePrefetchManager = imagePrefetchManager;
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
-            self.campaignId = (NSString*) jsonObject[@"wzrk_id"];
-            self.excludeFromCaps = [jsonObject[@"efc"] boolValue];
-            self.totalLifetimeCount = jsonObject[@"tlc"] ? [jsonObject[@"tlc"] intValue] : -1;
-            self.totalDailyCount = jsonObject[@"tdc"] ? [jsonObject[@"tdc"] intValue] : -1;
+            self.campaignId = (NSString*) jsonObject[CLTAP_NOTIFICATION_ID_TAG];
+            if (jsonObject[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil) {
+                self.excludeFromCaps = [jsonObject[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue];
+            } else {
+                self.excludeFromCaps = [jsonObject[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue];
+            }
+            self.maxPerSession = jsonObject[CLTAP_INAPP_MAX_PER_SESSION] ? [jsonObject[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
+            self.totalLifetimeCount = jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] intValue] : -1;
+            self.totalDailyCount = jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] intValue] : -1;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
             self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
-            
-            if (jsonObject[@"ti"]) {
-                self.Id = [NSString stringWithFormat:@"%@", jsonObject[@"ti"]];
+            NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
+            if (inAppId) {
+                self.Id = inAppId;
             }
             NSString *type = (NSString*) jsonObject[@"type"];
-            if (!type || [type isEqualToString:@"custom-html"]) {
+            if (!type || [type isEqualToString:CLTAP_INAPP_HTML_TYPE]) {
                 [self legacyConfigureFromJSON:jsonObject];
             } else {
                 [self configureFromJSON:jsonObject];
@@ -100,7 +111,7 @@
                 self.error = @"Unknown InApp Type";
             }
         
-            NSUInteger timeToLive = [jsonObject[@"wzrk_ttl"] longValue];
+            NSUInteger timeToLive = [jsonObject[CLTAP_INAPP_TTL] longValue];
             if (timeToLive) {
                 _timeToLive = timeToLive;
             } else {
@@ -242,12 +253,12 @@
         NSString *html = (NSString*) data[@"html"];
         if (html) {
             self.html = html;
-            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+            self.inAppType = [CTInAppUtils inAppTypeFromString:CLTAP_INAPP_HTML_TYPE];
         }
         NSString *url = (NSString*) data[@"url"];
         if (url && url.length > 5) {
             self.url = url;
-            self.inAppType = [CTInAppUtils inAppTypeFromString:@"custom-html"];
+            self.inAppType = [CTInAppUtils inAppTypeFromString:CLTAP_INAPP_HTML_TYPE];
         } else {
             if (url) {
                 self.error = [NSString stringWithFormat:@"Invalid url: %@",url];
@@ -269,7 +280,7 @@
         self.widthPercent = displayParams[CLTAP_INAPP_X_PERCENT] ? [displayParams[CLTAP_INAPP_X_PERCENT] floatValue] : 0.0;
         self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
         self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
-        self.maxPerSession = displayParams[@"mdc"] ? [displayParams[@"mdc"] intValue] : -1;
+        self.maxPerSession = displayParams[CLTAP_INAPP_MAX_PER_SESSION] ? [displayParams[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
     }
 }
 
@@ -305,33 +316,45 @@
     }
     
     if (self.imageURL) {
-        NSError *error = nil;
-        NSData *imageData = [NSData dataWithContentsOfURL:self.imageURL options:NSDataReadingMappedIfSafe error:&error];
-        if (error || !imageData) {
-            self.error = [NSString stringWithFormat:@"unable to load image from URL: %@", self.imageURL];
+        UIImage *image = [self loadImageIfPresentInDiskCache:self.imageURL];
+        if (image) {
+            self.inAppImage = image;
+            self.error = nil;
         } else {
-            if ([self.contentType isEqualToString:@"image/gif"] ) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
-                if (gif == nil) {
-                    self.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", self.imageURL];
+            NSError *error = nil;
+            NSData *imageData = [NSData dataWithContentsOfURL:self.imageURL options:NSDataReadingMappedIfSafe error:&error];
+            if (error || !imageData) {
+                self.error = [NSString stringWithFormat:@"unable to load image from URL: %@", self.imageURL];
+            } else {
+                if ([self.contentType isEqualToString:@"image/gif"] ) {
+                    SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
+                    if (gif == nil) {
+                        self.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", self.imageURL];
+                    }
                 }
+                self.image = self.error ? nil : imageData;
             }
-            self.image = self.error ? nil : imageData;
         }
     }
     if (self.imageUrlLandscape && self.hasLandscape) {
-        NSError *error = nil;
-        NSData *imageData = [NSData dataWithContentsOfURL:self.imageUrlLandscape options:NSDataReadingMappedIfSafe error:&error];
-        if (error || !imageData) {
-            self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
+        UIImage *image = [self loadImageIfPresentInDiskCache:self.imageUrlLandscape];
+        if (image) {
+            self.inAppImageLandscape = image;
+            self.error = nil;
         } else {
-            if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
-                if (gif == nil) {
-                    self.error = [NSString stringWithFormat:@"unable to decode landscape gif for URL: %@", self.imageUrlLandscape];
+            NSError *error = nil;
+            NSData *imageData = [NSData dataWithContentsOfURL:self.imageUrlLandscape options:NSDataReadingMappedIfSafe error:&error];
+            if (error || !imageData) {
+                self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
+            } else {
+                if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
+                    SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
+                    if (gif == nil) {
+                        self.error = [NSString stringWithFormat:@"unable to decode landscape gif for URL: %@", self.imageUrlLandscape];
+                    }
                 }
+                self.imageLandscape = self.error ? nil : imageData;
             }
-            self.imageLandscape = self.error ? nil : imageData;
         }
     }
 #endif
@@ -407,6 +430,23 @@
         }
     }
     return FALSE;
+}
+
+- (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
+    NSString *imageURLString = [imageURL absoluteString];
+    UIImage *image = [self.imagePrefetchManager loadImageFromDisk:imageURLString];
+    if (image) return image;
+    return nil;
+}
+
++ (NSString * _Nullable)inAppId:(NSDictionary * _Nullable)inApp {
+    if (inApp && inApp[CLTAP_INAPP_ID]) {
+        NSString *inAppId = [NSString stringWithFormat:@"%@", inApp[CLTAP_INAPP_ID]];
+        if ([inAppId length] > 0) {
+            return inAppId;
+        }
+    }
+    return nil;
 }
 
 @end

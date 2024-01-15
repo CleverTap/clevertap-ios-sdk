@@ -25,12 +25,24 @@
 }
 @end
 
+@interface CTInAppDisplayViewController ()
+
+@property (nonatomic, assign) BOOL waitingForSceneWindow;
+@property (nonatomic, assign) BOOL animated;
+
+@end
+
 @implementation CTInAppDisplayViewController
 
 - (instancetype)initWithNotification:(CTInAppNotification *)notification {
     self = [super init];
     if (self) {
         _notification = notification;
+        if (@available(iOS 13.0, *)) {
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(sceneDidActivate:) name:UISceneDidActivateNotification
+                                                       object:nil];
+        }
     }
     return self;
 }
@@ -41,6 +53,18 @@
     return self;
 }
 #endif
+
+// Notification will not be posted if the scene became active before registering the observer.
+// However, this means that there is already an active scene when the controller is initialized.
+// In this case, we do not need the notification, since showFromWindow will directly find the window from the already active scene and not wait for it.
+- (void)sceneDidActivate:(NSNotification *)notification
+API_AVAILABLE(ios(13.0)) {
+    if (!self.window && self.waitingForSceneWindow) {
+        CleverTapLogStaticDebug(@"%@:%@: Scene did activate. Showing from window.", [CTInAppDisplayViewController class], self);
+        self.waitingForSceneWindow = NO;
+        [self showFromWindow:self.animated];
+    }
+}
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
@@ -74,7 +98,6 @@
 }
 
 - (void)showFromWindow:(BOOL)animated {
-    
     if (!self.notification) return;
     
     if (@available(iOS 13, tvOS 13.0, *)) {
@@ -90,6 +113,21 @@
     } else {
         self.window = [[UIWindow alloc] initWithFrame:
                        CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    }
+    if (!self.window) {
+        CleverTapLogStaticDebug(@"%@:%@: UIWindow not initialized.", [CTInAppDisplayViewController class], self);
+        if (@available(iOS 13, tvOS 13.0, *)) {
+            // No active scene found to initialize the window from. Cannot present the view.
+            // Once a scene becomes active, the UISceneDidActivateNotification is posted.
+            // sceneDidActivate: will call again showFromWindow from the notification,
+            // so window is initialized from the scene that became active
+            CleverTapLogStaticDebug(@"%@:%@: Waiting for active scene.", [CTInAppDisplayViewController class], self);
+            self.waitingForSceneWindow = YES;
+            self.animated = animated;
+        }
+        return;
+    } else {
+        CleverTapLogStaticInternal(@"%@:%@: Window initialized.", [CTInAppDisplayViewController class], self);
     }
     self.window.alpha = 0;
     self.window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
@@ -225,7 +263,7 @@
     }
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
+        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
     }
 }
 
@@ -241,7 +279,13 @@
     }
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{@"wzrk_id":campaignId, @"wzrk_c2a": buttonText}];
+        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
+    }
+}
+
+- (void)dealloc {
+    if (@available(iOS 13.0, *)) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
 }
 

@@ -21,6 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (UIColor *)ct_colorWithHexString:(NSString *)string;
 + (UIColor *)ct_colorWithHexString:(NSString *)string withAlpha:(CGFloat)alpha;
 
++ (BOOL)runningInsideAppExtension;
++ (void)openURL:(NSURL *)ctaURL forModule:(NSString *)ctModule;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo *)deviceInfo;
 
-- (CTVar *)define:(NSString *)name
+- (CTVar * _Nullable)define:(NSString *)name
              with:(nullable NSObject *)defaultValue
              kind:(nullable NSString *)kind
 NS_SWIFT_NAME(define(name:value:kind:));

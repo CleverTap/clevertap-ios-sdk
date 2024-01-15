@@ -5,11 +5,11 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
-#import "CTInAppNotification.h"
 #import "CleverTap+Inbox.h"
 #import "CleverTap+DisplayUnit.h"
-
-NSString *const kCHARGED_EVENT = @"Charged";
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CTInAppNotification.h"
+#endif
 
 @implementation CTEventBuilder
 
@@ -89,6 +89,7 @@ NSString *const kCHARGED_EVENT = @"Charged";
         }
         for (int i = 0; i < [eventActionsAllKeys count]; i++) {
             NSString *key = eventActionsAllKeys[(NSUInteger) i];
+            id value = eventActions[key];
             vr = [CTValidator cleanObjectKey:key];
             if ([vr object] == nil || [((NSString *) [vr object]) isEqualToString:@""]) {
                 [errors addObject:[CTValidationResult resultWithErrorCode:512 andMessage:[NSString stringWithFormat:@"Invalid event property key: %@", key]]];
@@ -97,7 +98,6 @@ NSString *const kCHARGED_EVENT = @"Charged";
                 continue;
             }
             key = (NSString *) [vr object];
-            id value = eventActions[key];
             // Check for an error
             if ([vr errorCode] != 0) {
                 event[CLTAP_ERROR_KEY] = [self getErrorObject:vr];
@@ -132,8 +132,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
             }
             actions[key] = value;
         }
-        event[@"evtName"] = eventName;
-        event[@"evtData"] = actions;
+        event[CLTAP_EVENT_NAME] = eventName;
+        event[CLTAP_EVENT_DATA] = actions;
         completion(event, errors);
     } @catch (NSException *e) {
         completion(nil, errors);
@@ -259,10 +259,10 @@ NSString *const kCHARGED_EVENT = @"Charged";
                 [jsonItemsArray addObject:itemDetails];
             }
         }
-        evtData[@"Items"] = jsonItemsArray;
+        evtData[CLTAP_CHARGED_EVENT_ITEMS] = jsonItemsArray;
         
-        chargedEvent[@"evtName"] = kCHARGED_EVENT;
-        chargedEvent[@"evtData"] = evtData;
+        chargedEvent[CLTAP_EVENT_NAME] = CLTAP_CHARGED_EVENT;
+        chargedEvent[CLTAP_EVENT_DATA] = evtData;
         completion(chargedEvent, errors);
     } @catch (NSException *e) {
         completion(nil, errors);
@@ -293,8 +293,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
             notif[key] = value;
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         CleverTapLogStaticDebug(@"Unable to build push notification clicked event: %@", e.debugDescription);
@@ -311,6 +311,7 @@ NSString *const kCHARGED_EVENT = @"Charged";
                          forNotification:(CTInAppNotification *)notification
                       andQueryParameters:(NSDictionary *)params
                        completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     NSMutableDictionary *notif = [[NSMutableDictionary alloc] init];
     @try {
@@ -327,12 +328,15 @@ NSString *const kCHARGED_EVENT = @"Charged";
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Notification does not have any wzrk_* field");
         }
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
     }
+#else
+        completion(nil, nil);
+#endif
 }
 
 /**
@@ -360,8 +364,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Inbox Message does not have any wzrk_* field");
         }
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -389,8 +393,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
             notif[key] = value;
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
-        event[@"evtName"] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -414,8 +418,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
         if ([notif count] == 0) {
             CleverTapLogStaticInternal(@"Geofence does not have any field");
         }
-        event[@"evtName"] = entered ? CLTAP_GEOFENCE_ENTERED_EVENT_NAME : CLTAP_GEOFENCE_EXITED_EVENT_NAME;
-        event[@"evtData"] = notif;
+        event[CLTAP_EVENT_NAME] = entered ? CLTAP_GEOFENCE_ENTERED_EVENT_NAME : CLTAP_GEOFENCE_EXITED_EVENT_NAME;
+        event[CLTAP_EVENT_DATA] = notif;
         completion(event, nil);
     } @catch (NSException *e) {
         completion(nil, nil);
@@ -455,8 +459,8 @@ NSString *const kCHARGED_EVENT = @"Charged";
             default: break;
         }
         if (signedCallEvent) {
-            eventDic[@"evtName"] = signedCallEvent;
-            eventDic[@"evtData"] = notif;
+            eventDic[CLTAP_EVENT_NAME] = signedCallEvent;
+            eventDic[CLTAP_EVENT_DATA] = notif;
             completion(eventDic, errors);
         } else {
             CTValidationResult *error = [[CTValidationResult alloc] init];

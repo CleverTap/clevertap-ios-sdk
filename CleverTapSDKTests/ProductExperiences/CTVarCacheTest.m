@@ -379,7 +379,7 @@ CTVariables *variables;
     XCTAssertEqualObjects(@"b&", var5.stringValue);
     XCTAssertEqualObjects(@"'b", var6.stringValue);
     
-    [self deleteSavedFile:[variables.varCache getArchiveFileName]];
+    [self deleteSavedFile:[variables.varCache dataArchiveFileName]];
 }
 
 - (void)testSavesDiffs {
@@ -397,7 +397,7 @@ CTVariables *variables;
     // Call original saveDiffs and write to file
     [varCache originalSaveDiffs];
     
-    NSString *fileName = [varCache getArchiveFileName];
+    NSString *fileName = [varCache dataArchiveFileName];
     NSString *filePath = [CTPreferences filePathfromFileName:fileName];
     NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
     NSKeyedUnarchiver *unarchiver;
@@ -440,7 +440,7 @@ CTVariables *variables;
     CTVar *loadedVar = varCache.vars[varName];
     XCTAssertEqualObjects(loadedVar.value, overriddenValue);
     
-    [self deleteSavedFile:[varCache getArchiveFileName]];
+    [self deleteSavedFile:[varCache dataArchiveFileName]];
 }
 
 - (void)deleteSavedFile:(NSString *)fileName {
