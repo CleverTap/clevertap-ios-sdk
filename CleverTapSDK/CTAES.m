@@ -1,5 +1,5 @@
-#import <CommonCrypto/CommonCryptor.h>
 #import "CTAES.h"
+#import <CommonCrypto/CommonCryptor.h>
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
@@ -28,10 +28,11 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     return self;
 }
 
-- (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeObject: _accountID forKey:@"accountID"];
-    [coder encodeBool: _isDefaultInstance forKey:@"isDefaultInstance"];
-    [coder encodeInt: _encryptionLevel forKey:@"encryptionLevel"];
+- (instancetype)initWithAccountID:(NSString *)accountID {
+    if (self = [super init]) {
+        _accountID = accountID;
+    }
+    return self;
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -41,6 +42,12 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
         _encryptionLevel = [coder decodeIntForKey:@"encryptionLevel"];
     }
     return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject: _accountID forKey:@"accountID"];
+    [coder encodeBool: _isDefaultInstance forKey:@"isDefaultInstance"];
+    [coder encodeInt: _encryptionLevel forKey:@"encryptionLevel"];
 }
 
 + (BOOL)supportsSecureCoding {
@@ -192,6 +199,35 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 - (NSString *)generateKeyPassword {
     NSString *keyPassword = [NSString stringWithFormat:@"%@%@%@",kCRYPT_KEY_PREFIX, _accountID, kCRYPT_KEY_SUFFIX];
     return keyPassword;
+}
+
+- (NSString *)getEncryptedBase64String:(id)objectToEncrypt {
+    @try {
+        NSData *dataValue = [NSKeyedArchiver archivedDataWithRootObject:objectToEncrypt];
+        NSData *encryptedData = [self convertData:dataValue withOperation:kCCEncrypt];
+        if (encryptedData) {
+            return [encryptedData base64EncodedStringWithOptions:kNilOptions];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error: %@ while encrypting object: %@", e.debugDescription, objectToEncrypt);
+        return nil;
+    }
+    return nil;
+}
+
+- (id)getDecryptedObject:(NSString *)encryptedString {
+    if (!encryptedString) return nil;
+    @try {
+        NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:encryptedString options:kNilOptions];
+        NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
+        if (decryptedData && decryptedData.length > 0) {
+            return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"Error: %@ while decrypting string: %@", e.debugDescription, encryptedString);
+        return nil;
+    }
+    return nil;
 }
 
 @end

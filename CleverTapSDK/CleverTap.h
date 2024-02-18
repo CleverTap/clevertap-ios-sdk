@@ -26,11 +26,17 @@
 @protocol CleverTapInAppNotificationDelegate;
 #endif
 
+@protocol CTBatchSentDelegate;
+@protocol CTAttachToBatchHeaderDelegate;
+@protocol CTSwitchUserDelegate;
+
 @class CleverTapEventDetail;
 @class CleverTapUTMDetail;
 @class CleverTapInstanceConfig;
 @class CleverTapFeatureFlags;
 @class CleverTapProductConfig;
+
+@class CTInAppNotification;
 #import "CTVar.h"
 
 #pragma clang diagnostic push
@@ -58,6 +64,8 @@ typedef NS_ENUM(int, CleverTapEncryptionLevel) {
     CleverTapEncryptionNone = 0,
     CleverTapEncryptionMedium = 1
 };
+
+typedef void (^CleverTapFetchInAppsBlock)(BOOL success);
 
 @interface CleverTap : NSObject
 
@@ -989,6 +997,20 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param delegate     an object conforming to the CleverTapInAppNotificationDelegate Protocol
  */
 - (void)setInAppNotificationDelegate:(id <CleverTapInAppNotificationDelegate> _Nullable)delegate;
+
+/*!
+ @method
+ 
+ @abstract
+ Forces inapps to update from the server.
+ 
+ @discussion
+ Forces inapps to update from the server.
+ 
+ @param block a callback with a boolean flag whether the update was successful.
+ */
+- (void)fetchInApps:(CleverTapFetchInAppsBlock _Nullable)block;
+
 #endif
 
 /*!

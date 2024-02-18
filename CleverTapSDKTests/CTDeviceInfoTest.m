@@ -18,7 +18,6 @@
 
 - (void)setUp {
     self.classObject = [[CTDeviceInfo alloc] init];
-   
 }
 
 - (void)tearDown {
@@ -84,17 +83,4 @@
     XCTAssertFalse([_classObject isErrorDeviceID]);
 }
 
-- (void)test_incrementLocalInAppCount{
-    int inAppCount = [_classObject getLocalInAppCount];
-    [_classObject incrementLocalInAppCount];
-    
-    XCTAssertEqual(inAppCount+1, [_classObject getLocalInAppCount]);
-}
-
-- (void)test_getLocalInAppCount{
-    int inAppCount = [_classObject getLocalInAppCount];
-    [_classObject incrementLocalInAppCount];
-
-    XCTAssertEqual(inAppCount+1, [_classObject getLocalInAppCount]);
-}
 @end

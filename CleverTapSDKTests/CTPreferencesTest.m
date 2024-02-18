@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTPreferences.h"
+#import "XCTestCase+XCTestCase_Tests.h"
 
 @interface CTPreferencesTest : XCTestCase
 
@@ -120,18 +121,4 @@
     
     XCTAssertNil(checkValue);
 }
-
-// TODO: move this to a test utils class
-- (NSString*)randomString {
-    NSString *letters = @"abcdefghijklmnopqrstuvwxyz";
-
-    NSMutableString *randomString = [NSMutableString stringWithCapacity: 4];
-
-        for (int i=0; i<4; i++) {
-             [randomString appendFormat: @"%C", [letters characterAtIndex: arc4random_uniform([letters length])]];
-        }
-
-        return randomString;
-}
-
 @end

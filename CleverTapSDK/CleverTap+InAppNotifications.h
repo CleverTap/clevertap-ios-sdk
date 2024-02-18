@@ -32,6 +32,16 @@
  */
 - (void)resumeInAppNotifications;
 
+/*!
+ @method
+ 
+ @abstract
+ Clear inApps images stored in disk cache
+ 
+ @param expiredOnly  when true, it delete the expired images only
+ */
+- (void)clearInAppResources:(BOOL)expiredOnly;
+
 #endif
 
 @end

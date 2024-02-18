@@ -45,6 +45,7 @@ typedef enum {
 @property(nonatomic, assign) CGFloat originalCenter;
 
 @property(nonatomic, assign) BOOL revealing;
+@property (nonatomic, strong) UIImage *inAppImage;
 
 @end
 
@@ -83,11 +84,16 @@ typedef enum {
 
 - (void)setUpImage {
     // set image
-    if (self.notification.image) {
+    if (self.notification.inAppImage) {
+        self.inAppImage = self.notification.inAppImage;
+    } else if (self.notification.image) {
+        self.inAppImage = [UIImage imageWithData:self.notification.image];
+    }
+    if (self.inAppImage) {
         self.imageView.clipsToBounds = YES;
         self.imageView.hidden = NO;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-        self.imageView.image = [UIImage imageWithData:self.notification.image];
+        self.imageView.image = self.inAppImage;
     } else {
         self.imageView.hidden = YES;
     }
@@ -96,7 +102,7 @@ typedef enum {
                                   relatedBy:NSLayoutRelationEqual
                                      toItem:nil
                                   attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:self.notification.image ? 124 : 20] setActive:YES];
+                                 multiplier:1 constant:self.inAppImage ? 124 : 20] setActive:YES];
 }
 
 - (void)setUpContent {

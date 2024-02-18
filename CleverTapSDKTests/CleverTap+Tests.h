@@ -2,22 +2,17 @@
 #import <CleverTapSDK/CleverTap.h>
 #import "CTValidationResult.h"
 #import "CleverTapInstanceConfig.h"
+#import "CTDeviceInfo.h"
+#import "CleverTapInternal.h"
 
 @interface CleverTap (Tests)
 
-typedef NS_ENUM(NSInteger, CleverTapEventType) {
-    CleverTapEventTypePage,
-    CleverTapEventTypePing,
-    CleverTapEventTypeProfile,
-    CleverTapEventTypeRaised,
-    CleverTapEventTypeData,
-    CleverTapEventTypeNotificationViewed,
-    CleverTapEventTypeFetch,
-};
+@property (nonatomic, strong) CTDeviceInfo * deviceInfo;
+
 - (NSDictionary *)getCachedGUIDs;
 - (NSString *)getCachedIdentitiesForConfig:(CleverTapInstanceConfig*)config;
 + (void)notfityTestAppLaunch;
-- (NSDictionary*)getBatchHeader;
+- (NSDictionary *)getBatchHeader;
 - (void)pushValidationResults:(NSArray<CTValidationResult *> * _Nonnull )results;
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type;
 
