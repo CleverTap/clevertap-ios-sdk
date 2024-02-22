@@ -17,11 +17,7 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSPrivacyTrackingDomains</key>
-	<array/>
 	<key>NSPrivacyTracking</key>
 	<false/>
-	<key>NSPrivacyAccessedAPITypes</key>
-	<array/>
 </dict>
 </plist>
