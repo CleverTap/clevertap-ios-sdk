@@ -157,6 +157,7 @@
 		32394C2129FA264B00956058 /* CTPreferencesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2029FA264B00956058 /* CTPreferencesTest.m */; };
 		32394C2529FA272600956058 /* CTValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2429FA272600956058 /* CTValidatorTest.m */; };
 		32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2629FA278C00956058 /* CTUriHelperTest.m */; };
+		3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */; };
 		32790957299CC099001FE140 /* CTUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790956299CC099001FE140 /* CTUtilsTest.m */; };
 		32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790958299F4B29001FE140 /* CTDeviceInfoTest.m */; };
 		4803951B2A7ABAD200C4D254 /* CTAES.m in Sources */ = {isa = PBXBuildFile; fileRef = 480395192A7ABAD200C4D254 /* CTAES.m */; };
@@ -702,6 +703,7 @@
 		32394C2229FA26DE00956058 /* CTValidationResultStackTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultStackTest.m; sourceTree = "<group>"; };
 		32394C2429FA272600956058 /* CTValidatorTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidatorTest.m; sourceTree = "<group>"; };
 		32394C2629FA278C00956058 /* CTUriHelperTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUriHelperTest.m; sourceTree = "<group>"; };
+		3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		32790956299CC099001FE140 /* CTUtilsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUtilsTest.m; sourceTree = "<group>"; };
 		32790958299F4B29001FE140 /* CTDeviceInfoTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDeviceInfoTest.m; sourceTree = "<group>"; };
 		480395192A7ABAD200C4D254 /* CTAES.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAES.m; sourceTree = "<group>"; };
@@ -1489,6 +1491,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */,
 				4803951A2A7ABAD200C4D254 /* CTAES.h */,
 				480395192A7ABAD200C4D254 /* CTAES.m */,
 				4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */,
@@ -2087,6 +2090,7 @@
 				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
 				07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
+				3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */,
 				070229AD22084B0B0093CA41 /* ct_default_portrait_image.png in Resources */,
 				0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib in Resources */,
 				070BB5CC21E70BC000428DEE /* ct_volume_on.png in Resources */,

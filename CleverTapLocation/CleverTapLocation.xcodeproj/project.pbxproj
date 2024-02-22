@@ -12,6 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3242D7D92B1DC51100A5E37A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4E6EBB492A11604600FF1C4F /* CleverTapLocation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CleverTapLocation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E6EBB4C2A11604600FF1C4F /* CleverTapLocation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapLocation.h; sourceTree = "<group>"; };
 		4E6EBB542A11608600FF1C4F /* CTLocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTLocationManager.h; sourceTree = "<group>"; };
@@ -50,6 +51,7 @@
 			children = (
 				4E6EBB4C2A11604600FF1C4F /* CleverTapLocation.h */,
 				4E6EBB532A11607900FF1C4F /* Classes */,
+				3242D7D92B1DC51100A5E37A /* PrivacyInfo.xcprivacy */,
 			);
 			path = CleverTapLocation;
 			sourceTree = "<group>";
