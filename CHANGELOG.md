@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 #### Added
 - Adds privacy manifests.
 
+#### Fixed
+- Fixes crash due to out of bounds in NSLocale implementation.
+
 ### [Version 6.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/6.0.0) (January 15, 2024)
 
 #### Added
