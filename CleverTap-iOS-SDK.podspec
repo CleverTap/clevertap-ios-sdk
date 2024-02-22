@@ -8,7 +8,7 @@ s.author                    = { "CleverTap" => "http://www.clevertap.com" }
 s.source                    = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
 s.requires_arc              = true
 s.module_name               = 'CleverTapSDK'
-s.resources                 = 'CleverTapSDK/*.cer'
+s.resources                 = 'CleverTapSDK/*.{cer,xcprivacy}'
 s.ios.dependency             'SDWebImage', '~> 5.11'
 s.ios.resource_bundle       = {'CleverTapSDK' => ['CleverTapSDK/**/*.{png,xib,html}', 'CleverTapSDK/**/*.xcdatamodeld']}
 s.ios.deployment_target     = '9.0'

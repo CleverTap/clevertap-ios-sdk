@@ -525,7 +525,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
     if (!_systemLocale) {
         NSLocale *currentLocale = [NSLocale currentLocale];
         
-        NSString *language = [[NSLocale preferredLanguages] objectAtIndex:0];
+        NSString *language = [[NSLocale preferredLanguages] firstObject];
         if (!language || [language  isEqualToString:@""] ){
             language = @"xx";
         }
