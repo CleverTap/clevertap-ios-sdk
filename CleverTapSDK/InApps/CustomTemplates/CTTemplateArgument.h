@@ -8,15 +8,25 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger, CTTemplateArgumentType) {
+    CTTemplateArgumentTypeString,
+    CTTemplateArgumentTypeNumber,
+    CTTemplateArgumentTypeBool,
+    CTTemplateArgumentTypeFile,
+    CTTemplateArgumentTypeAction
+};
+
 @interface CTTemplateArgument : NSObject
 
 @property (nonatomic, strong, nonnull) NSString *name;
-@property (nonatomic, strong, nonnull) NSString *type;
+@property (nonatomic, assign) CTTemplateArgumentType type;
 @property (nonatomic, strong, nullable) id defaultValue;
 
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithName:(NSString * _Nonnull)name
-                                 type:(NSString * _Nonnull)type
+                                 type:(CTTemplateArgumentType)type
                          defaultValue:(id _Nullable)defaultValue;
+
++ (NSString * _Nonnull)templateArgumentTypeString:(CTTemplateArgumentType)type;
 
 @end

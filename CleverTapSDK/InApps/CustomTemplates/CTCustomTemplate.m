@@ -9,11 +9,11 @@
 #import "CTCustomTemplate.h"
 #import "CTCustomTemplate-Internal.h"
 
-@interface CTCustomTemplate()
+@interface CTCustomTemplate ()
 
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *templateType;
-@property (nonatomic, strong) NSSet<NSString *> *fileArgumentNames;
+@property (nonatomic, strong) NSArray<CTTemplateArgument *> *arguments;
 @property (nonatomic, strong) id<CTTemplatePresenter> presenter;
 
 @end
@@ -23,14 +23,12 @@
 - (instancetype)initWithTemplateName:(NSString *)templateName
                         templateType:(NSString *)templateType
                            arguments:(NSArray *)arguments
-                           presenter:(id<CTTemplatePresenter>)presenter
-                   fileArgumentNames:(NSSet *)fileArgumentNames {
+                           presenter:(id<CTTemplatePresenter>)presenter {
     if (self = [super init]) {
-        self.name = templateName;
-        self.templateType = templateType;
-        self.arguments = arguments;
-        self.fileArgumentNames = fileArgumentNames;
-        self.presenter = presenter;
+        _name = [templateName copy];
+        _templateType = [templateType copy];
+        _arguments = arguments;
+        _presenter = presenter;
     }
     return self;
 }

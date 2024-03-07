@@ -13,15 +13,15 @@
 #import "CTCustomTemplate.h"
 #import "CTTemplateArgument.h"
 
-@interface CTCustomTemplate ()
+@interface CTCustomTemplate (Internal)
 
-@property (nonatomic, strong) NSArray<CTTemplateArgument *> *arguments;
+@property (nonatomic, strong, readonly) NSString *templateType;
+@property (nonatomic, strong, readonly) NSArray<CTTemplateArgument *> *arguments;
 
 - (instancetype)initWithTemplateName:(NSString *)templateName
                         templateType:(NSString *)templateType
                            arguments:(NSArray *)arguments
-                           presenter:(id<CTTemplatePresenter>)presenter
-                   fileArgumentNames:(NSSet *)fileArgumentNames;
+                           presenter:(id<CTTemplatePresenter>)presenter;
 
 @end
 

@@ -7,23 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTCustomTemplate.h"
-#import "CTTemplatePresenter.h"
+#import "CTCustomTemplateBuilder.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTAppFunctionBuilder : NSObject
+@interface CTAppFunctionBuilder : CTCustomTemplateBuilder
 
-- (void)setName:(NSString *)name;
-
-- (void)addArgument:(NSString *)name withString:(NSString *)defaultValue;
-- (void)addArgument:(NSString *)name withNumber:(NSNumber *)defaultValue;
-- (void)addArgument:(NSString *)name withBool:(BOOL)defaultValue;
-- (void)addFileArgument:(NSString *)name;
-
-- (void)setOnPresentWithPresenter:(id<CTTemplatePresenter>)presenter;
-
-- (CTCustomTemplate *)build;
+- (instancetype)initWithIsVisual:(BOOL)isVisual;
 
 @end
 

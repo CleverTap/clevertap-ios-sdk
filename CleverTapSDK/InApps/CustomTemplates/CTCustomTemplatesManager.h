@@ -22,8 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)existsTemplateWithName:(NSString *)name;
 
-- (void)sync;
-
 - (NSDictionary*)syncPayload;
 
 @end

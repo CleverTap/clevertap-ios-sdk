@@ -13,7 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTCustomTemplate : NSObject
 
 @property (nonatomic, strong, readonly) NSString *name;
-@property (nonatomic, strong, readonly) NSString *templateType;
 
 - (instancetype)init NS_UNAVAILABLE;
 

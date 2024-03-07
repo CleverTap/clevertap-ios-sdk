@@ -50,8 +50,8 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     return self;
 }
 
-- (void)sync {
-    
+- (BOOL)existsTemplateWithName:(nonnull NSString *)name {
+    return self.templates[name];
 }
 
 - (NSDictionary*)syncPayload {
@@ -59,60 +59,51 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     payload[@"type"] = @"templatePayload";
     
     NSMutableDictionary *definitions = [NSMutableDictionary dictionary];
-    [self.templates enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSString * _Nonnull key, CTCustomTemplate * _Nonnull template, BOOL * _Nonnull stop) {
+    NSDictionary *templates = [self templates];
+    [templates enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSString * _Nonnull templateKey, CTCustomTemplate * _Nonnull template, BOOL * _Nonnull stop) {
         NSMutableDictionary *templateData = [NSMutableDictionary dictionary];
         templateData[@"type"] = template.templateType;
-        
-        // Flatten all arguments
-        NSMutableDictionary *varsData = [NSMutableDictionary dictionary];
-        for (CTTemplateArgument *arg in template.arguments) {
-            NSMutableDictionary *varData = [NSMutableDictionary dictionary];
-            if ([arg.type isEqualToString:CT_KIND_DICTIONARY]) {
-                NSDictionary *flattenedMap = [self flatten:arg.defaultValue varName:arg.name];
-                [varsData addEntriesFromDictionary:flattenedMap];
-            }
-            else {
-                if ([arg.type isEqualToString:CT_KIND_INT] || [arg.type isEqualToString:CT_KIND_FLOAT]) {
-                    varData[CT_PE_VAR_TYPE] = CT_PE_NUMBER_TYPE;
-                }
-                else if ([arg.type isEqualToString:CT_KIND_BOOLEAN]) {
-                    varData[CT_PE_VAR_TYPE] = CT_PE_BOOL_TYPE;
-                }
-                else {
-                    varData[CT_PE_VAR_TYPE] = arg.type;
-                }
-                varData[CT_PE_DEFAULT_VALUE] = arg.defaultValue;
-                varsData[arg.name] = varData;
-            }
-        }
 
-        // Sort the argument names alphabetically
-        NSArray *sortedKeys = [varsData.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+        NSMutableDictionary *groupedMap = [NSMutableDictionary dictionary];
+        for (CTTemplateArgument *arg in template.arguments) {
+            NSArray *components = [arg.name componentsSeparatedByString:@"."];
+            NSString *firstComponent = components[0];
+            NSMutableArray *groupedArguments = groupedMap[firstComponent];
+            if (!groupedArguments) {
+                groupedArguments = [NSMutableArray array];
+                groupedMap[firstComponent] = groupedArguments;
+            }
+            [groupedArguments addObject:arg];
+        }
+        
         // Set the order of each argument
         NSMutableSet *ordered = [NSMutableSet set];
         int order = 0;
+        NSMutableDictionary *arguments = [NSMutableDictionary dictionaryWithCapacity:template.arguments.count];
         for (CTTemplateArgument *arg in template.arguments) {
-            if ([arg.type isEqualToString:CT_KIND_DICTIONARY]) {
-                NSString *prefix = [NSString stringWithFormat:@"%@.", arg.name];
-                [ordered addObject:prefix];
-                for (NSString *key in sortedKeys) {
-                    if ([key hasPrefix:prefix]) {
-                        // Ensure the dictionary is mutable
-                        if (![varsData[key] isKindOfClass:[NSMutableDictionary class]]) {
-                            varsData[key] = [NSMutableDictionary dictionaryWithDictionary:varsData[key]];
-                        }
-                        // Set the order of the argument
-                        varsData[key][@"order"] = @(order);
+            if (![arg.name containsString:@"."]) {
+                NSMutableDictionary *argument = [self argumentPayload:arg order:order];
+                arguments[arg.name] = argument;
+                order++;
+            } else {
+                NSString *prefix = [arg.name componentsSeparatedByString:@"."][0];
+                if (![ordered containsObject:prefix]) {
+                    [ordered addObject:prefix];
+                    NSArray *groupedArguments = groupedMap[prefix];
+                    // Sort strings with dots by their first component and add them to the sorted array
+                    NSArray *sortedArgs = [groupedArguments sortedArrayUsingComparator:^NSComparisonResult(CTTemplateArgument *arg1, CTTemplateArgument *arg2) {
+                        return [arg1.name localizedCaseInsensitiveCompare:arg2.name];
+                    }];
+                    for (CTTemplateArgument *arg in sortedArgs) {
+                        NSMutableDictionary *argument = [self argumentPayload:arg order:order];
+                        arguments[arg.name] = argument;
                         order++;
                     }
                 }
-            } else if (![arg.name containsString:@"."]) {
-                varsData[arg.name][@"order"] = @(order);
-                order++;
             }
         }
         
-        templateData[@"vars"] = varsData;
+        templateData[@"vars"] = arguments;
         definitions[template.name] = templateData;
     }];
     payload[@"definitions"] = definitions;
@@ -120,26 +111,18 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     return payload;
 }
 
-- (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName {
-    NSMutableDictionary *varsPayload = [NSMutableDictionary dictionary];
-    
-    [map enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
-        if ([value isKindOfClass:[NSString class]] ||
-            [value isKindOfClass:[NSNumber class]]) {
-            NSString *flatKey = [NSString stringWithFormat:@"%@.%@", varName, key];
-            varsPayload[flatKey] = @{ CT_PE_DEFAULT_VALUE: value };
-        } else if ([value isKindOfClass:[NSDictionary class]]) {
-            NSString *flatKey = [NSString stringWithFormat:@"%@.%@", varName, key];
-            NSDictionary* flattenedMap = [self flatten:value varName:flatKey];
-            [varsPayload addEntriesFromDictionary:flattenedMap];
-        }
-    }];
-    
-    return varsPayload;
-}
-
-- (BOOL)existsTemplateWithName:(nonnull NSString *)name {
-    return self.templates[name];
+- (NSMutableDictionary *)argumentPayload:(CTTemplateArgument *)arg order:(int)order {
+    NSMutableDictionary *argument = [NSMutableDictionary new];
+    id defaultValue = arg.defaultValue;
+    if (defaultValue) {
+        argument[@"defaultValue"] = defaultValue;
+    }
+    NSString *type = [CTTemplateArgument templateArgumentTypeString:arg.type];
+    if (type) {
+        argument[@"type"] = type;
+    }
+    argument[@"order"] = @(order);
+    return argument;
 }
 
 @end

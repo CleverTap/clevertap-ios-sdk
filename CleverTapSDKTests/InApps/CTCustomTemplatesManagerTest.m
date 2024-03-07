@@ -10,6 +10,7 @@
 #import <XCTest/XCTest.h>
 #import "CTCustomTemplatesManager.h"
 #import "CTInAppTemplateBuilder.h"
+#import "CTAppFunctionBuilder.h"
 
 @interface TestPresenter : NSObject<CTTemplatePresenter>
 @end
@@ -66,7 +67,7 @@
     [myTemplate2Builder setOnPresentWithPresenter:[TestPresenter new]];
     [templates addObject:[myTemplate2Builder build]];
     
-    CTAppFunctionBuilder *myFunctionBuilder = [CTAppFunctionBuilder new];
+    CTAppFunctionBuilder *myFunctionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
     [myFunctionBuilder setName:@"My Function"];
     [myFunctionBuilder addArgument:@"b" withBool:NO];
     [myFunctionBuilder addArgument:@"a" withString:@"1 string"];
@@ -94,6 +95,14 @@
     NSLog(@"%@", syncPayload);
     
     XCTAssertEqual([syncPayload[@"definitions"] count], 3);
+}
+
+- (void)testBuild {
+    CTInAppTemplateBuilder *myTemplateBuilder = [[CTInAppTemplateBuilder alloc] init];
+    [myTemplateBuilder setName:@"My Template"];
+    [myTemplateBuilder addArgument:@"a" withBool:NO];
+    XCTAssertThrows([myTemplateBuilder addArgument:@"a" withBool:NO]);
+    //[myTemplateBuilder build];
 }
 
 @end

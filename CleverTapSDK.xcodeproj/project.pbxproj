@@ -330,6 +330,11 @@
 		6AA1357C2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */; };
 		6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
+		6B32A09E2B9901AA009ADC57 /* CTCustomTemplateBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B32A09C2B9901AA009ADC57 /* CTCustomTemplateBuilder.h */; };
+		6B32A09F2B9901AA009ADC57 /* CTCustomTemplateBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A09D2B9901AA009ADC57 /* CTCustomTemplateBuilder.m */; };
+		6B32A0A12B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B32A0A02B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h */; };
+		6B32A0A32B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A0A22B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m */; };
+		6B32A0A52B9A0F17009ADC57 /* CTCustomTemplateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A0A42B9A0F17009ADC57 /* CTCustomTemplateTest.m */; };
 		6B4A0F912B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */; };
 		6B535FB62AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
 		6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
@@ -354,7 +359,6 @@
 		6BB7272B2B8E5C66009CE7D0 /* CTTemplateArgument.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB727292B8E5C66009CE7D0 /* CTTemplateArgument.h */; };
 		6BB7272C2B8E5C66009CE7D0 /* CTTemplateArgument.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB7272A2B8E5C66009CE7D0 /* CTTemplateArgument.m */; };
 		6BB7272E2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB7272D2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h */; };
-		6BB727302B8F4039009CE7D0 /* CTAppFunctionBuilder-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB7272F2B8F4039009CE7D0 /* CTAppFunctionBuilder-Internal.h */; };
 		6BB727332B8F787D009CE7D0 /* CTCustomTemplatesManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB727312B8F787D009CE7D0 /* CTCustomTemplatesManager.h */; };
 		6BB727342B8F787D009CE7D0 /* CTCustomTemplatesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB727322B8F787D009CE7D0 /* CTCustomTemplatesManager.m */; };
 		6BB727362B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB727352B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m */; };
@@ -845,6 +849,11 @@
 		6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LeanplumCT.h; sourceTree = "<group>"; };
 		6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCT.m; sourceTree = "<group>"; };
 		6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = image_interstitial.html; sourceTree = "<group>"; };
+		6B32A09C2B9901AA009ADC57 /* CTCustomTemplateBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTCustomTemplateBuilder.h; sourceTree = "<group>"; };
+		6B32A09D2B9901AA009ADC57 /* CTCustomTemplateBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCustomTemplateBuilder.m; sourceTree = "<group>"; };
+		6B32A0A02B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTCustomTemplateBuilder-Internal.h"; sourceTree = "<group>"; };
+		6B32A0A22B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCustomTemplateBuilderTest.m; sourceTree = "<group>"; };
+		6B32A0A42B9A0F17009ADC57 /* CTCustomTemplateTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCustomTemplateTest.m; sourceTree = "<group>"; };
 		6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppTriggerManagerTest.m; sourceTree = "<group>"; };
 		6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTMultiDelegateManager.h; sourceTree = "<group>"; };
 		6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManager.m; sourceTree = "<group>"; };
@@ -873,7 +882,6 @@
 		6BB727292B8E5C66009CE7D0 /* CTTemplateArgument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTTemplateArgument.h; sourceTree = "<group>"; };
 		6BB7272A2B8E5C66009CE7D0 /* CTTemplateArgument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTemplateArgument.m; sourceTree = "<group>"; };
 		6BB7272D2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTCustomTemplate-Internal.h"; sourceTree = "<group>"; };
-		6BB7272F2B8F4039009CE7D0 /* CTAppFunctionBuilder-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTAppFunctionBuilder-Internal.h"; sourceTree = "<group>"; };
 		6BB727312B8F787D009CE7D0 /* CTCustomTemplatesManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTCustomTemplatesManager.h; sourceTree = "<group>"; };
 		6BB727322B8F787D009CE7D0 /* CTCustomTemplatesManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCustomTemplatesManager.m; sourceTree = "<group>"; };
 		6BB727352B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCustomTemplatesManagerTest.m; sourceTree = "<group>"; };
@@ -1384,6 +1392,8 @@
 				6B9DEEA02B4DF1B70097EF40 /* CTInAppImagePrefetchManager+Tests.h */,
 				6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */,
 				6BB727352B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m */,
+				6B32A0A22B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m */,
+				6B32A0A42B9A0F17009ADC57 /* CTCustomTemplateTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -1421,9 +1431,11 @@
 				6BB727292B8E5C66009CE7D0 /* CTTemplateArgument.h */,
 				6BB7272A2B8E5C66009CE7D0 /* CTTemplateArgument.m */,
 				6BB7272D2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h */,
-				6BB7272F2B8F4039009CE7D0 /* CTAppFunctionBuilder-Internal.h */,
 				6BB727312B8F787D009CE7D0 /* CTCustomTemplatesManager.h */,
 				6BB727322B8F787D009CE7D0 /* CTCustomTemplatesManager.m */,
+				6B32A09C2B9901AA009ADC57 /* CTCustomTemplateBuilder.h */,
+				6B32A09D2B9901AA009ADC57 /* CTCustomTemplateBuilder.m */,
+				6B32A0A02B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h */,
 			);
 			path = CustomTemplates;
 			sourceTree = "<group>";
@@ -1902,6 +1914,7 @@
 				6BEEC2C62AE9B02100BD4EC5 /* CTSystemClock.h in Headers */,
 				D020C928209006AD0073F61E /* CTUriHelper.h in Headers */,
 				D0596EFA208A6A9000A80753 /* CTSwizzle.h in Headers */,
+				6B32A09E2B9901AA009ADC57 /* CTCustomTemplateBuilder.h in Headers */,
 				6BB727122B8E458D009CE7D0 /* CTTemplateProducer.h in Headers */,
 				071EB508217F6427008F0FAB /* CTBaseHeaderFooterViewController.h in Headers */,
 				D0A84AD8209135D400191B1F /* CTPreferences.h in Headers */,
@@ -1927,7 +1940,6 @@
 				4E8B816F2AD2BB8A00714BB4 /* CTDispatchQueueManager.h in Headers */,
 				D01A0894207EC2D400423D6F /* CleverTapInstanceConfig.h in Headers */,
 				4808030E292EB4FB00C06E2F /* CleverTap+PushPermission.h in Headers */,
-				6BB727302B8F4039009CE7D0 /* CTAppFunctionBuilder-Internal.h in Headers */,
 				071EB50C217F6427008F0FAB /* CTCoverImageViewController.h in Headers */,
 				4E8B81782AD2CB4E00714BB4 /* CTPushPrimerManager.h in Headers */,
 				D0213D4B207D905800FE5740 /* CleverTapInAppNotificationDelegate.h in Headers */,
@@ -1939,6 +1951,7 @@
 				D0405B4622050C5200D64EC3 /* CTInboxUtils.h in Headers */,
 				4E25E3C6278887A70008C888 /* CTLegacyIdentityRepo.h in Headers */,
 				6BF5A5912ACC854800CDED20 /* CTInAppDisplayManager.h in Headers */,
+				6B32A0A12B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h in Headers */,
 				07B94547219EA34300D4C542 /* CTMessageMO.h in Headers */,
 				4E25E3C2278887A70008C888 /* CTIdentityRepoFactory.h in Headers */,
 				071EB4FF217F6427008F0FAB /* CTHeaderViewController.h in Headers */,
@@ -2339,11 +2352,13 @@
 				6BA3B2E12B05411C004E834B /* InAppHelper.m in Sources */,
 				32394C2529FA272600956058 /* CTValidatorTest.m in Sources */,
 				6BA3B2E82B07E207004E834B /* CTTriggersMatcher+Tests.m in Sources */,
+				6B32A0A52B9A0F17009ADC57 /* CTCustomTemplateTest.m in Sources */,
 				4E1F155B276B662C009387AE /* EventDetail.m in Sources */,
 				6B4A0F912B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m in Sources */,
 				4EFC642B2AB44CF900F01414 /* CTLimitsMatcherTest.m in Sources */,
 				4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */,
 				6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */,
+				6B32A0A32B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m in Sources */,
 				6A7BB8DC29E47CFF00651584 /* CTVarTest.m in Sources */,
 				6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */,
 				6A2E0B9529D49D0200FCEA5F /* CTVariables+Tests.m in Sources */,
@@ -2434,6 +2449,7 @@
 				4987C666251B5E79003E6BE8 /* CTImageInAppViewController.m in Sources */,
 				D0405B4722050C5200D64EC3 /* CTInboxUtils.m in Sources */,
 				D01651B32097B42C00660178 /* CTValidator.m in Sources */,
+				6B32A09F2B9901AA009ADC57 /* CTCustomTemplateBuilder.m in Sources */,
 				49C189A2243B08A40003E4D4 /* CTFeatureFlagsController.m in Sources */,
 				6A3EBD2E2AA06EB300CE97D4 /* CTInAppEvaluationManager.m in Sources */,
 				4E838C42299F419900ED0875 /* ContentMerger.m in Sources */,

@@ -7,12 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTAppFunctionBuilder.h"
+#import "CTCustomTemplateBuilder.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTInAppTemplateBuilder : CTAppFunctionBuilder
+@interface CTInAppTemplateBuilder : CTCustomTemplateBuilder
 
+- (instancetype)init;
 - (void)addArgument:(NSString *)name withDictionary:(NSDictionary *)defaultValue;
 - (void)addActionArgument:(NSString *)name;
 
