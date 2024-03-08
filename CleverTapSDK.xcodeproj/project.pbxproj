@@ -1372,6 +1372,7 @@
 		6A4427C32AA6513C0098866F /* InApps */ = {
 			isa = PBXGroup;
 			children = (
+				6B32A0AA2B9B0B6F009ADC57 /* CustomTemplates */,
 				6A4427C42AA6515A0098866F /* CTTriggersMatcherTest.m */,
 				4EFC642A2AB44CF900F01414 /* CTLimitsMatcherTest.m */,
 				6A4427CC2AB8C3B10098866F /* CTInAppEvaluationManagerTest.m */,
@@ -1391,9 +1392,6 @@
 				6BA3B2E72B07E207004E834B /* CTTriggersMatcher+Tests.m */,
 				6B9DEEA02B4DF1B70097EF40 /* CTInAppImagePrefetchManager+Tests.h */,
 				6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */,
-				6BB727352B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m */,
-				6B32A0A22B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m */,
-				6B32A0A42B9A0F17009ADC57 /* CTCustomTemplateTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -1412,6 +1410,16 @@
 				6A7BB8DB29E47CFF00651584 /* CTVarTest.m */,
 			);
 			path = ProductExperiences;
+			sourceTree = "<group>";
+		};
+		6B32A0AA2B9B0B6F009ADC57 /* CustomTemplates */ = {
+			isa = PBXGroup;
+			children = (
+				6BB727352B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m */,
+				6B32A0A22B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m */,
+				6B32A0A42B9A0F17009ADC57 /* CTCustomTemplateTest.m */,
+			);
+			path = CustomTemplates;
 			sourceTree = "<group>";
 		};
 		6BB727102B8E455B009CE7D0 /* CustomTemplates */ = {
