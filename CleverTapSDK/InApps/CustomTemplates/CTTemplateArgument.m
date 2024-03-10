@@ -20,15 +20,6 @@
     return self;
 }
 
-- (NSString *)description {
-    return [NSString stringWithFormat:@"<%@: %p> %@, type: %@, defaultValue: %@",
-            [self class],
-            self,
-            self.name,
-            [CTTemplateArgument templateArgumentTypeString:self.type],
-            self.defaultValue != nil ? self.defaultValue : @"nil"];
-}
-
 + (NSString *)templateArgumentTypeString:(CTTemplateArgumentType)type {
     static NSDictionary *enumStringMap = nil;
     static dispatch_once_t onceToken;
@@ -77,6 +68,15 @@
     result = prime * result + [self.defaultValue hash];
     
     return result;
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %p> %@, type: %@, defaultValue: %@",
+            [self class],
+            self,
+            self.name,
+            [CTTemplateArgument templateArgumentTypeString:self.type],
+            self.defaultValue];// TODO: do we need -- != nil ? self.defaultValue : @"nil"];
 }
 
 @end
