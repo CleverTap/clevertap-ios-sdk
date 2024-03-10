@@ -11,16 +11,7 @@
 #import "CTCustomTemplatesManager.h"
 #import "CTInAppTemplateBuilder.h"
 #import "CTAppFunctionBuilder.h"
-
-@interface TestPresenter : NSObject<CTTemplatePresenter>
-@end
-
-@implementation TestPresenter
-- (void)OnCloseClickedWithContext:(CTTemplateContext *)context {
-}
-- (void)OnPresentWithContext:(CTTemplateContext *)context {
-}
-@end
+#import "CTTemplatePresenterMock.h"
 
 @interface TestTemplateProducer : NSObject<CTTemplateProducer>
 @end
@@ -51,7 +42,7 @@
         @"n": @"12 string",
         @"m": @"11 string"
     }];
-    [myTemplateBuilder setOnPresentWithPresenter:[TestPresenter new]];
+    [myTemplateBuilder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
     [templates addObject:[myTemplateBuilder build]];
     
     CTInAppTemplateBuilder *myTemplate2Builder = [CTInAppTemplateBuilder new];
@@ -64,14 +55,14 @@
         @"b": @"3 string",
         @"a": @"2 string"
     }];
-    [myTemplate2Builder setOnPresentWithPresenter:[TestPresenter new]];
+    [myTemplate2Builder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
     [templates addObject:[myTemplate2Builder build]];
     
     CTAppFunctionBuilder *myFunctionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
     [myFunctionBuilder setName:@"My Function"];
     [myFunctionBuilder addArgument:@"b" withBool:NO];
     [myFunctionBuilder addArgument:@"a" withString:@"1 string"];
-    [myFunctionBuilder setOnPresentWithPresenter:[TestPresenter new]];
+    [myFunctionBuilder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
     [templates addObject:[myFunctionBuilder build]];
     
     return templates;
