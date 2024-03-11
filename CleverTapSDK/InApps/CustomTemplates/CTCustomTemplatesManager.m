@@ -54,6 +54,10 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     return self.templates[name];
 }
 
++ (void)clearTemplateProducers {
+    [templateProducers removeAllObjects];
+}
+
 - (NSDictionary*)syncPayload {
     NSMutableDictionary *payload = [NSMutableDictionary dictionary];
     payload[@"type"] = @"templatePayload";

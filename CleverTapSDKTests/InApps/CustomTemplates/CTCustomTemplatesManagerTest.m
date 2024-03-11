@@ -9,18 +9,25 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "CTCustomTemplatesManager.h"
+#import "CTCustomTemplatesManager+Tests.h"
 #import "CTInAppTemplateBuilder.h"
 #import "CTAppFunctionBuilder.h"
 #import "CTTemplatePresenterMock.h"
+#import "CTTestTemplateProducer.h"
 
-@interface TestTemplateProducer : NSObject<CTTemplateProducer>
+@interface CTCustomTemplatesManagerTest : XCTestCase
+
 @end
 
-@implementation TestTemplateProducer
+@implementation CTCustomTemplatesManagerTest
 
-- (NSSet<CTCustomTemplate *> *)defineTemplates:(NSString *)accountId {
+- (void)tearDown {
+    [super tearDown];
+    [CTCustomTemplatesManager clearTemplateProducers];
+}
+
+- (void)testSync {
     NSMutableSet *templates = [NSMutableSet set];
-    
     CTInAppTemplateBuilder *myTemplateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [myTemplateBuilder setName:@"My Template"];
     [myTemplateBuilder addArgument:@"b" withBool:NO];
@@ -65,20 +72,9 @@
     [myFunctionBuilder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
     [templates addObject:[myFunctionBuilder build]];
     
-    return templates;
-}
-
-@end
-
-@interface CTCustomTemplatesManagerTest : XCTestCase
-
-@end
-
-@implementation CTCustomTemplatesManagerTest
-
-- (void)testSync {
-    [CTCustomTemplatesManager registerTemplateProducer:[TestTemplateProducer new]];
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"" accountToken:@""];
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"account1" accountToken:@""];
     CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
     
     NSDictionary *syncPayload = [manager syncPayload];
@@ -88,12 +84,71 @@
     XCTAssertEqual([syncPayload[@"definitions"] count], 3);
 }
 
-- (void)testBuild {
-    CTInAppTemplateBuilder *myTemplateBuilder = [[CTInAppTemplateBuilder alloc] init];
-    [myTemplateBuilder setName:@"My Template"];
-    [myTemplateBuilder addArgument:@"a" withBool:NO];
-    XCTAssertThrows([myTemplateBuilder addArgument:@"a" withBool:NO]);
-    //[myTemplateBuilder build];
+- (void)testTemplatesRegistered {
+    NSMutableSet *templates = [NSMutableSet set];
+    
+    NSString *templateName1 = @"Template1";
+    NSString *templateName2 = @"Template2";
+    NSString *functionName1 = @"Function1";
+    NSString *functionName2 = @"Function2";
+    
+    CTInAppTemplateBuilder *templateBuilder1 = [CTInAppTemplateBuilder new];
+    [templateBuilder1 setName:templateName1];
+    [templateBuilder1 setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder1 build]];
+    
+    CTInAppTemplateBuilder *templateBuilder2 = [CTInAppTemplateBuilder new];
+    [templateBuilder2 setName:templateName2];
+    [templateBuilder2 setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder2 build]];
+    
+    CTAppFunctionBuilder *functionBuilder1 = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
+    [functionBuilder1 setName:functionName1];
+    [functionBuilder1 setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[functionBuilder1 build]];
+    
+    CTAppFunctionBuilder *functionBuilder2 = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
+    [functionBuilder2 setName:functionName2];
+    [functionBuilder2 setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[functionBuilder2 build]];
+    
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"accountId1" accountToken:@"token"];
+    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
+    
+    XCTAssertTrue([manager existsTemplateWithName:templateName1]);
+    XCTAssertTrue([manager existsTemplateWithName:templateName2]);
+    XCTAssertTrue([manager existsTemplateWithName:functionName1]);
+    XCTAssertTrue([manager existsTemplateWithName:functionName2]);
+    
+    XCTAssertFalse([manager existsTemplateWithName:@"non-existent"]);
+    
+    CleverTapInstanceConfig *config2 = [[CleverTapInstanceConfig alloc] initWithAccountId:@"accountId2" accountToken:@"token"];
+    CTCustomTemplatesManager *managerWithConfig2 = [[CTCustomTemplatesManager alloc] initWithConfig:config2];
+    
+    XCTAssertTrue([manager existsTemplateWithName:templateName1]);
+    XCTAssertTrue([manager existsTemplateWithName:templateName2]);
+    XCTAssertTrue([manager existsTemplateWithName:functionName1]);
+    XCTAssertTrue([manager existsTemplateWithName:functionName2]);
+    
+    XCTAssertFalse([manager existsTemplateWithName:@"non-existent"]);
+}
+
+- (void)testDuplicateTemplateNameThrows {
+    NSMutableSet *templates = [NSMutableSet set];
+    CTInAppTemplateBuilder *templateBuilder1 = [CTInAppTemplateBuilder new];
+    [templateBuilder1 setName:@"Template1"];
+    [templateBuilder1 setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder1 build]];
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"accountId1" accountToken:@"token"];
+    XCTAssertThrows([[CTCustomTemplatesManager alloc] initWithConfig:config]);
 }
 
 @end
