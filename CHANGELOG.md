@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 6.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/6.1.1) (April 2, 2024)
+
+#### Changed
+- Adds privacy manifests.
+
 ### [Version 6.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/6.1.0) (February 22, 2024)
 
 #### Added
