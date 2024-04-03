@@ -196,6 +196,11 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)prepareNotificationForDisplay:(NSDictionary*)jsonObj {
+    if (self.inAppRenderingStatus == CleverTapInAppDiscard) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
+        return;
+    }
+    
     if (!self.instance.isAppForeground) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, won't prepare in-app: %@", self, jsonObj);
         return;
