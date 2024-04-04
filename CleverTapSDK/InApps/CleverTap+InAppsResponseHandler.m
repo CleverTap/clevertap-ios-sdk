@@ -50,6 +50,19 @@
     NSString *mode = jsonResp[CLTAP_INAPP_MODE_JSON_RESPONSE_KEY];
     [self.inAppStore setMode:mode];
     
+    // Handle stale in-apps
+    @try {
+        NSArray *stale = jsonResp[CLTAP_INAPP_STALE_JSON_RESPONSE_KEY];
+        [self.inAppFCManager removeStaleInAppCounts:stale];
+    } @catch (NSException *ex) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)
+    }
+    
+    if (self.inAppDisplayManager.inAppRenderingStatus == CleverTapInAppDiscard) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
+        return;
+    }
+    
     // Parse SS App Launched notifications
     NSArray *inAppNotifsAppLaunched = jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
     if (inAppNotifsAppLaunched) {
@@ -60,21 +73,8 @@
         }
     }
     
-    // Handle stale in-apps
-    @try {
-        NSArray *stale = jsonResp[CLTAP_INAPP_STALE_JSON_RESPONSE_KEY];
-        [self.inAppFCManager removeStaleInAppCounts:stale];
-    } @catch (NSException *ex) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)
-    }
-    
     // Parse in-app notifications to be displayed
     NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
-    
-    if (self.inAppDisplayManager.inAppRenderingStatus == CleverTapInAppDiscard) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
-        return;
-    }
     if (inappsJSON) {
         NSMutableArray *inappNotifs;
         @try {
