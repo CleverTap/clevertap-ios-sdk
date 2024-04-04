@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 6.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/6.2.0) (April 4, 2024)
+
+#### Changed
+- Updates privacy manifests.
+
+#### Fixed
+- Fixes a bug where client side in-apps were not discarded when rendering status is set to "discard".
+
 ### [Version 6.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/6.1.0) (February 22, 2024)
 
 #### Added
