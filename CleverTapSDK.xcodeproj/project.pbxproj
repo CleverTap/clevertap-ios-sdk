@@ -165,6 +165,8 @@
 		4808030E292EB4FB00C06E2F /* CleverTap+PushPermission.h in Headers */ = {isa = PBXBuildFile; fileRef = 4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */; };
 		48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 4808030F292EB50D00C06E2F /* CTLocalInApp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		48080312292EB50D00C06E2F /* CTLocalInApp.m in Sources */ = {isa = PBXBuildFile; fileRef = 48080310292EB50D00C06E2F /* CTLocalInApp.m */; };
+		489A731A2BC51795008D4850 /* CTFileDownloadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 489A73192BC51795008D4850 /* CTFileDownloadManager.h */; };
+		489A731C2BC517B4008D4850 /* CTFileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */; };
 		48BEA4F62AFB868B00690424 /* CTInAppImagePrefetchManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 48BEA4F52AFB868B00690424 /* CTInAppImagePrefetchManager.h */; };
 		48BEA4F82AFB86A300690424 /* CTInAppImagePrefetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48BEA4F72AFB86A300690424 /* CTInAppImagePrefetchManager.m */; };
 		48C31A822B1DC5CF00CA2A90 /* CTInAppImagePrefetchManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C31A812B1DC5CF00CA2A90 /* CTInAppImagePrefetchManagerTest.m */; };
@@ -711,6 +713,8 @@
 		4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+PushPermission.h"; sourceTree = "<group>"; };
 		4808030F292EB50D00C06E2F /* CTLocalInApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTLocalInApp.h; sourceTree = "<group>"; };
 		48080310292EB50D00C06E2F /* CTLocalInApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTLocalInApp.m; sourceTree = "<group>"; };
+		489A73192BC51795008D4850 /* CTFileDownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTFileDownloadManager.h; sourceTree = "<group>"; };
+		489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManager.m; sourceTree = "<group>"; };
 		48BEA4F52AFB868B00690424 /* CTInAppImagePrefetchManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppImagePrefetchManager.h; sourceTree = "<group>"; };
 		48BEA4F72AFB86A300690424 /* CTInAppImagePrefetchManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppImagePrefetchManager.m; sourceTree = "<group>"; };
 		48C31A812B1DC5CF00CA2A90 /* CTInAppImagePrefetchManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppImagePrefetchManagerTest.m; sourceTree = "<group>"; };
@@ -1615,6 +1619,8 @@
 				6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */,
 				6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */,
 				6BA3B2DA2B03E926004E834B /* CTQueueType.h */,
+				489A73192BC51795008D4850 /* CTFileDownloadManager.h */,
+				489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -1782,6 +1788,7 @@
 				071EB4EE217F6427008F0FAB /* CTAlertViewController.h in Headers */,
 				4E838C4629A0C94B00ED0875 /* CleverTap+CTVar.h in Headers */,
 				D0CACF9620B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.h in Headers */,
+				489A731A2BC51795008D4850 /* CTFileDownloadManager.h in Headers */,
 				4E41FD92294F46510001FBED /* CTVar-Internal.h in Headers */,
 				071EB4FE217F6427008F0FAB /* CTDismissButton.h in Headers */,
 				071EB511217F6427008F0FAB /* CTUIUtils.h in Headers */,
@@ -2364,6 +2371,7 @@
 				071EB513217F6427008F0FAB /* CTInAppNotification.m in Sources */,
 				D0CACF9720B8A4F800A02327 /* CTPinnedNSURLSessionDelegate.m in Sources */,
 				D0047B0F2098E2F00019C6FD /* CTProfileBuilder.m in Sources */,
+				489A731C2BC517B4008D4850 /* CTFileDownloadManager.m in Sources */,
 				D0A6626E20801E7F00B403F3 /* CTDeviceInfo.m in Sources */,
 				6BD334EC2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */,
 				0797133A21A309720011C9A3 /* CTCarouselImageView.m in Sources */,
