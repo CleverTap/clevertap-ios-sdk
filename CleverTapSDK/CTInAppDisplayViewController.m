@@ -159,22 +159,26 @@ API_AVAILABLE(ios(13.0)) {
 }
 
 - (void)hideFromWindow:(BOOL)animated {
-    void (^completionBlock)(void) = ^ {
-        [self.window removeFromSuperview];
-        self.window = nil;
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
-            [self.delegate notificationDidDismiss:self.notification fromViewController:self];
+    __weak typeof(self) weakSelf = self;
+    void (^completionBlock)(void) = ^{
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+        [strongSelf.window removeFromSuperview];
+        strongSelf.window = nil;
+        if (strongSelf.delegate && [strongSelf.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
+            [strongSelf.delegate notificationDidDismiss:strongSelf.notification fromViewController:strongSelf];
         }
     };
     
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
-            self.window.alpha = 0;
+            weakSelf.window.alpha = 0;
         } completion:^(BOOL finished) {
             completionBlock();
         }];
-    }
-    else {
+    } else {
         completionBlock();
     }
 }

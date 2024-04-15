@@ -520,28 +520,6 @@ typedef enum {
     }
 }
 
-- (void)hideFromWindow:(BOOL)animated {
-    void (^completionBlock)(void) = ^ {
-        [self.window removeFromSuperview];
-        self.window = nil;
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
-            [self.delegate notificationDidDismiss:self.notification fromViewController:self];
-        }
-    };
-    
-    if (animated) {
-        [UIView animateWithDuration:0.25 animations:^{
-            self.window.alpha = 0;
-        } completion:^(BOOL finished) {
-            completionBlock();
-        }];
-    }
-    else {
-        completionBlock();
-    }
-}
-
-
 #pragma mark - Public
 
 - (void)show:(BOOL)animated {
