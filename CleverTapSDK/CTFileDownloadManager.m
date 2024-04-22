@@ -20,29 +20,29 @@
 
 #pragma mark - Public methods
 
-- (void)downloadFiles:(nonnull NSArray *)urls {
+- (void)downloadFiles:(nonnull NSArray<NSURL *> *)urls
+  withCompletionBlock:(nonnull CTFilesDownloadCompletedBlock)completion {
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     NSMutableDictionary<NSString *,id> *filesDownloadStatus = [NSMutableDictionary new];
     for (NSURL *url in urls) {
-        dispatch_group_enter(group);
-        dispatch_async(concurrentQueue, ^{
-            [self downloadSingleFile:url completed:^(BOOL success) {
-                // Callback for each file download
-                if (self.delegate && [self.delegate respondsToSelector:@selector(singleFileDownloaded:forURL:)]) {
-                    [self.delegate singleFileDownloaded:success forURL:[url absoluteString]];
-                }
-
-                [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[url absoluteString]];
-                dispatch_group_leave(group);
-            }];
-        });
+        // Download file only when it is not already present.
+        if (![self isFileAlreadyPresent:url]) {
+            dispatch_group_enter(group);
+            dispatch_async(concurrentQueue, ^{
+                [self downloadSingleFile:url completed:^(BOOL success) {
+                    [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[url absoluteString]];
+                    dispatch_group_leave(group);
+                }];
+            });
+        } else {
+            // Add the file url to callback as success true as it is already present
+            [filesDownloadStatus setObject:@1 forKey:[url absoluteString]];
+        }
     }
     dispatch_group_notify(group, concurrentQueue, ^{
         // Callback when all files are downloaded with their success status
-        if (self.delegate && [self.delegate respondsToSelector:@selector(allFilesDownloaded:)]) {
-            [self.delegate allFilesDownloaded:filesDownloadStatus];
-        }
+        completion(filesDownloadStatus);
     });
 }
 

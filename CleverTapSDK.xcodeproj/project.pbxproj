@@ -167,6 +167,8 @@
 		48080312292EB50D00C06E2F /* CTLocalInApp.m in Sources */ = {isa = PBXBuildFile; fileRef = 48080310292EB50D00C06E2F /* CTLocalInApp.m */; };
 		489A731A2BC51795008D4850 /* CTFileDownloadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 489A73192BC51795008D4850 /* CTFileDownloadManager.h */; };
 		489A731C2BC517B4008D4850 /* CTFileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */; };
+		48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */; };
+		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48BEA4F62AFB868B00690424 /* CTInAppImagePrefetchManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 48BEA4F52AFB868B00690424 /* CTInAppImagePrefetchManager.h */; };
 		48BEA4F82AFB86A300690424 /* CTInAppImagePrefetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48BEA4F72AFB86A300690424 /* CTInAppImagePrefetchManager.m */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
@@ -716,6 +718,8 @@
 		48080310292EB50D00C06E2F /* CTLocalInApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTLocalInApp.m; sourceTree = "<group>"; };
 		489A73192BC51795008D4850 /* CTFileDownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTFileDownloadManager.h; sourceTree = "<group>"; };
 		489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManager.m; sourceTree = "<group>"; };
+		48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sampleTXTStub.txt; sourceTree = "<group>"; };
+		48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = samplePDFStub.pdf; sourceTree = "<group>"; };
 		48BEA4F52AFB868B00690424 /* CTInAppImagePrefetchManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppImagePrefetchManager.h; sourceTree = "<group>"; };
 		48BEA4F72AFB86A300690424 /* CTInAppImagePrefetchManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppImagePrefetchManager.m; sourceTree = "<group>"; };
 		48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManagerTests.m; sourceTree = "<group>"; };
@@ -1263,6 +1267,8 @@
 		4E1F1560277090D6009387AE /* Stub Responses */ = {
 			isa = PBXGroup;
 			children = (
+				48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */,
+				48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */,
 				6B9DEE9E2B4D8A500097EF40 /* clevertap-logo.png */,
 				4E1F156727709848009387AE /* app_inbox.json */,
 				4E1F1561277090D6009387AE /* inapp_alert.json */,
@@ -2052,6 +2058,8 @@
 				6B9DEE9F2B4D8A500097EF40 /* clevertap-logo.png in Resources */,
 				4E1F156827709849009387AE /* app_inbox.json in Resources */,
 				4E1F1562277090D6009387AE /* inapp_alert.json in Resources */,
+				48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */,
+				48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

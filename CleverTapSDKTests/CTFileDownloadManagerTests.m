@@ -1,11 +1,10 @@
 #import <XCTest/XCTest.h>
-#import <OCMock/OCMock.h>
 #import "CleverTapInstanceConfig.h"
 #import "CTFileDownloadManager.h"
+#import <OHHTTPStubs/HTTPStubs.h>
 
-NSString *const CLTAP_TEST_PDF_FILE = @"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-NSString *const CLTAP_TEST_TXT_FILE = @"https://www.w3.org/TR/2003/REC-PNG-20031110/iso_8859-1.txt";
-NSString *const CLTAP_TEST_JPG_FILE = @"https://file-examples.com/storage/fef545ae0b661d470abe676/2017/10/file_example_JPG_100kB.jpg";
+NSString *const fileURLMatch = @"ct_test_url";
+NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
 
 @interface CTFileDownloadManagerTests : XCTestCase
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -18,46 +17,18 @@ NSString *const CLTAP_TEST_JPG_FILE = @"https://file-examples.com/storage/fef545
 
 - (void)setUp {
     [super setUp];
+    [self addAllStubs];
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     self.fileDownloadManager = [[CTFileDownloadManager alloc] initWithConfig:self.config];
     self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    
-    [self addSampleFilesURL];
 }
 
 - (void)tearDown {
     [super tearDown];
     
+    [HTTPStubs removeAllStubs];
     // Remove files after every testcase
     [self removeFiles];
-}
-
-- (void)addSampleFilesURL {
-    NSURL *url1 = [NSURL URLWithString:CLTAP_TEST_PDF_FILE];
-    NSURL *url2 = [NSURL URLWithString:CLTAP_TEST_TXT_FILE];
-    NSURL *url3 = [NSURL URLWithString:CLTAP_TEST_JPG_FILE];
-    self.fileURLs = @[url1, url2, url3];
-}
-
-- (void)downloadFiles {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Download files"];
-    
-    [self.fileDownloadManager downloadFiles:self.fileURLs];
-    
-    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
-    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-        [expectation fulfill];
-    });
-    
-    [self waitForExpectations:@[expectation] timeout:2.5];
-}
-
-- (void)removeFiles {
-    for(int i=0; i<[self.fileURLs count]; i++) {
-        NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[self.fileURLs[i] lastPathComponent]];
-        NSError *error;
-        [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
-    }
 }
 
 - (void)testDownloadMultipleFiles {
@@ -87,43 +58,99 @@ NSString *const CLTAP_TEST_JPG_FILE = @"https://file-examples.com/storage/fef545
     XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[2]]);
 }
 
-#pragma mark CTFileDownloadDelegate callback tests
-
-- (void)testSingleFileDownloadedCallback {
-    id protocolMock = OCMProtocolMock(@protocol(CTFileDownloadDelegate));
-    self.fileDownloadManager.delegate = protocolMock;
-    
-    // Expect singleFileDownloaded is called for file url.
-    OCMExpect([protocolMock singleFileDownloaded:YES forURL:CLTAP_TEST_PDF_FILE]);
-    
-    // Download files.
-    NSURL *url1 = [NSURL URLWithString:CLTAP_TEST_PDF_FILE];
-    NSArray *arr = @[url1];
-    [self.fileDownloadManager downloadFiles:arr];
-
-    // Verify protocol methods is called
-    OCMVerifyAllWithDelay(protocolMock, 2.0);
-}
+#pragma mark CTFileDownload callback test
 
 - (void)testAllFilesDownloadedCallback {
-    id protocolMock = OCMProtocolMock(@protocol(CTFileDownloadDelegate));
-    self.fileDownloadManager.delegate = protocolMock;
+    self.fileURLs = [self generateFileURLs:2];
+
+    NSMutableDictionary *expectedStatus = [NSMutableDictionary new];
+    NSString *urlString1 = [self.fileURLs[0] absoluteString];
+    NSString *urlString2 = [self.fileURLs[1] absoluteString];
+    expectedStatus[urlString1] = @1;
+    expectedStatus[urlString2] = @1;
     
-    NSMutableDictionary *status = [NSMutableDictionary new];
-    status[CLTAP_TEST_PDF_FILE] = @1;
-    status[CLTAP_TEST_TXT_FILE] = @1;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     
-    // Expect allFilesDownloaded method is called with status dictionary.
-    OCMExpect([protocolMock allFilesDownloaded:status]);
+    // Assert
+    void (^completionBlock)(NSDictionary<NSString *,id> * _Nullable) = ^(NSDictionary<NSString *,id> * _Nullable status) {
+        XCTAssertEqualObjects(status, expectedStatus);
+    };
     
     // Download files
-    NSURL *url1 = [NSURL URLWithString:CLTAP_TEST_PDF_FILE];
-    NSURL *url2 = [NSURL URLWithString:CLTAP_TEST_TXT_FILE];
-    NSArray *arr = @[url1, url2];
-    [self.fileDownloadManager downloadFiles:arr];
+    [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:completionBlock];
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
+}
 
-    // Verify protocol methods is called
-    OCMVerifyAllWithDelay(protocolMock, 2.0);
+#pragma mark Private methods
+
+- (void)addAllStubs {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:fileURLMatch];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        NSString *fileString = [request.URL absoluteString];
+        NSString *fileType = [fileString pathExtension];
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        if ([fileType isEqualToString:@"txt"]) {
+            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"sampleTXTStub" ofType:@"txt"]
+                                                  statusCode:200
+                                                     headers:nil];
+        } else if ([fileType isEqualToString:@"pdf"]) {
+            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"samplePDFStub" ofType:@"pdf"]
+                                                  statusCode:200
+                                                     headers:nil];
+        } else {
+            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"clevertap-logo" ofType:@"png"]
+                                                  statusCode:200
+                                                     headers:nil];
+        }
+    }];
+}
+
+- (NSArray<NSURL *> *)generateFileURLs:(int)count {
+    NSMutableArray *arr = [NSMutableArray new];
+    for (int i = 0; i < count; i++) {
+        NSString *urlString = [[NSString alloc] initWithFormat:@"https://clevertap.com/%@.%@",fileURLMatch, fileURLTypes[i]];
+        [arr addObject:[NSURL URLWithString:urlString]];
+    }
+    return arr;
+}
+
+- (void)downloadFiles {
+    self.fileURLs = [self generateFileURLs:3];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Download files"];
+    
+    [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        NSLog(@"All files downloaded with status: %@", status);
+    }];
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
+}
+
+- (void)removeFiles {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Remove files"];
+    for(int i=0; i<[self.fileURLs count]; i++) {
+        NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[self.fileURLs[i] lastPathComponent]];
+        NSError *error;
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+    }
+    
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
 }
 
 @end
