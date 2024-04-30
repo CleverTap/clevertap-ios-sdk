@@ -76,7 +76,7 @@
             self,
             self.name,
             [CTTemplateArgument templateArgumentTypeString:self.type],
-            self.defaultValue];// TODO: do we need -- != nil ? self.defaultValue : @"nil"];
+            self.defaultValue];
 }
 
 @end
