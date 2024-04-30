@@ -42,7 +42,10 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
                 if (!self.templates[template.name]) {
                     self.templates[template.name] = template;
                 } else {
-                    CleverTapLogInfo(instanceConfig.logLevel, @"%@: Template with name: %@ is already defined.", self, template.name);
+                    @throw([NSException
+                            exceptionWithName:@"CleverTap Error"
+                            reason:[NSString stringWithFormat:@"CleverTap: Template with name: %@ is already defined.", template.name]
+                            userInfo:nil]);
                 }
             }
         }
