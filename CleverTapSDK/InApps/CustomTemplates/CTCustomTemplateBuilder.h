@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addArgument:(NSString *)name withString:(NSString *)defaultValue;
 - (void)addArgument:(NSString *)name withNumber:(NSNumber *)defaultValue;
 - (void)addArgument:(NSString *)name withBool:(BOOL)defaultValue;
+- (void)addArgument:(nonnull NSString *)name withDictionary:(nonnull NSDictionary *)defaultValue;
 - (void)addFileArgument:(NSString *)name;
 
 - (void)setOnPresentWithPresenter:(id<CTTemplatePresenter>)presenter;

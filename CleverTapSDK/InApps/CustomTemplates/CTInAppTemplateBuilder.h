@@ -14,7 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTInAppTemplateBuilder : CTCustomTemplateBuilder
 
 - (instancetype)init;
-- (void)addArgument:(NSString *)name withDictionary:(NSDictionary *)defaultValue;
 - (void)addActionArgument:(NSString *)name;
 
 @end

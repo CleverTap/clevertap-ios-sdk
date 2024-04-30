@@ -59,11 +59,6 @@
     XCTAssertNoThrow([templateBuilder addArgument:@"valid.two.name" withString:@"string"]);
 }
 
-- (void)testFunctionDotArgumentNameThrows {
-    CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
-    XCTAssertThrows([functionBuilder addArgument:@"dot.name" withString:@"string"]);
-}
-
 - (void)testFunctionArgumentDictionaryThrows {
     CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
 #pragma clang diagnostic push
