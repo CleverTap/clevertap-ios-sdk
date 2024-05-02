@@ -362,7 +362,7 @@
 		6BB7272B2B8E5C66009CE7D0 /* CTTemplateArgument.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB727292B8E5C66009CE7D0 /* CTTemplateArgument.h */; };
 		6BB7272C2B8E5C66009CE7D0 /* CTTemplateArgument.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB7272A2B8E5C66009CE7D0 /* CTTemplateArgument.m */; };
 		6BB7272E2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB7272D2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h */; };
-		6BB727332B8F787D009CE7D0 /* CTCustomTemplatesManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB727312B8F787D009CE7D0 /* CTCustomTemplatesManager.h */; };
+		6BB727332B8F787D009CE7D0 /* CTCustomTemplatesManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB727312B8F787D009CE7D0 /* CTCustomTemplatesManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6BB727342B8F787D009CE7D0 /* CTCustomTemplatesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB727322B8F787D009CE7D0 /* CTCustomTemplatesManager.m */; };
 		6BB727362B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB727352B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m */; };
 		6BD334EA2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */; };
