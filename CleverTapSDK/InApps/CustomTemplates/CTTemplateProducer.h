@@ -12,9 +12,9 @@
 #import "CTCustomTemplate.h"
 #import "CleverTapInstanceConfig.h"
 
-@protocol CTTemplateProducer <NSObject>
+@protocol CTTemplateProducer
 
-- (NSSet<CTCustomTemplate *> *)defineTemplates:(CleverTapInstanceConfig *)instanceConfig;
+- (NSSet<CTCustomTemplate *> * _Nonnull)defineTemplates:(CleverTapInstanceConfig * _Nonnull)instanceConfig;
 
 @end
 #endif /* TemplateProducer_h */
