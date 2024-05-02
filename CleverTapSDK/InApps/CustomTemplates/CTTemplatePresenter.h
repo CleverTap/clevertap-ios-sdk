@@ -11,7 +11,7 @@
 
 #import "CTTemplateContext.h"
 
-@protocol CTTemplatePresenter <NSObject>
+@protocol CTTemplatePresenter
 
 - (void)OnPresentWithContext:(CTTemplateContext *)context;
 - (void)OnCloseClickedWithContext:(CTTemplateContext *)context;
