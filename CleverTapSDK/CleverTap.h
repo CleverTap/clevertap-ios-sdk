@@ -1417,6 +1417,26 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
+#pragma mark Custom Templates and Functions
+
+/*!
+ @method
+ 
+ @abstract
+ Uploads Custom in-app templates and app functions to the server. Requires Development/Debug build/configuration.
+ */
+- (void)syncCustomTemplates;
+
+/*!
+ @method
+ 
+ @abstract
+ Uploads Custom in-app templates and app functions to the server.
+ 
+ @param isProduction Provide `true` if Custom in-app templates and app functions must be sync in Productuon build/configuration.
+ */
+- (void)syncCustomTemplates:(BOOL)isProduction;
+
 @end
 
 #pragma clang diagnostic pop

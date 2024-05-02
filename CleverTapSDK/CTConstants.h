@@ -97,7 +97,6 @@ extern NSString *CT_KIND_DICTIONARY;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
-extern NSString *CT_PE_DEFINE_VARS_ENDPOINT;
 extern NSString *CT_PE_VARS_PAYLOAD_TYPE;
 extern NSString *CT_PE_VARS_PAYLOAD_KEY;
 extern NSString *CT_PE_VAR_TYPE;
@@ -106,7 +105,6 @@ extern NSString *CT_PE_BOOL_TYPE;
 extern NSString *CT_PE_DEFAULT_VALUE;
 
 extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
-#define CLTAP_DEFINE_VARS_URL @"/defineVars"
 
 #pragma mark Constants for In-App Notifications
 #define CLTAP_INAPP_JSON_RESPONSE_KEY @"inapp_notifs"
