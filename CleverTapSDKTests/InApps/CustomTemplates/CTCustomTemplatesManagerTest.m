@@ -26,7 +26,7 @@
     [CTCustomTemplatesManager clearTemplateProducers];
 }
 
-- (void)testSyncPayload {
+- (void)testSyncPayloadComplex {
     NSMutableSet *templates = [NSMutableSet set];
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"Template 1"];
@@ -209,7 +209,7 @@
     XCTAssertEqualObjects(syncPayload, expectedPayload);
 }
 
-- (void)testSyncPayload2 {
+- (void)testSyncPayload {
     NSMutableSet *templates = [NSMutableSet set];
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"Template 1"];
