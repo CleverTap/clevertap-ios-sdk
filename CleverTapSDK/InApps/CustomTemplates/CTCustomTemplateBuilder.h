@@ -18,13 +18,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setName:(NSString *)name;
 
-- (void)addArgument:(NSString *)name withString:(NSString *)defaultValue;
-- (void)addArgument:(NSString *)name withNumber:(NSNumber *)defaultValue;
-- (void)addArgument:(NSString *)name withBool:(BOOL)defaultValue;
-- (void)addArgument:(nonnull NSString *)name withDictionary:(nonnull NSDictionary *)defaultValue;
+- (void)addArgument:(NSString *)name withString:(NSString *)defaultValue
+NS_SWIFT_NAME(addArgument(_:string:));
+
+- (void)addArgument:(NSString *)name withNumber:(NSNumber *)defaultValue
+NS_SWIFT_NAME(addArgument(_:number:));
+
+- (void)addArgument:(NSString *)name withBool:(BOOL)defaultValue
+NS_SWIFT_NAME(addArgument(_:boolean:));
+
+- (void)addArgument:(nonnull NSString *)name withDictionary:(nonnull NSDictionary *)defaultValue
+NS_SWIFT_NAME(addArgument(_:dictionary:));
+
 - (void)addFileArgument:(NSString *)name;
 
-- (void)setOnPresentWithPresenter:(id<CTTemplatePresenter>)presenter;
+- (void)setPresenter:(id<CTTemplatePresenter>)presenter;
 
 - (CTCustomTemplate *)build;
 

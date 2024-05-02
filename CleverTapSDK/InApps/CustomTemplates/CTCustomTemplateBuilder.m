@@ -69,7 +69,6 @@
     [self validateParentNames:name];
 
     CTTemplateArgument *arg = [[CTTemplateArgument alloc] initWithName:name type:type defaultValue:defaultValue];
-    NSLog(@"ARG Test: %@", arg);
     [self.arguments addObject:arg];
     [self.argumentNames addObject:name];
 }
@@ -160,7 +159,7 @@
     _name = name;
 }
 
-- (void)setOnPresentWithPresenter:(id<CTTemplatePresenter>)presenter {
+- (void)setPresenter:(id<CTTemplatePresenter>)presenter {
     self.presenter = presenter;
 }
 

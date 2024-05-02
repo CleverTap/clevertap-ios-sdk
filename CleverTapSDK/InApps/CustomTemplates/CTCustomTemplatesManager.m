@@ -53,7 +53,7 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     return self;
 }
 
-- (BOOL)existsTemplateWithName:(nonnull NSString *)name {
+- (BOOL)isRegisteredTemplateWithName:(nonnull NSString *)name {
     return self.templates[name];
 }
 

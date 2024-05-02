@@ -146,7 +146,7 @@
 - (void)testArgumentOrder {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"template"];
-    [templateBuilder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     [templateBuilder addArgument:@"a" withString:@""];
     [templateBuilder addArgument:@"b" withBool:YES];
     [templateBuilder addFileArgument:@"c"];
@@ -162,7 +162,7 @@
 - (void)testFlatDictionaryArgument {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"template"];
-    [templateBuilder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     [templateBuilder addArgument:@"e" withDictionary:@{
         @"g": @"value",
         @"h": @1,
@@ -187,7 +187,7 @@
 - (void)testArguments {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"template"];
-    [templateBuilder setOnPresentWithPresenter:[CTTemplatePresenterMock new]];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     [templateBuilder addArgument:@"string" withString:@"string value"];
     [templateBuilder addArgument:@"string 2" withString:@"string value 2"];
     [templateBuilder addArgument:@"bool" withBool:YES];

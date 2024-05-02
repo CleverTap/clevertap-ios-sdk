@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig;
 
-- (BOOL)existsTemplateWithName:(NSString *)name;
+- (BOOL)isRegisteredTemplateWithName:(NSString *)name;
 
 - (NSDictionary*)syncPayload;
 
