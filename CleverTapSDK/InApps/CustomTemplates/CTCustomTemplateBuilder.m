@@ -146,7 +146,7 @@
 }
 
 - (void)setPresenter:(id<CTTemplatePresenter>)presenter {
-    self.presenter = presenter;
+    _presenter = presenter;
 }
 
 - (CTCustomTemplate *)build {
