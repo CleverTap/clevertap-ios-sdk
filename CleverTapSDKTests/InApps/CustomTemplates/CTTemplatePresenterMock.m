@@ -10,10 +10,10 @@
 
 @implementation CTTemplatePresenterMock
 
-- (void)OnCloseClickedWithContext:(CTTemplateContext *)context {
+- (void)onCloseClicked:(CTTemplateContext *)context {
 }
 
-- (void)OnPresentWithContext:(CTTemplateContext *)context {
+- (void)onPresent:(CTTemplateContext *)context {
 }
 
 @end

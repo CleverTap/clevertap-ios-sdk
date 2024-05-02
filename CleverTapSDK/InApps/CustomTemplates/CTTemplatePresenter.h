@@ -11,11 +11,17 @@
 
 #import "CTTemplateContext.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol CTTemplatePresenter
 
-- (void)OnPresentWithContext:(CTTemplateContext *)context;
-- (void)OnCloseClickedWithContext:(CTTemplateContext *)context;
+- (void)onPresent:(CTTemplateContext *)context
+NS_SWIFT_NAME(onPresent(context:));
+- (void)onCloseClicked:(CTTemplateContext *)context
+NS_SWIFT_NAME(onCloseClicked(context:));
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif /* TemplatePresenter_h */
