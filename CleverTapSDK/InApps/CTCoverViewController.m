@@ -44,7 +44,9 @@
         } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if !(TARGET_OS_VISION)
             topLength = self.topLayoutGuide.length;
+#endif
 #pragma clang diagnostic pop
         }
         [[NSLayoutConstraint constraintWithItem: self.closeButton

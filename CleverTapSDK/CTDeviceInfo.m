@@ -6,6 +6,7 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
+#import "CTUIUtils.h"
 #import "CTDeviceInfo.h"
 #import "CTValidator.h"
 #import "CTValidationResult.h"
@@ -13,10 +14,22 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 
+#if __has_include(<CoreTelephony/CTTelephonyNetworkInfo.h>)
+    #define HAS_NETWORK_INFO 1
+#endif
+
+#if __has_include(<CoreTelephony/CTCarrier.h>)
+    #define HAS_CARRIER 1
+#endif
+
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 #import <SystemConfiguration/SystemConfiguration.h>
+#if HAS_NETWORK_INFO
 #import <CoreTelephony/CTTelephonyNetworkInfo.h>
+#endif
+#if HAS_CARRIER
 #import <CoreTelephony/CTCarrier.h>
+#endif
 #endif
 
 NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
@@ -44,7 +57,9 @@ static NSLocale *_systemLocale;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 SCNetworkReachabilityRef _reachability;
+#if HAS_NETWORK_INFO
 static CTTelephonyNetworkInfo *_networkInfo;
+#endif
 #endif
 
 @interface CTDeviceInfo () {}
@@ -126,7 +141,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
                 }
             }
         }
+#if HAS_NETWORK_INFO
         _networkInfo = [CTTelephonyNetworkInfo new];
+#endif
 #endif
         [self initDeviceID:cleverTapID];
     }
@@ -383,6 +400,8 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)osName {
 #if TARGET_OS_TV
     return @"tvOS";
+#elif TARGET_OS_VISION
+    return @"VisionOS";
 #else
     return @"iOS";
 #endif
@@ -410,9 +429,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString *)deviceWidth {
     if (!_deviceWidth) {
-        float scale = [[UIScreen mainScreen] scale];
+        float scale = [CTUIUtils screenScale];
         float ppi = scale * ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad ? 132 : 163);
-        float width = ([[UIScreen mainScreen] bounds].size.width * scale);
+        float width = ([CTUIUtils screenBounds].size.width * scale);
         float rWidth = width / ppi;
         _deviceWidth = [NSString stringWithFormat:@"%.2f", [CTUtils toTwoPlaces:rWidth]];
     }
@@ -421,9 +440,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (NSString *)deviceHeight {
     if (!_deviceHeight) {
-        float scale = [[UIScreen mainScreen] scale];
+        float scale = [CTUIUtils screenScale];
         float ppi = scale * ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad ? 132 : 163);
-        float height = ([[UIScreen mainScreen] bounds].size.height * scale);
+        float height = ([CTUIUtils screenBounds].size.height * scale);
         float rHeight = height / ppi;
         _deviceHeight = [NSString stringWithFormat:@"%.2f", [CTUtils toTwoPlaces:rHeight]];
     }
@@ -448,6 +467,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 
 - (NSString *)carrier {
+#if HAS_CARRIER
     if (!_carrier) {
         if (@available(iOS 16.0, *)) {
             // CTCarrier is deprecated above iOS version 16 with no replacements so carrierName will be empty.
@@ -459,7 +479,8 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 #pragma clang diagnostic pop
         }
     }
-    return _carrier;
+#endif
+    return _carrier ?: @"";
 }
 
 - (NSString *)countryCode {
@@ -471,11 +492,13 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if HAS_CARRIER
             _countryCode =  [self getCarrier].isoCountryCode ?: @"";
+#endif
 #pragma clang diagnostic pop
         }
     }
-    return _countryCode;
+    return _countryCode ?: @"";
 }
 
 - (NSString *)radio {
@@ -488,6 +511,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if HAS_CARRIER
 - (CTCarrier *)getCarrier {
     if (@available(iOS 12.0, *)) {
         NSString *providerKey = _networkInfo.serviceSubscriberCellularProviders.allKeys.lastObject;
@@ -497,10 +521,12 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         return _networkInfo.subscriberCellularProvider;
     }
 }
+#endif
 #pragma clang diagnostic pop
 
 - (NSString *)getCurrentRadioAccessTechnology {
     __block NSString *radioValue;
+#if HAS_NETWORK_INFO
     if (@available(iOS 12, *)) {
         NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
         [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
@@ -517,13 +543,14 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
             radioValue = [radio substringFromIndex:23];
         }
     }
+#endif
     return radioValue;
 }
 #endif
 
 - (NSLocale *)systemLocale {
     if (!_systemLocale) {
-        NSLocale *currentLocale = [NSLocale currentLocale];
+        NSLocale *currentLocale = [NSLocale autoupdatingCurrentLocale];
         
         NSString *language = [[NSLocale preferredLanguages] firstObject];
         if (!language || [language  isEqualToString:@""] ){

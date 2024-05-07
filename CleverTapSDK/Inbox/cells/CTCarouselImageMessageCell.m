@@ -43,13 +43,13 @@
     
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = [CTUIUtils getLeftMargin];
-        CGFloat viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width - margins*2;
+        CGFloat viewWidth = (CGFloat)[CTUIUtils screenBounds].size.width - margins*2;
         CGFloat viewHeight = viewWidth / 3.5;
         self.carouselViewHeight.constant  = viewHeight;
         self.carouselLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
         self.carouselPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
     } else {
-        CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width;
+        CGFloat viewWidth = (CGFloat)[CTUIUtils screenBounds].size.width;
         CGFloat viewHeight = viewWidth;
         if (![self orientationIsPortrait]) {
             viewHeight = (viewWidth*[self getLandscapeMultiplier]);

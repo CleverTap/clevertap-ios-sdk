@@ -55,7 +55,8 @@ typedef enum {
 
 - (void)loadView {
     if (self.shouldPassThroughTouches) {
-        self.view = [[CTInAppPassThroughView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        CGRect bounds;
+        self.view = [[CTInAppPassThroughView alloc] initWithFrame:CGRectMake(0, 0, [CTUIUtils screenBounds].size.width, [CTUIUtils screenBounds].size.height)];
         CTInAppPassThroughView *view = (CTInAppPassThroughView*)self.view;
         view.delegate = self;
     } else {
@@ -113,7 +114,6 @@ typedef enum {
         [webView loadHTMLString:self.notification.html baseURL:nil];
     }
     boolean_t fixedWidth = false, fixedHeight = false;
-    
     CGSize size = CGSizeZero;
     if (self.notification.width > 0) {
         // Ignore Constants.INAPP_X_PERCENT
@@ -121,7 +121,7 @@ typedef enum {
         fixedWidth = true;
     } else {
         float percent = self.notification.widthPercent;
-        size.width = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
+        size.width = (CGFloat) ceil([CTUIUtils screenBounds].size.width * (percent / 100.0f));
     }
     
     if (self.notification.height > 0) {
@@ -130,7 +130,7 @@ typedef enum {
         fixedHeight = true;
     } else {
         float percent = self.notification.heightPercent;
-        size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        size.height = (CGFloat) ceil([CTUIUtils screenBounds].size.height * (percent / 100.0f));
     }
     
     // prevent webview content insets for Cover
@@ -146,7 +146,7 @@ typedef enum {
     frame.size = size;
     webView.autoresizingMask = UIViewAutoresizingNone;
     
-    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+    CGSize screenSize = [CTUIUtils screenBounds].size;
     char pos = self.notification.position;
     CGFloat statusBarFrameHeight = 0.0;
     if (@available(iOS 13.0, *)) {
@@ -154,7 +154,11 @@ typedef enum {
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if TARGET_OS_VISION
+        statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
+#else
         statusBarFrameHeight = [[CTUIUtils getSharedApplication] statusBarFrame].size.height;
+#endif
 #pragma clang diagnostic pop
     }
     CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? statusBarFrameHeight : 0.0;
@@ -494,7 +498,7 @@ typedef enum {
             }
         }
     } else {
-        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [CTUIUtils screenBounds].size.width, [CTUIUtils screenBounds].size.height)];
     }
     
     self.window.alpha = 0;

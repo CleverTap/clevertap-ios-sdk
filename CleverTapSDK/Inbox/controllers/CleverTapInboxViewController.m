@@ -176,7 +176,9 @@ static const int kMaxTags = 3;
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if !(TARGET_OS_VISION)
         self.automaticallyAdjustsScrollViewInsets = NO;
+#endif
 #pragma clang diagnostic pop
     }
     self.edgesForExtendedLayout = UIRectEdgeNone;

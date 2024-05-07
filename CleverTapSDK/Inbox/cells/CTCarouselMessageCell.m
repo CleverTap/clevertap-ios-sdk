@@ -104,7 +104,7 @@ static const float kPageControlViewHeight = 30.f;
     
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = [CTUIUtils getLeftMargin];
-        CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;
+        CGFloat viewWidth = (CGFloat)  [CTUIUtils screenBounds].size.width - margins*2;
         CGFloat viewHeight = viewWidth / 3.5;
         CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
         self.frame = frame;
@@ -114,7 +114,7 @@ static const float kPageControlViewHeight = 30.f;
         [self configurePageControlWithRect:CGRectMake(viewWidth/2, self.carouselView.frame.size.height - kPageControlViewHeight, 64 * [self.itemViews count], kPageControlViewHeight)];
     } else {
         captionHeight = [CTCarouselImageView captionHeight];
-        CGFloat viewWidth = (CGFloat) [[UIScreen mainScreen] bounds].size.width;
+        CGFloat viewWidth = (CGFloat) [CTUIUtils screenBounds].size.width;
         CGFloat viewHeight = [self calculateHeight:viewWidth];
         CGRect frame = CGRectMake(0, 0, viewWidth, viewHeight);
         self.frame = frame;

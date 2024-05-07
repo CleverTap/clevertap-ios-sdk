@@ -111,8 +111,9 @@ API_AVAILABLE(ios(13.0)) {
             }
         }
     } else {
+        
         self.window = [[UIWindow alloc] initWithFrame:
-                       CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+                       CGRectMake(0, 0, [CTUIUtils screenBounds].size.width, [CTUIUtils screenBounds].size.height)];
     }
     if (!self.window) {
         CleverTapLogStaticDebug(@"%@:%@: UIWindow not initialized.", [CTInAppDisplayViewController class], self);
@@ -143,7 +144,7 @@ API_AVAILABLE(ios(13.0)) {
     
     if (animated) {
         CGRect windowFrame = self.window.frame;
-        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  [UIScreen mainScreen].bounds.size.width, windowFrame.size.height);
+        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  [CTUIUtils screenBounds].size.width, windowFrame.size.height);
         self.window.frame = transformWindowFrame;
         
         [UIView animateWithDuration:0.33 delay:0 usingSpringWithDamping:1.0 initialSpringVelocity:10 options:UIViewAnimationOptionTransitionFlipFromTop animations:^{

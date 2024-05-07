@@ -59,8 +59,7 @@
     
     self.view.backgroundColor = [UIColor clearColor];
     self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
-    
-    if ([UIScreen mainScreen].bounds.size.height == 480) {
+    if ([CTUIUtils screenBounds].size.height == 480) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [[NSLayoutConstraint constraintWithItem:self.containerView
                                       attribute:NSLayoutAttributeWidth

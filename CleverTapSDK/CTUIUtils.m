@@ -78,7 +78,9 @@
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if !(TARGET_OS_VISION)
         orientation = [[CTUIUtils getSharedApplication] statusBarOrientation];
+#endif
 #pragma clang diagnostic pop
     }
     BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
@@ -153,6 +155,25 @@
             [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
         }
     }
+}
+
++ (CGRect)screenBounds {
+#if TARGET_OS_VISION
+    CGSize screenSize = CGSizeMake(1280, 720); // https://developer.apple.com/design/human-interface-guidelines/windows#visionOS
+    CGRect bounds = CGRectMake(0, 0, screenSize.width, screenSize.height);
+    
+    return bounds;
+#else
+    return [UIScreen mainScreen].bounds;
+#endif
+}
+
++ (CGFloat)screenScale {
+#if TARGET_OS_VISION
+    return UITraitCollection.currentTraitCollection.displayScale;
+#else
+    return [[UIScreen mainScreen] scale];
+#endif
 }
 
 @end

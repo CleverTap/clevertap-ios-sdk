@@ -1,6 +1,7 @@
 
 #import "CTInterstitialImageViewController.h"
 #import "CTImageInAppViewControllerPrivate.h"
+#import "CTUIUtils.h"
 
 @interface CTInterstitialImageViewController ()
 
@@ -20,7 +21,7 @@
 
 - (void)layoutNotification {
     [super layoutNotification];
-    if ([UIScreen mainScreen].bounds.size.height == 480) {
+    if ([CTUIUtils screenBounds].size.height == 480) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [[NSLayoutConstraint constraintWithItem:self.containerView
                                       attribute:NSLayoutAttributeWidth

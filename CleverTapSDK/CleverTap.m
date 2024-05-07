@@ -1530,9 +1530,11 @@ static BOOL sharedInstanceErrorLogged;
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#if !TARGET_OS_VISION
     else if ([object isKindOfClass:[UILocalNotification class]]) {
         notification = [((UILocalNotification *) object) userInfo];
     }
+#endif
 #pragma clang diagnostic pop
     else if ([object isKindOfClass:[NSDictionary class]]) {
         notification = object;

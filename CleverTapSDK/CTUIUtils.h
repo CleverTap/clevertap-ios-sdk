@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (BOOL)runningInsideAppExtension;
 + (void)openURL:(NSURL *)ctaURL forModule:(NSString *)ctModule;
++ (CGRect)screenBounds;
++ (CGFloat)screenScale;
 
 @end
 

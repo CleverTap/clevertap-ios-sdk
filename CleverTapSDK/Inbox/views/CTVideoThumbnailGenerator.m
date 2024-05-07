@@ -66,6 +66,7 @@
     NSArray *keys = @[@"playable", @"tracks", @"duration"];
     [asset loadValuesAsynchronouslyForKeys:keys completionHandler:^{
         if ([[url absoluteString] isEqualToString: [[asset URL] absoluteString]]) {
+#if !TARGET_OS_VISION
             CMTime duration = [asset duration];
             CMTime snapshot = CMTimeMake(0, duration.timescale);
             AVAssetImageGenerator *generator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
@@ -76,6 +77,17 @@
             UIImage *thumbnail = [UIImage imageWithCGImage:imageRef];
             CGImageRelease(imageRef);
             completion(thumbnail, self.sourceUrl);
+#else
+            CMTime duration = [asset duration];
+            CMTime snapshot = CMTimeMake(0, duration.timescale);
+            AVAssetImageGenerator *generator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
+            generator.appliesPreferredTrackTransform = YES;
+            [generator generateCGImageAsynchronouslyForTime:snapshot completionHandler:^(CGImageRef  _Nullable image, CMTime actualTime, NSError * _Nullable error) {
+                UIImage *thumbnail = [UIImage imageWithCGImage:image];
+                CGImageRelease(image);
+                completion(thumbnail, self.sourceUrl);
+            }];
+#endif
         }
     }];
 }

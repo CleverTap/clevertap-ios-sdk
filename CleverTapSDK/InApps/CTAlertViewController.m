@@ -108,7 +108,7 @@
             }
         }
     } else {
-        self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        self.window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, [CTUIUtils screenBounds].size.width, [CTUIUtils screenBounds].size.height)];
     }
     self.window.alpha = 0;
     self.window.backgroundColor = [UIColor clearColor];
