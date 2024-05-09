@@ -86,8 +86,8 @@ typedef enum {
     // set image
     if (self.notification.inAppImage) {
         self.inAppImage = self.notification.inAppImage;
-    } else if (self.notification.image) {
-        self.inAppImage = [UIImage imageWithData:self.notification.image];
+    } else if (self.notification.imageData) {
+        self.inAppImage = [UIImage imageWithData:self.notification.imageData];
     }
     if (self.inAppImage) {
         self.imageView.clipsToBounds = YES;

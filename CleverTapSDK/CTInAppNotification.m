@@ -15,13 +15,13 @@
 @property (nonatomic, readwrite) NSString *type;
 @property (nonatomic, readwrite) CTInAppType inAppType;
 
-@property (nonatomic, strong) NSURL *imageURL;
-@property (nonatomic, strong) NSURL *imageUrlLandscape;
+@property (nonatomic, strong, readwrite) NSURL *imageURL;
+@property (nonatomic, strong, readwrite) NSURL *imageUrlLandscape;
 
 @property (nonatomic, readwrite, strong) UIImage *inAppImage;
 @property (nonatomic, readwrite, strong) UIImage *inAppImageLandscape;
-@property (nonatomic, readwrite, strong) NSData *image;
-@property (nonatomic, readwrite, strong) NSData *imageLandscape;
+@property (nonatomic, readwrite, strong) NSData *imageData;
+@property (nonatomic, readwrite, strong) NSData *imageLandscapeData;
 @property (nonatomic, copy, readwrite) NSString *contentType;
 @property (nonatomic, copy, readwrite) NSString *landscapeContentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
@@ -64,10 +64,6 @@
 @property (nonatomic, readwrite) BOOL fallBackToNotificationSettings;
 @property (nonatomic, readwrite) BOOL skipSettingsAlert;
 
-@property (nonatomic, readwrite) NSString *error;
-
-@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
-
 @end
 
 @implementation CTInAppNotification: NSObject
@@ -77,11 +73,9 @@
 @synthesize mediaIsAudio=_mediaIsAudio;
 @synthesize mediaIsVideo=_mediaIsVideo;
 
-- (instancetype)initWithJSON:(NSDictionary *)jsonObject
-        imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
+- (instancetype)initWithJSON:(NSDictionary *)jsonObject {
     if (self = [super init]) {
         @try {
-            self.imagePrefetchManager = imagePrefetchManager;
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
             self.campaignId = (NSString*) jsonObject[CLTAP_NOTIFICATION_ID_TAG];
@@ -307,58 +301,18 @@
 #endif
 }
 
-- (void)prepareWithCompletionHandler: (void (^)(void))completionHandler {
-#if !(TARGET_OS_TV)
-    if ([NSThread isMainThread]) {
-        self.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
-        completionHandler();
-        return;
-    }
-    
-    if (self.imageURL) {
-        UIImage *image = [self loadImageIfPresentInDiskCache:self.imageURL];
-        if (image) {
-            self.inAppImage = image;
-            self.error = nil;
-        } else {
-            NSError *error = nil;
-            NSData *imageData = [NSData dataWithContentsOfURL:self.imageURL options:NSDataReadingMappedIfSafe error:&error];
-            if (error || !imageData) {
-                self.error = [NSString stringWithFormat:@"unable to load image from URL: %@", self.imageURL];
-            } else {
-                if ([self.contentType isEqualToString:@"image/gif"] ) {
-                    SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
-                    if (gif == nil) {
-                        self.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", self.imageURL];
-                    }
-                }
-                self.image = self.error ? nil : imageData;
-            }
-        }
-    }
-    if (self.imageUrlLandscape && self.hasLandscape) {
-        UIImage *image = [self loadImageIfPresentInDiskCache:self.imageUrlLandscape];
-        if (image) {
-            self.inAppImageLandscape = image;
-            self.error = nil;
-        } else {
-            NSError *error = nil;
-            NSData *imageData = [NSData dataWithContentsOfURL:self.imageUrlLandscape options:NSDataReadingMappedIfSafe error:&error];
-            if (error || !imageData) {
-                self.error = [NSString stringWithFormat:@"unable to load landscape image from URL: %@", self.imageUrlLandscape];
-            } else {
-                if ([self.landscapeContentType isEqualToString:@"image/gif"] ) {
-                    SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
-                    if (gif == nil) {
-                        self.error = [NSString stringWithFormat:@"unable to decode landscape gif for URL: %@", self.imageUrlLandscape];
-                    }
-                }
-                self.imageLandscape = self.error ? nil : imageData;
-            }
-        }
-    }
-#endif
-    completionHandler();
+- (void)setPreparedInAppImage:(UIImage *)inAppImage
+               inAppImageData:(NSData *)inAppImageData error:(NSString *)error {
+    self.error = error;
+    self.inAppImage = inAppImage;
+    self.imageData = inAppImageData;
+}
+
+- (void)setPreparedInAppImageLandscape:(UIImage *)inAppImageLandscape
+               inAppImageLandscapeData:(NSData *)inAppImageLandscapeData error:(NSString *)error {
+    self.error = error;
+    self.inAppImageLandscape = inAppImageLandscape;
+    self.imageLandscapeData = inAppImageLandscapeData;
 }
 
 - (BOOL)validateLegacyJSON:(NSDictionary *)jsonObject {
@@ -430,13 +384,6 @@
         }
     }
     return FALSE;
-}
-
-- (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
-    NSString *imageURLString = [imageURL absoluteString];
-    UIImage *image = [self.imagePrefetchManager loadImageFromDisk:imageURLString];
-    if (image) return image;
-    return nil;
 }
 
 + (NSString * _Nullable)inAppId:(NSDictionary * _Nullable)inApp {
