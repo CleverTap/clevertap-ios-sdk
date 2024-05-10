@@ -4,6 +4,7 @@
 #import "CTNotificationButton.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppImagePrefetchManager.h"
+#import "CTCustomTemplateInAppData.h"
 #endif
 
 @interface CTInAppNotification : NSObject
@@ -65,6 +66,8 @@
 @property (nonatomic, readonly) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readonly) BOOL fallBackToNotificationSettings;
 @property (nonatomic, readonly) BOOL skipSettingsAlert;
+
+@property (nonatomic, readonly) CTCustomTemplateInAppData *customTemplateInAppData;
 
 - (instancetype)init __unavailable;
 #if !CLEVERTAP_NO_INAPP_SUPPORT

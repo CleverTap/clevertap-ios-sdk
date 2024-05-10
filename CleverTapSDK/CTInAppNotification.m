@@ -64,6 +64,8 @@
 @property (nonatomic, readwrite) BOOL fallBackToNotificationSettings;
 @property (nonatomic, readwrite) BOOL skipSettingsAlert;
 
+@property (nonatomic, readwrite) CTCustomTemplateInAppData *customTemplateInAppData;
+
 @end
 
 @implementation CTInAppNotification: NSObject
@@ -100,6 +102,7 @@
                 [self legacyConfigureFromJSON:jsonObject];
             } else {
                 [self configureFromJSON:jsonObject];
+                self.customTemplateInAppData = [CTCustomTemplateInAppData createWithJSON:jsonObject];
             }
             if (self.inAppType == CTInAppTypeUnknown) {
                 self.error = @"Unknown InApp Type";

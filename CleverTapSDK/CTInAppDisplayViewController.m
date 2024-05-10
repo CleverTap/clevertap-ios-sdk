@@ -253,7 +253,7 @@ API_AVAILABLE(ios(13.0)) {
     }
     
     // For showing Push Permission through InApp Campaign, positive button type is "rfp".
-    if ([button.type isEqual:@"rfp"]) {
+    if (button.type == CTInAppActionTypeRequestForPermission) {
         if (self.delegate && [self.delegate respondsToSelector:@selector(handleInAppPushPrimer:fromViewController:withFallbackToSettings:)]) {
             [self.delegate handleInAppPushPrimer:self.notification
                               fromViewController:self
