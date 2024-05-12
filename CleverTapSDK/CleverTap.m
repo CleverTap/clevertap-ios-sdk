@@ -482,7 +482,8 @@ static BOOL sharedInstanceErrorLogged;
             [self initializeInAppSupport];
         }
 #endif
-#if defined(CLEVERTAP_TVOS)
+        // TODO: REMOVE VISIONOS WHEN INAPPS/INBOX ARE SUPPORTED
+#if defined(CLEVERTAP_TVOS) || TARGET_OS_VISION
         self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config];
 #endif
         

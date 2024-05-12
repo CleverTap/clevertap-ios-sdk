@@ -18,6 +18,14 @@
 #define CLEVERTAP_NO_GEOFENCE_SUPPORT 1
 #endif
 
+// TODO: REMOVE VISIONOS WHEN INAPPS/INBOX ARE SUPPORTED
+#if TARGET_OS_VISION
+#define CLEVERTAP_NO_INAPP_SUPPORT 1
+#define CLEVERTAP_NO_INBOX_SUPPORT 1
+#endif
+
+
+
 @protocol CleverTapDomainDelegate;
 @protocol CleverTapSyncDelegate;
 @protocol CleverTapURLDelegate;

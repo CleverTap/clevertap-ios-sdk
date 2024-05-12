@@ -196,6 +196,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 }
 
 - (void)prepareNotificationForDisplay:(NSDictionary*)jsonObj {
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     if (self.inAppRenderingStatus == CleverTapInAppDiscard) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
         return;
@@ -226,6 +227,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }];
         }];
     }];
+#endif
 }
 
 - (void)notificationReady:(CTInAppNotification*)notification {
