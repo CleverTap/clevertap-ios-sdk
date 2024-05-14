@@ -186,6 +186,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_TEMPLATE_ID @"templateId"
 #define CLTAP_INAPP_TEMPLATE_DESCRIPTION @"templateDescription"
 #define CLTAP_INAPP_VARS @"vars"
+#define CLTAP_INAPP_ACTIONS @"actions"
 
 #define CLTAP_INAPP_PREVIEW_TYPE @"wzrk_inapp_type"
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE @"image-interstitial"

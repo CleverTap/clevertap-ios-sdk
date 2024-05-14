@@ -1,4 +1,5 @@
 #import "CTNotificationButton.h"
+#import "CTConstants.h"
 
 @interface CTNotificationButton () {
     
@@ -30,7 +31,7 @@
             self.borderColor = jsonObject[@"border"];
             self.backgroundColor = jsonObject[@"bg"];
             
-            NSDictionary *actions = jsonObject[@"actions"];
+            NSDictionary *actions = jsonObject[CLTAP_INAPP_ACTIONS];
             if (actions) {
                 self.action = [[CTNotificationAction alloc] initWithJSON:actions];
                 if (self.action.error) {

@@ -8,8 +8,200 @@
 
 #import "CTTemplateContext.h"
 #import "CTTemplateContext-Internal.h"
+#import "CTTemplateArgument.h"
+#import "CTCustomTemplate-Internal.h"
+#import "CTNotificationAction.h"
+#import "CTConstants.h"
+
+@interface CTTemplateContext ()
+
+@property (nonatomic) CTCustomTemplate *template;
+@property (nonatomic) CTInAppNotification *notification;
+@property (nonatomic, strong) NSDictionary *argumentValues;
+
+@end
 
 @implementation CTTemplateContext
 
+@synthesize argumentValues = _argumentValues;
+
+- (instancetype)initWithTemplate:(CTCustomTemplate *)template andNotification:(CTInAppNotification *)notification {
+    if (self = [super init]) {
+        self.notification = notification;
+        self.template = template;
+    }
+    return self;
+}
+
+- (NSString *)templateName {
+    return self.template.name;
+}
+
+- (NSString *)stringNamed:(NSString *)name {
+    return self.argumentValues[name];
+}
+
+- (NSNumber *)numberNamed:(NSString *)name {
+    return self.argumentValues[name];
+}
+
+- (int)charNamed:(NSString *)name {
+    return [[self numberNamed:name] charValue];
+}
+
+- (int)intNamed:(NSString *)name {
+    return [[self numberNamed:name] intValue];
+}
+
+- (double)doubleNamed:(NSString *)name {
+    return [[self numberNamed:name] doubleValue];
+}
+
+- (float)floatNamed:(NSString *)name {
+    return [[self numberNamed:name] floatValue];
+}
+
+- (long)longNamed:(NSString *)name {
+    return [[self numberNamed:name] longValue];
+}
+
+- (long long)longLongNamed:(NSString *)name {
+    return [[self numberNamed:name] longLongValue];
+}
+
+- (BOOL)boolNamed:(NSString *)name {
+    return [self.argumentValues[name] boolValue];
+}
+
+- (NSDictionary *)dictionaryNamed:(NSString *)name {
+    NSString *namePrefix = [NSString stringWithFormat:@"%@.", name];
+    NSArray *matchingKeys = [self.argumentValues.allKeys filteredArrayUsingPredicate:
+                             [NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return [evaluatedObject hasPrefix:namePrefix];
+    }]];
+    
+    if ([matchingKeys count] == 0) {
+        return nil;
+    }
+    
+    NSDictionary<NSString *, id> *matchedDictionary = [self.argumentValues dictionaryWithValuesForKeys:matchingKeys];
+    NSMutableDictionary<NSString *, id> *result = [NSMutableDictionary dictionary];
+    for (NSString *key in matchedDictionary) {
+        NSString *subKey = [key substringWithRange:NSMakeRange(namePrefix.length, key.length - namePrefix.length)];
+        NSArray<NSString *> *keyParts = [subKey componentsSeparatedByString:@"."];
+        id value = matchedDictionary[key];
+        
+        // If value is an action (CTNotificationAction *) return the template name or action type
+        id keyValue;
+        if ([value isKindOfClass:[CTNotificationAction class]]) {
+            CTNotificationAction *action = value;
+            keyValue = action.customTemplateInAppData.templateName ?: [CTInAppUtils inAppActionTypeString:action.type] ?: @"";
+        } else {
+            keyValue = value;
+        }
+        
+        /* 
+         a.b.c = 1
+         a.b.d = 2
+         a.b.e.f = 3
+         [dictionaryNamed:a] -> keys = [b.c, b.d, b.e.f]
+         result = {
+            b {
+                c: 1,
+                d: 2,
+                e: {
+                    f: 3
+                }
+            }
+         }
+         */
+        NSMutableDictionary<NSString *, id> *currentMap = result;
+        for (NSUInteger i = 0; i < keyParts.count; i++) {
+            NSString *keyPart = keyParts[i];
+            if (i == keyParts.count - 1) {
+                currentMap[keyPart] = keyValue;
+            } else {
+                NSMutableDictionary<NSString *, id> *innerMap = currentMap[keyPart];
+                if (!innerMap) {
+                    innerMap = [NSMutableDictionary dictionary];
+                    currentMap[keyPart] = innerMap;
+                }
+                
+                currentMap = innerMap;
+            }
+        }
+    }
+    
+    return [result copy];
+}
+
+- (NSString *)fileNamed:(NSString *)name {
+    // TODO: add when implementing file handling
+    return self.argumentValues[name];
+}
+
+- (void)executeActionNamed:(NSString *)name {
+    // TODO: add when implementing action handling
+}
+
+- (void)dismissed {
+    // TODO: implement
+}
+
+- (NSDictionary *)argumentValues {
+    if (_argumentValues) {
+        return _argumentValues;
+    }
+    _argumentValues = [self mergeArguments];
+    return _argumentValues;
+}
+
+- (NSDictionary *)mergeArguments {
+    NSMutableDictionary *merged = [NSMutableDictionary new];
+    for (CTTemplateArgument *arg in self.template.arguments) {
+        merged[arg.name] = arg.defaultValue;
+        id override = [self valueForArgument:arg];
+        if (override) {
+            merged[arg.name] = override;
+        }
+    }
+    
+    return [merged copy];
+}
+
+- (id)valueForArgument:(CTTemplateArgument *)arg {
+    NSDictionary *overrides = self.notification.customTemplateInAppData.args;
+    id override = overrides[arg.name];
+    if (override) {
+        switch (arg.type) {
+            case CTTemplateArgumentTypeString:
+                if ([override isKindOfClass:[NSString class]]) {
+                    return override;
+                }
+                break;
+            case CTTemplateArgumentTypeNumber:
+            case CTTemplateArgumentTypeBool:
+                if ([override isKindOfClass:[NSNumber class]]) {
+                    return override;
+                }
+                break;
+            case CTTemplateArgumentTypeFile:
+                // TODO: add when implementing file handling
+                break;
+            case CTTemplateArgumentTypeAction: {
+                CTNotificationAction *action = [[CTNotificationAction alloc] initWithJSON:override[CLTAP_INAPP_ACTIONS]];
+                if (action && !action.error) {
+                    return action;
+                } else if (action.error) {
+                    CleverTapLogStaticDebug(@"%@: Error creating action for argument: %@. Error: %@", self, arg.name, action.error);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    return nil;
+}
 
 @end
