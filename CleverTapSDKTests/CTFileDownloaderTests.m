@@ -88,6 +88,17 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     XCTAssertEqual([inactiveUrls count], 1);
 }
 
+- (void)testGetFileDownloadPath {
+    NSArray *urls = [self generateFileURLs:1];
+    [self downloadFiles:urls ofType:CTInAppClientSide];
+    NSString *filePath = [self.fileDownloader getFileDownloadPath:urls[0]];
+
+    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *expectedFilePath = [documentsPath stringByAppendingPathComponent:[urls[0] lastPathComponent]];
+    XCTAssertNotNil(filePath);
+    XCTAssertEqualObjects(filePath, expectedFilePath);
+}
+
 #pragma mark Private methods
 
 - (void)addAllStubs {

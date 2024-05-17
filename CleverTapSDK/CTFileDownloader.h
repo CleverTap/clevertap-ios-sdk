@@ -18,6 +18,7 @@ typedef NS_ENUM(int, CTFileDownloadType) {
   withCompletionBlock:(void (^)(NSDictionary<NSString *,id> *status))completion;
 - (BOOL)isFileAlreadyPresent:(NSString *)url;
 - (void)clearFileAssets:(BOOL)expiredOnly;
+- (NSString *)getFileDownloadPath:(NSString *)url;
 
 @end
 

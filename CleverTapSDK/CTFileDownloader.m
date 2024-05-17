@@ -62,6 +62,18 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
     }
 }
 
+- (NSString *)getFileDownloadPath:(NSString *)url {
+    NSString *filePath = @"";
+    if ([self isFileAlreadyPresent:url]) {
+        NSString *fileName = [url lastPathComponent];
+        NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+        filePath = [documentsPath stringByAppendingPathComponent:fileName];
+    } else {
+        CleverTapLogInternal(self.config.logLevel, @"%@ File %@ is not present.", self, url);
+    }
+    return filePath;
+}
+
 #pragma mark - Private
 
 - (void)setup {
