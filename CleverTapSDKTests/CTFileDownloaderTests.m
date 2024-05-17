@@ -26,10 +26,18 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     [super tearDown];
     
     [HTTPStubs removeAllStubs];
-    [self.fileDownloader clearFileAssets:false];
     [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_ACTIVE_DICT]];
     [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
     [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for cleanup"];
+    [self.fileDownloader clearFileAssets:NO];
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+    dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
 }
 
 - (void)testFileAlreadyPresent {
@@ -97,6 +105,50 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     NSString *expectedFilePath = [documentsPath stringByAppendingPathComponent:[urls[0] lastPathComponent]];
     XCTAssertNotNil(filePath);
     XCTAssertEqualObjects(filePath, expectedFilePath);
+}
+
+- (void)testClearAllFileAssets {
+    // Download the file
+    NSArray *urls = [self generateFileURLs:1];
+    [self downloadFiles:urls ofType:CTInAppClientSide];
+    XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
+    
+    // Clear all file assets
+    [self.fileDownloader clearFileAssets:NO];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear all assets"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
+        XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0]]);
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
+}
+
+- (void)testClearExpiredFileAssets {
+    // Download files
+    NSArray *urls = [self generateFileURLs:3];
+    [self downloadFiles:@[urls[0], urls[1], urls[2]] ofType:CTInAppClientSide];
+    [self downloadFiles:@[urls[1]] ofType:CTFileVariables];
+    
+    // Set the expiry time and all urls are moved to inactive
+    [self setLastDeletedPastExpiry];
+    [self downloadFiles:@[urls[1]] ofType:CTFileVariables];
+    
+    // Download some file again to move those urls to active, only urls[1] is in active
+    [self downloadFiles:@[urls[1]] ofType:CTFileVariables];
+    
+    // Clear expired file assets, here urls[0] and urls[2] should be removed.
+    [self setLastDeletedPastExpiry];
+    [self.fileDownloader clearFileAssets:YES];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear expired assets"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
+        XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+        XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[2]]);
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
 }
 
 #pragma mark Private methods
