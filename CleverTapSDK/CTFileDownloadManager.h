@@ -4,6 +4,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^CTFilesDownloadCompletedBlock)(NSDictionary<NSString *,id> *status);
+typedef void(^CTFilesDeleteCompletedBlock)(NSDictionary<NSString *,id> *status);
 
 @interface CTFileDownloadManager : NSObject
 
@@ -33,9 +34,12 @@ typedef void(^CTFilesDownloadCompletedBlock)(NSDictionary<NSString *,id> *status
  @method
  
  @discussion
- This method delete the file from NSDocumentDirectory directory if present.
+ This method delete the files from NSDocumentDirectory directory if present.
+ 
+ @param completion the completion block to be executed when all files are deleted. `status` dictionary will
+                    contain file delete status of each file as {url,success}
  */
-- (void)deleteFile:(NSURL *)url;
+- (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion;
 
 @end
 

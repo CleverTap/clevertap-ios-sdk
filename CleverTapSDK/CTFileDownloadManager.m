@@ -52,15 +52,36 @@
     return fileExists;
 }
 
-- (void)deleteFile:(NSURL *)url {
-    if ([self isFileAlreadyPresent:url]) {
-        NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[url lastPathComponent]];
-        NSError *error;
-        BOOL success = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
-        if (!success) {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to remove file %@ - %@", self, url, error);
+- (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion {
+    NSMutableDictionary<NSString *,id> *filesDeleteStatus = [NSMutableDictionary new];
+    
+    if (urls.count == 0) {
+        completion(filesDeleteStatus);
+        return;
+    }
+
+    dispatch_group_t deleteGroup = dispatch_group_create();
+    dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    for (NSString *urlString in urls) {
+        NSURL *url = [NSURL URLWithString:urlString];
+        // Delete file only when it is present.
+        if ([self isFileAlreadyPresent:url]) {
+            dispatch_group_enter(deleteGroup);
+            dispatch_async(deleteConcurrentQueue, ^{
+                [self deleteSingleFile:url completed:^(BOOL success) {
+                    [filesDeleteStatus setObject:[NSNumber numberWithBool:success] forKey:urlString];
+                    dispatch_group_leave(deleteGroup);
+                }];
+            });
+        } else {
+            // Add the file url to callback as success true as it is already not present
+            [filesDeleteStatus setObject:@1 forKey:[url absoluteString]];
         }
     }
+    dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
+        // Callback when all files are deleted with their success status
+        completion(filesDeleteStatus);
+    });
 }
 
 #pragma mark - Private methods
@@ -83,6 +104,17 @@
         completedBlock(YES);
     }];
     [downloadTask resume];
+}
+
+- (void)deleteSingleFile:(NSURL *)url
+               completed:(void(^)(BOOL success))completedBlock {
+    NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[url lastPathComponent]];
+    NSError *error;
+    BOOL success = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+    if (!success) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Failed to remove file %@ - %@", self, url, error);
+    }
+    completedBlock(success);
 }
 
 @end

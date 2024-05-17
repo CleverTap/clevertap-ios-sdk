@@ -140,6 +140,10 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS @"cs_inapp_inactive_assets"
 #define CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS @"cs_inapp_assets_last_deleted_timestamp"
 
+#define CLTAP_FILE_ACTIVE_DICT @"cs_file_active_dict"
+#define CLTAP_FILE_INACTIVE_DICT @"cs_file_inactive_dict"
+#define CLTAP_FILE_ASSETS_LAST_DELETED_TS @"cs_file_assets_last_deleted_timestamp"
+
 #define CLTAP_PROP_CAMPAIGN_ID @"Campaign id"
 #define CLTAP_PROP_WZRK_ID @"wzrk_id"
 #define CLTAP_PROP_VARIANT @"Variant"

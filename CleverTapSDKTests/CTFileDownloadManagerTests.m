@@ -28,7 +28,7 @@ NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
     
     [HTTPStubs removeAllStubs];
     // Remove files after every testcase
-    [self removeFiles];
+    [self deleteFiles:(int)[self.fileURLs count]];
 }
 
 - (void)testDownloadMultipleFiles {
@@ -48,13 +48,14 @@ NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
     }
 }
 
-- (void)testDeleteFile {
+- (void)testDeleteFiles {
     [self downloadFiles];
 
-    [self.fileDownloadManager deleteFile:self.fileURLs[0]];
-    // Deleted only 1st file url.
+    [self deleteFiles:2];
+
+    // Deleted 1st and 2nd file url.
     XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[0]]);
-    XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[1]]);
+    XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[1]]);
     XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[2]]);
 }
 
@@ -126,7 +127,7 @@ NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files"];
     
     [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        NSLog(@"All files downloaded with status: %@", status);
+//        NSLog(@"All files downloaded with status: %@", status);
     }];
     
     dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
@@ -137,13 +138,17 @@ NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
     [self waitForExpectations:@[expectation] timeout:2.5];
 }
 
-- (void)removeFiles {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Remove files"];
-    for(int i=0; i<[self.fileURLs count]; i++) {
-        NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[self.fileURLs[i] lastPathComponent]];
-        NSError *error;
-        [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+- (void)deleteFiles:(int)count {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Delete files"];
+    
+    NSMutableArray<NSString *> *deleteFileURLs = [NSMutableArray new];
+    for(int i=0;i<count;i++) {
+        NSString *fileURL = [self.fileURLs[i] absoluteString];
+        [deleteFileURLs addObject:fileURL];
     }
+    [self.fileDownloadManager deleteFiles:deleteFileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+//        NSLog(@"All files deleted with status: %@", status);
+    }];
     
     dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
     dispatch_after(delay, dispatch_get_main_queue(), ^(void){
