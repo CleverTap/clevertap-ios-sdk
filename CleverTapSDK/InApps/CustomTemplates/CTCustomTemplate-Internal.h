@@ -17,6 +17,7 @@
 
 @property (nonatomic, strong, readonly) NSString *templateType;
 @property (nonatomic, strong, readonly) NSArray<CTTemplateArgument *> *arguments;
+@property (nonatomic, strong, readonly) id<CTTemplatePresenter> presenter;
 
 - (instancetype)initWithTemplateName:(NSString *)templateName
                         templateType:(NSString *)templateType

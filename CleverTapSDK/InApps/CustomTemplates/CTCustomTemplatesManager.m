@@ -10,6 +10,8 @@
 #import "CTCustomTemplate-Internal.h"
 #import "CTTemplateArgument.h"
 #import "CTConstants.h"
+#import "CTInAppNotification.h"
+#import "CTTemplateContext-Internal.h"
 
 @interface CTCustomTemplatesManager ()
 
@@ -30,6 +32,10 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
 
 + (void)registerTemplateProducer:(nonnull id<CTTemplateProducer>)producer {
     [templateProducers addObject:producer];
+}
+
++ (void)clearTemplateProducers {
+    [templateProducers removeAllObjects];
 }
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig {
@@ -57,8 +63,16 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     return self.templates[name];
 }
 
-+ (void)clearTemplateProducers {
-    [templateProducers removeAllObjects];
+- (void)presentNotification:(CTInAppNotification *)notification withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
+    CTCustomTemplate *template = self.templates[notification.customTemplateInAppData.templateName];
+    if (!template) {
+        CleverTapLogStaticDebug("%@: Template with name:%@ not registered.", self, notification.customTemplateInAppData.templateName);
+        return;
+    }
+    
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:template andNotification:notification];
+    context.delegate = delegate;
+    [template.presenter onPresent:context];
 }
 
 - (NSDictionary*)syncPayload {

@@ -57,7 +57,7 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppTriggerManager.h"
 #import "CTInAppImagePrefetchManager.h"
-#import "CTCustomTemplatesManager.h"
+#import "CTCustomTemplatesManager-Internal.h"
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -523,16 +523,17 @@ static BOOL sharedInstanceErrorLogged;
     
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
+    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config];
+    
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self
                                                                         dispatchQueueManager:self.dispatchQueueManager
                                                                               inAppFCManager:inAppFCManager
                                                                            impressionManager:impressionManager
                                                                                   inAppStore:inAppStore
-                                                                        imagePrefetchManager:self.imagePrefetchManager];
+                                                                        imagePrefetchManager:self.imagePrefetchManager
+                                                                            templatesManager:templatesManager];
     
     CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
-    
-    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config];
     
     self.customTemplatesManager = templatesManager;
     self.inAppFCManager = inAppFCManager;

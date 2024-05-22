@@ -12,10 +12,13 @@
 #import "CTInAppNotification.h"
 #import "CTCustomTemplate.h"
 #import "CTTemplateContext.h"
+#import "CTInAppNotificationDisplayDelegate.h"
 
 @interface CTTemplateContext (Internal)
 
-- (instancetype)initWithTemplate:(CTCustomTemplate *)template andNotification:(CTInAppNotification *)notification;
+- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate andNotification:(CTInAppNotification *)notification;
+
+- (void)setDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
 
 @end
 

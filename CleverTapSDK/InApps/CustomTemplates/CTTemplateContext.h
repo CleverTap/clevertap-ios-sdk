@@ -51,11 +51,16 @@ NS_SWIFT_NAME(dictionary(name:));
 NS_SWIFT_NAME(file(name:));
 
 /**
+ * Call this method to notify the SDK the template is presented.
+ */
+- (void)presented;
+
+/**
  * Executes the action given by the "name" key.
  * Records Notification Clicked event.
  */
-- (void)executeActionNamed:(NSString *)name
-NS_SWIFT_NAME(executeAction(name:));
+- (void)triggerActionNamed:(NSString *)name
+NS_SWIFT_NAME(triggerAction(name:));
 
 /**
  * Call this method to notify the SDK the template is dismissed.

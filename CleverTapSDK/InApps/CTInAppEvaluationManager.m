@@ -157,6 +157,10 @@
         if (!campaignId) {
             continue;
         }
+        if (![self.inAppDisplayManager isTemplateRegistered:inApp]) {
+            continue;
+        }
+        
         // Match trigger
         NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];

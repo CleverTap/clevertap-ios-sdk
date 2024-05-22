@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)onPresent:(CTTemplateContext *)context
 NS_SWIFT_NAME(onPresent(context:));
+
 - (void)onCloseClicked:(CTTemplateContext *)context
 NS_SWIFT_NAME(onCloseClicked(context:));
 

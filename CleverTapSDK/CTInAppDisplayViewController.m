@@ -136,8 +136,8 @@ API_AVAILABLE(ios(13.0)) {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidShow:fromViewController:)]) {
-            [self.delegate notificationDidShow:self.notification fromViewController:self];
+        if (self.delegate) {
+            [self.delegate notificationDidShow:self.notification];
         }
     };
     

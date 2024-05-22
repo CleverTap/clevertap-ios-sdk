@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "CTTemplateProducer.h"
-#import "CleverTapInstanceConfig.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,8 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)registerTemplateProducer:(id<CTTemplateProducer>)producer;
 
 - (instancetype)init NS_UNAVAILABLE;
-
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig;
 
 - (BOOL)isRegisteredTemplateWithName:(NSString *)name;
 

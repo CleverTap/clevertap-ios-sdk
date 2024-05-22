@@ -18,6 +18,7 @@
 @property (nonatomic) CTCustomTemplate *template;
 @property (nonatomic) CTInAppNotification *notification;
 @property (nonatomic, strong) NSDictionary *argumentValues;
+@property (nonatomic) id<CTInAppNotificationDisplayDelegate> delegate;
 
 @end
 
@@ -25,10 +26,10 @@
 
 @synthesize argumentValues = _argumentValues;
 
-- (instancetype)initWithTemplate:(CTCustomTemplate *)template andNotification:(CTInAppNotification *)notification {
+- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate andNotification:(CTInAppNotification *)notification {
     if (self = [super init]) {
         self.notification = notification;
-        self.template = template;
+        self.template = customTemplate;
     }
     return self;
 }
@@ -140,12 +141,28 @@
     return self.argumentValues[name];
 }
 
-- (void)executeActionNamed:(NSString *)name {
+- (void)presented {
+    if (self.delegate) {
+        [self.delegate notificationDidShow:self.notification];
+    } else {
+        CleverTapLogStaticDebug(@"%@: Cannot set template as presented.", [self class])
+    }
+}
+
+- (void)triggerActionNamed:(NSString *)name {
     // TODO: add when implementing action handling
+    id action = self.argumentValues[name];
+    if ([action isKindOfClass:[CTNotificationAction class]]) {
+        
+    }
 }
 
 - (void)dismissed {
-    // TODO: implement
+    if (self.delegate) {
+        [self.delegate notificationDidDismiss:self.notification fromViewController:nil];
+    } else {
+        CleverTapLogStaticDebug(@"%@: Cannot set template as dismissed.", [self class])
+    }
 }
 
 - (NSDictionary *)argumentValues {
@@ -193,7 +210,7 @@
                 if (action && !action.error) {
                     return action;
                 } else if (action.error) {
-                    CleverTapLogStaticDebug(@"%@: Error creating action for argument: %@. Error: %@", self, arg.name, action.error);
+                    CleverTapLogStaticDebug(@"%@: Error creating action for argument: %@. Error: %@", [self class], arg.name, action.error);
                 }
                 break;
             }
