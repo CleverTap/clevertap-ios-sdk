@@ -7,17 +7,62 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <OCMock/OCMock.h>
 #import "CTTemplateContext-Internal.h"
 #import "CTInAppTemplateBuilder.h"
 #import "CTAppFunctionBuilder.h"
 #import "CTTemplatePresenterMock.h"
 #import "CTTemplateContext-Internal.h"
 
+@interface CTTemplateContext (Tests)
+
+@property (nonatomic) id<CTInAppNotificationDisplayDelegate> delegate;
+
+@end
+
 @interface CTTemplateContextTest : XCTestCase
 
 @end
 
 @implementation CTTemplateContextTest
+
+- (void)testDismissedShouldCallDelegateDismiss {
+    CTTemplateContext *context = self.templateContext;
+    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
+    [context setDelegate:delegate];
+    [context dismissed];
+    [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
+    
+    // should call delegate dismiss only once
+    [context dismissed];
+    [[delegate reject] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
+}
+
+- (void)testPresentedShouldCallDelegateShow {
+    CTTemplateContext *context = self.templateContext;
+    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
+    [context setDelegate:delegate];
+    [context presented];
+    [[delegate verify] notificationDidShow:[OCMArg any]];
+}
+
+- (void)testDismissClearsDelegate {
+    CTTemplateContext *context = self.templateContext;
+    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
+    [context setDelegate:delegate];
+    [context dismissed];
+    [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
+    
+    XCTAssertNil([context delegate]);
+    [context presented];
+    [[delegate reject] notificationDidShow:[OCMArg any]];
+}
+
+- (void)testTemplateName {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.templateNotificationJson];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.template andNotification:notification];
+    XCTAssertEqualObjects(TEMPLATE_NAME_NESTED, [context templateName]);
+}
 
 - (void)testSimpleValueOverrides {
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.simpleTemplateNotificationJson];
