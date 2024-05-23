@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <OCMock/OCMock.h>
 #import "CTInAppEvaluationManager.h"
 #import "CTEventAdapter.h"
 #import "BaseTestCase.h"
@@ -21,6 +22,9 @@
 #import "CTInAppEvaluationManager+Tests.h"
 #import "CTPreferences.h"
 #import "CTMultiDelegateManager+Tests.h"
+#import "CTCustomTemplatesManager-Internal.h"
+#import "CTInAppTemplateBuilder.h"
+#import "CTTestTemplateProducer.h"
 
 @interface CTInAppDisplayManagerMock : CTInAppDisplayManager
 @property (nonatomic, strong) NSMutableArray *inappNotifs;
@@ -38,6 +42,18 @@
                              inAppStore:nil
                    imagePrefetchManager:nil
                        templatesManager:nil]) {
+        self.inappNotifs = [NSMutableArray new];
+    }
+    return self;
+}
+- (instancetype)initWithTemplateManager:(CTCustomTemplatesManager *)templatesManager {
+    if (self = [super initWithCleverTap:nil
+                   dispatchQueueManager:nil
+                         inAppFCManager:nil
+                      impressionManager:nil
+                             inAppStore:nil
+                   imagePrefetchManager:nil
+                       templatesManager:templatesManager]) {
         self.inappNotifs = [NSMutableArray new];
     }
     return self;
@@ -609,6 +625,50 @@
     
     [self.evaluationManager evaluateOnAppLaunchedServerSide:inApps];
     XCTAssertEqualObjects((@[inApps[0]]), self.mockDisplayManager.inappNotifs);
+}
+
+- (void)testEvaluateCustomInApps {
+    NSMutableSet *templates = [NSMutableSet set];
+    id templatePresenter = OCMProtocolMock(@protocol(CTTemplatePresenter));
+    CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
+    [templateBuilder setName:@"Template 1"];
+    [templateBuilder setPresenter:templatePresenter];
+    [templates addObject:[templateBuilder build]];
+    
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    
+    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.helper.config];
+    
+    // Initialize with the templatesManager to register the template
+    self.mockDisplayManager = [[CTInAppDisplayManagerMock alloc] initWithTemplateManager:templatesManager];
+    self.evaluationManager.inAppDisplayManager = self.mockDisplayManager;
+    
+    NSArray *inApps = @[
+        @{
+            @"ti": @1,
+            @"templateName": @"Template 2",
+            @"type": @"custom-code",
+            @"priority": @(100),
+            @"whenTriggers": @[@{
+                @"eventName": @"event1"
+            }]
+        },
+        @{
+            @"ti": @2,
+            @"templateName": @"Template 1",
+            @"type": @"custom-code",
+            @"priority": @(100),
+            @"whenTriggers": @[@{
+                @"eventName": @"event1"
+            }]
+        }
+    ];
+    
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:kCLLocationCoordinate2DInvalid];
+    
+    XCTAssertEqualObjects([self.evaluationManager evaluate:event withInApps:inApps], (@[inApps[1]]));
 }
 
 #pragma mark Delegates Tests
