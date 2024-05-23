@@ -160,6 +160,7 @@
 - (void)dismissed {
     if (self.delegate) {
         [self.delegate notificationDidDismiss:self.notification fromViewController:nil];
+        self.delegate = nil;
     } else {
         CleverTapLogStaticDebug(@"%@: Cannot set template as dismissed.", [self class])
     }
