@@ -11,6 +11,7 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
+#import "CTUserInfoMigrator.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -45,6 +46,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
+                // migrate to new persisted ct-accid-guid-userprofile
+                [CTUserInfoMigrator migrateUserInfoFileForAccountID:self->_config.accountId deviceID:self->_deviceInfo.deviceId];
+
                 self->localProfileForSession = [self _inflateLocalProfile];
                 for (NSString* key in [profileValues allKeys]) {
                     [self setProfileFieldWithKey:key andValue:profileValues[key]];
@@ -88,8 +92,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 - (void)changeUser {
     localProfileUpdateExpiryStore = [NSMutableDictionary new];
-    localProfileForSession = [NSMutableDictionary dictionary];
-    // this will remove the old profile from the file system
     [self _persistLocalProfileAsyncWithCompletion:nil];
     [self clearStoredEvents];
 }
@@ -622,7 +624,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (NSString *)profileFileName {
-    return [NSString stringWithFormat:@"clevertap-%@-userprofile.plist", self.config.accountId];
+    return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceInfo.deviceId];
 }
 
 - (NSMutableDictionary *)_inflateLocalProfile {
