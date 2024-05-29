@@ -26,14 +26,14 @@
     NSError *error = nil;
     if ([fileManager fileExistsAtPath:userProfileWithDeviceIDAndGUIDPath]) {
         NSLog(@"[CTUserInfo]: new Plist file exists %@", userProfileWithDeviceIDAndGUIDPath);
-        if ([fileManager fileExistsAtPath:userProfileWithDeviceIDAndGUIDPath]) {
+        if ([fileManager fileExistsAtPath:userProfileWithDeviceIDPath]) {
             [fileManager removeItemAtPath:userProfileWithDeviceIDPath error:&error];
             return;
         }
     }
   
     // Copy the plist file to the new location with the new name
-    if ([fileManager copyItemAtPath:userProfileWithDeviceIDPath toPath:userProfileWithDeviceIDAndGUIDPath error:&error]) {
+    else if ([fileManager copyItemAtPath:userProfileWithDeviceIDPath toPath:userProfileWithDeviceIDAndGUIDPath error:&error]) {
         NSLog(@"[CTUserInfo]: Plist file copied successfully to %@", userProfileWithDeviceIDAndGUIDPath);
         [fileManager removeItemAtPath:userProfileWithDeviceIDPath error:&error];
     } else {

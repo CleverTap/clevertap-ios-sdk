@@ -14,7 +14,7 @@
 #import "CTUserInfoMigrator.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
-static const double kProfilePersistenceIntervalSeconds = 30.f;
+static const double kProfilePersistenceIntervalSeconds = 1.f;
 NSString* const kWR_KEY_EVENTS = @"local_events_cache";
 NSString* const kLocalCacheLastSync = @"local_cache_last_sync";
 NSString* const kLocalCacheExpiry = @"local_cache_expiry";
@@ -92,7 +92,13 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 - (void)changeUser {
     localProfileUpdateExpiryStore = [NSMutableDictionary new];
-    [self _persistLocalProfileAsyncWithCompletion:nil];
+    localProfileForSession = [NSMutableDictionary new];
+    [self runOnBackgroundQueue:^{
+        @synchronized (self->localProfileForSession) {
+            self->localProfileForSession = [self _inflateLocalProfile];
+        }
+    }];
+//    [self _persistLocalProfileAsyncWithCompletion:nil];
     [self clearStoredEvents];
 }
 
