@@ -2558,9 +2558,6 @@ static BOOL sharedInstanceErrorLogged;
         // clear ARP and other context for the old user
         [self clearUserContext];
         
-        // clear old profile data
-        [self.localDataStore changeUser];
-        
         [self.sessionManager resetSession];
         
         if (cachedGUID) {
@@ -2570,6 +2567,9 @@ static BOOL sharedInstanceErrorLogged;
         } else {
             [self.deviceInfo forceNewDeviceID];
         }
+        
+        // clear old profile data
+        [self.localDataStore changeUser];
         
         [self recordDeviceErrors];
         [[self delegateManager] notifyDelegatesDeviceIdDidChange:self.deviceInfo.deviceId];
