@@ -1945,7 +1945,7 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
-            [self evaluateOnEvent:event];
+            [self evaluateOnEvent:event withType: eventType];
         }];
 #endif
         
@@ -1960,7 +1960,7 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)evaluateOnEvent:(NSDictionary *)event {
+- (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
     NSString *eventName = event[CLTAP_EVENT_NAME];
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
@@ -1970,6 +1970,13 @@ static BOOL sharedInstanceErrorLogged;
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
+    } else if (eventType == CleverTapEventTypeProfile) {
+        // debugging :- UserAttributekey
+        // Creating a sample event dictionary to simulate a JSON object
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self getUserAttributeChangeProperties:event];
+        NSLog(@"User Attributes: %@", result);
+        [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
+        
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
@@ -2922,6 +2929,75 @@ static BOOL sharedInstanceErrorLogged;
         [self.validationResultStack pushValidationResults:errors];
     }
 }
+
+- (NSMutableDictionary *)getLocalUserProfileFromCache:(NSDictionary *)event {
+    NSMutableDictionary *profile = [[NSMutableDictionary alloc] init];
+    [self.dispatchQueueManager runSerialAsync:^{
+        [CTProfileBuilder build:event completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
+            if (systemFields) {
+                [self.localDataStore setProfileFields:systemFields];
+            }
+            NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
+            if (customFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
+                [self.localDataStore setProfileFields:customFields];
+                [profile addEntriesFromDictionary:customFields];
+            }
+        }];
+    }];
+    return profile;
+}
+
+
+//Debugging
+- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
+        // Get the profile dictionary from the event
+        NSDictionary *PROFILE_FIELDS_IN_THIS_SESSION = @{
+            @"Email": @"old_email@example.com",
+            @"Gender": @"F",
+            @"Name": @"Old Name",
+            @"Phone": @1234567890,
+            @"cc": @"US",
+            @"kush": @"old_kusha1",
+            @"kush2": @"old_kusha2",
+            @"kush3": @"old_kusha3",
+            @"kush4": @"old_kusha4",
+            @"score": @10,
+            @"tz": @"America/New_York",
+            @"Cust_Type": @"Silver"
+        };
+    
+    //debug
+        NSDictionary *profile = event[@"profile"];
+        if (!profile) {
+            return @{};
+        }
+        
+        NSMutableDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [NSMutableDictionary dictionary];
+        NSMutableDictionary *oldProfile = [self getLocalUserProfileFromCache:event];
+    // Iterate through all keys in the profile dictionary
+        for (NSString *key in profile) {
+            if ([CLTAP_keysToSkipForUserAttributesEvaluation isEqual: key]) {
+                continue;
+            }
+            id oldValue = oldProfile[key];
+//            id oldValue = PROFILE_FIELDS_IN_THIS_SESSION[key];
+            id newValue = profile[key];
+            
+            // Only add to the result if oldValue and newValue are different
+            if (![oldValue isEqual:newValue]) {
+                NSDictionary<NSString *, id> *valueDict = @{
+                    @"oldValue": oldValue ?: [NSNull null],
+                    @"newValue": newValue
+                };
+                result[key] = valueDict;
+            }
+        }
+        
+        return [result copy];
+}
+
+    
 
 
 #pragma mark - User Action Events API

@@ -17,6 +17,7 @@
 @property (nonatomic, strong) NSArray *items;
 
 @property (nonatomic, strong) NSArray *geoRadius;
+@property (nonatomic, strong) NSString *profileAttrName;
 
 @end
 
@@ -28,6 +29,7 @@
         self.properties = triggerJSON[@"eventProperties"];
         self.items = triggerJSON[@"itemProperties"];
         self.geoRadius = triggerJSON[@"geoRadius"];
+        self.profileAttrName = triggerJSON[@"profileAttrName"];
     }
     return self;
 }

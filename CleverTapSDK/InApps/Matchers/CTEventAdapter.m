@@ -17,6 +17,7 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 @property (nonatomic, strong) NSDictionary *eventProperties;
 @property (nonatomic, strong) NSArray<NSDictionary *> *items;
 @property (nonatomic, assign) CLLocationCoordinate2D location;
+@property (nonatomic, strong, nullable) NSString *profileAttrName;
 
 @end
 
@@ -70,6 +71,19 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
         self.eventProperties = eventProperties;
         self.location = location;
         self.items = items;
+    }
+    return self;
+}
+
+- (instancetype)initWithprofileAttrName:(NSString *)profileAttrName
+                        eventProperties:(NSDictionary *)eventProperties
+                            andLocation:(CLLocationCoordinate2D)location {
+    
+    if (self = [super init]) {
+        if ([profileAttrName  isEqual: @"Cust_Type"])
+        self.profileAttrName = @"Customer Type";
+        self.eventProperties = eventProperties;
+        self.location = location;
     }
     return self;
 }

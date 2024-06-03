@@ -30,7 +30,7 @@
 }
 
 - (BOOL)match:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
-    if (![[event eventName] isEqualToString:[trigger eventName]]) {
+    if (![[event eventName] isEqualToString:[trigger eventName]] && ([event profileAttrName] == nil || ![[event profileAttrName] isEqualToString:[trigger profileAttrName]])) {
         return NO;
     }
     

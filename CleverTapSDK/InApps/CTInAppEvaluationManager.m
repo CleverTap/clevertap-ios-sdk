@@ -91,6 +91,40 @@
     [self evaluateClientSide:event];
 }
 
+/**
+  * Evaluates in-app notifications based on a profile event that corresponds to any profile attribute changes, incorporating the event name,
+  * additional properties associated with the event, the user's location and the profile attribute name.
+  * The key of an eventProperty is the profile attribute name that has been invoked in the profile event.
+  *
+  * This method creates an [EventAdapter] instance representing the specified event with the provided details,
+  * evaluates the event against server-side, and then proceeds to evaluate it client-side.
+  *
+  * @param properties Additional properties associated with the event, provided as a map.
+  *
+  *
+  *
+  *         This array includes in-app notifications that meet the criteria for display.
+  */
+
+-(void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)profile {
+    
+    NSString *eventName = @"CustomerTypeChanged";
+    
+    for (NSString *key in profile) {
+        NSDictionary *innerDictionary = profile[key];
+        
+        NSString *newValue = innerDictionary[@"newValue"];
+        NSString *oldValue = innerDictionary[@"oldValue"];
+        
+        // Do something with key, newValue, and oldValue
+        NSLog(@"Key: %@, New Value: %@, Old Value: %@", key, newValue, oldValue);
+        CTEventAdapter *event = [[CTEventAdapter alloc] initWithprofileAttrName:key eventProperties:innerDictionary andLocation:self.location];
+        [self evaluateServerSide:event];
+        [self evaluateClientSide:event];
+    }
+
+}
+
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:chargeDetails location:self.location andItems:items];
     [self evaluateServerSide:event];
