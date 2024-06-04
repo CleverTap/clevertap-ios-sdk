@@ -28,6 +28,7 @@ typedef NS_ENUM(NSUInteger, CTInAppActionType){
 @interface CTInAppUtils : NSObject
 
 + (CTInAppType)inAppTypeFromString:(NSString *_Nonnull)type;
++ (NSString * _Nonnull)inAppTypeString:(CTInAppType)type;
 + (CTInAppActionType)inAppActionTypeFromString:(NSString *_Nonnull)type;
 + (NSString * _Nonnull)inAppActionTypeString:(CTInAppActionType)type;
 + (NSBundle *_Nullable)bundle;

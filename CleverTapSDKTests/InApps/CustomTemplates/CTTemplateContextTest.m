@@ -16,7 +16,7 @@
 
 @interface CTTemplateContext (Tests)
 
-@property (nonatomic) id<CTInAppNotificationDisplayDelegate> delegate;
+@property (nonatomic) id<CTInAppNotificationDisplayDelegate> notificationDelegate;
 
 @end
 
@@ -29,7 +29,7 @@
 - (void)testDismissedShouldCallDelegateDismiss {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    [context setDelegate:delegate];
+    [context setNotificationDelegate:delegate];
     [context dismissed];
     [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
     
@@ -41,7 +41,7 @@
 - (void)testPresentedShouldCallDelegateShow {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    [context setDelegate:delegate];
+    [context setNotificationDelegate:delegate];
     [context presented];
     [[delegate verify] notificationDidShow:[OCMArg any]];
 }
@@ -49,11 +49,11 @@
 - (void)testDismissClearsDelegate {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    [context setDelegate:delegate];
+    [context setNotificationDelegate:delegate];
     [context dismissed];
     [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
     
-    XCTAssertNil([context delegate]);
+    XCTAssertNil([context notificationDelegate]);
     [context presented];
     [[delegate reject] notificationDidShow:[OCMArg any]];
 }

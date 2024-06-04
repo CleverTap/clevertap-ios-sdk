@@ -7,12 +7,13 @@
 #endif
 
 static NSDictionary<NSString *, NSNumber *> *_inAppTypeMap;
+static NSDictionary<NSNumber *, NSString *> *_inAppTypeToStringMap;
 static NSDictionary<NSString *, NSNumber *> *_inAppActionTypeStringToTypeMap;
 static NSDictionary<NSNumber *, NSString *> *_inAppActionTypeTypeToStringMap;
 
 @implementation CTInAppUtils
 
-+ (CTInAppType)inAppTypeFromString:(NSString*)type {
++ (NSDictionary<NSString *, NSNumber *> *)inAppTypeStringToTypeMap {
     if (_inAppTypeMap == nil) {
         _inAppTypeMap = @{
             CLTAP_INAPP_HTML_TYPE: @(CTInAppTypeHTML),
@@ -28,12 +29,31 @@ static NSDictionary<NSNumber *, NSString *> *_inAppActionTypeTypeToStringMap;
             @"custom-code": @(CTInAppTypeCustom)
         };
     }
-    
-    NSNumber *_type = type != nil ? _inAppTypeMap[type] : @(CTInAppTypeUnknown);
+    return _inAppTypeMap;
+}
+
++ (NSDictionary<NSNumber *, NSString *> *)inAppTypeTypeToStringMap {
+    if (_inAppTypeToStringMap == nil) {
+        NSDictionary *dict = [self inAppTypeStringToTypeMap];
+        NSMutableDictionary *swapped = [NSMutableDictionary new];
+        [dict enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+            swapped[value] = key;
+        }];
+        _inAppTypeToStringMap = [swapped copy];
+    }
+    return _inAppTypeToStringMap;
+}
+
++ (CTInAppType)inAppTypeFromString:(NSString*)type {
+    NSNumber *_type = type != nil ? [self inAppTypeStringToTypeMap][type] : @(CTInAppTypeUnknown);
     if (_type == nil) {
         _type = @(CTInAppTypeUnknown);
     }
     return [_type integerValue];
+}
+
++ (NSString * _Nonnull)inAppTypeString:(CTInAppType)type {
+    return self.inAppTypeTypeToStringMap[@(type)];
 }
 
 + (NSDictionary<NSNumber *, NSString *> *)inAppActionTypeTypeToStringMap {

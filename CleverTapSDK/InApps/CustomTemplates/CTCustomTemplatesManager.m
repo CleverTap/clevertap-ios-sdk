@@ -13,9 +13,10 @@
 #import "CTInAppNotification.h"
 #import "CTTemplateContext-Internal.h"
 
-@interface CTCustomTemplatesManager ()
+@interface CTCustomTemplatesManager () <CTTemplateContextDismissDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary<NSString *, CTCustomTemplate *> *templates;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, CTTemplateContext *> *activeContexts;
 
 @end
 
@@ -41,6 +42,7 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig {
     self = [super init];
     if (self) {
+        self.activeContexts = [NSMutableDictionary dictionary];
         self.templates = [NSMutableDictionary dictionary];
         for (id producer in templateProducers) {
             NSSet *customTemplates = [producer defineTemplates:instanceConfig];
@@ -63,16 +65,58 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     return self.templates[name];
 }
 
+- (BOOL)isVisualTemplateWithName:(nonnull NSString *)name {
+    return self.templates[name].isVisual;
+}
+
+- (CTTemplateContext *)activeContextForTemplate:(NSString *)templateName {
+    return self.activeContexts[templateName];
+}
+
+- (void)onDismissContext:(CTTemplateContext *)context {
+    [self.activeContexts removeObjectForKey:context.templateName];
+}
+
 - (void)presentNotification:(CTInAppNotification *)notification withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
     CTCustomTemplate *template = self.templates[notification.customTemplateInAppData.templateName];
     if (!template) {
-        CleverTapLogStaticDebug("%@: Template with name:%@ not registered.", self, notification.customTemplateInAppData.templateName);
+        CleverTapLogStaticDebug("%@: Template with name: %@ not registered.", self, notification.customTemplateInAppData.templateName);
         return;
     }
-    
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:template andNotification:notification];
-    context.delegate = delegate;
+
+    CTTemplateContext *context = [self createTemplateContext:template withNotification:notification andDelegate:delegate];
+    self.activeContexts[template.name] = context;
     [template.presenter onPresent:context];
+}
+
+- (CTTemplateContext *)createTemplateContext:(CTCustomTemplate *)template withNotification:(CTInAppNotification *)notification andDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:template andNotification:notification];
+    [context setNotificationDelegate:delegate];
+    [context setDismissDelegate:self];
+    return context;
+}
+
+- (void)closeNotification:(CTInAppNotification *)notification {
+    NSString *templateName = notification.customTemplateInAppData.templateName;
+    if (!templateName) {
+        CleverTapLogStaticDebug("%@: No template name set in the notification template data.", [self class]);
+                return;
+    }
+    
+    CTCustomTemplate *template = self.templates[templateName];
+    if (!template) {
+        CleverTapLogStaticDebug("%@: Template with name: %@ not registered.", [self class], templateName);
+                return;
+    }
+    
+    CTTemplateContext *context = [self activeContextForTemplate:templateName];
+    if (!context) {
+        CleverTapLogStaticDebug("%@: Cannot find active context for template: %@.", [self class], templateName);
+    }
+    
+    if (template.presenter) {
+        [template.presenter onCloseClicked:context];
+    }
 }
 
 - (NSDictionary*)syncPayload {

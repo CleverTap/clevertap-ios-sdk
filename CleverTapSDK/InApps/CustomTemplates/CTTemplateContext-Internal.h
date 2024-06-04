@@ -14,11 +14,19 @@
 #import "CTTemplateContext.h"
 #import "CTInAppNotificationDisplayDelegate.h"
 
+@protocol CTTemplateContextDismissDelegate <NSObject>
+
+- (void)onDismissContext:(CTTemplateContext *)context;
+
+@end
+
 @interface CTTemplateContext (Internal)
 
 - (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate andNotification:(CTInAppNotification *)notification;
 
-- (void)setDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
+- (void)setNotificationDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
+
+- (void)setDismissDelegate:(id<CTTemplateContextDismissDelegate>)delegate;
 
 @end
 

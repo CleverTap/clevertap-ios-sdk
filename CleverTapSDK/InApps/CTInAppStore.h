@@ -33,6 +33,7 @@
 - (NSArray * _Nonnull)inAppsQueue;
 - (void)storeInApps:(NSArray * _Nullable)inApps;
 - (void)enqueueInApps:(NSArray * _Nullable)inAppNotifs;
+- (void)insertInFrontInApp:(NSDictionary * _Nullable)inAppNotif;
 - (NSDictionary * _Nullable)peekInApp;
 - (NSDictionary * _Nullable)dequeueInApp;
 

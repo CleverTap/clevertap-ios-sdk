@@ -21,6 +21,7 @@
 
 - (instancetype)initWithTemplateName:(NSString *)templateName
                         templateType:(NSString *)templateType
+                            isVisual:(BOOL)isVisual
                            arguments:(NSArray *)arguments
                            presenter:(id<CTTemplatePresenter>)presenter;
 

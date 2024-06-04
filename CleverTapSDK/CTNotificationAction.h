@@ -24,7 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init NS_UNAVAILABLE;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-- (instancetype)initWithJSON:(NSDictionary*)json;
+- (instancetype)initWithJSON:(NSDictionary *)json;
+- (instancetype)initWithOpenURL:(NSURL *)url;
 #endif
 
 @end

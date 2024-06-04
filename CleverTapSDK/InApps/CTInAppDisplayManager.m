@@ -169,6 +169,21 @@ static BOOL once = YES;
     }
 }
 
+- (void)_addInAppNotificationInFrontOfQueue:(CTInAppNotification *)inappNotif {
+    @try {
+        NSString *templateName = inappNotif.customTemplateInAppData.templateName;
+        if ([self.templatesManager isRegisteredTemplateWithName:templateName]) {
+            [self.inAppStore insertInFrontInApp:inappNotif.jsonDescription];
+            // Fire the first notification, if any
+            [self.dispatchQueueManager runOnNotificationQueue:^{
+                [self _showNotificationIfAvailable];
+            }];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
+    }
+}
+
 - (NSArray *)filterNonRegisteredTemplates:(NSArray *)inappNotifs {
     NSMutableArray *filteredInAppNotifs = [NSMutableArray new];
     for (NSDictionary *inAppJSON in inappNotifs) {
@@ -546,18 +561,45 @@ static BOOL once = YES;
     }
 }
 
-- (void)handleNotificationCTA:(NSURL *)ctaURL buttonCustomExtras:(NSDictionary *)buttonCustomExtras forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras {
-    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp cta: %@ button custom extras: %@ with options:%@", self, ctaURL.absoluteString, buttonCustomExtras, extras);
+- (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
+    //CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp cta: %@ button custom extras: %@ with options:%@", self, ctaURL.absoluteString, buttonCustomExtras, extras);
+    // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
+    
+    // add the action extras so they can be passed to the dismissedWithExtras delegate
     if (extras) {
         notification.actionExtras = extras;
     }
-    if (buttonCustomExtras && buttonCustomExtras.count > 0) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
-        [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
+    
+    switch (action.type) {
+        case CTInAppActionTypeUnknown:
+            CleverTapLogDebug(self.config.logLevel, @"%@: Triggered in-app action with unknown type.", self);
+            break;
+        case CTInAppActionTypeClose:
+            // SDK in-apps are dismissed in CTInAppDisplayViewController buttonTapped: or tappedDismiss
+            if (notification.inAppType == CTInAppTypeCustom) {
+                [self.templatesManager closeNotification:notification];
+            }
+            break;
+        case CTInAppActionTypeOpenURL:
+            [self handleCTAOpenURL:action.actionURL];
+            break;
+        case CTInAppActionTypeKeyValues:
+            if (action.keyValues && action.keyValues.count > 0) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, action.keyValues);
+                [self notifyNotificationButtonTappedWithCustomExtras:action.keyValues];
+            }
+            break;
+        case CTInAppActionTypeCustom:
+            [self triggerCustomTemplateAction:action.customTemplateInAppData forNotification:notification];
+            break;
+        case CTInAppActionTypeRequestForPermission:
+            // Handled in CTInAppDisplayViewController handleButtonClickFromIndex:
+            break;
     }
-    else if (ctaURL) {
-        
+}
+
+- (void)handleCTAOpenURL:(NSURL *)ctaURL {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (self.instance.urlDelegate) {
             // URL DELEGATE FOUND. OPEN DEEP LINKS ONLY IF USER ALLOWS IT
@@ -574,8 +616,40 @@ static BOOL once = YES;
             }];
         }
 #endif
+}
+
+- (void)triggerCustomTemplateAction:(CTCustomTemplateInAppData *)actionData forNotification:(CTInAppNotification *)notification {
+    if (actionData && actionData.templateName) {
+        if ([self.templatesManager isRegisteredTemplateWithName:actionData.templateName]) {
+            CTCustomTemplateInAppData *inAppData = [actionData copy];
+            [inAppData setIsAction:YES];
+            CTInAppNotification *notificationFromAction = [self createNotificationForAction:inAppData andParentNotification:notification];
+            
+            if ([self.templatesManager isVisualTemplateWithName:inAppData.templateName]) {
+                [self _addInAppNotificationInFrontOfQueue:notificationFromAction];
+            } else {
+                [self.templatesManager presentNotification:notificationFromAction withDelegate:self];
+            }
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger non-registered template with name: %@", [self class], actionData.templateName);
+        }
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger action without template name.", [self class]);
     }
-    [controller hide:true];
+}
+
+- (CTInAppNotification *)createNotificationForAction:(CTCustomTemplateInAppData *)inAppData andParentNotification:(CTInAppNotification *)notification {
+    NSMutableDictionary *json = [@{
+        CLTAP_INAPP_ID: notification.Id ? notification.Id : @"",
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @(YES),
+        CLTAP_INAPP_TYPE: [CTInAppUtils inAppTypeString:CTInAppTypeCustom],
+        CLTAP_PROP_WZRK_ID: notification.campaignId ? notification.campaignId : @"",
+        CLTAP_INAPP_TTL: @(notification.timeToLive)
+    } mutableCopy];
+    
+    [json addEntriesFromDictionary:inAppData.json];
+    
+    return [[CTInAppNotification alloc] initWithJSON:json];
 }
 
 - (void)handleInAppPushPrimer:(CTInAppNotification *)notification

@@ -228,11 +228,8 @@ API_AVAILABLE(ios(13.0)) {
 
 - (void)handleButtonClickFromIndex:(int)index {
     CTNotificationButton *button = self.notification.buttons[index];
-    NSURL *buttonCTA = button.actionURL;
     NSString *buttonText = button.text;
     NSString *campaignId = self.notification.campaignId;
-    NSDictionary *buttonCustomExtras = button.customExtras;
-    
     if (campaignId == nil) {
         campaignId = @"";
     }
@@ -262,24 +259,21 @@ API_AVAILABLE(ios(13.0)) {
         return;
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
     }
 }
 
 - (void)handleImageTapGesture {
     CTNotificationButton *button = self.notification.buttons[0];
-    NSURL *buttonCTA = button.actionURL;
     NSString *buttonText = @"";
     NSString *campaignId = self.notification.campaignId;
-    NSDictionary *buttonCustomExtras = button.customExtras;
-    
     if (campaignId == nil) {
         campaignId = @"";
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:buttonCTA buttonCustomExtras:buttonCustomExtras forNotification:self.notification fromViewController:self withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
     }
 }
 

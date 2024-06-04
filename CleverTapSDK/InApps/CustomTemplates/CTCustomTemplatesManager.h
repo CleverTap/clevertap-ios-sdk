@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 
 - (BOOL)isRegisteredTemplateWithName:(NSString *)name;
+- (BOOL)isVisualTemplateWithName:(nonnull NSString *)name;
 
 - (NSDictionary*)syncPayload;
 

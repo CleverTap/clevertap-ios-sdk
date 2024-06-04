@@ -18,7 +18,9 @@
 @property (nonatomic) CTCustomTemplate *template;
 @property (nonatomic) CTInAppNotification *notification;
 @property (nonatomic, strong) NSDictionary *argumentValues;
-@property (nonatomic) id<CTInAppNotificationDisplayDelegate> delegate;
+@property (nonatomic) id<CTInAppNotificationDisplayDelegate> notificationDelegate;
+@property (nonatomic) id<CTTemplateContextDismissDelegate> dismissDelegate;
+@property (nonatomic) BOOL isAction;
 
 @end
 
@@ -30,6 +32,7 @@
     if (self = [super init]) {
         self.notification = notification;
         self.template = customTemplate;
+        self.isAction = notification.customTemplateInAppData.isAction;
     }
     return self;
 }
@@ -142,25 +145,51 @@
 }
 
 - (void)presented {
-    if (self.delegate) {
-        [self.delegate notificationDidShow:self.notification];
+    if (self.isAction) {
+        return;
+    }
+    
+    if (self.notificationDelegate) {
+        [self.notificationDelegate notificationDidShow:self.notification];
     } else {
         CleverTapLogStaticDebug(@"%@: Cannot set template as presented.", [self class])
     }
 }
 
 - (void)triggerActionNamed:(NSString *)name {
-    // TODO: add when implementing action handling
     id action = self.argumentValues[name];
-    if ([action isKindOfClass:[CTNotificationAction class]]) {
-        
+    if (![action isKindOfClass:[CTNotificationAction class]]) {
+        CleverTapLogStaticDebug(@"%@: No argument of type action with name %@ for template %@.",
+                                [self class], name, self.templateName);
+        return;
+    }
+    
+    if (self.notificationDelegate) {
+        CTNotificationAction *notificationAction = action;
+        NSString *campaignId = self.notification.campaignId ? self.notification.campaignId : @"";
+        NSString *cta = notificationAction.customTemplateInAppData.templateName ? notificationAction.customTemplateInAppData.templateName : name;
+        NSDictionary *extras = @{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": cta};
+        [self.notificationDelegate handleNotificationAction:notificationAction forNotification:self.notification withExtras:extras];
     }
 }
 
 - (void)dismissed {
-    if (self.delegate) {
-        [self.delegate notificationDidDismiss:self.notification fromViewController:nil];
-        self.delegate = nil;
+    if (self.dismissDelegate) {
+        [self.dismissDelegate onDismissContext:self];
+        self.dismissDelegate = nil;
+    }
+    
+    // If the context is an action and visual:false,
+    // it does not go through the in-app queue, so the dismiss is NOOP.
+    // If the context is not an action, then it goes through the in-app queue no matter
+    // the visual property i.e standalone function
+    if (self.isAction && !self.template.isVisual) {
+        return;
+    }
+    
+    if (self.notificationDelegate) {
+        [self.notificationDelegate notificationDidDismiss:self.notification fromViewController:nil];
+        self.notificationDelegate = nil;
     } else {
         CleverTapLogStaticDebug(@"%@: Cannot set template as dismissed.", [self class])
     }
