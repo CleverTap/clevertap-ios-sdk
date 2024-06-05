@@ -82,7 +82,7 @@
     NSDictionary *expectedPayload = @{
         @"definitions": @{
             @"Function 1": @{
-                @"type": @"function",
+                @"type": FUNCTION_TYPE,
                 @"vars": @{
                     @"b": @{
                         @"defaultValue": @0,
@@ -97,7 +97,7 @@
                 }
             },
             @"Template 1": @{
-                @"type": @"template",
+                @"type": TEMPLATE_TYPE,
                 @"vars": @{
                     @"a.m": @{
                         @"defaultValue": @"11 string",
@@ -167,7 +167,7 @@
                 }
             },
             @"Template 2": @{
-                @"type": @"template",
+                @"type": TEMPLATE_TYPE,
                 @"vars": @{
                     @"b": @{
                         @"defaultValue": @0,
@@ -233,7 +233,7 @@
         @"type": @"templatePayload",
         @"definitions": @{
             @"Template 1": @{
-                @"type": @"template",
+                @"type": TEMPLATE_TYPE,
                 @"vars": @{
                     @"boolean": @{
                         @"defaultValue": @0,

@@ -12,6 +12,7 @@
 #import "CTCustomTemplate-Internal.h"
 #import "CTNotificationAction.h"
 #import "CTConstants.h"
+#import "CTCustomTemplateBuilder.h"
 
 @interface CTTemplateContext ()
 
@@ -157,6 +158,10 @@
 }
 
 - (void)triggerActionNamed:(NSString *)name {
+    if ([self.template.templateType isEqualToString:FUNCTION_TYPE]) {
+        return;
+    }
+
     id action = self.argumentValues[name];
     if (![action isKindOfClass:[CTNotificationAction class]]) {
         CleverTapLogStaticDebug(@"%@: No argument of type action with name %@ for template %@.",

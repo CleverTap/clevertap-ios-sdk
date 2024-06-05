@@ -10,6 +10,9 @@
 #import "CTTemplatePresenter.h"
 #import "CTCustomTemplate.h"
 
+#define TEMPLATE_TYPE @"template"
+#define FUNCTION_TYPE @"function"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CTCustomTemplateBuilder : NSObject

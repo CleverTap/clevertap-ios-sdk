@@ -80,7 +80,8 @@
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.close"];
-    
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+
     context = self.templateContext;
     delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
@@ -90,7 +91,8 @@
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.function"];
-    
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+
     context = self.templateContext;
     delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
@@ -100,7 +102,8 @@
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.openUrl"];
-    
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+
     context = self.templateContext;
     delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
@@ -112,6 +115,7 @@
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.kv"];
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
     
     context = self.templateContext;
     delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
@@ -120,6 +124,16 @@
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"nonexistent"];
+    XCTAssertEqual(0, delegate.handleNotificationActionInvocations);
+}
+
+- (void)testTriggerActionNOOPForFunction {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"action"];
+    XCTAssertEqual(0, delegate.handleNotificationActionInvocations);
 }
 
 - (void)testDidShowNotCalledForActions {
@@ -333,6 +347,7 @@
     [templateBuilder addActionArgument:@"map.actions.function"];
     [templateBuilder addActionArgument:@"map.actions.close"];
     [templateBuilder addActionArgument:@"map.actions.openUrl"];
+    [templateBuilder addActionArgument:@"map.actions.kv"];
     [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     return [templateBuilder build];
 }

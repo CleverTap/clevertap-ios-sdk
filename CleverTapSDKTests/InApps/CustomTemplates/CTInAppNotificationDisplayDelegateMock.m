@@ -21,10 +21,6 @@
 }
 
 - (void)notificationDidShow:(CTInAppNotification *)notification {
-//    self.notificationDidShowInvocations++;
-//    if (self.notificationDidShow) {
-//        self.notificationDidShow(notification);
-//    }
 }
 
 - (void)handleInAppPushPrimer:(CTInAppNotification *)notification fromViewController:(CTInAppDisplayViewController *)controller withFallbackToSettings:(BOOL)isFallbackToSettings {

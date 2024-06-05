@@ -15,10 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTInAppNotificationDisplayDelegateMock : NSObject <CTInAppNotificationDisplayDelegate>
 
-//@property (nonatomic) void (^notificationDidShow)(CTInAppNotification *);
 @property (nonatomic) void (^handleNotificationAction)(CTNotificationAction *, CTInAppNotification *, NSDictionary *);
-
-//@property (nonatomic) int notificationDidShowInvocations;
 @property (nonatomic) int handleNotificationActionInvocations;
 
 @end
