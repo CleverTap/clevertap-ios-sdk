@@ -17,8 +17,8 @@
 
 @implementation CTCustomTemplateInAppDataTest
 
-- (void)testCreateWithJSON {
-    NSDictionary *json = @{
+- (NSDictionary *)jsonCustomCode {
+    return @{
         CLTAP_INAPP_TEMPLATE_ID: @"templateId",
         CLTAP_INAPP_TEMPLATE_NAME: @"templateName",
         CLTAP_INAPP_TYPE: @"custom-code",
@@ -28,7 +28,10 @@
             @"key2": @"value2"
         }
     };
-    CTCustomTemplateInAppData *customTemplate = [CTCustomTemplateInAppData createWithJSON:json];
+}
+
+- (void)testCreateWithJSON {
+    CTCustomTemplateInAppData *customTemplate = [CTCustomTemplateInAppData createWithJSON:self.jsonCustomCode];
     
     XCTAssertEqualObjects(customTemplate.templateName, @"templateName");
     XCTAssertEqualObjects(customTemplate.templateId, @"templateId");
@@ -91,6 +94,33 @@
         @"number": @123,
         @"string": @"hello",
     }));
+}
+
+- (void)testSetIsAction {
+    CTCustomTemplateInAppData *customTemplate = [CTCustomTemplateInAppData createWithJSON:self.jsonCustomCode];
+    [customTemplate setIsAction:YES];
+    
+    XCTAssertEqual(customTemplate.json[@"is_action"], @(YES));
+}
+
+- (void)testCopy {
+    CTCustomTemplateInAppData *customTemplate = [CTCustomTemplateInAppData createWithJSON:self.jsonCustomCode];
+    
+    CTCustomTemplateInAppData *copy = [customTemplate copy];
+    // Verify not the same instance
+    XCTAssertNotEqual(customTemplate, copy);
+    
+    // Verify property values match
+    XCTAssertEqualObjects(customTemplate.templateId, copy.templateId);
+    XCTAssertEqualObjects(customTemplate.templateName, copy.templateName);
+    XCTAssertEqualObjects(customTemplate.templateDescription, copy.templateDescription);
+    XCTAssertEqualObjects(customTemplate.args, copy.args);
+    XCTAssertEqualObjects(customTemplate.json, copy.json);
+    XCTAssertEqual(customTemplate.isAction, copy.isAction);
+    
+    // Verify copied properties are not the same instance (strings are immutable)
+    XCTAssertNotEqual(customTemplate.args, copy.args);
+    XCTAssertNotEqual(customTemplate.json, copy.json);
 }
 
 @end

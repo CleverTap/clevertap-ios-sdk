@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
-#import <OCMock/OCMock.h>
+#import "CTTemplatePresenterMock.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTEventAdapter.h"
 #import "BaseTestCase.h"
@@ -629,7 +629,7 @@
 
 - (void)testEvaluateCustomInApps {
     NSMutableSet *templates = [NSMutableSet set];
-    id templatePresenter = OCMProtocolMock(@protocol(CTTemplatePresenter));
+    CTTemplatePresenterMock *templatePresenter = [CTTemplatePresenterMock new];
     CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
     [templateBuilder setName:@"Template 1"];
     [templateBuilder setPresenter:templatePresenter];

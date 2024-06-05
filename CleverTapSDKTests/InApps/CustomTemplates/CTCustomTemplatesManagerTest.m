@@ -8,13 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
-#import <OCMock/OCMock.h>
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplatesManager+Tests.h"
 #import "CTInAppTemplateBuilder.h"
 #import "CTAppFunctionBuilder.h"
 #import "CTTemplatePresenterMock.h"
 #import "CTTestTemplateProducer.h"
+#import "CTInAppNotificationDisplayDelegateMock.h"
 
 @interface CTCustomTemplatesManagerTest : XCTestCase
 
@@ -75,8 +75,7 @@
     
     CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
     [CTCustomTemplatesManager registerTemplateProducer:producer];
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
+    CTCustomTemplatesManager *manager = [self templatesManager];
     
     NSDictionary *syncPayload = [manager syncPayload];
     
@@ -227,11 +226,9 @@
     
     CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
     [CTCustomTemplatesManager registerTemplateProducer:producer];
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
+    CTCustomTemplatesManager *manager = [self templatesManager];
     
     NSDictionary *syncPayload = [manager syncPayload];
-    
     NSDictionary *expectedPayload = @{
         @"type": @"templatePayload",
         @"definitions": @{
@@ -306,8 +303,7 @@
     CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
     [CTCustomTemplatesManager registerTemplateProducer:producer];
     
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
+    CTCustomTemplatesManager *manager = [self templatesManager];
     
     XCTAssertTrue([manager isRegisteredTemplateWithName:templateName1]);
     XCTAssertTrue([manager isRegisteredTemplateWithName:templateName2]);
@@ -330,7 +326,7 @@
 - (void)testDuplicateTemplateNameThrows {
     NSMutableSet *templates = [NSMutableSet set];
     CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
-    [templateBuilder setName:@"Template 1"];
+    [templateBuilder setName:TEMPLATE_NAME];
     [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     [templates addObject:[templateBuilder build]];
     CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
@@ -346,59 +342,124 @@
     NSMutableSet *templates = [NSMutableSet set];
     CTTemplatePresenterMock *templatePresenter = [CTTemplatePresenterMock new];
     CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
-    [templateBuilder setName:@"Template 1"];
+    [templateBuilder setName:TEMPLATE_NAME];
     [templateBuilder setPresenter:templatePresenter];
     [templates addObject:[templateBuilder build]];
     
     CTTemplatePresenterMock *functionPresenter = [CTTemplatePresenterMock new];
     CTInAppTemplateBuilder *functionBuilder = [CTInAppTemplateBuilder new];
-    [functionBuilder setName:@"Function 1"];
+    [functionBuilder setName:FUNCTION_NAME];
     [functionBuilder setPresenter:functionPresenter];
     [templates addObject:[functionBuilder build]];
     
     CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
     
     [CTCustomTemplatesManager registerTemplateProducer:producer];
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
+    CTCustomTemplatesManager *manager = [self templatesManager];
     
     CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
-    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    
+    id delegate = [CTInAppNotificationDisplayDelegateMock new];
+
     [manager presentNotification:notificaton withDelegate:delegate];
     XCTAssertEqual(1, templatePresenter.onPresentInvocationsCount);
-    XCTAssertEqual(@"Template 1", templatePresenter.onPresentContext.templateName);
-
+    XCTAssertEqual(TEMPLATE_NAME, templatePresenter.onPresentContext.templateName);
+    
     CTInAppNotification *functionNotificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleFunctionNotificationJson]];
     [manager presentNotification:functionNotificaton withDelegate:delegate];
     XCTAssertEqual(1, functionPresenter.onPresentInvocationsCount);
-    XCTAssertEqual(@"Function 1", functionPresenter.onPresentContext.templateName);
+    XCTAssertEqual(FUNCTION_NAME, functionPresenter.onPresentContext.templateName);
 }
 
 - (void)testPresenterOnPresentNonRegisteredTemplate {
+    CTTemplatePresenterMock *templatePresenter = [self registerTemplate];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    
+    // Use the simpleFunctionNotificationJson which is not registered
+    CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleFunctionNotificationJson]];
+    id delegate = [CTInAppNotificationDisplayDelegateMock new];
+
+    [manager presentNotification:notificaton withDelegate:delegate];
+    XCTAssertEqual(0, templatePresenter.onPresentInvocationsCount);
+}
+
+- (void)testActiveContextForTemplate {
+    CTTemplatePresenterMock *templatePresenter = [self registerTemplate];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    
+    CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
+    id delegate = [CTInAppNotificationDisplayDelegateMock new];
+
+    [manager presentNotification:notificaton withDelegate:delegate];
+    XCTAssertEqual(1, templatePresenter.onPresentInvocationsCount);
+    CTTemplateContext *context = [manager activeContextForTemplate:TEMPLATE_NAME];
+    XCTAssertEqual(templatePresenter.onPresentContext, context);
+    
+    [context dismissed];
+    XCTAssertNil([manager activeContextForTemplate:TEMPLATE_NAME]);
+}
+
+- (void)testActiveContextForInactiveTemplate {
+    [self registerTemplate];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    
+    XCTAssertNil([manager activeContextForTemplate:TEMPLATE_NAME]);
+}
+
+- (void)testOnClose {
+    CTTemplatePresenterMock *templatePresenter = [self registerTemplate];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    
+    CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
+    id delegate = [CTInAppNotificationDisplayDelegateMock new];
+
+    [manager presentNotification:notificaton withDelegate:delegate];
+    XCTAssertEqual(1, templatePresenter.onPresentInvocationsCount);
+    CTTemplateContext *context = [manager activeContextForTemplate:TEMPLATE_NAME];
+    XCTAssertEqual(templatePresenter.onPresentContext, context);
+    
+    [manager closeNotification:notificaton];
+    XCTAssertEqual(1, templatePresenter.onCloseInvocationsCount);
+    XCTAssertEqual(templatePresenter.onCloseContext, context);
+}
+
+- (void)testOnCloseNotActiveContext {
+    CTTemplatePresenterMock *templatePresenter = [self registerTemplate];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    
+    // Not active context
+    CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
+    [manager closeNotification:notificaton];
+    XCTAssertEqual(0, templatePresenter.onCloseInvocationsCount);
+    
+    // Not registered template
+    CTInAppNotification *notificatonNotRegistered = [[CTInAppNotification alloc] initWithJSON:[self simpleFunctionNotificationJson]];
+    [manager closeNotification:notificatonNotRegistered];
+    XCTAssertEqual(0, templatePresenter.onCloseInvocationsCount);
+}
+
+- (CTTemplatePresenterMock *)registerTemplate {
     NSMutableSet *templates = [NSMutableSet set];
     CTTemplatePresenterMock *templatePresenter = [CTTemplatePresenterMock new];
     CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
-    [templateBuilder setName:@"Template 1"];
+    [templateBuilder setName:TEMPLATE_NAME];
     [templateBuilder setPresenter:templatePresenter];
     [templates addObject:[templateBuilder build]];
     
     CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
     
     [CTCustomTemplatesManager registerTemplateProducer:producer];
+    return templatePresenter;
+}
+
+- (CTCustomTemplatesManager *)templatesManager {
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
-    
-    CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleFunctionNotificationJson]];
-    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    
-    [manager presentNotification:notificaton withDelegate:delegate];
-    XCTAssertEqual(0, templatePresenter.onPresentInvocationsCount);
+    return manager;
 }
 
 - (NSDictionary *)simpleTemplateNotificationJson {
     return @{
-        @"templateName": @"Template 1",
+        @"templateName": TEMPLATE_NAME,
         @"type": @"custom-code",
         @"vars": @{}
     };
@@ -406,10 +467,13 @@
 
 - (NSDictionary *)simpleFunctionNotificationJson {
     return @{
-        @"templateName": @"Function 1",
+        @"templateName": FUNCTION_NAME,
         @"type": @"custom-code",
         @"vars": @{}
     };
 }
+
+static NSString * const TEMPLATE_NAME = @"Template 1";
+static NSString * const FUNCTION_NAME = @"Function 1";
 
 @end

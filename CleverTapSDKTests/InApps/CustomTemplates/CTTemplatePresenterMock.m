@@ -11,6 +11,8 @@
 @implementation CTTemplatePresenterMock
 
 - (void)onCloseClicked:(CTTemplateContext *)context {
+    self.onCloseInvocationsCount++;
+    self.onCloseContext = context;
 }
 
 - (void)onPresent:(CTTemplateContext *)context {
