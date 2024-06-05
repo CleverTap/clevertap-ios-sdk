@@ -562,7 +562,7 @@ static BOOL once = YES;
 }
 
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
-    //CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp cta: %@ button custom extras: %@ with options:%@", self, ctaURL.absoluteString, buttonCustomExtras, extras);
+    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
     // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
     

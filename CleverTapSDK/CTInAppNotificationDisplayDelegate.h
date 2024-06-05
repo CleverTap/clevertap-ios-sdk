@@ -10,6 +10,8 @@
 #define CTInAppNotificationDisplayDelegate_h
 
 @class CTInAppDisplayViewController;
+@class CTInAppNotification;
+@class CTNotificationAction;
 
 @protocol CTInAppNotificationDisplayDelegate <NSObject>
 
