@@ -623,7 +623,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     id val = nil;
     
     @synchronized (localProfileForSession) {
-        val = localProfileForSession[key];
+        // CACHED VALUES HAVE a "user" PREFIX, SO PREPEND IT BEFORE SEARCHING CACHE
+        NSString *keyToSearch = [localProfileForSession.allKeys containsObject:key] ? key : [NSString stringWithFormat:@"user%@",key];
+        val = localProfileForSession[keyToSearch];
     }
     
     return val;

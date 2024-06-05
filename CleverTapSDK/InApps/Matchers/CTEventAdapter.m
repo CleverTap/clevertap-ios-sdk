@@ -80,8 +80,7 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
                             andLocation:(CLLocationCoordinate2D)location {
     
     if (self = [super init]) {
-        if ([profileAttrName  isEqual: @"Cust_Type"])
-        self.profileAttrName = @"Customer Type";
+        self.profileAttrName = profileAttrName;
         self.eventProperties = eventProperties;
         self.location = location;
     }

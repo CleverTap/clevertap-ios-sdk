@@ -81,6 +81,16 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 
+// profile commands
+static NSString *const kCLTAP_COMMAND_SET = @"$set";
+static NSString *const kCLTAP_COMMAND_ADD = @"$add";
+static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
+static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
+static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
+static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
+
+#define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
+
 #pragma mark Constants for App fields
 #define CLTAP_APP_VERSION @"Version"
 #define CLTAP_LATITUDE @"Latitude"
@@ -246,7 +256,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #pragma mark Constants for Profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email"] // LEGACY KEYS
 #define CLTAP_ALL_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"Phone"]
-#define CLTAP_keysToSkipForUserAttributesEvaluation @[@"cc", @"tz", @"Carrier"]
+#define CLTAP_KeysToSkipForUserAttributesEvaluation @[@"cc", @"tz", @"Carrier"]
 
 #pragma mark Constants for Encryption
 #define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"
