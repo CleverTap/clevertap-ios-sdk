@@ -59,12 +59,7 @@
     XCTAssertNoThrow([templateBuilder addArgument:@"valid.two.name" withString:@"string"]);
 }
 
-- (void)testFunctionDotArgumentNameThrows {
-    CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
-    XCTAssertThrows([functionBuilder addArgument:@"dot.name" withString:@"string"]);
-}
-
-- (void)testFunctionArgumentDictionaryThrows {
+- (void)testInvalidArgumentValueDictionaryThrows {
     CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types"
@@ -214,6 +209,16 @@
         [[CTTemplateArgument alloc] initWithName:@"action" type:CTTemplateArgumentTypeAction defaultValue:nil],
     ]];
     XCTAssertEqualObjects([[NSSet alloc] initWithArray:template.arguments], expected);
+}
+
+- (void)testFunctionArgumentDictionary {
+    CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
+    [functionBuilder addArgument:@"arg" withDictionary:@{ @"a": @"value" }];
+    [functionBuilder setName:@"function"];
+    [functionBuilder setPresenter:[CTTemplatePresenterMock new]];
+    CTCustomTemplate *template = [functionBuilder build];
+    CTTemplateArgument *arg = [[CTTemplateArgument alloc] initWithName:@"arg.a" type:CTTemplateArgumentTypeString defaultValue:@"value"];
+    XCTAssertEqualObjects(arg, template.arguments.firstObject);
 }
 
 @end

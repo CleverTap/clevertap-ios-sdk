@@ -14,7 +14,7 @@
 @implementation CTAppFunctionBuilder
 
 - (nonnull instancetype)initWithIsVisual:(BOOL)isVisual {
-    self = [super initWithType:FUNCTION_TYPE isVisual:isVisual allowHierarchicalNames:NO];
+    self = [super initWithType:FUNCTION_TYPE isVisual:isVisual];
     return self;
 }
 
