@@ -11,7 +11,6 @@
 
 @property (nonatomic, readonly) NSString *Id;
 @property (nonatomic, readonly) NSString *campaignId;
-@property (nonatomic, copy, readonly) NSString *type;
 @property (nonatomic, readonly) CTInAppType inAppType;
 
 @property (nonatomic, copy, readonly) NSString *html;
