@@ -77,16 +77,17 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     [self.activeContexts removeObjectForKey:context.templateName];
 }
 
-- (void)presentNotification:(CTInAppNotification *)notification withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
+- (BOOL)presentNotification:(CTInAppNotification *)notification withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
     CTCustomTemplate *template = self.templates[notification.customTemplateInAppData.templateName];
     if (!template) {
         CleverTapLogStaticDebug("%@: Template with name: %@ not registered.", self, notification.customTemplateInAppData.templateName);
-        return;
+        return NO;
     }
 
     CTTemplateContext *context = [self createTemplateContext:template withNotification:notification andDelegate:delegate];
     self.activeContexts[template.name] = context;
     [template.presenter onPresent:context];
+    return YES;
 }
 
 - (CTTemplateContext *)createTemplateContext:(CTCustomTemplate *)template withNotification:(CTInAppNotification *)notification andDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {

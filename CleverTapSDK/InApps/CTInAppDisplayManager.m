@@ -36,8 +36,8 @@
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
 #import "CTInAppImagePrefetchManager.h"
-
 #import "CTCustomTemplatesManager-Internal.h"
+#import "CTCustomTemplateInAppData-Internal.h"
 #endif
 
 #if !(TARGET_OS_TV)
@@ -462,8 +462,12 @@ static BOOL once = YES;
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
-            currentlyDisplayingNotification = notification;
-            [self.templatesManager presentNotification:notification withDelegate:self];
+            if ([self.templatesManager presentNotification:notification withDelegate:self]) {
+                currentlyDisplayingNotification = notification;
+            } else {
+                errorString = [NSString stringWithFormat:@"Cannot present custom notification with template name: %@.",
+                               notification.customTemplateInAppData.templateName];
+            }
             break;
         default:
             errorString = [NSString stringWithFormat:@"Unhandled notification type: %lu", (unsigned long)notification.inAppType];
