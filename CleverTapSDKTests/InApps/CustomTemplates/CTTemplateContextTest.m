@@ -13,6 +13,7 @@
 #import "CTAppFunctionBuilder.h"
 #import "CTTemplatePresenterMock.h"
 #import "CTTemplateContext-Internal.h"
+#import "CTCustomTemplateInAppData-Internal.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
 
 @interface CTTemplateContext (Tests)

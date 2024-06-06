@@ -16,8 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, readonly) NSString *templateId;
 @property (nonatomic, copy, readonly) NSString *templateDescription;
 @property (nonatomic, strong, readonly) NSDictionary *args;
-@property (nonatomic) BOOL isAction;
-
+@property (nonatomic, readonly) BOOL isAction;
 @property (nonatomic, strong, readonly) NSDictionary *json;
 
 - (instancetype)init NS_UNAVAILABLE;

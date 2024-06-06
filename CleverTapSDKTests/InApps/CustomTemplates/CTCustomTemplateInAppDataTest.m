@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTCustomTemplateInAppData.h"
+#import "CTCustomTemplateInAppData-Internal.h"
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
 
