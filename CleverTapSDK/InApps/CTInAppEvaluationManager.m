@@ -108,17 +108,17 @@
 
 -(void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)profile {
     
-    NSString *eventName = @"CustomerTypeChanged";
-    
     for (NSString *key in profile) {
         NSDictionary *innerDictionary = profile[key];
         
         NSString *newValue = innerDictionary[@"newValue"];
         NSString *oldValue = innerDictionary[@"oldValue"];
-        
+        NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
         // Do something with key, newValue, and oldValue
         NSLog(@"Key: %@, New Value: %@, Old Value: %@", key, newValue, oldValue);
-        CTEventAdapter *event = [[CTEventAdapter alloc] initWithprofileAttrName:key eventProperties:innerDictionary andLocation:self.location];
+
+        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: innerDictionary andLocation:self.location];
+        
         [self evaluateServerSide:event];
         [self evaluateClientSide:event];
     }

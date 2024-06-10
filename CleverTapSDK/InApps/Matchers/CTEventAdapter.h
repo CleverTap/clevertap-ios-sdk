@@ -28,9 +28,10 @@ NS_ASSUME_NONNULL_BEGIN
                          location:(CLLocationCoordinate2D)location
                          andItems:(NSArray<NSDictionary *> *)items;
 
-- (instancetype)initWithprofileAttrName:(NSString *)profileAttrName
-                        eventProperties:(NSDictionary *)eventProperties
-                            andLocation:(CLLocationCoordinate2D)location;
+- (instancetype)initWithEventName:(NSString *)eventName
+                  profileAttrName:(NSString *)profileAttrName
+                  eventProperties:(NSDictionary *)eventProperties
+                      andLocation:(CLLocationCoordinate2D)location;
 
 
 - (CTTriggerValue * _Nullable)propertyValueNamed:(NSString *)name;

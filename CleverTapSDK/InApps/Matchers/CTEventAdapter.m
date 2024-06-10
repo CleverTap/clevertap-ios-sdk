@@ -75,11 +75,12 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
     return self;
 }
 
-- (instancetype)initWithprofileAttrName:(NSString *)profileAttrName
-                        eventProperties:(NSDictionary *)eventProperties
-                            andLocation:(CLLocationCoordinate2D)location {
-    
+- (instancetype)initWithEventName:(NSString *)eventName
+                  profileAttrName:(NSString *)profileAttrName
+                  eventProperties:(NSDictionary *)eventProperties
+                      andLocation:(CLLocationCoordinate2D)location{
     if (self = [super init]) {
+        self.eventName = eventName;
         self.profileAttrName = profileAttrName;
         self.eventProperties = eventProperties;
         self.location = location;
