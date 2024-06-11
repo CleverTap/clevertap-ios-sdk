@@ -1818,14 +1818,6 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
-    
-#if !CLEVERTAP_NO_INAPP_SUPPORT
-    // Evaluate the event before processing
-    [self.dispatchQueueManager runSerialAsync:^{
-        [self evaluateOnEvent:event withType: type];
-    }];
-#endif
-    
     if ([self _shouldDropEvent:event withType:type]) {
         return;
     }
@@ -1950,6 +1942,13 @@ static BOOL sharedInstanceErrorLogged;
         
         CleverTapLogDebug(self.config.logLevel, @"%@: New event processed: %@", self, [CTUtils jsonObjectToString:mutableEvent]);
         
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        // Evaluate the event only if it will be processed
+        [self.dispatchQueueManager runSerialAsync:^{
+            [self evaluateOnEvent:event withType: eventType];
+        }];
+#endif
+        
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];
         } else {
@@ -1971,15 +1970,14 @@ static BOOL sharedInstanceErrorLogged;
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
+    } else if (eventType == CleverTapEventTypeProfile) {
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self getUserAttributeChangeProperties:event];
+        NSLog(@"User Attributes: %@", result);
+        [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
 #endif
-}
-
-- (void)_evaluateOnUserAttributeChange:(NSDictionary *)properties {
-    NSDictionary<NSString *, NSDictionary<NSString *, id> *> *changedProfileValues = [self getUserAttributeChangeProperties:properties];
-    [self.inAppEvaluationManager evaluateOnUserAttributeChange:changedProfileValues];
 }
 
 - (void)scheduleQueueFlush {
@@ -2731,7 +2729,6 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)profilePush:(NSDictionary *)properties {
-    [self _evaluateOnUserAttributeChange:properties];
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder build:properties completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             if (systemFields) {
@@ -2784,6 +2781,10 @@ static BOOL sharedInstanceErrorLogged;
     return self.deviceInfo.deviceId;
 }
 
+- (id)profileGetLocalValues:(NSString *)propertyName {
+    return [self.localDataStore getProfileFieldForKey:propertyName];
+}
+
 - (NSString *)getAccountID {
     return self.config.accountId;
 }
@@ -2803,13 +2804,7 @@ static BOOL sharedInstanceErrorLogged;
     return [self.localDataStore getProfileFieldForKey:propertyName];
 }
 
-// private method to retrieve profile values from keys
-- (id)profileGetLocalValues:(NSString *)propertyName {
-    return [self.localDataStore getProfileFieldForKey:propertyName];
-}
-
 - (void)profileRemoveValueForKey:(NSString *)key {
-    //    [self _evaluateOnUserAttributeChange:properties];
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder buildRemoveValueForKey:key completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             if (customFields && [[customFields allKeys] count] > 0) {
@@ -2872,39 +2867,11 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
-- (void)profileValueHandler:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key forCommandIdentifier:(NSString *_Nonnull)commandIdentifier completion:(void (^)(NSNumber * _Nullable))completion{
-    __block NSNumber *updatedValue = nil;
-    if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT]) {
-        [CTProfileBuilder buildIncrementValueBy: value forKey: key
-                                 localDataStore: _localDataStore
-                              completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValueResponse, NSArray<CTValidationResult *> *_Nullable errors) {
-            updatedValue = updatedValueResponse;
-            [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
-            
-            if (completion) {
-                completion(updatedValue);
-            }
-        }];
-    }
-    else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
-        [CTProfileBuilder buildDecrementValueBy: value forKey: key
-                                 localDataStore: _localDataStore
-                              completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValueResponse, NSArray<CTValidationResult *> *_Nullable errors) {
-            updatedValue = updatedValueResponse;
-            [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
-            
-            if (completion) {
-                completion(updatedValue);
-            }
-        }];
-    }
-}
-
 - (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     [CTProfileBuilder buildIncrementValueBy: value forKey: key
                              localDataStore: _localDataStore
                           completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _evaluateOnUserAttributeChange:operatorDict];
+        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
     }];
 }
 
@@ -2963,67 +2930,65 @@ static BOOL sharedInstanceErrorLogged;
         [self.validationResultStack pushValidationResults:errors];
     }
 }
-//debugging
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)properties {
-        if (!properties) {
+
+- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
+        NSDictionary *profile = event[@"profile"];
+        if (!profile) {
             return @{};
         }
         
         NSMutableDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [NSMutableDictionary dictionary];
-        for (NSString *key in properties) {
-            if ([CLTAP_KeysToSkipForUserAttributesEvaluation containsObject:key]) {
+        for (NSString *key in profile) {
+            if ([CLTAP_KeysToSkipForUserAttributesEvaluation containsObject: key]) {
                 continue;
             }
             id oldValue = [self profileGetLocalValues:key];
-            id newValue = properties[key];
-            __block NSNumber *newUpdatedValue = nil;
-            NSNumber *incrementValue = nil;
-            if ([newValue isKindOfClass:[NSDictionary class]]) {
-                NSDictionary *obj = (NSDictionary *)newValue;
-                NSString *commandIdentifier = obj.allKeys.firstObject;
-                if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT]) {
-                // Handle increment
-                    __block NSNumber *newUpdatedValue = nil;
-                    [self profileValueHandler:obj[commandIdentifier] forKey:key forCommandIdentifier:commandIdentifier completion:^(NSNumber * _Nullable updatedValue) {
-                        newUpdatedValue = updatedValue;
-                    }];
-                    newValue = newUpdatedValue;
-            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
-                // Handle decrement
-                    __block NSNumber *newUpdatedValue = nil;
-                    [self profileValueHandler:obj[commandIdentifier] forKey:key forCommandIdentifier:commandIdentifier completion:^(NSNumber * _Nullable updatedValue) {
-                        newUpdatedValue = updatedValue;
-                    }];
-                    newValue = newUpdatedValue;
-            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
-                // Handle delete
-                newValue = nil;
-            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
-                       [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
-                       [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
-                // Handle set/add/remove
+            id newValue = profile[key];
+//            __block NSNumber *newUpdatedValue = nil;
+//            NSNumber *incrementValue = nil;
+//            if ([newValue isKindOfClass:[NSDictionary class]]) {
+//                NSDictionary *obj = (NSDictionary *)newValue;
+//                NSString *commandIdentifier = obj.allKeys.firstObject;
+//                if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT]) {
+//                // Handle increment
+//                    __block NSNumber *newUpdatedValue = nil;
+//                    [self profileValueHandler:obj[commandIdentifier] forKey:key forCommandIdentifier:commandIdentifier completion:^(NSNumber * _Nullable updatedValue) {
+//                        newUpdatedValue = updatedValue;
+//                    }];
+//                    newValue = newUpdatedValue;
+//            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
+//                // Handle decrement
+//                    __block NSNumber *newUpdatedValue = nil;
+//                    [self profileValueHandler:obj[commandIdentifier] forKey:key forCommandIdentifier:commandIdentifier completion:^(NSNumber * _Nullable updatedValue) {
+//                        newUpdatedValue = updatedValue;
+//                    }];
+//                    newValue = newUpdatedValue;
+//            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
+//                // Handle delete
+//                newValue = nil;
+//            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
+//                       [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
+//                       [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
+//                 Handle set/add/remove
 //                newValue = [self handleMultiValuesForKey:key
 //                                                   values:obj[commandIdentifier]
 //                                       commandIdentifier:commandIdentifier
 //                                                oldValue:profile[key]];
-            } else {
-                NSLog(@"Unhandled command %@ in dictionary for key %@: %@", commandIdentifier, key, newValue);
-            }
-            }
+//            } else {
+//                NSLog(@"Unhandled command %@ in dictionary for key %@: %@", commandIdentifier, key, newValue);
+//            }
+//            }
+
             // Only add to the result if oldValue and newValue are different
-            if (![oldValue isEqual:newValue]) {
                 NSDictionary<NSString *, id> *valueDict = @{
                     @"oldValue": oldValue ?: [NSNull null],
                     @"newValue": newValue
                 };
                 result[key] = valueDict;
-            }
         }
-        
         return [result copy];
 }
 
-    
 
 
 #pragma mark - User Action Events API
