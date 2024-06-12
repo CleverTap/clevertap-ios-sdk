@@ -151,6 +151,90 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     [self waitForExpectations:@[expectation] timeout:2.5];
 }
 
+- (void)testSetImageFileInactiveAndClearExpired {
+    NSMutableDictionary *activeUrls, *inactiveUrls;
+
+    // Download files
+    NSArray *urls = [self generateFileURLs:3];
+    [self downloadFiles:@[urls[0], urls[1]] ofType:CTInAppClientSide];
+    [self downloadFiles:@[urls[0], urls[2]] ofType:CTFileVariables];
+    inactiveUrls = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
+    XCTAssertEqual([inactiveUrls count], 0);
+    
+    [self.fileDownloader setFileAssetsInactiveOfType:CTInAppClientSide];
+    activeUrls = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_ACTIVE_DICT]];
+    inactiveUrls = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
+    // Last deleted date has not passed, images that are not used by other types
+    // are moved to inactive assets only. Here urls[0] is used by CTFileVariables
+    // so only urls[1] will be moved to inactive urls.
+    NSDictionary *expectedActiveDict = @{
+        urls[0] : @[@2],
+        urls[2] : @[@2]
+    };
+    NSDictionary *expectedInactiveDict = @{
+        urls[1] : @[@0]
+    };
+    XCTAssertEqual([inactiveUrls count], 1);
+    XCTAssertEqualObjects(activeUrls, expectedActiveDict);
+    XCTAssertEqualObjects(inactiveUrls, expectedInactiveDict);
+    
+    [self setLastDeletedPastExpiry];
+    [self.fileDownloader setFileAssetsInactiveOfType:CTInAppClientSide];
+    // When expied files are cleared, only urls[1] will be deleted
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Clear disk cache"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
+        XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2]]);
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectations:@[expectation] timeout:2.5];
+}
+
+- (void)testImageLoadedFromDisk {
+    // Download files
+    NSArray *urls = [self generateFileURLs:3];
+    // Download files, urls[2] is of type txt
+    [self downloadFiles:@[urls[2]] ofType:CTInAppClientSide];
+    
+    // Check image is present in disk cache
+    UIImage *image = [self.fileDownloader loadImageFromDisk:urls[2]];
+    XCTAssertNotNil(image);
+}
+
+- (void)testImageNotLoadedFromDisk {
+    NSArray *urls = [self generateFileURLs:3];
+    // Download files, urls[0] is of type txt
+    [self downloadFiles:@[urls[0]] ofType:CTInAppClientSide];
+    
+    // Check image is present in disk cache
+    UIImage *image = [self.fileDownloader loadImageFromDisk:urls[0]];
+    XCTAssertNil(image);
+}
+
+- (void)testFileDownloadCallbacksWhenFileIsAlreadyDownloading {
+    // This test checks the file download callbacks when same url is already downloading.
+    // Verified from adding logs that same url is not downloaded twice if download is in
+    // progress for that url. Also callbacks are triggered when download is completed.
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Wait for first download callbacks"];
+    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Wait for second download callbacks"];
+    
+    NSArray *urls = [self generateFileURLs:3];
+    [self.fileDownloader downloadFiles:@[urls[0], urls[1], urls[2]] ofType:CTInAppClientSide withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2]]);
+        [expectation1 fulfill];
+    }];
+    [self.fileDownloader downloadFiles:@[urls[0], urls[1]] ofType:CTInAppClientSide withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+        [expectation2 fulfill];
+    }];
+    [self waitForExpectations:@[expectation1, expectation2] timeout:5];
+}
+
 #pragma mark Private methods
 
 - (void)addAllStubs {

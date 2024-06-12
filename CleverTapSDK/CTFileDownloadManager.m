@@ -4,15 +4,29 @@
 @interface CTFileDownloadManager()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *documentsDirectory;
+@property (nonatomic, strong) NSMutableSet<NSURL *> *downloadInProgressUrls;
+@property (nonatomic, strong) NSMutableDictionary<NSURL *, NSMutableArray<DownloadCompletionHandler> *> *downloadInProgressHandlers;
+
 @end
 
 @implementation CTFileDownloadManager
+
++ (instancetype)sharedInstanceWithConfig:(CleverTapInstanceConfig *)config {
+    static CTFileDownloadManager *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self alloc] initWithConfig:config];
+    });
+    return sharedInstance;
+}
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
     self = [super init];
     if (self) {
         self.config = config;
         self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+        _downloadInProgressUrls = [NSMutableSet new];
+        _downloadInProgressHandlers = [NSMutableDictionary new];
     }
     
     return self;
@@ -26,18 +40,49 @@
     dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     NSMutableDictionary<NSString *,id> *filesDownloadStatus = [NSMutableDictionary new];
     for (NSURL *url in urls) {
+        dispatch_group_enter(group);
+        @synchronized (self) {
+            BOOL isAlreadyDownloading = [_downloadInProgressUrls containsObject:url];
+            if (isAlreadyDownloading) {
+                // If the url download is already in Progress, add the completion handler to
+                // fileDownloadProgressHandlers dictionary which is called when file is downloaded.
+                if (!_downloadInProgressHandlers[url]) {
+                    _downloadInProgressHandlers[url] = [NSMutableArray array];
+                }
+                [_downloadInProgressHandlers[url] addObject:^(NSURL *completedURL, BOOL success) {
+                    [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
+                    dispatch_group_leave(group);
+                }];
+                continue;
+            }
+        }
+        
         // Download file only when it is not already present.
         if (![self isFileAlreadyPresent:url]) {
-            dispatch_group_enter(group);
+            @synchronized (self) {
+                [_downloadInProgressUrls addObject:url];
+            }
             dispatch_async(concurrentQueue, ^{
                 [self downloadSingleFile:url completed:^(BOOL success) {
                     [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[url absoluteString]];
+
+                    // Call the other completion handlers for this file url if present
+                    NSArray<DownloadCompletionHandler> *handlers;
+                    @synchronized (self) {
+                        handlers = [self->_downloadInProgressHandlers[url] copy];
+                        [self->_downloadInProgressHandlers removeObjectForKey:url];
+                        [self->_downloadInProgressUrls removeObject:url];
+                    }
+                    for (DownloadCompletionHandler handler in handlers) {
+                        handler(url, success);
+                    }
                     dispatch_group_leave(group);
                 }];
             });
         } else {
             // Add the file url to callback as success true as it is already present
             [filesDownloadStatus setObject:@1 forKey:[url absoluteString]];
+            dispatch_group_leave(group);
         }
     }
     dispatch_group_notify(group, concurrentQueue, ^{

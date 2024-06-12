@@ -5,11 +5,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^CTFilesDownloadCompletedBlock)(NSDictionary<NSString *,id> *status);
 typedef void(^CTFilesDeleteCompletedBlock)(NSDictionary<NSString *,id> *status);
+typedef void (^DownloadCompletionHandler)(NSURL *url, BOOL success);
 
 @interface CTFileDownloadManager : NSObject
 
++ (instancetype)sharedInstanceWithConfig:(CleverTapInstanceConfig *)config;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 
 /*!
  @method

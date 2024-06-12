@@ -53,7 +53,7 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
 - (void)clearFileAssets:(BOOL)expiredOnly {
     long lastDeletedTime = [self getLastDeletedTimestamp];
     if (!expiredOnly) {
-        [self moveAssetsToInactive];
+        [self moveAllFilesToInactive];
         lastDeletedTime = ([self getLastDeletedTimestamp] - (kDefaultFileExpiryTime + 1));
     }
 
@@ -74,10 +74,30 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
     return filePath;
 }
 
+- (void)setFileAssetsInactiveOfType:(CTFileDownloadType)type {
+    // This method is used for cases like image preloading when mode is changed from CS to SS.
+    [self moveFilesToInactiveOfType:type];
+    
+    // Check for expired images, if any delete them.
+    [self clearFileAssets:YES];
+}
+
+- (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL {
+    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *imagePath = [documentsPath stringByAppendingPathComponent:[imageURL lastPathComponent]];
+    UIImage *image = [UIImage imageWithContentsOfFile:imagePath];
+    if (image) {
+        return image;
+    }
+    
+    CleverTapLogInternal(self.config.logLevel, @"%@ Failed to load image from path %@", self, imagePath);
+    return nil;
+}
+
 #pragma mark - Private
 
 - (void)setup {
-    self.fileDownloadManager = [[CTFileDownloadManager alloc] initWithConfig:self.config];
+    self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
     self.fileExpiryTime = kDefaultFileExpiryTime;
     self.activeUrls = [NSMutableDictionary new];
     self.inactiveUrls = [NSMutableDictionary new];
@@ -93,7 +113,7 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
             NSArray<NSString *> *inactiveUrls = [self.inactiveUrls allKeys];
             [self.fileDownloadManager deleteFiles:inactiveUrls withCompletionBlock:^(NSDictionary<NSString *,id> *status) {
                 [self updateFileDeleteSets:status];
-                [self moveAssetsToInactive];
+                [self moveAllFilesToInactive];
                 [self updateLastDeletedTimestamp];
             }];
         }
@@ -113,7 +133,7 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
                         ofType:(CTFileDownloadType)type {
     for(NSString *key in [status allKeys]) {
         if(status[key]) {
-            self.activeUrls[key] = [self addValue:type toDict:self.activeUrls andKey:key];
+            [self addTypeToActive:type forkey:key];
             if ([self.inactiveUrls objectForKey:key]) {
                 [self.inactiveUrls removeObjectForKey:key];
             }
@@ -129,16 +149,28 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
     }
 }
 
-- (void)moveAssetsToInactive {
+- (void)moveFilesToInactiveOfType:(CTFileDownloadType)type {
+    // This add files of given type to inactive dict and remove from active dict.
     for(NSString *key in [self.activeUrls allKeys]) {
         NSMutableArray *activeTypes = [self.activeUrls[key] mutableCopy];
-        if ([self.inactiveUrls objectForKey:key]) {
-            NSMutableArray *inactiveTypes = [self.inactiveUrls[key] mutableCopy];
-            [inactiveTypes addObjectsFromArray:activeTypes];
-            self.inactiveUrls[key] = (NSMutableArray *)[[NSSet setWithArray:inactiveTypes] allObjects];
-        } else {
-            self.inactiveUrls[key] = activeTypes;
+        if ([activeTypes containsObject:[NSNumber numberWithInt:type]]) {
+            // Add url to inactive dict only when url is not used by other types.
+            if ([activeTypes count] == 1) {
+                NSMutableArray *types = [NSMutableArray new];
+                [types addObject:[NSNumber numberWithInt:type]];
+                [self addTypesToInactive:types forKey:key];
+            }
+            [self removeTypeFromActive:type forKey:key];
         }
+    }
+    [self updateFileAssetsInPreference];
+}
+
+- (void)moveAllFilesToInactive {
+    // Move all file urls from active to inactive dictionary.
+    for(NSString *key in [self.activeUrls allKeys]) {
+        NSMutableArray *activeTypes = [self.activeUrls[key] mutableCopy];
+        [self addTypesToInactive:activeTypes forKey:key];
     }
     self.activeUrls = [NSMutableDictionary new];
     
@@ -181,15 +213,40 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
     return [NSString stringWithFormat:@"%@:%@", self.config.accountId, suffix];
 }
 
-- (NSMutableArray *)addValue:(CTFileDownloadType)type
-                      toDict:(NSDictionary *)dict
-                      andKey:(NSString *)key {
+- (void)addTypeToActive:(CTFileDownloadType)type
+                 forkey:(NSString *)key {
+    // Adds the type to the file url key array in Active dictionary.
     NSMutableArray *types = [NSMutableArray new];
-    if ([dict objectForKey:key]) {
-        types = [dict[key] mutableCopy];
+    if ([self.activeUrls objectForKey:key]) {
+        types = [self.activeUrls[key] mutableCopy];
     }
     [types addObject:[NSNumber numberWithInt:type]];
-    return (NSMutableArray *)[[NSSet setWithArray:types] allObjects];
+    self.activeUrls[key] = (NSMutableArray *)[[NSSet setWithArray:types] allObjects];
+}
+
+- (void)removeTypeFromActive:(CTFileDownloadType)type
+                      forKey:(NSString *)key {
+    // Removes the type from file url key array,
+    // Removes the file url key if array is empty after deleting type.
+    NSMutableArray *types = [self.activeUrls[key] mutableCopy];
+    [types removeObject:[NSNumber numberWithInt:type]];
+    if (types.count > 0) {
+        self.activeUrls[key] = types;
+    } else {
+        [self.activeUrls removeObjectForKey:key];
+    }
+}
+
+- (void)addTypesToInactive:(NSMutableArray *)types
+                    forKey:(NSString *)key {
+    // Adds the array types to the file url key in Inactive dictionary.
+    if ([self.inactiveUrls objectForKey:key]) {
+        NSMutableArray *inactiveTypes = [self.inactiveUrls[key] mutableCopy];
+        [inactiveTypes addObjectsFromArray:types];
+        self.inactiveUrls[key] = (NSMutableArray *)[[NSSet setWithArray:inactiveTypes] allObjects];
+    } else {
+        self.inactiveUrls[key] = types;
+    }
 }
 
 @end

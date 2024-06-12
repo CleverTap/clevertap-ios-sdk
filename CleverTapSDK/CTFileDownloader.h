@@ -19,6 +19,8 @@ typedef NS_ENUM(int, CTFileDownloadType) {
 - (BOOL)isFileAlreadyPresent:(NSString *)url;
 - (void)clearFileAssets:(BOOL)expiredOnly;
 - (NSString *)getFileDownloadPath:(NSString *)url;
+- (void)setFileAssetsInactiveOfType:(CTFileDownloadType)type;
+- (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL;
 
 @end
 

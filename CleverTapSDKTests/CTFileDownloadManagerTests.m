@@ -19,7 +19,7 @@ NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
     [super setUp];
     [self addAllStubs];
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    self.fileDownloadManager = [[CTFileDownloadManager alloc] initWithConfig:self.config];
+    self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
     self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
 }
 
