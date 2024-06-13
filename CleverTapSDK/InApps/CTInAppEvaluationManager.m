@@ -137,11 +137,11 @@
 }
 
 - (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events {
-    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];
+    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];    
     for (CTEventAdapter *event in events) {
-        
-        //     Only for CS In-Apps check if oldValue != newValue
-        if (![event.eventProperties[CLTAP_KEY_OLD_VALUE] isEqual:event.eventProperties[CLTAP_KEY_OLD_VALUE]]) {
+        id oldValue = [event.eventProperties objectForKey:CLTAP_KEY_OLD_VALUE];
+        id newValue = [event.eventProperties objectForKey:CLTAP_KEY_NEW_VALUE];
+        if (newValue == nil || newValue !=  oldValue){
             [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
         }
     }

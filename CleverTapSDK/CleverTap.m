@@ -2737,11 +2737,9 @@ static BOOL sharedInstanceErrorLogged;
             NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
             if (customFields) {
                 CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
-                [self.localDataStore setProfileFields:customFields];
                 [profile addEntriesFromDictionary:customFields];
             }
             [self cacheGUIDSforProfile:profile];
-            
 #if !defined(CLEVERTAP_TVOS)
             // make sure Phone is a string and debug check for country code and phone format, but always send
             NSArray *profileAllKeys = [profile allKeys];
@@ -2811,7 +2809,6 @@ static BOOL sharedInstanceErrorLogged;
                 NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
                 NSString* _key = [customFields allKeys][0];
                 CleverTapLogInternal(self.config.logLevel, @"%@: removing key %@ from profile", self, _key);
-                [self.localDataStore removeProfileFieldForKey:_key];
                 [profile addEntriesFromDictionary:customFields];
                 
                 NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
@@ -2902,8 +2899,6 @@ static BOOL sharedInstanceErrorLogged;
     [profile addEntriesFromDictionary:operatorDict];
     CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", operatorDict);
     
-    [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
-    
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;
     [self queueEvent:event withType:CleverTapEventTypeProfile];
@@ -2932,64 +2927,70 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
-        NSDictionary *profile = event[@"profile"];
+        NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
+        NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
+        NSDictionary *profile = event[CLTAP_PROFILE];
         if (!profile) {
             return @{};
         }
-        
-        NSMutableDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [NSMutableDictionary dictionary];
         for (NSString *key in profile) {
             if ([CLTAP_KeysToSkipForUserAttributesEvaluation containsObject: key]) {
                 continue;
             }
             id oldValue = [self profileGetLocalValues:key];
             id newValue = profile[key];
-//            __block NSNumber *newUpdatedValue = nil;
-//            NSNumber *incrementValue = nil;
-//            if ([newValue isKindOfClass:[NSDictionary class]]) {
-//                NSDictionary *obj = (NSDictionary *)newValue;
-//                NSString *commandIdentifier = obj.allKeys.firstObject;
-//                if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT]) {
-//                // Handle increment
-//                    __block NSNumber *newUpdatedValue = nil;
-//                    [self profileValueHandler:obj[commandIdentifier] forKey:key forCommandIdentifier:commandIdentifier completion:^(NSNumber * _Nullable updatedValue) {
-//                        newUpdatedValue = updatedValue;
-//                    }];
-//                    newValue = newUpdatedValue;
-//            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
-//                // Handle decrement
-//                    __block NSNumber *newUpdatedValue = nil;
-//                    [self profileValueHandler:obj[commandIdentifier] forKey:key forCommandIdentifier:commandIdentifier completion:^(NSNumber * _Nullable updatedValue) {
-//                        newUpdatedValue = updatedValue;
-//                    }];
-//                    newValue = newUpdatedValue;
-//            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
-//                // Handle delete
-//                newValue = nil;
-//            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
-//                       [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
-//                       [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
-//                 Handle set/add/remove
-//                newValue = [self handleMultiValuesForKey:key
-//                                                   values:obj[commandIdentifier]
-//                                       commandIdentifier:commandIdentifier
-//                                                oldValue:profile[key]];
-//            } else {
-//                NSLog(@"Unhandled command %@ in dictionary for key %@: %@", commandIdentifier, key, newValue);
-//            }
-//            }
-
-            // Only add to the result if oldValue and newValue are different
-                NSDictionary<NSString *, id> *valueDict = @{
-                    @"oldValue": oldValue ?: [NSNull null],
-                    @"newValue": newValue
-                };
-                result[key] = valueDict;
+            NSMutableDictionary *properties = [NSMutableDictionary dictionary];
+            if ([newValue isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *obj = (NSDictionary *)newValue;
+                NSString *commandIdentifier = [[obj allKeys] firstObject];
+                id value = [obj objectForKey:commandIdentifier];
+                if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT] ||
+                    [commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
+                    newValue = [CTProfileBuilder _getUpdatedValue:value forKey:key withCommand:commandIdentifier cachedValue:oldValue];
+                } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
+                    newValue = nil;
+                    [self.localDataStore removeProfileFieldForKey:key];
+                }
+            } else if ([newValue isKindOfClass:[NSString class]]) {
+                // Remove the date prefix before evaluation and persisting
+                NSString *newValueStr = (NSString *)newValue;
+                if ([newValueStr hasPrefix:CLTAP_DATE_PREFIX]) {
+                    newValue = @([[newValueStr substringFromIndex:[CLTAP_DATE_PREFIX length]] longLongValue]);
+                }
+            }
+            if (oldValue != nil && ![oldValue isKindOfClass:[NSArray class]]) {
+                [properties setObject:oldValue forKey:CLTAP_KEY_OLD_VALUE];
+            }
+            if (newValue != nil && ![newValue isKindOfClass:[NSArray class]]) {
+                [properties setObject:newValue forKey:CLTAP_KEY_NEW_VALUE];
+            }
+            
+            // Skip evaluation if both newValue or oldValue are null
+            if ([properties count] > 0) {
+                [userAttributesChangeProperties setObject:properties forKey:key];
+            }
+            // Need to persist only if the new profile value is not a null value
+            if (newValue != nil) {
+                [fieldsToPersistLocally setObject:newValue forKey:key];
+            }
         }
-        return [result copy];
+    [self updateProfileFieldsLocally:fieldsToPersistLocally];
+    return userAttributesChangeProperties;
 }
 
-
+-(void) updateProfileFieldsLocally: (NSMutableDictionary<NSString *, id> *) fieldsToPersistLocally{
+    [self.dispatchQueueManager runSerialAsync:^{
+        [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
+            if (systemFields) {
+                [self.localDataStore setProfileFields:systemFields];
+            }
+            if (customFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
+                [self.localDataStore setProfileFields:customFields];
+            }
+        }];
+    }];
+}
 
 #pragma mark - User Action Events API
 
