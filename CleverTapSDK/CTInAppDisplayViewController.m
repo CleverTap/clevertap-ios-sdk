@@ -76,17 +76,55 @@ API_AVAILABLE(ios(13.0)) {
 
 #if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    UIWindow *window = [CTUIUtils getSharedApplication].windows.firstObject;
+    UIInterfaceOrientationMask windowSupportedOrientations = [[CTUIUtils getSharedApplication] supportedInterfaceOrientationsForWindow:window];
+    
     if (_notification.hasPortrait && _notification.hasLandscape) {
-        return UIInterfaceOrientationMaskAll;
-    } else if (_notification.hasPortrait) {
-        return (UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown);
-    } else if (_notification.hasLandscape) {
-        return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
-    } else {
-        return UIInterfaceOrientationMaskAll;
+        return windowSupportedOrientations;
     }
+    if (_notification.hasPortrait) {
+        if ([self isOrientationSupported:UIInterfaceOrientationPortrait mask:windowSupportedOrientations]
+            && [self isOrientationSupported:UIInterfaceOrientationPortraitUpsideDown mask:windowSupportedOrientations]) {
+            return (UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown);
+        }
+        if ([self isOrientationSupported:UIInterfaceOrientationPortrait mask:windowSupportedOrientations]) {
+            return UIInterfaceOrientationMaskPortrait;
+        }
+        if ([self isOrientationSupported:UIInterfaceOrientationPortraitUpsideDown mask:windowSupportedOrientations]) {
+            return UIInterfaceOrientationMaskPortraitUpsideDown;
+        }
+        return windowSupportedOrientations;
+    }
+    if (_notification.hasLandscape) {
+        if ([self isOrientationSupported:UIInterfaceOrientationLandscapeLeft mask:windowSupportedOrientations]
+            && [self isOrientationSupported:UIInterfaceOrientationLandscapeRight mask:windowSupportedOrientations]) {
+            return (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight);
+        }
+        if ([self isOrientationSupported:UIInterfaceOrientationLandscapeLeft mask:windowSupportedOrientations]) {
+            return UIInterfaceOrientationMaskLandscapeLeft;
+        }
+        if ([self isOrientationSupported:UIInterfaceOrientationLandscapeRight mask:windowSupportedOrientations]) {
+            return UIInterfaceOrientationMaskLandscapeRight;
+        }
+        return windowSupportedOrientations;
+    }
+    return windowSupportedOrientations;
 }
 
+- (BOOL)isOrientationSupported:(UIInterfaceOrientation)orientation mask:(UIInterfaceOrientationMask)mask {
+    switch (orientation) {
+        case UIInterfaceOrientationPortrait:
+            return (mask & UIInterfaceOrientationMaskPortrait) != 0;
+        case UIInterfaceOrientationPortraitUpsideDown:
+            return (mask & UIInterfaceOrientationMaskPortraitUpsideDown) != 0;
+        case UIInterfaceOrientationLandscapeLeft:
+            return (mask & UIInterfaceOrientationMaskLandscapeLeft) != 0;
+        case UIInterfaceOrientationLandscapeRight:
+            return (mask & UIInterfaceOrientationMaskLandscapeRight) != 0;
+        default:
+            return NO;
+    }
+}
 #endif
 
 - (void)show:(BOOL)animated {
