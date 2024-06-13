@@ -9,10 +9,8 @@
 @property (nonatomic, copy, readwrite) NSString *borderRadius;
 @property (nonatomic, copy, readwrite) NSString *borderColor;
 @property (nonatomic, copy, readwrite) NSString *backgroundColor;
-@property (nonatomic, copy, readwrite) NSDictionary *customExtras;
-@property (nonatomic, copy, readwrite) NSString *type;
-@property (nonatomic, readwrite) BOOL fallbackToSettings;
-@property (nonatomic, readwrite) NSURL *actionURL;
+
+@property (nonatomic, strong, readwrite) CTNotificationAction *action;
 
 @property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
 
@@ -34,24 +32,32 @@
             
             NSDictionary *actions = jsonObject[@"actions"];
             if (actions) {
-                self.customExtras = (NSDictionary *) actions[@"kv"];
-                NSString *action = actions[@"ios"];
-                if (action && action.length > 0) {
-                    @try {
-                        self.actionURL = [NSURL URLWithString:action];
-                    } @catch (NSException *e) {
-                        self.error = [e debugDescription];
-                    }
+                self.action = [[CTNotificationAction alloc] initWithJSON:actions];
+                if (self.action.error) {
+                    self.error = self.action.error;
                 }
-                self.type = actions[@"type"];
-                self.fallbackToSettings = actions[@"fbSettings"] ? [actions[@"fbSettings"] boolValue] : NO;
             }
-            
         } @catch (NSException *e) {
             self.error = [e debugDescription];
         }
     }
     return self;
+}
+
+- (NSDictionary *)customExtras {
+    return [self.action keyValues];
+}
+
+- (CTInAppActionType)type {
+    return [self.action type];
+}
+
+- (BOOL)fallbackToSettings {
+    return [self.action fallbackToSettings];
+}
+
+- (NSURL *)actionURL {
+    return [self.action actionURL];
 }
 
 @end

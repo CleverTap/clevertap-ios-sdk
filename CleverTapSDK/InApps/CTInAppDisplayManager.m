@@ -38,11 +38,29 @@
 #import "CTInAppImagePrefetchManager.h"
 #endif
 
+#if !(TARGET_OS_TV)
+#import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/SDAnimatedImageView.h>
+#endif
+
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 
 // static here as we may have multiple instances handling inapps
 static CTInAppDisplayViewController *currentDisplayController;
 static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControllers;
+
+// private class
+@interface ImageLoadingResult : NSObject
+
+@property (nonatomic, strong) UIImage *image;
+@property (nonatomic, strong) NSData *imageData;
+@property (nonatomic, copy) NSString *error;
+
+@end
+
+@implementation ImageLoadingResult
+
+@end
 
 @interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate> {
 }
@@ -208,7 +226,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
-        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj imagePrefetchManager:self.imagePrefetchManager];
+        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
         if (notification.error) {
             CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
             return;
@@ -219,13 +237,66 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
             return;
         }
-
-        [notification prepareWithCompletionHandler:^{
+        
+        [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
                 [self notificationReady:notification];
             }];
         }];
     }];
+}
+
+- (void)prepareNotification:(CTInAppNotification *)notification withCompletion:(void (^)(void))completionHandler {
+#if !(TARGET_OS_TV)
+    if ([NSThread isMainThread]) {
+        notification.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
+        completionHandler();
+        return;
+    }
+    
+    if (notification.imageURL) {
+        ImageLoadingResult *result = [self loadImageWithURL:notification.imageURL contentType:notification.contentType];
+        [notification setPreparedInAppImage:result.image inAppImageData:result.imageData error:result.error];
+    }
+    if (notification.imageUrlLandscape && notification.hasLandscape) {
+        ImageLoadingResult *result = [self loadImageWithURL:notification.imageUrlLandscape contentType:notification.landscapeContentType];
+        [notification setPreparedInAppImageLandscape:result.image inAppImageLandscapeData:result.imageData error:result.error];
+    }
+#endif
+    
+    completionHandler();
+}
+
+- (ImageLoadingResult *)loadImageWithURL:(NSURL *)url contentType:(NSString *)contentType {
+    ImageLoadingResult *result = [[ImageLoadingResult alloc] init];
+    
+    UIImage *loadedImage = [self loadImageIfPresentInDiskCache:url];
+    if (loadedImage) {
+        result.image = loadedImage;
+    } else {
+        NSError *loadError = nil;
+        NSData *imageData = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&loadError];
+        if (loadError || !imageData) {
+            result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
+        } else {
+            if ([contentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
+                if (gif == nil) {
+                    result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
+                }
+            }
+            result.imageData = imageData;
+        }
+    }
+    
+    return result;
+}
+
+- (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
+    NSString *imageURLString = [imageURL absoluteString];
+    UIImage *image = [self.imagePrefetchManager loadImageFromDisk:imageURLString];
+    if (image) return image;
+    return nil;
 }
 
 - (void)notificationReady:(CTInAppNotification*)notification {

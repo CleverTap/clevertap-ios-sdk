@@ -7,6 +7,7 @@
 #endif
 
 static NSDictionary *_inAppTypeMap;
+static NSDictionary *_inAppActionTypeMap;
 
 @implementation CTInAppUtils
 
@@ -22,7 +23,8 @@ static NSDictionary *_inAppTypeMap;
             @"alert-template": @(CTInAppTypeAlert),
             @"interstitial-image": @(CTInAppTypeInterstitialImage),
             @"half-interstitial-image": @(CTInAppTypeHalfInterstitialImage),
-            @"cover-image": @(CTInAppTypeCoverImage)
+            @"cover-image": @(CTInAppTypeCoverImage),
+            @"custom-code": @(CTInAppTypeCustom)
         };
     }
     
@@ -32,6 +34,25 @@ static NSDictionary *_inAppTypeMap;
     }
     return [_type integerValue];
 }
+
++ (CTInAppActionType)inAppActionTypeFromString:(NSString* _Nonnull)type {
+    if (_inAppActionTypeMap == nil) {
+        _inAppActionTypeMap = @{
+            @"close": @(CTInAppActionTypeClose),
+            @"url": @(CTInAppActionTypeOpenURL),
+            @"kv": @(CTInAppActionTypeKeyValues),
+            @"custom-code": @(CTInAppActionTypeCustom),
+            @"rfp": @(CTInAppActionTypeRequestForPermission)
+        };
+    }
+    
+    NSNumber *_type = type != nil ? _inAppActionTypeMap[type] : @(CTInAppActionTypeUnknown);
+    if (_type == nil) {
+        _type = @(CTInAppActionTypeUnknown);
+    }
+    return [_type integerValue];
+}
+
 
 + (NSBundle *)bundle {
 #if CLEVERTAP_NO_INAPP_SUPPORT
