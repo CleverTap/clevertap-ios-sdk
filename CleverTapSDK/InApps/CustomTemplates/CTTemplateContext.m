@@ -173,7 +173,7 @@
         CTNotificationAction *notificationAction = action;
         NSString *campaignId = self.notification.campaignId ? self.notification.campaignId : @"";
         NSString *cta = notificationAction.customTemplateInAppData.templateName ? notificationAction.customTemplateInAppData.templateName : name;
-        NSDictionary *extras = @{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": cta};
+        NSDictionary *extras = @{CLTAP_NOTIFICATION_ID_TAG:campaignId, CLTAP_PROP_WZRK_CTA: cta};
         [self.notificationDelegate handleNotificationAction:notificationAction forNotification:self.notification withExtras:extras];
     }
 }

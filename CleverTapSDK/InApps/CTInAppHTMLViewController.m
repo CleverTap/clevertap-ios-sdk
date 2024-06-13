@@ -1,7 +1,7 @@
 #import <WebKit/WebKit.h>
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CleverTapJSInterface.h"
+#import "CleverTapJSInterfacePrivate.h"
 #import "CTUIUtils.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
@@ -44,10 +44,10 @@ typedef enum {
 
 @implementation CTInAppHTMLViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
+- (instancetype)initWithNotification:(CTInAppNotification *)notification config:(CleverTapInstanceConfig *)config {
     self = [super initWithNotification:notification];
-    _jsInterface = jsInterface;
     if (self) {
+        _jsInterface = [[CleverTapJSInterface alloc] initWithConfigForInApps:config fromController:self];
         self.shouldPassThroughTouches = (self.notification.position == CLTAP_INAPP_POSITION_TOP || self.notification.position == CLTAP_INAPP_POSITION_BOTTOM);
     }
     return self;
@@ -244,13 +244,13 @@ typedef enum {
             params[elts[0]] = [elts[1] stringByRemovingPercentEncoding];
         };
         mutableParams = [params mutableCopy];
-        NSString *c2a = params[@"wzrk_c2a"];
+        NSString *c2a = params[CLTAP_PROP_WZRK_CTA];
         if (c2a) {
             c2a = [c2a stringByRemovingPercentEncoding];
             NSArray *parts = [c2a componentsSeparatedByString:@"__dl__"];
             if (parts && [parts count] == 2) {
                 dl = [NSURL URLWithString:parts[1]];
-                mutableParams[@"wzrk_c2a"] = parts[0];
+                mutableParams[CLTAP_PROP_WZRK_CTA] = parts[0];
             }
         }
     }
@@ -260,7 +260,6 @@ typedef enum {
     }
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
-    
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {

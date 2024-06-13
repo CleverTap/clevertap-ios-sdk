@@ -15,6 +15,7 @@
 #import "CTTemplateContext-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
+#import "CTConstants.h"
 
 @interface CTTemplateContext (Tests)
 
@@ -77,7 +78,7 @@
     CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTAssertEqual(action.type, CTInAppActionTypeClose);
-        XCTAssertEqualObjects(extras[@"wzrk_c2a"], @"map.actions.close");
+        XCTAssertEqualObjects(extras[CLTAP_PROP_WZRK_CTA], @"map.actions.close");
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.close"];
@@ -88,7 +89,7 @@
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTAssertEqual(action.type, CTInAppActionTypeCustom);
         XCTAssertEqualObjects(action.customTemplateInAppData.templateName, VARS_ACTION_FUNCTION_NAME);
-        XCTAssertEqualObjects(extras[@"wzrk_c2a"], VARS_ACTION_FUNCTION_NAME);
+        XCTAssertEqualObjects(extras[CLTAP_PROP_WZRK_CTA], VARS_ACTION_FUNCTION_NAME);
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.function"];
@@ -99,7 +100,7 @@
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTAssertEqual(action.type, CTInAppActionTypeOpenURL);
         XCTAssertEqualObjects(action.actionURL, [[NSURL alloc] initWithString:VARS_ACTION_OPEN_URL_ADDRESS]);
-        XCTAssertEqualObjects(extras[@"wzrk_c2a"], @"map.actions.openUrl");
+        XCTAssertEqualObjects(extras[CLTAP_PROP_WZRK_CTA], @"map.actions.openUrl");
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.openUrl"];
@@ -112,7 +113,7 @@
         XCTAssertEqualObjects(action.keyValues, @{
             @"key1": @"value1"
         });
-        XCTAssertEqualObjects(extras[@"wzrk_c2a"], @"map.actions.kv");
+        XCTAssertEqualObjects(extras[CLTAP_PROP_WZRK_CTA], @"map.actions.kv");
     }];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"map.actions.kv"];
