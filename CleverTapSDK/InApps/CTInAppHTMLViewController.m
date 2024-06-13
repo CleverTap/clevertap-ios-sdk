@@ -521,6 +521,7 @@ typedef enum {
 
 - (void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
+        [self->webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
         [self.window removeFromSuperview];
         self.window = nil;
         if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
