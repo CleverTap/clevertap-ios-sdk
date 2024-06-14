@@ -14,6 +14,8 @@
 }
 
 - (void)onPresent:(CTTemplateContext *)context {
+    self.onPresentInvocationsCount++;
+    self.onPresentContext = context;
 }
 
 @end

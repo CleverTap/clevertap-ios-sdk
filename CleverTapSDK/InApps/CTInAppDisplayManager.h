@@ -14,6 +14,7 @@
 #import "CTPushPrimerManager.h"
 #import "CTInAppStore.h"
 #import "CTInAppImagePrefetchManager.h"
+#import "CTCustomTemplatesManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -36,11 +37,13 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
                                 inAppStore:(CTInAppStore *)inAppStore
-                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager;
+                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager
+                          templatesManager:(CTCustomTemplatesManager *)templatesManager;
 
 - (void)setPushPrimerManager:(CTPushPrimerManager* _Nonnull)pushPrimerManagerObj;
 - (void)prepareNotificationForDisplay:(NSDictionary* _Nonnull)jsonObj;
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary* _Nullable)notification;
+- (BOOL)isTemplateRegistered:(NSDictionary *)inAppJSON;
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs;
 - (void)_showNotificationIfAvailable;

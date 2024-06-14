@@ -9,9 +9,16 @@
 #ifndef CTTemplateContext_Internal_h
 #define CTTemplateContext_Internal_h
 
-@interface CTTemplateContext ()
+#import "CTInAppNotification.h"
+#import "CTCustomTemplate.h"
+#import "CTTemplateContext.h"
+#import "CTInAppNotificationDisplayDelegate.h"
 
-- (instancetype)initWithTemplateName:(NSString *)templateName;
+@interface CTTemplateContext (Internal)
+
+- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate andNotification:(CTInAppNotification *)notification;
+
+- (void)setDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
 
 @end
 

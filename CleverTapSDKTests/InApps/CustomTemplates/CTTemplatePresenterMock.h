@@ -13,6 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTTemplatePresenterMock : NSObject<CTTemplatePresenter>
 
+@property (nonatomic) int onPresentInvocationsCount;
+@property (nonatomic) CTTemplateContext *onPresentContext;
+
 @end
 
 NS_ASSUME_NONNULL_END

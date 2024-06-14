@@ -36,6 +36,8 @@
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
 #import "CTInAppImagePrefetchManager.h"
+
+#import "CTCustomTemplatesManager-Internal.h"
 #endif
 
 #if !(TARGET_OS_TV)
@@ -44,10 +46,14 @@
 #endif
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
+static const NSString *kInAppNotificationKey = @"inAppNotification";
 
 // static here as we may have multiple instances handling inapps
 static CTInAppDisplayViewController *currentDisplayController;
-static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControllers;
+static CTInAppNotification *currentlyDisplayingNotification;
+static NSMutableArray<NSArray *> *pendingNotifications;
+
+static BOOL once = YES;
 
 // private class
 @interface ImageLoadingResult : NSObject
@@ -77,6 +83,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 @property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
 
+@property (nonatomic, strong) CTCustomTemplatesManager *templatesManager;
+
 @property (nonatomic, strong, readonly) NSString *imageInterstitialHtml;
 
 @end
@@ -88,7 +96,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        pendingNotificationControllers = [NSMutableArray new];
+        pendingNotifications = [NSMutableArray new];
     });
 }
 
@@ -97,7 +105,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
                                 inAppStore:(CTInAppStore *)inAppStore
-                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
+                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager
+                          templatesManager:(CTCustomTemplatesManager *)templatesManager {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
@@ -105,8 +114,20 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         self.inAppFCManager = inAppFCManager;
         self.inAppStore = inAppStore;
         self.imagePrefetchManager = imagePrefetchManager;
+        self.templatesManager = templatesManager;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onDisplayPendingNotification:)
+                                                     name:[self.class pendingNotificationKey:self.config.accountId]
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:[self.class pendingNotificationKey:self.config.accountId]
+                                                  object:nil];
 }
 
 - (void)setPushPrimerManager:(CTPushPrimerManager *)pushPrimerManagerObj {
@@ -136,7 +157,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
-        [self.inAppStore enqueueInApps:inappNotifs];
+        NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
+        [self.inAppStore enqueueInApps:filteredInAppNotifs];
 
         // Fire the first notification, if any
         [self.dispatchQueueManager runOnNotificationQueue:^{
@@ -144,6 +166,31 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
+    }
+}
+
+- (NSArray *)filterNonRegisteredTemplates:(NSArray *)inappNotifs {
+    NSMutableArray *filteredInAppNotifs = [NSMutableArray new];
+    for (NSDictionary *inAppJSON in inappNotifs) {
+        if ([self isTemplateRegistered:inAppJSON]) {
+            [filteredInAppNotifs addObject:inAppJSON];
+        }
+    }
+    return filteredInAppNotifs;
+}
+
+- (BOOL)isTemplateRegistered:(NSDictionary *)inAppJSON {
+    CTCustomTemplateInAppData *customTemplateData = [CTCustomTemplateInAppData createWithJSON:inAppJSON];
+    
+    if (customTemplateData) {
+        if ([self.templatesManager isRegisteredTemplateWithName:customTemplateData.templateName]) {
+            return YES;
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Template with name: %@ is not registered and cannot be presented.", self, customTemplateData.templateName);
+            return NO;
+        }
+    } else {
+        return YES;
     }
 }
 
@@ -335,6 +382,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
+    // if we are currently displaying a notification, cache this notification for later display
+    if (currentlyDisplayingNotification) {
+        if (self.config.accountId && notification) {
+            [pendingNotifications addObject:@[self.config.accountId, notification]];
+            CleverTapLogDebug(self.config.logLevel, @"%@: InApp already displaying, queueing to pending InApps", self);
+        }
+        return;
+    }
+    
     BOOL isHTMLType = (notification.inAppType == CTInAppTypeHTML);
     BOOL isInternetAvailable = self.instance.deviceInfo.isOnline;
     if (isHTMLType && !isInternetAvailable) {
@@ -390,11 +446,16 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
+        case CTInAppTypeCustom:
+            currentlyDisplayingNotification = notification;
+            [self.templatesManager presentNotification:notification withDelegate:self];
+            break;
         default:
             errorString = [NSString stringWithFormat:@"Unhandled notification type: %lu", (unsigned long)notification.inAppType];
             break;
     }
     if (controller) {
+        currentlyDisplayingNotification = notification;
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
         [[self class] displayInAppDisplayController:controller];
@@ -422,32 +483,46 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+#pragma mark - Pending Notification
+
+- (void)onDisplayPendingNotification:(NSNotification *)notification {
+    currentlyDisplayingNotification = nil;
+    CleverTapLogDebug(self.config.logLevel, @"%@: Displaying pending notification.", self);
+    [self displayNotification:notification.userInfo[kInAppNotificationKey]];
+}
+
 #pragma mark - InAppDisplayController static
 + (void)displayInAppDisplayController:(CTInAppDisplayViewController*)controller {
-    // if we are currently displaying a notification, cache this notification for later display
-    if (currentDisplayController) {
-        [pendingNotificationControllers addObject:controller];
-        return;
-    }
-    // no current notification so display
     currentDisplayController = controller;
     [controller show:YES];
 }
 
 + (void)inAppDisplayControllerDidDismiss:(CTInAppDisplayViewController*)controller {
-    if (currentDisplayController && currentDisplayController == controller) {
-        currentDisplayController = nil;
+    if (controller) {
+        if (currentDisplayController && currentDisplayController == controller) {
+            currentDisplayController = nil;
+            [self checkPendingNotifications];
+        }
+    } else {
         [self checkPendingNotifications];
     }
 }
 
 // static display handling as we may have more than one instance competing to show an inapp
 + (void)checkPendingNotifications {
-    if (pendingNotificationControllers && [pendingNotificationControllers count] > 0) {
-        CTInAppDisplayViewController *controller = [pendingNotificationControllers objectAtIndex:0];
-        [pendingNotificationControllers removeObjectAtIndex:0];
-        [self displayInAppDisplayController:controller];
+    if (pendingNotifications && [pendingNotifications count] > 0) {
+        NSArray *pendingNotification = [pendingNotifications objectAtIndex:0];
+        [pendingNotifications removeObjectAtIndex:0];
+        NSString *accountId = [pendingNotification objectAtIndex:0];
+        CTInAppNotification *inAppNotification = [pendingNotification objectAtIndex:1];
+        [[NSNotificationCenter defaultCenter] postNotificationName:[self pendingNotificationKey:accountId] object:nil userInfo:@{kInAppNotificationKey: inAppNotification}];
+    } else {
+        currentlyDisplayingNotification = nil;
     }
+}
+
++ (NSString *)pendingNotificationKey:(NSString *)accountId {
+    return [NSString stringWithFormat:@"%@:%@:onDisplayPendingNotification", [self class], accountId];
 }
 
 #pragma mark - CTInAppNotificationDisplayDelegate
@@ -459,7 +534,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _showInAppNotificationIfAny];
 }
 
-- (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
+- (void)notificationDidShow:(CTInAppNotification*)notification {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did show: %@", self, notification.campaignId);
     [self.instance recordInAppNotificationStateEvent:NO forNotification:notification andQueryParameters:nil];
     [self.inAppFCManager didShow:notification];
