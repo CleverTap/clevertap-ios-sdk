@@ -12,7 +12,6 @@
 
 @property (nonatomic, readwrite) NSString *Id;
 @property (nonatomic, readwrite) NSString *campaignId;
-@property (nonatomic, readwrite) NSString *type;
 @property (nonatomic, readwrite) CTInAppType inAppType;
 
 @property (nonatomic, strong, readwrite) NSURL *imageURL;
@@ -107,7 +106,7 @@
             if (self.inAppType == CTInAppTypeUnknown) {
                 self.error = @"Unknown InApp Type";
             }
-        
+            
             NSUInteger timeToLive = [jsonObject[CLTAP_INAPP_TTL] longValue];
             if (timeToLive) {
                 _timeToLive = timeToLive;
@@ -126,10 +125,7 @@
 }
 
 - (void)configureFromJSON: (NSDictionary *)jsonObject {
-    self.type = (NSString*) jsonObject[@"type"];
-    if (self.type) {
-        self.inAppType = [CTInAppUtils inAppTypeFromString:self.type];
-    }
+    self.inAppType = [CTInAppUtils inAppTypeFromString:jsonObject[@"type"]];
     self.backgroundColor = jsonObject[@"bg"];
     self.title = (NSString*) jsonObject[@"title"][@"text"];
     self.titleColor = (NSString*) jsonObject[@"title"][@"color"];

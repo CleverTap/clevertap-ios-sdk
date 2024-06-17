@@ -254,11 +254,11 @@ typedef enum {
             }
         }
     }
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:dl buttonCustomExtras:nil forNotification:self.notification fromViewController:self withExtras:mutableParams];
-    } else {
-        [self hide:YES];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+        CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
+        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams];
     }
+    [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
     
 }

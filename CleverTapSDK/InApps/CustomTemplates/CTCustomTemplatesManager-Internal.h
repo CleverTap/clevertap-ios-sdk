@@ -18,7 +18,10 @@
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig;
 
-- (void)presentNotification:(CTInAppNotification *)notification withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
+- (BOOL)presentNotification:(CTInAppNotification *)notification
+               withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
+
+- (void)closeNotification:(CTInAppNotification *)notification;
 
 @end
 

@@ -131,6 +131,16 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+- (void)insertInFrontInApp:(NSDictionary *)inAppNotif {
+    if (!inAppNotif) return;
+    
+    @synchronized(self) {
+        NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
+        [inAppsQueue insertObject:inAppNotif atIndex:0];
+        [self storeInApps:inAppsQueue];
+    }
+}
+
 - (NSDictionary *)peekInApp {
     @synchronized(self) {
         NSArray *inApps = [self inAppsQueue];

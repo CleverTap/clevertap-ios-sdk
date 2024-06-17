@@ -47,4 +47,12 @@
     return self;
 }
 
+- (nonnull instancetype)initWithOpenURL:(nonnull NSURL *)url {
+    if (self = [super init]) {
+        self.type = CTInAppActionTypeOpenURL;
+        self.actionURL = url;
+    }
+    return self;
+}
+
 @end

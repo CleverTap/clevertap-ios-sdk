@@ -166,6 +166,7 @@
 
     return [[CTCustomTemplate alloc] initWithTemplateName:self.name
                                              templateType:self.templateType
+                                                 isVisual:self.isVisual
                                                 arguments:self.arguments
                                                 presenter:self.presenter];
 }

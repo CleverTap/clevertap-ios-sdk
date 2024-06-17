@@ -10,12 +10,14 @@
 #define CTInAppNotificationDisplayDelegate_h
 
 @class CTInAppDisplayViewController;
+@class CTInAppNotification;
+@class CTNotificationAction;
 
 @protocol CTInAppNotificationDisplayDelegate <NSObject>
 
 - (void)notificationDidShow:(CTInAppNotification *)notification;
 
-- (void)handleNotificationCTA:(NSURL *)ctaURL buttonCustomExtras:(NSDictionary *)buttonCustomExtras forNotification:(CTInAppNotification *)notification fromViewController:(CTInAppDisplayViewController *)controller withExtras:(NSDictionary *)extras;
+- (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras;
 
 - (void)notificationDidDismiss:(CTInAppNotification *)notification fromViewController:(CTInAppDisplayViewController *)controller;
 

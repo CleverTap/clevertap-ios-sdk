@@ -13,10 +13,12 @@
 #import "CTAppFunctionBuilder.h"
 #import "CTTemplatePresenterMock.h"
 #import "CTTemplateContext-Internal.h"
+#import "CTCustomTemplateInAppData-Internal.h"
+#import "CTInAppNotificationDisplayDelegateMock.h"
 
 @interface CTTemplateContext (Tests)
 
-@property (nonatomic) id<CTInAppNotificationDisplayDelegate> delegate;
+@property (nonatomic) id<CTInAppNotificationDisplayDelegate> notificationDelegate;
 
 @end
 
@@ -29,7 +31,7 @@
 - (void)testDismissedShouldCallDelegateDismiss {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    [context setDelegate:delegate];
+    [context setNotificationDelegate:delegate];
     [context dismissed];
     [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
     
@@ -38,10 +40,22 @@
     [[delegate reject] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
 }
 
+- (void)testDismissedShouldCallDelegateDismiss2 {
+    CTTemplateContext *context = self.templateContext;
+    id delegate = OCMProtocolMock(@protocol(CTTemplateContextDismissDelegate));
+    [context setDismissDelegate:delegate];
+    [context dismissed];
+    [[delegate verify] onDismissContext:[OCMArg any]];
+    
+    // should call delegate dismiss only once
+    [context dismissed];
+    [[delegate reject] onDismissContext:[OCMArg any]];
+}
+
 - (void)testPresentedShouldCallDelegateShow {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    [context setDelegate:delegate];
+    [context setNotificationDelegate:delegate];
     [context presented];
     [[delegate verify] notificationDidShow:[OCMArg any]];
 }
@@ -49,13 +63,115 @@
 - (void)testDismissClearsDelegate {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
-    [context setDelegate:delegate];
+    [context setNotificationDelegate:delegate];
     [context dismissed];
     [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
     
-    XCTAssertNil([context delegate]);
+    XCTAssertNil([context notificationDelegate]);
     [context presented];
     [[delegate reject] notificationDidShow:[OCMArg any]];
+}
+
+- (void)testTriggerAction {
+    CTTemplateContext *context = self.templateContext;
+    CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
+        XCTAssertEqual(action.type, CTInAppActionTypeClose);
+        XCTAssertEqualObjects(extras[@"wzrk_c2a"], @"map.actions.close");
+    }];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"map.actions.close"];
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+
+    context = self.templateContext;
+    delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
+        XCTAssertEqual(action.type, CTInAppActionTypeCustom);
+        XCTAssertEqualObjects(action.customTemplateInAppData.templateName, VARS_ACTION_FUNCTION_NAME);
+        XCTAssertEqualObjects(extras[@"wzrk_c2a"], VARS_ACTION_FUNCTION_NAME);
+    }];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"map.actions.function"];
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+
+    context = self.templateContext;
+    delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
+        XCTAssertEqual(action.type, CTInAppActionTypeOpenURL);
+        XCTAssertEqualObjects(action.actionURL, [[NSURL alloc] initWithString:VARS_ACTION_OPEN_URL_ADDRESS]);
+        XCTAssertEqualObjects(extras[@"wzrk_c2a"], @"map.actions.openUrl");
+    }];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"map.actions.openUrl"];
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+
+    context = self.templateContext;
+    delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
+        XCTAssertEqual(action.type, CTInAppActionTypeKeyValues);
+        XCTAssertEqualObjects(action.keyValues, @{
+            @"key1": @"value1"
+        });
+        XCTAssertEqualObjects(extras[@"wzrk_c2a"], @"map.actions.kv");
+    }];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"map.actions.kv"];
+    XCTAssertEqual(1, delegate.handleNotificationActionInvocations);
+    
+    context = self.templateContext;
+    delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
+        XCTFail(@"handleNotificationAction called for non-existent action arguments");
+    }];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"nonexistent"];
+    XCTAssertEqual(0, delegate.handleNotificationActionInvocations);
+}
+
+- (void)testTriggerActionNOOPForFunction {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    [context setNotificationDelegate:delegate];
+    [context triggerActionNamed:@"action"];
+    XCTAssertEqual(0, delegate.handleNotificationActionInvocations);
+}
+
+- (void)testDidShowNotCalledForActions {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
+    notification.customTemplateInAppData.isAction = YES;
+    
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
+    [context setNotificationDelegate:delegate];
+    [context presented];
+    [[delegate reject] notificationDidShow:[OCMArg any]];
+}
+
+- (void)testDidDismissNotCalledForActionsNotVisual {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
+    notification.customTemplateInAppData.isAction = YES;
+    
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
+    id dismissDelegate = OCMProtocolMock(@protocol(CTTemplateContextDismissDelegate));
+    [context setNotificationDelegate:delegate];
+    [context setDismissDelegate:dismissDelegate];
+    [context dismissed];
+    [[dismissDelegate verify] onDismissContext:[OCMArg any]];
+    [[delegate reject] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
+}
+
+- (void)testDidDismissCalledForActionsVisual {
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
+    notification.customTemplateInAppData.isAction = YES;
+    
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.functionVisual andNotification:notification];
+    
+    id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
+    [context setNotificationDelegate:delegate];
+    [context dismissed];
+    [[delegate verify] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
 }
 
 - (void)testTemplateName {
@@ -168,7 +284,7 @@
 
 - (CTCustomTemplate *)simpleTemplate {
     CTInAppTemplateBuilder *builder = [[CTInAppTemplateBuilder alloc] init];
-    [builder setName:TEMPLATE_NAME];
+    [builder setName:SIMPLE_TEMPLATE_NAME];
     [builder addArgument:@"a.b.c" withBool:VARS_DEFAULT_BOOLEAN];
     [builder addArgument:@"a.b.d" withString:VARS_DEFAULT_STRING];
     [builder addArgument:@"a.b.e.f" withNumber:@(VARS_DEFAULT_LONG)];
@@ -181,7 +297,7 @@
 
 - (NSDictionary *)simpleTemplateNotificationJson {
     return @{
-        @"templateName": TEMPLATE_NAME,
+        @"templateName": SIMPLE_TEMPLATE_NAME,
         @"type": @"custom-code",
         @"vars": @{
             @"a.b.c": @(VARS_OVERRIDE_BOOLEAN),
@@ -232,6 +348,7 @@
     [templateBuilder addActionArgument:@"map.actions.function"];
     [templateBuilder addActionArgument:@"map.actions.close"];
     [templateBuilder addActionArgument:@"map.actions.openUrl"];
+    [templateBuilder addActionArgument:@"map.actions.kv"];
     [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     return [templateBuilder build];
 }
@@ -269,6 +386,14 @@
                     @"ios": VARS_ACTION_OPEN_URL_ADDRESS
                 }
             },
+            @"map.actions.kv": @{
+                @"actions": @{
+                    @"type": @"kv",
+                    @"kv": @{
+                        @"key1": @"value1"
+                    },
+                }
+            },
             @"map.int": @123,
             @"map.float": @15.6f,
             @"map.innerMap.boolean": @YES,
@@ -284,9 +409,35 @@
     };
 }
 
-static NSString * const TEMPLATE_NAME = @"Template";
+- (CTCustomTemplate *)function {
+    CTAppFunctionBuilder *bulder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
+    [bulder setName:FUNCTION_NAME];
+    [bulder addArgument:@"string" withString:VARS_DEFAULT_STRING];
+    [bulder setPresenter:[CTTemplatePresenterMock new]];
+    return [bulder build];
+}
+
+- (CTCustomTemplate *)functionVisual {
+    CTAppFunctionBuilder *bulder = [[CTAppFunctionBuilder alloc] initWithIsVisual:YES];
+    [bulder setName:FUNCTION_NAME];
+    [bulder addArgument:@"string" withString:VARS_DEFAULT_STRING];
+    [bulder setPresenter:[CTTemplatePresenterMock new]];
+    return [bulder build];
+}
+
+- (NSDictionary *)functionNotificationJson {
+    return @{
+        @"templateName": FUNCTION_NAME,
+        @"type": @"custom-code",
+        @"vars": @{
+            @"string": VARS_OVERRIDE_STRING
+        }
+    };
+}
+
+static NSString * const SIMPLE_TEMPLATE_NAME = @"Template";
 static NSString * const TEMPLATE_NAME_NESTED = @"TemplateNestedArgs";
-static NSString * const FUNCTION_NAME_TOP_LEVEL = @"FunctionTopLevel";
+static NSString * const FUNCTION_NAME = @"Function";
 
 static BOOL const VARS_OVERRIDE_BOOLEAN = YES;
 static NSString * const VARS_OVERRIDE_STRING = @"Text";

@@ -12,6 +12,7 @@
 @interface CTCustomTemplate ()
 
 @property (nonatomic, strong) NSString *name;
+@property (nonatomic) BOOL isVisual;
 @property (nonatomic, strong) NSString *templateType;
 @property (nonatomic, strong) NSArray<CTTemplateArgument *> *arguments;
 @property (nonatomic, strong) id<CTTemplatePresenter> presenter;
@@ -22,11 +23,13 @@
 
 - (instancetype)initWithTemplateName:(NSString *)templateName
                         templateType:(NSString *)templateType
+                            isVisual:(BOOL)isVisual
                            arguments:(NSArray *)arguments
                            presenter:(id<CTTemplatePresenter>)presenter {
     if (self = [super init]) {
         _name = [templateName copy];
         _templateType = [templateType copy];
+        _isVisual = isVisual;
         _arguments = arguments;
         _presenter = presenter;
     }

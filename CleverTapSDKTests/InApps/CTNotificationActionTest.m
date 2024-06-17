@@ -126,4 +126,12 @@
     }));
 }
 
+- (void)testInitWithOpenURL {
+    NSURL *url = [[NSURL alloc] initWithString:@"https://example.com/"];
+    CTNotificationAction *notificationAction = [[CTNotificationAction alloc] initWithOpenURL:url];
+    
+    XCTAssertEqual(notificationAction.type, CTInAppActionTypeOpenURL);
+    XCTAssertEqualObjects(notificationAction.actionURL, url);
+}
+
 @end
