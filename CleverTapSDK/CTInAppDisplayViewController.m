@@ -76,7 +76,7 @@ API_AVAILABLE(ios(13.0)) {
 
 #if !(TARGET_OS_TV)
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    UIWindow *window = [CTUIUtils getSharedApplication].windows.firstObject;
+    UIWindow *window = [CTUIUtils getKeyWindow];
     UIInterfaceOrientationMask windowSupportedOrientations = [[CTUIUtils getSharedApplication] supportedInterfaceOrientationsForWindow:window];
     
     if (_notification.hasPortrait && _notification.hasLandscape) {
