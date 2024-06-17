@@ -13,16 +13,15 @@
 
 @implementation CTCustomTemplateBuilder
 
-- (instancetype)initWithType:(nonnull NSString *)type isVisual:(BOOL)isVisual allowHierarchicalNames:(BOOL)allowHierarchicalNames {
-    return [self initWithType:type isVisual:isVisual allowHierarchicalNames:allowHierarchicalNames nullableArgumentTypes:[NSSet setWithObject:@(CTTemplateArgumentTypeFile)]];
+- (instancetype)initWithType:(nonnull NSString *)type isVisual:(BOOL)isVisual {
+    return [self initWithType:type isVisual:isVisual nullableArgumentTypes:[NSSet setWithObject:@(CTTemplateArgumentTypeFile)]];
 }
 
-- (instancetype)initWithType:(nonnull NSString *)type isVisual:(BOOL)isVisual allowHierarchicalNames:(BOOL)allowHierarchicalNames nullableArgumentTypes:(NSSet *)nullableArgumentTypes {
+- (instancetype)initWithType:(nonnull NSString *)type isVisual:(BOOL)isVisual nullableArgumentTypes:(NSSet *)nullableArgumentTypes {
     self = [super init];
     if (self) {
         _templateType = [type copy];
         _isVisual = isVisual;
-        _allowHierarchicalNames = allowHierarchicalNames;
         
         _nullableArgumentTypes = [NSSet setWithObject:@(CTTemplateArgumentTypeFile)];
         if (nullableArgumentTypes && [nullableArgumentTypes count] > 0) {
@@ -52,13 +51,6 @@
                 userInfo:nil]);
     }
     
-    if (!self.allowHierarchicalNames && [name containsString:@"."]) {
-        @throw([NSException
-                exceptionWithName:@"CleverTap Error"
-                reason:@"CleverTap: Argument Name cannot contain a dot \".\" ."
-                userInfo:nil]);
-    }
-    
     if ([self.argumentNames containsObject:name]) {
         @throw([NSException
                 exceptionWithName:@"CleverTap Error"
@@ -74,9 +66,7 @@
                 userInfo:nil]);
     }
     
-    if (self.allowHierarchicalNames) {
-        [self validateParentNames:name];
-    }
+    [self validateParentNames:name];
 
     CTTemplateArgument *arg = [[CTTemplateArgument alloc] initWithName:name type:type defaultValue:defaultValue];
     [self.arguments addObject:arg];
@@ -121,6 +111,30 @@
 
 - (void)addArgument:(NSString *)name withNumber:(NSNumber *)defaultValue {
     [self addArgumentWithName:name type:CTTemplateArgumentTypeNumber defaultValue:defaultValue];
+}
+
+- (void)addArgument:(nonnull NSString *)name withDictionary:(nonnull NSDictionary *)defaultValue {
+    if (defaultValue == nil || [defaultValue count] == 0) {
+        @throw([NSException
+                exceptionWithName:@"CleverTap Error"
+                reason:[NSString stringWithFormat:@"CleverTap: Default value cannot be nil or empty."]
+                userInfo:nil]);
+    }
+    
+    [self flatten:defaultValue name:name];
+}
+
+- (void)flatten:(NSDictionary *)map name:(NSString *)name {
+    [map enumerateKeysAndObjectsUsingBlock:^(NSString*  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
+        NSString *argName = [NSString stringWithFormat:@"%@.%@", name, key];
+        if ([value isKindOfClass:[NSString class]]) {
+            [self addArgument:argName withString:value];
+        } else if ([value isKindOfClass:[NSNumber class]]) {
+            [self addArgument:argName withNumber:value];
+        } else if ([value isKindOfClass:[NSDictionary class]]) {
+            [self flatten:value name:argName];
+        }
+    }];
 }
 
 - (void)addFileArgument:(NSString *)name {

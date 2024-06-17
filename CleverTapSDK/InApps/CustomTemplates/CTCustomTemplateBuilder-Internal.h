@@ -18,7 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *templateType;
 @property (nonatomic, assign) BOOL isVisual;
-@property (nonatomic, assign) BOOL allowHierarchicalNames;
 
 @property (nonatomic, strong) NSSet<NSNumber *> *nullableArgumentTypes;
 @property (nonatomic, strong) NSMutableSet<NSString *> *argumentNames;
@@ -27,8 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) id<CTTemplatePresenter> presenter;
 
-- (instancetype)initWithType:(NSString *)type isVisual:(BOOL)isVisual allowHierarchicalNames:(BOOL)allowHierarchicalNames;
-- (instancetype)initWithType:(NSString *)type isVisual:(BOOL)isVisual allowHierarchicalNames:(BOOL)allowHierarchicalNames nullableArgumentTypes:(NSSet *)nullableArgumentTypes;
+- (instancetype)initWithType:(NSString *)type isVisual:(BOOL)isVisual;
+- (instancetype)initWithType:(NSString *)type isVisual:(BOOL)isVisual nullableArgumentTypes:(NSSet *)nullableArgumentTypes;
 
 - (void)addArgumentWithName:(NSString *)name type:(CTTemplateArgumentType)type defaultValue:(nullable id)defaultValue;
 

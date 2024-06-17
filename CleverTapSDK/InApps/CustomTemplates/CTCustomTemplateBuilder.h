@@ -30,6 +30,9 @@ NS_SWIFT_NAME(addArgument(_:number:));
 - (void)addArgument:(NSString *)name withBool:(BOOL)defaultValue
 NS_SWIFT_NAME(addArgument(_:boolean:));
 
+- (void)addArgument:(nonnull NSString *)name withDictionary:(nonnull NSDictionary *)defaultValue
+NS_SWIFT_NAME(addArgument(_:dictionary:));
+
 - (void)addFileArgument:(NSString *)name;
 
 - (void)setPresenter:(id<CTTemplatePresenter>)presenter;
