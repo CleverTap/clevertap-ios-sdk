@@ -53,8 +53,6 @@ static CTInAppDisplayViewController *currentDisplayController;
 static CTInAppNotification *currentlyDisplayingNotification;
 static NSMutableArray<NSArray *> *pendingNotifications;
 
-static BOOL once = YES;
-
 // private class
 @interface ImageLoadingResult : NSObject
 
@@ -427,12 +425,9 @@ static BOOL once = YES;
 
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
-    CleverTapJSInterface *jsInterface = nil;
-
     switch (notification.inAppType) {
         case CTInAppTypeHTML:
-            jsInterface = [[CleverTapJSInterface alloc] initWithConfigForInApps:self.config];
-            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification jsInterface:jsInterface];
+            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
             break;
         case CTInAppTypeInterstitial:
             controller = [[CTInterstitialViewController alloc] initWithNotification:notification];

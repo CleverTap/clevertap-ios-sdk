@@ -47,13 +47,6 @@
     return self;
 }
 
-#if !(TARGET_OS_TV)
-- (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
-    self = [self initWithNotification:notification];
-    return self;
-}
-#endif
-
 // Notification will not be posted if the scene became active before registering the observer.
 // However, this means that there is already an active scene when the controller is initialized.
 // In this case, we do not need the notification, since showFromWindow will directly find the window from the already active scene and not wait for it.
@@ -260,8 +253,28 @@ API_AVAILABLE(ios(13.0)) {
     }
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
+        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, CLTAP_PROP_WZRK_CTA: buttonText}];
     }
+}
+
+- (void)triggerInAppAction:(CTNotificationAction *)action callToAction:(NSString *)callToAction buttonId:(NSString *)buttonId {
+    NSMutableDictionary *extras = [NSMutableDictionary new];
+    if (callToAction) {
+        extras[CLTAP_PROP_WZRK_CTA] = callToAction;
+    }
+    if (buttonId) {
+        extras[@"button_id"] = buttonId;
+    }
+    NSString *campaignId = self.notification.campaignId;
+    if (campaignId == nil) {
+        campaignId = @"";
+    }
+    extras[CLTAP_NOTIFICATION_ID_TAG] = campaignId;
+    if (self.delegate &&
+        [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
+    }
+    [self hide:YES];
 }
 
 - (void)handleImageTapGesture {
@@ -273,7 +286,7 @@ API_AVAILABLE(ios(13.0)) {
     }
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, @"wzrk_c2a": buttonText}];
+        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, CLTAP_PROP_WZRK_CTA: buttonText}];
     }
 }
 
