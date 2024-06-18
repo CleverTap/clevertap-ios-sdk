@@ -2,7 +2,7 @@
 #import "CTConstants.h"
 
 #define PREF_PREFIX @"WizRocket"
-#define SUITE_NAME @"Clevertap"
+#define SUITE_NAME @"CleverTap"
 
 @implementation CTPreferences
 
