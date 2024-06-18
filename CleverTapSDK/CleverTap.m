@@ -2970,7 +2970,7 @@ static BOOL sharedInstanceErrorLogged;
                 [userAttributesChangeProperties setObject:properties forKey:key];
             }
             // Need to persist only if the new profile value is not a null value
-            if (newValue != nil) {
+            if (newValue != nil && newValue != oldValue) {
                 [fieldsToPersistLocally setObject:newValue forKey:key];
             }
         }
@@ -2981,9 +2981,6 @@ static BOOL sharedInstanceErrorLogged;
 -(void) updateProfileFieldsLocally: (NSMutableDictionary<NSString *, id> *) fieldsToPersistLocally{
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
-            if (systemFields) {
-                [self.localDataStore setProfileFields:systemFields];
-            }
             if (customFields) {
                 CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
                 [self.localDataStore setProfileFields:customFields];
