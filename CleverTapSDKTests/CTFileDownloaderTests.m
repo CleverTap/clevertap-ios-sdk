@@ -227,7 +227,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
         XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2]]);
         [expectation1 fulfill];
     }];
-    [self.fileDownloader downloadFiles:@[urls[0], urls[1]] ofType:CTInAppClientSide withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+    [self.fileDownloader downloadFiles:@[urls[0], urls[1]] ofType:CTFileVariables withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
         XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
         [expectation2 fulfill];

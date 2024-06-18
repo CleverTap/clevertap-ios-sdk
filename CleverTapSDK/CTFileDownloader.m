@@ -30,7 +30,7 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
 
 - (void)downloadFiles:(NSArray<NSString *> *)fileURLs
                ofType:(CTFileDownloadType)type
-  withCompletionBlock:(void (^)(NSDictionary<NSString *,id> *status))completion {
+  withCompletionBlock:(void (^ _Nullable)(NSDictionary<NSString *,id> *status))completion {
     if (fileURLs.count == 0) return;
     
     NSArray<NSURL *> *urls = [self getFileURLs:fileURLs];
@@ -85,7 +85,7 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL {
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *imagePath = [documentsPath stringByAppendingPathComponent:[imageURL lastPathComponent]];
-    UIImage *image = [UIImage imageWithContentsOfFile:imagePath];
+    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfFile:imagePath]];
     if (image) {
         return image;
     }
@@ -131,36 +131,42 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
 
 - (void)updateFileDownloadSets:(NSDictionary<NSString *,id> *)status
                         ofType:(CTFileDownloadType)type {
-    for(NSString *key in [status allKeys]) {
-        if(status[key]) {
-            [self addTypeToActive:type forkey:key];
-            if ([self.inactiveUrls objectForKey:key]) {
-                [self.inactiveUrls removeObjectForKey:key];
+    @synchronized (self) {
+        for(NSString *key in [status allKeys]) {
+            if(status[key]) {
+                [self addTypeToActive:type forkey:key];
+                if ([self.inactiveUrls objectForKey:key]) {
+                    [self.inactiveUrls removeObjectForKey:key];
+                }
             }
         }
     }
 }
 
 - (void)updateFileDeleteSets:(NSDictionary<NSString *,id> *)status {
-    for(NSString *key in [status allKeys]) {
-        if(status[key]) {
-            [self.inactiveUrls removeObjectForKey:key];
+    @synchronized (self) {
+        for(NSString *key in [status allKeys]) {
+            if(status[key]) {
+                [self.inactiveUrls removeObjectForKey:key];
+            }
         }
     }
 }
 
 - (void)moveFilesToInactiveOfType:(CTFileDownloadType)type {
     // This add files of given type to inactive dict and remove from active dict.
-    for(NSString *key in [self.activeUrls allKeys]) {
-        NSMutableArray *activeTypes = [self.activeUrls[key] mutableCopy];
-        if ([activeTypes containsObject:[NSNumber numberWithInt:type]]) {
-            // Add url to inactive dict only when url is not used by other types.
-            if ([activeTypes count] == 1) {
-                NSMutableArray *types = [NSMutableArray new];
-                [types addObject:[NSNumber numberWithInt:type]];
-                [self addTypesToInactive:types forKey:key];
+    @synchronized (self) {
+        for(NSString *key in [self.activeUrls allKeys]) {
+            NSMutableArray *activeTypes = [self.activeUrls[key] mutableCopy];
+            if ([activeTypes containsObject:[NSNumber numberWithInt:type]]) {
+                // Add url to inactive dict only when url is not used by other types.
+                if ([activeTypes count] == 1) {
+                    NSMutableArray *types = [NSMutableArray new];
+                    [types addObject:[NSNumber numberWithInt:type]];
+                    [self addTypesToInactive:types forKey:key];
+                }
+                [self removeTypeFromActive:type forKey:key];
             }
-            [self removeTypeFromActive:type forKey:key];
         }
     }
     [self updateFileAssetsInPreference];
@@ -168,32 +174,40 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
 
 - (void)moveAllFilesToInactive {
     // Move all file urls from active to inactive dictionary.
-    for(NSString *key in [self.activeUrls allKeys]) {
-        NSMutableArray *activeTypes = [self.activeUrls[key] mutableCopy];
-        [self addTypesToInactive:activeTypes forKey:key];
+    @synchronized (self) {
+        for(NSString *key in [self.activeUrls allKeys]) {
+            NSMutableArray *activeTypes = [self.activeUrls[key] mutableCopy];
+            [self addTypesToInactive:activeTypes forKey:key];
+        }
+        self.activeUrls = [NSMutableDictionary new];
     }
-    self.activeUrls = [NSMutableDictionary new];
     
     [self updateFileAssetsInPreference];
 }
 
 - (void)addActiveFileAssets {
     // Add only active dict from preferences in `activeUrls`
-    NSDictionary *activeUrlsDict = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_ACTIVE_DICT]];
-    self.activeUrls = [NSMutableDictionary dictionaryWithDictionary:activeUrlsDict];
+    @synchronized (self) {
+        NSDictionary *activeUrlsDict = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_ACTIVE_DICT]];
+        self.activeUrls = [NSMutableDictionary dictionaryWithDictionary:activeUrlsDict];
+    }
 }
 
 - (void)addInactiveFileAssets {
     // Add only inactive dict from preferences in `inactiveUrls`
-    NSDictionary *inactiveUrlsDict = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
-    self.inactiveUrls = [NSMutableDictionary dictionaryWithDictionary:inactiveUrlsDict];
+    @synchronized (self) {
+        NSDictionary *inactiveUrlsDict = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
+        self.inactiveUrls = [NSMutableDictionary dictionaryWithDictionary:inactiveUrlsDict];
+    }
 }
 
 - (void)updateFileAssetsInPreference {
-    [CTPreferences putObject:self.activeUrls
-                      forKey:[self storageKeyWithSuffix:CLTAP_FILE_ACTIVE_DICT]];
-    [CTPreferences putObject:self.inactiveUrls
-                      forKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
+    @synchronized (self) {
+        [CTPreferences putObject:self.activeUrls
+                          forKey:[self storageKeyWithSuffix:CLTAP_FILE_ACTIVE_DICT]];
+        [CTPreferences putObject:self.inactiveUrls
+                          forKey:[self storageKeyWithSuffix:CLTAP_FILE_INACTIVE_DICT]];
+    }
 }
 
 - (long)getLastDeletedTimestamp {

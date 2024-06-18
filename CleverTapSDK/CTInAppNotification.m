@@ -66,7 +66,7 @@
 
 @property (nonatomic, readwrite) NSString *error;
 
-@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
 
 @end
 
@@ -78,10 +78,10 @@
 @synthesize mediaIsVideo=_mediaIsVideo;
 
 - (instancetype)initWithJSON:(NSDictionary *)jsonObject
-        imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
+              fileDownloader:(CTFileDownloader *)fileDownloader {
     if (self = [super init]) {
         @try {
-            self.imagePrefetchManager = imagePrefetchManager;
+            self.fileDownloader = fileDownloader;
             self.inAppType = CTInAppTypeUnknown;
             self.jsonDescription = jsonObject;
             self.campaignId = (NSString*) jsonObject[CLTAP_NOTIFICATION_ID_TAG];
@@ -434,7 +434,7 @@
 
 - (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
     NSString *imageURLString = [imageURL absoluteString];
-    UIImage *image = [self.imagePrefetchManager loadImageFromDisk:imageURLString];
+    UIImage *image = [self.fileDownloader loadImageFromDisk:imageURLString];
     if (image) return image;
     return nil;
 }

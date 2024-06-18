@@ -15,7 +15,7 @@ typedef NS_ENUM(int, CTFileDownloadType) {
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 - (void)downloadFiles:(NSArray<NSString *> *)fileURLs
                ofType:(CTFileDownloadType)type
-  withCompletionBlock:(void (^)(NSDictionary<NSString *,id> *status))completion;
+  withCompletionBlock:(void (^ _Nullable)(NSDictionary<NSString *,id> *status))completion;
 - (BOOL)isFileAlreadyPresent:(NSString *)url;
 - (void)clearFileAssets:(BOOL)expiredOnly;
 - (NSString *)getFileDownloadPath:(NSString *)url;
