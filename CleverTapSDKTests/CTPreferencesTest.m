@@ -17,12 +17,12 @@
 @implementation CTPreferencesTest
 
 - (void)setUp {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults setObject:@(2333333333333333333) forKey:@"WizRocketlongValueForTesting"];
 }
 
 - (void)tearDown {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults removeObjectForKey:@"WizRocketlongValueForTesting"];
 }
 
@@ -51,7 +51,7 @@
 }
 
 - (void)test_getStringForKey_withValidKey {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
     
     NSString *stringValue = [CTPreferences getStringForKey:@"stringValueForTesting" withResetValue:@"testResetStringValue"];
@@ -60,7 +60,7 @@
 }
 
 - (void)test_getStringForKey_withInvalidKey {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
     
     NSString *stringValue = [CTPreferences getStringForKey:@"invalidTestKey" withResetValue:@"testResetStringValue"];
@@ -83,18 +83,18 @@
 }
 
 - (void)test_getObjectForKey_withValidKey {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
-
+    
     id idValue = [CTPreferences getObjectForKey:@"stringValueForTesting"];
     
     XCTAssertEqualObjects(idValue, @"stringValueForTesting");
 }
 
 - (void)test_getObjectForKey_withInvalidKey {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
-
+    
     id idValue = [CTPreferences getObjectForKey:@"invalidTestStringKey"];
     
     XCTAssertNil(idValue);
@@ -112,13 +112,42 @@
 }
 
 -(void)test_removeObjectForKey {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
     [defaults setObject:@"objectValueForTesting" forKey:@"WizRocketobjectValueForTesting"];
-
+    
     [CTPreferences removeObjectForKey:@"objectValueForTesting"];
     
     id checkValue = [CTPreferences getObjectForKey:@"WizRocketobjectValueForTesting"];
     
     XCTAssertNil(checkValue);
 }
+
+-(void)test_migrateCTUserDefaultsData {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *ctDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+
+    // Set test data
+    [defaults setObject:@"TestValue1" forKey:@"WizRocket_TestKey1"];
+    [defaults setObject:@"TestValue2" forKey:@"WizRocket_TestKey2"];
+    [defaults setObject:@"OtherValue" forKey:@"OtherKey"];
+    [defaults synchronize];
+        
+    // Call the method to migrate data
+    [CTPreferences migrateCTUserDefaultsData];
+    
+    // Verify that data with PREF_PREFIX is migrated to CleverTap user defaults
+    XCTAssertEqualObjects([ctDefaults objectForKey:@"WizRocket_TestKey1"], @"TestValue1");
+    XCTAssertEqualObjects([ctDefaults objectForKey:@"WizRocket_TestKey2"], @"TestValue2");
+    
+    // Verify that data without PREF_PREFIX is not migrated
+    XCTAssertNil([ctDefaults objectForKey:@"OtherKey"]);
+    
+    // Verify that data with PREF_PREFIX is removed from standard user defaults
+    XCTAssertNil([defaults objectForKey:@"WizRocket_TestKey1"]);
+    XCTAssertNil([defaults objectForKey:@"WizRocket_TestKey2"]);
+    
+    // Verify that data without PREF_PREFIX is not removed from standard user defaults
+    XCTAssertEqualObjects([defaults objectForKey:@"OtherKey"], @"OtherValue");
+}
+
 @end

@@ -2,12 +2,14 @@
 #import "CTConstants.h"
 
 #define PREF_PREFIX @"WizRocket"
+#define SUITE_NAME @"Clevertap"
 
 @implementation CTPreferences
 
 + (long)getIntForKey:(NSString *)key withResetValue:(long)resetValue {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     id value = [defaults objectForKey:key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((long) [value longLongValue]);
@@ -20,14 +22,16 @@
 
 + (void)putInt:(long)resetValue forKey:(NSString *)key {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     [defaults setObject:@(resetValue) forKey:key];
     [defaults synchronize];
 }
 
 + (NSString *_Nullable)getStringForKey:(NSString *_Nonnull)key withResetValue:(NSString *_Nullable)resetValue {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     id value = [defaults objectForKey:key];
     if ([value isKindOfClass:[NSString class]]) {
         return value;
@@ -42,27 +46,31 @@
 
 + (void)putString:(NSString *)resetValue forKey:(NSString *)key {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     [defaults setObject:resetValue forKey:key];
     [defaults synchronize];
 }
 
 + (id)getObjectForKey:(NSString *)key {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     return [defaults objectForKey:key];
 }
 
 + (void)putObject:(id)object forKey:(NSString *)key {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     [defaults setObject:object forKey:key];
     [defaults synchronize];
 }
 
 + (void)removeObjectForKey:(NSString *)key {
     key = [NSString stringWithFormat:@"%@%@", PREF_PREFIX, key];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
     [defaults removeObjectForKey:key];
     [defaults synchronize];
 }
@@ -189,6 +197,23 @@
 
 + (NSString * _Nonnull)storageKeyWithSuffix: (NSString * _Nonnull)suffix config: (CleverTapInstanceConfig* _Nonnull)config {
     return [NSString stringWithFormat:@"%@:%@", config.accountId, suffix];
+}
+
++ (void)migrateCTUserDefaultsData{
+    NSUserDefaults *standardDefaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *standardDefaultsDict = [standardDefaults dictionaryRepresentation];
+    NSUserDefaults *ctDefaults = [[NSUserDefaults alloc] initWithSuiteName:SUITE_NAME];
+
+    for (NSString *key in standardDefaultsDict) {
+        if ([key containsString:PREF_PREFIX]){
+            id value = standardDefaultsDict[key];
+            [ctDefaults setObject:value forKey:key];
+            [standardDefaults removeObjectForKey:key];
+        }
+    }
+    
+    [standardDefaults synchronize];
+    [ctDefaults synchronize];
 }
 
 @end

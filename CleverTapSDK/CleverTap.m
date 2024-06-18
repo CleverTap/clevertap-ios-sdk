@@ -336,6 +336,7 @@ static BOOL sharedInstanceErrorLogged;
 
 + (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
     CleverTapLogStaticInfo("%@: Auto Integration enabled", self);
+    [CTPreferences migrateCTUserDefaultsData];
     isAutoIntegrated = YES;
     [CTSwizzleManager swizzleAppDelegate];
     CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
