@@ -3,8 +3,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^CTFilesDownloadCompletedBlock)(NSDictionary<NSString *,id> *status);
-typedef void(^CTFilesDeleteCompletedBlock)(NSDictionary<NSString *,id> *status);
+typedef void(^CTFilesDownloadCompletedBlock)(NSDictionary<NSString *, NSNumber *> *status);
+typedef void(^CTFilesDeleteCompletedBlock)(NSDictionary<NSString *, NSNumber *> *status);
 typedef void (^DownloadCompletionHandler)(NSURL *url, BOOL success);
 
 @interface CTFileDownloadManager : NSObject

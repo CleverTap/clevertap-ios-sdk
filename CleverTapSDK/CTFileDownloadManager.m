@@ -2,10 +2,13 @@
 #import "CTConstants.h"
 
 @interface CTFileDownloadManager()
+
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *documentsDirectory;
 @property (nonatomic, strong) NSMutableSet<NSURL *> *downloadInProgressUrls;
 @property (nonatomic, strong) NSMutableDictionary<NSURL *, NSMutableArray<DownloadCompletionHandler> *> *downloadInProgressHandlers;
+
+@property (nonatomic, strong) NSURLSession *session;
 
 @end
 
@@ -27,13 +30,18 @@
         self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
         _downloadInProgressUrls = [NSMutableSet new];
         _downloadInProgressHandlers = [NSMutableDictionary new];
+        
+        NSURLSessionConfiguration *sc = [NSURLSessionConfiguration defaultSessionConfiguration];
+        sc.timeoutIntervalForRequest = CLTAP_REQUEST_TIME_OUT_INTERVAL;
+        sc.timeoutIntervalForResource = CLTAP_REQUEST_TIME_OUT_INTERVAL;
+        
+        self.session = [NSURLSession sessionWithConfiguration:sc];
     }
     
     return self;
 }
 
 #pragma mark - Public methods
-
 - (void)downloadFiles:(nonnull NSArray<NSURL *> *)urls
   withCompletionBlock:(nonnull CTFilesDownloadCompletedBlock)completion {
     dispatch_group_t group = dispatch_group_create();
@@ -122,7 +130,7 @@
             // Add the file url to callback as success true as it is already not present
             [filesDeleteStatus setObject:@1 forKey:[url absoluteString]];
         }
-    }
+    } 
     dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
         // Callback when all files are deleted with their success status
         completion(filesDeleteStatus);
@@ -131,21 +139,35 @@
 
 #pragma mark - Private methods
 
--(void)downloadSingleFile:(NSURL *)url
-                completed:(void(^)(BOOL success))completedBlock {
-    NSURLSession *session = [NSURLSession sharedSession];
-    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:url
-                                                        completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+- (void)downloadSingleFile:(NSURL *)url
+                 completed:(void(^)(BOOL success))completedBlock {
+    NSURLSessionDownloadTask *downloadTask = [self.session downloadTaskWithURL:url
+                                                             completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
         if (error) {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Error downloading file %@ - %@", self, url, error);
+            CleverTapLogInternal(self.config.logLevel, @"%@ Error downloading file: %@ - %@", self, url, error);
             completedBlock(NO);
             return;
         }
-        NSData *fileData = [NSData dataWithContentsOfURL:location];
-
-        // Save the file to a desired location
-        NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[response suggestedFilename]];
-        [fileData writeToFile:filePath atomically:YES];
+        
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+        if (httpResponse.statusCode != 200) {
+            CleverTapLogInternal(self.config.logLevel, @"HTTP Error: %ld for file: %@", (long)httpResponse.statusCode, url);
+            completedBlock(NO);
+            return;
+        }
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        // Create the destination path by appending the suggested filename to the documents directory path
+        NSString *destinationPath = [self.documentsDirectory stringByAppendingPathComponent:[response suggestedFilename]];
+        NSURL *destinationURL = [NSURL fileURLWithPath:destinationPath];
+        // Move the file from the temporary location to the documents directory
+        NSError *fileError;
+        [fileManager moveItemAtURL:location toURL:destinationURL error:&fileError];
+        if (fileError) {
+            CleverTapLogInternal(self.config.logLevel, @"File Error: %@ for file: %@", fileError.localizedDescription, url);
+            completedBlock(NO);
+            return;
+        }
         completedBlock(YES);
     }];
     [downloadTask resume];
@@ -153,6 +175,11 @@
 
 - (void)deleteSingleFile:(NSURL *)url
                completed:(void(^)(BOOL success))completedBlock {
+    if (![url lastPathComponent] || [[url lastPathComponent] isEqualToString:@""]) {
+        completedBlock(NO);
+        return;
+    }
+
     NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[url lastPathComponent]];
     NSError *error;
     BOOL success = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];

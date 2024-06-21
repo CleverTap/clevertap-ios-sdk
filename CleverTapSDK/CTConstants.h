@@ -76,6 +76,11 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 
+#pragma mark Constants for File Assets
+#define CLTAP_FILE_URLS_EXPIRY_DICT @"file_urls_expiry_dict"
+#define CLTAP_FILE_ASSETS_LAST_DELETED_TS @"cs_file_assets_last_deleted_timestamp"
+#define CLTAP_FILE_EXPIRY_OFFSET (60 * 60 * 24 * 7 * 2) // 2 weeks
+
 #pragma mark Constants for App fields
 #define CLTAP_APP_VERSION @"Version"
 #define CLTAP_LATITUDE @"Latitude"
@@ -139,10 +144,6 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS @"cs_inapp_active_assets"
 #define CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS @"cs_inapp_inactive_assets"
 #define CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS @"cs_inapp_assets_last_deleted_timestamp"
-
-#define CLTAP_FILE_ACTIVE_DICT @"cs_file_active_dict"
-#define CLTAP_FILE_INACTIVE_DICT @"cs_file_inactive_dict"
-#define CLTAP_FILE_ASSETS_LAST_DELETED_TS @"cs_file_assets_last_deleted_timestamp"
 
 #define CLTAP_PROP_CAMPAIGN_ID @"Campaign id"
 #define CLTAP_PROP_WZRK_ID @"wzrk_id"

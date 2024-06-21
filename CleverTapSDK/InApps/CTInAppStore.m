@@ -180,9 +180,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 #pragma mark Client-Side In-Apps
 - (void)removeClientSideInApps {
     @synchronized (self) {
-        // Clear the CS images stored in disk cache
-        [self.fileDownloader setFileAssetsInactiveOfType:CTInAppClientSide];
-
         _clientSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences removeObjectForKey:storageKey];
@@ -197,7 +194,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         
         // Preload CS inApp images to disk cache
         NSArray<NSString *> *imageURLs = [self getImageURLs:_clientSideInApps];
-        [self.fileDownloader downloadFiles:imageURLs ofType:CTInAppClientSide withCompletionBlock:nil];
+        [self.fileDownloader downloadFiles:imageURLs withCompletionBlock:nil];
 
         NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
@@ -261,6 +258,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
 }
 
+// TODO: rename
 - (NSArray<NSString *> *)getImageURLs:(NSArray *)csInAppNotifs {
     NSMutableSet<NSString *> *mediaURLs = [NSMutableSet new];
     for (NSDictionary *jsonInApp in csInAppNotifs) {
@@ -282,6 +280,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [mediaURLs allObjects];
 }
 
+// TODO: rename
 - (NSString *)getURLFromDictionary:(NSDictionary *)media {
     NSString *contentType = media[@"content_type"];
     NSString *mediaUrl = media[@"url"];
