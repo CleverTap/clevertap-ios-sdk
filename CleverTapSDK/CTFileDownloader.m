@@ -40,7 +40,10 @@ static const NSInteger kDefaultFileExpiryTime = 60 * 60 * 24 * 7 * 2; // 2 weeks
         [self updateFileAssetsInPreference];
         long lastDeletedTime = [self getLastDeletedTimestamp];
         [self removeInactiveExpiredAssets:lastDeletedTime];
-        completion(status);
+        if (type == CTFileVariables) {
+            // Currently we need completion callback for `CTFileVariables` only.
+            completion(status);
+        }
     }];
 }
 
