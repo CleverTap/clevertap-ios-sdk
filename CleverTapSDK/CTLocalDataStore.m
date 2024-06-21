@@ -14,7 +14,7 @@
 #import "CTUserInfoMigrator.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
-static const double kProfilePersistenceIntervalSeconds = 1.f;
+static const double kProfilePersistenceIntervalSeconds = 30.f;
 NSString* const kWR_KEY_EVENTS = @"local_events_cache";
 NSString* const kLocalCacheLastSync = @"local_cache_last_sync";
 NSString* const kLocalCacheExpiry = @"local_cache_expiry";
