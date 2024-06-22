@@ -18,7 +18,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 - (void)removeDeletedFilesFromExpiry:(NSDictionary<NSString *, id> *)status;
 - (void)updateFilesExpiryInPreference;
 - (void)updateLastDeletedTimestamp;
-- (long)getLastDeletedTimestamp;
+- (long)lastDeletedTimestamp;
 - (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion;
 - (void)migrateActiveAndInactiveUrls;
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
@@ -185,7 +185,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 - (void)testFileDownloadPath {
     NSArray *urls = [self generateFileURLs:1];
     [self downloadFiles:urls];
-    NSString *filePath = [self.fileDownloader getFileDownloadPath:urls[0]];
+    NSString *filePath = [self.fileDownloader fileDownloadPath:urls[0]];
 
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *expectedFilePath = [documentsPath stringByAppendingPathComponent:[urls[0] lastPathComponent]];
@@ -195,7 +195,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 
 - (void)testFileDownloadPathNotFound {
     NSArray *urls = [self generateFileURLs:1];
-    NSString *filePath = [self.fileDownloader getFileDownloadPath:urls[0]];
+    NSString *filePath = [self.fileDownloader fileDownloadPath:urls[0]];
     XCTAssertNil(filePath);
 }
 
@@ -247,7 +247,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 - (void)testDownloadTriggersRemoveExpired {
     NSArray *urls = [self generateFileURLs:2];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download triggers remove expired files."];
-    long lastDeletedTs = [self.fileDownloader getLastDeletedTimestamp];
+    long lastDeletedTs = [self.fileDownloader lastDeletedTimestamp];
     self.fileDownloader.removeInactiveExpiredAssetsBlock = ^(long lastDeleted) {
         XCTAssertEqual(lastDeletedTs, lastDeleted);
         [expectation fulfill];
@@ -352,7 +352,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     
     self.fileDownloader.mockCurrentTimeInterval = ts;
     //
-    XCTAssertEqual(ts, [self.fileDownloader getLastDeletedTimestamp]);
+    XCTAssertEqual(ts, [self.fileDownloader lastDeletedTimestamp]);
     self.fileDownloader.mockCurrentTimeInterval = ts + 100;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Delete files."];
@@ -367,7 +367,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
         
         XCTAssertEqualObjects(self.fileDownloader.urlsExpiry, [CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]]);
 
-        XCTAssertEqual(ts + 100, [self.fileDownloader getLastDeletedTimestamp]);
+        XCTAssertEqual(ts + 100, [self.fileDownloader lastDeletedTimestamp]);
         [expectation fulfill];
     }];
     [self waitForExpectations:@[expectation] timeout:2.0];

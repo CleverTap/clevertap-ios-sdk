@@ -33,13 +33,14 @@
         return;
     }
     
-    NSArray<NSURL *> *urls = [self getFileURLs:fileURLs];
+    NSArray<NSURL *> *urls = [self fileURLs:fileURLs];
     [self.fileDownloadManager downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *, NSNumber *> *status) {
         [self updateFilesExpiry:status];
         [self updateFilesExpiryInPreference];
         
-        long lastDeletedTime = [self getLastDeletedTimestamp];
+        long lastDeletedTime = [self lastDeletedTimestamp];
         [self removeInactiveExpiredAssets:lastDeletedTime];
+
         if (completion) {
             completion(status);
         }
@@ -61,8 +62,7 @@
     }
 }
 
-// TODO: rename
-- (nullable NSString *)getFileDownloadPath:(NSString *)url {
+- (nullable NSString *)fileDownloadPath:(NSString *)url {
     NSString *filePath = nil;
     if ([self isFileAlreadyPresent:url]) {
         NSString *fileName = [url lastPathComponent];
@@ -147,8 +147,7 @@
     }
 }
 
-// TODO: rename
-- (NSArray<NSURL *> *)getFileURLs:(NSArray<NSString *> *)fileURLs {
+- (NSArray<NSURL *> *)fileURLs:(NSArray<NSString *> *)fileURLs {
     NSMutableSet<NSURL *> *urls = [NSMutableSet new];
     for (NSString *urlString in fileURLs) {
         NSURL *url = [NSURL URLWithString:urlString];
@@ -175,8 +174,7 @@
     }
 }
 
-// TODO: rename
-- (long)getLastDeletedTimestamp {
+- (long)lastDeletedTimestamp {
     long lastDeletedTime = [CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]
                                            withResetValue:[self currentTimeInterval]];
     return lastDeletedTime;

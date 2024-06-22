@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)downloadFiles:(NSArray<NSString *> *)fileURLs withCompletionBlock:(void (^ _Nullable)(NSDictionary<NSString *, NSNumber *> *status))completion;
 - (BOOL)isFileAlreadyPresent:(NSString *)url;
 - (void)clearFileAssets:(BOOL)expiredOnly;
-- (nullable NSString *)getFileDownloadPath:(NSString *)url;
+- (nullable NSString *)fileDownloadPath:(NSString *)url;
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL;
 
 @end

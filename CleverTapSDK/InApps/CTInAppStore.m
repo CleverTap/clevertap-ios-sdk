@@ -193,7 +193,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         _clientSideInApps = clientSideInApps;
         
         // Preload CS inApp images to disk cache
-        NSArray<NSString *> *imageURLs = [self getImageURLs:_clientSideInApps];
+        NSArray<NSString *> *imageURLs = [self imageURLs:_clientSideInApps];
         [self.fileDownloader downloadFiles:imageURLs withCompletionBlock:nil];
 
         NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
@@ -258,20 +258,19 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
 }
 
-// TODO: rename
-- (NSArray<NSString *> *)getImageURLs:(NSArray *)csInAppNotifs {
+- (NSArray<NSString *> *)imageURLs:(NSArray *)csInAppNotifs {
     NSMutableSet<NSString *> *mediaURLs = [NSMutableSet new];
     for (NSDictionary *jsonInApp in csInAppNotifs) {
         NSDictionary *media = (NSDictionary*) jsonInApp[@"media"];
         if (media) {
-            NSString *imageURL = [self getURLFromDictionary:media];
+            NSString *imageURL = [self URLFromDictionary:media];
             if (imageURL) {
                 [mediaURLs addObject:imageURL];
             }
         }
         NSDictionary *mediaLandscape = (NSDictionary*) jsonInApp[@"mediaLandscape"];
         if (mediaLandscape) {
-            NSString *imageURL = [self getURLFromDictionary:mediaLandscape];
+            NSString *imageURL = [self URLFromDictionary:mediaLandscape];
             if (imageURL) {
                 [mediaURLs addObject:imageURL];
             }
@@ -280,8 +279,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [mediaURLs allObjects];
 }
 
-// TODO: rename
-- (NSString *)getURLFromDictionary:(NSDictionary *)media {
+- (NSString *)URLFromDictionary:(NSDictionary *)media {
     NSString *contentType = media[@"content_type"];
     NSString *mediaUrl = media[@"url"];
     if (mediaUrl && mediaUrl.length > 0) {
