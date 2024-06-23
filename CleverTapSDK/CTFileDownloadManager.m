@@ -33,7 +33,7 @@
         
         NSURLSessionConfiguration *sc = [NSURLSessionConfiguration defaultSessionConfiguration];
         sc.timeoutIntervalForRequest = CLTAP_REQUEST_TIME_OUT_INTERVAL;
-        sc.timeoutIntervalForResource = CLTAP_REQUEST_TIME_OUT_INTERVAL;
+        sc.timeoutIntervalForResource = CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL;
         
         self.session = [NSURLSession sessionWithConfiguration:sc];
     }

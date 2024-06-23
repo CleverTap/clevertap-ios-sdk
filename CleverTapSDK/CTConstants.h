@@ -80,6 +80,7 @@ extern NSString *const kSessionId;
 #define CLTAP_FILE_URLS_EXPIRY_DICT @"file_urls_expiry_dict"
 #define CLTAP_FILE_ASSETS_LAST_DELETED_TS @"cs_file_assets_last_deleted_timestamp"
 #define CLTAP_FILE_EXPIRY_OFFSET (60 * 60 * 24 * 7 * 2) // 2 weeks
+#define CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL 15
 
 #pragma mark Constants for App fields
 #define CLTAP_APP_VERSION @"Version"

@@ -288,7 +288,7 @@
 - (void)testTimeoutConfiguration {
     NSURLSessionConfiguration *configuration = self.fileDownloadManager.session.configuration;
     XCTAssertEqual(configuration.timeoutIntervalForRequest, CLTAP_REQUEST_TIME_OUT_INTERVAL);
-    XCTAssertEqual(configuration.timeoutIntervalForResource, CLTAP_REQUEST_TIME_OUT_INTERVAL);
+    XCTAssertEqual(configuration.timeoutIntervalForResource, CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL);
 }
 
 - (void)testDownloadSingle404 {
