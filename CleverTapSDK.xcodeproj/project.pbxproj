@@ -1376,9 +1376,21 @@
 			path = ProductExperiences;
 			sourceTree = "<group>";
 		};
+		6B9E95AD2C285F2F0002D557 /* FileDownload */ = {
+			isa = PBXGroup;
+			children = (
+				48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */,
+				487854062BF4BC4E00565685 /* CTFileDownloaderTests.m */,
+				6B9E95AA2C27164B0002D557 /* CTFileDownloadTestHelper.h */,
+				6B9E95AB2C27164B0002D557 /* CTFileDownloadTestHelper.m */,
+			);
+			path = FileDownload;
+			sourceTree = "<group>";
+		};
 		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				6B9E95AD2C285F2F0002D557 /* FileDownload */,
 				4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */,
 				6A4427C32AA6513C0098866F /* InApps */,
 				6A7BB8DE29E60BE900651584 /* ProductExperiences */,
@@ -1409,10 +1421,6 @@
 				6A59D20E2A3351A800531F9D /* LeanplumCTTest.m */,
 				4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */,
 				6BD851C82B45CD1800FA5298 /* CTMultiDelegateManager+Tests.h */,
-				48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */,
-				487854062BF4BC4E00565685 /* CTFileDownloaderTests.m */,
-				6B9E95AA2C27164B0002D557 /* CTFileDownloadTestHelper.h */,
-				6B9E95AB2C27164B0002D557 /* CTFileDownloadTestHelper.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
