@@ -3,11 +3,11 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTFileDownloadManager.h"
 #import "CTConstants.h"
-
-NSString *const fileURLMatch = @"ct_test_url";
-NSString *const fileURLTypes[] = {@"txt", @"pdf", @"png"};
+#import "CTFileDownloadTestHelper.h"
 
 @interface CTFileDownloadManager(Tests)
+
+@property (nonatomic, strong) NSURLSession *session;
 
 - (void)downloadSingleFile:(NSURL *)url
 completed:(void(^)(BOOL success))completedBlock;
@@ -23,8 +23,7 @@ completed:(void(^)(BOOL success))completedBlock;
 @property (nonatomic, strong) CTFileDownloadManager *fileDownloadManager;
 @property (nonatomic, strong) NSString *documentsDirectory;
 @property (nonatomic, strong) NSArray<NSURL *> *fileURLs;
-
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *filesDownloaded;
+@property (nonatomic, strong) CTFileDownloadTestHelper *helper;
 
 @end
 
@@ -32,8 +31,9 @@ completed:(void(^)(BOOL success))completedBlock;
 
 - (void)setUp {
     [super setUp];
-    self.filesDownloaded = [NSMutableDictionary new];
-    [self addAllStubs];
+
+    self.helper = [CTFileDownloadTestHelper new];
+    [self.helper addHTTPStub];
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
     self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
@@ -42,7 +42,7 @@ completed:(void(^)(BOOL success))completedBlock;
 - (void)tearDown {
     [super tearDown];
     
-    [HTTPStubs removeAllStubs];
+    [self.helper removeStub];
     [self deleteFiles:self.fileURLs];
 }
 
@@ -66,7 +66,7 @@ completed:(void(^)(BOOL success))completedBlock;
 - (void)testDeleteFiles {
     [self downloadFiles];
 
-    NSArray *urls = [self generateFileURLs:2];
+    NSArray *urls = [self.helper generateFileURLs:2];
     [self deleteFiles:urls];
 
     // Deleted 1st and 2nd file url.
@@ -97,7 +97,7 @@ completed:(void(^)(BOOL success))completedBlock;
 }
 
 - (void)testNotExistDeleteFiles {
-    NSArray *urls = [self generateFileURLs:2];
+    NSArray *urls = [self.helper generateFileURLs:2];
     NSMutableArray<NSString *> *deleteFileURLs = [NSMutableArray new];
     for(int i = 0; i < urls.count; i++) {
         NSString *fileURL = [urls[i] absoluteString];
@@ -154,7 +154,7 @@ completed:(void(^)(BOOL success))completedBlock;
 #pragma mark CTFileDownload callback test
 
 - (void)testAllFilesDownloadedCallback {
-    self.fileURLs = [self generateFileURLs:2];
+    self.fileURLs = [self.helper generateFileURLs:2];
 
     NSMutableDictionary *expectedStatus = [NSMutableDictionary new];
     NSString *urlString1 = [self.fileURLs[0] absoluteString];
@@ -176,8 +176,8 @@ completed:(void(^)(BOOL success))completedBlock;
 }
 
 - (void)testFileAlreadyDownloaded {
-    NSArray<NSURL *> *urls = [self generateFileURLs:2];
-    self.fileURLs = [self generateFileURLs:5];
+    NSArray<NSURL *> *urls = [self.helper generateFileURLs:2];
+    self.fileURLs = [self.helper generateFileURLs:5];
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
 
@@ -191,14 +191,14 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
-    XCTAssertEqual(5, self.filesDownloaded.count);
-    XCTAssertTrue([self.filesDownloaded[urls[0].absoluteString] intValue] == 1);
-    XCTAssertTrue([self.filesDownloaded[urls[1].absoluteString] intValue] == 1);
+    XCTAssertEqual(5, self.helper.filesDownloaded.count);
+    XCTAssertTrue([self.helper fileDownloadedCount:urls[0]] == 1);
+    XCTAssertTrue([self.helper fileDownloadedCount:urls[1]] == 1);
 }
 
 - (void)testDownloadsPending {
-    NSArray<NSURL *> *urls = [self generateFileURLs:2];
-    self.fileURLs = [self generateFileURLs:5];
+    NSArray<NSURL *> *urls = [self.helper generateFileURLs:2];
+    self.fileURLs = [self.helper generateFileURLs:5];
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
 
@@ -213,13 +213,13 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
-    XCTAssertEqual(5, self.filesDownloaded.count);
-    XCTAssertTrue([self.filesDownloaded[urls[0].absoluteString] intValue] == 1);
-    XCTAssertTrue([self.filesDownloaded[urls[1].absoluteString] intValue] == 1);
+    XCTAssertEqual(5, self.helper.filesDownloaded.count);
+    XCTAssertTrue([self.helper fileDownloadedCount:urls[0]] == 1);
+    XCTAssertTrue([self.helper fileDownloadedCount:urls[1]] == 1);
 }
 
 - (void)testRequestFailure {
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.absoluteString containsString:@"non-existent"];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
         return [HTTPStubsResponse responseWithData:[NSData data]
@@ -227,7 +227,7 @@ completed:(void(^)(BOOL success))completedBlock;
                                            headers:@{@"Content-Type":@"text/plain"}];
     }];
 
-    NSArray *fileURLs = [self generateFileURLs:2];
+    NSArray *fileURLs = [self.helper generateFileURLs:2];
     NSMutableArray *urls = [fileURLs mutableCopy];
     NSString *nonexistentUrl = @"https://non-existent.com/non-existent.png";
     [urls insertObject:[NSURL URLWithString:nonexistentUrl] atIndex:0];
@@ -242,10 +242,11 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation] timeout:2.0];
+    [HTTPStubs removeStub:stub];
 }
 
 - (void)testDownloadFilesOneUrlTimeOut {
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.absoluteString containsString:@"timeout"];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
         return [[HTTPStubsResponse responseWithError:[NSError errorWithDomain:NSURLErrorDomain
@@ -257,7 +258,7 @@ completed:(void(^)(BOOL success))completedBlock;
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
 
-    NSArray *fileURLs = [self generateFileURLs:2];
+    NSArray *fileURLs = [self.helper generateFileURLs:2];
     NSMutableArray *urls = [fileURLs mutableCopy];
     [urls insertObject:[NSURL URLWithString:@"https://timeout.com/timeout.png"] atIndex:0];
     self.fileURLs = urls;
@@ -276,10 +277,11 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
+    [HTTPStubs removeStub:stub];
 }
 
 - (void)testDownloadSingle {
-    self.fileURLs = [self generateFileURLs:1];
+    self.fileURLs = [self.helper generateFileURLs:1];
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
 
@@ -292,20 +294,26 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0];
-    XCTAssertTrue([self.filesDownloaded[self.fileURLs[0].absoluteString] intValue] == 2);
+    XCTAssertTrue([self.helper fileDownloadedCount:self.fileURLs[0]] == 2);
+}
+
+- (void)testTimeoutConfiguration {
+    NSURLSessionConfiguration *configuration = self.fileDownloadManager.session.configuration;
+    XCTAssertEqual(configuration.timeoutIntervalForRequest, CLTAP_REQUEST_TIME_OUT_INTERVAL);
+    XCTAssertEqual(configuration.timeoutIntervalForResource, CLTAP_REQUEST_TIME_OUT_INTERVAL);
 }
 
 - (void)testDownloadSingle404 {
     // Stub the network request to simulate a 404 Not Found error
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-        return [request.URL.absoluteString containsString:fileURLMatch];
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:self.helper.fileURL];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
             return [HTTPStubsResponse responseWithData:[NSData data]
                                             statusCode:404
                                                headers:@{@"Content-Type":@"text/plain"}];
     }];
     
-    NSURL *url = [self generateFileURLs:1][0];
+    NSURL *url = [self.helper generateFileURLs:1][0];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
         XCTAssertFalse(success);
@@ -313,17 +321,18 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation] timeout:2.0];
+    [HTTPStubs removeStub:stub];
 }
 
 - (void)testDownloadSingleHostNotFound {
     // Stub the network request to simulate a 404 Not Found error
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-        return [request.URL.absoluteString containsString:fileURLMatch];
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:self.helper.fileURL];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
         return [HTTPStubsResponse responseWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotFindHost userInfo:nil]];
     }];
     
-    NSURL *url = [self generateFileURLs:1][0];
+    NSURL *url = [self.helper generateFileURLs:1][0];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
         XCTAssertFalse(success);
@@ -331,59 +340,17 @@ completed:(void(^)(BOOL success))completedBlock;
     }];
     
     [self waitForExpectations:@[expectation] timeout:2.0];
+    [HTTPStubs removeStub:stub];
 }
 
 #pragma mark Private methods
-
-- (void)addAllStubs {
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-        return [request.URL.absoluteString containsString:fileURLMatch];
-    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
-        NSString *fileString = [request.URL absoluteString];
-        NSString *fileType = [fileString pathExtension];
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        
-        NSNumber *count = self.filesDownloaded[fileString];
-        if (count) {
-            int value = [count intValue];
-            count = [NSNumber numberWithInt:value + 1];
-            self.filesDownloaded[fileString] = count;
-        } else {
-            self.filesDownloaded[fileString] = @1;
-        }
-        
-        if ([fileType isEqualToString:@"txt"]) {
-            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"sampleTXTStub" ofType:@"txt"]
-                                                  statusCode:200
-                                                     headers:nil];
-        } else if ([fileType isEqualToString:@"pdf"]) {
-            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"samplePDFStub" ofType:@"pdf"]
-                                                  statusCode:200
-                                                     headers:nil];
-        } else {
-            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"clevertap-logo" ofType:@"png"]
-                                                  statusCode:200
-                                                     headers:nil];
-        }
-    }];
-}
-
-- (NSArray<NSURL *> *)generateFileURLs:(int)count {
-    NSMutableArray *arr = [NSMutableArray new];
-    for (int i = 0; i < count; i++) {
-        int type = i >= 3 ? i % 3 : i;
-        NSString *urlString = [[NSString alloc] initWithFormat:@"https://clevertap.com/%@_%d.%@", fileURLMatch, i, fileURLTypes[type]];
-        [arr addObject:[NSURL URLWithString:urlString]];
-    }
-    return arr;
-}
 
 - (void)downloadFiles {
     [self downloadFiles:3];
 }
 
 - (void)downloadFiles:(int)count {
-    self.fileURLs = [self generateFileURLs:count];
+    self.fileURLs = [self.helper generateFileURLs:count];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files"];
     
     [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {

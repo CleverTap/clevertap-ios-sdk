@@ -4,9 +4,7 @@
 #import "CTConstants.h"
 #import "CTFileDownloader.h"
 #import "CTFileDownloadManager.h"
-
-NSString *const fileURL = @"ct_test_url";
-NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
+#import "CTFileDownloadTestHelper.h"
 
 @interface CTFileDownloader(Tests)
 
@@ -74,6 +72,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTFileDownloaderMock *fileDownloader;
 @property (nonatomic, strong) NSArray *fileURLs;
+@property (nonatomic, strong) CTFileDownloadTestHelper *helper;
 
 @end
 
@@ -81,7 +80,10 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 
 - (void)setUp {
     [super setUp];
-    [self addAllStubs];
+    
+    self.helper = [CTFileDownloadTestHelper new];
+    [self.helper addHTTPStub];
+    
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     self.fileDownloader = [[CTFileDownloaderMock alloc] initWithConfig:self.config];
 }
@@ -89,7 +91,8 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 - (void)tearDown {
     [super tearDown];
     
-    [HTTPStubs removeAllStubs];
+    [self.helper removeStub];
+    
     [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
     [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
     
@@ -151,7 +154,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testFileAlreadyPresent {
-    NSArray *urls = [self generateFileURLs:2];
+    NSArray *urls = [self.helper generateFileURLStrings:2];
     XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0]]);
     XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1]]);
     
@@ -163,7 +166,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 
 - (void)testImageLoadedFromDisk {
     // Download files
-    NSArray *urls = [self generateFileURLs:3];
+    NSArray *urls = [self.helper generateFileURLStrings:3];
     // Download files, urls[2] is of type txt
     [self downloadFiles:@[urls[2]]];
     
@@ -173,7 +176,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testImageNotLoadedFromDisk {
-    NSArray *urls = [self generateFileURLs:3];
+    NSArray *urls = [self.helper generateFileURLStrings:3];
     // Download files, urls[0] is of type txt
     [self downloadFiles:@[urls[0]]];
     
@@ -183,7 +186,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testFileDownloadPath {
-    NSArray *urls = [self generateFileURLs:1];
+    NSArray *urls = [self.helper generateFileURLStrings:1];
     [self downloadFiles:urls];
     NSString *filePath = [self.fileDownloader fileDownloadPath:urls[0]];
 
@@ -194,7 +197,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testFileDownloadPathNotFound {
-    NSArray *urls = [self generateFileURLs:1];
+    NSArray *urls = [self.helper generateFileURLStrings:1];
     NSString *filePath = [self.fileDownloader fileDownloadPath:urls[0]];
     XCTAssertNil(filePath);
 }
@@ -215,7 +218,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     long ts = (long)[[NSDate date] timeIntervalSince1970];
     self.fileDownloader.mockCurrentTimeInterval = ts;
     
-    NSString *url = [self generateFileURLs:1][0];
+    NSString *url = [self.helper generateFileURLStrings:1][0];
     XCTAssertNil(self.fileDownloader.urlsExpiry[url]);
     
     [self downloadFiles:@[url]];
@@ -228,7 +231,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testDownloadUpdatesFileExpiryCache {
-    NSArray *urls = [self generateFileURLs:2];
+    NSArray *urls = [self.helper generateFileURLStrings:2];
     XCTAssertEqual(0, self.fileDownloader.urlsExpiry.count);
     
     long ts = (long)[[NSDate date] timeIntervalSince1970];
@@ -245,7 +248,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testDownloadTriggersRemoveExpired {
-    NSArray *urls = [self generateFileURLs:2];
+    NSArray *urls = [self.helper generateFileURLStrings:2];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download triggers remove expired files."];
     long lastDeletedTs = [self.fileDownloader lastDeletedTimestamp];
     self.fileDownloader.removeInactiveExpiredAssetsBlock = ^(long lastDeleted) {
@@ -345,7 +348,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 
 - (void)testDeleteFiles {
     long ts = (long)[[NSDate date] timeIntervalSince1970];
-    NSArray<NSString *> *urls = [self generateFileURLs:3];
+    NSArray<NSString *> *urls = [self.helper generateFileURLStrings:3];
     for (NSString *url in urls) {
         self.fileDownloader.urlsExpiry[url] = @(ts);
     }
@@ -384,7 +387,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 }
 
 - (void)testClearAllFiles {
-    NSArray<NSString *> *urlsExpiry = [self generateFileURLs:3];
+    NSArray<NSString *> *urlsExpiry = [self.helper generateFileURLStrings:3];
     for (NSString *url in urlsExpiry) {
         self.fileDownloader.urlsExpiry[url] = @(1);
     }
@@ -402,7 +405,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 
 - (void)testClearAllFileAssets {
     // Download the file
-    NSArray *urls = [self generateFileURLs:1];
+    NSArray *urls = [self.helper generateFileURLStrings:1];
     [self downloadFiles:urls];
     XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
     
@@ -425,7 +428,7 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     XCTestExpectation *expectation1 = [self expectationWithDescription:@"Wait for first download callbacks"];
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"Wait for second download callbacks"];
     
-    NSArray *urls = [self generateFileURLs:3];
+    NSArray *urls = [self.helper generateFileURLStrings:3];
     [self.fileDownloader downloadFiles:@[urls[0], urls[1], urls[2]] withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
         XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
@@ -442,30 +445,6 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
 
 #pragma mark Private methods
 
-// TODO: reuse from other test
-- (void)addAllStubs {
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
-        return [request.URL.absoluteString containsString:fileURL];
-    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
-        NSString *fileString = [request.URL absoluteString];
-        NSString *fileType = [fileString pathExtension];
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        if ([fileType isEqualToString:@"txt"]) {
-            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"sampleTXTStub" ofType:@"txt"]
-                                                  statusCode:200
-                                                     headers:nil];
-        } else if ([fileType isEqualToString:@"pdf"]) {
-            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"samplePDFStub" ofType:@"pdf"]
-                                                  statusCode:200
-                                                     headers:nil];
-        } else {
-            return [HTTPStubsResponse responseWithFileAtPath:[bundle pathForResource:@"clevertap-logo" ofType:@"png"]
-                                                  statusCode:200
-                                                     headers:nil];
-        }
-    }];
-}
-
 - (void)downloadFiles:(NSArray *)urls  {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files"];
     [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
@@ -473,16 +452,6 @@ NSString *const fileTypes[] = {@"txt", @"pdf", @"png"};
     }];
     
     [self waitForExpectations:@[expectation] timeout:2.0];
-}
-
-// TODO: reuse from other test
-- (NSArray<NSString *> *)generateFileURLs:(int)count {
-    NSMutableArray *arr = [NSMutableArray new];
-    for (int i = 0; i < count; i++) {
-        NSString *urlString = [[NSString alloc] initWithFormat:@"https://clevertap.com/%@.%@",fileURL, fileTypes[i]];
-        [arr addObject:urlString];
-    }
-    return arr;
 }
 
 @end
