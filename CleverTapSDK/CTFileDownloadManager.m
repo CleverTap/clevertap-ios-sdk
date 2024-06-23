@@ -1,5 +1,6 @@
 #import "CTFileDownloadManager.h"
 #import "CTConstants.h"
+#import "CleverTapInstanceConfig.h"
 
 @interface CTFileDownloadManager()
 
@@ -7,7 +8,6 @@
 @property (nonatomic, strong) NSString *documentsDirectory;
 @property (nonatomic, strong) NSMutableSet<NSURL *> *downloadInProgressUrls;
 @property (nonatomic, strong) NSMutableDictionary<NSURL *, NSMutableArray<DownloadCompletionHandler> *> *downloadInProgressHandlers;
-
 @property (nonatomic, strong) NSURLSession *session;
 
 @end

@@ -2,70 +2,10 @@
 #import <OHHTTPStubs/HTTPStubs.h>
 #import "CTPreferences.h"
 #import "CTConstants.h"
-#import "CTFileDownloader.h"
 #import "CTFileDownloadManager.h"
 #import "CTFileDownloadTestHelper.h"
-
-@interface CTFileDownloader(Tests)
-
-@property (nonatomic, strong) CTFileDownloadManager *fileDownloadManager;
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *urlsExpiry;
-@property (nonatomic) NSTimeInterval fileExpiryTime;
-- (long)currentTimeInterval;
-- (void)removeInactiveExpiredAssets:(long)lastDeletedTime;
-- (void)removeDeletedFilesFromExpiry:(NSDictionary<NSString *, id> *)status;
-- (void)updateFilesExpiryInPreference;
-- (void)updateLastDeletedTimestamp;
-- (long)lastDeletedTimestamp;
-- (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion;
-- (void)migrateActiveAndInactiveUrls;
-- (NSString *)storageKeyWithSuffix:(NSString *)suffix;
-- (void)updateFilesExpiry:(NSDictionary<NSString *, NSNumber *> *)status;
-
-@end
-
-@interface CTFileDownloaderMock: CTFileDownloader
-
-@property (nonatomic) long mockCurrentTimeInterval;
-@property (nonatomic) void(^removeInactiveExpiredAssetsBlock)(long);
-
-@property (nonatomic) CTFilesDeleteCompletedBlock deleteCompletion;
-@property (nonatomic) void(^deleteFilesInvokedBlock)(NSArray<NSString *> *);
-
-@end
-
-@implementation CTFileDownloaderMock
-
-- (long)currentTimeInterval {
-    if (self.mockCurrentTimeInterval) {
-        return self.mockCurrentTimeInterval;
-    }
-    return [super currentTimeInterval];
-}
-
-- (void)removeInactiveExpiredAssets:(long)lastDeletedTime {
-    if (self.removeInactiveExpiredAssetsBlock) {
-        self.removeInactiveExpiredAssetsBlock(lastDeletedTime);
-    }
-    [super removeInactiveExpiredAssets:lastDeletedTime];
-}
-
-- (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion {
-    if (self.deleteFilesInvokedBlock) {
-        self.deleteFilesInvokedBlock(urls);
-    }
-    CTFilesDeleteCompletedBlock completionBlock = ^(NSDictionary<NSString *,id> *status) {
-        if (completion) {
-            completion(status);
-        }
-        if (self.deleteCompletion) {
-            self.deleteCompletion(status);
-        }
-    };
-    [super deleteFiles:urls withCompletionBlock:completionBlock];
-}
-
-@end
+#import "CTFileDownloader+Tests.h"
+#import "CTFileDownloaderMock.h"
 
 @interface CTFileDownloaderTests : XCTestCase
 

@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
-#import "CleverTapInstanceConfig.h"
+
+@class CleverTapInstanceConfig;
 
 NS_ASSUME_NONNULL_BEGIN
 

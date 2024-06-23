@@ -1,21 +1,9 @@
 #import <XCTest/XCTest.h>
 #import <OHHTTPStubs/HTTPStubs.h>
 #import "CleverTapInstanceConfig.h"
-#import "CTFileDownloadManager.h"
+#import "CTFileDownloadManager+Tests.h"
 #import "CTConstants.h"
 #import "CTFileDownloadTestHelper.h"
-
-@interface CTFileDownloadManager(Tests)
-
-@property (nonatomic, strong) NSURLSession *session;
-
-- (void)downloadSingleFile:(NSURL *)url
-completed:(void(^)(BOOL success))completedBlock;
-
-- (void)deleteSingleFile:(NSURL *)url
-               completed:(void(^)(BOOL success))completedBlock;
-
-@end
 
 @interface CTFileDownloadManagerTests : XCTestCase
 
