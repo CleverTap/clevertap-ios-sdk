@@ -40,7 +40,7 @@
     self.fileDownloader.deleteCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
         [expectation fulfill];
     };
-    
+    // Clear all files
     [self.fileDownloader clearFileAssets:NO];
     [self waitForExpectations:@[expectation] timeout:2.0];
 }
@@ -74,6 +74,7 @@
 }
 
 - (void)testSetup {
+    // Test setup initializes the FileDownloader with the urlsExpiry from cache
     NSDictionary *urlsExpiry= @{
         @"url0": @(1),
         @"url1": @(1)
@@ -82,11 +83,14 @@
     
     self.fileDownloader = [[CTFileDownloaderMock alloc] initWithConfig:self.config];
     XCTAssertTrue([urlsExpiry isEqualToDictionary:self.fileDownloader.urlsExpiry]);
+    XCTAssertTrue([self.fileDownloader.urlsExpiry isKindOfClass:[NSMutableDictionary class]]);
     
+    // Test setup initializes the FileDownloader with empty dictionary if no cached value
     [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
     self.fileDownloader = [[CTFileDownloaderMock alloc] initWithConfig:self.config];
     XCTAssertNotNil(self.fileDownloader.urlsExpiry);
     XCTAssertEqual(0, self.fileDownloader.urlsExpiry.count);
+    XCTAssertTrue([self.fileDownloader.urlsExpiry isKindOfClass:[NSMutableDictionary class]]);
 }
 
 - (void)testDefaultExpiryTime {
@@ -159,14 +163,17 @@
     self.fileDownloader.mockCurrentTimeInterval = ts;
     
     NSString *url = [self.helper generateFileURLStrings:1][0];
+    // Ensure not yet present
     XCTAssertNil(self.fileDownloader.urlsExpiry[url]);
     
     [self downloadFiles:@[url]];
     long expiryDate = ts + self.fileDownloader.fileExpiryTime;
+    // Ensure url has correct expiry set
     XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
     
     self.fileDownloader.mockCurrentTimeInterval = ts + 100;
     [self downloadFiles:@[url]];
+    // Ensure url expiry is updated
     XCTAssertEqualObjects(@(expiryDate + 100), self.fileDownloader.urlsExpiry[url]);
 }
 
@@ -189,19 +196,21 @@
 
 - (void)testDownloadTriggersRemoveExpired {
     NSArray *urls = [self.helper generateFileURLStrings:2];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Download triggers remove expired files."];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Download triggers remove expired files"];
     long lastDeletedTs = [self.fileDownloader lastDeletedTimestamp];
+    // Download files should trigger removeInactiveExpiredAssets with the lastDeletedTimestamp
     self.fileDownloader.removeInactiveExpiredAssetsBlock = ^(long lastDeleted) {
         XCTAssertEqual(lastDeletedTs, lastDeleted);
         [expectation fulfill];
     };
     [self downloadFiles:urls];
-    [self waitForExpectations:@[expectation] timeout:2.0];
+    [self waitForExpectations:@[expectation] timeout:1.0];
 }
 
-- (void)testRemoveExpiredAssetsNotCalledLastDeleted {
+- (void)testRemoveExpiredAssetsNoDeletedFiles {
     // This block is synchronous
     self.fileDownloader.deleteFilesInvokedBlock = ^(NSArray<NSString *> *urls) {
+        // Delete files should not be invoked if the last deleted time is within the expiry time
         XCTFail();
     };
     
@@ -216,12 +225,15 @@
 }
 
 - (void)testRemoveExpiredAssets {
+    // Mock the current time
     long ts = (long)[[NSDate date] timeIntervalSince1970];
-    
+    self.fileDownloader.mockCurrentTimeInterval = ts;
+
     NSString *expiredUrl1 = @"url0-expired";
     NSString *expiredUrl2 = @"url2-expired";
 
     self.fileDownloader.deleteFilesInvokedBlock = ^(NSArray<NSString *> *urls) {
+        // Delete files is invoked with the expired urls only
         NSSet *urlsSet = [NSSet setWithArray:urls];
         NSSet *expected = [NSSet setWithArray:@[expiredUrl1, expiredUrl2]];
         XCTAssertEqualObjects(expected, urlsSet);
@@ -229,6 +241,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for delete completion"];
     __weak CTFileDownloaderTests *weakSelf = self;
+    // Expired files are deleted
     self.fileDownloader.deleteCompletion = ^(NSDictionary<NSString *, id> * _Nonnull status) {
         XCTAssertNotNil([status objectForKey:expiredUrl1]);
         XCTAssertNotNil([status objectForKey:expiredUrl2]);
@@ -242,14 +255,17 @@
         [expectation fulfill];
     };
     
+    // Calculate last deleted to force remove assets
     long lastDeleted = ts - self.fileDownloader.fileExpiryTime - 1;
-    self.fileDownloader.mockCurrentTimeInterval = ts;
+    
+    // Set the urls expiry to have both expired and valid assets
     self.fileDownloader.urlsExpiry = [@{
         expiredUrl1: @(ts - 1),
         @"url1": @(ts),
         expiredUrl2: @(ts - 60),
         @"url3": @(ts + 1),
     } mutableCopy];
+    
     [self.fileDownloader removeInactiveExpiredAssets:lastDeleted];
     [self waitForExpectations:@[expectation] timeout:2.0];
     self.fileDownloader.deleteFilesInvokedBlock = nil;
@@ -260,6 +276,7 @@
     self.fileDownloader.mockCurrentTimeInterval = ts;
     long expiry = ts + self.fileDownloader.fileExpiryTime;
 
+    // url0 and url3 are successful
     NSDictionary *status = @{
         @"url0": @(1),
         @"url1": @(0),
@@ -268,6 +285,7 @@
     };
     
     long previousExpiry = (ts - 100) + self.fileDownloader.fileExpiryTime;
+    // url3 is not in the expiry dictionary
     self.fileDownloader.urlsExpiry = [@{
         @"url0": @(previousExpiry),
         @"url2": @(previousExpiry),
@@ -276,6 +294,7 @@
     
     [self.fileDownloader updateFilesExpiry:status];
     
+    // Expect url0 to be updated and url3 to be added
     NSMutableDictionary *expected = [@{
         @"url0": @(expiry),
         @"url2": @(previousExpiry),
@@ -288,28 +307,37 @@
 
 - (void)testDeleteFiles {
     long ts = (long)[[NSDate date] timeIntervalSince1970];
+    self.fileDownloader.mockCurrentTimeInterval = ts;
+    
+    // Set 3 files in urlsExpiry
     NSArray<NSString *> *urls = [self.helper generateFileURLStrings:3];
     for (NSString *url in urls) {
         self.fileDownloader.urlsExpiry[url] = @(ts);
     }
     
-    self.fileDownloader.mockCurrentTimeInterval = ts;
-    //
+    // Assert lastDeletedTimestamp returns current timestamp
     XCTAssertEqual(ts, [self.fileDownloader lastDeletedTimestamp]);
+    // Change the current timestamp
     self.fileDownloader.mockCurrentTimeInterval = ts + 100;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Delete files."];
+    // Delete 1st and 2nd file (3rd file is not deleted)
     [self.fileDownloader deleteFiles:@[urls[0], urls[1]] withCompletionBlock:^(NSDictionary<NSString *,id> * _Nonnull status) {
+        // Assert files are deleted
         XCTAssertEqualObjects(status[urls[0]], @1);
         XCTAssertEqualObjects(status[urls[1]], @1);
         
+        // Assert 1st and 2nd files are removed from urlsExpiry
+        // Assert 3rd file is still in the urlsExpiry
         NSDictionary *expectedExpiry = [@{
             urls[2]: @(ts)
         } mutableCopy];
         XCTAssertTrue([expectedExpiry isEqualToDictionary:self.fileDownloader.urlsExpiry]);
         
+        // Assert expiry is updated in preferences
         XCTAssertEqualObjects(self.fileDownloader.urlsExpiry, [CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]]);
 
+        // Assert last deleted timestamp is updated
         XCTAssertEqual(ts + 100, [self.fileDownloader lastDeletedTimestamp]);
         [expectation fulfill];
     }];

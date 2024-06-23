@@ -68,14 +68,15 @@
     
     NSMutableArray<NSString *> *deleteFileURLs = [NSMutableArray new];
     for(int i = 0; i < self.fileURLs.count; i++) {
-        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[2]]);
-
+        // Ensure files are downloaded and saved to disk
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[i]]);
         NSString *fileURL = [self.fileURLs[i] absoluteString];
         [deleteFileURLs addObject:fileURL];
     }
     XCTestExpectation *expectation = [self expectationWithDescription:@"Delete files"];
     [self.fileDownloadManager deleteFiles:deleteFileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         for (NSString *url in deleteFileURLs) {
+            // Assert delete status is success and file is removed from disk
             XCTAssertEqual(YES, [status[url] boolValue]);
             XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[0]]);
         }
@@ -85,15 +86,10 @@
 }
 
 - (void)testNotExistDeleteFiles {
-    NSArray *urls = [self.helper generateFileURLs:2];
-    NSMutableArray<NSString *> *deleteFileURLs = [NSMutableArray new];
-    for(int i = 0; i < urls.count; i++) {
-        NSString *fileURL = [urls[i] absoluteString];
-        [deleteFileURLs addObject:fileURL];
-    }
+    NSArray *urls = [self.helper generateFileURLStrings:2];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Delete files"];
-    [self.fileDownloadManager deleteFiles:deleteFileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        for (NSString *url in deleteFileURLs) {
+    [self.fileDownloadManager deleteFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        for (NSString *url in urls) {
             XCTAssertEqual(YES, [status[url] boolValue]);
         }
         [expectation fulfill];
@@ -130,7 +126,7 @@
     }];
     
     XCTestExpectation *expectationNoLastComponent = [self expectationWithDescription:@"Delete single file nil url"];
-    NSURL *urlNoLastComponent = [NSURL URLWithString:@"https://no-component.png"];
+    NSURL *urlNoLastComponent = [NSURL URLWithString:@"https://no-url-component.png"];
     [self.fileDownloadManager deleteSingleFile:urlNoLastComponent completed:^(BOOL success) {
         XCTAssertEqual(NO, success);
         [expectationNoLastComponent fulfill];
@@ -164,44 +160,57 @@
 }
 
 - (void)testFileAlreadyDownloaded {
-    NSArray<NSURL *> *urls = [self.helper generateFileURLs:2];
     self.fileURLs = [self.helper generateFileURLs:5];
-    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
-    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
+    NSArray<NSURL *> *urls = @[self.fileURLs[0], self.fileURLs[1]];
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback"];
+    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download already present files callback"];
 
+    // Download 5 files
     [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         [expectation1 fulfill];
+        // Assert files are already downloaded
         XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:urls[0]]);
         XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:urls[1]]);
+        // Call download for 1st and 2nd files again
         [self.fileDownloadManager downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
             [expectation2 fulfill];
         }];
     }];
     
+    // Enforce the order
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
+    // Ensure total files downloaded are only 5 (one request for each unique file)
     XCTAssertEqual(5, self.helper.filesDownloaded.count);
+    // Ensure 1st and 2nd files are downloaded only once
     XCTAssertTrue([self.helper fileDownloadedCount:urls[0]] == 1);
     XCTAssertTrue([self.helper fileDownloadedCount:urls[1]] == 1);
 }
 
 - (void)testDownloadsPending {
-    NSArray<NSURL *> *urls = [self.helper generateFileURLs:2];
+    // Generate 5 file URLs
     self.fileURLs = [self.helper generateFileURLs:5];
-    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
-    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
+    NSArray<NSURL *> *urls = @[self.fileURLs[0], self.fileURLs[1]];
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download 1st and 2nd files callback"];
+    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download all files callback"];
 
+    // Download all 5 files
     [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         [expectation2 fulfill];
     }];
     
+    // Ensure files are not present yet since download is not yet completed
     XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:urls[0]]);
     XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:urls[1]]);
+    // Download the 1st and 2nd files
     [self.fileDownloadManager downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         [expectation1 fulfill];
     }];
     
+    // Ensure the expecation for Download 1st and 2nd files is fulfilled first
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
+    // Ensure total files downloaded are only 5 (one request for each unique file)
     XCTAssertEqual(5, self.helper.filesDownloaded.count);
+    // Ensure 1st and 2nd files are downloaded only once
     XCTAssertTrue([self.helper fileDownloadedCount:urls[0]] == 1);
     XCTAssertTrue([self.helper fileDownloadedCount:urls[1]] == 1);
 }
@@ -217,15 +226,25 @@
 
     NSArray *fileURLs = [self.helper generateFileURLs:2];
     NSMutableArray *urls = [fileURLs mutableCopy];
-    NSString *nonexistentUrl = @"https://non-existent.com/non-existent.png";
-    [urls insertObject:[NSURL URLWithString:nonexistentUrl] atIndex:0];
+    NSString *nonexistentURLString = @"https://non-existent.com/non-existent.png";
+    NSURL *nonexistentURL = [NSURL URLWithString:nonexistentURLString];
+    [urls insertObject:nonexistentURL atIndex:0];
     self.fileURLs = urls;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nonnull status) {
-        XCTAssertEqualObjects(@0, status[nonexistentUrl]);
+        // Assert the file that returns 404 has error status
+        XCTAssertEqualObjects(@0, status[nonexistentURLString]);
+        // Assert the files that return 200 has success status
         XCTAssertEqualObjects(@1, status[[urls[1] absoluteString]]);
         XCTAssertEqualObjects(@1, status[[urls[2] absoluteString]]);
+        
+        // Assert error file not written to disk
+        XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:nonexistentURL]);
+        // Assert files written to disk
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:urls[1]]);
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:urls[2]]);
+        
         [expectation fulfill];
     }];
     
@@ -234,36 +253,43 @@
 }
 
 - (void)testDownloadFilesOneUrlTimeOut {
+    // Stub the network request for timeout file to simulate a Timed Out Error
     id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.absoluteString containsString:@"timeout"];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        // Return Timed Out Error and delay the response time with 0.1s
         return [[HTTPStubsResponse responseWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                          code:NSURLErrorTimedOut
                                                                      userInfo:nil]]
                 responseTime:0.1];
     }];
     
-    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
-    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback"];
+    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files with 1 file timed out callback"];
 
     NSArray *fileURLs = [self.helper generateFileURLs:2];
-    NSMutableArray *urls = [fileURLs mutableCopy];
-    [urls insertObject:[NSURL URLWithString:@"https://timeout.com/timeout.png"] atIndex:0];
-    self.fileURLs = urls;
+    NSMutableArray *fileURLsWithTimedOutURL = [fileURLs mutableCopy];
+    [fileURLsWithTimedOutURL insertObject:[NSURL URLWithString:@"https://timeout.com/timeout.png"] atIndex:0];
+    self.fileURLs = fileURLsWithTimedOutURL;
     
-    [self.fileDownloadManager downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nonnull status) {
-        XCTAssertEqualObjects(@0, status[[urls[0] absoluteString]]);
-        XCTAssertEqualObjects(@1, status[[urls[1] absoluteString]]);
-        XCTAssertEqualObjects(@1, status[[urls[2] absoluteString]]);
+    // Download files where 1st file will time out
+    [self.fileDownloadManager downloadFiles:fileURLsWithTimedOutURL withCompletionBlock:^(NSDictionary<NSString *,id> * _Nonnull status) {
+        XCTAssertEqualObjects(@0, status[[fileURLsWithTimedOutURL[0] absoluteString]]);
+        XCTAssertEqualObjects(@1, status[[fileURLsWithTimedOutURL[1] absoluteString]]);
+        XCTAssertEqualObjects(@1, status[[fileURLsWithTimedOutURL[2] absoluteString]]);
         [expectation2 fulfill];
     }];
     
+    // Download files
+    // Ensure the downloadFiles does not wait for the first call to complete
     [self.fileDownloadManager downloadFiles:fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nonnull status) {
         XCTAssertEqualObjects(@1, status[[fileURLs[0] absoluteString]]);
         XCTAssertEqualObjects(@1, status[[fileURLs[1] absoluteString]]);
         [expectation1 fulfill];
     }];
     
+    // Ensure 2nd downloadFiles callback does not wait on the 1st
+    // Ensure the expecation for successful download is called first
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
     [HTTPStubs removeStub:stub];
 }
@@ -282,6 +308,7 @@
     }];
     
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0];
+    // Expected file requests to equal the calls to downloadSingleFile
     XCTAssertTrue([self.helper fileDownloadedCount:self.fileURLs[0]] == 2);
 }
 
@@ -305,6 +332,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
         XCTAssertFalse(success);
+        XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:url]);
         [expectation fulfill];
     }];
     
@@ -313,7 +341,6 @@
 }
 
 - (void)testDownloadSingleHostNotFound {
-    // Stub the network request to simulate a 404 Not Found error
     id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
         return [request.URL.absoluteString containsString:self.helper.fileURL];
     } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
@@ -324,6 +351,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
         XCTAssertFalse(success);
+        XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:url]);
         [expectation fulfill];
     }];
     
