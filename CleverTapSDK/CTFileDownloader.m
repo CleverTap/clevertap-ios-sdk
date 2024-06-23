@@ -56,6 +56,8 @@
 - (void)clearFileAssets:(BOOL)expiredOnly {
     if (expiredOnly) {
         // Disregard the last deleted timestamp to force delete the expired files
+        // currentTime - lastDeletedTime > self.fileExpiryTime
+        long forceLastDeleted = ([self currentTimeInterval] - self.fileExpiryTime) + 1;
         [self removeInactiveExpiredAssets:1];
     } else {
         [self removeAllAssets];
