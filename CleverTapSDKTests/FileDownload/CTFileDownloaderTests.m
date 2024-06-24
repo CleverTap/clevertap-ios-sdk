@@ -37,7 +37,7 @@
     [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for cleanup"];
-    self.fileDownloader.deleteCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
+    self.fileDownloader.removeAllAssetsCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
         [expectation fulfill];
     };
     // Clear all files
@@ -134,8 +134,12 @@
     [self downloadFiles:urls];
     NSString *filePath = [self.fileDownloader fileDownloadPath:urls[0]];
 
+    NSURL *URL = [NSURL URLWithString:urls[0]];
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *expectedFilePath = [documentsPath stringByAppendingPathComponent:[urls[0] lastPathComponent]];
+    NSString *pathComponent = [URL lastPathComponent];
+    long hash = [urls[0] hash];
+    NSString *fileName = [NSString stringWithFormat:@"%@/%ld_%@", CLTAP_FILES_DIRECTORY_NAME, hash, pathComponent];
+    NSString *expectedFilePath = [documentsPath stringByAppendingPathComponent:fileName];
     XCTAssertNotNil(filePath);
     XCTAssertEqualObjects(filePath, expectedFilePath);
 }
@@ -374,49 +378,49 @@
     self.fileDownloader.deleteFilesInvokedBlock = nil;
 }
 
-- (void)testClearAllFiles {
+- (void)testDownloadAndClearAllFileAssets {
+    // Mock the current timestamp
     long ts = (long)[[NSDate date] timeIntervalSince1970];
     self.fileDownloader.mockCurrentTimeInterval = ts;
     
-    NSArray<NSString *> *urlsExpiry = [self.helper generateFileURLStrings:3];
-    for (NSString *url in urlsExpiry) {
-        // Set expiry to not expired
-        self.fileDownloader.urlsExpiry[url] = @(ts + 1);
-    }
-    XCTestExpectation *expectation = [self expectationWithDescription:@"ClearAllFiles trigger delete files"];
-    self.fileDownloader.deleteFilesInvokedBlock = ^(NSArray<NSString *> *urls) {
-        NSSet *urlsSet = [NSSet setWithArray:urls];
-        NSSet *expected = [NSSet setWithArray:urlsExpiry];
-        // Assert deleteFiles is invoked for all files in urlsExpiry
-        XCTAssertEqualObjects(expected, urlsSet);
-        [expectation fulfill];
-    };
-    
-    [self.fileDownloader clearFileAssets:NO];
-    [self waitForExpectations:@[expectation] timeout:1.0];
-    self.fileDownloader.deleteFilesInvokedBlock = nil;
-}
-
-- (void)testDownloadAndClearAllFileAssets {
-    // Download the file
+    // Download files
     NSArray *urls = [self.helper generateFileURLStrings:3];
     [self downloadFiles:urls];
+    // Assert expiry is updated
+    XCTAssertEqual(3, self.fileDownloader.urlsExpiry.count);
+
+    NSMutableArray *paths = [NSMutableArray array];
     for (NSString *url in urls) {
+        // Assert the files are downloaded
         XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:url]);
+        [paths addObject:[self.fileDownloader fileDownloadPath:url]];
     }
-    
+
+    long lastDeleted = self.fileDownloader.lastDeletedTimestamp;
+    self.fileDownloader.mockCurrentTimeInterval = lastDeleted + 100;
+
     // Clear all file assets
     XCTestExpectation *expectation = [self expectationWithDescription:@"Clear all assets"];
     __weak CTFileDownloaderTests *weakSelf = self;
-    self.fileDownloader.deleteCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
+    self.fileDownloader.removeAllAssetsCompletion = ^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+        // Assert all files status is success
+        for (NSString *path in paths) {
+            XCTAssertTrue(status[path]);
+        }
+        // Assert the files no longer exist
         for (NSString *url in urls) {
             XCTAssertFalse([weakSelf.fileDownloader isFileAlreadyPresent:url]);
         }
+        // Assert urlsExpiry is cleared
+        XCTAssertEqual(0, weakSelf.fileDownloader.urlsExpiry.count);
+        // Assert the last deleted ts is updated
+        XCTAssertEqual(lastDeleted + 100, weakSelf.fileDownloader.lastDeletedTimestamp);
         [expectation fulfill];
     };
     
     [self.fileDownloader clearFileAssets:NO];
     [self waitForExpectations:@[expectation] timeout:2.0];
+    self.fileDownloader.removeAllAssetsCompletion = nil;
 }
 
 - (void)testFileDownloadCallbacksWhenFileIsAlreadyDownloading {

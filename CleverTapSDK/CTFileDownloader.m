@@ -60,16 +60,15 @@
         long forceLastDeleted = ([self currentTimeInterval] - self.fileExpiryTime) - 1;
         [self removeInactiveExpiredAssets:forceLastDeleted];
     } else {
-        [self removeAllAssets];
+        [self removeAllAssetsWithCompletion:nil];
     }
 }
 
 - (nullable NSString *)fileDownloadPath:(NSString *)url {
     NSString *filePath = nil;
     if ([self isFileAlreadyPresent:url]) {
-        NSString *fileName = [url lastPathComponent];
-        NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-        filePath = [documentsPath stringByAppendingPathComponent:fileName];
+        NSURL *fileURL = [NSURL URLWithString:url];
+        return [self.fileDownloadManager filePath:fileURL];
     } else {
         CleverTapLogInternal(self.config.logLevel, @"%@ File %@ is not present.", self, url);
     }
@@ -77,8 +76,8 @@
 }
 
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL {
-    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *imagePath = [documentsPath stringByAppendingPathComponent:[imageURL lastPathComponent]];
+    NSURL *URL = [NSURL URLWithString:imageURL];
+    NSString *imagePath = [self.fileDownloadManager filePath:URL];
     UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfFile:imagePath]];
     if (image) {
         return image;
@@ -134,9 +133,16 @@
     }];
 }
 
-- (void)removeAllAssets {
-    NSArray *inactiveUrls = [self.urlsExpiry allKeys];
-    [self deleteFiles:inactiveUrls withCompletionBlock:nil];
+- (void)removeAllAssetsWithCompletion:(void(^)(NSDictionary<NSString *,NSNumber *> *status))completion {
+    [self.fileDownloadManager removeAllFilesWithCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+        [self.urlsExpiry removeAllObjects];
+        [self updateFilesExpiryInPreference];
+        [self updateLastDeletedTimestamp];
+        if (completion) {
+            completion(status);
+        }
+        CleverTapLogInternal(self.config.logLevel, @"%@ Remove all files completed with status: %@", self, status);
+    }];
 }
 
 - (void)removeDeletedFilesFromExpiry:(NSDictionary<NSString *, NSNumber *> *)status {

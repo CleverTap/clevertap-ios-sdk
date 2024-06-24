@@ -26,6 +26,7 @@
 - (void)migrateActiveAndInactiveUrls;
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 - (void)updateFilesExpiry:(NSDictionary<NSString *, NSNumber *> *)status;
+- (void)removeAllAssetsWithCompletion:(void(^)(NSDictionary<NSString *,NSNumber *> *status))completion;
 
 @end
 

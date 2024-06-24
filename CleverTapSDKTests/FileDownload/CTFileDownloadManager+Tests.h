@@ -14,6 +14,7 @@
 @interface CTFileDownloadManager(Tests)
 
 @property (nonatomic, strong) NSURLSession *session;
+@property (nonatomic, strong) NSFileManager* fileManager;
 
 - (void)downloadSingleFile:(NSURL *)url
 completed:(void(^)(BOOL success))completedBlock;

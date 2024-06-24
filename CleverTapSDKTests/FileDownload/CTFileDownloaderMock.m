@@ -40,4 +40,16 @@
     [super deleteFiles:urls withCompletionBlock:completionBlock];
 }
 
+- (void)removeAllAssetsWithCompletion:(void(^)(NSDictionary<NSString *,NSNumber *> *status))completion {
+    CTFilesDeleteCompletedBlock completionBlock = ^(NSDictionary<NSString *,id> *status) {
+        if (completion) {
+            completion(status);
+        }
+        if (self.removeAllAssetsCompletion) {
+            self.removeAllAssetsCompletion(status);
+        }
+    };
+    [super removeAllAssetsWithCompletion:completionBlock];
+}
+
 @end
