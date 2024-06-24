@@ -356,7 +356,9 @@
     self.fileDownloader.urlsExpiry[urlsExpiry[0]] = @(ts);
     XCTestExpectation *expectation = [self expectationWithDescription:@"ClearAllFiles expired only triggers remove expired files"];
     self.fileDownloader.removeInactiveExpiredAssetsBlock = ^(long lastDeleted) {
-        XCTAssertEqual(1, lastDeleted);
+        long expectedForceLastDeleted = (ts - self.fileDownloader.fileExpiryTime) - 1;
+        XCTAssertEqual(expectedForceLastDeleted, lastDeleted);
+        XCTAssertTrue(ts - expectedForceLastDeleted > self.fileDownloader.fileExpiryTime);
         [expectation fulfill];
     };
     XCTestExpectation *expectation2 = [self expectationWithDescription:@"ClearAllFiles trigger delete files"];
