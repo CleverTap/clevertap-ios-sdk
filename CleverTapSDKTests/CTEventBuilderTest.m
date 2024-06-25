@@ -13,14 +13,14 @@
 #import "InAppHelper.h"
 
 @interface CTEventBuilderTest : XCTestCase
-@property (nonatomic, strong) CTInAppImagePrefetchManager *prefetchManager;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
 @end
 
 @implementation CTEventBuilderTest
 
 - (void)setUp {
     InAppHelper *helper = [InAppHelper new];
-    self.prefetchManager = helper.imagePrefetchManager;
+    self.fileDownloader = helper.fileDownloader;
 }
 
 - (void)tearDown {
@@ -283,7 +283,7 @@
 
 - (void)test_buildInAppNotificationStateEvent_withClickedTrueAndInvalidKey {
     NSDictionary *notification = @{@"notiKey": @"notiValue"};
-    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification imagePrefetchManager:self.prefetchManager];
+    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification fileDownloader:self.fileDownloader];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
     [CTEventBuilder buildInAppNotificationStateEvent:true forNotification:inAppNotification andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
@@ -296,7 +296,7 @@
 
 - (void)test_buildInAppNotificationStateEvent_withClickedFalseAndInvalidKey {
     NSDictionary *notification = @{@"notiKey": @"notiValue"};
-    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification imagePrefetchManager:self.prefetchManager];
+    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification fileDownloader:self.fileDownloader];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
     [CTEventBuilder buildInAppNotificationStateEvent:false forNotification:inAppNotification andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
@@ -309,7 +309,7 @@
 
 - (void)test_buildInAppNotificationStateEvent_withValidKey {
     NSDictionary *notification = @{@"wzrk_notiKey": @"notiValue"};
-    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification imagePrefetchManager:self.prefetchManager];
+    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification fileDownloader:self.fileDownloader];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
     [CTEventBuilder buildInAppNotificationStateEvent:false forNotification:inAppNotification andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
