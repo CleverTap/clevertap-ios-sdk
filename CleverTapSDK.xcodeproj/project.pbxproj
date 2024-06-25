@@ -1401,6 +1401,17 @@
 			path = FileDownload;
 			sourceTree = "<group>";
 		};
+		6B9E95B62C2AE6740002D557 /* FileDownload */ = {
+			isa = PBXGroup;
+			children = (
+				489A73192BC51795008D4850 /* CTFileDownloadManager.h */,
+				489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */,
+				487854022BF4B79F00565685 /* CTFileDownloader.h */,
+				487854042BF4B7D800565685 /* CTFileDownloader.m */,
+			);
+			path = FileDownload;
+			sourceTree = "<group>";
+		};
 		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -1527,6 +1538,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				6B9E95B62C2AE6740002D557 /* FileDownload */,
 				3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */,
 				4803951A2A7ABAD200C4D254 /* CTAES.h */,
 				480395192A7ABAD200C4D254 /* CTAES.m */,
@@ -1651,10 +1663,6 @@
 				6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */,
 				6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */,
 				6BA3B2DA2B03E926004E834B /* CTQueueType.h */,
-				489A73192BC51795008D4850 /* CTFileDownloadManager.h */,
-				489A731B2BC517B4008D4850 /* CTFileDownloadManager.m */,
-				487854022BF4B79F00565685 /* CTFileDownloader.h */,
-				487854042BF4B7D800565685 /* CTFileDownloader.m */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
