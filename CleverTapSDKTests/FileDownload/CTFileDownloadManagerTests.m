@@ -4,12 +4,12 @@
 #import "CTFileDownloadManager+Tests.h"
 #import "CTConstants.h"
 #import "CTFileDownloadTestHelper.h"
+#import "NSFileManagerMock.h"
 
 @interface CTFileDownloadManagerTests : XCTestCase
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTFileDownloadManager *fileDownloadManager;
-@property (nonatomic, strong) NSString *documentsDirectory;
 @property (nonatomic, strong) NSArray<NSURL *> *fileURLs;
 @property (nonatomic, strong) CTFileDownloadTestHelper *helper;
 
@@ -24,7 +24,6 @@
     [self.helper addHTTPStub];
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
-    self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
 }
 
 - (void)tearDown {
@@ -37,10 +36,22 @@
 - (void)testFilesExist {
     [self downloadFiles];
     
-    for(int i = 0; i < [self.fileURLs count]; i++) {
-        NSString* filePath = [self.documentsDirectory stringByAppendingPathComponent:[self.fileURLs[i] lastPathComponent]];
-        XCTAssertTrue([[NSFileManager defaultManager] fileExistsAtPath:filePath]);
+    for (NSURL *url in self.fileURLs) {
+        NSString *filePath = [NSString stringWithFormat:@"%lu_%@", [url.absoluteString hash], [url lastPathComponent]];
+        NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+        NSString *ctFiles = [documentsDirectory stringByAppendingPathComponent:CLTAP_FILES_DIRECTORY_NAME];
+        NSString *path = [ctFiles stringByAppendingPathComponent:filePath];
+        
+        XCTAssertTrue([[NSFileManager defaultManager] fileExistsAtPath:path]);
     }
+}
+
+- (void)testFilePath {
+    NSURL *url = [NSURL URLWithString:@"https://clevertap.com/ct_test_url_0.png"];
+    NSString *filePath = [self.fileDownloadManager filePath:url];
+    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    documentsPath = [documentsPath stringByAppendingPathComponent:CLTAP_FILES_DIRECTORY_NAME];
+    XCTAssertEqualObjects(filePath, [documentsPath stringByAppendingPathComponent:@"1176188917138815486_ct_test_url_0.png"]);
 }
 
 - (void)testIsFileAlreadyPresent {
@@ -301,15 +312,133 @@
 
     // downloadSingleFile directly downloads the file
     [self.fileDownloadManager downloadSingleFile:self.fileURLs[0] completed:^(BOOL success) {
+        XCTAssertTrue(success);
         [expectation1 fulfill];
     }];
     [self.fileDownloadManager downloadSingleFile:self.fileURLs[0] completed:^(BOOL success) {
+        XCTAssertTrue(success);
         [expectation2 fulfill];
     }];
     
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0];
     // Expected file requests to equal the calls to downloadSingleFile
     XCTAssertTrue([self.helper fileDownloadedCount:self.fileURLs[0]] == 2);
+}
+
+- (void)testDownloadSingleSameURLComponentDifferentHost {
+    NSURL *url1 = [NSURL URLWithString:[NSString stringWithFormat:@"https://clevertap.com/%@.png", self.helper.fileURL]];
+    NSURL *url2 = [NSURL URLWithString:[NSString stringWithFormat:@"https://clevertap-1.com/%@.png", self.helper.fileURL]];
+    self.fileURLs = @[url1, url2];
+    
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download files callback 1"];
+    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download files callback 2"];
+
+    // Expect to download and save two different files
+    [self.fileDownloadManager downloadSingleFile:url1 completed:^(BOOL success) {
+        XCTAssertTrue(success);
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:url1]);
+        [expectation1 fulfill];
+    }];
+    [self.fileDownloadManager downloadSingleFile:url2 completed:^(BOOL success) {
+        XCTAssertTrue(success);
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:url2]);
+        [expectation2 fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation1, expectation2] timeout:2.0];
+    // Expected file requests to equal the calls to downloadSingleFile
+    XCTAssertEqual(2, self.helper.filesDownloaded.count);
+    XCTAssertNotEqualObjects([self.fileDownloadManager filePath:url1], [self.fileDownloadManager filePath:url2]);
+}
+
+- (void)testDownloadSingleOverwriteFile {
+    NSURL *url = [self.helper generateFileURL];
+    self.fileURLs = @[url];
+    
+    __block NSDate *firstFileCreationDate;
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Download file callback"];
+    // Download file
+    [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
+        XCTAssertTrue(success);
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:url]);
+        
+        // Set the 1st file creation date
+        NSDictionary* fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.fileDownloadManager filePath:url] error:nil];
+        firstFileCreationDate = [fileAttributes objectForKey:NSFileCreationDate];
+        [expectation1 fulfill];
+    }];
+
+    __block NSDate *secondFileCreationDate;
+    XCTestExpectation *expectation2 = [self expectationWithDescription:@"Download file again callback"];
+    // Download the file again. Since the file exists, it should be deleted and then saved.
+    [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
+        XCTAssertTrue(success);
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:url]);
+        
+        // Set the 2nd file creation date
+        NSDictionary* fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.fileDownloadManager filePath:url] error:nil];
+        secondFileCreationDate = [fileAttributes objectForKey:NSFileCreationDate];
+        [expectation2 fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation1, expectation2] timeout:2.0];
+    // Ensure the file is overwritten by comparing the created dates
+    XCTAssertNotEqualObjects(firstFileCreationDate, secondFileCreationDate);
+}
+
+- (void)testDownloadSingleFileWithCreateDirectoryError {
+    NSFileManager *originalFileManager = self.fileDownloadManager.fileManager;
+    NSFileManagerMock *fileManagerMock = [[NSFileManagerMock alloc] init];
+    self.fileDownloadManager.fileManager = fileManagerMock;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block called"];
+
+    NSURL *URL = [self.helper generateFileURL];
+    fileManagerMock.createDirectoryError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteNoPermissionError userInfo:nil];
+
+    [self.fileDownloadManager downloadSingleFile:URL completed:^(BOOL success) {
+        XCTAssertFalse(success);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    self.fileDownloadManager.fileManager = originalFileManager;
+}
+
+- (void)testDownloadSingleFileWithFileRemoveError {
+    NSFileManager *originalFileManager = self.fileDownloadManager.fileManager;
+    NSFileManagerMock *fileManagerMock = [[NSFileManagerMock alloc] init];
+    self.fileDownloadManager.fileManager = fileManagerMock;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block called"];
+
+    NSURL *URL = [self.helper generateFileURL];
+    fileManagerMock.fileExists = YES;
+    fileManagerMock.removeItemError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteNoPermissionError userInfo:nil];
+
+    [self.fileDownloadManager downloadSingleFile:URL completed:^(BOOL success) {
+        XCTAssertFalse(success);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    self.fileDownloadManager.fileManager = originalFileManager;
+}
+
+- (void)testDownloadSingleFileWithFileMoveError {
+    NSFileManager *originalFileManager = self.fileDownloadManager.fileManager;
+    NSFileManagerMock *fileManagerMock = [[NSFileManagerMock alloc] init];
+    self.fileDownloadManager.fileManager = fileManagerMock;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block called"];
+
+    NSURL *URL = [self.helper generateFileURL];
+    fileManagerMock.moveItemError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteNoPermissionError userInfo:nil];
+
+    [self.fileDownloadManager downloadSingleFile:URL completed:^(BOOL success) {
+        XCTAssertFalse(success);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    self.fileDownloadManager.fileManager = originalFileManager;
 }
 
 - (void)testTimeoutConfiguration {
@@ -328,7 +457,7 @@
                                                headers:@{@"Content-Type":@"text/plain"}];
     }];
     
-    NSURL *url = [self.helper generateFileURLs:1][0];
+    NSURL *url = [self.helper generateFileURL];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
         XCTAssertFalse(success);
@@ -347,7 +476,7 @@
         return [HTTPStubsResponse responseWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotFindHost userInfo:nil]];
     }];
     
-    NSURL *url = [self.helper generateFileURLs:1][0];
+    NSURL *url = [self.helper generateFileURL];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Download files callback"];
     [self.fileDownloadManager downloadSingleFile:url completed:^(BOOL success) {
         XCTAssertFalse(success);
@@ -357,6 +486,65 @@
     
     [self waitForExpectations:@[expectation] timeout:2.0];
     [HTTPStubs removeStub:stub];
+}
+
+- (void)testRemoveAllFiles {
+    [self downloadFiles:3];
+    NSMutableArray *paths = [NSMutableArray array];
+    for (int i = 0; i < 3; i++) {
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[i]]);
+        [paths addObject:[self.fileDownloadManager filePath:self.fileURLs[i]]];
+    }
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Remove all files callback"];
+    [self.fileDownloadManager removeAllFilesWithCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+        for (int i = 0; i < 3; i++) {
+            XCTAssertTrue(status[paths[i]]);
+            XCTAssertFalse([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[i]]);
+        }
+        [expectation fulfill];
+    }];
+    [self waitForExpectations:@[expectation] timeout:2.0];
+}
+
+- (void)testRemoveAllFilesContentsOfDirectoryError {
+    NSFileManager *originalFileManager = self.fileDownloadManager.fileManager;
+    NSFileManagerMock *fileManagerMock = [[NSFileManagerMock alloc] init];
+    self.fileDownloadManager.fileManager = fileManagerMock;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block called"];
+    
+    fileManagerMock.contentsOfDirectoryError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteNoPermissionError userInfo:nil];
+    [self.fileDownloadManager removeAllFilesWithCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+        XCTAssertTrue(status.count == 0);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+    self.fileDownloadManager.fileManager = originalFileManager;
+}
+
+- (void)testRemoveAllFilesRemoveFileError {
+    [self downloadFiles:3];
+    NSMutableArray *paths = [NSMutableArray array];
+    for (int i = 0; i < 3; i++) {
+        XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[i]]);
+        [paths addObject:[self.fileDownloadManager filePath:self.fileURLs[i]]];
+    }
+    
+    NSFileManager *originalFileManager = self.fileDownloadManager.fileManager;
+    NSFileManagerMock *fileManagerMock = [[NSFileManagerMock alloc] init];
+    self.fileDownloadManager.fileManager = fileManagerMock;
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Remove all files callback"];
+    fileManagerMock.removeItemError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteNoPermissionError userInfo:nil];
+    [self.fileDownloadManager removeAllFilesWithCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+        self.fileDownloadManager.fileManager = originalFileManager;
+        for (int i = 0; i < 3; i++) {
+            XCTAssertEqualObjects(@0, status[paths[i]]);
+            XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:self.fileURLs[i]]);
+        }
+        [expectation fulfill];
+    }];
+    [self waitForExpectations:@[expectation] timeout:2.0];
 }
 
 #pragma mark Private methods

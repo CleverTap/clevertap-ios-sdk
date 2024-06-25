@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CTFilesDeleteCompletedBlock deleteCompletion;
 @property (nonatomic, nullable) void(^deleteFilesInvokedBlock)(NSArray<NSString *> *);
 
+@property (nonatomic, nullable) CTFilesDeleteCompletedBlock removeAllAssetsCompletion;
+
 @end
 
 NS_ASSUME_NONNULL_END

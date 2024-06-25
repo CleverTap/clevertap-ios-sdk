@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeStub;
 
 - (NSString *)fileURL;
+- (NSURL *)generateFileURL;
 - (NSArray<NSURL *> *)generateFileURLs:(int)count;
 - (NSArray<NSString *> *)generateFileURLStrings:(int)count;
 

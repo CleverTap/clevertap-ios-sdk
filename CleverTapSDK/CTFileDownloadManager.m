@@ -9,6 +9,7 @@
 @property (nonatomic, strong) NSMutableSet<NSURL *> *downloadInProgressUrls;
 @property (nonatomic, strong) NSMutableDictionary<NSURL *, NSMutableArray<DownloadCompletionHandler> *> *downloadInProgressHandlers;
 @property (nonatomic, strong) NSURLSession *session;
+@property (nonatomic, strong) NSFileManager* fileManager;
 
 @end
 
@@ -27,7 +28,9 @@
     self = [super init];
     if (self) {
         self.config = config;
-        self.documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+        NSString *documents = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+        self.documentsDirectory = [documents stringByAppendingPathComponent:CLTAP_FILES_DIRECTORY_NAME];
+
         _downloadInProgressUrls = [NSMutableSet new];
         _downloadInProgressHandlers = [NSMutableDictionary new];
         
@@ -36,6 +39,7 @@
         sc.timeoutIntervalForResource = CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL;
         
         self.session = [NSURLSession sessionWithConfiguration:sc];
+        self.fileManager = [NSFileManager defaultManager];
     }
     
     return self;
@@ -100,9 +104,13 @@
 }
 
 - (BOOL)isFileAlreadyPresent:(NSURL *)url {
-    NSString* filePath = [self.documentsDirectory stringByAppendingPathComponent:[url lastPathComponent]];
-    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    NSString* filePath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+    BOOL fileExists = [self.fileManager fileExistsAtPath:filePath];
     return fileExists;
+}
+
+- (NSString *)filePath:(NSURL *)url {
+    return [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
 }
 
 - (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion {
@@ -137,6 +145,38 @@
     });
 }
 
+- (void)removeAllFilesWithCompletionBlock:(CTFilesRemoveCompletedBlock)completion {
+    dispatch_group_t deleteGroup = dispatch_group_create();
+    dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    NSMutableDictionary<NSString *,id> *filesDeleteStatus = [NSMutableDictionary new];
+    NSError *error;
+    NSURL *path = [NSURL fileURLWithPath:self.documentsDirectory];
+    NSArray<NSURL *> *files = [self.fileManager contentsOfDirectoryAtURL:path
+                                              includingPropertiesForKeys:nil
+                                                                 options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                   error:&error];
+    if (error) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Failed to get contents of directory %@ - %@", self, path, error);
+        completion(filesDeleteStatus);
+    }
+    for (NSURL *file in files) {
+        dispatch_group_enter(deleteGroup);
+        dispatch_async(deleteConcurrentQueue, ^{
+            NSError *error;
+            BOOL success = [self.fileManager removeItemAtURL:file error:&error];
+            if (!success) {
+                CleverTapLogInternal(self.config.logLevel, @"%@ Failed to remove file %@ - %@", self, [file absoluteString], error);
+            }
+            [filesDeleteStatus setObject:@(success) forKey:[file path]];
+            dispatch_group_leave(deleteGroup);
+        });
+    }
+    dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
+        // Callback when all files are deleted with their success status
+        completion(filesDeleteStatus);
+    });
+}
+
 #pragma mark - Private methods
 
 - (void)downloadSingleFile:(NSURL *)url
@@ -156,12 +196,33 @@
             return;
         }
         
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        // Create the destination path by appending the suggested filename to the documents directory path
-        NSString *destinationPath = [self.documentsDirectory stringByAppendingPathComponent:[response suggestedFilename]];
+        NSFileManager *fileManager = self.fileManager;
+        NSError *createDirectoryError;
+        if (![fileManager fileExistsAtPath:self.documentsDirectory]) {
+            [fileManager createDirectoryAtURL:[NSURL fileURLWithPath:self.documentsDirectory]
+                                     withIntermediateDirectories:YES
+                                                      attributes:nil
+                                                           error:&createDirectoryError];
+            if (createDirectoryError) {
+                CleverTapLogInternal(self.config.logLevel, @"Error creating documents folder: %@", createDirectoryError);
+                completedBlock(NO);
+                return;
+            }
+        }
+        
+        NSString *destinationPath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
         NSURL *destinationURL = [NSURL fileURLWithPath:destinationPath];
-        // Move the file from the temporary location to the documents directory
         NSError *fileError;
+        // Check if the file exists at the destination
+        if ([fileManager fileExistsAtPath:[destinationURL path]]) {
+            // Remove the existing file
+            if (![fileManager removeItemAtURL:destinationURL error:&fileError]) {
+                CleverTapLogInternal(self.config.logLevel, @"Error removing file at destination: %@", fileError);
+                completedBlock(NO);
+                return;
+            }
+        }
+        // Move the file from the temporary location to the documents directory
         [fileManager moveItemAtURL:location toURL:destinationURL error:&fileError];
         if (fileError) {
             CleverTapLogInternal(self.config.logLevel, @"File Error: %@ for file: %@", fileError.localizedDescription, url);
@@ -173,6 +234,11 @@
     [downloadTask resume];
 }
 
+- (NSString *)hashedFileNameForURL:(NSURL *)url {
+    NSUInteger hashValue = [url.absoluteString hash];
+    return [NSString stringWithFormat:@"%lu_%@", (unsigned long)hashValue, [url lastPathComponent]];
+}
+
 - (void)deleteSingleFile:(NSURL *)url
                completed:(void(^)(BOOL success))completedBlock {
     if (![url lastPathComponent] || [[url lastPathComponent] isEqualToString:@""]) {
@@ -180,9 +246,9 @@
         return;
     }
 
-    NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[url lastPathComponent]];
+    NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
     NSError *error;
-    BOOL success = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+    BOOL success = [self.fileManager removeItemAtPath:filePath error:&error];
     if (!success) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Failed to remove file %@ - %@", self, url, error);
     }

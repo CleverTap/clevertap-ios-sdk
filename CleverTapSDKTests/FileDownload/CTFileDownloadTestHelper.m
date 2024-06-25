@@ -78,6 +78,10 @@
     }
 }
 
+- (NSURL *)generateFileURL {
+    return [NSURL URLWithString:[self generateFileURLStringAtIndex:0]];
+}
+
 - (NSArray<NSURL *> *)generateFileURLs:(int)count {
     NSMutableArray *arr = [NSMutableArray arrayWithCapacity:count];
     for (int i = 0; i < count; i++) {
