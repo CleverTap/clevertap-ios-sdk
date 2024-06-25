@@ -137,11 +137,6 @@
                 values:self.valuesFromClient];
     
     [self mergeVariable:var];
-    
-    // setHasPendingDownloads to YES if type is FILE.
-    if ([var.kind isEqualToString:CT_KIND_FILE]) {
-        [self setHasPendingDownloads:YES];
-    }
 }
 
 - (CTVar *)getVariable:(NSString *)name {
@@ -312,19 +307,23 @@
     return [self.fileDownloader fileDownloadPath:fileURL];
 }
 
+- (BOOL)isFileAlreadyPresent:(NSString *)fileURL {
+    return [self.fileDownloader isFileAlreadyPresent:fileURL];
+}
+
 - (NSMutableArray<NSString *> *)fileURLs {
     NSMutableArray<NSString *> *downloadURLs = [NSMutableArray new];
     for (id key in self.vars) {
         CTVar *var = self.vars[key];
-        if (var.kind == CT_KIND_FILE) {
+        if (var.kind == CT_KIND_FILE && var.fileURL) {
             // If file is already present, call fileIsReady
             // Else download the file and call fileIsReady when downloaded
-            if ([self.fileDownloader isFileAlreadyPresent:var.value]) {
+            if ([self.fileDownloader isFileAlreadyPresent:var.fileURL]) {
                 [var triggerFileIsReady];
             } else {
-                [downloadURLs addObject:var.value];
+                [downloadURLs addObject:var.fileURL];
                 @synchronized (self) {
-                    [self.fileVarsInDownload setObject:var forKey:var.value];
+                    [self.fileVarsInDownload setObject:var forKey:var.fileURL];
                 }
             }
         }
