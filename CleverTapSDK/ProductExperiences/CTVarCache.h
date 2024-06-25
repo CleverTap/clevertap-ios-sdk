@@ -35,6 +35,7 @@ NS_SWIFT_NAME(VarCache)
 - (void)clearUserContent;
 
 - (nullable NSString *)fileDownloadPath:(NSString *)fileURL;
+- (BOOL)isFileAlreadyPresent:(NSString *)fileURL;
 @end
 
 NS_ASSUME_NONNULL_END
