@@ -15,6 +15,7 @@
 #import "CTVarCacheMock.h"
 #import "CTVariables+Tests.h"
 #import "CTConstants.h"
+#import "InAppHelper.h"
 
 @interface CTVarCacheTest : XCTestCase
 
@@ -25,10 +26,11 @@ CTVariables *variables;
 @implementation CTVarCacheTest
 
 - (void)setUp {
+    InAppHelper *helper = [InAppHelper new];
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     config.useCustomCleverTapId = YES;
     CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
-    CTVarCacheMock *varCache = [[CTVarCacheMock alloc] initWithConfig:config deviceInfo:deviceInfo];
+    CTVarCacheMock *varCache = [[CTVarCacheMock alloc] initWithConfig:config deviceInfo:deviceInfo fileDownloader:helper.fileDownloader];
     variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo varCache:varCache];
 }
 
