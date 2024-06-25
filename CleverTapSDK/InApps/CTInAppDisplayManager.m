@@ -35,7 +35,7 @@
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
-#import "CTInAppImagePrefetchManager.h"
+
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
 #endif
@@ -79,7 +79,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 @property (nonatomic, weak) CleverTap* instance;
 
-@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
 
 @property (nonatomic, strong) CTCustomTemplatesManager *templatesManager;
 
@@ -103,16 +103,16 @@ static NSMutableArray<NSArray *> *pendingNotifications;
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
                                 inAppStore:(CTInAppStore *)inAppStore
-                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager
-                          templatesManager:(CTCustomTemplatesManager *)templatesManager {
+                          templatesManager:(CTCustomTemplatesManager *)templatesManager
+                            fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
         self.inAppStore = inAppStore;
-        self.imagePrefetchManager = imagePrefetchManager;
         self.templatesManager = templatesManager;
+        self.fileDownloader = fileDownloader;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(onDisplayPendingNotification:)
@@ -354,7 +354,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
     NSString *imageURLString = [imageURL absoluteString];
-    UIImage *image = [self.imagePrefetchManager loadImageFromDisk:imageURLString];
+    UIImage *image = [self.fileDownloader loadImageFromDisk:imageURLString];
     if (image) return image;
     return nil;
 }

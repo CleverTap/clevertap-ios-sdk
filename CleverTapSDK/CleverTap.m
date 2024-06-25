@@ -31,6 +31,7 @@
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
 #import "CTSessionManager.h"
+#import "CTFileDownloader.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppFCManager.h"
@@ -56,7 +57,6 @@
 #import "CleverTap+InAppsResponseHandler.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppTriggerManager.h"
-#import "CTInAppImagePrefetchManager.h"
 #import "CTCustomTemplatesManager-Internal.h"
 #endif
 
@@ -243,7 +243,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
 @property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
-@property (nonatomic, strong, readwrite) CTInAppImagePrefetchManager *imagePrefetchManager;
+@property (nonatomic, strong, readwrite) CTFileDownloader *fileDownloader;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 
 @property (nonatomic, strong) CTCustomTemplatesManager *customTemplatesManager;
@@ -480,6 +480,8 @@ static BOOL sharedInstanceErrorLogged;
         [self initNetworking];
         [self inflateQueuesAsync];
         [self addObservers];
+        
+        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
             [self initializeInAppSupport];
@@ -509,12 +511,9 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)initializeInAppSupport {
-    CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
-    self.imagePrefetchManager = imagePrefetchManager;
-
     CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
                                                     delegateManager:self.delegateManager
-                                               imagePrefetchManager:self.imagePrefetchManager
+                                                     fileDownloader:self.fileDownloader
                                                            deviceId:self.deviceInfo.deviceId];
     self.inAppStore = inAppStore;
     
@@ -530,8 +529,8 @@ static BOOL sharedInstanceErrorLogged;
                                                                               inAppFCManager:inAppFCManager
                                                                            impressionManager:impressionManager
                                                                                   inAppStore:inAppStore
-                                                                        imagePrefetchManager:self.imagePrefetchManager
-                                                                            templatesManager:templatesManager];
+                                                                            templatesManager:templatesManager
+                                                                              fileDownloader:self.fileDownloader];
     
     CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
     
@@ -1585,7 +1584,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)clearInAppResources:(BOOL)expiredOnly {
-    [self.imagePrefetchManager _clearImageAssets:expiredOnly];
+    [self.fileDownloader clearFileAssets:expiredOnly];
 }
 #endif
 

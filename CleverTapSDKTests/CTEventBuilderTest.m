@@ -10,17 +10,13 @@
 #import "CTEventBuilder.h"
 #import "CTValidator.h"
 #import "CTInAppNotification.h"
-#import "InAppHelper.h"
 
 @interface CTEventBuilderTest : XCTestCase
-@property (nonatomic, strong) CTInAppImagePrefetchManager *prefetchManager;
 @end
 
 @implementation CTEventBuilderTest
 
 - (void)setUp {
-    InAppHelper *helper = [InAppHelper new];
-    self.prefetchManager = helper.imagePrefetchManager;
 }
 
 - (void)tearDown {

@@ -3,7 +3,6 @@
 #import "CTInAppUtils.h"
 #import "CTNotificationButton.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-#import "CTInAppImagePrefetchManager.h"
 #import "CTCustomTemplateInAppData.h"
 #endif
 

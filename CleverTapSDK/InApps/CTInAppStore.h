@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "CTSwitchUserDelegate.h"
-#import "CTInAppImagePrefetchManager.h"
 
 @class CleverTapInstanceConfig;
 @class CTMultiDelegateManager;
+@class CTFileDownloader;
 
 @interface CTInAppStore : NSObject <CTSwitchUserDelegate>
 
@@ -20,7 +20,7 @@
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config
                         delegateManager:(CTMultiDelegateManager * _Nonnull)delegateManager
-                   imagePrefetchManager:(CTInAppImagePrefetchManager * _Nonnull)imagePrefetchManager
+                         fileDownloader:(CTFileDownloader * _Nonnull)fileDownloader
                                deviceId:(NSString * _Nonnull)deviceId;
 
 - (NSArray * _Nonnull)clientSideInApps;

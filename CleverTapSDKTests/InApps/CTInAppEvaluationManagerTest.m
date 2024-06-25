@@ -35,13 +35,13 @@
 #pragma clang diagnostic ignored "-Wnonnull"
 @implementation CTInAppDisplayManagerMock
 - (instancetype)initWithNil {
-    if (self = [super initWithCleverTap:nil 
+    if (self = [super initWithCleverTap:nil
                    dispatchQueueManager:nil
                          inAppFCManager:nil
                       impressionManager:nil
                              inAppStore:nil
-                   imagePrefetchManager:nil
-                       templatesManager:nil]) {
+                       templatesManager:nil
+                         fileDownloader:nil]) {
         self.inappNotifs = [NSMutableArray new];
     }
     return self;
@@ -52,8 +52,8 @@
                          inAppFCManager:nil
                       impressionManager:nil
                              inAppStore:nil
-                   imagePrefetchManager:nil
-                       templatesManager:templatesManager]) {
+                       templatesManager:templatesManager
+                         fileDownloader:nil]) {
         self.inappNotifs = [NSMutableArray new];
     }
     return self;

@@ -33,7 +33,7 @@
 
 @interface CTInAppFCManagerTest : XCTestCase
 @property (nonatomic, strong) CTInAppFCManagerMock *inAppFCManager;
-@property (nonatomic, strong) CTInAppImagePrefetchManager *prefetchManager;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
 @property (nonatomic, strong) InAppHelper *helper;
 @end
 
@@ -47,7 +47,7 @@
     // Set to the reset values
     self.inAppFCManager.globalSessionMax = 1;
     self.inAppFCManager.maxPerDayCount = 1;
-    self.prefetchManager = helper.imagePrefetchManager;
+    self.fileDownloader = helper.fileDownloader;
 }
 
 - (void)tearDown {
