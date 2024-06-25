@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)update;
 - (void)cacheComputedValues;
 - (void)triggerValueChanged;
+- (void)triggerFileIsReady;
 
 + (BOOL)printedCallbackWarning;
 + (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning;

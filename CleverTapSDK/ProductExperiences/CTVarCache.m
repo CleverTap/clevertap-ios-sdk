@@ -12,14 +12,19 @@
 @property (strong, nonatomic) CacheUpdateBlock updateBlock;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, id> *fileVarsInDownload;
 @end
 
 @implementation CTVarCache
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config 
+                    deviceInfo:(CTDeviceInfo*)deviceInfo
+                fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
         self.config = config;
         self.deviceInfo = deviceInfo;
+        self.fileDownloader = fileDownloader;
         [self initialize];
     }
     return self;
@@ -30,6 +35,8 @@
     self.diffs = [NSMutableDictionary dictionary];
     self.valuesFromClient = [NSMutableDictionary dictionary];
     self.hasVarsRequestCompleted = NO;
+    self.hasPendingDownloads = NO;
+    self.fileVarsInDownload = [NSMutableDictionary dictionary];
 }
 
 - (NSArray *)getNameComponents:(NSString *)name {
@@ -130,6 +137,11 @@
                 values:self.valuesFromClient];
     
     [self mergeVariable:var];
+    
+    // setHasPendingDownloads to YES if type is FILE.
+    if ([var.kind isEqualToString:CT_KIND_FILE]) {
+        [self setHasPendingDownloads:YES];
+    }
 }
 
 - (CTVar *)getVariable:(NSString *)name {
@@ -240,6 +252,14 @@
             for (NSString *name in [self.vars allKeys]) {
                 [self.vars[name] update];
             }
+            
+            NSMutableArray *fileURLs = [self fileURLs];
+            if ([fileURLs count] > 0) {
+                [self setHasPendingDownloads:YES];
+                [self startFileDownload:fileURLs];
+            } else {
+                [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION object:nil];
+            }
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: No variables received from the server", self);
         }
@@ -259,6 +279,73 @@
     [self.vars enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         CTVar *var = (CTVar *)obj;
         [var clearState];
+    }];
+}
+
+#pragma mark - File Handling
+
+- (void)startFileDownload:(NSMutableArray *)fileURLs {
+    [self.fileDownloader downloadFiles:fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        NSMutableArray<NSString *> *retryURLs;
+        // Call fileIsReady for variables whose files are downloaded.
+        for (NSString *key in status.allKeys) {
+            if (status[key]) {
+                @synchronized (self) {
+                    [self.fileVarsInDownload[key] triggerFileIsReady];
+                    [self.fileVarsInDownload removeObjectForKey:key];
+                }
+            } else {
+                [retryURLs addObject:key];
+            }
+        }
+        // Retry once if any url is not downloaded.
+        if ([retryURLs count] == 0) {
+            [self setHasPendingDownloads:NO];
+            [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION object:nil];
+        } else {
+            [self retryFileDownload:retryURLs];
+        }
+    }];
+}
+
+- (nullable NSString *)fileDownloadPath:(NSString *)fileURL {
+    return [self.fileDownloader fileDownloadPath:fileURL];
+}
+
+- (NSMutableArray<NSString *> *)fileURLs {
+    NSMutableArray<NSString *> *downloadURLs = [NSMutableArray new];
+    for (id key in self.vars) {
+        CTVar *var = self.vars[key];
+        if (var.kind == CT_KIND_FILE) {
+            // If file is already present, call fileIsReady
+            // Else download the file and call fileIsReady when downloaded
+            if ([self.fileDownloader isFileAlreadyPresent:var.value]) {
+                [var triggerFileIsReady];
+            } else {
+                [downloadURLs addObject:var.value];
+                @synchronized (self) {
+                    [self.fileVarsInDownload setObject:var forKey:var.value];
+                }
+            }
+        }
+    }
+    
+    return downloadURLs;
+}
+
+- (void)retryFileDownload:(NSMutableArray *)urls {
+    [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        [self setHasPendingDownloads:NO];
+        for (NSString *key in status.allKeys) {
+            if (status[key]) {
+                @synchronized (self) {
+                    [self.fileVarsInDownload[key] triggerFileIsReady];
+                    [self.fileVarsInDownload removeObjectForKey:key];
+                }
+            }
+        }
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION object:nil];
     }];
 }
 

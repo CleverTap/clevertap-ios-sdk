@@ -17,15 +17,28 @@
 @property(strong, nonatomic) NSMutableArray *variablesChangedBlocks;
 @property(strong, nonatomic) NSMutableArray *onceVariablesChangedBlocks;
 
+@property(strong, nonatomic) NSMutableArray *noFileDownloadsBlocks;
+@property(strong, nonatomic) NSMutableArray *onceNoFileDownloadsBlocks;
+
 @end
 
 @implementation CTVariables
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config 
+                    deviceInfo:(CTDeviceInfo*)deviceInfo
+                fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
-        self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo];
+        self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo fileDownloader:fileDownloader];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(triggerVariablesChangedAndNoDownloadsPending)
+                                                     name:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark Define Var
@@ -159,6 +172,67 @@
         });
         @synchronized (self.onceVariablesChangedBlocks) {
             [self.onceVariablesChangedBlocks addObject:[block copy]];
+        }
+        CT_END_TRY
+    }
+}
+
+- (void)triggerVariablesChangedAndNoDownloadsPending {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self triggerVariablesChangedAndNoDownloadsPending];
+        });
+        return;
+    }
+    
+    for (CleverTapVariablesChangedBlock block in self.noFileDownloadsBlocks.copy) {
+        block();
+    }
+    
+    NSArray *onceBlocksCopy;
+    @synchronized (self.onceNoFileDownloadsBlocks) {
+        onceBlocksCopy = self.onceNoFileDownloadsBlocks.copy;
+        [self.onceNoFileDownloadsBlocks removeAllObjects];
+    }
+    for (CleverTapVariablesChangedBlock block in onceBlocksCopy) {
+        block();
+    }
+}
+
+- (void)onVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull)block {
+    if (!block) {
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onVariablesChangedAndNoDownloadsPending].");
+        return;
+    }
+    
+    CT_TRY
+    if (!self.noFileDownloadsBlocks) {
+        self.noFileDownloadsBlocks = [NSMutableArray array];
+    }
+    [self.noFileDownloadsBlocks addObject:[block copy]];
+    CT_END_TRY
+
+    if ([self.varCache hasVarsRequestCompleted] && ![self.varCache hasPendingDownloads]) {
+        block();
+    }
+}
+
+- (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull)block {
+    if (!block) {
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CleverTap onceVariablesChangedAndNoDownloadsPending].");
+        return;
+    }
+    
+    if ([self.varCache hasVarsRequestCompleted] && ![self.varCache hasPendingDownloads]) {
+        block();
+    } else {
+        CT_TRY
+        static dispatch_once_t onceBlocksToken;
+        dispatch_once(&onceBlocksToken, ^{
+            self.onceNoFileDownloadsBlocks = [NSMutableArray array];
+        });
+        @synchronized (self.onceNoFileDownloadsBlocks) {
+            [self.onceNoFileDownloadsBlocks addObject:[block copy]];
         }
         CT_END_TRY
     }

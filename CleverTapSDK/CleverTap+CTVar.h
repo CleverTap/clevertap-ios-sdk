@@ -52,6 +52,8 @@ NS_SWIFT_NAME(defineVar(name:unsignedLongLong:));
 NS_SWIFT_NAME(defineVar(name:UnsignedShort:));
 - (CTVar *)defineVar:(NSString *)name withDictionary:(nullable NSDictionary *)defaultValue
 NS_SWIFT_NAME(defineVar(name:dictionary:));
+- (CTVar *)defineFileVar:(NSString *)name
+NS_SWIFT_NAME(defineFileVar(name:));
 
 @end
 

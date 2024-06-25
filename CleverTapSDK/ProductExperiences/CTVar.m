@@ -10,6 +10,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 @property (nonatomic, strong) NSArray *nameComponents;
 @property (nonatomic, strong) NSString *stringValue;
 @property (nonatomic, strong) NSNumber *numberValue;
+@property (nonatomic, strong) NSString *fileValue;
 @property (nonatomic) BOOL hadStarted;
 @property (nonatomic, strong) id value;
 @property (nonatomic, strong) id defaultValue;
@@ -48,6 +49,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 @synthesize stringValue = _stringValue;
 @synthesize numberValue = _numberValue;
 @synthesize varCache = _varCache;
+@synthesize fileValue = _fileValue;
 
 - (CTVarCache *)varCache {
     return _varCache;
@@ -128,7 +130,29 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     if ([[self varCache] hasVarsRequestCompleted]) {
         [self triggerValueChanged];
     }
+    
+    // Call fileIsReady if file is already present.
+    if (![[self varCache] hasPendingDownloads]) {
+        [self triggerFileIsReady];
+    }
     CT_END_TRY
+}
+
+#pragma mark File Handling
+
+- (void)triggerFileIsReady {
+    if (self.delegate &&
+        [self.delegate respondsToSelector:@selector(fileIsReady:)]) {
+        [self.delegate fileIsReady:self];
+    }
+}
+
+- (nullable NSString *)fileValue {
+    [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_value];
+    }
+    return nil;
 }
 
 #pragma mark Dictionary handling
@@ -176,6 +200,9 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 - (NSString *)stringValue {
     [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_value];
+    }
     return _stringValue;
 }
 
