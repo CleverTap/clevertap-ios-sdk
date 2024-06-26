@@ -158,6 +158,7 @@
     if (error) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Failed to get contents of directory %@ - %@", self, path, error);
         completion(filesDeleteStatus);
+        return;
     }
     for (NSURL *file in files) {
         dispatch_group_enter(deleteGroup);
