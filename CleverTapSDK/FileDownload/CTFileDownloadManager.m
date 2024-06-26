@@ -62,8 +62,10 @@
                     _downloadInProgressHandlers[url] = [NSMutableArray array];
                 }
                 [_downloadInProgressHandlers[url] addObject:^(NSURL *completedURL, BOOL success) {
-                    [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
-                    dispatch_group_leave(group);
+                    @synchronized (self) {
+                        [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
+                        dispatch_group_leave(group);
+                    }
                 }];
                 continue;
             }
@@ -104,7 +106,7 @@
 }
 
 - (BOOL)isFileAlreadyPresent:(NSURL *)url {
-    NSString* filePath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+    NSString* filePath = [self filePath:url];
     BOOL fileExists = [self.fileManager fileExistsAtPath:filePath];
     return fileExists;
 }
@@ -158,6 +160,7 @@
     if (error) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Failed to get contents of directory %@ - %@", self, path, error);
         completion(filesDeleteStatus);
+        return;
     }
     for (NSURL *file in files) {
         dispatch_group_enter(deleteGroup);
@@ -210,7 +213,7 @@
             }
         }
         
-        NSString *destinationPath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+        NSString *destinationPath = [self filePath:url];
         NSURL *destinationURL = [NSURL fileURLWithPath:destinationPath];
         NSError *fileError;
         // Check if the file exists at the destination
@@ -246,7 +249,7 @@
         return;
     }
 
-    NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+    NSString *filePath = [self filePath:url];
     NSError *error;
     BOOL success = [self.fileManager removeItemAtPath:filePath error:&error];
     if (!success) {

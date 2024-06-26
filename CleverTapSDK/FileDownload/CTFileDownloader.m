@@ -65,14 +65,13 @@
 }
 
 - (nullable NSString *)fileDownloadPath:(NSString *)url {
-    NSString *filePath = nil;
     if ([self isFileAlreadyPresent:url]) {
         NSURL *fileURL = [NSURL URLWithString:url];
         return [self.fileDownloadManager filePath:fileURL];
     } else {
         CleverTapLogInternal(self.config.logLevel, @"%@ File %@ is not present.", self, url);
     }
-    return filePath;
+    return nil;
 }
 
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL {
