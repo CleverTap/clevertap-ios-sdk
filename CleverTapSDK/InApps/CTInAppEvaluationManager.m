@@ -97,10 +97,9 @@
     NSMutableArray<CTEventAdapter *> *eventAdapterList = [NSMutableArray array];
     [profile enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
         NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
+        NSMutableDictionary *eventProperties = [NSMutableDictionary dictionaryWithDictionary:value];
+        [eventProperties addEntriesFromDictionary:appFields];
         CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: value andLocation:self.location];
-        NSMutableDictionary *mergedProperties = [event.eventProperties mutableCopy];
-        [mergedProperties addEntriesFromDictionary:appFields];
-        event.eventProperties = [mergedProperties copy];
         [eventAdapterList addObject:event];
     }];
         

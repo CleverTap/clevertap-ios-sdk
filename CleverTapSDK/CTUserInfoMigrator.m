@@ -1,46 +1,30 @@
-//
-//  CTUserInfoMigrator.m
-//
-//  Created by Kushagra Mishra on 29/05/24.
-//
-
 #import "CTUserInfoMigrator.h"
+#import "CTConstants.h"
 
 @implementation CTUserInfoMigrator
 
 + (void)migrateUserInfoFileForAccountID:(NSString *)acc_id deviceID:(NSString *)device_id {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    
-    // Get the path to the Documents directory
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
     NSString *libraryPath = [paths objectAtIndex:0];
-    
-    // Construct the old plist file name and path
-    NSString *userProfileWithDeviceID = [NSString stringWithFormat:@"clevertap-%@-userprofile.plist", acc_id];
-    NSString *userProfileWithDeviceIDPath = [libraryPath stringByAppendingPathComponent:userProfileWithDeviceID];
-        
-    // Construct the new plist file name and path
-    NSString *userProfileWithDeviceIDAndGUID = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", acc_id, device_id];
-    NSString *userProfileWithDeviceIDAndGUIDPath = [libraryPath stringByAppendingPathComponent:userProfileWithDeviceIDAndGUID];
+    NSString *userProfileWithAccountID = [NSString stringWithFormat:@"clevertap-%@-userprofile.plist", acc_id];
+    NSString *userProfileWithAccountIDPath = [libraryPath stringByAppendingPathComponent:userProfileWithAccountID];
+    NSString *userProfileWithAccountIDAndDeviceID = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", acc_id, device_id];
+    NSString *userProfileWithAccountIDAndDeviceIDPath = [libraryPath stringByAppendingPathComponent:userProfileWithAccountIDAndDeviceID];
     
     NSError *error = nil;
-    if ([fileManager fileExistsAtPath:userProfileWithDeviceIDAndGUIDPath]) {
-        NSLog(@"[CTUserInfo]: new Plist file exists %@", userProfileWithDeviceIDAndGUIDPath);
-        if ([fileManager fileExistsAtPath:userProfileWithDeviceIDPath]) {
-            [fileManager removeItemAtPath:userProfileWithDeviceIDPath error:&error];
+    if ([fileManager fileExistsAtPath:userProfileWithAccountIDAndDeviceIDPath]) {
+        CleverTapLogStaticInternal(@"[CTUserInfo]: The local updated file exists %@", userProfileWithAccountIDAndDeviceIDPath);
+        if ([fileManager fileExistsAtPath:userProfileWithAccountIDPath]) {
+            [fileManager removeItemAtPath:userProfileWithAccountIDPath error:&error];
             return;
         }
     }
-  
-    // Copy the plist file to the new location with the new name
-    else if ([fileManager copyItemAtPath:userProfileWithDeviceIDPath toPath:userProfileWithDeviceIDAndGUIDPath error:&error]) {
-        NSLog(@"[CTUserInfo]: Plist file copied successfully to %@", userProfileWithDeviceIDAndGUIDPath);
-        [fileManager removeItemAtPath:userProfileWithDeviceIDPath error:&error];
+    else if ([fileManager copyItemAtPath:userProfileWithAccountIDPath toPath:userProfileWithAccountIDAndDeviceIDPath error:&error]) {
+        CleverTapLogStaticInternal(@"[CTUserInfo]: Local file copied successfully to %@", userProfileWithAccountIDAndDeviceIDPath);
+        [fileManager removeItemAtPath:userProfileWithAccountIDPath error:&error];
     } else {
-        NSLog(@"[CTUserInfo]: Failed to copy plist file: %@", error.localizedDescription);
+        CleverTapLogStaticInternal(@"[CTUserInfo]: Failed to copy local file: %@", error.localizedDescription);
     }
 }
-
-
-
 @end

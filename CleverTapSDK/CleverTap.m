@@ -2925,53 +2925,53 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
-        NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
-        NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
-        NSDictionary *profile = event[CLTAP_PROFILE];
-        if (!profile) {
-            return @{};
+    NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
+    NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
+    NSDictionary *profile = event[CLTAP_PROFILE];
+    if (!profile) {
+        return @{};
+    }
+    for (NSString *key in profile) {
+        if ([CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION containsObject: key]) {
+            continue;
         }
-        for (NSString *key in profile) {
-            if ([CLTAP_KeysToSkipForUserAttributesEvaluation containsObject: key]) {
-                continue;
+        id oldValue = [self profileGetLocalValues:key];
+        id newValue = profile[key];
+        NSMutableDictionary *properties = [NSMutableDictionary dictionary];
+        if ([newValue isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *obj = (NSDictionary *)newValue;
+            NSString *commandIdentifier = [[obj allKeys] firstObject];
+            id value = [obj objectForKey:commandIdentifier];
+            if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT] ||
+                [commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
+                newValue = [CTProfileBuilder _getUpdatedValue:value forKey:key withCommand:commandIdentifier cachedValue:oldValue];
+            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
+                newValue = nil;
+                [self.localDataStore removeProfileFieldForKey:key];
             }
-            id oldValue = [self profileGetLocalValues:key];
-            id newValue = profile[key];
-            NSMutableDictionary *properties = [NSMutableDictionary dictionary];
-            if ([newValue isKindOfClass:[NSDictionary class]]) {
-                NSDictionary *obj = (NSDictionary *)newValue;
-                NSString *commandIdentifier = [[obj allKeys] firstObject];
-                id value = [obj objectForKey:commandIdentifier];
-                if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT] ||
-                    [commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
-                    newValue = [CTProfileBuilder _getUpdatedValue:value forKey:key withCommand:commandIdentifier cachedValue:oldValue];
-                } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
-                    newValue = nil;
-                    [self.localDataStore removeProfileFieldForKey:key];
-                }
-            } else if ([newValue isKindOfClass:[NSString class]]) {
-                // Remove the date prefix before evaluation and persisting
-                NSString *newValueStr = (NSString *)newValue;
-                if ([newValueStr hasPrefix:CLTAP_DATE_PREFIX]) {
-                    newValue = @([[newValueStr substringFromIndex:[CLTAP_DATE_PREFIX length]] longLongValue]);
-                }
-            }
-            if (oldValue != nil && ![oldValue isKindOfClass:[NSArray class]]) {
-                [properties setObject:oldValue forKey:CLTAP_KEY_OLD_VALUE];
-            }
-            if (newValue != nil && ![newValue isKindOfClass:[NSArray class]]) {
-                [properties setObject:newValue forKey:CLTAP_KEY_NEW_VALUE];
-            }
-            
-            // Skip evaluation if both newValue or oldValue are null
-            if ([properties count] > 0) {
-                [userAttributesChangeProperties setObject:properties forKey:key];
-            }
-            // Need to persist only if the new profile value is not a null value
-            if (newValue != nil && newValue != oldValue) {
-                [fieldsToPersistLocally setObject:newValue forKey:key];
+        } else if ([newValue isKindOfClass:[NSString class]]) {
+            // Remove the date prefix before evaluation and persisting
+            NSString *newValueStr = (NSString *)newValue;
+            if ([newValueStr hasPrefix:CLTAP_DATE_PREFIX]) {
+                newValue = @([[newValueStr substringFromIndex:[CLTAP_DATE_PREFIX length]] longLongValue]);
             }
         }
+        if (oldValue != nil && ![oldValue isKindOfClass:[NSArray class]]) {
+            [properties setObject:oldValue forKey:CLTAP_KEY_OLD_VALUE];
+        }
+        if (newValue != nil && ![newValue isKindOfClass:[NSArray class]]) {
+            [properties setObject:newValue forKey:CLTAP_KEY_NEW_VALUE];
+        }
+        
+        // Skip evaluation if both newValue or oldValue are null
+        if ([properties count] > 0) {
+            [userAttributesChangeProperties setObject:properties forKey:key];
+        }
+        // Need to persist only if the new profile value is not a null value
+        if (newValue != nil && newValue != oldValue) {
+            [fieldsToPersistLocally setObject:newValue forKey:key];
+        }
+    }
     [self updateProfileFieldsLocally:fieldsToPersistLocally];
     return userAttributesChangeProperties;
 }

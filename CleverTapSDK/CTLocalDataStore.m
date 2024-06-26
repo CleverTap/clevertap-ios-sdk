@@ -98,7 +98,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             self->localProfileForSession = [self _inflateLocalProfile];
         }
     }];
-//    [self _persistLocalProfileAsyncWithCompletion:nil];
     [self clearStoredEvents];
 }
 
