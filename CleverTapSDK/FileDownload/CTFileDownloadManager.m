@@ -62,8 +62,10 @@
                     _downloadInProgressHandlers[url] = [NSMutableArray array];
                 }
                 [_downloadInProgressHandlers[url] addObject:^(NSURL *completedURL, BOOL success) {
-                    [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
-                    dispatch_group_leave(group);
+                    @synchronized (self) {
+                        [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
+                        dispatch_group_leave(group);
+                    }
                 }];
                 continue;
             }
