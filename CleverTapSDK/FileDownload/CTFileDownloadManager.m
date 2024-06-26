@@ -106,7 +106,7 @@
 }
 
 - (BOOL)isFileAlreadyPresent:(NSURL *)url {
-    NSString* filePath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+    NSString* filePath = [self filePath:url];
     BOOL fileExists = [self.fileManager fileExistsAtPath:filePath];
     return fileExists;
 }
@@ -213,7 +213,7 @@
             }
         }
         
-        NSString *destinationPath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+        NSString *destinationPath = [self filePath:url];
         NSURL *destinationURL = [NSURL fileURLWithPath:destinationPath];
         NSError *fileError;
         // Check if the file exists at the destination
@@ -249,7 +249,7 @@
         return;
     }
 
-    NSString *filePath = [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+    NSString *filePath = [self filePath:url];
     NSError *error;
     BOOL success = [self.fileManager removeItemAtPath:filePath error:&error];
     if (!success) {
