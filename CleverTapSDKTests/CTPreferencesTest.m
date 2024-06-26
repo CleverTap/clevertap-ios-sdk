@@ -17,12 +17,12 @@
 @implementation CTPreferencesTest
 
 - (void)setUp {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults setObject:@(2333333333333333333) forKey:@"WizRocketlongValueForTesting"];
 }
 
 - (void)tearDown {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults removeObjectForKey:@"WizRocketlongValueForTesting"];
 }
 
@@ -51,7 +51,7 @@
 }
 
 - (void)test_getStringForKey_withValidKey {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
     
     NSString *stringValue = [CTPreferences getStringForKey:@"stringValueForTesting" withResetValue:@"testResetStringValue"];
@@ -60,7 +60,7 @@
 }
 
 - (void)test_getStringForKey_withInvalidKey {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
     
     NSString *stringValue = [CTPreferences getStringForKey:@"invalidTestKey" withResetValue:@"testResetStringValue"];
@@ -83,7 +83,7 @@
 }
 
 - (void)test_getObjectForKey_withValidKey {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
     
     id idValue = [CTPreferences getObjectForKey:@"stringValueForTesting"];
@@ -92,7 +92,7 @@
 }
 
 - (void)test_getObjectForKey_withInvalidKey {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults setObject:@"stringValueForTesting" forKey:@"WizRocketstringValueForTesting"];
     
     id idValue = [CTPreferences getObjectForKey:@"invalidTestStringKey"];
@@ -112,7 +112,7 @@
 }
 
 -(void)test_removeObjectForKey {
-    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
     [defaults setObject:@"objectValueForTesting" forKey:@"WizRocketobjectValueForTesting"];
     
     [CTPreferences removeObjectForKey:@"objectValueForTesting"];
@@ -124,7 +124,7 @@
 
 -(void)test_migrateCTUserDefaultsData {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSUserDefaults *ctDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"Clevertap"];
+    NSUserDefaults *ctDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"CleverTap"];
 
     // Set test data
     [defaults setObject:@"TestValue1" forKey:@"WizRocket_TestKey1"];
