@@ -15,7 +15,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppTriggerManager.h"
-#import "CTInAppImagePrefetchManager.h"
+#import "CTFileDownloader.h"
 
 NSString *const CLTAP_TEST_ACCOUNT_ID = @"testAccountId";
 NSString *const CLTAP_TEST_ACCOUNT_TOKEN = @"testAccountToken";
@@ -47,7 +47,7 @@ NSString *const CLTAP_TEST_CAMPAIGN_ID = @"testCampaignId";
         
         self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:self.accountId accountToken:self.accountToken];
         
-        self.imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
+        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
         
         self.impressionManager = [[CTImpressionManager alloc] initWithAccountId:self.accountId
                                                                        deviceId:self.deviceId
@@ -55,7 +55,7 @@ NSString *const CLTAP_TEST_CAMPAIGN_ID = @"testCampaignId";
         
         self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
                                                delegateManager:self.delegateManager
-                                          imagePrefetchManager:self.imagePrefetchManager
+                                                fileDownloader:self.fileDownloader
                                                       deviceId:self.deviceId];
         
         self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId
