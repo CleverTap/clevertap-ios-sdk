@@ -327,7 +327,7 @@
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     // Evaluation is done for events only at the moment,
     // send the evaluated and suppressed ids in that queue header
-    if (queueType != CTQueueTypeEvents) {
+    if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
         return [NSMutableDictionary new];
     }
     

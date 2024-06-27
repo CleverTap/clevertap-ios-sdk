@@ -51,7 +51,7 @@ extern NSString *const kSessionId;
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_CHARGED_EVENT @"Charged"
 #define CLTAP_PROFILE @"profile"
-#define CLTAP_USER_ATTRIBUTE_CHANGE @"_CTUserAttributeChange"
+#define CLTAP_USER_ATTRIBUTE_CHANGE @"_change"
 #define CLTAP_KEY_NEW_VALUE @"newValue"
 #define CLTAP_KEY_OLD_VALUE @"oldValue"
 #define CLTAP_KEY_PROFILE_ATTR_NAME @"profileAttrName"
