@@ -10,6 +10,8 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 @property (nonatomic, strong) NSArray *nameComponents;
 @property (nonatomic, strong) NSString *stringValue;
 @property (nonatomic, strong) NSNumber *numberValue;
+@property (nonatomic, strong) NSString *fileValue;
+@property (nonatomic, strong) NSString *fileURL;
 @property (nonatomic) BOOL hadStarted;
 @property (nonatomic, strong) id value;
 @property (nonatomic, strong) id defaultValue;
@@ -37,6 +39,11 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
         [self.varCache registerVariable:self];
         
         [self update];
+        
+        // Store the actual file URL as _value returns path of file downloaded.
+        if ([_kind isEqualToString:CT_KIND_FILE]) {
+            _fileURL = _value;
+        }
         CT_END_TRY
     }
     return self;
@@ -45,9 +52,11 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 // Manually @synthesize since CTVar provides custom getters/setters
 // Properties are defined as readonly in CTVar-Internal
 // and readwrite in PrivateProperties category
+@synthesize value = _value;
 @synthesize stringValue = _stringValue;
 @synthesize numberValue = _numberValue;
 @synthesize varCache = _varCache;
+@synthesize fileValue = _fileValue;
 
 - (CTVarCache *)varCache {
     return _varCache;
@@ -84,6 +93,11 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     
     if (![_value isEqual:oldValue]) {
         _hasChanged = YES;
+        
+        // Update _fileURL with new value if it has changed.
+        if ([_kind isEqualToString:CT_KIND_FILE]) {
+            _fileURL = _value;
+        }
     }
     
     if ([[self varCache] hasVarsRequestCompleted]) {
@@ -128,7 +142,31 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     if ([[self varCache] hasVarsRequestCompleted]) {
         [self triggerValueChanged];
     }
+    
+    // Call fileIsReady if value is already fetched and file is already present.
+    if ([_kind isEqualToString:CT_KIND_FILE] && _fileURL) {
+        if ([self.varCache isFileAlreadyPresent:_fileURL]) {
+            [self triggerFileIsReady];
+        }
+    }
     CT_END_TRY
+}
+
+#pragma mark File Handling
+
+- (void)triggerFileIsReady {
+    if (self.delegate &&
+        [self.delegate respondsToSelector:@selector(fileIsReady:)]) {
+        [self.delegate fileIsReady:self];
+    }
+}
+
+- (nullable NSString *)fileValue {
+    [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_fileURL];
+    }
+    return nil;
 }
 
 #pragma mark Dictionary handling
@@ -169,6 +207,14 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Value accessors
 
+- (id)value {
+    [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_fileURL];
+    }
+    return _value;
+}
+
 - (NSNumber *)numberValue {
     [self warnIfNotStarted];
     return _numberValue;
@@ -176,6 +222,9 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 - (NSString *)stringValue {
     [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_fileURL];
+    }
     return _stringValue;
 }
 
