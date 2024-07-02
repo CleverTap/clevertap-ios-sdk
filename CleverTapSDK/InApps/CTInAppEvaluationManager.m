@@ -36,8 +36,8 @@
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
 
-- (void)evaluateServerSide:(CTEventAdapter *)event;
-- (void)evaluateClientSide:(CTEventAdapter *)event;
+- (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events;
+- (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 
 @end
@@ -87,19 +87,38 @@
     }
     
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
-    [self evaluateServerSide:event];
-    [self evaluateClientSide:event];
+    NSArray *eventList = @[event];
+    [self evaluateServerSide:eventList];
+    [self evaluateClientSide:eventList];
+}
+
+-(void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)profile {
+    NSDictionary *appFields = self.appLaunchedProperties;
+    NSMutableArray<CTEventAdapter *> *eventAdapterList = [NSMutableArray array];
+    [profile enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
+        NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
+        NSMutableDictionary *eventProperties = [NSMutableDictionary dictionaryWithDictionary:value];
+        [eventProperties addEntriesFromDictionary:appFields];
+        CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: value andLocation:self.location];
+        [eventAdapterList addObject:event];
+    }];
+        
+    [self evaluateServerSide:eventAdapterList];
+    [self evaluateClientSide:eventAdapterList];
+    
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:chargeDetails location:self.location andItems:items];
-    [self evaluateServerSide:event];
-    [self evaluateClientSide:event];
+    NSArray *eventList = @[event];
+    [self evaluateServerSide:eventList];
+    [self evaluateClientSide:eventList];
 }
 
 - (void)evaluateOnAppLaunchedClientSide {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
-    [self evaluateClientSide:event];
+    NSArray *eventList = @[event];
+    [self evaluateClientSide:eventList];
 }
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
@@ -116,8 +135,18 @@
     }
 }
 
-- (void)evaluateClientSide:(CTEventAdapter *)event {
-    NSMutableArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.clientSideInApps];
+- (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events {
+    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];    
+    for (CTEventAdapter *event in events) {
+        id oldValue = [event.eventProperties objectForKey:CLTAP_KEY_OLD_VALUE];
+        id newValue = [event.eventProperties objectForKey:CLTAP_KEY_NEW_VALUE];
+        if (event.profileAttrName != nil) {
+            if (newValue == oldValue) {
+                continue;
+            }
+            [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
+        }
+    }
     [self sortByPriority:eligibleInApps];
     
     for (NSDictionary *inApp in eligibleInApps) {
@@ -132,8 +161,11 @@
     }
 }
 
-- (void)evaluateServerSide:(CTEventAdapter *)event {
-    NSArray *eligibleInApps = [self evaluate:event withInApps:self.inAppStore.serverSideInApps];
+- (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events {
+    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];
+    for (CTEventAdapter *event in events) {
+            [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.serverSideInApps]];
+        }
     BOOL updated = NO;
     for (NSDictionary *inApp in eligibleInApps) {
         NSString *campaignId = [CTInAppNotification inAppId:inApp];
@@ -298,7 +330,7 @@
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     // Evaluation is done for events only at the moment,
     // send the evaluated and suppressed ids in that queue header
-    if (queueType != CTQueueTypeEvents) {
+    if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
         return [NSMutableDictionary new];
     }
     

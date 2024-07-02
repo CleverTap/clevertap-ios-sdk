@@ -14,9 +14,9 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 @interface CTEventAdapter()
 
 @property (nonatomic, strong) NSString *eventName;
-@property (nonatomic, strong) NSDictionary *eventProperties;
 @property (nonatomic, strong) NSArray<NSDictionary *> *items;
 @property (nonatomic, assign) CLLocationCoordinate2D location;
+@property (nonatomic, strong, nullable) NSString *profileAttrName;
 
 @end
 
@@ -70,6 +70,18 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
         self.eventProperties = eventProperties;
         self.location = location;
         self.items = items;
+    }
+    return self;
+}
+
+- (instancetype)initWithEventName:(NSString *)eventName
+                  profileAttrName:(NSString *)profileAttrName
+                  eventProperties:(NSDictionary *)eventProperties
+                      andLocation:(CLLocationCoordinate2D)location{
+    
+    if (self = [super init]) {
+        self = [self initWithEventName:eventName eventProperties:eventProperties location:location andItems:@[]];
+        self.profileAttrName = profileAttrName;
     }
     return self;
 }

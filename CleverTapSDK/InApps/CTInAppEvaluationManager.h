@@ -34,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;
+- (void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)properties;
 - (void)evaluateOnAppLaunchedClientSide;
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs;
 
