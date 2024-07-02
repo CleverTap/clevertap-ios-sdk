@@ -13,16 +13,11 @@
     NSString *userProfileWithAccountIDAndDeviceIDPath = [libraryPath stringByAppendingPathComponent:userProfileWithAccountIDAndDeviceID];
     
     NSError *error = nil;
-    if ([fileManager fileExistsAtPath:userProfileWithAccountIDAndDeviceIDPath]) {
-        CleverTapLogStaticInternal(@"[CTUserInfo]: The local updated file exists %@", userProfileWithAccountIDAndDeviceIDPath);
-        if ([fileManager fileExistsAtPath:userProfileWithAccountIDPath]) {
-            [fileManager removeItemAtPath:userProfileWithAccountIDPath error:&error];
-            return;
-        }
-    }
-    else if ([fileManager copyItemAtPath:userProfileWithAccountIDPath toPath:userProfileWithAccountIDAndDeviceIDPath error:&error]) {
+    if ([fileManager fileExistsAtPath:userProfileWithAccountIDPath]) {
+        [fileManager copyItemAtPath:userProfileWithAccountIDPath toPath:userProfileWithAccountIDAndDeviceIDPath error:&error];
         CleverTapLogStaticInternal(@"[CTUserInfo]: Local file copied successfully to %@", userProfileWithAccountIDAndDeviceIDPath);
         [fileManager removeItemAtPath:userProfileWithAccountIDPath error:&error];
+        return;
     } else {
         CleverTapLogStaticInternal(@"[CTUserInfo]: Failed to copy local file: %@", error.localizedDescription);
     }

@@ -80,10 +80,8 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
                       andLocation:(CLLocationCoordinate2D)location{
     
     if (self = [super init]) {
-        self.eventName = eventName;
+        self = [self initWithEventName:eventName eventProperties:eventProperties location:location andItems:@[]];
         self.profileAttrName = profileAttrName;
-        self.eventProperties = eventProperties;
-        self.location = location;
     }
     return self;
 }
