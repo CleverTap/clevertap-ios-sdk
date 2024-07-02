@@ -29,16 +29,9 @@
                 fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
         self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo fileDownloader:fileDownloader];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(triggerVariablesChangedAndNoDownloadsPending)
-                                                     name:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION
-                                                   object:nil];
+        [self.varCache setDelegate:self];
     }
     return self;
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark Define Var
@@ -324,6 +317,12 @@
     }];
     
     return unflattenVars;
+}
+
+#pragma mark CTFileVarDelegate
+
+- (void)triggerNoDownloadsPending { 
+    [self triggerVariablesChangedAndNoDownloadsPending];
 }
 
 @end

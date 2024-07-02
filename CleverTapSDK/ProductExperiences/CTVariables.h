@@ -14,7 +14,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTVariables : NSObject
+@interface CTVariables : NSObject <CTFileVarDelegate>
 
 @property(strong, nonatomic) CTVarCache *varCache;
 @property(strong, nonatomic, nullable) CleverTapFetchVariablesBlock fetchVariablesBlock;

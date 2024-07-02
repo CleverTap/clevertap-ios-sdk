@@ -93,6 +93,11 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     
     if (![_value isEqual:oldValue]) {
         _hasChanged = YES;
+        
+        // Update _fileURL with new value if it has changed.
+        if ([_kind isEqualToString:CT_KIND_FILE]) {
+            _fileURL = _value;
+        }
     }
     
     if ([[self varCache] hasVarsRequestCompleted]) {
