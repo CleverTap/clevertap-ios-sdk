@@ -253,7 +253,7 @@
                 [self setHasPendingDownloads:YES];
                 [self startFileDownload:fileURLs];
             } else {
-                [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION object:nil];
+                [self.delegate triggerNoDownloadsPending];
             }
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: No variables received from the server", self);
@@ -296,7 +296,7 @@
         // Retry once if any url is not downloaded.
         if ([retryURLs count] == 0) {
             [self setHasPendingDownloads:NO];
-            [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION object:nil];
+            [self.delegate triggerNoDownloadsPending];
         } else {
             [self retryFileDownload:retryURLs];
         }
@@ -336,15 +336,15 @@
     [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
         [self setHasPendingDownloads:NO];
         for (NSString *key in status.allKeys) {
-            if (status[key]) {
-                @synchronized (self) {
+            @synchronized (self) {
+                if (status[key]) {
                     [self.fileVarsInDownload[key] triggerFileIsReady];
-                    [self.fileVarsInDownload removeObjectForKey:key];
                 }
+                [self.fileVarsInDownload removeObjectForKey:key];
             }
         }
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_NO_PENDING_DOWNLOADS_NOTIFICATION object:nil];
+        [self.delegate triggerNoDownloadsPending];
     }];
 }
 

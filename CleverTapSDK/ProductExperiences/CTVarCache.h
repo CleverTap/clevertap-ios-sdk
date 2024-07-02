@@ -4,6 +4,11 @@
 #import "CTDeviceInfo.h"
 #import "CTFileDownloader.h"
 
+@protocol CTFileVarDelegate <NSObject>
+@required
+- (void)triggerNoDownloadsPending;
+@end
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^CacheUpdateBlock)(void);
@@ -21,6 +26,7 @@ NS_SWIFT_NAME(VarCache)
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
 @property (assign, nonatomic) BOOL hasVarsRequestCompleted;
 @property (assign, nonatomic) BOOL hasPendingDownloads;
+@property (nonatomic, weak) id<CTFileVarDelegate> delegate;
 
 - (nullable NSDictionary<NSString *, id> *)diffs;
 - (void)loadDiffs;
