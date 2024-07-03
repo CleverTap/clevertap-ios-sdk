@@ -51,7 +51,7 @@ extern NSString *const kSessionId;
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_CHARGED_EVENT @"Charged"
 #define CLTAP_PROFILE @"profile"
-#define CLTAP_USER_ATTRIBUTE_CHANGE @"_CTUserAttributeChange"
+#define CLTAP_USER_ATTRIBUTE_CHANGE @"_change"
 #define CLTAP_KEY_NEW_VALUE @"newValue"
 #define CLTAP_KEY_OLD_VALUE @"oldValue"
 #define CLTAP_KEY_PROFILE_ATTR_NAME @"profileAttrName"
@@ -257,7 +257,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #pragma mark Constants for Profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email"] // LEGACY KEYS
 #define CLTAP_ALL_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"Phone"]
-#define CLTAP_KeysToSkipForUserAttributesEvaluation @[@"cc", @"tz", @"Carrier"]
+#define CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION @[@"cc", @"tz", @"Carrier"]
 
 #pragma mark Constants for Encryption
 #define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"

@@ -53,7 +53,7 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 }
 
 - (instancetype)initWithEventName:(NSString *)eventName
-                  eventProperties:(NSMutableDictionary *)eventProperties
+                  eventProperties:(NSDictionary *)eventProperties
                       andLocation:(CLLocationCoordinate2D)location{
     if (self = [super init]) {
         self = [self initWithEventName:eventName eventProperties:eventProperties location:location andItems:@[]];
@@ -62,7 +62,7 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 }
 
 - (instancetype)initWithEventName:(NSString *)eventName
-                  eventProperties:(NSMutableDictionary *)eventProperties
+                  eventProperties:(NSDictionary *)eventProperties
                          location:(CLLocationCoordinate2D)location
                          andItems:(NSArray<NSDictionary *> *)items {
     if (self = [super init]) {
@@ -76,14 +76,12 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 
 - (instancetype)initWithEventName:(NSString *)eventName
                   profileAttrName:(NSString *)profileAttrName
-                  eventProperties:(NSMutableDictionary *)eventProperties
+                  eventProperties:(NSDictionary *)eventProperties
                       andLocation:(CLLocationCoordinate2D)location{
     
     if (self = [super init]) {
-        self.eventName = eventName;
+        self = [self initWithEventName:eventName eventProperties:eventProperties location:location andItems:@[]];
         self.profileAttrName = profileAttrName;
-        self.eventProperties = eventProperties;
-        self.location = location;
     }
     return self;
 }

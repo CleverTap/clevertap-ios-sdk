@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSString *eventName;
 @property (nonatomic, assign, readonly) CLLocationCoordinate2D location;
 @property (nonatomic, strong, readonly) NSString *profileAttrName;
-@property (nonatomic, strong, nonnull) NSMutableDictionary *eventProperties;
+@property (nonatomic, strong, nonnull) NSDictionary *eventProperties;
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithEventName:(NSString *)eventName

@@ -97,10 +97,9 @@
     NSMutableArray<CTEventAdapter *> *eventAdapterList = [NSMutableArray array];
     [profile enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
         NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
+        NSMutableDictionary *eventProperties = [NSMutableDictionary dictionaryWithDictionary:value];
+        [eventProperties addEntriesFromDictionary:appFields];
         CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: value andLocation:self.location];
-        NSMutableDictionary *mergedProperties = [event.eventProperties mutableCopy];
-        [mergedProperties addEntriesFromDictionary:appFields];
-        event.eventProperties = [mergedProperties copy];
         [eventAdapterList addObject:event];
     }];
         
@@ -141,7 +140,10 @@
     for (CTEventAdapter *event in events) {
         id oldValue = [event.eventProperties objectForKey:CLTAP_KEY_OLD_VALUE];
         id newValue = [event.eventProperties objectForKey:CLTAP_KEY_NEW_VALUE];
-        if (newValue == nil || newValue !=  oldValue){
+        if (event.profileAttrName != nil) {
+            if (newValue == oldValue) {
+                continue;
+            }
             [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
         }
     }
@@ -328,7 +330,7 @@
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     // Evaluation is done for events only at the moment,
     // send the evaluated and suppressed ids in that queue header
-    if (queueType != CTQueueTypeEvents) {
+    if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
         return [NSMutableDictionary new];
     }
     

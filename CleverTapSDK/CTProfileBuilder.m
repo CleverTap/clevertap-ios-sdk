@@ -382,71 +382,18 @@
     NSDictionary* operatorDict = @{
         key: @{command: value}
     };
-    NSNumber *newValue;
-    
     id cachedValue = [dataStore getProfileFieldForKey: key];
-    if ([cachedValue isKindOfClass: [NSNumber class]]) {
-        
-        NSNumber *cachedNumber = (NSNumber*)cachedValue;
-        CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
-        
-        switch (numberType) {
-            case kCFNumberSInt8Type:
-            case kCFNumberSInt16Type:
-            case kCFNumberIntType:
-            case kCFNumberSInt32Type:
-            case kCFNumberSInt64Type:
-            case kCFNumberNSIntegerType:
-            case kCFNumberShortType:
-                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                    newValue = [NSNumber numberWithInt: cachedNumber.intValue + value.intValue];
-                } else {
-                    newValue = [NSNumber numberWithInt: cachedNumber.intValue - value.intValue];
-                }
-                break;
-            case kCFNumberLongType:
-                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                    newValue = [NSNumber numberWithLong: cachedNumber.longValue + value.longValue];
-                } else {
-                    newValue = [NSNumber numberWithLong: cachedNumber.longValue - value.longValue];
-                }
-                break;
-            case kCFNumberLongLongType:
-                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                    newValue = [NSNumber numberWithLongLong: cachedNumber.longLongValue + value.longLongValue];
-                } else {
-                    newValue = [NSNumber numberWithLongLong: cachedNumber.longLongValue - value.longLongValue];
-                }
-                break;
-            case kCFNumberFloatType:
-            case kCFNumberFloat32Type:
-            case kCFNumberFloat64Type:
-            case kCFNumberCGFloatType:
-                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                    newValue = [NSNumber numberWithFloat: cachedNumber.floatValue + value.floatValue];
-                } else {
-                    newValue = [NSNumber numberWithFloat: cachedNumber.floatValue - value.floatValue];
-                }
-                break;
-            case kCFNumberDoubleType:
-                if ([command isEqualToString: kCLTAP_COMMAND_INCREMENT]) {
-                    newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue + value.doubleValue];
-                } else {
-                    newValue = [NSNumber numberWithDouble: cachedNumber.doubleValue - value.doubleValue];
-                }
-                break;
-            default:
-                break;
-        }
-    }
+    NSNumber *newValue;
+    newValue = [self _getUpdatedValue:value forKey:key withCommand:command cachedValue:cachedValue];
     
     completion(operatorDict, newValue, nil);
 }
 
 + (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id)cachedValue {
-
+    NSDictionary* operatorDict = @{
+        key: @{command: value}
+    };
     NSNumber *newValue;
-    
     if ([cachedValue isKindOfClass: [NSNumber class]]) {
         
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
@@ -502,7 +449,7 @@
         }
     }
     return newValue;
+    
 }
-
 
 @end

@@ -460,10 +460,11 @@ static BOOL sharedInstanceErrorLogged;
         if (_deviceInfo.timeZone&& ![_deviceInfo.timeZone isEqualToString:@""]) {
             initialProfileValues[CLTAP_SYS_TZ] = _deviceInfo.timeZone;
         }
-        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo];
         
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
+        
+        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
@@ -1971,7 +1972,7 @@ static BOOL sharedInstanceErrorLogged;
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
-        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self getUserAttributeChangeProperties:event];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore getUserAttributeChangeProperties:event];
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
@@ -2922,73 +2923,6 @@ static BOOL sharedInstanceErrorLogged;
     if (errors) {
         [self.validationResultStack pushValidationResults:errors];
     }
-}
-
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
-        NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
-        NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
-        NSDictionary *profile = event[CLTAP_PROFILE];
-        if (!profile) {
-            return @{};
-        }
-        for (NSString *key in profile) {
-            if ([CLTAP_KeysToSkipForUserAttributesEvaluation containsObject: key]) {
-                continue;
-            }
-            id oldValue = [self profileGetLocalValues:key];
-            id newValue = profile[key];
-            NSMutableDictionary *properties = [NSMutableDictionary dictionary];
-            if ([newValue isKindOfClass:[NSDictionary class]]) {
-                NSDictionary *obj = (NSDictionary *)newValue;
-                NSString *commandIdentifier = [[obj allKeys] firstObject];
-                id value = [obj objectForKey:commandIdentifier];
-                if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT] ||
-                    [commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
-                    newValue = [CTProfileBuilder _getUpdatedValue:value forKey:key withCommand:commandIdentifier cachedValue:oldValue];
-                } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
-                    newValue = nil;
-                    [self.localDataStore removeProfileFieldForKey:key];
-                }
-            } else if ([newValue isKindOfClass:[NSString class]]) {
-                // Remove the date prefix before evaluation and persisting
-                NSString *newValueStr = (NSString *)newValue;
-                if ([newValueStr hasPrefix:CLTAP_DATE_PREFIX]) {
-                    newValue = @([[newValueStr substringFromIndex:[CLTAP_DATE_PREFIX length]] longLongValue]);
-                }
-            }
-            if (oldValue != nil && ![oldValue isKindOfClass:[NSArray class]]) {
-                [properties setObject:oldValue forKey:CLTAP_KEY_OLD_VALUE];
-            }
-            if (newValue != nil && ![newValue isKindOfClass:[NSArray class]]) {
-                [properties setObject:newValue forKey:CLTAP_KEY_NEW_VALUE];
-            }
-            
-            // Skip evaluation if both newValue or oldValue are null
-            if ([properties count] > 0) {
-                [userAttributesChangeProperties setObject:properties forKey:key];
-            }
-            // Need to persist only if the new profile value is not a null value
-            if (newValue != nil && newValue != oldValue) {
-                [fieldsToPersistLocally setObject:newValue forKey:key];
-            }
-        }
-    [self updateProfileFieldsLocally:fieldsToPersistLocally];
-    return userAttributesChangeProperties;
-}
-
--(void) updateProfileFieldsLocally: (NSMutableDictionary<NSString *, id> *) fieldsToPersistLocally{
-    [self.dispatchQueueManager runSerialAsync:^{
-        [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
-            if (systemFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed system profile: %@", self, systemFields);
-                [self.localDataStore setProfileFields:systemFields];
-            }
-            if (customFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
-                [self.localDataStore setProfileFields:customFields];
-            }
-        }];
-    }];
 }
 
 #pragma mark - User Action Events API
