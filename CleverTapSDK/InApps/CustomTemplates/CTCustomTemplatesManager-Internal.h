@@ -13,13 +13,18 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppNotification.h"
 #import "CTInAppNotificationDisplayDelegate.h"
+#import "CTFileDownloader.h"
 
 @interface CTCustomTemplatesManager (Internal)
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig;
 
+- (NSSet<NSString *> *)fileArgsURLsForInAppData:(CTCustomTemplateInAppData *)inAppData;
+- (NSSet<NSString *> *)fileArgsURLs:(NSDictionary *)inAppJSON;
+
 - (BOOL)presentNotification:(CTInAppNotification *)notification
-               withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
+               withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate
+          andFileDownloader:(CTFileDownloader *)fileDownloader;
 
 - (void)closeNotification:(CTInAppNotification *)notification;
 

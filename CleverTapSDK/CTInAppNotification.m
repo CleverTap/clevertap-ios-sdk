@@ -135,10 +135,10 @@
     self.tablet = [jsonObject[@"tablet"] boolValue];
     self.hasPortrait = jsonObject[@"hasPortrait"] ? [jsonObject[@"hasPortrait"] boolValue] : YES;
     self.hasLandscape = jsonObject[@"hasLandscape"] ? [jsonObject[@"hasLandscape"] boolValue] : NO;
-    NSDictionary *_media = (NSDictionary*) jsonObject[@"media"];
+    NSDictionary *_media = (NSDictionary*) jsonObject[CLTAP_INAPP_MEDIA];
     if (_media) {
-        self.contentType = _media[@"content_type"];
-        NSString *_mediaUrl = _media[@"url"];
+        self.contentType = _media[CLTAP_INAPP_MEDIA_CONTENT_TYPE];
+        NSString *_mediaUrl = _media[CLTAP_INAPP_MEDIA_URL];
         if (_mediaUrl && _mediaUrl.length > 0) {
             if ([self.contentType hasPrefix:@"image"]) {
                 self.imageURL = [NSURL URLWithString:_mediaUrl];
@@ -159,10 +159,10 @@
         }
     }
     
-    NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[@"mediaLandscape"];
+    NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[CLTAP_INAPP_MEDIA_LANDSCAPE];
     if (_mediaLandscape) {
-        self.landscapeContentType = _mediaLandscape[@"content_type"];
-        NSString *_mediaUrlLandscape = _mediaLandscape[@"url"];
+        self.landscapeContentType = _mediaLandscape[CLTAP_INAPP_MEDIA_CONTENT_TYPE];
+        NSString *_mediaUrlLandscape = _mediaLandscape[CLTAP_INAPP_MEDIA_URL];
         if (_mediaUrlLandscape && _mediaUrlLandscape.length > 0) {
             if ([self.landscapeContentType hasPrefix:@"image"]) {
                 self.imageUrlLandscape = [NSURL URLWithString:_mediaUrlLandscape];

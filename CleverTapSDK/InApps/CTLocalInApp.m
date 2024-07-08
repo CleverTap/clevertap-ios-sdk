@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "CTLocalInApp.h"
+#import "CTConstants.h"
 
 @interface CTLocalInApp () {}
 @property (nonatomic, strong) NSString *inAppType;
@@ -113,11 +114,11 @@ static NSDictionary *_inAppTypeMap;
 
 - (void)setImageUrl:(NSString *)imageUrl {
     NSMutableDictionary *mediaObj = [NSMutableDictionary new];
-    mediaObj[@"content_type"] = @"image";
-    mediaObj[@"url"] = imageUrl;
-    self.inAppSettings[@"media"] = mediaObj;
+    mediaObj[CLTAP_INAPP_MEDIA_CONTENT_TYPE] = @"image";
+    mediaObj[CLTAP_INAPP_MEDIA_URL] = imageUrl;
+    self.inAppSettings[CLTAP_INAPP_MEDIA] = mediaObj;
     if (self.followDeviceOrientation) {
-        self.inAppSettings[@"mediaLandscape"] = mediaObj;
+        self.inAppSettings[CLTAP_INAPP_MEDIA_LANDSCAPE] = mediaObj;
     }
 }
 

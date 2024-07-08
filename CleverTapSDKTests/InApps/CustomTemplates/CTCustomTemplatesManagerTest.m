@@ -15,12 +15,19 @@
 #import "CTTemplatePresenterMock.h"
 #import "CTTestTemplateProducer.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
+#import "CTFileDownloaderCustomTemplatesMock.h"
 
 @interface CTCustomTemplatesManagerTest : XCTestCase
+
+@property CTFileDownloader* fileDownloader;
 
 @end
 
 @implementation CTCustomTemplatesManagerTest
+
+- (void)setUp {
+    self.fileDownloader = [[CTFileDownloaderCustomTemplatesMock alloc] initWithConfig:self.instanceConfig];
+}
 
 - (void)tearDown {
     [super tearDown];
@@ -360,12 +367,12 @@
     CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
     id delegate = [CTInAppNotificationDisplayDelegateMock new];
 
-    [manager presentNotification:notificaton withDelegate:delegate];
+    [manager presentNotification:notificaton withDelegate:delegate andFileDownloader:self.fileDownloader];
     XCTAssertEqual(1, templatePresenter.onPresentInvocationsCount);
     XCTAssertEqual(TEMPLATE_NAME, templatePresenter.onPresentContext.templateName);
     
     CTInAppNotification *functionNotificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleFunctionNotificationJson]];
-    [manager presentNotification:functionNotificaton withDelegate:delegate];
+    [manager presentNotification:functionNotificaton withDelegate:delegate andFileDownloader:self.fileDownloader];
     XCTAssertEqual(1, functionPresenter.onPresentInvocationsCount);
     XCTAssertEqual(FUNCTION_NAME, functionPresenter.onPresentContext.templateName);
 }
@@ -378,7 +385,7 @@
     CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleFunctionNotificationJson]];
     id delegate = [CTInAppNotificationDisplayDelegateMock new];
 
-    [manager presentNotification:notificaton withDelegate:delegate];
+    [manager presentNotification:notificaton withDelegate:delegate andFileDownloader:self.fileDownloader];
     XCTAssertEqual(0, templatePresenter.onPresentInvocationsCount);
 }
 
@@ -389,7 +396,7 @@
     CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
     id delegate = [CTInAppNotificationDisplayDelegateMock new];
 
-    [manager presentNotification:notificaton withDelegate:delegate];
+    [manager presentNotification:notificaton withDelegate:delegate andFileDownloader:self.fileDownloader];
     XCTAssertEqual(1, templatePresenter.onPresentInvocationsCount);
     CTTemplateContext *context = [manager activeContextForTemplate:TEMPLATE_NAME];
     XCTAssertEqual(templatePresenter.onPresentContext, context);
@@ -412,7 +419,7 @@
     CTInAppNotification *notificaton = [[CTInAppNotification alloc] initWithJSON:[self simpleTemplateNotificationJson]];
     id delegate = [CTInAppNotificationDisplayDelegateMock new];
 
-    [manager presentNotification:notificaton withDelegate:delegate];
+    [manager presentNotification:notificaton withDelegate:delegate andFileDownloader:self.fileDownloader];
     XCTAssertEqual(1, templatePresenter.onPresentInvocationsCount);
     CTTemplateContext *context = [manager activeContextForTemplate:TEMPLATE_NAME];
     XCTAssertEqual(templatePresenter.onPresentContext, context);
@@ -437,6 +444,58 @@
     XCTAssertEqual(0, templatePresenter.onCloseInvocationsCount);
 }
 
+- (void)testFileArgURLs {
+    NSMutableSet *templates = [NSMutableSet set];
+    CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
+    [templateBuilder setName:TEMPLATE_NAME];
+    [templateBuilder addFileArgument:@"file"];
+    [templateBuilder addFileArgument:@"file1"];
+    [templateBuilder addActionArgument:@"action"];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder build]];
+    
+    CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
+    [functionBuilder setName:FUNCTION_NAME];
+    [functionBuilder addFileArgument:@"file"];
+    [functionBuilder setPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[functionBuilder build]];
+    
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    
+    NSString *url = @"url";
+    NSString *url1 = @"url1";
+    NSString *url2 = @"url2";
+    
+    NSDictionary *inAppDataJson = @{
+        @"templateDescription": @"",
+        @"templateId": @"id",
+        @"templateName": TEMPLATE_NAME,
+        @"type": @"custom-code",
+        @"vars": @{
+            @"file": url,
+            @"file1": url1,
+            @"action": @{
+                @"templateDescription": @"",
+                @"templateId": @"id",
+                @"templateName": FUNCTION_NAME,
+                @"type": @"custom-code",
+                @"vars": @{
+                    @"file": url2,
+                }
+            }
+        }
+    };
+    CTCustomTemplateInAppData *inAppData = [CTCustomTemplateInAppData createWithJSON:inAppDataJson];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    NSSet *actual = [manager fileArgsURLsForInAppData:inAppData];
+    NSSet *expected = [NSSet setWithObjects:url, url1, url2, nil];
+    XCTAssertEqualObjects(expected, actual);
+    
+    NSSet *actualFromJSON = [manager fileArgsURLs:inAppDataJson];
+    XCTAssertEqualObjects(expected, actualFromJSON);
+}
+
 - (CTTemplatePresenterMock *)registerTemplate {
     NSMutableSet *templates = [NSMutableSet set];
     CTTemplatePresenterMock *templatePresenter = [CTTemplatePresenterMock new];
@@ -451,9 +510,12 @@
     return templatePresenter;
 }
 
+- (CleverTapInstanceConfig *)instanceConfig {
+    return [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
+}
+
 - (CTCustomTemplatesManager *)templatesManager {
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:config];
+    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig];
     return manager;
 }
 

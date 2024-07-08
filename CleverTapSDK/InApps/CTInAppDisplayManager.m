@@ -322,6 +322,21 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageUrlLandscape contentType:notification.landscapeContentType];
         [notification setPreparedInAppImageLandscape:result.image inAppImageLandscapeData:result.imageData error:result.error];
     }
+    
+    NSArray *urls = [[self.templatesManager fileArgsURLsForInAppData:notification.customTemplateInAppData] allObjects];
+    if (urls.count > 0) {
+        [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+            for (NSString *url in status) {
+                if (![status[url] boolValue]) {
+                    notification.error = @"Failed to download custom template files.";
+                    break;
+                }
+            }
+            completionHandler();
+        }];
+        return;
+    }
+    
 #endif
     
     completionHandler();
@@ -457,7 +472,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
-            if ([self.templatesManager presentNotification:notification withDelegate:self]) {
+            if ([self.templatesManager presentNotification:notification 
+                                              withDelegate:self
+                                         andFileDownloader:self.fileDownloader]) {
                 currentlyDisplayingNotification = notification;
             } else {
                 errorString = [NSString stringWithFormat:@"Cannot present custom notification with template name: %@.",
@@ -627,7 +644,18 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             if ([self.templatesManager isVisualTemplateWithName:inAppData.templateName]) {
                 [self _addInAppNotificationInFrontOfQueue:notificationFromAction];
             } else {
-                [self.templatesManager presentNotification:notificationFromAction withDelegate:self];
+                NSSet *fileURLs = [self.templatesManager fileArgsURLsForInAppData:notificationFromAction.customTemplateInAppData];
+                [self.fileDownloader downloadFiles:[fileURLs allObjects] withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+                    for (NSString *url in status) {
+                        if (![status[url] boolValue]) {
+                            CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger action due to file download error.", [self class]);
+                            return;
+                        }
+                    }
+                    [CTUtils runSyncMainQueue:^{
+                        [self.templatesManager presentNotification:notificationFromAction withDelegate:self andFileDownloader:self.fileDownloader];
+                    }];
+                }];
             }
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger non-registered template with name: %@", [self class], actionData.templateName);
@@ -640,11 +668,19 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (CTInAppNotification *)createNotificationForAction:(CTCustomTemplateInAppData *)inAppData andParentNotification:(CTInAppNotification *)notification {
     NSMutableDictionary *json = [@{
         CLTAP_INAPP_ID: notification.Id ? notification.Id : @"",
-        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @(YES),
-        CLTAP_INAPP_TYPE: [CTInAppUtils inAppTypeString:CTInAppTypeCustom],
         CLTAP_PROP_WZRK_ID: notification.campaignId ? notification.campaignId : @"",
+        CLTAP_INAPP_TYPE: [CTInAppUtils inAppTypeString:CTInAppTypeCustom],
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @(YES),
+        CLTAP_INAPP_EXCLUDE_FROM_CAPS: @(YES),
         CLTAP_INAPP_TTL: @(notification.timeToLive)
     } mutableCopy];
+    
+    if (notification.jsonDescription[CLTAP_NOTIFICATION_PIVOT]) {
+        json[CLTAP_NOTIFICATION_PIVOT] = notification.jsonDescription[CLTAP_NOTIFICATION_PIVOT];
+    }
+    if (notification.jsonDescription[CLTAP_NOTIFICATION_CONTROL_GROUP_ID]) {
+        json[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = notification.jsonDescription[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
+    }
     
     [json addEntriesFromDictionary:inAppData.json];
     

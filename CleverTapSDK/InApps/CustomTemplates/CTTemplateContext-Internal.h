@@ -13,6 +13,7 @@
 #import "CTCustomTemplate.h"
 #import "CTTemplateContext.h"
 #import "CTInAppNotificationDisplayDelegate.h"
+#import "CTFileDownloader.h"
 
 @protocol CTTemplateContextDismissDelegate <NSObject>
 
@@ -22,7 +23,9 @@
 
 @interface CTTemplateContext (Internal)
 
-- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate andNotification:(CTInAppNotification *)notification;
+- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate
+                    notification:(CTInAppNotification *)notification
+               andFileDownloader:(CTFileDownloader *)fileDownloader;
 
 - (void)setNotificationDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate;
 

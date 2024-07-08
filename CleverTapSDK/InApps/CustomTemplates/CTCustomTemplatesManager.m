@@ -77,21 +77,29 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     [self.activeContexts removeObjectForKey:context.templateName];
 }
 
-- (BOOL)presentNotification:(CTInAppNotification *)notification withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
+- (BOOL)presentNotification:(CTInAppNotification *)notification 
+               withDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate
+          andFileDownloader:(CTFileDownloader *)fileDownloader {
     CTCustomTemplate *template = self.templates[notification.customTemplateInAppData.templateName];
     if (!template) {
         CleverTapLogStaticDebug("%@: Template with name: %@ not registered.", self, notification.customTemplateInAppData.templateName);
         return NO;
     }
 
-    CTTemplateContext *context = [self createTemplateContext:template withNotification:notification andDelegate:delegate];
+    CTTemplateContext *context = [self createTemplateContext:template
+                                            withNotification:notification
+                                                    delegate:delegate
+                                           andFileDownloader:fileDownloader];
     self.activeContexts[template.name] = context;
     [template.presenter onPresent:context];
     return YES;
 }
 
-- (CTTemplateContext *)createTemplateContext:(CTCustomTemplate *)template withNotification:(CTInAppNotification *)notification andDelegate:(id<CTInAppNotificationDisplayDelegate>)delegate {
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:template andNotification:notification];
+- (CTTemplateContext *)createTemplateContext:(CTCustomTemplate *)template
+                            withNotification:(CTInAppNotification *)notification
+                                    delegate:(id<CTInAppNotificationDisplayDelegate>)delegate
+                           andFileDownloader:(CTFileDownloader *)fileDownloader {
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:template notification:notification andFileDownloader:fileDownloader];
     [context setNotificationDelegate:delegate];
     [context setDismissDelegate:self];
     return context;
@@ -119,6 +127,43 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     if (template.presenter) {
         [template.presenter onCloseClicked:context];
     }
+}
+
+- (NSSet<NSString *> *)fileArgsURLsForInAppData:(CTCustomTemplateInAppData *)inAppData {
+    NSMutableSet<NSString *> *urls = [NSMutableSet set];
+    if (!inAppData) {
+        return urls;
+    }
+    
+    CTCustomTemplate *template = self.templates[inAppData.templateName];
+    if (!template) {
+        return urls;
+    }
+    
+    for (CTTemplateArgument *arg in template.arguments) {
+        if (arg.type == CTTemplateArgumentTypeFile) {
+            id value = inAppData.args[arg.name];
+            if (value && [value isKindOfClass:[NSString class]]) {
+                [urls addObject:value];
+            }
+        }
+        if (arg.type == CTTemplateArgumentTypeAction) {
+            id value = inAppData.args[arg.name];
+            if (value && [value isKindOfClass:[NSDictionary class]]) {
+                CTCustomTemplateInAppData *actionData = [CTCustomTemplateInAppData createWithJSON:value];
+                if (actionData) {
+                    NSSet<NSString *> *actionUrls = [self fileArgsURLsForInAppData:actionData];
+                    [urls unionSet:actionUrls];
+                }
+            }
+        }
+    }
+    return urls;
+}
+
+- (NSSet<NSString *> *)fileArgsURLs:(NSDictionary *)inAppJSON {
+    CTCustomTemplateInAppData *inAppData = [CTCustomTemplateInAppData createWithJSON:inAppJSON];
+    return [self fileArgsURLsForInAppData:inAppData];
 }
 
 - (NSDictionary*)syncPayload {
