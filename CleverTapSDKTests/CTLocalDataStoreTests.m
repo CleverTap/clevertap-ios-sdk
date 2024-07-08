@@ -66,9 +66,6 @@
     // Call the method and get the result
     NSDictionary *result = [dataStoreMock getUserAttributeChangeProperties:event];
     
-    // Print debug information
-    NSLog(@"Result: %@", result);
-    
     // Verify the result dictionary
     XCTAssertEqual(result.count, 2);
     XCTAssertEqual(result[@"name"][CLTAP_KEY_OLD_VALUE], mockOldValueForName);
@@ -102,9 +99,6 @@
     
     // Call the method and get the result
     NSDictionary *result = [dataStoreMock getUserAttributeChangeProperties:event];
-    
-    // Print debug information
-    NSLog(@"Result: %@", result);
     
     // Verify the result dictionary
     XCTAssertEqual(result.count, 1);
