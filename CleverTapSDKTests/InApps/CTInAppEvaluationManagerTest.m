@@ -299,6 +299,43 @@
     XCTAssertEqual([self.evaluationManager.triggerManager getTriggers:@"4"], 1);
 }
 
+- (void)testEvaluateUserAttribute {
+    
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": @"newValue",
+                @"propertyValue": @"Gold",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    },
+    @{
+        @"ti": @2,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": @"newValue",
+                @"propertyValue": @"Premium",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    },
+    ];
+    NSDictionary *profile = @{
+        @"Customer Type": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+
+
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIds);
+    XCTAssertNotEqualObjects((@[@2]), self.evaluationManager.evaluatedServerSideInAppIds);
+}
+
 - (void)testEvaluateCharged {
     self.helper.inAppStore.serverSideInApps = @[
     @{
