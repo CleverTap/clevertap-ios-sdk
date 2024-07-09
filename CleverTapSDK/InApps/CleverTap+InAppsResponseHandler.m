@@ -14,6 +14,7 @@
 #import "CTConstants.h"
 #import "CleverTapInternal.h"
 #import "CTUtils.h"
+#import "CTCustomTemplatesManager-Internal.h"
 
 @implementation CleverTap(InAppsResponseHandler)
 
@@ -44,6 +45,11 @@
     NSArray *csInAppNotifs = jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY];
     if (csInAppNotifs) {
         [self.inAppStore storeClientSideInApps:csInAppNotifs];
+        
+        // Preload CS in-app images to disk cache
+        [self downloadMediaURLs:csInAppNotifs];
+        // Preload CS custom template in-app files to disk cache
+        [self downloadCustomTemplatesFileURLs:csInAppNotifs];
     }
     
     // Parse in-app Mode
@@ -91,6 +97,53 @@
     }
     
     [self triggerFetchInApps:YES];
+}
+
+- (void)downloadMediaURLs:(NSArray *)inApps {
+    NSArray<NSString *> *imageURLs = [self imageURLs:inApps];
+    [self.fileDownloader downloadFiles:imageURLs withCompletionBlock:nil];
+}
+
+- (void)downloadCustomTemplatesFileURLs:(NSArray *)inApps {
+    NSMutableSet *urls = [NSMutableSet set];
+    for (NSDictionary *inApp in inApps) {
+        NSSet *inAppFileArgsUrls = [self.customTemplatesManager fileArgsURLs:inApp];
+        [urls unionSet:inAppFileArgsUrls];
+    }
+    [self.fileDownloader downloadFiles:[urls allObjects] withCompletionBlock:nil];
+}
+
+- (NSArray<NSString *> *)imageURLs:(NSArray *)inApps {
+    NSMutableSet<NSString *> *mediaURLs = [NSMutableSet new];
+    for (NSDictionary *jsonInApp in inApps) {
+        NSDictionary *media = (NSDictionary *)jsonInApp[CLTAP_INAPP_MEDIA];
+        if (media) {
+            NSString *imageURL = [self URLFromMedia:media];
+            if (imageURL) {
+                [mediaURLs addObject:imageURL];
+            }
+        }
+        NSDictionary *mediaLandscape = (NSDictionary *)jsonInApp[CLTAP_INAPP_MEDIA_LANDSCAPE];
+        if (mediaLandscape) {
+            NSString *imageURL = [self URLFromMedia:mediaLandscape];
+            if (imageURL) {
+                [mediaURLs addObject:imageURL];
+            }
+        }
+    }
+    return [mediaURLs allObjects];
+}
+
+- (NSString *)URLFromMedia:(NSDictionary *)media {
+    NSString *contentType = media[CLTAP_INAPP_MEDIA_CONTENT_TYPE];
+    NSString *mediaUrl = media[CLTAP_INAPP_MEDIA_URL];
+    if (mediaUrl && mediaUrl.length > 0) {
+        // Preload contentType with image/jpeg or image/gif
+        if ([contentType hasPrefix:@"image"]) {
+            return mediaUrl;
+        }
+    }
+    return nil;
 }
 
 - (void)triggerFetchInApps:(BOOL)success {

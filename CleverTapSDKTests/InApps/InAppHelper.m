@@ -55,7 +55,6 @@ NSString *const CLTAP_TEST_CAMPAIGN_ID = @"testCampaignId";
         
         self.inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
                                                delegateManager:self.delegateManager
-                                                fileDownloader:self.fileDownloader
                                                       deviceId:self.deviceId];
         
         self.inAppTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.accountId

@@ -161,6 +161,10 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_TOTAL_LIFETIME_COUNT @"tlc"
 #define CLTAP_INAPP_EXCLUDE_FROM_CAPS @"efc"
 #define CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS @"excludeGlobalFCaps"
+#define CLTAP_INAPP_MEDIA @"media"
+#define CLTAP_INAPP_MEDIA_LANDSCAPE @"mediaLandscape"
+#define CLTAP_INAPP_MEDIA_CONTENT_TYPE @"content_type"
+#define CLTAP_INAPP_MEDIA_URL @"url"
 
 #define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
 #define CLTAP_TRIGGER_BOOL_STRING_NO @"false"

@@ -13,7 +13,6 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTMultiDelegateManager.h"
-#import "CTFileDownloader.h"
 
 NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";
@@ -23,7 +22,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
-@property (nonatomic, strong) CTFileDownloader *fileDownloader;
 @property (nonatomic, strong) CTAES *ctAES;
 
 @property (nonatomic, strong) NSArray *inAppsQueue;
@@ -38,7 +36,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                delegateManager:(CTMultiDelegateManager *)delegateManager
-                fileDownloader:(CTFileDownloader *)fileDownloader
                       deviceId:(NSString *)deviceId {
     self = [super init];
     if (self) {
@@ -46,7 +43,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.accountId = config.accountId;
         self.deviceId = deviceId;
         self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
-        self.fileDownloader = fileDownloader;
         
         [delegateManager addSwitchUserDelegate:self];
         [self migrateInAppQueueKeys];
@@ -202,10 +198,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = clientSideInApps;
         
-        // Preload CS inApp images to disk cache
-        NSArray<NSString *> *imageURLs = [self imageURLs:_clientSideInApps];
-        [self.fileDownloader downloadFiles:imageURLs withCompletionBlock:nil];
-
         NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences putString:encryptedString forKey:storageKey];
@@ -266,39 +258,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
-}
-
-- (NSArray<NSString *> *)imageURLs:(NSArray *)csInAppNotifs {
-    NSMutableSet<NSString *> *mediaURLs = [NSMutableSet new];
-    for (NSDictionary *jsonInApp in csInAppNotifs) {
-        NSDictionary *media = (NSDictionary*) jsonInApp[@"media"];
-        if (media) {
-            NSString *imageURL = [self URLFromDictionary:media];
-            if (imageURL) {
-                [mediaURLs addObject:imageURL];
-            }
-        }
-        NSDictionary *mediaLandscape = (NSDictionary*) jsonInApp[@"mediaLandscape"];
-        if (mediaLandscape) {
-            NSString *imageURL = [self URLFromDictionary:mediaLandscape];
-            if (imageURL) {
-                [mediaURLs addObject:imageURL];
-            }
-        }
-    }
-    return [mediaURLs allObjects];
-}
-
-- (NSString *)URLFromDictionary:(NSDictionary *)media {
-    NSString *contentType = media[@"content_type"];
-    NSString *mediaUrl = media[@"url"];
-    if (mediaUrl && mediaUrl.length > 0) {
-        // Preload contentType with image/jpeg or image/gif
-        if ([contentType hasPrefix:@"image"]) {
-            return mediaUrl;
-        }
-    }
-    return nil;
 }
 
 #pragma mark CTSwitchUserDelegate

@@ -11,7 +11,6 @@
 
 @class CleverTapInstanceConfig;
 @class CTMultiDelegateManager;
-@class CTFileDownloader;
 
 @interface CTInAppStore : NSObject <CTSwitchUserDelegate>
 
@@ -20,7 +19,6 @@
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config
                         delegateManager:(CTMultiDelegateManager * _Nonnull)delegateManager
-                         fileDownloader:(CTFileDownloader * _Nonnull)fileDownloader
                                deviceId:(NSString * _Nonnull)deviceId;
 
 - (NSArray * _Nonnull)clientSideInApps;

@@ -22,6 +22,7 @@
 @property (nonatomic) id<CTInAppNotificationDisplayDelegate> notificationDelegate;
 @property (nonatomic) id<CTTemplateContextDismissDelegate> dismissDelegate;
 @property (nonatomic) BOOL isAction;
+@property (nonatomic) CTFileDownloader *fileDownloader;
 
 @end
 
@@ -29,11 +30,14 @@
 
 @synthesize argumentValues = _argumentValues;
 
-- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate andNotification:(CTInAppNotification *)notification {
+- (instancetype)initWithTemplate:(CTCustomTemplate *)customTemplate
+                    notification:(CTInAppNotification *)notification
+               andFileDownloader:(CTFileDownloader *)fileDownloader {
     if (self = [super init]) {
         self.notification = notification;
         self.template = customTemplate;
         self.isAction = notification.customTemplateInAppData.isAction;
+        self.fileDownloader = fileDownloader;
     }
     return self;
 }
@@ -141,7 +145,6 @@
 }
 
 - (NSString *)fileNamed:(NSString *)name {
-    // TODO: add when implementing file handling
     return self.argumentValues[name];
 }
 
@@ -238,7 +241,9 @@
                 }
                 break;
             case CTTemplateArgumentTypeFile:
-                // TODO: add when implementing file handling
+                if ([override isKindOfClass:[NSString class]]) {
+                    return [self.fileDownloader fileDownloadPath:override];
+                }
                 break;
             case CTTemplateArgumentTypeAction: {
                 CTNotificationAction *action = [[CTNotificationAction alloc] initWithJSON:override[CLTAP_INAPP_ACTIONS]];

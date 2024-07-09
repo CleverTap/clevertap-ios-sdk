@@ -234,19 +234,19 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
 @property (nonatomic, strong, readwrite) CTMultiDelegateManager *delegateManager;
 
+@property (nonatomic, strong, readwrite) CTFileDownloader *fileDownloader;
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
-@property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (atomic, strong) CTPushPrimerManager *pushPrimerManager;
 
+@property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (nonatomic, strong, readwrite) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
 @property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
-@property (nonatomic, strong, readwrite) CTFileDownloader *fileDownloader;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
-
-@property (nonatomic, strong) CTCustomTemplatesManager *customTemplatesManager;
+@property (nonatomic, strong, readwrite) CTCustomTemplatesManager *customTemplatesManager;
 #endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
@@ -513,7 +513,6 @@ static BOOL sharedInstanceErrorLogged;
 - (void)initializeInAppSupport {
     CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
                                                     delegateManager:self.delegateManager
-                                                     fileDownloader:self.fileDownloader
                                                            deviceId:self.deviceInfo.deviceId];
     self.inAppStore = inAppStore;
     

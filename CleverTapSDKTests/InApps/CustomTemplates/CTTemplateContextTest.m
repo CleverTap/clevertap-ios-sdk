@@ -16,6 +16,8 @@
 #import "CTCustomTemplateInAppData-Internal.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
 #import "CTConstants.h"
+#import "CTFileDownloaderCustomTemplatesMock.h"
+#import "CleverTapInstanceConfig.h"
 
 @interface CTTemplateContext (Tests)
 
@@ -25,11 +27,18 @@
 
 @interface CTTemplateContextTest : XCTestCase
 
+@property CTFileDownloader* fileDownloader;
+
 @end
 
 @implementation CTTemplateContextTest
 
-- (void)testDismissedShouldCallDelegateDismiss {
+- (void)setUp {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
+    self.fileDownloader = [[CTFileDownloaderCustomTemplatesMock alloc] initWithConfig:config];
+}
+
+- (void)testDismissedShouldCallDelegateNotificationDidDismiss {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
     [context setNotificationDelegate:delegate];
@@ -41,7 +50,7 @@
     [[delegate reject] notificationDidDismiss:[OCMArg any] fromViewController:[OCMArg any]];
 }
 
-- (void)testDismissedShouldCallDelegateDismiss2 {
+- (void)testDismissedShouldCallDelegateOnDismiss {
     CTTemplateContext *context = self.templateContext;
     id delegate = OCMProtocolMock(@protocol(CTTemplateContextDismissDelegate));
     [context setDismissDelegate:delegate];
@@ -121,6 +130,7 @@
     
     context = self.templateContext;
     delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
+    // Action is called synchronously
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTFail(@"handleNotificationAction called for non-existent action arguments");
     }];
@@ -131,7 +141,7 @@
 
 - (void)testTriggerActionNOOPForFunction {
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function notification:notification andFileDownloader:self.fileDownloader];
     CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [context setNotificationDelegate:delegate];
     [context triggerActionNamed:@"action"];
@@ -142,7 +152,7 @@
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
     notification.customTemplateInAppData.isAction = YES;
     
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function notification:notification andFileDownloader:self.fileDownloader];
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
     [context setNotificationDelegate:delegate];
     [context presented];
@@ -153,7 +163,7 @@
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
     notification.customTemplateInAppData.isAction = YES;
     
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function andNotification:notification];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.function notification:notification andFileDownloader:self.fileDownloader];
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
     id dismissDelegate = OCMProtocolMock(@protocol(CTTemplateContextDismissDelegate));
     [context setNotificationDelegate:delegate];
@@ -167,7 +177,7 @@
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.functionNotificationJson];
     notification.customTemplateInAppData.isAction = YES;
     
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.functionVisual andNotification:notification];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.functionVisual notification:notification andFileDownloader:self.fileDownloader];
     
     id delegate = OCMProtocolMock(@protocol(CTInAppNotificationDisplayDelegate));
     [context setNotificationDelegate:delegate];
@@ -177,13 +187,13 @@
 
 - (void)testTemplateName {
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.templateNotificationJson];
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.template andNotification:notification];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.template notification:notification andFileDownloader:self.fileDownloader];
     XCTAssertEqualObjects(TEMPLATE_NAME_NESTED, [context templateName]);
 }
 
 - (void)testSimpleValueOverrides {
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.simpleTemplateNotificationJson];
-    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.simpleTemplate andNotification:notification];
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:self.simpleTemplate notification:notification andFileDownloader:self.fileDownloader];
     XCTAssertEqual(VARS_OVERRIDE_BOOLEAN, [context boolNamed:@"a.b.c"]);
     XCTAssertEqualObjects(VARS_OVERRIDE_STRING, [context stringNamed:@"a.b.d"]);
     XCTAssertEqualObjects(@(VARS_OVERRIDE_LONG), [context numberNamed:@"a.b.e.f"]);
@@ -266,6 +276,12 @@
     XCTAssertEqualObjects(@"close", actionsMap[@"close"]);
 }
 
+- (void)testFileArgument {
+    XCTAssertEqualObjects(VARS_FILE_URL, [self.templateContext fileNamed:@"map.file"]);
+    XCTAssertEqualObjects(VARS_IMAGE_URL, [self.templateContext fileNamed:@"file"]);
+    XCTAssertNil([self.templateContext fileNamed:@"noOverrideFile"]);
+}
+
 - (void)verifyInnerMap:(NSDictionary *)vars map:(NSDictionary *)map {
     XCTAssertEqualObjects(vars[@"map.innerMap.boolean"], map[@"boolean"]);
     XCTAssertEqualObjects(vars[@"map.innerMap.string"], map[@"string"]);
@@ -312,7 +328,7 @@
 
 - (CTTemplateContext *)templateContext {
     CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:self.templateNotificationJson];
-    return [[CTTemplateContext alloc] initWithTemplate:self.template andNotification:notification];
+    return [[CTTemplateContext alloc] initWithTemplate:self.template notification:notification andFileDownloader:self.fileDownloader];
 }
 
 - (CTCustomTemplate *)template {
@@ -350,6 +366,9 @@
     [templateBuilder addActionArgument:@"map.actions.close"];
     [templateBuilder addActionArgument:@"map.actions.openUrl"];
     [templateBuilder addActionArgument:@"map.actions.kv"];
+    [templateBuilder addFileArgument:@"map.file"];
+    [templateBuilder addFileArgument:@"file"];
+    [templateBuilder addFileArgument:@"noOverrideFile"];
     [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
     return [templateBuilder build];
 }
@@ -405,7 +424,9 @@
             @"map.innerMap.double": @3402823466385288.0,
             @"map.innerMap.innermostMap.int": @1024,
             @"map.innerMap.innermostMap.string": @"innerText",
-            @"map.innerMap.innermostMap.boolean": @YES
+            @"map.innerMap.innermostMap.boolean": @YES,
+            @"map.file": VARS_FILE_URL,
+            @"file": VARS_IMAGE_URL,
         }
     };
 }
@@ -459,5 +480,7 @@ static NSString * const VARS_ACTION_OVERRIDE_STRING = @"Function text";
 static int const VARS_ACTION_OVERRIDE_INT = 5421;
 
 static NSString * const VARS_ACTION_OPEN_URL_ADDRESS = @"https://clevertap.com";
+static NSString * const VARS_FILE_URL = @"https://clevertap.com/file.pdf";
+static NSString * const VARS_IMAGE_URL = @"https://clevertap.com/image.png";
 
 @end
