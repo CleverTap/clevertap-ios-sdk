@@ -22,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, nullable) CTFilesDeleteCompletedBlock removeAllAssetsCompletion;
 
+@property (nonatomic) CTFilesDownloadCompletedBlock downloadCompletion;
+
 @end
 
 NS_ASSUME_NONNULL_END

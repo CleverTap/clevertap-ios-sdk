@@ -8,17 +8,21 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import "CTPreferences.h"
 #import "CTVariables.h"
 #import "CTVarCache.h"
 #import "CTVarCacheMock.h"
 #import "CTConstants.h"
 #import "CTVariables+Tests.h"
-#import "InAppHelper.h"
+#import "CTFileDownloaderMock.h"
+#import "CTFileDownloader+Tests.h"
+#import "CTFileDownloadTestHelper.h"
 
 @interface CTVarDelegateImpl : NSObject <CTVarDelegate>
 
 typedef void(^Callback)(CTVar *);
 @property Callback callback;
+@property Callback fileReadyCallback;
 
 @end
 
@@ -30,27 +34,40 @@ typedef void(^Callback)(CTVar *);
     }
 }
 
+- (void)fileIsReady:(CTVar *)var {
+    if ([self fileReadyCallback]) {
+        self.fileReadyCallback(var);
+    }
+}
+
 @end
 
 @interface CTVarTest : XCTestCase
 
 @property(strong, nonatomic) CTVariables *variables;
+@property (nonatomic, strong) CTFileDownloaderMock *fileDownloader;
+@property (nonatomic, strong) CTFileDownloadTestHelper *fileDownloadHelper;
 
 @end
 
 @implementation CTVarTest
 
 - (void)setUp {
-    InAppHelper *helper = [InAppHelper new];
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"id" accountToken:@"token" accountRegion:@"eu"];
     config.useCustomCleverTapId = YES;
     CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"test"];
-    CTVarCacheMock *varCache = [[CTVarCacheMock alloc] initWithConfig:config deviceInfo:deviceInfo fileDownloader:helper.fileDownloader];
+    self.fileDownloader = [[CTFileDownloaderMock alloc] initWithConfig:config];
+    CTVarCacheMock *varCache = [[CTVarCacheMock alloc] initWithConfig:config deviceInfo:deviceInfo fileDownloader:self.fileDownloader];
     self.variables = [[CTVariables alloc] initWithConfig:config deviceInfo:deviceInfo varCache:varCache];
+    
+    self.fileDownloadHelper = [CTFileDownloadTestHelper new];
+    [self.fileDownloadHelper addHTTPStub];
 }
 
 - (void)tearDown {
     self.variables = nil;
+    [self.fileDownloadHelper removeStub];
+    [self removeFiles];
 }
 
 - (void)testVariableName {
@@ -225,6 +242,58 @@ typedef void(^Callback)(CTVar *);
     XCTAssertTrue([[groupVar objectForKey:@"number"] isKindOfClass:[varValue class]]);
     XCTAssertTrue([groupVar.value isKindOfClass:[NSDictionary class]]);
     XCTAssertTrue([groupVar.defaultValue isKindOfClass:[NSDictionary class]]);
+}
+
+#pragma mark - File type vars tests
+
+- (void)testDefineFileVariable {
+    CTVar *var = [self.variables define:@"fileVar" with:nil kind:CT_KIND_FILE];
+    
+    XCTAssertEqualObjects(@"fileVar", var.name);
+    XCTAssertEqualObjects(CT_KIND_FILE, var.kind);
+    XCTAssertNil(var.value);
+    XCTAssertNil(var.stringValue);
+    XCTAssertNil(var.fileValue);
+}
+
+- (void)testCTVarDelegateFileIsReady {
+    // Register File var
+    CTVar *var1 = [self.variables define:@"var1" with:nil kind:CT_KIND_FILE];
+    
+    XCTestExpectation *expect = [self expectationWithDescription:@"delegate"];
+    CTVarDelegateImpl *del = [[CTVarDelegateImpl alloc] init];
+    __block CTVar *varFromDelegate = nil;
+    [del setFileReadyCallback:^(CTVar * variable) {
+        varFromDelegate = variable;
+        [expect fulfill];
+    }];
+    [var1 setDelegate:del];
+    
+    // Apply diffs
+    NSArray *urls = [self.fileDownloadHelper generateFileURLStrings:1];
+    NSDictionary *diffs = @{
+        @"var1": urls[0],
+    };
+    [self.variables handleVariablesResponse:diffs];
+    
+    [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
+    
+    NSString *expValue = [self.fileDownloader fileDownloadPath:urls[0]];
+    XCTAssertEqualObjects(@"var1", varFromDelegate.name);
+    XCTAssertEqualObjects(expValue, varFromDelegate.value);
+}
+
+- (void)removeFiles {
+    [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
+    [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
+    
+    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Wait for cleanup"];
+    self.fileDownloader.removeAllAssetsCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
+        [expectation1 fulfill];
+    };
+    // Clear all files
+    [self.fileDownloader clearFileAssets:NO];
+    [self waitForExpectations:@[expectation1] timeout:2.0];
 }
 
 @end
