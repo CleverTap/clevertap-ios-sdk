@@ -2214,7 +2214,7 @@ static BOOL sharedInstanceErrorLogged;
                 [self scheduleQueueFlush];
                 [self handleSendQueueFail];
                 
-                [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:NO];
+                [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:NO withQueueType:queueType];
             }
             
             if (!success || redirect) {
@@ -2227,7 +2227,7 @@ static BOOL sharedInstanceErrorLogged;
             
             [self parseResponse:responseData];
             
-            [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES];
+            [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES withQueueType:queueType];
 
             CleverTapLogDebug(self.config.logLevel,@"%@: Successfully sent %lu events", self, (unsigned long)[batch count]);
             

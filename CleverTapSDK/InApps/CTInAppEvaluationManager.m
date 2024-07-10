@@ -23,6 +23,8 @@
 
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
+@property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIdsForProfile;
+@property (nonatomic, strong) NSMutableArray *suppressedClientSideInAppsForProfile;
 @property BOOL hasAppLaunchedFailed;
 @property (nonatomic, strong) NSDictionary *appLaunchedProperties;
 
@@ -36,7 +38,7 @@
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
 
-- (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events;
+- (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events withQueueType:(CTQueueType)queueType;
 - (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
 
@@ -68,6 +70,18 @@
         if (savedSuppressedClientSideInApps) {
             self.suppressedClientSideInApps = [savedSuppressedClientSideInApps mutableCopy];
         }
+        
+        self.evaluatedServerSideInAppIdsForProfile = [NSMutableArray new];
+        NSArray *savedEvaluatedServerSideInAppIdsForProfile = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE]];
+        if (savedEvaluatedServerSideInAppIdsForProfile) {
+            self.evaluatedServerSideInAppIdsForProfile = [savedEvaluatedServerSideInAppIdsForProfile mutableCopy];
+        }
+        
+        self.suppressedClientSideInAppsForProfile = [NSMutableArray new];
+        NSArray *savedSuppressedClientSideInAppsForProfile = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE]];
+        if (savedSuppressedClientSideInAppsForProfile) {
+            self.suppressedClientSideInAppsForProfile = [savedSuppressedClientSideInAppsForProfile mutableCopy];
+        }
 
         self.inAppStore = inAppStore;
         self.triggersMatcher = [CTTriggersMatcher new];
@@ -88,7 +102,8 @@
     
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
     NSArray *eventList = @[event];
-    [self evaluateServerSide:eventList];
+    CTQueueType queueType = CTQueueTypeEvents;
+    [self evaluateServerSide:eventList withQueueType:queueType];
     [self evaluateClientSide:eventList];
 }
 
@@ -102,8 +117,8 @@
         CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: value andLocation:self.location];
         [eventAdapterList addObject:event];
     }];
-        
-    [self evaluateServerSide:eventAdapterList];
+    CTQueueType queueType = CTQueueTypeProfile;
+    [self evaluateServerSide:eventAdapterList withQueueType:queueType];
     [self evaluateClientSide:eventAdapterList];
     
 }
@@ -111,7 +126,8 @@
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_CHARGED_EVENT eventProperties:chargeDetails location:self.location andItems:items];
     NSArray *eventList = @[event];
-    [self evaluateServerSide:eventList];
+    CTQueueType queueType = CTQueueTypeEvents;
+    [self evaluateServerSide:eventList withQueueType:queueType];
     [self evaluateClientSide:eventList];
 }
 
@@ -161,7 +177,7 @@
     }
 }
 
-- (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events {
+- (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events withQueueType:(CTQueueType)queueType{
     NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];
     for (CTEventAdapter *event in events) {
             [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.serverSideInApps]];
@@ -173,12 +189,22 @@
             NSNumber *cid = [CTUtils numberFromString:campaignId];
             if (cid) {
                 updated = YES;
-                [self.evaluatedServerSideInAppIds addObject:cid];
+                if (queueType == CTQueueTypeEvents){
+                    [self.evaluatedServerSideInAppIds addObject:cid];
+                }
+                else if (queueType == CTQueueTypeProfile){
+                    [self.evaluatedServerSideInAppIdsForProfile addObject:cid];
+                }
             }
         }
     }
     if (updated) {
-        [self saveEvaluatedServerSideInAppIds];
+        if (queueType == CTQueueTypeEvents){
+            [self saveEvaluatedServerSideInAppIds];
+        }
+        else if (queueType == CTQueueTypeProfile){
+            [self saveEvaluatedServerSideInAppIdsForProfile];
+        }
     }
 }
 
@@ -213,11 +239,17 @@
     return eligibleInApps;
 }
 
-- (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
+- (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success withQueueType:(CTQueueType)queueType{
     if (success) {
         NSDictionary *header = batchWithHeader[0];
-        [self removeSentEvaluatedServerSideInAppIds:header];
-        [self removeSentSuppressedClientSideInApps:header];
+        if (queueType == CTQueueTypeEvents) {
+            [self removeSentEvaluatedServerSideInAppIds:header];
+            [self removeSentSuppressedClientSideInApps:header];
+        }
+        else if (queueType == CTQueueTypeEvents) {
+            [self removeSentEvaluatedServerSideInAppIdsForProfile:header];
+            [self removeSentSuppressedClientSideInAppsForProfile:header];
+        }
     }
 }
 
@@ -246,6 +278,25 @@
         [self saveSuppressedClientSideInApps];
     }
 }
+
+- (void)removeSentEvaluatedServerSideInAppIdsForProfile:(NSDictionary *)header {
+    NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE];
+    if (inapps_eval && [inapps_eval count] > 0) {
+        NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIdsForProfile.count ?  self.evaluatedServerSideInAppIdsForProfile.count : inapps_eval.count;
+        [self.evaluatedServerSideInAppIdsForProfile removeObjectsInRange:NSMakeRange(0, len)];
+        [self saveEvaluatedServerSideInAppIdsForProfile];
+    }
+}
+
+- (void)removeSentSuppressedClientSideInAppsForProfile:(NSDictionary *)header {
+    NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE];
+    if (suppresed_inapps && [suppresed_inapps count] > 0) {
+        NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInAppsForProfile.count ?  self.suppressedClientSideInAppsForProfile.count : suppresed_inapps.count;
+        [self.suppressedClientSideInAppsForProfile removeObjectsInRange:NSMakeRange(0, len)];
+        [self saveSuppressedClientSideInAppsForProfile];
+    }
+}
+
 
 - (BOOL)shouldSuppress:(NSDictionary *)inApp {
     return [inApp[CLTAP_INAPP_IS_SUPPRESSED] boolValue];
@@ -333,15 +384,24 @@
     if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
         return [NSMutableDictionary new];
     }
-    
     NSMutableDictionary *header = [NSMutableDictionary new];
-    if ([self.evaluatedServerSideInAppIds count] > 0) {
-        header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;
+    if (queueType == CTQueueTypeProfile) {
+        
+        if ([self.evaluatedServerSideInAppIdsForProfile count] > 0) {
+            header[CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE] = self.evaluatedServerSideInAppIdsForProfile;
+        }
+        if ([self.suppressedClientSideInAppsForProfile count] > 0) {
+            header[CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE] = self.suppressedClientSideInAppsForProfile;
+        }
     }
-    if ([self.suppressedClientSideInApps count] > 0) {
-        header[CLTAP_INAPP_SUPPRESSED_META_KEY] = self.suppressedClientSideInApps;
+    else {
+        if ([self.evaluatedServerSideInAppIds count] > 0) {
+            header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;
+        }
+        if ([self.suppressedClientSideInApps count] > 0) {
+            header[CLTAP_INAPP_SUPPRESSED_META_KEY] = self.suppressedClientSideInApps;
+        }
     }
-    
     return header;
 }
 
@@ -351,6 +411,14 @@
 
 - (void)saveSuppressedClientSideInApps {
     [CTPreferences putObject:self.suppressedClientSideInApps forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY]];
+}
+
+- (void)saveEvaluatedServerSideInAppIdsForProfile {
+    [CTPreferences putObject:self.evaluatedServerSideInAppIdsForProfile forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE]];
+}
+
+- (void)saveSuppressedClientSideInAppsForProfile {
+    [CTPreferences putObject:self.suppressedClientSideInAppsForProfile forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE]];
 }
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {

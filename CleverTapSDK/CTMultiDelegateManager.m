@@ -76,11 +76,11 @@
     [self.batchSentDelegates removeObject:delegate];
 }
 
-- (void)notifyDelegatesBatchDidSend:(NSArray *)batchWithHeader withSuccess:(BOOL)success {
+- (void)notifyDelegatesBatchDidSend:(NSArray *)batchWithHeader withSuccess:(BOOL)success withQueueType:(CTQueueType)queueType{
     NSNumber *isAppLaunched = nil;
     for (id<CTBatchSentDelegate> batchSentDelegate in self.batchSentDelegates) {
-        if ([batchSentDelegate respondsToSelector:@selector(onBatchSent: withSuccess:)]) {
-            [batchSentDelegate onBatchSent:batchWithHeader withSuccess:success];
+        if ([batchSentDelegate respondsToSelector:@selector(onBatchSent: withSuccess:withQueueType:)]) {
+            [batchSentDelegate onBatchSent:batchWithHeader withSuccess:success withQueueType:queueType];
         }
         if ([batchSentDelegate respondsToSelector:@selector(onAppLaunchedWithSuccess:)]) {
             if (isAppLaunched == nil) {

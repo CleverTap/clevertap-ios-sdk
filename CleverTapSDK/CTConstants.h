@@ -140,6 +140,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_SUPPRESSED_META_KEY @"inapps_suppressed"
 #define CLTAP_INAPP_SS_EVAL_STORAGE_KEY @"inapps_eval"
 #define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY @"inapps_suppressed"
+#define CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE @"inapps_eval_profile"
+#define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE @"inapps_suppressed_profile"
 
 #define CLTAP_PREFS_INAPP_SESSION_MAX_KEY @"imc_max"
 #define CLTAP_PREFS_INAPP_LAST_DATE_KEY @"ict_date"
