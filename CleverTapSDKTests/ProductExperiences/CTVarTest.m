@@ -14,6 +14,8 @@
 #import "CTVarCacheMock.h"
 #import "CTConstants.h"
 #import "CTVariables+Tests.h"
+#import "CTVarCache+Tests.h"
+#import "CTVar-Internal.h"
 #import "CTFileDownloaderMock.h"
 #import "CTFileDownloader+Tests.h"
 #import "CTFileDownloadTestHelper.h"
@@ -300,6 +302,49 @@ typedef void(^Callback)(CTVar *);
     [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
 }
 
+- (void)testFileVarUpdate {
+    CTVar *var1 = [self.variables define:@"var1" with:nil kind:CT_KIND_FILE];
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
+    self.variables.varCache.merged = [NSMutableDictionary dictionaryWithDictionary:@{
+        @"var1": url
+    }];
+    XCTAssertTrue([var1 update]);
+    XCTAssertFalse(var1.hadStarted);
+    XCTAssertFalse([var1 update]);
+    
+    self.variables.varCache.merged = [NSMutableDictionary dictionaryWithDictionary:@{
+        @"var1": [NSString stringWithFormat:@"%@?changed", url]
+    }];
+    XCTAssertTrue([var1 update]);
+    XCTAssertFalse(var1.hadStarted);
+    XCTAssertFalse([var1 update]);
+}
+
+- (void)testOnFileIsReadyNoOverride {
+    CTVar *var1 = [self.variables define:@"var1" with:nil kind:CT_KIND_FILE];
+    XCTestExpectation *expect = [self expectationWithDescription:@"onFileIsReady"];
+    XCTestExpectation *expect1 = [self expectationWithDescription:@"onFileIsReady After Change"];
+    __block int count = 0;
+    [var1 onFileIsReady:^{
+        count++;
+        if (count == 1) {
+            [expect fulfill];
+        } else {
+            [expect1 fulfill];
+        }
+    }];
+    
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
+    NSDictionary *diffs = @{
+        @"var1": url
+    };
+    [self.variables.varCache applyVariableDiffs:diffs];
+    [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
+    
+    [self.variables handleVariablesResponse:@{}];
+    [self waitForExpectations:@[expect1] timeout:DISPATCH_TIME_NOW + 5.0];
+}
+
 - (void)testFileVariablesCallbacks {
     NSString *url = [self.fileDownloadHelper generateFileURLString];
     
@@ -329,7 +374,8 @@ typedef void(^Callback)(CTVar *);
     }];
     
     [var2 onFileIsReady:^{
-        XCTFail(@"var2 onFileIsReady should not be called, var2 is not overridden.");
+        XCTAssertNil(var2.value);
+        XCTAssertNil(var2.fileValue);
     }];
 
     XCTestExpectation *expectationDownload = [self expectationWithDescription:@"Wait for download completion"];
@@ -342,6 +388,37 @@ typedef void(^Callback)(CTVar *);
     };
     [self.variables handleVariablesResponse:diffs];
     [self waitForExpectations:@[expectationDownload, expect1, expect2, expect3] timeout:2.0];
+}
+
+- (void)testCallbacksDefineFileVarAfterResponse {
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
+    // Apply diffs with var1 override
+    NSDictionary *diffs = @{
+        @"var1": url
+    };
+    [self.variables handleVariablesResponse:diffs];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for download completion"];
+    self.fileDownloader.downloadCompletion = ^(NSDictionary<NSString *, id> * _Nonnull status) {
+        [expectation fulfill];
+    };
+
+    // Create delegate
+    CTVarDelegateImpl *del = [[CTVarDelegateImpl alloc] init];
+    XCTestExpectation *expectationDelegate = [self expectationWithDescription:@"FileReadyCallback completion"];
+    XCTestExpectation *expectationBlock = [self expectationWithDescription:@"FileReadyCallback completion"];
+    [del setFileReadyCallback:^(CTVar * variable) {
+        [expectationDelegate fulfill];
+    }];
+    // Define the variable after the initial response and applied diffs
+    CTVar *var1 = [self.variables define:@"var1" with:nil kind:CT_KIND_FILE];
+    // Set delegate
+    [var1 setDelegate:del];
+    // Set block
+    [var1 onFileIsReady:^{
+        [expectationBlock fulfill];
+    }];
+    [self waitForExpectations:@[expectation, expectationDelegate, expectationBlock] timeout:2.0];
 }
 
 @end

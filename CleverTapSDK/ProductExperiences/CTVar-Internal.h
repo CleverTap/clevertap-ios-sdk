@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) BOOL shouldDownloadFile;
 @property (readonly, strong, nullable) NSString *fileURL;
 
-- (void)update;
+- (BOOL)update;
 - (void)cacheComputedValues;
 - (void)triggerValueChanged;
 - (void)triggerFileIsReady;

@@ -90,18 +90,19 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
 }
 
-- (void)update {
+- (BOOL)update {
     NSObject *oldValue = _value;
     _value = [self.varCache getMergedValueFromComponentArray:_nameComponents];
     
     if ([_value isEqual:oldValue] && _hadStarted) {
-        return;
+        return NO;
     }
     [self cacheComputedValues];
     
+    BOOL changed = NO;
     if (![_value isEqual:oldValue]) {
         _hasChanged = YES;
-        
+        changed = YES;
         // Update _fileURL with new value if it has changed.
         if ([_kind isEqualToString:CT_KIND_FILE]) {
             _fileURL = _value;
@@ -117,6 +118,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
         _hadStarted = YES;
         _shouldDownloadFile = NO;
     }
+    return changed;
 }
 
 #pragma mark Callbacks

@@ -244,11 +244,17 @@
             // Update variables with new values.
             // Have to extract the keys because a dictionary variable may add a new sub-variable,
             // modifying the variable dictionary.
+            NSMutableArray *updatedFileVariables = [NSMutableArray array];
             for (NSString *name in [self.vars allKeys]) {
-                [self.vars[name] update];
+                CTVar *var = self.vars[name];
+                // Always update the variable
+                BOOL hasChanged = [var update];
+                if (hasChanged && [var.kind isEqualToString:CT_KIND_FILE]) {
+                    [updatedFileVariables addObject:var];
+                }
             }
             
-            NSMutableArray *fileURLs = [self fileURLs];
+            NSMutableArray *fileURLs = [self fileURLs:updatedFileVariables];
             if ([fileURLs count] > 0) {
                 [self setHasPendingDownloads:YES];
                 [self startFileDownload:fileURLs];
@@ -311,11 +317,10 @@
     return [self.fileDownloader isFileAlreadyPresent:fileURL];
 }
 
-- (NSMutableArray<NSString *> *)fileURLs {
+- (NSMutableArray<NSString *> *)fileURLs:(NSArray *)fileVars {
     NSMutableArray<NSString *> *downloadURLs = [NSMutableArray new];
-    for (id key in self.vars) {
-        CTVar *var = self.vars[key];
-        if (var.kind == CT_KIND_FILE && var.fileURL) {
+    for (CTVar *var in fileVars) {
+        if (var.fileURL) {
             // If file is already present, call fileIsReady
             // else download the file and call fileIsReady when downloaded
             if ([self.fileDownloader isFileAlreadyPresent:var.fileURL]) {
@@ -326,6 +331,9 @@
                     [self.fileVarsInDownload setObject:var forKey:var.fileURL];
                 }
             }
+        } else {
+            // Trigger FileIsReady since the value changed to null (no override)
+            [var triggerFileIsReady];
         }
     }
     

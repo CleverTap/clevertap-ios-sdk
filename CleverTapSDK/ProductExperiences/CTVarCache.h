@@ -23,7 +23,7 @@ NS_SWIFT_NAME(VarCache)
                 fileDownloader:(CTFileDownloader *)fileDownloader;
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
-@property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, CTVar *> *vars;
 @property (assign, nonatomic) BOOL hasVarsRequestCompleted;
 @property (assign, nonatomic) BOOL hasPendingDownloads;
 @property (nonatomic, weak) id<CTFileVarDelegate> delegate;
