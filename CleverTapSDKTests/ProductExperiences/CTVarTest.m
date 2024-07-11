@@ -309,23 +309,23 @@ typedef void(^Callback)(CTVar *);
     
     XCTestExpectation *expect1 = [self expectationWithDescription:@"var1 onValueChanged"];
     [var1 onValueChanged:^{
-        [expect1 fulfill];
         XCTAssertEqualObjects(url, var1.fileURL);
+        [expect1 fulfill];
     }];
     
     XCTestExpectation *expect2 = [self expectationWithDescription:@"var2 onValueChanged"];
     [var2 onValueChanged:^{
-        [expect2 fulfill];
         XCTAssertNil(var2.value);
+        [expect2 fulfill];
     }];
     
     XCTestExpectation *expect3 = [self expectationWithDescription:@"var1 onFileIsReady"];
     [var1 onFileIsReady:^{
-        [expect3 fulfill];
         NSString *expValue1 = [self.fileDownloader fileDownloadPath:url];
         XCTAssertEqualObjects(expValue1, var1.value);
         XCTAssertEqualObjects(expValue1, var1.stringValue);
         XCTAssertEqualObjects(expValue1, var1.fileValue);
+        [expect3 fulfill];
     }];
     
     [var2 onFileIsReady:^{

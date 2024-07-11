@@ -601,13 +601,12 @@ CTVariables *variables;
     }];
     CTVar *var1 = [variables define:@"var1" with:nil kind:CT_KIND_FILE];
     [var1 onFileIsReady:^{
-        [expectation fulfill];
-        
         NSString *expValue1 = [self.fileDownloader fileDownloadPath:url];
         XCTAssertEqualObjects(url, var1.fileURL);
         XCTAssertEqualObjects(expValue1, var1.value);
         XCTAssertEqualObjects(expValue1, var1.stringValue);
         XCTAssertEqualObjects(expValue1, var1.fileValue);
+        [expectation fulfill];
     }];
     [variables.varCache fileVarUpdated:var1];
     [self waitForExpectations:@[expectation] timeout:2.0];
