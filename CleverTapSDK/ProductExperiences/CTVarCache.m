@@ -358,7 +358,9 @@
         [fileVar triggerFileIsReady];
     } else {
         [self.fileDownloader downloadFiles:@[url] withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
-            [fileVar triggerFileIsReady];
+            if ([status[url] boolValue]) {
+                [fileVar triggerFileIsReady];
+            }
         }];
     }
 }

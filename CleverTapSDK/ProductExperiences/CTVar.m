@@ -109,9 +109,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
     
     if (_shouldDownloadFile) {
-        if ([_kind isEqualToString:CT_KIND_FILE]) {
-            [self.varCache fileVarUpdated:self];
-        }
+        [self.varCache fileVarUpdated:self];
     }
     
     if ([[self varCache] hasVarsRequestCompleted]) {
@@ -173,7 +171,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 - (void)onFileIsReady:(CleverTapVariablesChangedBlock)block {
     if (!block) {
-        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CTVar onValueChanged].");
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CTVar onFileIsReady].");
         return;
     }
     
