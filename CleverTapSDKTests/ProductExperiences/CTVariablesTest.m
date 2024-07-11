@@ -41,7 +41,7 @@
 - (void)tearDown {
     self.variables = nil;
     [self.fileDownloadHelper removeStub];
-    [self removeFiles];
+    [self.fileDownloadHelper cleanUpFiles:self.fileDownloader forTest:self];
 }
 
 - (void)testVarCacheNotNil {
@@ -590,27 +590,14 @@
 #pragma mark - File type vars tests
 
 - (void)testOnceVariablesChangedAndNoDownloadsPending {
-    // set hasVarsRequestCompleted to YES, this will trigger once block instantly.
-    [self.variables handleVariablesError];
     __block int count = 0;
     [self.variables onceVariablesChangedAndNoDownloadsPending:^{
         // Should be called once
         count++;
     }];
-    CTVar *var1 = [self.variables define:@"var1" with:nil kind:CT_KIND_FILE];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for download completion"];
-    self.fileDownloader.downloadCompletion = ^(NSDictionary<NSString *, id> * _Nonnull status) {
-        [expectation fulfill];
-    };
-    NSArray *urls = [self.fileDownloadHelper generateFileURLStrings:1];
-    NSDictionary *diffs = @{
-        @"var1": urls[0],
-    };
-    XCTAssertEqualObjects(nil, var1.value);
-    [self.variables handleVariablesResponse:diffs];
-    
-    [self waitForExpectations:@[expectation] timeout:DISPATCH_TIME_NOW + 5.0];
+    [self.variables triggerNoDownloadsPending];
+    [self.variables triggerNoDownloadsPending];
     XCTAssertEqual(count, 1);
 }
 
@@ -625,9 +612,9 @@
         [expect2 fulfill];
     }];
     CTVar *var1 = [self.variables define:@"var1" with:nil kind:CT_KIND_FILE];
-    NSArray *urls = [self.fileDownloadHelper generateFileURLStrings:1];
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
     NSDictionary *diffs = @{
-        @"var1": urls[0],
+        @"var1": url
     };
     XCTAssertEqualObjects(nil, var1.value);
     [self.variables handleVariablesResponse:diffs];
@@ -649,19 +636,6 @@
     
     [self waitForExpectations:@[expect] timeout:DISPATCH_TIME_NOW + 5.0];
     XCTAssertEqualObjects(@1, var1.value);
-}
-
-- (void)removeFiles {
-    [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
-    [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
-    
-    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Wait for cleanup"];
-    self.fileDownloader.removeAllAssetsCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
-        [expectation1 fulfill];
-    };
-    // Clear all files
-    [self.fileDownloader clearFileAssets:NO];
-    [self waitForExpectations:@[expectation1] timeout:2.0];
 }
 
 @end

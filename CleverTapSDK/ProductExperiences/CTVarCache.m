@@ -281,10 +281,10 @@
 
 - (void)startFileDownload:(NSMutableArray *)fileURLs {
     [self.fileDownloader downloadFiles:fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        NSMutableArray<NSString *> *retryURLs;
+        NSMutableArray<NSString *> *retryURLs = [NSMutableArray new];
         // Call fileIsReady for variables whose files are downloaded.
         for (NSString *key in status.allKeys) {
-            if (status[key]) {
+            if ([status[key] boolValue]) {
                 @synchronized (self) {
                     [self.fileVarsInDownload[key] triggerFileIsReady];
                     [self.fileVarsInDownload removeObjectForKey:key];
@@ -293,8 +293,8 @@
                 [retryURLs addObject:key];
             }
         }
-        // Retry once if any url is not downloaded.
-        if ([retryURLs count] == 0) {
+        // Retry once if a URL failed to download
+        if (retryURLs.count == 0) {
             [self setHasPendingDownloads:NO];
             [self.delegate triggerNoDownloadsPending];
         } else {
@@ -317,7 +317,7 @@
         CTVar *var = self.vars[key];
         if (var.kind == CT_KIND_FILE && var.fileURL) {
             // If file is already present, call fileIsReady
-            // Else download the file and call fileIsReady when downloaded
+            // else download the file and call fileIsReady when downloaded
             if ([self.fileDownloader isFileAlreadyPresent:var.fileURL]) {
                 [var triggerFileIsReady];
             } else {
@@ -337,15 +337,30 @@
         [self setHasPendingDownloads:NO];
         for (NSString *key in status.allKeys) {
             @synchronized (self) {
-                if (status[key]) {
+                if ([status[key] boolValue]) {
                     [self.fileVarsInDownload[key] triggerFileIsReady];
                 }
                 [self.fileVarsInDownload removeObjectForKey:key];
             }
         }
-        
         [self.delegate triggerNoDownloadsPending];
     }];
+}
+
+- (void)fileVarUpdated:(CTVar *)fileVar {
+    NSString *url = fileVar.fileURL;
+    if (!url) {
+        // FileIsReady is not triggered if there is no override, fileURL is nil
+        return;
+    }
+    
+    if ([self.fileDownloader isFileAlreadyPresent:url]) {
+        [fileVar triggerFileIsReady];
+    } else {
+        [self.fileDownloader downloadFiles:@[url] withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+            [fileVar triggerFileIsReady];
+        }];
+    }
 }
 
 @end

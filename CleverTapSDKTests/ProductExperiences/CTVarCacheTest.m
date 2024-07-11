@@ -45,7 +45,7 @@ CTVariables *variables;
 - (void)tearDown {
     variables = nil;
     [self.fileDownloadHelper removeStub];
-    [self removeFiles];
+    [self.fileDownloadHelper cleanUpFiles:self.fileDownloader forTest:self];
 }
 
 #pragma mark Name Components
@@ -512,7 +512,7 @@ CTVariables *variables;
 }
 
 - (void)testFileVariableValues {
-    NSArray *urls = [self.fileDownloadHelper generateFileURLStrings:1];
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
     
     // Register Vars
     CTVar *var1 = [variables define:@"var1" with:nil kind:CT_KIND_FILE];
@@ -524,29 +524,93 @@ CTVariables *variables;
     
     // Apply diffs
     NSDictionary *diffs = @{
-        @"var1": urls[0]
+        @"var1": url
     };
     [variables.varCache applyVariableDiffs:diffs];
     [self waitForExpectations:@[expectation] timeout:2.0];
     
-    NSString *expValue1 = [self.fileDownloader fileDownloadPath:urls[0]];
-    XCTAssertEqualObjects(urls[0], var1.fileURL);
+    NSString *expValue1 = [self.fileDownloader fileDownloadPath:url];
+    XCTAssertEqualObjects(url, var1.fileURL);
     XCTAssertEqualObjects(expValue1, var1.value);
     XCTAssertEqualObjects(expValue1, var1.stringValue);
     XCTAssertEqualObjects(expValue1, var1.fileValue);
 }
 
-- (void)removeFiles {
-    [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
-    [CTPreferences removeObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
+- (void)testApplyVariableValuesNil {
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
+
+    // Register Vars
+    CTVar *var1 = [variables define:@"var1" with:nil kind:CT_KIND_FILE];
     
-    XCTestExpectation *expectation1 = [self expectationWithDescription:@"Wait for cleanup"];
-    self.fileDownloader.removeAllAssetsCompletion = ^(NSDictionary<NSString *,id> * _Nonnull status) {
-        [expectation1 fulfill];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for download completion"];
+    self.fileDownloader.downloadCompletion = ^(NSDictionary<NSString *, id> * _Nonnull status) {
+        [expectation fulfill];
     };
-    // Clear all files
-    [self.fileDownloader clearFileAssets:NO];
-    [self waitForExpectations:@[expectation1] timeout:2.0];
+    
+    // Apply diffs with var1 override
+    NSDictionary *diffs = @{
+        @"var1": url
+    };
+    [variables.varCache applyVariableDiffs:diffs];
+    [self waitForExpectations:@[expectation] timeout:2.0];
+    
+    NSString *expValue1 = [self.fileDownloader fileDownloadPath:url];
+    XCTAssertEqualObjects(url, var1.fileURL);
+    XCTAssertEqualObjects(expValue1, var1.value);
+    XCTAssertEqualObjects(expValue1, var1.stringValue);
+    XCTAssertEqualObjects(expValue1, var1.fileValue);
+    
+    // Apply diffs with no override
+    NSDictionary *diffsNil = @{
+    };
+    [variables.varCache applyVariableDiffs:diffsNil];
+    XCTAssertNil(var1.fileURL);
+    XCTAssertNil(var1.value);
+    XCTAssertNil(var1.stringValue);
+    XCTAssertNil(var1.fileValue);
+}
+
+- (void)testDefineFileVarAfterResponse {
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
+    // Apply diffs with var1 override
+    NSDictionary *diffs = @{
+        @"var1": url
+    };
+    [variables handleVariablesResponse:diffs];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for download completion"];
+    self.fileDownloader.downloadCompletion = ^(NSDictionary<NSString *, id> * _Nonnull status) {
+        [expectation fulfill];
+    };
+    // Define the variable after the initial response and applied diffs
+    CTVar *var1 = [variables define:@"var1" with:nil kind:CT_KIND_FILE];
+    [self waitForExpectations:@[expectation] timeout:2.0];
+
+    NSString *expValue1 = [self.fileDownloader fileDownloadPath:url];
+    XCTAssertEqualObjects(url, var1.fileURL);
+    XCTAssertEqualObjects(expValue1, var1.value);
+    XCTAssertEqualObjects(expValue1, var1.stringValue);
+    XCTAssertEqualObjects(expValue1, var1.fileValue);
+}
+
+- (void)testFileVarUpdated {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for download completion"];
+    NSString *url = [self.fileDownloadHelper generateFileURLString];
+    variables.varCache.merged = [NSMutableDictionary dictionaryWithDictionary:@{
+        @"var1": url
+    }];
+    CTVar *var1 = [variables define:@"var1" with:nil kind:CT_KIND_FILE];
+    [var1 onFileIsReady:^{
+        [expectation fulfill];
+        
+        NSString *expValue1 = [self.fileDownloader fileDownloadPath:url];
+        XCTAssertEqualObjects(url, var1.fileURL);
+        XCTAssertEqualObjects(expValue1, var1.value);
+        XCTAssertEqualObjects(expValue1, var1.stringValue);
+        XCTAssertEqualObjects(expValue1, var1.fileValue);
+    }];
+    [variables.varCache fileVarUpdated:var1];
+    [self waitForExpectations:@[expectation] timeout:2.0];
 }
 
 @end

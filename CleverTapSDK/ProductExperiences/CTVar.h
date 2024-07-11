@@ -73,6 +73,11 @@ NS_SWIFT_NAME(Var)
 - (void)onValueChanged:(CleverTapVariablesChangedBlock)block;
 
 /**
+ * Called when the value of the file variable is downloaded and ready.
+ */
+- (void)onFileIsReady:(CleverTapVariablesChangedBlock)block;
+
+/**
  * Sets the delegate of the variable in order to use
  * {@link CTVarDelegate::valueDidChange:}
  */
