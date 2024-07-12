@@ -22,4 +22,5 @@
         CleverTapLogStaticInternal(@"[CTUserInfo]: Failed to copy local file: %@", error.localizedDescription);
     }
 }
+
 @end

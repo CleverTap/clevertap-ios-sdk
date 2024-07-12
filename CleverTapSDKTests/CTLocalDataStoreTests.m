@@ -23,7 +23,7 @@
     [super setUp];
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken" accountRegion:@"testRegion"];
     CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:config andCleverTapID:@"testDeviceInfo"];
-    CTDispatchQueueManager *queueManager =[[CTDispatchQueueManager alloc]initWithConfig:config];
+    CTDispatchQueueManager *queueManager = [[CTDispatchQueueManager alloc] initWithConfig:config];
     self.dataStore = [[CTLocalDataStore alloc] initWithConfig:config profileValues:[NSMutableDictionary new] andDeviceInfo:deviceInfo dispatchQueueManager:queueManager];
 }
 

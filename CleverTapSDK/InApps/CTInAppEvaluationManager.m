@@ -102,8 +102,7 @@
     
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName eventProperties:properties andLocation:self.location];
     NSArray *eventList = @[event];
-    CTQueueType queueType = CTQueueTypeEvents;
-    [self evaluateServerSide:eventList withQueueType:queueType];
+    [self evaluateServerSide:eventList withQueueType:CTQueueTypeEvents];
     [self evaluateClientSide:eventList];
 }
 
@@ -117,8 +116,7 @@
         CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:eventName profileAttrName:key eventProperties: value andLocation:self.location];
         [eventAdapterList addObject:event];
     }];
-    CTQueueType queueType = CTQueueTypeProfile;
-    [self evaluateServerSide:eventAdapterList withQueueType:queueType];
+    [self evaluateServerSide:eventAdapterList withQueueType:CTQueueTypeProfile];
     [self evaluateClientSide:eventAdapterList];
     
 }
@@ -178,8 +176,8 @@
 - (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events withQueueType:(CTQueueType)queueType{
     NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];
     for (CTEventAdapter *event in events) {
-            [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.serverSideInApps]];
-        }
+        [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.serverSideInApps]];
+    }
     BOOL updated = NO;
     for (NSDictionary *inApp in eligibleInApps) {
         NSString *campaignId = [CTInAppNotification inAppId:inApp];
