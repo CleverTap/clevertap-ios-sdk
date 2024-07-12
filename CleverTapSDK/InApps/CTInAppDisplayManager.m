@@ -35,7 +35,6 @@
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
-#import "CTInAppImagePrefetchManager.h"
 #endif
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
@@ -57,7 +56,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 @property (nonatomic, weak) CleverTap* instance;
 
-@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
 
 @property (nonatomic, strong, readonly) NSString *imageInterstitialHtml;
 
@@ -79,14 +78,14 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
                                 inAppStore:(CTInAppStore *)inAppStore
-                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
+                            fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
         self.inAppStore = inAppStore;
-        self.imagePrefetchManager = imagePrefetchManager;
+        self.fileDownloader = fileDownloader;
     }
     return self;
 }
@@ -208,7 +207,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
-        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj imagePrefetchManager:self.imagePrefetchManager];
+        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj fileDownloader:self.fileDownloader];
         if (notification.error) {
             CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
             return;

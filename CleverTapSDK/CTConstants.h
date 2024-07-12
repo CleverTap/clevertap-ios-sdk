@@ -76,6 +76,13 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 
+#pragma mark Constants for File Assets
+#define CLTAP_FILE_URLS_EXPIRY_DICT @"file_urls_expiry_dict"
+#define CLTAP_FILE_ASSETS_LAST_DELETED_TS @"cs_file_assets_last_deleted_timestamp"
+#define CLTAP_FILE_EXPIRY_OFFSET (60 * 60 * 24 * 7 * 2) // 2 weeks
+#define CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL 15
+#define CLTAP_FILES_DIRECTORY_NAME @"CleverTap_Files"
+
 #pragma mark Constants for App fields
 #define CLTAP_APP_VERSION @"Version"
 #define CLTAP_LATITUDE @"Latitude"
@@ -94,6 +101,7 @@ extern NSString *CT_KIND_FLOAT;
 extern NSString *CT_KIND_STRING;
 extern NSString *CT_KIND_BOOLEAN;
 extern NSString *CT_KIND_DICTIONARY;
+extern NSString *CT_KIND_FILE;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
@@ -246,5 +254,3 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"
 #define CLTAP_ENCRYPTION_IV @"__CL3>3Rt#P__1V_"
 #define CLTAP_ENCRYPTION_PII_DATA (@[@"Identity", @"userEmail", @"userPhone", @"userName"]);
-
-

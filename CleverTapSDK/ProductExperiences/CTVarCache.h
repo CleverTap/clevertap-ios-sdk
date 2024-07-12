@@ -2,6 +2,12 @@
 #import "CTVar-Internal.h"
 #import "CleverTapInstanceConfig.h"
 #import "CTDeviceInfo.h"
+#import "CTFileDownloader.h"
+
+@protocol CTFileVarDelegate <NSObject>
+@required
+- (void)triggerNoDownloadsPending;
+@end
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -12,11 +18,15 @@ NS_SWIFT_NAME(VarCache)
 
 - (instancetype)init NS_UNAVAILABLE;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config 
+                    deviceInfo:(CTDeviceInfo*)deviceInfo
+                fileDownloader:(CTFileDownloader *)fileDownloader;
 
 @property (nonatomic, strong, readonly) CleverTapInstanceConfig *config;
-@property (strong, nonatomic) NSMutableDictionary<NSString *, id> *vars;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, CTVar *> *vars;
 @property (assign, nonatomic) BOOL hasVarsRequestCompleted;
+@property (assign, nonatomic) BOOL hasPendingDownloads;
+@property (nonatomic, weak) id<CTFileVarDelegate> delegate;
 
 - (nullable NSDictionary<NSString *, id> *)diffs;
 - (void)loadDiffs;
@@ -29,6 +39,10 @@ NS_SWIFT_NAME(VarCache)
 - (NSArray<NSString *> *)getNameComponents:(NSString *)name;
 - (nullable id)getMergedValueFromComponentArray:(NSArray<NSString *> *) components;
 - (void)clearUserContent;
+
+- (nullable NSString *)fileDownloadPath:(NSString *)fileURL;
+- (BOOL)isFileAlreadyPresent:(NSString *)fileURL;
+- (void)fileVarUpdated:(CTVar *)fileVar;
 
 @end
 

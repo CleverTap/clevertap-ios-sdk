@@ -3,7 +3,7 @@
 #import "CTInAppUtils.h"
 #import "CTNotificationButton.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-#import "CTInAppImagePrefetchManager.h"
+#import "CTFileDownloader.h"
 #endif
 
 @interface CTInAppNotification : NSObject
@@ -66,7 +66,7 @@
 - (instancetype)init __unavailable;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (instancetype)initWithJSON:(NSDictionary*)json
-        imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager;
+              fileDownloader:(CTFileDownloader *)fileDownloader;
 #endif
 
 - (void)prepareWithCompletionHandler: (void (^)(void))completionHandler;
