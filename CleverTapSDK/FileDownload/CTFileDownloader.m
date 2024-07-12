@@ -222,11 +222,15 @@
     for (NSString *url in urls) {
         dispatch_group_enter(deleteGroup);
         dispatch_async(deleteConcurrentQueue, ^{
-            [sdImageCache removeImageForKey:url
-                                   fromDisk:YES
-                             withCompletion:^{
+            if ([sdImageCache diskImageDataExistsWithKey:url]) {
+                [sdImageCache removeImageForKey:url
+                                       fromDisk:YES
+                                 withCompletion:^{
+                    dispatch_group_leave(deleteGroup);
+                }];
+            } else {
                 dispatch_group_leave(deleteGroup);
-            }];
+            }
         });
     }
     
