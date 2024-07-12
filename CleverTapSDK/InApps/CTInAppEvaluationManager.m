@@ -244,7 +244,7 @@
             [self removeSentEvaluatedServerSideInAppIds:header];
             [self removeSentSuppressedClientSideInApps:header];
         }
-        else if (queueType == CTQueueTypeEvents) {
+        else if (queueType == CTQueueTypeProfile) {
             [self removeSentEvaluatedServerSideInAppIdsForProfile:header];
             [self removeSentSuppressedClientSideInAppsForProfile:header];
         }
@@ -278,7 +278,7 @@
 }
 
 - (void)removeSentEvaluatedServerSideInAppIdsForProfile:(NSDictionary *)header {
-    NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE];
+    NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_META_KEY];
     if (inapps_eval && [inapps_eval count] > 0) {
         NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIdsForProfile.count ?  self.evaluatedServerSideInAppIdsForProfile.count : inapps_eval.count;
         [self.evaluatedServerSideInAppIdsForProfile removeObjectsInRange:NSMakeRange(0, len)];
@@ -287,7 +287,7 @@
 }
 
 - (void)removeSentSuppressedClientSideInAppsForProfile:(NSDictionary *)header {
-    NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE];
+    NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
     if (suppresed_inapps && [suppresed_inapps count] > 0) {
         NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInAppsForProfile.count ?  self.suppressedClientSideInAppsForProfile.count : suppresed_inapps.count;
         [self.suppressedClientSideInAppsForProfile removeObjectsInRange:NSMakeRange(0, len)];
@@ -384,12 +384,11 @@
     }
     NSMutableDictionary *header = [NSMutableDictionary new];
     if (queueType == CTQueueTypeProfile) {
-        
         if ([self.evaluatedServerSideInAppIdsForProfile count] > 0) {
-            header[CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE] = self.evaluatedServerSideInAppIdsForProfile;
+            header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIdsForProfile;
         }
         if ([self.suppressedClientSideInAppsForProfile count] > 0) {
-            header[CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE] = self.suppressedClientSideInAppsForProfile;
+            header[CLTAP_INAPP_SUPPRESSED_META_KEY] = self.suppressedClientSideInAppsForProfile;
         }
     }
     else {
