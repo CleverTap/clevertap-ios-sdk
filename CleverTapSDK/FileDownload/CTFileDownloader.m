@@ -48,9 +48,17 @@
     }];
 }
 
-- (BOOL)isFileAlreadyPresent:(NSString *)url {
+- (BOOL)isFileAlreadyPresent:(NSString *)url
+         andUpdateExpiryTime:(BOOL)updateExpiryTime {
     NSURL *fileUrl = [NSURL URLWithString:url];
     BOOL fileExists = [self.fileDownloadManager isFileAlreadyPresent:fileUrl];
+
+    // For PE File vars when fileExists returns true, we are not calling downloadFiles for existing files
+    // so we need to update file expiry time for those existing files.
+    if (fileExists && updateExpiryTime) {
+        [self updateFilesExpiry:@{url:@1}];
+        [self updateFilesExpiryInPreference];
+    }
     return fileExists;
 }
 
@@ -66,7 +74,7 @@
 }
 
 - (nullable NSString *)fileDownloadPath:(NSString *)url {
-    if ([self isFileAlreadyPresent:url]) {
+    if ([self isFileAlreadyPresent:url andUpdateExpiryTime:NO]) {
         NSURL *fileURL = [NSURL URLWithString:url];
         return [self.fileDownloadManager filePath:fileURL];
     } else {
@@ -103,6 +111,10 @@
             self.urlsExpiry = [NSMutableDictionary new];
         }
     }
+    
+    // Check for expired files and delete them at every start of session.
+    long lastDeletedTime = [self lastDeletedTimestamp];
+    [self removeInactiveExpiredAssets:lastDeletedTime];
 }
 
 - (void)removeInactiveExpiredAssets:(long)lastDeletedTime {

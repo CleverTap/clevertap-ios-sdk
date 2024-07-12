@@ -314,7 +314,7 @@
 }
 
 - (BOOL)isFileAlreadyPresent:(NSString *)fileURL {
-    return [self.fileDownloader isFileAlreadyPresent:fileURL];
+    return [self.fileDownloader isFileAlreadyPresent:fileURL andUpdateExpiryTime:YES];
 }
 
 - (NSMutableArray<NSString *> *)fileURLs:(NSArray *)fileVars {
@@ -323,7 +323,7 @@
         if (var.fileURL) {
             // If file is already present, call fileIsReady
             // else download the file and call fileIsReady when downloaded
-            if ([self.fileDownloader isFileAlreadyPresent:var.fileURL]) {
+            if ([self isFileAlreadyPresent:var.fileURL]) {
                 [var triggerFileIsReady];
             } else {
                 [downloadURLs addObject:var.fileURL];
@@ -362,7 +362,7 @@
         return;
     }
     
-    if ([self.fileDownloader isFileAlreadyPresent:url]) {
+    if ([self isFileAlreadyPresent:url]) {
         [fileVar triggerFileIsReady];
     } else {
         [self.fileDownloader downloadFiles:@[url] withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {

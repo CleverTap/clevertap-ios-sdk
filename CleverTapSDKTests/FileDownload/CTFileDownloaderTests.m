@@ -131,13 +131,13 @@
 
 - (void)testFileAlreadyPresent {
     NSArray *urls = [self.helper generateFileURLStrings:2];
-    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
     
     [self downloadFiles:@[urls[0]]];
     
-    XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+    XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
 }
 
 - (void)testImageLoadedFromDisk {
@@ -424,7 +424,7 @@
     NSMutableArray *paths = [NSMutableArray array];
     for (NSString *url in urls) {
         // Assert the files are downloaded
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:url]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:NO]);
         [paths addObject:[self.fileDownloader fileDownloadPath:url]];
     }
 
@@ -441,7 +441,7 @@
         }
         // Assert the files no longer exist
         for (NSString *url in urls) {
-            XCTAssertFalse([weakSelf.fileDownloader isFileAlreadyPresent:url]);
+            XCTAssertFalse([weakSelf.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:NO]);
         }
         // Assert urlsExpiry is cleared
         XCTAssertEqual(0, weakSelf.fileDownloader.urlsExpiry.count);
@@ -464,17 +464,57 @@
     
     NSArray *urls = [self.helper generateFileURLStrings:3];
     [self.fileDownloader downloadFiles:@[urls[0], urls[1], urls[2]] withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2] andUpdateExpiryTime:NO]);
         [expectation1 fulfill];
     }];
     [self.fileDownloader downloadFiles:@[urls[0], urls[1]] withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
         [expectation2 fulfill];
     }];
     [self waitForExpectations:@[expectation2, expectation1] timeout:2.0 enforceOrder:YES];
+}
+
+- (void)testFileAlreadyPresentUpdatesFileExpiryTime {
+    // This test checks that file expiry time is updated when file is already present
+    // and `isFileAlreadyPresent:` method is called with andUpdateExpiryTime YES.
+    
+    // Mock currentTimeInterval
+    long ts = (long)[[NSDate date] timeIntervalSince1970];
+    self.fileDownloader.mockCurrentTimeInterval = ts;
+    
+    NSString *url = [self.helper generateFileURLStrings:1][0];
+    [self downloadFiles:@[url]];
+    long expiryDate = ts + self.fileDownloader.fileExpiryTime;
+    // Ensure url has correct expiry set
+    XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
+    
+    self.fileDownloader.mockCurrentTimeInterval = ts + 100;
+    [self.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:YES];
+    // Ensure url expiry is updated
+    XCTAssertEqualObjects(@(expiryDate + 100), self.fileDownloader.urlsExpiry[url]);
+}
+
+- (void)testFileAlreadyPresentDoesNotUpdatesFileExpiryTime {
+    // This test checks that file expiry time is not updated when file is already present
+    // and `isFileAlreadyPresent:` method is called with andUpdateExpiryTime NO.
+    
+    // Mock currentTimeInterval
+    long ts = (long)[[NSDate date] timeIntervalSince1970];
+    self.fileDownloader.mockCurrentTimeInterval = ts;
+    
+    NSString *url = [self.helper generateFileURLStrings:1][0];
+    [self downloadFiles:@[url]];
+    long expiryDate = ts + self.fileDownloader.fileExpiryTime;
+    // Ensure url has correct expiry set
+    XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
+    
+    self.fileDownloader.mockCurrentTimeInterval = ts + 100;
+    [self.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:NO];
+    // Ensure url expiry is not updated
+    XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
 }
 
 #pragma mark Private methods
