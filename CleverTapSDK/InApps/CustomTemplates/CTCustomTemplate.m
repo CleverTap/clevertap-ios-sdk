@@ -51,4 +51,12 @@
     return [self.name hash];
 }
 
+- (NSString *)debugDescription {
+    return [NSString stringWithFormat:@"<%@: %p> name: %@, args: {\n%@\n}",
+            [self class],
+            self,
+            self.name,
+            [self.arguments componentsJoinedByString:@",\n"]];
+}
+
 @end
