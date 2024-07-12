@@ -36,7 +36,7 @@
                          inAppFCManager:nil
                       impressionManager:nil
                              inAppStore:nil
-                   imagePrefetchManager:nil]) {
+                         fileDownloader:nil]) {
         self.inappNotifs = [NSMutableArray new];
     }
     return self;
