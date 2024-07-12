@@ -14,6 +14,8 @@
 @property (nonatomic, strong) CTInAppDisplayManager *inAppDisplayManager;
 @property (nonatomic, strong) NSMutableArray *suppressedClientSideInApps;
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIds;
+@property (nonatomic, strong) NSMutableArray *evaluatedServerSideInAppIdsForProfile;
+@property (nonatomic, strong) NSMutableArray *suppressedClientSideInAppsForProfile;
 @property (nonatomic, strong) NSDictionary *appLaunchedProperties;
 - (void)sortByPriority:(NSMutableArray *)inApps;
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps;
@@ -24,6 +26,8 @@
 - (void)onAppLaunchedWithSuccess:(BOOL)success;
 - (void)saveEvaluatedServerSideInAppIds;
 - (void)saveSuppressedClientSideInApps;
+- (void)saveEvaluatedServerSideInAppIdsForProfile;
+- (void)saveSuppressedClientSideInAppsForProfile;
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 @end
 

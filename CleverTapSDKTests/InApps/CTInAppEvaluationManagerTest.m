@@ -66,15 +66,20 @@
 }
 
 - (void)tearDown {
-    // Clean up resources if needed
-    //self.evaluationManager = nil;
+    // Remove triggers
     for (int i = 1; i <= 4; i++) {
         [self.evaluationManager.triggerManager removeTriggers:[NSString stringWithFormat:@"%d", i]];
     }
+    // Remove saved ids
     self.evaluationManager.evaluatedServerSideInAppIds = [NSMutableArray new];
     [self.evaluationManager saveEvaluatedServerSideInAppIds];
     self.evaluationManager.suppressedClientSideInApps = [NSMutableArray new];
     [self.evaluationManager saveSuppressedClientSideInApps];
+    
+    self.evaluationManager.evaluatedServerSideInAppIdsForProfile = [NSMutableArray new];
+    [self.evaluationManager saveEvaluatedServerSideInAppIdsForProfile];
+    self.evaluationManager.suppressedClientSideInAppsForProfile = [NSMutableArray new];
+    [self.evaluationManager saveSuppressedClientSideInAppsForProfile];
     [super tearDown];
 }
 
@@ -332,8 +337,8 @@
 
 
     [self.evaluationManager evaluateOnUserAttributeChange:profile];
-    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIds);
-    XCTAssertNotEqualObjects((@[@2]), self.evaluationManager.evaluatedServerSideInAppIds);
+    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
+    XCTAssertNotEqualObjects((@[@2]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
 }
 
 - (void)testEvaluateCharged {
@@ -438,7 +443,7 @@
             CLTAP_INAPP_SUPPRESSED_META_KEY: @[@0]
         }
     ];
-    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES];
+    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES withQueueType:CTQueueTypeEvents];
     XCTAssertEqualObjects((@[@3]), [self savedEvaluatedServerSideInAppIds]);
     XCTAssertEqual(1, [[self savedSuppressedClientSideInApps] count]);
     
@@ -683,11 +688,11 @@
             CLTAP_INAPP_SUPPRESSED_META_KEY: @[@4, @5, @6]
         }
     ];
-    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:NO];
+    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:NO withQueueType:CTQueueTypeEvents];
     XCTAssertEqualObjects((@[@1, @2, @3]), self.evaluationManager.evaluatedServerSideInAppIds);
     XCTAssertEqualObjects((@[@4, @5, @6]), self.evaluationManager.suppressedClientSideInApps);
 
-    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES];
+    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES withQueueType:CTQueueTypeEvents];
     XCTAssertEqualObjects((@[]), self.evaluationManager.evaluatedServerSideInAppIds);
     XCTAssertEqualObjects((@[]), self.evaluationManager.suppressedClientSideInApps);
 }
@@ -708,18 +713,18 @@
         }
     ];
     // If batch is not successful, do not remove elements
-    [self.evaluationManager onBatchSent:batchWithHeader withSuccess:NO];
+    [self.evaluationManager onBatchSent:batchWithHeader withSuccess:NO withQueueType:CTQueueTypeEvents];
     XCTAssertEqualObjects((@[@1, @2, @3]), self.evaluationManager.evaluatedServerSideInAppIds);
     XCTAssertEqualObjects((@[@4, @5, @6]), self.evaluationManager.suppressedClientSideInApps);
 
     // Remove only the first n elements in the batch
-    [self.evaluationManager onBatchSent:batchWithHeader withSuccess:YES];
+    [self.evaluationManager onBatchSent:batchWithHeader withSuccess:YES withQueueType:CTQueueTypeEvents];
     XCTAssertEqualObjects((@[@3]), self.evaluationManager.evaluatedServerSideInAppIds);
     XCTAssertEqualObjects((@[@5, @6]), self.evaluationManager.suppressedClientSideInApps);
     
     // Remove all elements, ensure no out of range exception
     // Current values are @[@3] and @[@5, @6]
-    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES];
+    [self.evaluationManager onBatchSent:batchWithHeaderAll withSuccess:YES withQueueType:CTQueueTypeEvents];
     XCTAssertEqualObjects((@[]), self.evaluationManager.evaluatedServerSideInAppIds);
     XCTAssertEqualObjects((@[]), self.evaluationManager.suppressedClientSideInApps);
 }
