@@ -9,6 +9,12 @@
 #import "CTFileDownloadTestHelper.h"
 #import <OHHTTPStubs/HTTPStubs.h>
 
+#import "CTFileDownloaderMock.h"
+#import "CTFileDownloader+Tests.h"
+#import <XCTest/XCTest.h>
+#import "CTPreferences.h"
+#import "CTConstants.h"
+
 @interface CTFileDownloadTestHelper()
 
 @property (nonatomic, strong) id<HTTPStubsDescriptor> HTTPStub;
@@ -91,6 +97,10 @@
     return arr;
 }
 
+- (NSString *)generateFileURLString {
+    return [self generateFileURLStrings:1][0];
+}
+
 - (NSArray<NSString *> *)generateFileURLStrings:(int)count {
     NSMutableArray *arr = [NSMutableArray arrayWithCapacity:count];
     for (int i = 0; i < count; i++) {
@@ -103,6 +113,18 @@
 - (NSString *)generateFileURLStringAtIndex:(int)index {
     int type = index >= 3 ? index % 3 : index;
     return [NSString stringWithFormat:@"https://clevertap.com/%@_%d.%@", self.fileURL, index, self.fileURLTypes[type]];
+}
+
+- (void)cleanUpFiles:(CTFileDownloader *)fileDownloader forTest:(XCTestCase *)testCase {
+    [CTPreferences removeObjectForKey:[fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
+    [CTPreferences removeObjectForKey:[fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
+    
+    XCTestExpectation *expectation = [testCase expectationWithDescription:@"Wait for remove all assets"];
+    // Clear all files
+    [fileDownloader removeAllAssetsWithCompletion:^(NSDictionary<NSString *,NSNumber *> *status) {
+        [expectation fulfill];
+    }];
+    [testCase waitForExpectations:@[expectation] timeout:2.0];
 }
 
 @end

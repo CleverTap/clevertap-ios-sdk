@@ -498,7 +498,7 @@ static BOOL sharedInstanceErrorLogged;
         [self _initProductConfig];
         
         // Initialise Variables
-        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
+        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
         
         [self notifyUserProfileInitialized];
     }
@@ -4370,6 +4370,14 @@ static BOOL sharedInstanceErrorLogged;
     return [[self.variables varCache] getMergedValue:name];
 }
 
+- (void)onVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block {
+    [[self variables] onVariablesChangedAndNoDownloadsPending:block];
+}
+
+- (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block {
+    [[self variables] onceVariablesChangedAndNoDownloadsPending:block];
+}
+
 #pragma mark - PE Vars
 
 - (CTVar *)defineVar:(NSString *)name {
@@ -4479,6 +4487,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (CTVar *)defineVar:(NSString *)name withDictionary:(NSDictionary *)defaultValue {
     return [self.variables define:name with:defaultValue kind:CT_KIND_DICTIONARY];
+}
+
+- (CTVar *)defineFileVar:(NSString *)name {
+    return [self.variables define:name with:nil kind:CT_KIND_FILE];
 }
 
 @end

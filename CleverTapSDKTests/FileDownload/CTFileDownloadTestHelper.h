@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <XCTest/XCTest.h>
+#import "CTFileDownloader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -21,7 +23,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)fileURL;
 - (NSURL *)generateFileURL;
 - (NSArray<NSURL *> *)generateFileURLs:(int)count;
+- (NSString *)generateFileURLString;
 - (NSArray<NSString *> *)generateFileURLStrings:(int)count;
+
+- (void)cleanUpFiles:(CTFileDownloader *)fileDownloader forTest:(XCTestCase *)testCase;
 
 @end
 
