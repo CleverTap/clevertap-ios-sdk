@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addBatchSentDelegate:(id<CTBatchSentDelegate>)delegate;
 - (void)removeBatchSentDelegate:(id<CTBatchSentDelegate>)delegate;
-- (void)notifyDelegatesBatchDidSend:(NSArray *)batchWithHeader withSuccess:(BOOL)success;
+- (void)notifyDelegatesBatchDidSend:(NSArray *)batchWithHeader withSuccess:(BOOL)success withQueueType:(CTQueueType)queueType;
 
 @end
 
