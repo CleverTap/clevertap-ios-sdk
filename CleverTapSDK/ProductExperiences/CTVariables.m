@@ -304,7 +304,10 @@
                     currentMap = nestedMap;
                 }
                 else {
-                    currentMap = ((NSMutableDictionary*)currentMap[component]);
+                    if (![currentMap[component] isKindOfClass:[NSMutableDictionary class]] && [currentMap[component] isKindOfClass:[NSDictionary class]]) {
+                        currentMap[component] = [[NSMutableDictionary alloc] initWithDictionary:currentMap[component]];
+                    }
+                    currentMap = currentMap[component];
                 }
             }
             if ([currentMap isKindOfClass:[NSMutableDictionary class]]) {
