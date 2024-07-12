@@ -23,7 +23,7 @@
 - (void)updateLastDeletedTimestamp;
 - (long)lastDeletedTimestamp;
 - (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion;
-- (void)migrateActiveAndInactiveUrls;
+- (void)removeLegacyAssets:(void (^)(void))completion;
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 - (void)updateFilesExpiry:(NSDictionary<NSString *, NSNumber *> *)status;
 - (void)removeAllAssetsWithCompletion:(void(^)(NSDictionary<NSString *,NSNumber *> *status))completion;
