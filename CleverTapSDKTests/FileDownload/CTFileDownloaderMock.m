@@ -52,4 +52,16 @@
     [super removeAllAssetsWithCompletion:completionBlock];
 }
 
+- (void)downloadFiles:(NSArray<NSString *> *)fileURLs withCompletionBlock:(void (^)(NSDictionary<NSString *,NSNumber *> * _Nonnull))completion {
+    CTFilesDownloadCompletedBlock completionBlock = ^(NSDictionary<NSString *,id> *status) {
+        if (completion) {
+            completion(status);
+        }
+        if (self.downloadCompletion) {
+            self.downloadCompletion(status);
+        }
+    };
+    [super downloadFiles:fileURLs withCompletionBlock:completionBlock];
+}
+
 @end

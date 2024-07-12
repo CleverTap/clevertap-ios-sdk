@@ -10,19 +10,22 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 @property (nonatomic, strong) NSArray *nameComponents;
 @property (nonatomic, strong) NSString *stringValue;
 @property (nonatomic, strong) NSNumber *numberValue;
+@property (nonatomic, strong) NSString *fileValue;
+@property (nonatomic, strong) NSString *fileURL;
 @property (nonatomic) BOOL hadStarted;
 @property (nonatomic, strong) id value;
 @property (nonatomic, strong) id defaultValue;
 @property (nonatomic, strong) NSString *kind;
 @property (nonatomic, strong) NSMutableArray *valueChangedBlocks;
+@property (nonatomic, strong) NSMutableArray *fileReadyBlocks;
 @property (nonatomic) BOOL hasChanged;
+@property (nonatomic) BOOL shouldDownloadFile;
 @end
 
 @implementation CTVar
 
 - (instancetype)initWithName:(NSString *)name withDefaultValue:(NSNumber *)defaultValue
-                    withKind:(NSString *)kind varCache:(CTVarCache *)cache
-{
+                    withKind:(NSString *)kind varCache:(CTVarCache *)cache {
     self = [super init];
     if (self) {
         CT_TRY
@@ -34,9 +37,21 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
         _kind = kind;
         [self cacheComputedValues];
         
+        // If the file is defined after the Vars request has completed,
+        // file needs to be downloaded individually
+        if ([_kind isEqualToString:CT_KIND_FILE] && [[self varCache] hasVarsRequestCompleted]) {
+            _shouldDownloadFile = YES;
+        }
+        
         [self.varCache registerVariable:self];
         
         [self update];
+        
+        // Store the actual file URL as _value returns path of file downloaded
+        // after the var update
+        if ([_kind isEqualToString:CT_KIND_FILE]) {
+            _fileURL = _value;
+        }
         CT_END_TRY
     }
     return self;
@@ -45,9 +60,11 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 // Manually @synthesize since CTVar provides custom getters/setters
 // Properties are defined as readonly in CTVar-Internal
 // and readwrite in PrivateProperties category
+@synthesize value = _value;
 @synthesize stringValue = _stringValue;
 @synthesize numberValue = _numberValue;
 @synthesize varCache = _varCache;
+@synthesize fileValue = _fileValue;
 
 - (CTVarCache *)varCache {
     return _varCache;
@@ -59,7 +76,7 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Updates
 
-- (void) cacheComputedValues {
+- (void)cacheComputedValues {
     // Cache computed values.
     if ([_value isKindOfClass:NSString.class]) {
         _stringValue = (NSString *) _value;
@@ -73,23 +90,35 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     }
 }
 
-- (void)update {
+- (BOOL)update {
     NSObject *oldValue = _value;
     _value = [self.varCache getMergedValueFromComponentArray:_nameComponents];
     
     if ([_value isEqual:oldValue] && _hadStarted) {
-        return;
+        return NO;
     }
     [self cacheComputedValues];
     
+    BOOL changed = NO;
     if (![_value isEqual:oldValue]) {
         _hasChanged = YES;
+        changed = YES;
+        // Update _fileURL with new value if it has changed.
+        if ([_kind isEqualToString:CT_KIND_FILE]) {
+            _fileURL = _value;
+        }
+    }
+    
+    if (_shouldDownloadFile) {
+        [self.varCache fileVarUpdated:self];
     }
     
     if ([[self varCache] hasVarsRequestCompleted]) {
         [self triggerValueChanged];
         _hadStarted = YES;
+        _shouldDownloadFile = NO;
     }
+    return changed;
 }
 
 #pragma mark Callbacks
@@ -100,8 +129,10 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
         [self.delegate valueDidChange:self];
     }
     
-    for (CleverTapVariablesChangedBlock block in _valueChangedBlocks.copy) {
-        block();
+    if (_valueChangedBlocks && _valueChangedBlocks.count > 0) {
+        for (CleverTapVariablesChangedBlock block in _valueChangedBlocks.copy) {
+            block();
+        }
     }
 }
 
@@ -128,20 +159,72 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
     if ([[self varCache] hasVarsRequestCompleted]) {
         [self triggerValueChanged];
     }
+    
+    // Call fileIsReady if value is already fetched and file is already present.
+    if ([_kind isEqualToString:CT_KIND_FILE] && _fileURL) {
+        if ([self.varCache isFileAlreadyPresent:_fileURL]) {
+            [self triggerFileIsReady];
+        }
+    }
     CT_END_TRY
+}
+
+#pragma mark File Handling
+
+- (void)onFileIsReady:(CleverTapVariablesChangedBlock)block {
+    if (!block) {
+        CleverTapLogStaticDebug(@"Nil block parameter provided while calling [CTVar onFileIsReady].");
+        return;
+    }
+    
+    if (![_kind isEqualToString:CT_KIND_FILE]) {
+        CleverTapLogStaticDebug(@"[CTVar onFileIsReady] is only available for File Variables.");
+        return;
+    }
+    
+    CT_TRY
+    if (!_fileReadyBlocks) {
+        _fileReadyBlocks = [NSMutableArray array];
+    }
+    [_fileReadyBlocks addObject:[block copy]];
+    if ([self.varCache isFileAlreadyPresent:_fileURL]) {
+        [self triggerFileIsReady];
+    }
+    CT_END_TRY
+}
+
+- (void)triggerFileIsReady {
+    if (self.delegate &&
+        [self.delegate respondsToSelector:@selector(fileIsReady:)]) {
+        [self.delegate fileIsReady:self];
+    }
+    
+    if (_fileReadyBlocks && _fileReadyBlocks.count > 0) {
+        for (CleverTapVariablesChangedBlock block in _fileReadyBlocks.copy) {
+            block();
+        }
+    }
+}
+
+- (nullable NSString *)fileValue {
+    [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_fileURL];
+    }
+    return nil;
 }
 
 #pragma mark Dictionary handling
 
-- (id) objectForKey:(NSString *)key {
+- (id)objectForKey:(NSString *)key {
     return [self objectForKeyPath:key, nil];
 }
 
-- (id) objectAtIndex:(NSUInteger)index {
+- (id)objectAtIndex:(NSUInteger)index {
     return [self objectForKeyPath:@(index), nil];
 }
 
-- (id) objectForKeyPath:(id)firstComponent, ... {
+- (id)objectForKeyPath:(id)firstComponent, ... {
     CT_TRY
     [self warnIfNotStarted];
     NSMutableArray *components = [_nameComponents mutableCopy];
@@ -169,6 +252,14 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 #pragma mark Value accessors
 
+- (id)value {
+    [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_fileURL];
+    }
+    return _value;
+}
+
 - (NSNumber *)numberValue {
     [self warnIfNotStarted];
     return _numberValue;
@@ -176,6 +267,9 @@ static BOOL LPVAR_PRINTED_CALLBACK_WARNING = NO;
 
 - (NSString *)stringValue {
     [self warnIfNotStarted];
+    if ([_kind isEqualToString:CT_KIND_FILE]) {
+        return [self.varCache fileDownloadPath:_fileURL];
+    }
     return _stringValue;
 }
 

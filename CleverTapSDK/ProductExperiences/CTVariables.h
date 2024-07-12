@@ -10,15 +10,18 @@
 #import "CTVarCache.h"
 #import "CleverTapInstanceConfig.h"
 #import "CTDeviceInfo.h"
+#import "CTFileDownloader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTVariables : NSObject
+@interface CTVariables : NSObject <CTFileVarDelegate>
 
 @property(strong, nonatomic) CTVarCache *varCache;
 @property(strong, nonatomic, nullable) CleverTapFetchVariablesBlock fetchVariablesBlock;
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo *)deviceInfo;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config 
+                    deviceInfo:(CTDeviceInfo *)deviceInfo
+                fileDownloader:(CTFileDownloader *)fileDownloader;
 
 - (CTVar * _Nullable)define:(NSString *)name
              with:(nullable NSObject *)defaultValue
@@ -30,6 +33,8 @@ NS_SWIFT_NAME(define(name:value:kind:));
 - (void)triggerFetchVariables:(BOOL)success;
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull)block;
 - (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull)block;
+- (void)onVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull)block;
+- (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull)block;
 - (NSDictionary*)flatten:(NSDictionary*)map varName:(NSString*)varName;
 - (NSDictionary*)varsPayload;
 - (NSDictionary*)unflatten:(NSDictionary*)result;

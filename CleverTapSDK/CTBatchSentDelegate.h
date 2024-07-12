@@ -7,11 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CTQueueType.h"
 
 @protocol CTBatchSentDelegate <NSObject>
 
 @optional
-- (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success;
+- (void)onBatchSent:(NSArray *)batchWithHeader withSuccess:(BOOL)success withQueueType:(CTQueueType)queueType;
 
 @optional
 - (void)onAppLaunchedWithSuccess:(BOOL)success;

@@ -178,7 +178,7 @@
 
     // Download 5 files
     [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        [expectation1 fulfill];
+
         // Assert files are already downloaded
         XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:urls[0]]);
         XCTAssertTrue([self.fileDownloadManager isFileAlreadyPresent:urls[1]]);
@@ -186,6 +186,8 @@
         [self.fileDownloadManager downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
             [expectation2 fulfill];
         }];
+        
+        [expectation1 fulfill];
     }];
     
     // Enforce the order

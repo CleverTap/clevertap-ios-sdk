@@ -2,6 +2,7 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTFileDownloadManager.h"
+#import <SDWebImage/SDImageCache.h>
 
 @interface CTFileDownloader()
 
@@ -47,9 +48,17 @@
     }];
 }
 
-- (BOOL)isFileAlreadyPresent:(NSString *)url {
+- (BOOL)isFileAlreadyPresent:(NSString *)url
+         andUpdateExpiryTime:(BOOL)updateExpiryTime {
     NSURL *fileUrl = [NSURL URLWithString:url];
     BOOL fileExists = [self.fileDownloadManager isFileAlreadyPresent:fileUrl];
+
+    // For PE File vars when fileExists returns true, we are not calling downloadFiles for existing files
+    // so we need to update file expiry time for those existing files.
+    if (fileExists && updateExpiryTime) {
+        [self updateFilesExpiry:@{url:@1}];
+        [self updateFilesExpiryInPreference];
+    }
     return fileExists;
 }
 
@@ -65,14 +74,13 @@
 }
 
 - (nullable NSString *)fileDownloadPath:(NSString *)url {
-    NSString *filePath = nil;
-    if ([self isFileAlreadyPresent:url]) {
+    if ([self isFileAlreadyPresent:url andUpdateExpiryTime:NO]) {
         NSURL *fileURL = [NSURL URLWithString:url];
         return [self.fileDownloadManager filePath:fileURL];
     } else {
         CleverTapLogInternal(self.config.logLevel, @"%@ File %@ is not present.", self, url);
     }
-    return filePath;
+    return nil;
 }
 
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL {
@@ -93,7 +101,7 @@
     self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
     self.fileExpiryTime = CLTAP_FILE_EXPIRY_OFFSET;
 
-    [self migrateActiveAndInactiveUrls];
+    [self removeLegacyAssets:nil];
     
     @synchronized (self) {
         NSDictionary *cachedUrlsExpiry = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
@@ -103,6 +111,10 @@
             self.urlsExpiry = [NSMutableDictionary new];
         }
     }
+    
+    // Check for expired files and delete them at every start of session.
+    long lastDeletedTime = [self lastDeletedTimestamp];
+    [self removeInactiveExpiredAssets:lastDeletedTime];
 }
 
 - (void)removeInactiveExpiredAssets:(long)lastDeletedTime {
@@ -201,7 +213,7 @@
     return [[NSDate date] timeIntervalSince1970];
 }
 
-- (void)migrateActiveAndInactiveUrls {
+- (void)removeLegacyAssets:(void (^)(void))completion {
     NSArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
     NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
     NSMutableSet<NSString *> *urls = [NSMutableSet new];
@@ -211,23 +223,37 @@
     if (inactiveAssetsArray && inactiveAssetsArray.count > 0) {
         [urls addObjectsFromArray:inactiveAssetsArray];
     }
-    NSMutableDictionary<NSString *, NSNumber *> *urlsExpiry = [NSMutableDictionary new];
-    NSNumber *expiry = @([self currentTimeInterval] + self.fileExpiryTime);
-    for (NSString *url in urls) {
-        urlsExpiry[url] = expiry;
+    
+    if (!inactiveAssetsArray && !activeAssetsArray) {
+        return;
     }
     
-    if (urlsExpiry.count > 0) {
-        [CTPreferences putObject:urlsExpiry forKey:[self storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
+    dispatch_group_t deleteGroup = dispatch_group_create();
+    dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    SDImageCache *sdImageCache = [SDImageCache sharedImageCache];
+    for (NSString *url in urls) {
+        dispatch_group_enter(deleteGroup);
+        dispatch_async(deleteConcurrentQueue, ^{
+            if ([sdImageCache diskImageDataExistsWithKey:url]) {
+                [sdImageCache removeImageForKey:url
+                                       fromDisk:YES
+                                 withCompletion:^{
+                    dispatch_group_leave(deleteGroup);
+                }];
+            } else {
+                dispatch_group_leave(deleteGroup);
+            }
+        });
+    }
+    
+    dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
         [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
         [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
-    }
-    id inAppAssetsDeletedTs = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
-    if ([inAppAssetsDeletedTs isKindOfClass:[NSNumber class]]) {
-        long ts = [inAppAssetsDeletedTs longLongValue];
-        [CTPreferences putInt:ts forKey:[self storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
         [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
-    }
+        if (completion) {
+            completion();
+        }
+    });
 }
 
 @end

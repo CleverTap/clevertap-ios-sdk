@@ -6,6 +6,8 @@
 #import "CTFileDownloadTestHelper.h"
 #import "CTFileDownloader+Tests.h"
 #import "CTFileDownloaderMock.h"
+#import <SDWebImage/SDImageCache.h>
+#import <SDWebImage/SDWebImageManager.h>
 
 @interface CTFileDownloaderTests : XCTestCase
 
@@ -45,9 +47,16 @@
     [self waitForExpectations:@[expectation] timeout:2.0];
 }
 
-- (void)testMigration {
-    NSArray<NSString *> *activeAssetsArray = @[@"url0", @"url1"];
-    NSArray<NSString *> *inactiveAssetsArray = @[@"url2", @"url3"];
+- (void)testRemoveLegacyAssets {
+    // Setup
+    NSArray *urls = @[
+        [NSString stringWithFormat:@"https://clevertap.com/%@_0.png", self.helper.fileURL],
+        [NSString stringWithFormat:@"https://clevertap.com/%@_1.jpg", self.helper.fileURL],
+        [NSString stringWithFormat:@"https://clevertap.com/%@_2.jpeg", self.helper.fileURL],
+        [NSString stringWithFormat:@"https://clevertap.com/%@_3.png", self.helper.fileURL]
+    ];
+    NSArray<NSString *> *activeAssetsArray = @[urls[0], urls[1]];
+    NSArray<NSString *> *inactiveAssetsArray = @[urls[2], urls[3]];
     [CTPreferences putObject:activeAssetsArray forKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
     [CTPreferences putObject:inactiveAssetsArray forKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
     
@@ -55,22 +64,45 @@
     self.fileDownloader.mockCurrentTimeInterval = ts;
     [CTPreferences putInt:ts forKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
     
-    [self.fileDownloader migrateActiveAndInactiveUrls];
+    SDWebImageManager *sdWebImageManager = [SDWebImageManager sharedManager];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"SDWebImage loadImageWithURL"];
+    dispatch_group_t downloads = dispatch_group_create();
+    dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    for (NSString *url in urls) {
+        dispatch_group_enter(downloads);
+        dispatch_async(concurrentQueue, ^{
+            [sdWebImageManager loadImageWithURL:[NSURL URLWithString:url]
+                                        options:SDWebImageRetryFailed
+                                        context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeDisk)}
+                                       progress:nil
+                                      completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
+                dispatch_group_leave(downloads);
+            }];
+        });
+    }
+    dispatch_group_notify(downloads, concurrentQueue, ^{
+        [expectation fulfill];
+    });
     
-    XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]]);
-    XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]]);
-    NSDictionary *urlsExpiry = [CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
-    NSDictionary *urlsExpiryExpected = @{
-        @"url0": @(ts + self.fileDownloader.fileExpiryTime),
-        @"url1": @(ts + self.fileDownloader.fileExpiryTime),
-        @"url2": @(ts + self.fileDownloader.fileExpiryTime),
-        @"url3": @(ts + self.fileDownloader.fileExpiryTime)
-    };
-    XCTAssertTrue([urlsExpiryExpected isEqualToDictionary:urlsExpiry]);
+    [self waitForExpectations:@[expectation] timeout:2.0];
+    SDImageCache *sdImageCache = [SDImageCache sharedImageCache];
+    for (NSString *url in urls) {
+        XCTAssertNotNil([sdImageCache imageFromDiskCacheForKey:url]);
+    }
     
-    XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]]);
-    id filesLastDeletedTs = [CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_FILE_ASSETS_LAST_DELETED_TS]];
-    XCTAssertEqual(ts, [filesLastDeletedTs longValue]);
+    // Remove legacy assets
+    XCTestExpectation *expectationRemoveLegacyAssets = [self expectationWithDescription:@"RemoveLegacyAssets"];
+    [self.fileDownloader removeLegacyAssets:^{
+        XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]]);
+        XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]]);
+        XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]]);
+        for (NSString *url in urls) {
+            XCTAssertNil([sdImageCache imageFromDiskCacheForKey:url]);
+        }
+        [expectationRemoveLegacyAssets fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectationRemoveLegacyAssets] timeout:2.0];
 }
 
 - (void)testSetup {
@@ -99,13 +131,13 @@
 
 - (void)testFileAlreadyPresent {
     NSArray *urls = [self.helper generateFileURLStrings:2];
-    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
     
     [self downloadFiles:@[urls[0]]];
     
-    XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+    XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+    XCTAssertFalse([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
 }
 
 - (void)testImageLoadedFromDisk {
@@ -392,7 +424,7 @@
     NSMutableArray *paths = [NSMutableArray array];
     for (NSString *url in urls) {
         // Assert the files are downloaded
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:url]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:NO]);
         [paths addObject:[self.fileDownloader fileDownloadPath:url]];
     }
 
@@ -409,7 +441,7 @@
         }
         // Assert the files no longer exist
         for (NSString *url in urls) {
-            XCTAssertFalse([weakSelf.fileDownloader isFileAlreadyPresent:url]);
+            XCTAssertFalse([weakSelf.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:NO]);
         }
         // Assert urlsExpiry is cleared
         XCTAssertEqual(0, weakSelf.fileDownloader.urlsExpiry.count);
@@ -432,17 +464,57 @@
     
     NSArray *urls = [self.helper generateFileURLStrings:3];
     [self.fileDownloader downloadFiles:@[urls[0], urls[1], urls[2]] withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[2] andUpdateExpiryTime:NO]);
         [expectation1 fulfill];
     }];
     [self.fileDownloader downloadFiles:@[urls[0], urls[1]] withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0]]);
-        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1]]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[0] andUpdateExpiryTime:NO]);
+        XCTAssertTrue([self.fileDownloader isFileAlreadyPresent:urls[1] andUpdateExpiryTime:NO]);
         [expectation2 fulfill];
     }];
     [self waitForExpectations:@[expectation2, expectation1] timeout:2.0 enforceOrder:YES];
+}
+
+- (void)testFileAlreadyPresentUpdatesFileExpiryTime {
+    // This test checks that file expiry time is updated when file is already present
+    // and `isFileAlreadyPresent:` method is called with andUpdateExpiryTime YES.
+    
+    // Mock currentTimeInterval
+    long ts = (long)[[NSDate date] timeIntervalSince1970];
+    self.fileDownloader.mockCurrentTimeInterval = ts;
+    
+    NSString *url = [self.helper generateFileURLStrings:1][0];
+    [self downloadFiles:@[url]];
+    long expiryDate = ts + self.fileDownloader.fileExpiryTime;
+    // Ensure url has correct expiry set
+    XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
+    
+    self.fileDownloader.mockCurrentTimeInterval = ts + 100;
+    [self.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:YES];
+    // Ensure url expiry is updated
+    XCTAssertEqualObjects(@(expiryDate + 100), self.fileDownloader.urlsExpiry[url]);
+}
+
+- (void)testFileAlreadyPresentDoesNotUpdatesFileExpiryTime {
+    // This test checks that file expiry time is not updated when file is already present
+    // and `isFileAlreadyPresent:` method is called with andUpdateExpiryTime NO.
+    
+    // Mock currentTimeInterval
+    long ts = (long)[[NSDate date] timeIntervalSince1970];
+    self.fileDownloader.mockCurrentTimeInterval = ts;
+    
+    NSString *url = [self.helper generateFileURLStrings:1][0];
+    [self downloadFiles:@[url]];
+    long expiryDate = ts + self.fileDownloader.fileExpiryTime;
+    // Ensure url has correct expiry set
+    XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
+    
+    self.fileDownloader.mockCurrentTimeInterval = ts + 100;
+    [self.fileDownloader isFileAlreadyPresent:url andUpdateExpiryTime:NO];
+    // Ensure url expiry is not updated
+    XCTAssertEqualObjects(@(expiryDate), self.fileDownloader.urlsExpiry[url]);
 }
 
 #pragma mark Private methods

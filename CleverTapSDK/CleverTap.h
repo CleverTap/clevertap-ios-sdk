@@ -1417,6 +1417,26 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
+/*!
+ @method
+ 
+ @abstract
+ Adds a callback to be invoked when no more file downloads are pending (either when no files needed to be downloaded or all downloads have been completed).
+ 
+ @param block a callback to add.
+ */
+- (void)onVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block;
+
+/*!
+ @method
+ 
+ @abstract
+ Adds a callback to be invoked only once when no more file downloads are pending (either when no files needed to be downloaded or all downloads have been completed).
+ 
+ @param block a callback to add.
+ */
+- (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block;
+
 #pragma mark Custom Templates and Functions
 
 /*!

@@ -185,7 +185,7 @@ static NSArray *discardedEvents;
         }
         return vr;
     } else if ([o isKindOfClass:[NSDate class]]) {
-        NSString *date = [NSString stringWithFormat:@"$D_%d", (int) ((NSDate *) o).timeIntervalSince1970];
+        NSString *date = [NSString stringWithFormat:@"%@%d",CLTAP_DATE_PREFIX, (int) ((NSDate *) o).timeIntervalSince1970];
         [vr setObject:date];
         return vr;
         

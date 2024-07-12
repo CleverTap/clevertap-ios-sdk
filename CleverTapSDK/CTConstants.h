@@ -50,6 +50,11 @@ extern NSString *const kSessionId;
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_CHARGED_EVENT @"Charged"
+#define CLTAP_PROFILE @"profile"
+#define CLTAP_USER_ATTRIBUTE_CHANGE @"_change"
+#define CLTAP_KEY_NEW_VALUE @"newValue"
+#define CLTAP_KEY_OLD_VALUE @"oldValue"
+#define CLTAP_KEY_PROFILE_ATTR_NAME @"profileAttrName"
 #define CLTAP_EVENT_NAME @"evtName"
 #define CLTAP_EVENT_DATA @"evtData"
 #define CLTAP_CHARGED_EVENT_ITEMS @"Items"
@@ -75,6 +80,17 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
+#define CLTAP_DATE_PREFIX @"$D_"
+
+// profile commands
+static NSString *const kCLTAP_COMMAND_SET = @"$set";
+static NSString *const kCLTAP_COMMAND_ADD = @"$add";
+static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
+static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
+static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
+static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
+
+#define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
 
 #pragma mark Constants for File Assets
 #define CLTAP_FILE_URLS_EXPIRY_DICT @"file_urls_expiry_dict"
@@ -101,6 +117,7 @@ extern NSString *CT_KIND_FLOAT;
 extern NSString *CT_KIND_STRING;
 extern NSString *CT_KIND_BOOLEAN;
 extern NSString *CT_KIND_DICTIONARY;
+extern NSString *CT_KIND_FILE;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
@@ -129,6 +146,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_SUPPRESSED_META_KEY @"inapps_suppressed"
 #define CLTAP_INAPP_SS_EVAL_STORAGE_KEY @"inapps_eval"
 #define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY @"inapps_suppressed"
+#define CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE @"inapps_eval_profile"
+#define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE @"inapps_suppressed_profile"
 
 #define CLTAP_PREFS_INAPP_SESSION_MAX_KEY @"imc_max"
 #define CLTAP_PREFS_INAPP_LAST_DATE_KEY @"ict_date"
@@ -258,10 +277,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #pragma mark Constants for Profile identifier keys
 #define CLTAP_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email"] // LEGACY KEYS
 #define CLTAP_ALL_PROFILE_IDENTIFIER_KEYS @[@"Identity", @"Email", @"Phone"]
+#define CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION @[@"cc", @"tz", @"Carrier"]
 
 #pragma mark Constants for Encryption
 #define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"
 #define CLTAP_ENCRYPTION_IV @"__CL3>3Rt#P__1V_"
 #define CLTAP_ENCRYPTION_PII_DATA (@[@"Identity", @"userEmail", @"userPhone", @"userName"]);
-
-

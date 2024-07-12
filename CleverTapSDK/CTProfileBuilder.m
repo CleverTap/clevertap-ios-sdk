@@ -7,16 +7,6 @@
 #import "CTLocalDataStore.h"
 #import "CTUtils.h"
 
-// profile commands
-static NSString *const kCLTAP_COMMAND_SET = @"$set";
-static NSString *const kCLTAP_COMMAND_ADD = @"$add";
-static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
-static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
-static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
-static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
-
-#define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
-
 @implementation CTProfileBuilder
 
 + (void)build:(NSDictionary *)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
@@ -392,9 +382,18 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
     NSDictionary* operatorDict = @{
         key: @{command: value}
     };
-    NSNumber *newValue;
-    
     id cachedValue = [dataStore getProfileFieldForKey: key];
+    NSNumber *newValue;
+    newValue = [self _getUpdatedValue:value forKey:key withCommand:command cachedValue:cachedValue];
+    
+    completion(operatorDict, newValue, nil);
+}
+
++ (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id)cachedValue {
+    NSDictionary* operatorDict = @{
+        key: @{command: value}
+    };
+    NSNumber *newValue;
     if ([cachedValue isKindOfClass: [NSNumber class]]) {
         
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
@@ -449,9 +448,8 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
                 break;
         }
     }
+    return newValue;
     
-    completion(operatorDict, newValue, nil);
 }
-
 
 @end

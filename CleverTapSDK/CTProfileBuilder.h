@@ -23,4 +23,6 @@
 
 + (void)buildDecrementValueBy:(NSNumber *_Nonnull)value forKey: (NSString *_Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSNumber *_Nullable updatedValue, NSArray<CTValidationResult*> *_Nullable errors))completion;
 
++ (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id _Nullable)cachedValue;
+
 @end
