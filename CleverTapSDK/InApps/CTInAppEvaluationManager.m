@@ -156,12 +156,10 @@
     for (CTEventAdapter *event in events) {
         id oldValue = [event.eventProperties objectForKey:CLTAP_KEY_OLD_VALUE];
         id newValue = [event.eventProperties objectForKey:CLTAP_KEY_NEW_VALUE];
-        if (event.profileAttrName != nil) {
-            if (newValue == oldValue) {
-                continue;
-            }
-            [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
+        if (event.profileAttrName != nil && newValue == oldValue) {
+            continue;
         }
+        [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
     }
     [self sortByPriority:eligibleInApps];
     
