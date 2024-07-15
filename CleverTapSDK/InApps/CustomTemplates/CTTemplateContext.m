@@ -261,4 +261,24 @@
     return nil;
 }
 
+- (NSString *)debugDescription {
+    NSMutableArray<NSString *> *argsDescription = [NSMutableArray array];
+    for (NSString *key in self.argumentValues) {
+        NSString *value;
+        if ([self.argumentValues[key] isKindOfClass:[CTNotificationAction class]]) {
+            CTNotificationAction *action = self.argumentValues[key];
+            NSString *name = action.customTemplateInAppData.templateName ? action.customTemplateInAppData.templateName : @"";
+            value = [NSString stringWithFormat:@"Action: %@", name];
+        } else {
+            value = [self.argumentValues[key] debugDescription];
+        }
+        [argsDescription addObject:[NSString stringWithFormat:@"%@: %@", key, value]];
+    }
+    return [NSString stringWithFormat:@"<%@: %p> templateName: %@, args: {\n%@\n}",
+            [self class],
+            self,
+            self.templateName,
+            [argsDescription componentsJoinedByString:@",\n"]];
+}
+
 @end
