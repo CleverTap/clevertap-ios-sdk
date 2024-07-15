@@ -8,6 +8,7 @@
 #import "CTSessionManager.h"
 
 @class CTInAppDisplayManager;
+@class CTFileDownloader;
 
 @interface CleverTap (Internal)
 

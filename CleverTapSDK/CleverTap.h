@@ -1437,6 +1437,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block;
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 #pragma mark Custom Templates and Functions
 
 /*!
@@ -1456,6 +1457,8 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param isProduction Provide `true` if Custom in-app templates and app functions must be sync in Productuon build/configuration.
  */
 - (void)syncCustomTemplates:(BOOL)isProduction;
+
+#endif
 
 @end
 

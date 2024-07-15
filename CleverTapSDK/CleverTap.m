@@ -1982,12 +1982,12 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     NSString *eventName = event[CLTAP_EVENT_NAME];
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden
     [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
-#if !CLEVERTAP_NO_INAPP_SUPPORT
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
@@ -4308,6 +4308,7 @@ static BOOL sharedInstanceErrorLogged;
     } methodName:NSStringFromSelector(_cmd) isProduction:isProduction];
 }
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)syncCustomTemplates {
     [self syncCustomTemplates:NO];
 }
@@ -4320,6 +4321,7 @@ static BOOL sharedInstanceErrorLogged;
         [self syncRequest:ctRequest logMessage:@"Define Custom Templates"];
     } methodName:NSStringFromSelector(_cmd) isProduction:isProduction];
 }
+#endif
 
 - (void)syncWithBlock:(void(^)(void))syncBlock methodName:(NSString *)methodName isProduction:(BOOL)isProduction {
     if (isProduction) {
