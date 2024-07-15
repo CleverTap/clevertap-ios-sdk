@@ -481,19 +481,9 @@ typedef enum {
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     Class windowClass = self.shouldPassThroughTouches ? CTInAppPassThroughWindow.class : UIWindow.class;
-    
-    if (@available(iOS 13, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                self.window = [[windowClass alloc] initWithFrame:
-                               windowScene.coordinateSpace.bounds];
-                self.window.windowScene = windowScene;
-            }
-        }
-    } else {
-        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    [self initializeWindowOfClass:windowClass animated:animated];
+    if (!self.window) {
+        return;
     }
     
     self.window.alpha = 0;

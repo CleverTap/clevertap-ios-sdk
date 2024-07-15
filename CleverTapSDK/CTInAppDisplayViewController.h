@@ -13,6 +13,8 @@
 - (instancetype)init __unavailable;
 - (instancetype)initWithNotification:(CTInAppNotification*)notification;
 
+- (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated;
+
 - (void)show:(BOOL)animated;
 - (void)hide:(BOOL)animated;
 - (BOOL)deviceOrientationIsLandscape;
