@@ -38,7 +38,7 @@
     self = [super init];
     if (self) {
         _notification = notification;
-        if (@available(iOS 13.0, *)) {
+        if (@available(iOS 13, tvOS 13.0, *)) {
             [[NSNotificationCenter defaultCenter] addObserver:self
                                                      selector:@selector(sceneDidActivate:) name:UISceneDidActivateNotification
                                                        object:nil];
@@ -51,7 +51,7 @@
 // However, this means that there is already an active scene when the controller is initialized.
 // In this case, we do not need the notification, since showFromWindow will directly find the window from the already active scene and not wait for it.
 - (void)sceneDidActivate:(NSNotification *)notification
-API_AVAILABLE(ios(13.0)) {
+API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (!self.window && self.waitingForSceneWindow) {
         CleverTapLogStaticDebug(@"%@:%@: Scene did activate. Showing from window.", [CTInAppDisplayViewController class], self);
         self.waitingForSceneWindow = NO;
@@ -129,7 +129,7 @@ API_AVAILABLE(ios(13.0)) {
 }
 
 - (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
-    if (@available(iOS 13, *)) {
+    if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
@@ -335,7 +335,7 @@ API_AVAILABLE(ios(13.0)) {
 }
 
 - (void)dealloc {
-    if (@available(iOS 13.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
 }
