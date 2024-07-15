@@ -2,7 +2,9 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTFileDownloadManager.h"
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 #import <SDWebImage/SDImageCache.h>
+#endif
 
 @interface CTFileDownloader()
 
@@ -100,8 +102,10 @@
 - (void)setup {
     self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
     self.fileExpiryTime = CLTAP_FILE_EXPIRY_OFFSET;
-
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     [self removeLegacyAssets:nil];
+#endif
     
     @synchronized (self) {
         NSDictionary *cachedUrlsExpiry = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_FILE_URLS_EXPIRY_DICT]];
@@ -213,6 +217,7 @@
     return [[NSDate date] timeIntervalSince1970];
 }
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)removeLegacyAssets:(void (^)(void))completion {
     NSArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
     NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
@@ -255,5 +260,6 @@
         }
     });
 }
+#endif
 
 @end

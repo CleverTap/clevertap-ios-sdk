@@ -178,7 +178,7 @@
             return;
         }
         NSKeyedUnarchiver *unarchiver;
-        if (@available(iOS 12.0, *)) {
+        if (@available(iOS 12.0, tvOS 11.0, *)) {
             NSError *error = nil;
             unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
             if (error != nil) {
