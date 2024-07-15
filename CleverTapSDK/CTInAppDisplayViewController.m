@@ -128,23 +128,21 @@ API_AVAILABLE(ios(13.0)) {
     NSAssert(false, @"Override in sub-class");
 }
 
-- (void)showFromWindow:(BOOL)animated {
-    if (!self.notification) return;
-    
-    if (@available(iOS 13, tvOS 13.0, *)) {
+- (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
+    if (@available(iOS 13, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
-                self.window = [[UIWindow alloc] initWithFrame:
+                self.window = [[windowClass alloc] initWithFrame:
                                windowScene.coordinateSpace.bounds];
                 self.window.windowScene = windowScene;
             }
         }
     } else {
-        self.window = [[UIWindow alloc] initWithFrame:
-                       CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
     }
+    
     if (!self.window) {
         CleverTapLogStaticDebug(@"%@:%@: UIWindow not initialized.", [CTInAppDisplayViewController class], self);
         if (@available(iOS 13, tvOS 13.0, *)) {
@@ -153,12 +151,20 @@ API_AVAILABLE(ios(13.0)) {
             // sceneDidActivate: will call again showFromWindow from the notification,
             // so window is initialized from the scene that became active
             CleverTapLogStaticDebug(@"%@:%@: Waiting for active scene.", [CTInAppDisplayViewController class], self);
-            self.waitingForSceneWindow = YES;
             self.animated = animated;
+            self.waitingForSceneWindow = YES;
         }
-        return;
     } else {
         CleverTapLogStaticInternal(@"%@:%@: Window initialized.", [CTInAppDisplayViewController class], self);
+    }
+}
+
+- (void)showFromWindow:(BOOL)animated {
+    if (!self.notification) return;
+    
+    [self initializeWindowOfClass:UIWindow.class animated:animated];
+    if (!self.window) {
+        return;
     }
     self.window.alpha = 0;
     self.window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
