@@ -8,6 +8,8 @@
 #import "CTNotificationAction.h"
 #import "CTInAppDisplayViewController.h"
 
+#import "CleverTapBuildInfo.h"
+
 @interface CleverTapJSInterface (){}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -32,6 +34,12 @@
         _controller = controller;
     }
     return self;
+}
+
+- (WKUserScript *)versionScript {
+    NSString *js = [NSString stringWithFormat:@"window.cleverTapIOSSDKVersion = %@;", WR_SDK_REVISION];
+    WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    return wkScript;
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {

@@ -77,6 +77,7 @@ typedef enum {
     WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
     WKUserContentController *wkController = [[WKUserContentController alloc] init];
     [wkController addUserScript:wkScript];
+    [wkController addUserScript:_jsInterface.versionScript];
     [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
