@@ -199,7 +199,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         if ([self.templatesManager isRegisteredTemplateWithName:customTemplateData.templateName]) {
             return YES;
         } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Template with name: %@ is not registered and cannot be presented.", self, customTemplateData.templateName);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Template with name: \"%@\" is not registered and cannot be presented.", self, customTemplateData.templateName);
             return NO;
         }
     } else {

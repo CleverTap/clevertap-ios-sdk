@@ -71,7 +71,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@: %p> %@, type: %@, defaultValue: %@",
+    return [NSString stringWithFormat:@"<%@: %p> name: %@, type: %@, defaultValue: %@",
             [self class],
             self,
             self.name,

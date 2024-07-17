@@ -52,11 +52,13 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@: %p> name: %@, args: {\n%@\n}",
+    return [NSString stringWithFormat:@"<%@: %p> name: %@, isVisual: %@, type: %@, args: %@",
             [self class],
             self,
             self.name,
-            [self.arguments componentsJoinedByString:@",\n"]];
+            self.isVisual ? @"YES" : @"NO",
+            self.templateType,
+            self.arguments.count > 0 ? [NSString stringWithFormat:@"{\n%@\n}", [self.arguments componentsJoinedByString:@",\n"]] : @"{\n}"];
 }
 
 @end

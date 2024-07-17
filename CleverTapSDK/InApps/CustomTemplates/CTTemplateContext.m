@@ -274,11 +274,15 @@
         }
         [argsDescription addObject:[NSString stringWithFormat:@"%@: %@", key, value]];
     }
-    return [NSString stringWithFormat:@"<%@: %p> templateName: %@, args: {\n%@\n}",
+    NSString *argsString = @"{\n}";
+    if (argsDescription.count > 0) {
+        argsString = [NSString stringWithFormat:@"{\n%@\n}", [argsDescription componentsJoinedByString:@",\n"]];
+    }
+    return [NSString stringWithFormat:@"<%@: %p> templateName: %@, args: %@",
             [self class],
             self,
             self.templateName,
-            [argsDescription componentsJoinedByString:@",\n"]];
+            argsString];
 }
 
 @end
