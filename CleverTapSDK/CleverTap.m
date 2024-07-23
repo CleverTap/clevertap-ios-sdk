@@ -4300,9 +4300,9 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)syncVariables:(BOOL)isProduction {
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+    NSDictionary *varsPayload = [[self variables] varsPayload];
     [self syncWithBlock:^{
-        NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
-        NSDictionary *varsPayload = [[self variables] varsPayload];
         CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:@[meta, varsPayload] domain:self.domainFactory.redirectDomain];
         [self syncRequest:ctRequest logMessage:@"Vars sync"];
     } methodName:NSStringFromSelector(_cmd) isProduction:isProduction];
@@ -4314,9 +4314,9 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)syncCustomTemplates:(BOOL)isProduction {
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+    NSDictionary *syncPayload = [[self customTemplatesManager] syncPayload];
     [self syncWithBlock:^{
-        NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
-        NSDictionary *syncPayload = [[self customTemplatesManager] syncPayload];
         CTRequest *ctRequest = [CTRequestFactory syncTemplatesRequestWithConfig:self.config params:@[meta, syncPayload] domain:self.domainFactory.redirectDomain];
         [self syncRequest:ctRequest logMessage:@"Define Custom Templates"];
     } methodName:NSStringFromSelector(_cmd) isProduction:isProduction];
