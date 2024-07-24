@@ -445,7 +445,6 @@ static BOOL sharedInstanceErrorLogged;
 - (instancetype)initWithConfig:(CleverTapInstanceConfig*)config andCleverTapID:(NSString *)cleverTapID {
     self = [super init];
     if (self) {
-        [CTPreferences migrateCTUserDefaultsData];
         _config = [config copy];
         if (_config.analyticsOnly) {
             CleverTapLogDebug(_config.logLevel, @"%@ is configured as analytics only!", self);
