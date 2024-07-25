@@ -1586,6 +1586,11 @@ static BOOL sharedInstanceErrorLogged;
 - (void)clearInAppResources:(BOOL)expiredOnly {
     [self.fileDownloader clearFileAssets:expiredOnly];
 }
+
+- (CTTemplateContext * _Nullable)activeContextForTemplate:(NSString * _Nonnull)templateName {
+    return [[self customTemplatesManager] activeContextForTemplate:templateName];
+}
+
 #endif
 
 #pragma mark Private Method
