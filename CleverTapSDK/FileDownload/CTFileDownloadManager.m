@@ -10,6 +10,7 @@
 @property (nonatomic, strong) NSMutableDictionary<NSURL *, NSMutableArray<DownloadCompletionHandler> *> *downloadInProgressHandlers;
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSFileManager* fileManager;
+@property NSTimeInterval semaphoreTimeout;
 
 @end
 
@@ -37,6 +38,8 @@
         NSURLSessionConfiguration *sc = [NSURLSessionConfiguration defaultSessionConfiguration];
         sc.timeoutIntervalForRequest = CLTAP_REQUEST_TIME_OUT_INTERVAL;
         sc.timeoutIntervalForResource = CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL;
+        // Timeout of (request timeout + 5) seconds for acquiring semaphore
+        self.semaphoreTimeout = CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL + 5;
         
         self.session = [NSURLSession sessionWithConfiguration:sc];
         self.fileManager = [NSFileManager defaultManager];
@@ -50,9 +53,20 @@
   withCompletionBlock:(nonnull CTFilesDownloadCompletedBlock)completion {
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(CLTAP_FILE_MAX_CONCURRENCY_COUNT);
+
     NSMutableDictionary<NSString *,id> *filesDownloadStatus = [NSMutableDictionary new];
     for (NSURL *url in urls) {
         dispatch_group_enter(group);
+        
+        dispatch_time_t semaphore_timeout = dispatch_time(DISPATCH_TIME_NOW,
+                                                          self.semaphoreTimeout * NSEC_PER_SEC);
+        if (dispatch_semaphore_wait(semaphore, semaphore_timeout) != 0) {
+            [filesDownloadStatus setObject:@0 forKey:[url absoluteString]];
+            dispatch_group_leave(group);
+            continue; // Proceed to next URL
+        }
+        
         @synchronized (self) {
             BOOL isAlreadyDownloading = [_downloadInProgressUrls containsObject:url];
             if (isAlreadyDownloading) {
@@ -65,6 +79,7 @@
                     @synchronized (self) {
                         [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
                         dispatch_group_leave(group);
+                        dispatch_semaphore_signal(semaphore); // Signal that a slot is free
                     }
                 }];
                 continue;
@@ -91,14 +106,17 @@
                         handler(url, success);
                     }
                     dispatch_group_leave(group);
+                    dispatch_semaphore_signal(semaphore); // Signal that a slot is free
                 }];
             });
         } else {
             // Add the file url to callback as success true as it is already present
             [filesDownloadStatus setObject:@1 forKey:[url absoluteString]];
             dispatch_group_leave(group);
+            dispatch_semaphore_signal(semaphore); // Signal that a slot is free
         }
     }
+    
     dispatch_group_notify(group, concurrentQueue, ^{
         // Callback when all files are downloaded with their success status
         completion(filesDownloadStatus);

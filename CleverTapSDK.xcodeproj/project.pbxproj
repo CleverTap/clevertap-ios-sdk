@@ -394,6 +394,7 @@
 		6BB778D62BFD26E000A41628 /* CTInAppNotificationDisplayDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778D52BFD26DF00A41628 /* CTInAppNotificationDisplayDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		6BB778D72BFD26E000A41628 /* CTInAppNotificationDisplayDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778D52BFD26DF00A41628 /* CTInAppNotificationDisplayDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		6BB778D92BFD277400A41628 /* CTCustomTemplatesManager-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778D82BFD277400A41628 /* CTCustomTemplatesManager-Internal.h */; };
+		6BBF05CE2C58E3FB0047E3D9 /* NSURLSessionMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BBF05CD2C58E3FB0047E3D9 /* NSURLSessionMock.m */; };
 		6BD334EA2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */; };
 		6BD334EB2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */; };
 		6BD334EC2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */; };
@@ -953,6 +954,8 @@
 		6BB778D12BF267B600A41628 /* CTTemplateContextTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTemplateContextTest.m; sourceTree = "<group>"; };
 		6BB778D52BFD26DF00A41628 /* CTInAppNotificationDisplayDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppNotificationDisplayDelegate.h; sourceTree = "<group>"; };
 		6BB778D82BFD277400A41628 /* CTCustomTemplatesManager-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTCustomTemplatesManager-Internal.h"; sourceTree = "<group>"; };
+		6BBF05CC2C58E3FB0047E3D9 /* NSURLSessionMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSURLSessionMock.h; sourceTree = "<group>"; };
+		6BBF05CD2C58E3FB0047E3D9 /* NSURLSessionMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSURLSessionMock.m; sourceTree = "<group>"; };
 		6BD334E82AF2A41F0099E33E /* CTBatchSentDelegateHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTBatchSentDelegateHelper.h; sourceTree = "<group>"; };
 		6BD334E92AF2A41F0099E33E /* CTBatchSentDelegateHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTBatchSentDelegateHelper.m; sourceTree = "<group>"; };
 		6BD334EF2AF545C70099E33E /* CTInAppStoreTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppStoreTest.m; sourceTree = "<group>"; };
@@ -1514,6 +1517,8 @@
 				6B9E95B22C2868470002D557 /* CTFileDownloadManager+Tests.h */,
 				6B9E95B32C29C2F30002D557 /* NSFileManagerMock.h */,
 				6B9E95B42C29C2F30002D557 /* NSFileManagerMock.m */,
+				6BBF05CC2C58E3FB0047E3D9 /* NSURLSessionMock.h */,
+				6BBF05CD2C58E3FB0047E3D9 /* NSURLSessionMock.m */,
 			);
 			path = FileDownload;
 			sourceTree = "<group>";
@@ -2495,6 +2500,7 @@
 				32394C2529FA272600956058 /* CTValidatorTest.m in Sources */,
 				6BB778CE2BEE48C300A41628 /* CTCustomTemplateInAppDataTest.m in Sources */,
 				6BA3B2E82B07E207004E834B /* CTTriggersMatcher+Tests.m in Sources */,
+				6BBF05CE2C58E3FB0047E3D9 /* NSURLSessionMock.m in Sources */,
 				6B32A0A52B9A0F17009ADC57 /* CTCustomTemplateTest.m in Sources */,
 				4E1F155B276B662C009387AE /* EventDetail.m in Sources */,
 				6B4A0F912B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m in Sources */,
