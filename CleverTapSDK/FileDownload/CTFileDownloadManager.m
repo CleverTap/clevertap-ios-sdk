@@ -170,7 +170,10 @@
             if (!success) {
                 CleverTapLogInternal(self.config.logLevel, @"%@ Failed to remove file %@ - %@", self, [file absoluteString], error);
             }
-            [filesDeleteStatus setObject:@(success) forKey:[file path]];
+            // Synchronize access to the dictionary
+            @synchronized (filesDeleteStatus) {
+                [filesDeleteStatus setObject:@(success) forKey:[file path]];
+            }
             dispatch_group_leave(deleteGroup);
         });
     }
