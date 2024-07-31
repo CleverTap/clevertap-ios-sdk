@@ -62,7 +62,9 @@
         dispatch_time_t semaphore_timeout = dispatch_time(DISPATCH_TIME_NOW,
                                                           self.semaphoreTimeout * NSEC_PER_SEC);
         if (dispatch_semaphore_wait(semaphore, semaphore_timeout) != 0) {
-            [filesDownloadStatus setObject:@0 forKey:[url absoluteString]];
+            @synchronized (filesDownloadStatus) {
+                [filesDownloadStatus setObject:@0 forKey:[url absoluteString]];
+            }
             dispatch_group_leave(group);
             continue; // Proceed to next URL
         }
@@ -76,11 +78,11 @@
                     _downloadInProgressHandlers[url] = [NSMutableArray array];
                 }
                 [_downloadInProgressHandlers[url] addObject:^(NSURL *completedURL, BOOL success) {
-                    @synchronized (self) {
+                    @synchronized (filesDownloadStatus) {
                         [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[completedURL absoluteString]];
-                        dispatch_group_leave(group);
-                        dispatch_semaphore_signal(semaphore); // Signal that a slot is free
                     }
+                    dispatch_group_leave(group);
+                    dispatch_semaphore_signal(semaphore); // Signal that a slot is free
                 }];
                 continue;
             }
@@ -93,8 +95,9 @@
             }
             dispatch_async(concurrentQueue, ^{
                 [self downloadSingleFile:url completed:^(BOOL success) {
-                    [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[url absoluteString]];
-
+                    @synchronized (filesDownloadStatus) {
+                        [filesDownloadStatus setObject:[NSNumber numberWithBool:success] forKey:[url absoluteString]];
+                    }
                     // Call the other completion handlers for this file url if present
                     NSArray<DownloadCompletionHandler> *handlers;
                     @synchronized (self) {
@@ -105,13 +108,16 @@
                     for (DownloadCompletionHandler handler in handlers) {
                         handler(url, success);
                     }
+                    
                     dispatch_group_leave(group);
                     dispatch_semaphore_signal(semaphore); // Signal that a slot is free
                 }];
             });
         } else {
-            // Add the file url to callback as success true as it is already present
-            [filesDownloadStatus setObject:@1 forKey:[url absoluteString]];
+            @synchronized (filesDownloadStatus) {
+                // Add the file url to callback as success true as it is already present
+                [filesDownloadStatus setObject:@1 forKey:[url absoluteString]];
+            }
             dispatch_group_leave(group);
             dispatch_semaphore_signal(semaphore); // Signal that a slot is free
         }
@@ -150,13 +156,17 @@
             dispatch_group_enter(deleteGroup);
             dispatch_async(deleteConcurrentQueue, ^{
                 [self deleteSingleFile:url completed:^(BOOL success) {
-                    [filesDeleteStatus setObject:[NSNumber numberWithBool:success] forKey:urlString];
+                    @synchronized(filesDeleteStatus) {
+                        [filesDeleteStatus setObject:[NSNumber numberWithBool:success] forKey:urlString];
+                    }
                     dispatch_group_leave(deleteGroup);
                 }];
             });
         } else {
-            // Add the file url to callback as success true as it is already not present
-            [filesDeleteStatus setObject:@1 forKey:[url absoluteString]];
+            @synchronized(filesDeleteStatus) {
+                // Add the file url to callback as success true as it is already not present
+                [filesDeleteStatus setObject:@1 forKey:[url absoluteString]];
+            }
         }
     } 
     dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
