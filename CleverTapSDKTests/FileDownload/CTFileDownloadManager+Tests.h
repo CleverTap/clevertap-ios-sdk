@@ -15,6 +15,9 @@
 
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSFileManager* fileManager;
+@property NSTimeInterval semaphoreTimeout;
+
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 
 - (void)downloadSingleFile:(NSURL *)url
 completed:(void(^)(BOOL success))completedBlock;
