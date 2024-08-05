@@ -48,6 +48,7 @@ let package = Package(
                 .headerSearchPath("ProductConfig/controllers"),
                 .headerSearchPath("InApps/"),
                 .headerSearchPath("InApps/Matchers/"),
+                .headerSearchPath("InApps/CustomTemplates/"),
                 .headerSearchPath("Inbox/"),
                 .headerSearchPath("Inbox/cells"),
                 .headerSearchPath("Inbox/config"),
@@ -56,7 +57,8 @@ let package = Package(
                 .headerSearchPath("Inbox/views"),
                 .headerSearchPath("ProductExperiences/"),
                 .headerSearchPath("Session/"),
-                .headerSearchPath("Swizzling/")
+                .headerSearchPath("Swizzling/"),
+                .headerSearchPath("FileDownload/")
             ],
             linkerSettings: [
                 .linkedFramework("AVFoundation"),

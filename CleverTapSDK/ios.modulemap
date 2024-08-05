@@ -21,5 +21,13 @@ framework module CleverTapSDK {
     header "CleverTap+CTVar.h"
     header "CTVar.h"
     header "LeanplumCT.h"
+    header "CTInAppTemplateBuilder.h"
+    header "CTAppFunctionBuilder.h"
+    header "CTTemplatePresenter.h"
+    header "CTTemplateProducer.h"
+    header "CTCustomTemplateBuilder.h"
+    header "CTCustomTemplate.h"
+    header "CTTemplateContext.h"
+    header "CTCustomTemplatesManager.h"
     export *
 }
