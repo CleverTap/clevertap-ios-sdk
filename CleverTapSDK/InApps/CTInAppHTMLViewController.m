@@ -1,7 +1,7 @@
 #import <WebKit/WebKit.h>
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
-#import "CleverTapJSInterface.h"
+#import "CleverTapJSInterfacePrivate.h"
 #import "CTUIUtils.h"
 #import "CTDismissButton.h"
 #import "CTUriHelper.h"
@@ -44,10 +44,10 @@ typedef enum {
 
 @implementation CTInAppHTMLViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification *)notification jsInterface:(CleverTapJSInterface *)jsInterface {
+- (instancetype)initWithNotification:(CTInAppNotification *)notification config:(CleverTapInstanceConfig *)config {
     self = [super initWithNotification:notification];
-    _jsInterface = jsInterface;
     if (self) {
+        _jsInterface = [[CleverTapJSInterface alloc] initWithConfigForInApps:config fromController:self];
         self.shouldPassThroughTouches = (self.notification.position == CLTAP_INAPP_POSITION_TOP || self.notification.position == CLTAP_INAPP_POSITION_BOTTOM);
     }
     return self;
@@ -77,6 +77,7 @@ typedef enum {
     WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
     WKUserContentController *wkController = [[WKUserContentController alloc] init];
     [wkController addUserScript:wkScript];
+    [wkController addUserScript:_jsInterface.versionScript];
     [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
@@ -244,23 +245,22 @@ typedef enum {
             params[elts[0]] = [elts[1] stringByRemovingPercentEncoding];
         };
         mutableParams = [params mutableCopy];
-        NSString *c2a = params[@"wzrk_c2a"];
+        NSString *c2a = params[CLTAP_PROP_WZRK_CTA];
         if (c2a) {
             c2a = [c2a stringByRemovingPercentEncoding];
             NSArray *parts = [c2a componentsSeparatedByString:@"__dl__"];
             if (parts && [parts count] == 2) {
                 dl = [NSURL URLWithString:parts[1]];
-                mutableParams[@"wzrk_c2a"] = parts[0];
+                mutableParams[CLTAP_PROP_WZRK_CTA] = parts[0];
             }
         }
     }
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationCTA:buttonCustomExtras:forNotification:fromViewController:withExtras:)]) {
-        [self.delegate handleNotificationCTA:dl buttonCustomExtras:nil forNotification:self.notification fromViewController:self withExtras:mutableParams];
-    } else {
-        [self hide:YES];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+        CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
+        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams];
     }
+    [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
-    
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {
@@ -482,19 +482,9 @@ typedef enum {
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     Class windowClass = self.shouldPassThroughTouches ? CTInAppPassThroughWindow.class : UIWindow.class;
-    
-    if (@available(iOS 13, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                self.window = [[windowClass alloc] initWithFrame:
-                               windowScene.coordinateSpace.bounds];
-                self.window.windowScene = windowScene;
-            }
-        }
-    } else {
-        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    [self initializeWindowOfClass:windowClass animated:animated];
+    if (!self.window) {
+        return;
     }
     
     self.window.alpha = 0;
@@ -504,8 +494,8 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidShow:fromViewController:)]) {
-            [self.delegate notificationDidShow:self.notification fromViewController:self];
+        if (self.delegate) {
+            [self.delegate notificationDidShow:self.notification];
         }
     };
     if (animated) {
@@ -522,6 +512,7 @@ typedef enum {
 
 - (void)hideFromWindow:(BOOL)animated {
     void (^completionBlock)(void) = ^ {
+        [self->webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
         [self.window removeFromSuperview];
         self.window = nil;
         if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {

@@ -96,7 +96,8 @@ static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
 #define CLTAP_FILE_URLS_EXPIRY_DICT @"file_urls_expiry_dict"
 #define CLTAP_FILE_ASSETS_LAST_DELETED_TS @"cs_file_assets_last_deleted_timestamp"
 #define CLTAP_FILE_EXPIRY_OFFSET (60 * 60 * 24 * 7 * 2) // 2 weeks
-#define CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL 15
+#define CLTAP_FILE_RESOURCE_TIME_OUT_INTERVAL 25
+#define CLTAP_FILE_MAX_CONCURRENCY_COUNT 10
 #define CLTAP_FILES_DIRECTORY_NAME @"CleverTap_Files"
 
 #pragma mark Constants for App fields
@@ -121,7 +122,6 @@ extern NSString *CT_KIND_FILE;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
-extern NSString *CT_PE_DEFINE_VARS_ENDPOINT;
 extern NSString *CT_PE_VARS_PAYLOAD_TYPE;
 extern NSString *CT_PE_VARS_PAYLOAD_KEY;
 extern NSString *CT_PE_VAR_TYPE;
@@ -130,7 +130,6 @@ extern NSString *CT_PE_BOOL_TYPE;
 extern NSString *CT_PE_DEFAULT_VALUE;
 
 extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
-#define CLTAP_DEFINE_VARS_URL @"/defineVars"
 
 #pragma mark Constants for In-App Notifications
 #define CLTAP_INAPP_JSON_RESPONSE_KEY @"inapp_notifs"
@@ -170,6 +169,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_WZRK_ID @"wzrk_id"
 #define CLTAP_PROP_VARIANT @"Variant"
 #define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
+#define CLTAP_PROP_WZRK_CTA @"wzrk_c2a"
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"
@@ -181,6 +181,10 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_TOTAL_LIFETIME_COUNT @"tlc"
 #define CLTAP_INAPP_EXCLUDE_FROM_CAPS @"efc"
 #define CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS @"excludeGlobalFCaps"
+#define CLTAP_INAPP_MEDIA @"media"
+#define CLTAP_INAPP_MEDIA_LANDSCAPE @"mediaLandscape"
+#define CLTAP_INAPP_MEDIA_CONTENT_TYPE @"content_type"
+#define CLTAP_INAPP_MEDIA_URL @"url"
 
 #define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
 #define CLTAP_TRIGGER_BOOL_STRING_NO @"false"
@@ -208,6 +212,13 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_NOTIF_SHOW_CLOSE @"sc"
 
 #define CLTAP_INAPP_HTML_TYPE @"custom-html"
+
+#define CLTAP_INAPP_TYPE @"type"
+#define CLTAP_INAPP_TEMPLATE_NAME @"templateName"
+#define CLTAP_INAPP_TEMPLATE_ID @"templateId"
+#define CLTAP_INAPP_TEMPLATE_DESCRIPTION @"templateDescription"
+#define CLTAP_INAPP_VARS @"vars"
+#define CLTAP_INAPP_ACTIONS @"actions"
 
 #define CLTAP_INAPP_PREVIEW_TYPE @"wzrk_inapp_type"
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE @"image-interstitial"

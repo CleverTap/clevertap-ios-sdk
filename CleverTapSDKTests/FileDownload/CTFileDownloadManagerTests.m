@@ -5,6 +5,7 @@
 #import "CTConstants.h"
 #import "CTFileDownloadTestHelper.h"
 #import "NSFileManagerMock.h"
+#import "NSURLSessionMock.h"
 
 @interface CTFileDownloadManagerTests : XCTestCase
 
@@ -23,7 +24,7 @@
     self.helper = [CTFileDownloadTestHelper new];
     [self.helper addHTTPStub];
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    self.fileDownloadManager = [CTFileDownloadManager sharedInstanceWithConfig:self.config];
+    self.fileDownloadManager = [[CTFileDownloadManager alloc] initWithConfig:self.config];
 }
 
 - (void)tearDown {
@@ -305,6 +306,29 @@
     // Ensure the expecation for successful download is called first
     [self waitForExpectations:@[expectation1, expectation2] timeout:2.0 enforceOrder:YES];
     [HTTPStubs removeStub:stub];
+}
+
+- (void)testSemaphoreTimeout {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Semaphore Timeout Test"];
+    // Generate URLs more than the max concurrency count CLTAP_FILE_MAX_CONCURRENCY_COUNT
+    self.fileURLs = [self.helper generateFileURLs:15];
+
+    // Set mock session
+    NSURLSessionMock *mockSession = [[NSURLSessionMock alloc] init];
+    mockSession.delayInterval = 0.3; // Simulate a delay longer than semaphore timeout
+    self.fileDownloadManager.semaphoreTimeout = 0.1;
+    self.fileDownloadManager.session = mockSession;
+    
+    [self.fileDownloadManager downloadFiles:self.fileURLs withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull fileDownloadStatus) {
+        for (NSURL *url in self.fileURLs) {
+            NSNumber *status = fileDownloadStatus[url.absoluteString];
+            XCTAssertNotNil(status, @"File download status should not be nil.");
+            XCTAssertEqual([status integerValue], 0, @"File download should fail due to semaphore timeout.");
+        }
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:2.0];
 }
 
 - (void)testDownloadSingle {

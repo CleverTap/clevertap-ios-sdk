@@ -390,12 +390,8 @@
 }
 
 + (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id)cachedValue {
-    NSDictionary* operatorDict = @{
-        key: @{command: value}
-    };
     NSNumber *newValue;
     if ([cachedValue isKindOfClass: [NSNumber class]]) {
-        
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
         CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
         
@@ -449,7 +445,6 @@
         }
     }
     return newValue;
-    
 }
 
 @end

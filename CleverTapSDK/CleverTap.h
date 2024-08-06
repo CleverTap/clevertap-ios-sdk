@@ -24,6 +24,7 @@
 @protocol CleverTapPushNotificationDelegate;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
+@class CTTemplateContext;
 #endif
 
 @protocol CTBatchSentDelegate;
@@ -1436,6 +1437,44 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param block a callback to add.
  */
 - (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block;
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+#pragma mark Custom Templates and Functions
+
+/*!
+ @method
+ 
+ @abstract
+ Uploads Custom in-app templates and app functions to the server. Requires Development/Debug build/configuration.
+ */
+- (void)syncCustomTemplates;
+
+/*!
+ @method
+ 
+ @abstract
+ Uploads Custom in-app templates and app functions to the server.
+ 
+ @param isProduction Provide `true` if Custom in-app templates and app functions must be sync in Productuon build/configuration.
+ */
+- (void)syncCustomTemplates:(BOOL)isProduction;
+
+/*!
+ @method
+ 
+ @abstract
+ Retrieves the active context for a template that is currently displaying. If the provided template
+ name is not of a currently active template, this method returns nil.
+ 
+ @param templateName The template name to get the active context for.
+ 
+ @return
+ A CTTemplateContext object representing the active context for the given template name, or nil if no active context exists.
+ 
+ */
+- (CTTemplateContext * _Nullable)activeContextForTemplate:(NSString * _Nonnull)templateName;
+
+#endif
 
 @end
 

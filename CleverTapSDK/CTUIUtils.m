@@ -53,7 +53,7 @@
 
 + (CGFloat)getLeftMargin {
     CGFloat margin = 0;
-    if (@available(iOS 11.0, *)) {
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
         for (UIWindow *window in [CTUIUtils getSharedApplication].windows) {
             if (window.isKeyWindow) {
                 margin = window.safeAreaInsets.left;
