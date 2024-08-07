@@ -9,6 +9,7 @@
 #ifndef CTCustomTemplatesManager_Tests_h
 #define CTCustomTemplatesManager_Tests_h
 #import "CTCustomTemplatesManager.h"
+#import "CTCustomTemplatesManager-Internal.h"
 
 @interface CTCustomTemplatesManager (Tests)
 
