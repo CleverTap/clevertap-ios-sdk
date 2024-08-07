@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.0) (August DD, 2024)
+### [Version 7.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.0) (August 07, 2024)
 
 #### Added
 - Adds support for Custom Code Templates. Please refer to the [Custom Code Templates doc](/docs/CustomCodeTemplates.md) to read more on how to integrate this in your app.
