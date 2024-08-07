@@ -35,14 +35,36 @@
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
 #import "CleverTapJSInterfacePrivate.h"
-#import "CTInAppImagePrefetchManager.h"
+
+#import "CTCustomTemplatesManager-Internal.h"
+#import "CTCustomTemplateInAppData-Internal.h"
+#endif
+
+#if !(TARGET_OS_TV)
+#import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/SDAnimatedImageView.h>
 #endif
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
+static const NSString *kInAppNotificationKey = @"inAppNotification";
 
 // static here as we may have multiple instances handling inapps
 static CTInAppDisplayViewController *currentDisplayController;
-static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControllers;
+static CTInAppNotification *currentlyDisplayingNotification;
+static NSMutableArray<NSArray *> *pendingNotifications;
+
+// private class
+@interface ImageLoadingResult : NSObject
+
+@property (nonatomic, strong) UIImage *image;
+@property (nonatomic, strong) NSData *imageData;
+@property (nonatomic, copy) NSString *error;
+
+@end
+
+@implementation ImageLoadingResult
+
+@end
 
 @interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate> {
 }
@@ -57,7 +79,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 @property (nonatomic, weak) CleverTap* instance;
 
-@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
+
+@property (nonatomic, strong) CTCustomTemplatesManager *templatesManager;
 
 @property (nonatomic, strong, readonly) NSString *imageInterstitialHtml;
 
@@ -70,7 +94,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        pendingNotificationControllers = [NSMutableArray new];
+        pendingNotifications = [NSMutableArray new];
     });
 }
 
@@ -79,16 +103,29 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
                                 inAppStore:(CTInAppStore *)inAppStore
-                      imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager {
+                          templatesManager:(CTCustomTemplatesManager *)templatesManager
+                            fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
         self.dispatchQueueManager = dispatchQueueManager;
         self.instance = instance;
         self.config = instance.config;
         self.inAppFCManager = inAppFCManager;
         self.inAppStore = inAppStore;
-        self.imagePrefetchManager = imagePrefetchManager;
+        self.templatesManager = templatesManager;
+        self.fileDownloader = fileDownloader;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onDisplayPendingNotification:)
+                                                     name:[self.class pendingNotificationKey:self.config.accountId]
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:[self.class pendingNotificationKey:self.config.accountId]
+                                                  object:nil];
 }
 
 - (void)setPushPrimerManager:(CTPushPrimerManager *)pushPrimerManagerObj {
@@ -118,7 +155,8 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
-        [self.inAppStore enqueueInApps:inappNotifs];
+        NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
+        [self.inAppStore enqueueInApps:filteredInAppNotifs];
 
         // Fire the first notification, if any
         [self.dispatchQueueManager runOnNotificationQueue:^{
@@ -126,6 +164,46 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         }];
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
+    }
+}
+
+- (void)_addInAppNotificationInFrontOfQueue:(CTInAppNotification *)inappNotif {
+    @try {
+        NSString *templateName = inappNotif.customTemplateInAppData.templateName;
+        if ([self.templatesManager isRegisteredTemplateWithName:templateName]) {
+            [self.inAppStore insertInFrontInApp:inappNotif.jsonDescription];
+            // Fire the first notification, if any
+            [self.dispatchQueueManager runOnNotificationQueue:^{
+                [self _showNotificationIfAvailable];
+            }];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
+    }
+}
+
+- (NSArray *)filterNonRegisteredTemplates:(NSArray *)inappNotifs {
+    NSMutableArray *filteredInAppNotifs = [NSMutableArray new];
+    for (NSDictionary *inAppJSON in inappNotifs) {
+        if ([self isTemplateRegistered:inAppJSON]) {
+            [filteredInAppNotifs addObject:inAppJSON];
+        }
+    }
+    return filteredInAppNotifs;
+}
+
+- (BOOL)isTemplateRegistered:(NSDictionary *)inAppJSON {
+    CTCustomTemplateInAppData *customTemplateData = [CTCustomTemplateInAppData createWithJSON:inAppJSON];
+    
+    if (customTemplateData) {
+        if ([self.templatesManager isRegisteredTemplateWithName:customTemplateData.templateName]) {
+            return YES;
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Template with name: \"%@\" is not registered and cannot be presented.", self, customTemplateData.templateName);
+            return NO;
+        }
+    } else {
+        return YES;
     }
 }
 
@@ -208,7 +286,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
-        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj imagePrefetchManager:self.imagePrefetchManager];
+        __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
         if (notification.error) {
             CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
             return;
@@ -219,13 +297,81 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
             return;
         }
-
-        [notification prepareWithCompletionHandler:^{
+        
+        [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
                 [self notificationReady:notification];
             }];
         }];
     }];
+}
+
+- (void)prepareNotification:(CTInAppNotification *)notification withCompletion:(void (^)(void))completionHandler {
+#if !(TARGET_OS_TV)
+    if ([NSThread isMainThread]) {
+        notification.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
+        completionHandler();
+        return;
+    }
+    
+    if (notification.imageURL) {
+        ImageLoadingResult *result = [self loadImageWithURL:notification.imageURL contentType:notification.contentType];
+        [notification setPreparedInAppImage:result.image inAppImageData:result.imageData error:result.error];
+    }
+    if (notification.imageUrlLandscape && notification.hasLandscape) {
+        ImageLoadingResult *result = [self loadImageWithURL:notification.imageUrlLandscape contentType:notification.landscapeContentType];
+        [notification setPreparedInAppImageLandscape:result.image inAppImageLandscapeData:result.imageData error:result.error];
+    }
+    
+    NSArray *urls = [[self.templatesManager fileArgsURLsForInAppData:notification.customTemplateInAppData] allObjects];
+    if (urls.count > 0) {
+        [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+            for (NSString *url in status) {
+                if (![status[url] boolValue]) {
+                    notification.error = @"Failed to download custom template files.";
+                    break;
+                }
+            }
+            completionHandler();
+        }];
+        return;
+    }
+    
+#endif
+    
+    completionHandler();
+}
+
+- (ImageLoadingResult *)loadImageWithURL:(NSURL *)url contentType:(NSString *)contentType {
+    ImageLoadingResult *result = [[ImageLoadingResult alloc] init];
+    
+    UIImage *loadedImage = [self loadImageIfPresentInDiskCache:url];
+    if (loadedImage) {
+        result.image = loadedImage;
+    } else {
+        NSError *loadError = nil;
+        NSData *imageData = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&loadError];
+        if (loadError || !imageData) {
+            result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
+        } else {
+            if ([contentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
+                if (gif == nil) {
+                    result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
+                }
+            }
+            result.imageData = imageData;
+        }
+    }
+    
+    return result;
+}
+
+- (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
+    NSString *imageURLString = [imageURL absoluteString];
+    UIImage *image = [self.fileDownloader loadImageFromDisk:imageURLString];
+    if (image) return image;
+    return nil;
 }
 
 - (void)notificationReady:(CTInAppNotification*)notification {
@@ -264,6 +410,15 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         return;
     }
     
+    // if we are currently displaying a notification, cache this notification for later display
+    if (currentlyDisplayingNotification) {
+        if (self.config.accountId && notification) {
+            [pendingNotifications addObject:@[self.config.accountId, notification]];
+            CleverTapLogDebug(self.config.logLevel, @"%@: InApp already displaying, queueing to pending InApps", self);
+        }
+        return;
+    }
+    
     BOOL isHTMLType = (notification.inAppType == CTInAppTypeHTML);
     BOOL isInternetAvailable = self.instance.deviceInfo.isOnline;
     if (isHTMLType && !isInternetAvailable) {
@@ -285,12 +440,9 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
 
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
-    CleverTapJSInterface *jsInterface = nil;
-
     switch (notification.inAppType) {
         case CTInAppTypeHTML:
-            jsInterface = [[CleverTapJSInterface alloc] initWithConfigForInApps:self.config];
-            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification jsInterface:jsInterface];
+            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
             break;
         case CTInAppTypeInterstitial:
             controller = [[CTInterstitialViewController alloc] initWithNotification:notification];
@@ -319,11 +471,22 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
+        case CTInAppTypeCustom:
+            if ([self.templatesManager presentNotification:notification 
+                                              withDelegate:self
+                                         andFileDownloader:self.fileDownloader]) {
+                currentlyDisplayingNotification = notification;
+            } else {
+                errorString = [NSString stringWithFormat:@"Cannot present custom notification with template name: %@.",
+                               notification.customTemplateInAppData.templateName];
+            }
+            break;
         default:
             errorString = [NSString stringWithFormat:@"Unhandled notification type: %lu", (unsigned long)notification.inAppType];
             break;
     }
     if (controller) {
+        currentlyDisplayingNotification = notification;
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
         [[self class] displayInAppDisplayController:controller];
@@ -351,32 +514,46 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
+#pragma mark - Pending Notification
+
+- (void)onDisplayPendingNotification:(NSNotification *)notification {
+    currentlyDisplayingNotification = nil;
+    CleverTapLogDebug(self.config.logLevel, @"%@: Displaying pending notification.", self);
+    [self displayNotification:notification.userInfo[kInAppNotificationKey]];
+}
+
 #pragma mark - InAppDisplayController static
 + (void)displayInAppDisplayController:(CTInAppDisplayViewController*)controller {
-    // if we are currently displaying a notification, cache this notification for later display
-    if (currentDisplayController) {
-        [pendingNotificationControllers addObject:controller];
-        return;
-    }
-    // no current notification so display
     currentDisplayController = controller;
     [controller show:YES];
 }
 
 + (void)inAppDisplayControllerDidDismiss:(CTInAppDisplayViewController*)controller {
-    if (currentDisplayController && currentDisplayController == controller) {
-        currentDisplayController = nil;
+    if (controller) {
+        if (currentDisplayController && currentDisplayController == controller) {
+            currentDisplayController = nil;
+            [self checkPendingNotifications];
+        }
+    } else {
         [self checkPendingNotifications];
     }
 }
 
 // static display handling as we may have more than one instance competing to show an inapp
 + (void)checkPendingNotifications {
-    if (pendingNotificationControllers && [pendingNotificationControllers count] > 0) {
-        CTInAppDisplayViewController *controller = [pendingNotificationControllers objectAtIndex:0];
-        [pendingNotificationControllers removeObjectAtIndex:0];
-        [self displayInAppDisplayController:controller];
+    if (pendingNotifications && [pendingNotifications count] > 0) {
+        NSArray *pendingNotification = [pendingNotifications objectAtIndex:0];
+        [pendingNotifications removeObjectAtIndex:0];
+        NSString *accountId = [pendingNotification objectAtIndex:0];
+        CTInAppNotification *inAppNotification = [pendingNotification objectAtIndex:1];
+        [[NSNotificationCenter defaultCenter] postNotificationName:[self pendingNotificationKey:accountId] object:nil userInfo:@{kInAppNotificationKey: inAppNotification}];
+    } else {
+        currentlyDisplayingNotification = nil;
     }
+}
+
++ (NSString *)pendingNotificationKey:(NSString *)accountId {
+    return [NSString stringWithFormat:@"%@:%@:onDisplayPendingNotification", [self class], accountId];
 }
 
 #pragma mark - CTInAppNotificationDisplayDelegate
@@ -388,7 +565,7 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     [self _showInAppNotificationIfAny];
 }
 
-- (void)notificationDidShow:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller {
+- (void)notificationDidShow:(CTInAppNotification*)notification {
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did show: %@", self, notification.campaignId);
     [self.instance recordInAppNotificationStateEvent:NO forNotification:notification andQueryParameters:nil];
     [self.inAppFCManager didShow:notification];
@@ -400,18 +577,45 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
     }
 }
 
-- (void)handleNotificationCTA:(NSURL *)ctaURL buttonCustomExtras:(NSDictionary *)buttonCustomExtras forNotification:(CTInAppNotification*)notification fromViewController:(CTInAppDisplayViewController*)controller withExtras:(NSDictionary*)extras {
-    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp cta: %@ button custom extras: %@ with options:%@", self, ctaURL.absoluteString, buttonCustomExtras, extras);
+- (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
+    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
+    // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
+    
+    // add the action extras so they can be passed to the dismissedWithExtras delegate
     if (extras) {
         notification.actionExtras = extras;
     }
-    if (buttonCustomExtras && buttonCustomExtras.count > 0) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, buttonCustomExtras);
-        [self notifyNotificationButtonTappedWithCustomExtras:buttonCustomExtras];
+    
+    switch (action.type) {
+        case CTInAppActionTypeUnknown:
+            CleverTapLogDebug(self.config.logLevel, @"%@: Triggered in-app action with unknown type.", self);
+            break;
+        case CTInAppActionTypeClose:
+            // SDK in-apps are dismissed in CTInAppDisplayViewController buttonTapped: or tappedDismiss
+            if (notification.inAppType == CTInAppTypeCustom) {
+                [self.templatesManager closeNotification:notification];
+            }
+            break;
+        case CTInAppActionTypeOpenURL:
+            [self handleCTAOpenURL:action.actionURL];
+            break;
+        case CTInAppActionTypeKeyValues:
+            if (action.keyValues && action.keyValues.count > 0) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: InApp: button tapped with custom extras: %@", self, action.keyValues);
+                [self notifyNotificationButtonTappedWithCustomExtras:action.keyValues];
+            }
+            break;
+        case CTInAppActionTypeCustom:
+            [self triggerCustomTemplateAction:action.customTemplateInAppData forNotification:notification];
+            break;
+        case CTInAppActionTypeRequestForPermission:
+            // Handled in CTInAppDisplayViewController handleButtonClickFromIndex:
+            break;
     }
-    else if (ctaURL) {
-        
+}
+
+- (void)handleCTAOpenURL:(NSURL *)ctaURL {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (self.instance.urlDelegate) {
             // URL DELEGATE FOUND. OPEN DEEP LINKS ONLY IF USER ALLOWS IT
@@ -428,8 +632,59 @@ static NSMutableArray<CTInAppDisplayViewController*> *pendingNotificationControl
             }];
         }
 #endif
+}
+
+- (void)triggerCustomTemplateAction:(CTCustomTemplateInAppData *)actionData forNotification:(CTInAppNotification *)notification {
+    if (actionData && actionData.templateName) {
+        if ([self.templatesManager isRegisteredTemplateWithName:actionData.templateName]) {
+            CTCustomTemplateInAppData *inAppData = [actionData copy];
+            [inAppData setIsAction:YES];
+            CTInAppNotification *notificationFromAction = [self createNotificationForAction:inAppData andParentNotification:notification];
+            
+            if ([self.templatesManager isVisualTemplateWithName:inAppData.templateName]) {
+                [self _addInAppNotificationInFrontOfQueue:notificationFromAction];
+            } else {
+                NSSet *fileURLs = [self.templatesManager fileArgsURLsForInAppData:notificationFromAction.customTemplateInAppData];
+                [self.fileDownloader downloadFiles:[fileURLs allObjects] withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+                    for (NSString *url in status) {
+                        if (![status[url] boolValue]) {
+                            CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger action due to file download error.", [self class]);
+                            return;
+                        }
+                    }
+                    [CTUtils runSyncMainQueue:^{
+                        [self.templatesManager presentNotification:notificationFromAction withDelegate:self andFileDownloader:self.fileDownloader];
+                    }];
+                }];
+            }
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger non-registered template with name: %@", [self class], actionData.templateName);
+        }
+    } else {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Cannot trigger action without template name.", [self class]);
     }
-    [controller hide:true];
+}
+
+- (CTInAppNotification *)createNotificationForAction:(CTCustomTemplateInAppData *)inAppData andParentNotification:(CTInAppNotification *)notification {
+    NSMutableDictionary *json = [@{
+        CLTAP_INAPP_ID: notification.Id ? notification.Id : @"",
+        CLTAP_PROP_WZRK_ID: notification.campaignId ? notification.campaignId : @"",
+        CLTAP_INAPP_TYPE: [CTInAppUtils inAppTypeString:CTInAppTypeCustom],
+        CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS: @(YES),
+        CLTAP_INAPP_EXCLUDE_FROM_CAPS: @(YES),
+        CLTAP_INAPP_TTL: @(notification.timeToLive)
+    } mutableCopy];
+    
+    if (notification.jsonDescription[CLTAP_NOTIFICATION_PIVOT]) {
+        json[CLTAP_NOTIFICATION_PIVOT] = notification.jsonDescription[CLTAP_NOTIFICATION_PIVOT];
+    }
+    if (notification.jsonDescription[CLTAP_NOTIFICATION_CONTROL_GROUP_ID]) {
+        json[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = notification.jsonDescription[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
+    }
+    
+    [json addEntriesFromDictionary:inAppData.json];
+    
+    return [[CTInAppNotification alloc] initWithJSON:json];
 }
 
 - (void)handleInAppPushPrimer:(CTInAppNotification *)notification

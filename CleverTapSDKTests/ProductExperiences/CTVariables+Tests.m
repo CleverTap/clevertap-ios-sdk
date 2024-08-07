@@ -15,6 +15,7 @@
     self = [super init];
     if (self) {
         self.varCache = varCache;
+        [self.varCache setDelegate:self];
     }
     return self;
 }

@@ -31,6 +31,7 @@
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
 #import "CTSessionManager.h"
+#import "CTFileDownloader.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppFCManager.h"
@@ -56,7 +57,7 @@
 #import "CleverTap+InAppsResponseHandler.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppTriggerManager.h"
-#import "CTInAppImagePrefetchManager.h"
+#import "CTCustomTemplatesManager-Internal.h"
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -233,17 +234,19 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, weak) id <CTBatchSentDelegate> batchSentDelegate;
 @property (nonatomic, strong, readwrite) CTMultiDelegateManager *delegateManager;
 
+@property (nonatomic, strong, readwrite) CTFileDownloader *fileDownloader;
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
-@property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (atomic, strong) CTPushPrimerManager *pushPrimerManager;
 
+@property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (nonatomic, strong, readwrite) CTInAppFCManager *inAppFCManager;
 @property (nonatomic, strong, readwrite) CTInAppEvaluationManager *inAppEvaluationManager;
 @property (nonatomic, strong, readwrite) CTInAppDisplayManager *inAppDisplayManager;
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
-@property (nonatomic, strong, readwrite) CTInAppImagePrefetchManager *imagePrefetchManager;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
+@property (nonatomic, strong, readwrite) CTCustomTemplatesManager *customTemplatesManager;
 #endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
@@ -460,10 +463,11 @@ static BOOL sharedInstanceErrorLogged;
         if (_deviceInfo.timeZone&& ![_deviceInfo.timeZone isEqualToString:@""]) {
             initialProfileValues[CLTAP_SYS_TZ] = _deviceInfo.timeZone;
         }
-        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo];
         
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
+        
+        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
@@ -477,6 +481,8 @@ static BOOL sharedInstanceErrorLogged;
         [self initNetworking];
         [self inflateQueuesAsync];
         [self addObservers];
+        
+        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
             [self initializeInAppSupport];
@@ -496,7 +502,7 @@ static BOOL sharedInstanceErrorLogged;
         [self _initProductConfig];
         
         // Initialise Variables
-        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo];
+        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
         
         [self notifyUserProfileInitialized];
     }
@@ -506,12 +512,8 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)initializeInAppSupport {
-    CTInAppImagePrefetchManager *imagePrefetchManager = [[CTInAppImagePrefetchManager alloc] initWithConfig:self.config];
-    self.imagePrefetchManager = imagePrefetchManager;
-
     CTInAppStore *inAppStore = [[CTInAppStore alloc] initWithConfig:self.config
                                                     delegateManager:self.delegateManager
-                                               imagePrefetchManager:self.imagePrefetchManager
                                                            deviceId:self.deviceInfo.deviceId];
     self.inAppStore = inAppStore;
     
@@ -520,15 +522,19 @@ static BOOL sharedInstanceErrorLogged;
     
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
+    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config];
+    
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self
                                                                         dispatchQueueManager:self.dispatchQueueManager
                                                                               inAppFCManager:inAppFCManager
                                                                            impressionManager:impressionManager
                                                                                   inAppStore:inAppStore
-                                                                        imagePrefetchManager:self.imagePrefetchManager];
+                                                                            templatesManager:templatesManager
+                                                                              fileDownloader:self.fileDownloader];
     
     CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
     
+    self.customTemplatesManager = templatesManager;
     self.inAppFCManager = inAppFCManager;
     self.impressionManager = impressionManager;
     self.inAppEvaluationManager = evaluationManager;
@@ -729,6 +735,21 @@ static BOOL sharedInstanceErrorLogged;
         [self.requestSender send:ctRequest];
         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     }];
+}
+
+- (void)runSerialAsyncEnsureHandshake:(void(^)(void))block {
+    if ([self needHandshake]) {
+        [self.dispatchQueueManager runSerialAsync:^{
+            [self doHandshakeAsyncWithCompletion:^{
+                block();
+            }];
+        }];
+    }
+    else {
+        [self.dispatchQueueManager runSerialAsync:^{
+            block();
+        }];
+    }
 }
 
 - (BOOL)updateStateFromResponseHeadersShouldRedirectForNotif:(NSDictionary *)headers {
@@ -1563,8 +1584,13 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)clearInAppResources:(BOOL)expiredOnly {
-    [self.imagePrefetchManager _clearImageAssets:expiredOnly];
+    [self.fileDownloader clearFileAssets:expiredOnly];
 }
+
+- (CTTemplateContext * _Nullable)activeContextForTemplate:(NSString * _Nonnull)templateName {
+    return [[self customTemplatesManager] activeContextForTemplate:templateName];
+}
+
 #endif
 
 #pragma mark Private Method
@@ -1945,7 +1971,7 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
-            [self evaluateOnEvent:event];
+            [self evaluateOnEvent:event withType: eventType];
         }];
 #endif
         
@@ -1960,16 +1986,19 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)evaluateOnEvent:(NSDictionary *)event {
+- (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
+#if !CLEVERTAP_NO_INAPP_SUPPORT
     NSString *eventName = event[CLTAP_EVENT_NAME];
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden
     [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
-#if !CLEVERTAP_NO_INAPP_SUPPORT
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
+    } else if (eventType == CleverTapEventTypeProfile) {
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore getUserAttributeChangeProperties:event];
+        [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
@@ -2210,7 +2239,7 @@ static BOOL sharedInstanceErrorLogged;
                 [self scheduleQueueFlush];
                 [self handleSendQueueFail];
                 
-                [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:NO];
+                [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:NO withQueueType:queueType];
             }
             
             if (!success || redirect) {
@@ -2223,7 +2252,7 @@ static BOOL sharedInstanceErrorLogged;
             
             [self parseResponse:responseData];
             
-            [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES];
+            [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES withQueueType:queueType];
 
             CleverTapLogDebug(self.config.logLevel,@"%@: Successfully sent %lu events", self, (unsigned long)[batch count]);
             
@@ -2558,9 +2587,6 @@ static BOOL sharedInstanceErrorLogged;
         // clear ARP and other context for the old user
         [self clearUserContext];
         
-        // clear old profile data
-        [self.localDataStore changeUser];
-        
         [self.sessionManager resetSession];
         
         if (cachedGUID) {
@@ -2570,6 +2596,9 @@ static BOOL sharedInstanceErrorLogged;
         } else {
             [self.deviceInfo forceNewDeviceID];
         }
+        
+        // clear old profile data
+        [self.localDataStore changeUser];
         
         [self recordDeviceErrors];
         [[self delegateManager] notifyDelegatesDeviceIdDidChange:self.deviceInfo.deviceId];
@@ -2727,17 +2756,14 @@ static BOOL sharedInstanceErrorLogged;
 - (void)profilePush:(NSDictionary *)properties {
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder build:properties completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
-            if (systemFields) {
-                [self.localDataStore setProfileFields:systemFields];
-            }
             NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
+            if (systemFields) {
+                [profile addEntriesFromDictionary:systemFields];
+            }
             if (customFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
-                [self.localDataStore setProfileFields:customFields];
                 [profile addEntriesFromDictionary:customFields];
             }
             [self cacheGUIDSforProfile:profile];
-            
 #if !defined(CLEVERTAP_TVOS)
             // make sure Phone is a string and debug check for country code and phone format, but always send
             NSArray *profileAllKeys = [profile allKeys];
@@ -2777,6 +2803,10 @@ static BOOL sharedInstanceErrorLogged;
     return self.deviceInfo.deviceId;
 }
 
+- (id)profileGetLocalValues:(NSString *)propertyName {
+    return [self.localDataStore getProfileFieldForKey:propertyName];
+}
+
 - (NSString *)getAccountID {
     return self.config.accountId;
 }
@@ -2803,7 +2833,6 @@ static BOOL sharedInstanceErrorLogged;
                 NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
                 NSString* _key = [customFields allKeys][0];
                 CleverTapLogInternal(self.config.logLevel, @"%@: removing key %@ from profile", self, _key);
-                [self.localDataStore removeProfileFieldForKey:_key];
                 [profile addEntriesFromDictionary:customFields];
                 
                 NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
@@ -2894,8 +2923,6 @@ static BOOL sharedInstanceErrorLogged;
     [profile addEntriesFromDictionary:operatorDict];
     CleverTapLogInternal(self.config.logLevel, @"Created Increment/ Decrement profile push: %@", operatorDict);
     
-    [self.localDataStore setProfileFieldWithKey: key andValue: updatedValue];
-    
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;
     [self queueEvent:event withType:CleverTapEventTypeProfile];
@@ -2922,7 +2949,6 @@ static BOOL sharedInstanceErrorLogged;
         [self.validationResultStack pushValidationResults:errors];
     }
 }
-
 
 #pragma mark - User Action Events API
 
@@ -4272,6 +4298,86 @@ static BOOL sharedInstanceErrorLogged;
     return [CTValidator isValidCleverTapId:cleverTapID];
 }
 
+#pragma mark - Sync PE and Custom Templates
+
+- (void)syncVariables {
+    [self syncVariables:NO];
+}
+
+- (void)syncVariables:(BOOL)isProduction {
+    NSDictionary *varsPayload = [[self variables] varsPayload];
+    [self syncWithBlock:^{
+        NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+        CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:@[meta, varsPayload] domain:self.domainFactory.redirectDomain];
+        [self syncRequest:ctRequest logMessage:@"Vars sync"];
+    } methodName:NSStringFromSelector(_cmd) isProduction:isProduction];
+}
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (void)syncCustomTemplates {
+    [self syncCustomTemplates:NO];
+}
+
+- (void)syncCustomTemplates:(BOOL)isProduction {
+    NSDictionary *syncPayload = [[self customTemplatesManager] syncPayload];
+    [self syncWithBlock:^{
+        NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+        CTRequest *ctRequest = [CTRequestFactory syncTemplatesRequestWithConfig:self.config params:@[meta, syncPayload] domain:self.domainFactory.redirectDomain];
+        [self syncRequest:ctRequest logMessage:@"Define Custom Templates"];
+    } methodName:NSStringFromSelector(_cmd) isProduction:isProduction];
+}
+#endif
+
+- (void)syncWithBlock:(void(^)(void))syncBlock methodName:(NSString *)methodName isProduction:(BOOL)isProduction {
+    if (isProduction) {
+#if DEBUG
+        CleverTapLogInfo(_config.logLevel, @"%@: Calling %@: with isProduction:YES from Debug configuration/build. Use syncVariables in this case", self, methodName);
+#else
+        CleverTapLogInfo(_config.logLevel, @"%@: Calling %@: with isProduction:YES from Release configuration/build. Do not release this build and use with caution", self, methodName);
+#endif
+        [self runSerialAsyncEnsureHandshake:syncBlock];
+    } else {
+#if DEBUG
+        [self runSerialAsyncEnsureHandshake:syncBlock];
+#else
+        CleverTapLogInfo(_config.logLevel, @"%@: %@ can only be called from Debug configurations/builds", self, methodName);
+#endif
+    }
+}
+
+- (void)syncRequest:(CTRequest *)request logMessage:(NSString *)logMessage {
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
+        [self handleSyncOnResponse:data response:response logMessage:logMessage];
+        dispatch_semaphore_signal(semaphore);
+    }];
+    [request onError:^(NSError * _Nullable error) {
+        CleverTapLogDebug(self->_config.logLevel, @"%@: Error %@: %@", self, logMessage, error.debugDescription);
+        dispatch_semaphore_signal(semaphore);
+    }];
+    [self.requestSender send:request];
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+}
+
+- (void)handleSyncOnResponse:(NSData * _Nullable)data response:(NSURLResponse * _Nullable)response
+                     logMessage:(NSString *)logMessage {
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+        if (httpResponse.statusCode == 200) {
+            CleverTapLogDebug(self->_config.logLevel, @"%@: %@ successful.", self, logMessage);
+        }
+        else if (httpResponse.statusCode == 401) {
+            CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test profile. Please mark this profile as a test profile from the CleverTap dashboard.", self);
+        }
+    }
+    CT_TRY
+    id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+    if (jsonResp[@"error"]) {
+        CleverTapLogDebug(self->_config.logLevel, @"%@: %@ error: %@", self, logMessage, jsonResp[@"error"]);
+    }
+    CT_END_TRY
+}
+
 #pragma mark - Product Experiences
 
 - (void)onVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
@@ -4280,78 +4386,6 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)onceVariablesChanged:(CleverTapVariablesChangedBlock _Nonnull )block {
     [[self variables] onceVariablesChanged:block];
-}
-
-- (void)syncVariables {
-    [self syncVariables:NO];
-}
-
-- (void)syncVariablesEnsureHandshake {
-    if ([self needHandshake]) {
-        [self.dispatchQueueManager runSerialAsync:^{
-            [self doHandshakeAsyncWithCompletion:^{
-                [self _syncVars];
-            }];
-        }];
-    }
-    else {
-        [self.dispatchQueueManager runSerialAsync:^{
-            [self _syncVars];
-        }];
-    }
-}
-    
-- (void)syncVariables:(BOOL)isProduction {
-    if (isProduction) {
-#if DEBUG
-        CleverTapLogInfo(_config.logLevel, @"%@: Calling syncVariables: with isProduction:YES from Debug configuration/build. Use syncVariables in this case", self);
-#else
-        CleverTapLogInfo(_config.logLevel, @"%@: Calling syncVariables: with isProduction:YES from Release configuration/build. Do not release this build and use with caution", self);
-#endif
-        [self syncVariablesEnsureHandshake];
-    } else {
-#if DEBUG
-        [self syncVariablesEnsureHandshake];
-#else
-        CleverTapLogInfo(_config.logLevel, @"%@: syncVariables can only be called from Debug configurations/builds", self);
-#endif
-    }
-}
-
-- (void)_syncVars {
-    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
-    NSDictionary *varsPayload = [[self variables] varsPayload];
-    NSArray *payload = @[meta,varsPayload];
-    
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    
-    NSString *url = [NSString stringWithFormat:@"https://%@/%@", self.domainFactory.redirectDomain, CT_PE_DEFINE_VARS_ENDPOINT];
-    CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:payload url:url];
-    
-    [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
-        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-            if (httpResponse.statusCode == 200) {
-                CleverTapLogDebug(self->_config.logLevel, @"%@: Vars synced successfully", self);
-            }
-            else if (httpResponse.statusCode == 401) {
-                CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test profile. Please mark this profile as a test profile from the CleverTap dashboard.", self);
-            }
-        }
-        CT_TRY
-        id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-        if (jsonResp[@"error"]) {
-            CleverTapLogDebug(self->_config.logLevel, @"%@: Error while syncing vars: %@", self, jsonResp[@"error"]);
-        }
-        CT_END_TRY
-        dispatch_semaphore_signal(semaphore);
-    }];
-    [ctRequest onError:^(NSError * _Nullable error) {
-        CleverTapLogDebug(self->_config.logLevel, @"%@: error syncing vars: %@", self, error.debugDescription);
-        dispatch_semaphore_signal(semaphore);
-    }];
-    [self.requestSender send:ctRequest];
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
 - (void)fetchVariables:(CleverTapFetchVariablesBlock)block {
@@ -4369,6 +4403,14 @@ static BOOL sharedInstanceErrorLogged;
 
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name {
     return [[self.variables varCache] getMergedValue:name];
+}
+
+- (void)onVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block {
+    [[self variables] onVariablesChangedAndNoDownloadsPending:block];
+}
+
+- (void)onceVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block {
+    [[self variables] onceVariablesChangedAndNoDownloadsPending:block];
 }
 
 #pragma mark - PE Vars
@@ -4480,6 +4522,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (CTVar *)defineVar:(NSString *)name withDictionary:(NSDictionary *)defaultValue {
     return [self.variables define:name with:defaultValue kind:CT_KIND_DICTIONARY];
+}
+
+- (CTVar *)defineFileVar:(NSString *)name {
+    return [self.variables define:name with:nil kind:CT_KIND_FILE];
 }
 
 @end

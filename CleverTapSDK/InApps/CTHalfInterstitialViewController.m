@@ -118,14 +118,14 @@
     if (![self deviceOrientationIsLandscape]) {
         if (self.notification.inAppImage) {
             self.imageView.image = self.notification.inAppImage;
-        } else if (self.notification.image) {
-            self.imageView.image  = [UIImage imageWithData:self.notification.image];
+        } else if (self.notification.imageData) {
+            self.imageView.image  = [UIImage imageWithData:self.notification.imageData];
         }
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
-        } else if (self.notification.imageLandscape) {
-            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscape];
+        } else if (self.notification.imageLandscapeData) {
+            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
         }
     }
     

@@ -86,8 +86,8 @@ typedef enum {
     // set image
     if (self.notification.inAppImage) {
         self.inAppImage = self.notification.inAppImage;
-    } else if (self.notification.image) {
-        self.inAppImage = [UIImage imageWithData:self.notification.image];
+    } else if (self.notification.imageData) {
+        self.inAppImage = [UIImage imageWithData:self.notification.imageData];
     }
     if (self.inAppImage) {
         self.imageView.clipsToBounds = YES;
@@ -381,8 +381,8 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidShow:fromViewController:)]) {
-            [self.delegate notificationDidShow:self.notification fromViewController:self];
+        if (self.delegate) {
+            [self.delegate notificationDidShow:self.notification];
         }
     };
     if (animated) {

@@ -12,14 +12,19 @@
 @property (strong, nonatomic) CacheUpdateBlock updateBlock;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+@property (nonatomic, strong) CTFileDownloader *fileDownloader;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, id> *fileVarsInDownload;
 @end
 
 @implementation CTVarCache
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config deviceInfo: (CTDeviceInfo*)deviceInfo {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config 
+                    deviceInfo:(CTDeviceInfo*)deviceInfo
+                fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
         self.config = config;
         self.deviceInfo = deviceInfo;
+        self.fileDownloader = fileDownloader;
         [self initialize];
     }
     return self;
@@ -30,6 +35,8 @@
     self.diffs = [NSMutableDictionary dictionary];
     self.valuesFromClient = [NSMutableDictionary dictionary];
     self.hasVarsRequestCompleted = NO;
+    self.hasPendingDownloads = NO;
+    self.fileVarsInDownload = [NSMutableDictionary dictionary];
 }
 
 - (NSArray *)getNameComponents:(NSString *)name {
@@ -171,7 +178,7 @@
             return;
         }
         NSKeyedUnarchiver *unarchiver;
-        if (@available(iOS 12.0, *)) {
+        if (@available(iOS 12.0, tvOS 11.0, *)) {
             NSError *error = nil;
             unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
             if (error != nil) {
@@ -237,8 +244,22 @@
             // Update variables with new values.
             // Have to extract the keys because a dictionary variable may add a new sub-variable,
             // modifying the variable dictionary.
+            NSMutableArray *updatedFileVariables = [NSMutableArray array];
             for (NSString *name in [self.vars allKeys]) {
-                [self.vars[name] update];
+                CTVar *var = self.vars[name];
+                // Always update the variable
+                BOOL hasChanged = [var update];
+                if (hasChanged && [var.kind isEqualToString:CT_KIND_FILE]) {
+                    [updatedFileVariables addObject:var];
+                }
+            }
+            
+            NSMutableArray *fileURLs = [self fileURLs:updatedFileVariables];
+            if ([fileURLs count] > 0) {
+                [self setHasPendingDownloads:YES];
+                [self startFileDownload:fileURLs];
+            } else {
+                [self.delegate triggerNoDownloadsPending];
             }
         } else {
             CleverTapLogDebug(self.config.logLevel, @"%@: No variables received from the server", self);
@@ -260,6 +281,96 @@
         CTVar *var = (CTVar *)obj;
         [var clearState];
     }];
+}
+
+#pragma mark - File Handling
+
+- (void)startFileDownload:(NSMutableArray *)fileURLs {
+    [self.fileDownloader downloadFiles:fileURLs withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        NSMutableArray<NSString *> *retryURLs = [NSMutableArray new];
+        // Call fileIsReady for variables whose files are downloaded.
+        for (NSString *key in status.allKeys) {
+            if ([status[key] boolValue]) {
+                @synchronized (self) {
+                    [self.fileVarsInDownload[key] triggerFileIsReady];
+                    [self.fileVarsInDownload removeObjectForKey:key];
+                }
+            } else {
+                [retryURLs addObject:key];
+            }
+        }
+        // Retry once if a URL failed to download
+        if (retryURLs.count == 0) {
+            [self setHasPendingDownloads:NO];
+            [self.delegate triggerNoDownloadsPending];
+        } else {
+            [self retryFileDownload:retryURLs];
+        }
+    }];
+}
+
+- (nullable NSString *)fileDownloadPath:(NSString *)fileURL {
+    return [self.fileDownloader fileDownloadPath:fileURL];
+}
+
+- (BOOL)isFileAlreadyPresent:(NSString *)fileURL {
+    return [self.fileDownloader isFileAlreadyPresent:fileURL andUpdateExpiryTime:YES];
+}
+
+- (NSMutableArray<NSString *> *)fileURLs:(NSArray *)fileVars {
+    NSMutableArray<NSString *> *downloadURLs = [NSMutableArray new];
+    for (CTVar *var in fileVars) {
+        if (var.fileURL) {
+            // If file is already present, call fileIsReady
+            // else download the file and call fileIsReady when downloaded
+            if ([self isFileAlreadyPresent:var.fileURL]) {
+                [var triggerFileIsReady];
+            } else {
+                [downloadURLs addObject:var.fileURL];
+                @synchronized (self) {
+                    [self.fileVarsInDownload setObject:var forKey:var.fileURL];
+                }
+            }
+        } else {
+            // Trigger FileIsReady since the value changed to null (no override)
+            [var triggerFileIsReady];
+        }
+    }
+    
+    return downloadURLs;
+}
+
+- (void)retryFileDownload:(NSMutableArray *)urls {
+    [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,id> * _Nullable status) {
+        [self setHasPendingDownloads:NO];
+        for (NSString *key in status.allKeys) {
+            @synchronized (self) {
+                if ([status[key] boolValue]) {
+                    [self.fileVarsInDownload[key] triggerFileIsReady];
+                }
+                [self.fileVarsInDownload removeObjectForKey:key];
+            }
+        }
+        [self.delegate triggerNoDownloadsPending];
+    }];
+}
+
+- (void)fileVarUpdated:(CTVar *)fileVar {
+    NSString *url = fileVar.fileURL;
+    if (!url) {
+        // FileIsReady is not triggered if there is no override, fileURL is nil
+        return;
+    }
+    
+    if ([self isFileAlreadyPresent:url]) {
+        [fileVar triggerFileIsReady];
+    } else {
+        [self.fileDownloader downloadFiles:@[url] withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
+            if ([status[url] boolValue]) {
+                [fileVar triggerFileIsReady];
+            }
+        }];
+    }
 }
 
 @end

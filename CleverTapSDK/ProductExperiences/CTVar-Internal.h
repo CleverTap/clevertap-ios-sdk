@@ -16,12 +16,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) BOOL hadStarted;
 @property (readonly, strong) NSString *kind;
 @property (readonly, strong) NSMutableArray *valueChangedBlocks;
+@property (readonly, strong) NSMutableArray *fileReadyBlocks;
 @property (nonatomic, unsafe_unretained, nullable) id <CTVarDelegate> delegate;
 @property (readonly) BOOL hasChanged;
+@property (readonly) BOOL shouldDownloadFile;
+@property (readonly, strong, nullable) NSString *fileURL;
 
-- (void)update;
+- (BOOL)update;
 - (void)cacheComputedValues;
 - (void)triggerValueChanged;
+- (void)triggerFileIsReady;
 
 + (BOOL)printedCallbackWarning;
 + (void)setPrintedCallbackWarning:(BOOL)newPrintedCallbackWarning;

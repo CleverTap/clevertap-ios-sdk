@@ -8,6 +8,7 @@
 #import "CTSessionManager.h"
 
 @class CTInAppDisplayManager;
+@class CTFileDownloader;
 
 @interface CleverTap (Internal)
 
@@ -31,7 +32,10 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 @property (nonatomic, assign, readonly) BOOL isAppForeground;
 @property (nonatomic, strong, readonly) CTDeviceInfo * _Nonnull deviceInfo;
 @property (atomic, strong, readonly) CTSessionManager * _Nonnull sessionManager;
+@property (nonatomic, strong, readonly) CTCustomTemplatesManager * _Nullable customTemplatesManager;
 #endif
+
+@property (nonatomic, strong, readonly) CTFileDownloader * _Nullable fileDownloader;
 
 + (NSMutableDictionary<NSString *, CleverTap *> * _Nullable)getInstances;
 

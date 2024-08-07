@@ -6,7 +6,7 @@ You can define variables using the CleverTap iOS SDK. When you define a variable
 Currently, CleverTap SDK supports the following variable types:
 
 - String
-- boolean
+- BOOL
 - Dictionary
 - int
 - float 
@@ -14,6 +14,7 @@ Currently, CleverTap SDK supports the following variable types:
 - short
 - long
 - Number
+- File (supported from **v7.0.0**)
 
 # Define Variables
 
@@ -79,7 +80,18 @@ let var_dict_nested = CleverTap.sharedInstance()?.defineVar(name: "var_dict_comp
 
 ```
 
+# Define File Variables
 
+CleverTap supports file types for variables from `v7.0.0+`. Supported file types include but are not limited to images (jpg, jpeg, png, gif), text files, and PDFs. The File Variable is defined using the `defineFileVar` method, which returns an instance of a `CTVar` variable. The file variable does not have a default value.
+
+```objectivec
+#import <CleverTapSDK/CleverTap+CTVar.h>
+
+CTVar *var_file = [[CleverTap sharedInstance] defineFileVar:@"fileVariable"];
+```
+```swift Swift
+let var_file = CleverTap.sharedInstance()?.defineFileVar(name: "fileVariable")
+```
 
 # Setup Callbacks
 
@@ -90,6 +102,9 @@ CleverTap iOS SDK provides several callbacks for the developer to receive feedba
 - `onceVariablesChanged`
 - `onValueChanged`
 - Variables Delegate
+- File variables Callback
+- File variables individual Callback
+- File variables Delegates
 
 ## Status of Variables Fetch Request
 
@@ -111,8 +126,6 @@ CleverTap.sharedInstance()?.fetchVariables({ success in
         
     }];
 ```
-
-
 
 ## `onVariablesChanged`
 
@@ -138,8 +151,6 @@ CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withStri
         NSLog(@"CleverTap.onVariablesChanged: %@", [var_string value]);
     }];
 ```
-
-
 
 ## `onceVariablesChanged`
 
@@ -169,8 +180,6 @@ CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withStri
 
 ```
 
-
-
 ## `onValueChanged`
 
 This callback is invoked when the value of the variable changes.
@@ -194,8 +203,6 @@ CTVar *var_string = [[CleverTap sharedInstance] defineVar:@"var_string" withStri
         NSLog(@"var_string.onValueChanged: %@", [var_string value]);
     }];
 ```
-
-
 
 ## Variables Delegate
 
@@ -231,7 +238,97 @@ CTVarDelegateImpl *del = [[CTVarDelegateImpl alloc] init];
 [var_string setDelegate:del];
 ```
 
+## File Variables Callbacks
 
+### `onVariablesChangedAndNoDownloadsPending`
+
+This callback will be called when no files need to be downloaded or all downloads have been completed. It is called each time new values are fetched and downloads are completed.
+
+```objectivec
+[[CleverTap sharedInstance] onVariablesChangedAndNoDownloadsPending:^{
+  // Executed each time
+}];
+```
+```swift
+CleverTap.sharedInstance()?.onVariablesChangedAndNoDownloadsPending {
+   // Executed each time        
+}
+```
+
+### `onceVariablesChangedAndNoDownloadsPending`
+
+This callback will also be called when no files need to be downloaded or all downloads have been completed, but It is called only once.
+
+```objectivec
+[[CleverTap sharedInstance] onceVariablesChangedAndNoDownloadsPending:^{
+  // Executed only once
+}];
+```
+```swift
+CleverTap.sharedInstance()?.onceVariablesChangedAndNoDownloadsPending {
+    // Executed only once            
+}
+```
+
+## File variables individual Callback
+
+### `onFileIsReady`
+
+This callback will be called when the value of the file variable is downloaded and ready. This is only available for File variables.
+
+```objectivec
+#import <CleverTapSDK/CleverTap+CTVar.h>
+
+CTVar *var_file = [[CleverTap sharedInstance] defineFileVar:@"fileVariable"];
+[var_file onFileIsReady:^{
+      // Called when file is downloaded.
+}];
+```
+```swift
+let var_file = CleverTap.sharedInstance()?.defineFileVar(name: "fileVariable")
+
+var_file?.onFileIsReady {
+  // Called when file is downloaded.          
+}
+```
+
+## File Variables Delegates
+
+The `fileIsReady` method is called when file is downloaded. This method is only for file type variables and variable's value will return the file downloaded path.
+
+```objectivec
+#import <CleverTapSDK/CleverTap+CTVar.h>
+
+@interface CTVarDelegateImpl : NSObject <CTVarDelegate>
+@end
+
+
+@implementation CTVarDelegateImpl
+- (void)valueDidChange:(CTVar *)variable {
+// valueDidChange
+}
+
+- (void)fileIsReady:(CTVar *)var {
+    NSLog(@"CleverTap file var:%@ is downloaded at path: %@", var.name ,var.value);
+}
+@end
+
+CTVarDelegateImpl *del = [[CTVarDelegateImpl alloc] init];
+[var_file setDelegate:del];
+```
+```swift
+@objc class VarDelegateImpl: NSObject, VarDelegate {
+    func valueDidChange(_ variable: CleverTapSDK.Var) {
+        print("CleverTap \(String(describing: variable.name)):valueDidChange to: \(variable.value!)")
+    }
+    
+    func fileIsReady(_ variable: CleverTapSDK.Var) {
+        print("CleverTap file downloaded to path: \(variable.value ?? "nil")")
+    }
+}
+
+var_file?.setDelegate(self)
+```
 
 # Sync Defined Variables
 
@@ -262,8 +359,6 @@ CleverTap.sharedInstance()?.syncVariables();
 [[CleverTap sharedInstance] syncVariables];
 ```
 
-
-
 > 📘 Key Points to Remember
 > 
 > - In a scenario where there is already a draft created by another user profile in the dashboard, the sync call will fail to avoid overriding important changes made by someone else. In this case, Publish or Dismiss the existing draft before you proceed with syncing variables again. However, you can override a draft you created via the sync method previously to optimize the integration experience.
@@ -289,8 +384,6 @@ CleverTap.sharedInstance()?.fetchVariables({ success in
         
 }];
 ```
-
-
 
 # Use Fetched Variables Values
 
@@ -318,15 +411,13 @@ variable?.onValueChanged {
 }];
 ```
 
-
-
 ## Access Variable Values
 
 You can access these fetched values in the following three ways:
 
 ### From `Var` instance
 
-You can use several methods on the `Var` instance as shown in the following code:
+You can use several methods on the `Var` instance as shown in the following code. For File Variables, value returns the file downloaded path.
 
 ```swift
 // Swift
@@ -335,6 +426,12 @@ variable?.defaultValue // returns default value
 variable?.value // returns current value
 variable?.numberValue // returns value as NSNumber if applicable
 variable?.stringValue // returns value as String
+
+// File Variables
+let var_file = CleverTap.sharedInstance()?.defineFileVar(name: "fileVariable")
+var_file?.value // returns file downloaded path
+var_file?.stringValue // returns file downloaded path
+var_file?.fileValue // returns file downloaded path
 ```
 ```objectivec
 // Objective-C
@@ -343,9 +440,13 @@ variable.defaultValue; // returns default value
 variable.value; // returns current value
 variable.numberValue; // returns value as NSNumber if applicable
 variable.stringValue; // returns value as String
+
+// File Variables
+CTVar *var_file = [[CleverTap sharedInstance] defineFileVar:@"fileVariable"];
+var_file.value // returns file downloaded path
+var_file.stringValue // returns file downloaded path
+var_file.fileValue // returns file downloaded path
 ```
-
-
 
 ### Using `CleverTap` Instance method
 

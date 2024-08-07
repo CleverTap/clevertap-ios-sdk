@@ -330,7 +330,7 @@
 - (void)testSwitchUserDelegateAdded {
     CTMultiDelegateManager *delegateManager = [[CTMultiDelegateManager alloc] init];
     NSUInteger count = [[delegateManager switchUserDelegates] count];
-    __unused CTInAppStore *store = [[CTInAppStore alloc] initWithConfig:self.helper.config delegateManager:delegateManager imagePrefetchManager:self.helper.imagePrefetchManager deviceId:self.helper.deviceId];
+    __unused CTInAppStore *store = [[CTInAppStore alloc] initWithConfig:self.helper.config delegateManager:delegateManager deviceId:self.helper.deviceId];
     
     XCTAssertEqual([[delegateManager switchUserDelegates] count], count + 1);
 }

@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.0.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.0) (August 07, 2024)
+
+#### Added
+- Adds support for Custom Code Templates. Please refer to the [Custom Code Templates doc](/docs/CustomCodeTemplates.md) to read more on how to integrate this in your app.
+- Adds support for File Type Variables in Remote Config. Please refer to the [Remote Config Variables doc](/docs/Variables.md) to read more on how to integrate this in your app.
+- Adds support for triggering in-app notifications on User Attribute Change.
+- Adds the CleverTap SDK version in the JS interface for HTML in-app notifications.
+
+#### Fixed
+- Fix HTML view controller `CTInAppHTMLViewController` presented before scene became active.
+- Use keyWindow supported orientations for `CTInAppDisplayViewController`.
+
 ### [Version 6.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/6.2.1) (April 12, 2024)
 
 #### Fixed

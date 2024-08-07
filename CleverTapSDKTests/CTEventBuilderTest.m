@@ -10,17 +10,13 @@
 #import "CTEventBuilder.h"
 #import "CTValidator.h"
 #import "CTInAppNotification.h"
-#import "InAppHelper.h"
 
 @interface CTEventBuilderTest : XCTestCase
-@property (nonatomic, strong) CTInAppImagePrefetchManager *prefetchManager;
 @end
 
 @implementation CTEventBuilderTest
 
 - (void)setUp {
-    InAppHelper *helper = [InAppHelper new];
-    self.prefetchManager = helper.imagePrefetchManager;
 }
 
 - (void)tearDown {
@@ -283,7 +279,7 @@
 
 - (void)test_buildInAppNotificationStateEvent_withClickedTrueAndInvalidKey {
     NSDictionary *notification = @{@"notiKey": @"notiValue"};
-    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification imagePrefetchManager:self.prefetchManager];
+    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
     [CTEventBuilder buildInAppNotificationStateEvent:true forNotification:inAppNotification andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
@@ -296,7 +292,7 @@
 
 - (void)test_buildInAppNotificationStateEvent_withClickedFalseAndInvalidKey {
     NSDictionary *notification = @{@"notiKey": @"notiValue"};
-    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification imagePrefetchManager:self.prefetchManager];
+    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
     [CTEventBuilder buildInAppNotificationStateEvent:false forNotification:inAppNotification andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
@@ -309,7 +305,7 @@
 
 - (void)test_buildInAppNotificationStateEvent_withValidKey {
     NSDictionary *notification = @{@"wzrk_notiKey": @"notiValue"};
-    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification imagePrefetchManager:self.prefetchManager];
+    CTInAppNotification *inAppNotification = [[CTInAppNotification alloc] initWithJSON:notification];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
     [CTEventBuilder buildInAppNotificationStateEvent:false forNotification:inAppNotification andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {

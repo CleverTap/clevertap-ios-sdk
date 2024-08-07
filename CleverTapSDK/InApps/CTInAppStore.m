@@ -12,7 +12,6 @@
 #import "CTAES.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
-#import "CTInAppImagePrefetchManager.h"
 #import "CTMultiDelegateManager.h"
 
 NSString* const kCLIENT_SIDE_MODE = @"CS";
@@ -23,7 +22,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
-@property (nonatomic, strong) CTInAppImagePrefetchManager *imagePrefetchManager;
 @property (nonatomic, strong) CTAES *ctAES;
 
 @property (nonatomic, strong) NSArray *inAppsQueue;
@@ -38,7 +36,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                delegateManager:(CTMultiDelegateManager *)delegateManager
-          imagePrefetchManager:(CTInAppImagePrefetchManager *)imagePrefetchManager
                       deviceId:(NSString *)deviceId {
     self = [super init];
     if (self) {
@@ -46,7 +43,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.accountId = config.accountId;
         self.deviceId = deviceId;
         self.ctAES = [[CTAES alloc] initWithAccountID:config.accountId];
-        self.imagePrefetchManager = imagePrefetchManager;
         
         [delegateManager addSwitchUserDelegate:self];
         [self migrateInAppQueueKeys];
@@ -131,6 +127,16 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+- (void)insertInFrontInApp:(NSDictionary *)inAppNotif {
+    if (!inAppNotif) return;
+    
+    @synchronized(self) {
+        NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
+        [inAppsQueue insertObject:inAppNotif atIndex:0];
+        [self storeInApps:inAppsQueue];
+    }
+}
+
 - (NSDictionary *)peekInApp {
     @synchronized(self) {
         NSArray *inApps = [self inAppsQueue];
@@ -180,9 +186,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 #pragma mark Client-Side In-Apps
 - (void)removeClientSideInApps {
     @synchronized (self) {
-        // Clear the CS images stored in disk cache
-        [self.imagePrefetchManager setImageAssetsInactiveAndClearExpired];
-
         _clientSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences removeObjectForKey:storageKey];
@@ -195,9 +198,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = clientSideInApps;
         
-        // Preload CS inApp images to disk cache
-        [self.imagePrefetchManager preloadClientSideInAppImages:_clientSideInApps];
-
         NSString *encryptedString = [self.ctAES getEncryptedBase64String:clientSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences putString:encryptedString forKey:storageKey];
