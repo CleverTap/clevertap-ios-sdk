@@ -52,7 +52,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
                 // migrate to new persisted ct-accid-guid-userprofile
-                [CTUserInfoMigrator migrateUserInfoFileForAccountID:self->_config.accountId deviceID:self->_deviceInfo.deviceId];
+                [CTUserInfoMigrator migrateUserInfoFileForAccountID:self->_config.accountId deviceID:self->_deviceInfo.deviceId config:self->_config];
 
                 self->localProfileForSession = [self _inflateLocalProfile];
                 for (NSString* key in [profileValues allKeys]) {
