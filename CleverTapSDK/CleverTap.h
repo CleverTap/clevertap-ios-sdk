@@ -373,16 +373,16 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
- Creates a separate and distinct user profile identified by one or more of Identity, Email, FBID or GPID values,
+ Creates a separate and distinct user profile identified by one or more of Identity or Email values,
  and populated with the key-values included in the properties dictionary.
  
  @discussion
  If your app is used by multiple users, you can use this method to assign them each a unique profile to track them separately.
  
- If instead you wish to assign multiple Identity, Email, FBID and/or GPID values to the same user profile,
+ If instead you wish to assign multiple Identity and/or Email values to the same user profile,
  use profilePush rather than this method.
  
- If none of Identity, Email, FBID or GPID is included in the properties dictionary,
+ If none of Identity or Email is included in the properties dictionary,
  all properties values will be associated with the current user profile.
  
  When initially installed on this device, your app is assigned an "anonymous" profile.
@@ -412,10 +412,10 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @discussion
  If your app is used by multiple users, you can use this method to assign them each a unique profile to track them separately.
  
- If instead you wish to assign multiple Identity, Email, FBID and/or GPID values to the same user profile,
+ If instead you wish to assign multiple Identity and/or Email values to the same user profile,
  use profilePush rather than this method.
  
- If none of Identity, Email, FBID or GPID is included in the properties dictionary,
+ If none of Identity or Email is included in the properties dictionary,
  all properties values will be associated with the current user profile.
  
  When initially installed on this device, your app is assigned an "anonymous" profile.

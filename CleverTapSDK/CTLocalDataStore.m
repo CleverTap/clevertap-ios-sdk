@@ -908,18 +908,16 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 - (NSDictionary*)generateBaseProfile {
     NSMutableDictionary *profile = [NSMutableDictionary new];
-    [self addPropertyFromStoreIfExists:@"Name" profile:profile storageKeys:@[CLTAP_USER_NAME, CLTAP_FB_NAME, CLTAP_GP_NAME]];
-    [self addPropertyFromStoreIfExists:@"Gender" profile:profile storageKeys:@[CLTAP_USER_GENDER, CLTAP_FB_GENDER, CLTAP_GP_GENDER]];
-    [self addPropertyFromStoreIfExists:@"Education" profile:profile storageKeys:@[CLTAP_USER_EDUCATION, CLTAP_FB_EDUCATION]];
-    [self addPropertyFromStoreIfExists:@"Employed" profile:profile storageKeys:@[CLTAP_USER_EMPLOYED, CLTAP_FB_EMPLOYED, CLTAP_GP_EMPLOYED]];
-    [self addPropertyFromStoreIfExists:@"Married" profile:profile storageKeys:@[CLTAP_USER_MARRIED, CLTAP_FB_MARRIED, CLTAP_GP_MARRIED]];
-    [self addPropertyFromStoreIfExists:@"DOB" profile:profile storageKeys:@[CLTAP_USER_DOB, CLTAP_FB_DOB, CLTAP_GP_DOB]];
+    [self addPropertyFromStoreIfExists:@"Name" profile:profile storageKeys:@[CLTAP_USER_NAME]];
+    [self addPropertyFromStoreIfExists:@"Gender" profile:profile storageKeys:@[CLTAP_USER_GENDER]];
+    [self addPropertyFromStoreIfExists:@"Education" profile:profile storageKeys:@[CLTAP_USER_EDUCATION]];
+    [self addPropertyFromStoreIfExists:@"Employed" profile:profile storageKeys:@[CLTAP_USER_EMPLOYED]];
+    [self addPropertyFromStoreIfExists:@"Married" profile:profile storageKeys:@[CLTAP_USER_MARRIED]];
+    [self addPropertyFromStoreIfExists:@"DOB" profile:profile storageKeys:@[CLTAP_USER_DOB]];
     [self addPropertyFromStoreIfExists:@"Birthday" profile:profile storageKeys:@[CLTAP_USER_BIRTHDAY]];
-    [self addPropertyFromStoreIfExists:@"FBID" profile:profile storageKeys:@[CLTAP_FB_ID]];
-    [self addPropertyFromStoreIfExists:@"GPID" profile:profile storageKeys:@[CLTAP_GP_ID]];
     [self addPropertyFromStoreIfExists:@"Phone" profile:profile storageKeys:@[CLTAP_USER_PHONE]];
     [self addPropertyFromStoreIfExists:@"Age" profile:profile storageKeys:@[CLTAP_USER_AGE]];
-    [self addPropertyFromStoreIfExists:@"Email" profile:profile storageKeys:@[CLTAP_USER_EMAIL, CLTAP_FB_EMAIL]];
+    [self addPropertyFromStoreIfExists:@"Email" profile:profile storageKeys:@[CLTAP_USER_EMAIL]];
     [self addPropertyFromStoreIfExists:@"tz" profile:profile storageKeys:@[CLTAP_SYS_TZ]];
     [self addPropertyFromStoreIfExists:@"Carrier" profile:profile storageKeys:@[CLTAP_SYS_CARRIER]];
     [self addPropertyFromStoreIfExists:@"cc" profile:profile storageKeys:@[CLTAP_SYS_CC]];
