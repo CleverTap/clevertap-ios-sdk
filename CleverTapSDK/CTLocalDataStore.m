@@ -707,7 +707,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (NSMutableDictionary *)_inflateLocalProfile {
-    NSSet *allowedClasses = [NSSet setWithObjects:[NSString class], [NSMutableDictionary class], nil];
+    NSSet *allowedClasses = [NSSet setWithObjects:[NSArray class], [NSString class], [NSDictionary class], [NSNumber class], nil];
     NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofTypes:allowedClasses removeFile:NO];
     if (!_profile) {
         _profile = [NSMutableDictionary dictionary];
