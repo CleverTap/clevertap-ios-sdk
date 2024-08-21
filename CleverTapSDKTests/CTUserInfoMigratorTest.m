@@ -9,11 +9,13 @@
 #import <XCTest/XCTest.h>
 #import "CTUserInfoMigrator.h"
 #import "XCTestCase+XCTestCase_Tests.h"
+#import "CleverTapInstanceConfig.h"
 
 @interface CTUserInfoMigratorTest : XCTestCase
 
 @property (nonatomic, strong) NSFileManager *fileManager;
 @property (nonatomic, strong) NSString *libraryPath;
+@property (nonatomic, strong) CleverTapInstanceConfig *config;
 
 @end
 
@@ -27,6 +29,7 @@
     // Get the path to the Library directory
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
     self.libraryPath = [paths objectAtIndex:0];
+    self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccID" accountToken:@"testToken" accountRegion:@"testRegion"];
 }
 
 - (void)tearDown {
@@ -52,7 +55,7 @@
     [self.fileManager createFileAtPath:oldFilePath contents:[@"old content" dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
     
     // Call the method to migrate the user info file
-    [CTUserInfoMigrator migrateUserInfoFileForAccountID:acc_id deviceID:device_id];
+    [CTUserInfoMigrator migrateUserInfoFileForDeviceID:device_id config:self.config];
     
     // Check that the old file has been copied to the new location
     NSString *newFileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", acc_id, device_id];
@@ -77,7 +80,7 @@
     [self.fileManager createFileAtPath:newFilePath contents:[@"new content" dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
     
     // Call the method to migrate the user info file
-    [CTUserInfoMigrator migrateUserInfoFileForAccountID:acc_id deviceID:device_id];
+    [CTUserInfoMigrator migrateUserInfoFileForDeviceID:device_id config:self.config];
     
     // Check that the new file still exists
     XCTAssertTrue([self.fileManager fileExistsAtPath:newFilePath], @"New plist file should exist");
@@ -96,7 +99,7 @@
     [self.fileManager removeItemAtPath:oldFilePath error:nil];
     
     // Call the method to migrate the user info file
-    [CTUserInfoMigrator migrateUserInfoFileForAccountID:acc_id deviceID:device_id];
+    [CTUserInfoMigrator migrateUserInfoFileForDeviceID:device_id config:self.config];
     
     // Check that the new file does not exist
     NSString *newFileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", acc_id, device_id];
