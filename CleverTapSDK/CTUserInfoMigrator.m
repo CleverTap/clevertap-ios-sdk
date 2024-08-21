@@ -4,7 +4,8 @@
 
 @implementation CTUserInfoMigrator
 
-+ (void)migrateUserInfoFileForAccountID:(NSString *)acc_id deviceID:(NSString *)device_id config:(CleverTapInstanceConfig *) config {
++ (void)migrateUserInfoFileForDeviceID:(NSString *)device_id config:(CleverTapInstanceConfig *) config {
+    NSString *acc_id = config.accountId;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
     NSString *libraryPath = [paths objectAtIndex:0];
@@ -54,7 +55,7 @@
 
     // Iterate through the original dictionary's keys
     for (NSString *key in [dictionary allKeys]) {
-        if ([knownProfileFields containsObject:key] && [key hasPrefix:@"user"]) {
+        if ([knownProfileFields containsObject:key]) {
             NSString *newKey = [key substringFromIndex:[@"user" length]];
 
             // Update the dictionary with the new key

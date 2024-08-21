@@ -25,4 +25,6 @@
 
 + (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id _Nullable)cachedValue;
 
++ (NSArray<NSString *> *_Nullable) _constructLocalMultiValueWithOriginalValues:(NSArray * _Nonnull)values forKey:(NSString * _Nonnull)key usingCommand:(NSString * _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore;
+
 @end

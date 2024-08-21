@@ -52,8 +52,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
                 // migrate to new persisted ct-accid-guid-userprofile
-                [CTUserInfoMigrator migrateUserInfoFileForAccountID:self->_config.accountId deviceID:self->_deviceInfo.deviceId config:self->_config];
-
+                [CTUserInfoMigrator migrateUserInfoFileForDeviceID:self->_deviceInfo.deviceId config:self->_config];
                 self->localProfileForSession = [self _inflateLocalProfile];
                 for (NSString* key in [profileValues allKeys]) {
                     [self setProfileFieldWithKey:key andValue:profileValues[key]];
@@ -547,6 +546,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
                 newValue = nil;
                 [self removeProfileFieldForKey:key];
+            }
+            else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
+                     [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
+                     [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
+                newValue = [CTProfileBuilder _constructLocalMultiValueWithOriginalValues:value forKey:key usingCommand:commandIdentifier localDataStore:self];
             }
         } else if ([newValue isKindOfClass:[NSString class]]) {
             // Remove the date prefix before evaluation and persisting

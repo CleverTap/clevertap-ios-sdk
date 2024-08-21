@@ -10,6 +10,6 @@
 
 @interface CTUserInfoMigrator : NSObject
 
-+ (void)migrateUserInfoFileForAccountID:(NSString *)acc_id deviceID:(NSString *)device_id config:(CleverTapInstanceConfig *) config;
++ (void)migrateUserInfoFileForDeviceID:(NSString *)device_id config:(CleverTapInstanceConfig *) config;
 
 @end
