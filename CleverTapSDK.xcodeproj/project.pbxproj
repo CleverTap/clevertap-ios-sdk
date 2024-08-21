@@ -560,13 +560,6 @@
 			remoteGlobalIDString = D0C7BBBC207D82C0001345EF;
 			remoteInfo = CleverTapSDK;
 		};
-		D0B044B027697466000ED628 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D0C7BBB4207D82C0001345EF /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D0B044962769744E000ED628;
-			remoteInfo = CleverTapSDKTestsApp;
-		};
 		D0B044BF27697660000ED628 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D0C7BBB4207D82C0001345EF /* Project object */;
@@ -2139,7 +2132,6 @@
 			);
 			dependencies = (
 				D02AC2DE276044F70031C1BE /* PBXTargetDependency */,
-				D0B044B127697466000ED628 /* PBXTargetDependency */,
 			);
 			name = CleverTapSDKTests;
 			productName = CleverTapSDKTests;
@@ -2711,11 +2703,6 @@
 			isa = PBXTargetDependency;
 			target = D0C7BBBC207D82C0001345EF /* CleverTapSDK */;
 			targetProxy = D02AC2DD276044F70031C1BE /* PBXContainerItemProxy */;
-		};
-		D0B044B127697466000ED628 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D0B044962769744E000ED628 /* CleverTapSDKTestsApp */;
-			targetProxy = D0B044B027697466000ED628 /* PBXContainerItemProxy */;
 		};
 		D0B044C027697660000ED628 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
