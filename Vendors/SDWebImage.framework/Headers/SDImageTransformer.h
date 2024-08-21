@@ -19,12 +19,33 @@
 FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullable key, NSString * _Nonnull transformerKey);
 
 /**
+ Return the thumbnailed cache key which applied with specify thumbnailSize and preserveAspectRatio control.
+ @param key The original cache key
+ @param thumbnailPixelSize The thumbnail pixel size
+ @param preserveAspectRatio The preserve aspect ratio option
+ @return The thumbnailed cache key
+ @note If you have both transformer and thumbnail applied for image, call `SDThumbnailedKeyForKey` firstly and then with `SDTransformedKeyForKey`.`
+ */
+FOUNDATION_EXPORT NSString * _Nullable SDThumbnailedKeyForKey(NSString * _Nullable key, CGSize thumbnailPixelSize, BOOL preserveAspectRatio);
+
+/**
  A transformer protocol to transform the image load from cache or from download.
  You can provide transformer to cache and manager (Through the `transformer` property or context option `SDWebImageContextImageTransformer`).
  
  @note The transform process is called from a global queue in order to not to block the main queue.
  */
 @protocol SDImageTransformer <NSObject>
+
+@optional
+
+/**
+ Defaults to YES.
+ We keep some metadata like Image Format (`sd_imageFormat`)/ Animated Loop Count (`sd_imageLoopCount`) via associated object on UIImage instance.
+ When transformer generate a new UIImage instance, in most cases you still want to keep these information. So this is what for during the image loading pipeline.
+ If the value is YES, we will keep and override the metadata **After you generate the UIImage**
+ If the value is NO, we will not touch the UIImage metadata and it's controlled by you during the generation. Read `UIImage+Medata.h` and pick the metadata you want for the new generated UIImage.
+ */
+@property (nonatomic, assign, readonly) BOOL preserveImageMetadata;
 
 @required
 /**
@@ -38,10 +59,10 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
  Transform the image to another image.
 
  @param image The image to be transformed
- @param key The cache key associated to the image
+ @param key The cache key associated to the image. This arg is a hint for image source, not always useful and should be nullable. In the future we will remove this arg.
  @return The transformed image, or nil if transform failed
  */
-- (nullable UIImage *)transformedImageWithImage:(nonnull UIImage *)image forKey:(nonnull NSString *)key;
+- (nullable UIImage *)transformedImageWithImage:(nonnull UIImage *)image forKey:(nonnull NSString *)key API_DEPRECATED("The key arg will be removed in the future. Update your code and don't rely on that.", macos(10.10, API_TO_BE_DEPRECATED), ios(8.0, API_TO_BE_DEPRECATED), tvos(9.0, API_TO_BE_DEPRECATED), watchos(2.0, API_TO_BE_DEPRECATED));
 
 @end
 
@@ -49,7 +70,7 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 
 /**
  Pipeline transformer. Which you can bind multiple transformers together to let the image to be transformed one by one in order and generate the final image.
- @note Because transformers are lightweight, if you want to append or arrange transfomers, create another pipeline transformer instead. This class is considered as immutable.
+ @note Because transformers are lightweight, if you want to append or arrange transformers, create another pipeline transformer instead. This class is considered as immutable.
  */
 @interface SDImagePipelineTransformer : NSObject <SDImageTransformer>
 
@@ -59,6 +80,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, copy, readonly, nonnull) NSArray<id<SDImageTransformer>> *transformers;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithTransformers:(nonnull NSArray<id<SDImageTransformer>> *)transformers;
 
 @end
@@ -99,6 +122,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, strong, readonly, nullable) UIColor *borderColor;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithRadius:(CGFloat)cornerRadius corners:(SDRectCorner)corners borderWidth:(CGFloat)borderWidth borderColor:(nullable UIColor *)borderColor;
 
 @end
@@ -119,6 +144,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, assign, readonly) SDImageScaleMode scaleMode;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithSize:(CGSize)size scaleMode:(SDImageScaleMode)scaleMode;
 
 @end
@@ -134,6 +161,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, assign, readonly) CGRect rect;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithRect:(CGRect)rect;
 
 @end
@@ -154,6 +183,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, assign, readonly) BOOL vertical;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithHorizontal:(BOOL)horizontal vertical:(BOOL)vertical;
 
 @end
@@ -175,6 +206,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, assign, readonly) BOOL fitSize;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithAngle:(CGFloat)angle fitSize:(BOOL)fitSize;
 
 @end
@@ -192,6 +225,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, strong, readonly, nonnull) UIColor *tintColor;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithColor:(nonnull UIColor *)tintColor;
 
 @end
@@ -209,6 +244,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, assign, readonly) CGFloat blurRadius;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithRadius:(CGFloat)blurRadius;
 
 @end
@@ -225,6 +262,8 @@ FOUNDATION_EXPORT NSString * _Nullable SDTransformedKeyForKey(NSString * _Nullab
 @property (nonatomic, strong, readonly, nonnull) CIFilter *filter;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new  NS_UNAVAILABLE;
+
 + (nonnull instancetype)transformerWithFilter:(nonnull CIFilter *)filter;
 
 @end
