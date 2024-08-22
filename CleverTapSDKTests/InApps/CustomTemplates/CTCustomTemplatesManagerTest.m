@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
-#import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplatesManager+Tests.h"
 #import "CTInAppTemplateBuilder.h"
 #import "CTAppFunctionBuilder.h"

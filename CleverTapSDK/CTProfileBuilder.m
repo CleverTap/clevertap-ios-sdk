@@ -70,7 +70,7 @@
             // if a reserved key add to systemFields else add to customFields
             KnownField kf = [CTKnownProfileFields getKnownFieldIfPossibleForKey:key];
             if (kf != UNKNOWN) {
-                systemFields[[CTKnownProfileFields getStorageValueForField:kf]] = value;
+                systemFields[key] = value;
             } else {
                 customFields[key] = value;
             }

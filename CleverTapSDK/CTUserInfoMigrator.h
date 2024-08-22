@@ -6,9 +6,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CleverTapInstanceConfig.h"
 
 @interface CTUserInfoMigrator : NSObject
 
-+ (void)migrateUserInfoFileForAccountID:(NSString *)acc_id deviceID:(NSString *)device_id;
++ (void)migrateUserInfoFileForDeviceID:(NSString *)device_id config:(CleverTapInstanceConfig *) config;
 
 @end

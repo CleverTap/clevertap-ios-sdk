@@ -7,8 +7,6 @@ typedef enum {
 
 @interface CTKnownProfileFields : NSObject
 
-+ (NSString *)getStorageValueForField:(KnownField)field;
-
 + (KnownField)getKnownFieldIfPossibleForKey:(NSString *)key;
 
 @end

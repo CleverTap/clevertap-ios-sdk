@@ -226,40 +226,21 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_HTML_SPLIT @"\"##Vars##\""
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_HTML_NAME @"image_interstitial"
 
-#pragma mark Constants for persisting Facebook data
-#define CLTAP_FB_NAME @"fbName"
-#define CLTAP_FB_ID @"fbId"
-#define CLTAP_FB_EMAIL @"fbEmail"
-#define CLTAP_FB_GENDER @"fbGender"
-#define CLTAP_FB_EDUCATION @"fbEducation"
-#define CLTAP_FB_EMPLOYED @"fbEmployed"
-#define CLTAP_FB_DOB @"fbDOB"
-#define CLTAP_FB_MARRIED @"fbMarried"
-
-#pragma mark Constants for persisting G+ data
-#define CLTAP_GP_NAME @"gpName"
-#define CLTAP_GP_ID @"gpId"
-#define CLTAP_GP_EMAIL @"gpEmail"
-#define CLTAP_GP_GENDER @"gpGender"
-#define CLTAP_GP_EMPLOYED @"gpEmployed"
-#define CLTAP_GP_DOB @"gpDOB"
-#define CLTAP_GP_MARRIED @"gpMarried"
-
 #pragma mark Constants for persisting system data
 #define CLTAP_SYS_CARRIER @"sysCarrier"
 #define CLTAP_SYS_CC @"sysCountryCode"
 #define CLTAP_SYS_TZ @"sysTZ"
 
-#define CLTAP_USER_NAME @"userName"
-#define CLTAP_USER_EMAIL @"userEmail"
-#define CLTAP_USER_EDUCATION @"userEducation"
-#define CLTAP_USER_MARRIED @"userMarried"
-#define CLTAP_USER_DOB @"userDOB"
-#define CLTAP_USER_BIRTHDAY @"userBirthday"
-#define CLTAP_USER_EMPLOYED @"userEmployed"
-#define CLTAP_USER_GENDER @"userGender"
-#define CLTAP_USER_PHONE @"userPhone"
-#define CLTAP_USER_AGE @"userAge"
+#define CLTAP_USER_NAME @"Name"
+#define CLTAP_USER_EMAIL @"Email"
+#define CLTAP_USER_EDUCATION @"Education"
+#define CLTAP_USER_MARRIED @"Married"
+#define CLTAP_USER_DOB @"DOB"
+#define CLTAP_USER_BIRTHDAY @"Birthday"
+#define CLTAP_USER_EMPLOYED @"Employed"
+#define CLTAP_USER_GENDER @"Gender"
+#define CLTAP_USER_PHONE @"Phone"
+#define CLTAP_USER_AGE @"Age"
 
 #define CLTAP_OPTOUT @"ct_optout"
 
@@ -283,4 +264,4 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #pragma mark Constants for Encryption
 #define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"
 #define CLTAP_ENCRYPTION_IV @"__CL3>3Rt#P__1V_"
-#define CLTAP_ENCRYPTION_PII_DATA (@[@"Identity", @"userEmail", @"userPhone", @"userName"]);
+#define CLTAP_ENCRYPTION_PII_DATA (@[@"Identity", @"Email", @"Phone", @"Name"]);
