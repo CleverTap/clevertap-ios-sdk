@@ -4,32 +4,6 @@
 @implementation CTKnownProfileFields {
     
 }
-+ (NSString *)getStorageValueForField:(KnownField)field {
-    switch (field) {
-        case Name:
-            return CLTAP_USER_NAME;
-        case Email:
-            return CLTAP_USER_EMAIL;
-        case Education:
-            return CLTAP_USER_EDUCATION;
-        case Married:
-            return CLTAP_USER_MARRIED;
-        case DOB:
-            return CLTAP_USER_DOB;
-        case Birthday:
-            return CLTAP_USER_BIRTHDAY;
-        case Employed:
-            return CLTAP_USER_EMPLOYED;
-        case Gender:
-            return CLTAP_USER_GENDER;
-        case Phone:
-            return CLTAP_USER_PHONE;
-        case Age:
-            return CLTAP_USER_AGE;
-        default:
-            return nil;
-    }
-}
 
 + (KnownField)getKnownFieldIfPossibleForKey:(NSString *)key {
     if ([key isEqualToString:@"Name"])
