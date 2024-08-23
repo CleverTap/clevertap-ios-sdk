@@ -130,7 +130,16 @@
         if ([value isKindOfClass:[NSString class]]) {
             [self addArgument:argName withString:value];
         } else if ([value isKindOfClass:[NSNumber class]]) {
-            [self addArgument:argName withNumber:value];
+            // If the NSNumber is a boolean, use addArgument:withBool:
+            // so the values are correctly mapped to the type.
+            // This is required so dictionary arguments with booleans defined in Swift
+            // have correct type and value.
+            // Booleans are of class __NSCFBoolean, Numbers are of class __NSCFNumber.
+            if ([value isKindOfClass:NSClassFromString(@"__NSCFBoolean")]) {
+                [self addArgument:argName withBool:[value boolValue]];
+            } else {
+                [self addArgument:argName withNumber:value];
+            }
         } else if ([value isKindOfClass:[NSDictionary class]]) {
             [self flatten:value name:argName];
         }
