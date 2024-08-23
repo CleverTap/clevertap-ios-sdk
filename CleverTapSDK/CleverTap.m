@@ -4331,9 +4331,9 @@ static BOOL sharedInstanceErrorLogged;
 - (void)syncWithBlock:(void(^)(void))syncBlock methodName:(NSString *)methodName isProduction:(BOOL)isProduction {
     if (isProduction) {
 #if DEBUG
-        CleverTapLogInfo(_config.logLevel, @"%@: Calling %@: with isProduction:YES from Debug configuration/build. Use syncVariables in this case", self, methodName);
+        CleverTapLogInfo(_config.logLevel, @"%@: Calling %@ with isProduction:YES from Debug configuration/build. Do not use isProduction:YES in this case", self, methodName);
 #else
-        CleverTapLogInfo(_config.logLevel, @"%@: Calling %@: with isProduction:YES from Release configuration/build. Do not release this build and use with caution", self, methodName);
+        CleverTapLogInfo(_config.logLevel, @"%@: Calling %@ with isProduction:YES from Release configuration/build. Do not release this build and use with caution", self, methodName);
 #endif
         [self runSerialAsyncEnsureHandshake:syncBlock];
     } else {
