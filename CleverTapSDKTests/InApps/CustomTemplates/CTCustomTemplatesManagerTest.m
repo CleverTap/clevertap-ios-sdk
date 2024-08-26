@@ -278,6 +278,77 @@
     XCTAssertEqualObjects(syncPayload, expectedPayload);
 }
 
+- (void)testSyncPayloadDictionaryBooleans {
+    NSMutableSet *templates = [NSMutableSet set];
+    CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
+    [templateBuilder setName:@"Template 1"];
+    [templateBuilder addArgument:@"dictionary.booleanYes" withBool:YES];
+    [templateBuilder addArgument:@"dictionary.booleanNo" withBool:NO];
+    [templateBuilder addArgument:@"dictionary.number" withNumber:@1];
+    [templateBuilder addArgument:@"dictionary" withDictionary:@{
+        @"double": @1.0,
+        @"int": @0,
+        @"boolYes": @(YES),
+        @"boolNo": @(NO)
+    }];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder build]];
+    
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+    CTCustomTemplatesManager *manager = [self templatesManager];
+    
+    NSDictionary *syncPayload = [manager syncPayload];
+    NSDictionary *expectedPayload = @{
+        @"type": @"templatePayload",
+        @"definitions": @{
+            @"Template 1": @{
+                @"type": TEMPLATE_TYPE,
+                @"vars": @{
+                    @"dictionary.booleanNo": @{
+                        @"defaultValue": @0,
+                        @"order": @0,
+                        @"type": @"boolean"
+                    },
+                    @"dictionary.booleanYes": @{
+                        @"defaultValue": @1,
+                        @"order": @1,
+                        @"type": @"boolean"
+                    },
+                    @"dictionary.boolNo": @{
+                        @"defaultValue": @0,
+                        @"order": @2,
+                        @"type": @"boolean"
+                    },
+                    @"dictionary.boolYes": @{
+                        @"defaultValue": @1,
+                        @"order": @3,
+                        @"type": @"boolean"
+                    },
+                    @"dictionary.double": @{
+                        @"defaultValue": @1.0,
+                        @"order": @4,
+                        @"type": @"number"
+                    },
+                    @"dictionary.int": @{
+                        @"defaultValue": @0,
+                        @"order": @5,
+                        @"type": @"number"
+                    },
+                    @"dictionary.number": @{
+                        @"defaultValue": @1,
+                        @"order": @6,
+                        @"type": @"number"
+                    }
+                }
+            }
+        }
+    };
+    
+    XCTAssertEqual([syncPayload[@"definitions"] count], 1);
+    XCTAssertEqualObjects(syncPayload, expectedPayload);
+}
+
 - (void)testTemplatesRegistered {
     NSMutableSet *templates = [NSMutableSet set];
     
