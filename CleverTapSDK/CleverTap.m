@@ -1168,7 +1168,11 @@ static BOOL sharedInstanceErrorLogged;
     if (launchOptions && launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
         NSDictionary *notification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
         CleverTapLogDebug(self.config.logLevel, @"%@: found push notification at launch: %@", self, notification);
-        [self _handlePushNotification:notification];
+        if ([self.deviceInfo.library isEqualToString:@"Leanplum"]) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Leanplum will handle the notification: %@", self, notification);
+        } else {
+            [self _handlePushNotification:notification];
+        }
     }
 #endif
 }
