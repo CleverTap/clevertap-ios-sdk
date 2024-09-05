@@ -270,6 +270,45 @@
     XCTAssertTrue([innermostMap isEqualToDictionary:[self.templateContext dictionaryNamed:@"map.innerMap.innermostMap"]]);
 }
 
+- (void)testDictionaryBoolArguments {
+    NSDictionary *notificationJson = @{
+        @"templateName": TEMPLATE_NAME_NESTED,
+        @"type": @"custom-code",
+        @"vars": @{
+            @"map.double": @(0.0),
+            @"map.boolFalse": @(YES),
+            @"map.bool": @(NO)
+        }
+    };
+    CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:notificationJson];
+    
+    CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
+    [templateBuilder setName:TEMPLATE_NAME_NESTED];
+    [templateBuilder addArgument:@"map" withDictionary:@{
+        @"int": @0,
+        @"double": @1.0,
+        @"boolFalse": @(NO),
+        @"boolTrue": @(YES),
+        @"bool": @(YES)
+    }];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
+    CTCustomTemplate *template = [templateBuilder build];
+    
+    CTTemplateContext *context = [[CTTemplateContext alloc] initWithTemplate:template notification:notification andFileDownloader:self.fileDownloader];
+    
+    NSDictionary *map = [context dictionaryNamed:@"map"];
+    NSDictionary *notificationVars = notificationJson[@"vars"];
+    XCTAssertEqualObjects(@0, map[@"int"]);
+    XCTAssertEqualObjects(notificationVars[@"map.double"], map[@"double"]);
+    XCTAssertEqualObjects(@YES, map[@"boolTrue"]);
+    XCTAssertEqualObjects(notificationVars[@"map.boolFalse"], map[@"boolFalse"]);
+    XCTAssertEqualObjects(@([context boolNamed:@"map.boolFalse"]), map[@"boolFalse"]);
+    XCTAssertEqualObjects(@([context boolNamed:@"map.boolFalse"]), @(YES));
+    XCTAssertEqualObjects(notificationVars[@"map.bool"], map[@"bool"]);
+    XCTAssertEqualObjects(@([context boolNamed:@"map.bool"]), map[@"bool"]);
+    XCTAssertEqualObjects(@([context boolNamed:@"map.bool"]), @(NO));
+}
+
 - (void)testActionsValueInDictionary {
     NSDictionary *actionsMap = [self.templateContext dictionaryNamed:@"map.actions"];
     XCTAssertEqualObjects(VARS_ACTION_FUNCTION_NAME, actionsMap[@"function"]);
