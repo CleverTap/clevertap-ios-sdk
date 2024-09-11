@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.0.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.2) (September 16, 2024)
+
+#### Added
+- Adds support for custom handshake domains.
+
 ### [Version 7.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.1) (August 22, 2024)
 
 #### Fixed
