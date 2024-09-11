@@ -76,10 +76,6 @@ NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED
         }
     }
     
-//    if (self.config.handshakeDomain) {
-//        return nil;
-//    }
-    
     NSString *domain = nil;
     if (self.config.isDefaultInstance) {
         domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config] withResetValue:[CTPreferences getStringForKey:REDIRECT_DOMAIN_KEY withResetValue:nil]];
