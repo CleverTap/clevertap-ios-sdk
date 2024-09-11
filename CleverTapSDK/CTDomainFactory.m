@@ -11,10 +11,6 @@
 #import "CTConstants.h"
 #import "CleverTapInstanceConfigPrivate.h"
 
-NSString *const CUSTOM_DOMAIN_KEY = @"CLTAP_CUSTOM_DOMAIN_KEY";
-NSString *const REDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
-NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
-
 @interface CTDomainFactory ()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 

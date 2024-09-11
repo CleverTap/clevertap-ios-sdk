@@ -5,6 +5,11 @@ extern NSString *const kCTNotifViewedApiDomain;
 extern NSString *const kHANDSHAKE_URL;
 extern NSString *const kHANDSHAKE_DOMAIN_HEADER;
 
+
+extern NSString *const CUSTOM_DOMAIN_KEY;
+extern NSString *const REDIRECT_DOMAIN_KEY;
+extern NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY;
+
 extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;

@@ -252,6 +252,8 @@
 		4E872969277CDF9000A7A618 /* inapp_alert.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F1561277090D6009387AE /* inapp_alert.json */; };
 		4E87296E277CE8EB00A7A618 /* StubHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E87296D277CE8EB00A7A618 /* StubHelper.m */; };
 		4E872973277CEE6700A7A618 /* TestConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E872972277CEE6700A7A618 /* TestConstants.m */; };
+		4E87397B2C92223C00FDFDFD /* CTDomainFactoryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8739772C921D9000FDFDFD /* CTDomainFactoryTests.m */; };
+		4E87397E2C9223B300FDFDFD /* CTDomainFactory+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E87397D2C9223B300FDFDFD /* CTDomainFactory+Tests.m */; };
 		4E8B81662AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81642AD2ADAE00714BB4 /* CTSwizzleManager.m */; };
 		4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81642AD2ADAE00714BB4 /* CTSwizzleManager.m */; };
 		4E8B81682AD2ADAE00714BB4 /* CTSwizzleManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E8B81652AD2ADAE00714BB4 /* CTSwizzleManager.h */; };
@@ -819,6 +821,9 @@
 		4E87296D277CE8EB00A7A618 /* StubHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StubHelper.m; sourceTree = "<group>"; };
 		4E872971277CEE6700A7A618 /* TestConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestConstants.h; sourceTree = "<group>"; };
 		4E872972277CEE6700A7A618 /* TestConstants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestConstants.m; sourceTree = "<group>"; };
+		4E8739772C921D9000FDFDFD /* CTDomainFactoryTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDomainFactoryTests.m; sourceTree = "<group>"; };
+		4E87397C2C9223B300FDFDFD /* CTDomainFactory+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTDomainFactory+Tests.h"; sourceTree = "<group>"; };
+		4E87397D2C9223B300FDFDFD /* CTDomainFactory+Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTDomainFactory+Tests.m"; sourceTree = "<group>"; };
 		4E8B81642AD2ADAE00714BB4 /* CTSwizzleManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTSwizzleManager.m; sourceTree = "<group>"; };
 		4E8B81652AD2ADAE00714BB4 /* CTSwizzleManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTSwizzleManager.h; sourceTree = "<group>"; };
 		4E8B816A2AD2B2FD00714BB4 /* CleverTapInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapInternal.h; sourceTree = "<group>"; };
@@ -1600,6 +1605,9 @@
 				6BD851C82B45CD1800FA5298 /* CTMultiDelegateManager+Tests.h */,
 				0B5564552C25946C00B87284 /* CTUserInfoMigratorTest.m */,
 				0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */,
+				4E8739772C921D9000FDFDFD /* CTDomainFactoryTests.m */,
+				4E87397C2C9223B300FDFDFD /* CTDomainFactory+Tests.h */,
+				4E87397D2C9223B300FDFDFD /* CTDomainFactory+Tests.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -2500,6 +2508,7 @@
 				32394C2529FA272600956058 /* CTValidatorTest.m in Sources */,
 				6BB778CE2BEE48C300A41628 /* CTCustomTemplateInAppDataTest.m in Sources */,
 				6BA3B2E82B07E207004E834B /* CTTriggersMatcher+Tests.m in Sources */,
+				4E87397E2C9223B300FDFDFD /* CTDomainFactory+Tests.m in Sources */,
 				6BBF05CE2C58E3FB0047E3D9 /* NSURLSessionMock.m in Sources */,
 				6B32A0A52B9A0F17009ADC57 /* CTCustomTemplateTest.m in Sources */,
 				4E1F155B276B662C009387AE /* EventDetail.m in Sources */,
@@ -2539,6 +2548,7 @@
 				0B995A4A2C36AEDC00AF6006 /* CTLocalDataStoreTests.m in Sources */,
 				6A4427C52AA6515A0098866F /* CTTriggersMatcherTest.m in Sources */,
 				6B32A0B02B9DC374009ADC57 /* CTTemplateArgumentTest.m in Sources */,
+				4E87397B2C92223C00FDFDFD /* CTDomainFactoryTests.m in Sources */,
 				0B5564562C25946C00B87284 /* CTUserInfoMigratorTest.m in Sources */,
 				4E2CF1442AC56D8F00441E8B /* CTEncryptionTests.m in Sources */,
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
