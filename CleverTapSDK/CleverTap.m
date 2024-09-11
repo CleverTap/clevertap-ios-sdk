@@ -873,7 +873,7 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     // Adds debug flag to show errors and events on the dashboard - integration-debugger when dubug level is set to 3
-    if ([CleverTap getDebugLevel] == 3){
+    if ([CleverTap getDebugLevel] >= CleverTapLogDebug){
         header[@"debug"] = @YES;
     }
     
