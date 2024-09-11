@@ -3,6 +3,7 @@
 NSString *const kCTApiDomain = @"clevertap-prod.com";
 NSString *const kCTNotifViewedApiDomain = @"spiky.clevertap-prod.com";
 NSString *const kHANDSHAKE_URL = @"https://clevertap-prod.com/hello";
+NSString *const kHANDSHAKE_DOMAIN_HEADER =@"X-CleverTap-Handshake-Domain";
 
 NSString *const kLastSessionPing = @"last_session_ping";
 NSString *const kLastSessionTime = @"lastSessionTime";

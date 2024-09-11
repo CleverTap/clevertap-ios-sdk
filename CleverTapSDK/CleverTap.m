@@ -403,6 +403,7 @@ static BOOL sharedInstanceErrorLogged;
         _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
         _defaultInstanceConfig.logLevel = [self getDebugLevel];
         _defaultInstanceConfig.enableFileProtection = _plistInfo.enableFileProtection;
+        _defaultInstanceConfig.handshakeDomain = _plistInfo.handshakeDomain;
         NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
         NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
         NSString *spikyProxyDomainLog = (!_plistInfo.spikyProxyDomain || _plistInfo.spikyProxyDomain.length < 1) ? @"" : _plistInfo.spikyProxyDomain;
