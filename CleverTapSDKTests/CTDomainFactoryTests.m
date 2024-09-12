@@ -43,10 +43,28 @@
 
 - (void)testLoadRedirectDomainCached {
     [self.domainFactory persistRedirectDomain];
-    
     NSString *domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config] withResetValue:nil];
-    NSString *result = [NSString stringWithFormat:@"%@.%@", self.region, kCTApiDomain].lowercaseString;
+    NSString *result = [self.domainFactory loadRedirectDomain];
     XCTAssertEqualObjects(domain, result);
+}
+
+- (void)testLoadRedirectDomainCustomHandShake {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
+    config.handshakeDomain = @"testCustomDomain";
+    CTDomainFactory *domainFactory = [[CTDomainFactory alloc]initWithConfig:config];
+    domainFactory.redirectDomain = config.handshakeDomain;
+    [domainFactory persistRedirectDomain];
+    
+    NSString *domain = [domainFactory loadRedirectDomain];;
+    XCTAssertEqualObjects(domain, config.handshakeDomain);
+}
+
+- (void)testLoadRedirectDomainProxy {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken" proxyDomain:@"testProxydomain"];
+    CTDomainFactory *domainFactory = [[CTDomainFactory alloc]initWithConfig:config];
+    
+    NSString *domain = [domainFactory loadRedirectDomain];
+    XCTAssertEqualObjects(domain, config.proxyDomain.lowercaseString);
 }
 
 @end
