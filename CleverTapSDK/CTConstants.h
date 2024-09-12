@@ -4,7 +4,8 @@ extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
 extern NSString *const kHANDSHAKE_URL;
 extern NSString *const kHANDSHAKE_DOMAIN_HEADER;
-
+extern NSString *const ACCOUNT_ID_HEADER;
+extern NSString *const ACCOUNT_TOKEN_HEADER;
 
 extern NSString *const CUSTOM_DOMAIN_KEY;
 extern NSString *const REDIRECT_DOMAIN_KEY;
