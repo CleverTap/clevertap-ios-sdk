@@ -337,6 +337,9 @@
 		6AA1357C2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AA135782A2E467800EFF2C1 /* NSDictionary+Extensions.m */; };
 		6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
+		6B12F7662C94312D0045D743 /* CTJsonTemplateProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B12F7652C94312D0045D743 /* CTJsonTemplateProducer.m */; };
+		6B12F7672C94312D0045D743 /* CTJsonTemplateProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B12F7642C94312D0045D743 /* CTJsonTemplateProducer.h */; };
+		6B12F7692C9466460045D743 /* CTJsonTemplateProducerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B12F7682C9466460045D743 /* CTJsonTemplateProducerTest.m */; };
 		6B32A09E2B9901AA009ADC57 /* CTCustomTemplateBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B32A09C2B9901AA009ADC57 /* CTCustomTemplateBuilder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6B32A09F2B9901AA009ADC57 /* CTCustomTemplateBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A09D2B9901AA009ADC57 /* CTCustomTemplateBuilder.m */; };
 		6B32A0A12B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B32A0A02B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h */; };
@@ -891,6 +894,9 @@
 		6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LeanplumCT.h; sourceTree = "<group>"; };
 		6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LeanplumCT.m; sourceTree = "<group>"; };
 		6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = image_interstitial.html; sourceTree = "<group>"; };
+		6B12F7642C94312D0045D743 /* CTJsonTemplateProducer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTJsonTemplateProducer.h; sourceTree = "<group>"; };
+		6B12F7652C94312D0045D743 /* CTJsonTemplateProducer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTJsonTemplateProducer.m; sourceTree = "<group>"; };
+		6B12F7682C9466460045D743 /* CTJsonTemplateProducerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTJsonTemplateProducerTest.m; sourceTree = "<group>"; };
 		6B32A09C2B9901AA009ADC57 /* CTCustomTemplateBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTCustomTemplateBuilder.h; sourceTree = "<group>"; };
 		6B32A09D2B9901AA009ADC57 /* CTCustomTemplateBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCustomTemplateBuilder.m; sourceTree = "<group>"; };
 		6B32A0A02B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTCustomTemplateBuilder-Internal.h"; sourceTree = "<group>"; };
@@ -1500,6 +1506,7 @@
 				6B9157B82C10F40C00B1C907 /* CTInAppNotificationDisplayDelegateMock.m */,
 				6BAFFE9A2C371B4500654CAF /* CTFileDownloaderCustomTemplatesMock.h */,
 				6BAFFE9B2C371B4500654CAF /* CTFileDownloaderCustomTemplatesMock.m */,
+				6B12F7682C9466460045D743 /* CTJsonTemplateProducerTest.m */,
 			);
 			path = CustomTemplates;
 			sourceTree = "<group>";
@@ -1560,6 +1567,8 @@
 				6BB778C62BECEC2700A41628 /* CTCustomTemplateInAppData.m */,
 				6BB778D82BFD277400A41628 /* CTCustomTemplatesManager-Internal.h */,
 				6B9157BA2C11D07200B1C907 /* CTCustomTemplateInAppData-Internal.h */,
+				6B12F7642C94312D0045D743 /* CTJsonTemplateProducer.h */,
+				6B12F7652C94312D0045D743 /* CTJsonTemplateProducer.m */,
 			);
 			path = CustomTemplates;
 			sourceTree = "<group>";
@@ -1973,6 +1982,7 @@
 				6A4427B92AA3903C0098866F /* CTTriggerCondition.h in Headers */,
 				4E49AE53275D24570074A774 /* CTValidationResultStack.h in Headers */,
 				07B94544219EA34300D4C542 /* CTInboxController.h in Headers */,
+				6B12F7672C94312D0045D743 /* CTJsonTemplateProducer.h in Headers */,
 				4E838C40299F419900ED0875 /* ContentMerger.h in Headers */,
 				5709005327FD8E1F0011B89F /* CleverTap+SCDomain.h in Headers */,
 				6BB727152B8E463C009CE7D0 /* CTCustomTemplate.h in Headers */,
@@ -2522,6 +2532,7 @@
 				32394C2129FA264B00956058 /* CTPreferencesTest.m in Sources */,
 				6BD334F02AF545C80099E33E /* CTInAppStoreTest.m in Sources */,
 				32394C1F29FA251E00956058 /* CTEventBuilderTest.m in Sources */,
+				6B12F7692C9466460045D743 /* CTJsonTemplateProducerTest.m in Sources */,
 				6BB778D02BEE4C3400A41628 /* CTNotificationActionTest.m in Sources */,
 				D02AC2EB2767F4590031C1BE /* BaseTestCase.m in Sources */,
 				6BAFFE9C2C371B4500654CAF /* CTFileDownloaderCustomTemplatesMock.m in Sources */,
@@ -2590,6 +2601,7 @@
 				D01651AF2097B38400660178 /* CTEventBuilder.m in Sources */,
 				D020C929209006AD0073F61E /* CTUriHelper.m in Sources */,
 				07B9454C219EA34300D4C542 /* CTMessageMO.m in Sources */,
+				6B12F7662C94312D0045D743 /* CTJsonTemplateProducer.m in Sources */,
 				48F9FD1E2C3D30BF00617770 /* CTFileDownloader.m in Sources */,
 				D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */,
 				4E5A02DE2A4C5FD800DE242A /* LeanplumCT.m in Sources */,
