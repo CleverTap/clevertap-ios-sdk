@@ -157,10 +157,17 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     @try {
         NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
         [self.inAppStore enqueueInApps:filteredInAppNotifs];
-
-        // Fire the first notification, if any
-        [self.dispatchQueueManager runOnNotificationQueue:^{
-            [self _showNotificationIfAvailable];
+        
+        [CTUtils runSyncMainQueue:^{
+            if (!self.isAppActiveForeground) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, won't try to show in-app if available.", self);
+                return;
+            }
+            
+            // Fire the first notification, if any
+            [self.dispatchQueueManager runOnNotificationQueue:^{
+                [self _showNotificationIfAvailable];
+            }];
         }];
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
@@ -172,6 +179,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         NSString *templateName = inappNotif.customTemplateInAppData.templateName;
         if ([self.templatesManager isRegisteredTemplateWithName:templateName]) {
             [self.inAppStore insertInFrontInApp:inappNotif.jsonDescription];
+            
+            if (!self.isAppActiveForeground) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, won't try to show in-app if available.", self);
+                return;
+            }
             // Fire the first notification, if any
             [self.dispatchQueueManager runOnNotificationQueue:^{
                 [self _showNotificationIfAvailable];
@@ -213,6 +225,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
     if (!self.config.analyticsOnly) {
+        if (!self.isAppActiveForeground) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, won't try to show in-app if any.", self);
+            return;
+        }
+        
         [self.dispatchQueueManager runOnNotificationQueue:^{
             [self _showNotificationIfAvailable];
         }];
@@ -279,11 +296,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
     
-    if (!self.instance.isAppForeground) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, won't prepare in-app: %@", self, jsonObj);
-        return;
-    }
-
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
         __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
@@ -399,7 +411,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
 
-    if (!self.instance.isAppForeground) {
+    if (!self.isAppActiveForeground) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Application is not in the foreground, not displaying in-app: %@", self, notification.jsonDescription);
         return;
     }
@@ -512,6 +524,14 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         }
         [self.inAppNotificationDelegate inAppNotificationDismissedWithExtras:notification.customExtras andActionExtras:extras];
     }
+}
+
+- (BOOL)isAppActiveForeground {
+    UIApplication *app = [CTUIUtils getSharedApplication];
+    if (app != nil) {
+        return [app applicationState] == UIApplicationStateActive;
+    }
+    return NO;
 }
 
 #pragma mark - Pending Notification
@@ -744,7 +764,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         }
         
         if (inapp) {
-            float delay = self.instance.isAppForeground ? 0.5 : 2.0;
+            float delay = self.isAppActiveForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 @try {
                     [self prepareNotificationForDisplay:inapp];
