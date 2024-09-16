@@ -60,9 +60,23 @@
         
         CTCustomTemplateBuilder *builder;
         if ([type isEqualToString:TEMPLATE_TYPE]) {
+            if (!self.templatePresenter) {
+                @throw([NSException
+                        exceptionWithName:@"CleverTap Error"
+                        reason:@"CleverTap: JSON definition contains a template definition and a template presenter is required."
+                        userInfo:nil]);
+            }
+            
             builder = [CTInAppTemplateBuilder new];
             [builder setPresenter:self.templatePresenter];
         } else if ([type isEqualToString:FUNCTION_TYPE]) {
+            if (!self.functionPresenter) {
+                @throw([NSException
+                        exceptionWithName:@"CleverTap Error"
+                        reason:@"CleverTap: JSON definition contains a function definition and a function presenter is required."
+                        userInfo:nil]);
+            }
+            
             BOOL isVisual = NO;
             if (item[@"isVisual"]) {
                 isVisual = [item[@"isVisual"] boolValue];
@@ -124,6 +138,11 @@
                         userInfo:nil]);
             }
             [(CTInAppTemplateBuilder *)builder addActionArgument:argKey];
+        } else {
+            @throw([NSException
+                    exceptionWithName:@"CleverTap Error"
+                    reason:[NSString stringWithFormat:@"Unknown argument type: %@ for argument: %@", argType, argKey]
+                    userInfo:nil]);
         }
     }
 }

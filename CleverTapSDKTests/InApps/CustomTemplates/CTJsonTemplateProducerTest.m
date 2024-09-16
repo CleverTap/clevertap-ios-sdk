@@ -14,19 +14,24 @@
 
 @interface CTJsonTemplateProducerTest : XCTestCase
 
+@property CTTemplatePresenterMock *presenter;
+@property CleverTapInstanceConfig *config;
+
 @end
 
 @implementation CTJsonTemplateProducerTest
 
+- (void)setUp {
+    self.presenter = [[CTTemplatePresenterMock alloc] init];
+    self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
+}
+
 - (void)testJsonDefinitions {
     NSString *json = [NSString stringWithFormat:@"{%@, %@}", self.template1, self.function1];
     
-    CTTemplatePresenterMock *presenter = [[CTTemplatePresenterMock alloc] init];
-    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:json templatePresenter:presenter functionPresenter:presenter];
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:json templatePresenter:self.presenter functionPresenter:self.presenter];
     
-    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    
-    NSSet *templates = [producer defineTemplates:config];
+    NSSet *templates = [producer defineTemplates:self.config];
     XCTAssertEqual(2, templates.count);
     
     // Validate template1
@@ -63,6 +68,143 @@
     XCTAssertEqual(YES, [function2ArgsDict[@"functionBoolean"] boolValue]);
     XCTAssertEqualObjects([NSNull null], function2ArgsDict[@"functionFile"]);
     XCTAssertEqualObjects(@"Inner Default", function2ArgsDict[@"functionMap.innerString"]);
+}
+
+- (void)testInvalidJson {
+    NSString *invalidJson = @"{[]}";
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    
+    XCTAssertThrows([producer defineTemplates:self.config]);
+}
+
+- (void)testPresenterNotProvided {
+#pragma clang diagnostic ignored "-Wnonnull"
+    NSString *templateJson = [NSString stringWithFormat:@"{%@}", self.template1];
+    CTJsonTemplateProducer *templateJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:templateJson templatePresenter:nil functionPresenter:self.presenter];
+    XCTAssertThrows([templateJsonProducer defineTemplates:self.config]);
+    
+    NSString *functionJson = [NSString stringWithFormat:@"{%@}", self.function1];
+    CTJsonTemplateProducer *functionJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:functionJson templatePresenter:self.presenter functionPresenter:nil];
+    XCTAssertThrows([functionJsonProducer defineTemplates:self.config]);
+#pragma clang diagnostic pop
+}
+
+- (void)testInvalidValues {
+    // Invalid Template Type JSON
+    NSString *invalidTemplateTypeJson = @"{"
+        "\"template\": {"
+            "\"type\": \"string\","
+            "\"arguments\": {"
+                "\"string\": {"
+                    "\"type\": \"string\","
+                    "\"value\": \"Text\""
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer1 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidTemplateTypeJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer1 defineTemplates:self.config]);
+
+    // Invalid Argument Type JSON
+    NSString *invalidArgumentTypeJson = @"{"
+        "\"template\": {"
+            "\"type\": \"template\","
+            "\"arguments\": {"
+                "\"json\": {"
+                    "\"type\": \"json\","
+                    "\"value\": {}"
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer2 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidArgumentTypeJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer2 defineTemplates:self.config]);
+
+    // Invalid File Value JSON
+    NSString *invalidFileValueJson = @"{"
+        "\"template\": {"
+            "\"type\": \"template\","
+            "\"arguments\": {"
+                "\"file\": {"
+                    "\"type\": \"file\","
+                    "\"value\": \"https://files.example.com/file.pdf\""
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer3 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidFileValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer3 defineTemplates:self.config]);
+
+    // Invalid Function File Value JSON
+    NSString *invalidFunctionFileValueJson = @"{"
+        "\"template\": {"
+            "\"type\": \"function\","
+            "\"arguments\": {"
+                "\"file\": {"
+                    "\"type\": \"file\","
+                    "\"value\": \"https://files.example.com/file.pdf\""
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer4 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidFunctionFileValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer4 defineTemplates:self.config]);
+
+    // Invalid Action Value JSON
+    NSString *invalidActionValueJson = @"{"
+        "\"template\": {"
+            "\"type\": \"template\","
+            "\"arguments\": {"
+                "\"action\": {"
+                    "\"type\": \"action\","
+                    "\"value\": \"function1\""
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer5 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidActionValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer5 defineTemplates:self.config]);
+
+    // Invalid Function Action JSON
+    NSString *invalidFunctionActionJson = @"{"
+        "\"template\": {"
+            "\"type\": \"function\","
+            "\"isVisual\": true,"
+            "\"arguments\": {"
+                "\"action\": {"
+                    "\"type\": \"action\""
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer6 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidFunctionActionJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer6 defineTemplates:self.config]);
+
+    // Invalid Nested File JSON
+    NSString *invalidNestedFileJson = @"{"
+        "\"template\": {"
+            "\"type\": \"template\","
+            "\"arguments\": {"
+                "\"map\": {"
+                    "\"type\": \"object\","
+                    "\"value\": {"
+                        "\"file\": {"
+                            "\"type\": \"file\""
+                        "}"
+                    "}"
+                "}"
+            "}"
+        "}"
+    "}";
+    
+    CTJsonTemplateProducer *producer7 = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidNestedFileJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    XCTAssertThrows([producer7 defineTemplates:self.config]);
 }
 
 - (CTCustomTemplate * _Nullable)templateWithName:(NSString *)name inSet:(NSSet *)templates {
