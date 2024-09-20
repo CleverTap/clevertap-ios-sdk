@@ -338,7 +338,7 @@
 		6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */ = {isa = PBXBuildFile; fileRef = 6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */; };
 		6B12F7662C94312D0045D743 /* CTJsonTemplateProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B12F7652C94312D0045D743 /* CTJsonTemplateProducer.m */; };
-		6B12F7672C94312D0045D743 /* CTJsonTemplateProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B12F7642C94312D0045D743 /* CTJsonTemplateProducer.h */; };
+		6B12F7672C94312D0045D743 /* CTJsonTemplateProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B12F7642C94312D0045D743 /* CTJsonTemplateProducer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6B12F7692C9466460045D743 /* CTJsonTemplateProducerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B12F7682C9466460045D743 /* CTJsonTemplateProducerTest.m */; };
 		6B32A09E2B9901AA009ADC57 /* CTCustomTemplateBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B32A09C2B9901AA009ADC57 /* CTCustomTemplateBuilder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6B32A09F2B9901AA009ADC57 /* CTCustomTemplateBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A09D2B9901AA009ADC57 /* CTCustomTemplateBuilder.m */; };

@@ -8,14 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import "CTTemplatePresenter.h"
+#import "CTTemplateProducer.h"
 #import "CTCustomTemplate.h"
 #import "CleverTapInstanceConfig.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTJsonTemplateProducer : NSObject
+@interface CTJsonTemplateProducer : NSObject <CTTemplateProducer>
 
 - (instancetype)init NS_UNAVAILABLE;
+
 - (nonnull instancetype)initWithJsonTemplateDefinitions:(nonnull NSString *)jsonTemplateDefinitions
                                       templatePresenter:(nonnull id<CTTemplatePresenter>)templatePresenter
                                       functionPresenter:(nonnull id<CTTemplatePresenter>)functionPresenter;
