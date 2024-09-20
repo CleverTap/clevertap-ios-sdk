@@ -10,6 +10,7 @@
 #import "CTCustomTemplateBuilder-Internal.h"
 #import "CTCustomTemplate-Internal.h"
 #import "CTTemplatePresenter.h"
+#import "CTConstants.h"
 
 @implementation CTCustomTemplateBuilder
 
@@ -39,21 +40,21 @@
 
     if (!name || [name isEqualToString:@""]) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:@"CleverTap: Argument Name cannot be null or empty."
                 userInfo:nil]);
     }
     
     if ([name hasPrefix:@"."] || [name hasSuffix:@"."] || [name containsString:@".."]) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:@"CleverTap: Argument Name cannot start or end with dot \".\" or contain consecutive dots \"..\"."
                 userInfo:nil]);
     }
     
     if ([self.argumentNames containsObject:name]) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Argument with the name \"%@\" already defined.", name]
                 userInfo:nil]);
     }
@@ -61,7 +62,7 @@
     if (![self.nullableArgumentTypes containsObject:@(type)] &&
         (defaultValue == nil || [defaultValue isEqual:[NSNull null]])) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Default value cannot be nil."]
                 userInfo:nil]);
     }
@@ -86,7 +87,7 @@
         
         if ([self.argumentNames containsObject:parentName]) {
             @throw([NSException
-                    exceptionWithName:@"CleverTap Error"
+                    exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                     reason:[NSString stringWithFormat:@"CleverTap: Argument with the name \"%@\" already defined.", parentName]
                     userInfo:nil]);
         }
@@ -95,7 +96,7 @@
     
     if ([self.parentArgumentNames containsObject:name]) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Argument with the name \"%@\" already defined.", name]
                 userInfo:nil]);
     }
@@ -116,7 +117,7 @@
 - (void)addArgument:(nonnull NSString *)name withDictionary:(nonnull NSDictionary *)defaultValue {
     if (defaultValue == nil || [defaultValue count] == 0) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Default value cannot be nil or empty."]
                 userInfo:nil]);
     }
@@ -153,14 +154,14 @@
 - (void)setName:(NSString *)name {
     if (_name) {
             @throw([NSException
-                    exceptionWithName:@"CleverTap Error"
+                    exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                     reason:@"CleverTap: Name is already set."
                     userInfo:nil]);
     }
     
     if (name == nil || [name isEqualToString:@""]) {
             @throw([NSException
-                    exceptionWithName:@"CleverTap Error"
+                    exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                     reason:@"CleverTap: Name cannot be null or empty."
                     userInfo:nil]);
     }
@@ -175,14 +176,14 @@
 - (CTCustomTemplate *)build {
     if (!self.name || [self.name isEqualToString:@""]) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Name cannot be null or empty. Use setName to set it."]
                 userInfo:nil]);
     }
     
     if (!self.presenter) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Presenter cannot be null. Use setOnPresentWithPresenter to set it."]
                 userInfo:nil]);
     }

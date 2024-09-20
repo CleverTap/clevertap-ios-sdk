@@ -13,6 +13,7 @@
 #import "CTAppFunctionBuilder.h"
 #import "CTCustomTemplate-Internal.h"
 #import "CTTemplatePresenterMock.h"
+#import "CTConstants.h"
 
 @interface CTCustomTemplateBuilderTest : XCTestCase
 
@@ -22,33 +23,34 @@
 
 - (void)testNameNotSetThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
-    XCTAssertThrows([templateBuilder build]);
+    XCTAssertThrowsSpecificNamed([templateBuilder build], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     
     CTAppFunctionBuilder *functionBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO];
-    XCTAssertThrows([functionBuilder build]);
+    XCTAssertThrowsSpecificNamed([functionBuilder build], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testEmptyNameSetThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
-    XCTAssertThrows([templateBuilder setName:@""]);
+    XCTAssertThrowsSpecificNamed([templateBuilder setName:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
-    XCTAssertThrows([templateBuilder setName:nil]);
+    XCTAssertThrowsSpecificNamed([templateBuilder setName:nil], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 #pragma clang diagnostic pop
 }
 
 - (void)testNameAlreadySetThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"template"];
-    XCTAssertThrows([templateBuilder setName:@"template"]);
+    XCTAssertThrowsSpecificNamed([templateBuilder setName:@"template"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testInvalidArgumentNameThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
-    XCTAssertThrows([templateBuilder addArgument:@"" withString:@"string"]);
-    XCTAssertThrows([templateBuilder addArgument:@".start" withString:@"string"]);
-    XCTAssertThrows([templateBuilder addArgument:@"end." withString:@"string"]);
-    XCTAssertThrows([templateBuilder addArgument:@"two.." withString:@"string"]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"" withString:@"string"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@".start" withString:@"string"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"end." withString:@"string"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"two.." withString:@"string"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testValidArgumentName {
@@ -69,61 +71,61 @@
 
 - (void)testArgumentEmptyDictionaryThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
-    XCTAssertThrows([templateBuilder addArgument:@"dictionary" withDictionary:@{}]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"dictionary" withDictionary:@{}], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     XCTAssertNoThrow([templateBuilder addArgument:@"dictionary" withDictionary:@{ @"a": @(0) }]);
 }
 
 - (void)testArgumentSameNameThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder addArgument:@"arg" withString:@"value"];
-    XCTAssertThrows([templateBuilder addArgument:@"arg" withString:@"value"]);
-    XCTAssertThrows([templateBuilder addArgument:@"arg" withNumber:@(2)]);
-    XCTAssertThrows([templateBuilder addArgument:@"arg" withBool:YES]);
-    XCTAssertThrows([templateBuilder addFileArgument:@"arg"]);
-    XCTAssertThrows([templateBuilder addActionArgument:@"arg"]);
-    XCTAssertThrows([templateBuilder addArgument:@"arg" withDictionary:@{ @"a": @(0) }]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"arg" withString:@"value"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"arg" withNumber:@(2)], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"arg" withBool:YES], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addFileArgument:@"arg"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addActionArgument:@"arg"], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"arg" withDictionary:@{ @"a": @(0) }], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testArgumentDictionaryName {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder addArgument:@"arg" withDictionary:@{ @"a": @(0) }];
     [templateBuilder addArgument:@"arg" withDictionary:@{ @"b": @(0) }];
-    XCTAssertThrows([templateBuilder addArgument:@"arg" withDictionary:@{ @"a": @(0) }]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"arg" withDictionary:@{ @"a": @(0) }], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testNoPresenterThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder setName:@"template"];
-    XCTAssertThrows([templateBuilder build]);
+    XCTAssertThrowsSpecificNamed([templateBuilder build], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testParentArgsAlreadyDefinedThrows {
     CTInAppTemplateBuilder *templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder addArgument:@"a.b" withString:@""];
-    XCTAssertThrows([templateBuilder addArgument:@"a" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a.b" withString:@""]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.b" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     
     templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder addArgument:@"a.b.c.d" withString:@""];
-    XCTAssertThrows([templateBuilder addArgument:@"a" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a.b" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a.b.c" withString:@""]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.b" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.b.c" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     [templateBuilder addArgument:@"a.b.c.e" withString:@""];
     
     
     templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder addArgument:@"a.a.a" withString:@""];
     [templateBuilder addArgument:@"a.a.b" withString:@""];
-    XCTAssertThrows([templateBuilder addArgument:@"a.a.a.d" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a.a" withString:@""]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.a.a.d" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.a" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     
     templateBuilder = [[CTInAppTemplateBuilder alloc] init];
     [templateBuilder addArgument:@"a.a.a" withString:@""];
     [templateBuilder addArgument:@"a.a.b" withString:@""];
-    XCTAssertThrows([templateBuilder addArgument:@"a.a.a.d" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a" withString:@""]);
-    XCTAssertThrows([templateBuilder addArgument:@"a.a" withString:@""]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.a.a.d" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"a.a" withString:@""], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     [templateBuilder addArgument:@"a.a.c" withString:@""];
 }
 
@@ -136,10 +138,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types"
 #pragma clang diagnostic ignored "-Wnonnull"
-    XCTAssertThrows([templateBuilder addArgument:@"e" withString:nil]);
-    XCTAssertThrows([templateBuilder addArgument:@"f" withString:[NSNull null]]);
-    XCTAssertThrows([templateBuilder addArgument:@"g" withNumber:nil]);
-    XCTAssertThrows([templateBuilder addArgument:@"h" withDictionary:nil]);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"e" withString:nil], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"f" withString:[NSNull null]], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"g" withNumber:nil], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([templateBuilder addArgument:@"h" withDictionary:nil], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 #pragma clang diagnostic pop
 }
 

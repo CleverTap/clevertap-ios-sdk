@@ -15,6 +15,7 @@
 #import "CTTestTemplateProducer.h"
 #import "CTInAppNotificationDisplayDelegateMock.h"
 #import "CTFileDownloaderCustomTemplatesMock.h"
+#import "CTConstants.h"
 
 @interface CTCustomTemplatesManagerTest : XCTestCase
 
@@ -412,7 +413,7 @@
     [CTCustomTemplatesManager registerTemplateProducer:producer];
     
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    XCTAssertThrows([[CTCustomTemplatesManager alloc] initWithConfig:config]);
+    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testPresenterOnPresent {
