@@ -11,6 +11,7 @@
 #import "CTInAppTemplateBuilder.h"
 #import "CTAppFunctionBuilder.h"
 #import "CTTemplateArgument.h"
+#import "CTConstants.h"
 
 @interface CTJsonTemplateProducer ()
 
@@ -36,7 +37,7 @@
 - (NSSet<CTCustomTemplate *> * _Nonnull)defineTemplates:(CleverTapInstanceConfig * _Nonnull)instanceConfig {
     if (!self.jsonTemplateDefinitions || [self.jsonTemplateDefinitions length] == 0) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:@"CleverTap: JSON template definitions cannot be nil or empty."
                 userInfo:nil]);
     }
@@ -47,7 +48,7 @@
     
     if (error) {
         @throw([NSException
-                exceptionWithName:@"CleverTap Error"
+                exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:[NSString stringWithFormat:@"CleverTap: Error parsing JSON template definitions: %@.", error.localizedDescription]
                 userInfo:nil]);
     }
@@ -62,7 +63,7 @@
         if ([type isEqualToString:TEMPLATE_TYPE]) {
             if (!self.templatePresenter) {
                 @throw([NSException
-                        exceptionWithName:@"CleverTap Error"
+                        exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                         reason:@"CleverTap: JSON definition contains a template definition and a template presenter is required."
                         userInfo:nil]);
             }
@@ -72,7 +73,7 @@
         } else if ([type isEqualToString:FUNCTION_TYPE]) {
             if (!self.functionPresenter) {
                 @throw([NSException
-                        exceptionWithName:@"CleverTap Error"
+                        exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                         reason:@"CleverTap: JSON definition contains a function definition and a function presenter is required."
                         userInfo:nil]);
             }
@@ -83,6 +84,11 @@
             }
             builder = [[CTAppFunctionBuilder alloc] initWithIsVisual:isVisual];
             [builder setPresenter:self.functionPresenter];
+        } else {
+            @throw([NSException
+                    exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
+                    reason:[NSString stringWithFormat:@"Unknown template type: %@ for template: %@.", type, key]
+                    userInfo:nil]);
         }
         [builder setName:key];
         
@@ -106,42 +112,42 @@
             continue;
         }
         
-        if ([argType isEqualToString:@"string"]) {
+        if ([argType isEqualToString:[CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeString]]) {
             NSString *stringValue = value;
             [builder addArgument:argKey withString:stringValue];
-        } else if ([argType isEqualToString:@"number"]) {
+        } else if ([argType isEqualToString:[CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeNumber]]) {
             NSNumber *numberValue = value;
             [builder addArgument:argKey withNumber:numberValue];
-        } else if ([argType isEqualToString:@"boolean"]) {
+        } else if ([argType isEqualToString:[CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeBool]]) {
             BOOL boolValue = [value boolValue];
             [builder addArgument:argKey withBool:boolValue];
-        } else if ([argType isEqualToString:@"file"]) {
+        } else if ([argType isEqualToString:[CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeFile]]) {
             if (value) {
                 @throw([NSException
-                        exceptionWithName:@"CleverTap Error"
+                        exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                         reason:[NSString stringWithFormat:@"CleverTap: File arguments should not specify a value. Remove value from argument: %@.", argKey]
                         userInfo:nil]);
             }
             [builder addFileArgument:argKey];
-        } else if ([argType isEqualToString:@"action"]) {
+        } else if ([argType isEqualToString:[CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeAction]]) {
             if (value) {
                 @throw([NSException
-                        exceptionWithName:@"CleverTap Error"
+                        exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                         reason:[NSString stringWithFormat:@"CleverTap: Action arguments should not specify a value. Remove value from argument: %@.", argKey]
                         userInfo:nil]);
             }
             
             if (![builder isKindOfClass:CTInAppTemplateBuilder.class]) {
                 @throw([NSException
-                        exceptionWithName:@"CleverTap Error"
+                        exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                         reason:[NSString stringWithFormat:@"Function templates cannot have action arguments. Remove argument: %@.", argKey]
                         userInfo:nil]);
             }
             [(CTInAppTemplateBuilder *)builder addActionArgument:argKey];
         } else {
             @throw([NSException
-                    exceptionWithName:@"CleverTap Error"
-                    reason:[NSString stringWithFormat:@"Unknown argument type: %@ for argument: %@", argType, argKey]
+                    exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
+                    reason:[NSString stringWithFormat:@"Unknown argument type: %@ for argument: %@.", argType, argKey]
                     userInfo:nil]);
         }
     }
@@ -149,7 +155,13 @@
 
 - (NSDictionary *)objectArgumentJsonToDictionary:(NSDictionary *)objectArgumentJson {
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-    NSSet *supportedNestedTypes = [NSSet setWithArray:@[@"boolean", @"string", @"number"]];
+    
+    NSSet *supportedNestedTypes = [NSSet setWithArray:@[
+        [CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeBool],
+        [CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeString],
+        [CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeNumber]
+    ]];
+                                   
     for (id argName in objectArgumentJson) {
         NSDictionary *argJson = objectArgumentJson[argName];
         NSString *argType = argJson[@"type"];
@@ -167,7 +179,7 @@
              @"Nesting of file and action arguments within objects is not supported",
              @"To define nested file and actions use dot '.' notation in the argument name"];
             @throw([NSException
-                    exceptionWithName:@"CleverTap Error"
+                    exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                     reason:reason
                     userInfo:nil]);
         }

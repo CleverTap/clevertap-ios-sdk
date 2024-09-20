@@ -20,7 +20,7 @@
     return self;
 }
 
-+ (NSString *)templateArgumentTypeString:(CTTemplateArgumentType)type {
++ (NSString *)templateArgumentTypeToString:(CTTemplateArgumentType)type {
     static NSDictionary *enumStringMap = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -75,7 +75,7 @@
             [self class],
             self,
             self.name,
-            [CTTemplateArgument templateArgumentTypeString:self.type],
+            [CTTemplateArgument templateArgumentTypeToString:self.type],
             self.defaultValue];
 }
 

@@ -229,7 +229,7 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     if (defaultValue) {
         argument[@"defaultValue"] = defaultValue;
     }
-    NSString *type = [CTTemplateArgument templateArgumentTypeString:arg.type];
+    NSString *type = [CTTemplateArgument templateArgumentTypeToString:arg.type];
     if (type) {
         argument[@"type"] = type;
     }
