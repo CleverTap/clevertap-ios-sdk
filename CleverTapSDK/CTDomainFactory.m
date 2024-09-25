@@ -72,16 +72,6 @@
         }
     }
     
-    if (self.config.handshakeDomain) {
-        NSString *customDomain = nil;
-        if (self.config.isDefaultInstance) {
-            customDomain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:CUSTOM_DOMAIN_KEY config: self.config] withResetValue:[CTPreferences getStringForKey:CUSTOM_DOMAIN_KEY withResetValue:nil]];
-        } else {
-            customDomain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:CUSTOM_DOMAIN_KEY config: self.config] withResetValue:nil];
-        }
-        return customDomain;
-    }
-    
     NSString *domain = nil;
     if (self.config.isDefaultInstance) {
         domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config] withResetValue:[CTPreferences getStringForKey:REDIRECT_DOMAIN_KEY withResetValue:nil]];
@@ -119,23 +109,13 @@
 
 - (void)persistRedirectDomain {
     if (self.redirectDomain != nil) {
-        if (self.config.handshakeDomain) {
-            [CTPreferences putString:self.redirectDomain forKey:[CTPreferences storageKeyWithSuffix:CUSTOM_DOMAIN_KEY config: self.config]];
-        }
-        else {
-            [CTPreferences putString:self.redirectDomain forKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config]];
-        }
+        [CTPreferences putString:self.redirectDomain forKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config]];
 #if CLEVERTAP_SSL_PINNING
         [self.urlSessionDelegate pinSSLCerts:self.sslCertNames forDomains:@[kCTApiDomain, self.redirectDomain]];
 #endif
     } else {
-        if (self.config.handshakeDomain) {
-            [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:CUSTOM_DOMAIN_KEY config: self.config]];
-        }
-        else {
-            [CTPreferences removeObjectForKey:REDIRECT_DOMAIN_KEY];
-            [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config]];
-        }
+        [CTPreferences removeObjectForKey:REDIRECT_DOMAIN_KEY];
+        [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config]];
     }
 }
 
