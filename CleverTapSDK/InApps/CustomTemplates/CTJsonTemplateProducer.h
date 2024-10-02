@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  Invalid definitions throw `NSException` with name `CleverTapCustomTemplateException` when ``defineTemplates:`` is called.
  
- @param jsonTemplateDefinitions A string with a json definition of templates in the following format:
+ @param jsonTemplatesDefinition A string with a json definition of templates in the following format:
  ```
  {
    "TemplateName": {
@@ -72,18 +72,18 @@ NS_ASSUME_NONNULL_BEGIN
  @param functionPresenter A presenter for all functions in the json definitions. Required if there
         is at least one template with type "function".
  */
-- (nonnull instancetype)initWithJsonTemplateDefinitions:(nonnull NSString *)jsonTemplateDefinitions
+- (nonnull instancetype)initWithJson:(nonnull NSString *)jsonTemplatesDefinition
                                       templatePresenter:(nonnull id<CTTemplatePresenter>)templatePresenter
                                       functionPresenter:(nonnull id<CTTemplatePresenter>)functionPresenter;
 
 
 /*!
- Creates ``CTCustomTemplate``s based on the `jsonTemplateDefinitions` this ``CTJsonTemplateProducer`` was initialized with.
+ Creates ``CTCustomTemplate``s based on the `jsonTemplatesDefinition` this ``CTJsonTemplateProducer`` was initialized with.
  
  @param instanceConfig The config of the CleverTap instance.
  @return A set of the custom templates created.
  
- This method throws an `NSException` with name `CleverTapCustomTemplateException` if an invalid JSON format or values occur while parsing `jsonTemplateDefinitions`.
+ This method throws an `NSException` with name `CleverTapCustomTemplateException` if an invalid JSON format or values occur while parsing `jsonTemplatesDefinition`.
  See the exception reason for details.
  */
 - (NSSet<CTCustomTemplate *> * _Nonnull)defineTemplates:(CleverTapInstanceConfig * _Nonnull)instanceConfig;

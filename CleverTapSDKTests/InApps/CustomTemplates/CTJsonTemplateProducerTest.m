@@ -30,7 +30,7 @@
 - (void)testJsonDefinitions {
     NSString *json = [NSString stringWithFormat:@"{%@, %@}", self.template1, self.function1];
     
-    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:json templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJson:json templatePresenter:self.presenter functionPresenter:self.presenter];
     
     NSSet *templates = [producer defineTemplates:self.config];
     XCTAssertEqual(2, templates.count);
@@ -79,7 +79,7 @@
     "    }"
     "  }"
     "}";
-    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:noArgumentsJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJson:noArgumentsJson templatePresenter:self.presenter functionPresenter:self.presenter];
     
     NSSet *templates = [producer defineTemplates:self.config];
     CTCustomTemplate *template1 = [self templateWithName:@"template-1" inSet:templates];
@@ -90,7 +90,7 @@
 
 - (void)testNoJson {
     NSString *nilJson = nil;
-    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:nilJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJson:nilJson templatePresenter:self.presenter functionPresenter:self.presenter];
     
     XCTAssertThrowsSpecificNamed([producer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
@@ -98,18 +98,18 @@
 - (void)testPresenterNotProvided {
 #pragma clang diagnostic ignored "-Wnonnull"
     NSString *templateJson = [NSString stringWithFormat:@"{%@}", self.template1];
-    CTJsonTemplateProducer *templateJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:templateJson templatePresenter:nil functionPresenter:self.presenter];
+    CTJsonTemplateProducer *templateJsonProducer = [[CTJsonTemplateProducer alloc] initWithJson:templateJson templatePresenter:nil functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([templateJsonProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
     
     NSString *functionJson = [NSString stringWithFormat:@"{%@}", self.function1];
-    CTJsonTemplateProducer *functionJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:functionJson templatePresenter:self.presenter functionPresenter:nil];
+    CTJsonTemplateProducer *functionJsonProducer = [[CTJsonTemplateProducer alloc] initWithJson:functionJson templatePresenter:self.presenter functionPresenter:nil];
     XCTAssertThrowsSpecificNamed([functionJsonProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 #pragma clang diagnostic pop
 }
 
 - (void)testInvalidJson {
     NSString *invalidJson = @"{[]}";
-    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJson:invalidJson templatePresenter:self.presenter functionPresenter:self.presenter];
     
     XCTAssertThrowsSpecificNamed([producer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
@@ -128,7 +128,7 @@
         "  }"
         "}" stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
-    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:json templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *producer = [[CTJsonTemplateProducer alloc] initWithJson:json templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([producer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
@@ -146,7 +146,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidTemplateTypeProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidTemplateTypeJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidTemplateTypeProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidTemplateTypeJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidTemplateTypeProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 
     // Invalid Argument Type JSON
@@ -162,7 +162,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidArgumentTypeProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidArgumentTypeJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidArgumentTypeProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidArgumentTypeJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidArgumentTypeProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 
     // Invalid File Value JSON
@@ -178,7 +178,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidFileValueJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidFileValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidFileValueJsonProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidFileValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidFileValueJsonProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 
     // Invalid Function File Value JSON
@@ -194,7 +194,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidFunctionFileValueJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidFunctionFileValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidFunctionFileValueJsonProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidFunctionFileValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidFunctionFileValueJsonProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 
     // Invalid Action Value JSON
@@ -210,7 +210,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidActionValueJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidActionValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidActionValueJsonProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidActionValueJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidActionValueJsonProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 
     // Invalid Function Action JSON
@@ -226,7 +226,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidFunctionActionProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidFunctionActionJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidFunctionActionProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidFunctionActionJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidFunctionActionProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 
     // Invalid Nested File JSON
@@ -246,7 +246,7 @@
         "}"
     "}";
     
-    CTJsonTemplateProducer *invalidNestedFileJsonProducer = [[CTJsonTemplateProducer alloc] initWithJsonTemplateDefinitions:invalidNestedFileJson templatePresenter:self.presenter functionPresenter:self.presenter];
+    CTJsonTemplateProducer *invalidNestedFileJsonProducer = [[CTJsonTemplateProducer alloc] initWithJson:invalidNestedFileJson templatePresenter:self.presenter functionPresenter:self.presenter];
     XCTAssertThrowsSpecificNamed([invalidNestedFileJsonProducer defineTemplates:self.config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 

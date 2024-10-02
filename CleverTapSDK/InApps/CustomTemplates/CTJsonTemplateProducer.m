@@ -15,7 +15,7 @@
 
 @interface CTJsonTemplateProducer ()
 
-@property (nonatomic, strong) NSString *jsonTemplateDefinitions;
+@property (nonatomic, strong) NSString *jsonTemplatesDefinition;
 @property (nonatomic, strong) id<CTTemplatePresenter> templatePresenter;
 @property (nonatomic, strong) id<CTTemplatePresenter> functionPresenter;
 
@@ -23,11 +23,11 @@
 
 @implementation CTJsonTemplateProducer
 
-- (nonnull instancetype)initWithJsonTemplateDefinitions:(nonnull NSString *)jsonTemplateDefinitions
+- (nonnull instancetype)initWithJson:(nonnull NSString *)jsonTemplatesDefinition
                                       templatePresenter:(nonnull id<CTTemplatePresenter>)templatePresenter
                                       functionPresenter:(nonnull id<CTTemplatePresenter>)functionPresenter {
     if (self = [super init]) {
-        self.jsonTemplateDefinitions = jsonTemplateDefinitions;
+        self.jsonTemplatesDefinition = jsonTemplatesDefinition;
         self.templatePresenter = templatePresenter;
         self.functionPresenter = functionPresenter;
     }
@@ -35,14 +35,14 @@
 }
 
 - (NSSet<CTCustomTemplate *> * _Nonnull)defineTemplates:(CleverTapInstanceConfig * _Nonnull)instanceConfig {
-    if (!self.jsonTemplateDefinitions || [self.jsonTemplateDefinitions length] == 0) {
+    if (!self.jsonTemplatesDefinition || [self.jsonTemplatesDefinition length] == 0) {
         @throw([NSException
                 exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                 reason:@"CleverTap: JSON template definitions cannot be nil or empty."
                 userInfo:nil]);
     }
     
-    NSData *jsonData = [self.jsonTemplateDefinitions dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *jsonData = [self.jsonTemplatesDefinition dataUsingEncoding:NSUTF8StringEncoding];
     NSError *error;
     NSDictionary *jsonDefinitions = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&error];
     
