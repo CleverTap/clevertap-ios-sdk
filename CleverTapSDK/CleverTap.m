@@ -1591,6 +1591,10 @@ static BOOL sharedInstanceErrorLogged;
     [self.fileDownloader clearFileAssets:expiredOnly];
 }
 
++ (void)registerCustomInAppTemplates:(id<CTTemplateProducer> _Nonnull)producer {
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
+}
+
 - (CTTemplateContext * _Nullable)activeContextForTemplate:(NSString * _Nonnull)templateName {
     return [[self customTemplatesManager] activeContextForTemplate:templateName];
 }
