@@ -27,6 +27,6 @@ typedef NS_ENUM(NSInteger, CTTemplateArgumentType) {
                                  type:(CTTemplateArgumentType)type
                          defaultValue:(id _Nullable)defaultValue;
 
-+ (NSString * _Nonnull)templateArgumentTypeString:(CTTemplateArgumentType)type;
++ (NSString * _Nonnull)templateArgumentTypeToString:(CTTemplateArgumentType)type;
 
 @end

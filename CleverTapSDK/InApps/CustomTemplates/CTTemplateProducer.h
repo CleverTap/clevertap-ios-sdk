@@ -14,6 +14,13 @@
 
 @protocol CTTemplateProducer
 
+/*!
+ Defines custom templates.
+ 
+ @param instanceConfig Use the config to decide which instance the templates are defined for.
+ 
+ @return A set of ``CTCustomTemplate`` definitions. ``CTCustomTemplate``s are uniquely identified by their name.
+ */
 - (NSSet<CTCustomTemplate *> * _Nonnull)defineTemplates:(CleverTapInstanceConfig * _Nonnull)instanceConfig;
 
 @end

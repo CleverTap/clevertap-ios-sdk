@@ -25,6 +25,7 @@
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @protocol CleverTapInAppNotificationDelegate;
 @class CTTemplateContext;
+@protocol CTTemplateProducer;
 #endif
 
 @protocol CTBatchSentDelegate;
@@ -1440,6 +1441,22 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #pragma mark Custom Templates and Functions
+
+/*!
+ Register ``CTCustomTemplate`` templates through a ``CTTemplateProducer``.
+ See ``CTCustomTemplateBuilder``. Templates must be registered before the ``CleverTap`` instance, that would use
+ them, is created.
+ 
+ Typically, this method is called from `UIApplicationDelegate/application:didFinishLaunchingWithOptions:`.
+ If your application uses multiple ``CleverTap`` instances, use the ``CleverTapInstanceConfig`` within the
+ ``CTTemplateProducer/defineTemplates:`` method to differentiate which templates should be registered to which instances.
+ 
+ This method can be called multiple times with different ``CTTemplateProducer`` producers, however all of the
+ produced templates must have unique names.
+ 
+ @param producer A ``CTTemplateProducer`` to register and define templates with.
+ */
++ (void)registerCustomInAppTemplates:(id<CTTemplateProducer> _Nonnull)producer;
 
 /*!
  @method
