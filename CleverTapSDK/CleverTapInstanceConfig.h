@@ -16,7 +16,7 @@
 @property (nonatomic, assign) BOOL useCustomCleverTapId;
 @property (nonatomic, assign) BOOL disableIDFV;
 @property (nonatomic, assign) BOOL enableFileProtection;
-@property (nonatomic, strong, readonly, nullable) NSString *handshakeDomain;
+@property (nonatomic, strong, nullable) NSString *handshakeDomain;
 
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 @property (nonatomic, strong, nullable) NSArray *identityKeys;
