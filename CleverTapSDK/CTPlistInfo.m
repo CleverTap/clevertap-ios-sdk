@@ -94,6 +94,8 @@ static NSArray *registeredURLSchemes;
         NSString *enableFileProtection = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENABLE_FILE_PROTECTION];
         _enableFileProtection = (enableFileProtection && [enableFileProtection isEqualToString:@"1"]);
         
+        _handshakeDomain = [CTPlistInfo getMetaDataForAttribute:CLTAP_HANDSHAKE_DOMAIN];
+        
         NSString *encryptionLevel = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_LEVEL];
         [self setEncryption:encryptionLevel];
     }

@@ -11,10 +11,6 @@
 #import "CTConstants.h"
 #import "CleverTapInstanceConfigPrivate.h"
 
-
-NSString *const REDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
-NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
-
 @interface CTDomainFactory ()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 
@@ -75,6 +71,7 @@ NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED
             return self.explictEndpointDomain;
         }
     }
+    
     NSString *domain = nil;
     if (self.config.isDefaultInstance) {
         domain = [CTPreferences getStringForKey:[CTPreferences storageKeyWithSuffix:REDIRECT_DOMAIN_KEY config: self.config] withResetValue:[CTPreferences getStringForKey:REDIRECT_DOMAIN_KEY withResetValue:nil]];
