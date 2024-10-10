@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 #### Added
 - Adds support for custom handshake domains.
+- Adds support for custom code in-app templates definitions through a json scheme.
 
 ### [Version 7.0.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.1) (August 22, 2024)
 
