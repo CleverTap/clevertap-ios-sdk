@@ -10,9 +10,6 @@
 #import "CTConstants.h"
 #import "CTUtils.h"
 
-NSString *const ACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
-NSString *const ACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
-
 @interface CTRequest()
 
 @property (nonatomic, strong, nullable) id params;

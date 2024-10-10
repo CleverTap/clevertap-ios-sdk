@@ -51,7 +51,7 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
                     self.templates[template.name] = template;
                 } else {
                     @throw([NSException
-                            exceptionWithName:@"CleverTap Error"
+                            exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                             reason:[NSString stringWithFormat:@"CleverTap: Template with name: %@ is already defined.", template.name]
                             userInfo:nil]);
                 }
@@ -229,7 +229,7 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     if (defaultValue) {
         argument[@"defaultValue"] = defaultValue;
     }
-    NSString *type = [CTTemplateArgument templateArgumentTypeString:arg.type];
+    NSString *type = [CTTemplateArgument templateArgumentTypeToString:arg.type];
     if (type) {
         argument[@"type"] = type;
     }

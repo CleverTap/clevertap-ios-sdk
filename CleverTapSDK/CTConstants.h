@@ -3,6 +3,12 @@
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
 extern NSString *const kHANDSHAKE_URL;
+extern NSString *const kHANDSHAKE_DOMAIN_HEADER;
+extern NSString *const ACCOUNT_ID_HEADER;
+extern NSString *const ACCOUNT_TOKEN_HEADER;
+
+extern NSString *const REDIRECT_DOMAIN_KEY;
+extern NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY;
 
 extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
@@ -10,15 +16,17 @@ extern NSString *const kSessionId;
 
 #define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogInternal(level, fmt, ...) if (level > 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
+#define CleverTapLogInternal(level, fmt, ...) if (level >= 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogStaticInfo(fmt, ...)  if([CTLogger getDebugLevel] >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 #define CleverTapLogStaticDebug(fmt, ...) if([CTLogger getDebugLevel] > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticInternal(fmt, ...) if([CTLogger getDebugLevel] > 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
+#define CleverTapLogStaticInternal(fmt, ...) if([CTLogger getDebugLevel] >= 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
 
 #define CT_TRY @try {
 #define CT_END_TRY }\
 @catch (NSException *e) {\
 [CTLogger logInternalError:e]; }
+
+#define CLTAP_CUSTOM_TEMPLATE_EXCEPTION @"CleverTapCustomTemplateException"
 
 #pragma mark Constants for General data
 #define CLTAP_REQUEST_TIME_OUT_INTERVAL 10
@@ -31,6 +39,7 @@ extern NSString *const kSessionId;
 #define CLTAP_USE_CUSTOM_CLEVERTAP_ID_LABEL @"CleverTapUseCustomId"
 #define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
 #define CLTAP_ENABLE_FILE_PROTECTION @"CleverTapEnableFileProtection"
+#define CLTAP_HANDSHAKE_DOMAIN @"CleverTapHandshakeDomain"
 #define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"

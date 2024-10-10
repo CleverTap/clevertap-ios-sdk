@@ -12,7 +12,15 @@
 @implementation CTRequestFactory
 
 + (CTRequest *_Nonnull)helloRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config {
-    return [[CTRequest alloc] initWithHttpMethod:@"GET" config:config params:nil url:kHANDSHAKE_URL];
+    NSString *helloUrl = kHANDSHAKE_URL;
+    if (config.handshakeDomain) {
+        helloUrl = [NSString stringWithFormat:@"https://%@/hello",config.handshakeDomain];
+    }
+    CTRequest *request = [[CTRequest alloc] initWithHttpMethod:@"GET" config:config params:nil url:helloUrl];
+    if (config.handshakeDomain) {
+        [request.urlRequest setValue:config.handshakeDomain forHTTPHeaderField:kHANDSHAKE_DOMAIN_HEADER];
+    }
+    return request;
 }
 
 + (CTRequest *_Nonnull)eventRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url {
