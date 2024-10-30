@@ -184,23 +184,23 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!event || !event[CLTAP_EVENT_NAME]) return;
     [self runOnBackgroundQueue:^{
         NSString *eventName = event[CLTAP_EVENT_NAME];
-        NSDictionary *s = [self getStoredEvents];
-        if (!s) s = @{};
+        NSDictionary *storedEvents = [self getStoredEvents];
+        if (!storedEvents) storedEvents = @{};
         NSTimeInterval now = [[[NSDate alloc] init] timeIntervalSince1970];
-        NSArray *ed = s[eventName];
-        if (!ed || ed.count < 3) {
+        NSArray *eventData = storedEvents[eventName];
+        if (!eventData || eventData.count < 3) {
             // This event has been recorded for the very first time
             // Set the count to 0, first and last to now
             // Count will be incremented soon after this block
-            ed = @[@0.0f, @(now), @(now)];
+            eventData = @[@0.0f, @(now), @(now)];
         }
-        NSMutableArray *ped = [ed mutableCopy];
-        double currentCount = ((NSNumber *) ped[0]).doubleValue;
+        NSMutableArray *eventDataCopy = [eventData mutableCopy];
+        double currentCount = ((NSNumber *) eventDataCopy[0]).doubleValue;
         currentCount++;
-        ped[0] = @(currentCount);
-        ped[2] = @(now);
-        NSMutableDictionary *store = [s mutableCopy];
-        store[eventName] = ped;
+        eventDataCopy[0] = @(currentCount);
+        eventDataCopy[2] = @(now);
+        NSMutableDictionary *store = [storedEvents mutableCopy];
+        store[eventName] = eventDataCopy;
         [self setStoredEvents:store];
     }];
 }
@@ -642,6 +642,14 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }
         if (!fromUpstream) {
             [self updateLocalProfileUpdateExpiryTimeForKey:key];
+        }
+        
+        // PERSIST PROFILE KEY AS EVENT
+        NSArray *systemProfileKeys = @[CLTAP_SYS_CARRIER, CLTAP_SYS_CC, CLTAP_SYS_TZ];
+        if (![systemProfileKeys containsObject:key]) {
+            NSDictionary *profileEvent = @{CLTAP_EVENT_NAME: key};
+            // TODO: Call appropriate persist method from the new db/localDataStore class
+            [self persistEvent:profileEvent];
         }
     }
     @catch (NSException *exception) {
