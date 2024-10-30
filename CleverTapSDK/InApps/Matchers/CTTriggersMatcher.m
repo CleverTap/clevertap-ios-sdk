@@ -41,6 +41,10 @@
         return NO;
     }
     
+    if (![self matchFirstTimeOnly:event trigger:trigger]) {
+        return NO;
+    }
+    
     if (![self matchGeoRadius:event trigger:trigger]) {
         return NO;
     }
@@ -113,6 +117,16 @@
             }
         }
     }
+    return YES;
+}
+
+- (BOOL)matchFirstTimeOnly:(CTEventAdapter *)event trigger:(CTTriggerAdapter *)trigger {
+    if (!trigger.firstTimeOnly) {
+        return YES;
+    }
+    // TODO: Call IsEventFirstTime from the new db/localDataStore class
+//    return [CTLocalDataStore IsEventFirstTime:eventName];
+    
     return YES;
 }
 

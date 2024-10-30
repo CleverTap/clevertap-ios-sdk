@@ -1821,4 +1821,85 @@
     XCTAssertFalse(match);
 }
 
+#pragma mark FirstTimeOnly
+
+- (void)testMatchEventWithFirstTimeOnly {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"firstTimeOnly": @YES
+        }
+    ];
+    
+    // TODO: Update tests after db/localdatastore is updated with db methods
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{}];
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchChargedEventWithFirstTimeOnly {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"firstTimeOnly": @YES,
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"propertyValue": @150
+                }],
+            @"itemProperties": @[
+                @{
+                    @"propertyName": @"product_name",
+                    @"operator": @1,
+                    @"propertyValue": @"product 1"
+                }]
+        }
+    ];
+    
+    // TODO: Update tests after db/localdatastore is updated with db methods
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
+        @"prop1": @150,
+    } items:@[
+        @{
+            @"product_name": @"product 1",
+            @"price": @5.99
+        },
+        @{
+            @"product_name": @"product 2",
+            @"price": @5.50
+        }
+    ]];
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchEventFirstTimeOnlyWithGeoRadius {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"firstTimeOnly": @YES,
+            @"geoRadius": @[
+                @{
+                    @"lat": @19.07609,
+                    @"lng": @72.877426,
+                    @"rad": @2
+                }]
+        }
+    ];
+    
+    // Distance ~1.1km
+    CLLocationCoordinate2D location1km = CLLocationCoordinate2DMake(19.08609, 72.877426);
+    
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:location1km];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:event];
+    XCTAssertTrue(match);
+}
+
 @end
+
+
