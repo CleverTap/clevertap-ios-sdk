@@ -510,29 +510,6 @@ typedef enum {
     }
 }
 
-- (void)hideFromWindow:(BOOL)animated {
-    void (^completionBlock)(void) = ^ {
-        [self->webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
-        [self.window removeFromSuperview];
-        self.window = nil;
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
-            [self.delegate notificationDidDismiss:self.notification fromViewController:self];
-        }
-    };
-    
-    if (animated) {
-        [UIView animateWithDuration:0.25 animations:^{
-            self.window.alpha = 0;
-        } completion:^(BOOL finished) {
-            completionBlock();
-        }];
-    }
-    else {
-        completionBlock();
-    }
-}
-
-
 #pragma mark - Public
 
 - (void)show:(BOOL)animated {
@@ -541,7 +518,14 @@ typedef enum {
 }
 
 - (void)hide:(BOOL)animated {
-    [self hideFromWindow:animated];
+    __weak typeof(self) weakSelf = self;
+    [self hideFromWindow:animated withCompletion:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+        [strongSelf->webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
+    }];
 }
 
 @end
