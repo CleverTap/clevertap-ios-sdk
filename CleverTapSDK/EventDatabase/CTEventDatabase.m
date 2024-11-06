@@ -170,4 +170,101 @@
     });
 }
 
+- (NSInteger)getCountForEventName:(NSString *)eventName
+                         deviceID:(NSString *)deviceID {
+    const char *querySQL = "SELECT count FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?;";
+    __block NSInteger count = 0;
+
+    dispatch_sync(_databaseQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(statement, 1, [eventName UTF8String], -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
+            
+            if (sqlite3_step(statement) == SQLITE_ROW) {
+                count = sqlite3_column_int(statement, 0);
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, eventName, deviceID);
+            }
+            
+            sqlite3_finalize(statement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+    });
+
+    return count;
+}
+
+- (NSInteger)getFirstTimestampForEventName:(NSString *)eventName
+                                  deviceID:(NSString *)deviceID {
+    const char *querySQL = "SELECT firstTs FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?;";
+    __block NSInteger firstTs = 0;
+
+    dispatch_sync(_databaseQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(statement, 1, [eventName UTF8String], -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
+            
+            if (sqlite3_step(statement) == SQLITE_ROW) {
+                firstTs = sqlite3_column_int(statement, 0);
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, eventName, deviceID);
+            }
+            
+            sqlite3_finalize(statement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+    });
+
+    return firstTs;
+}
+
+- (NSInteger)getLastTimestampForEventName:(NSString *)eventName
+                                 deviceID:(NSString *)deviceID {
+    const char *querySQL = "SELECT lastTs FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?;";
+    __block NSInteger lastTs = 0;
+
+    dispatch_sync(_databaseQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(statement, 1, [eventName UTF8String], -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
+            
+            if (sqlite3_step(statement) == SQLITE_ROW) {
+                lastTs = sqlite3_column_int(statement, 0);
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, eventName, deviceID);
+            }
+            
+            sqlite3_finalize(statement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+    });
+
+    return lastTs;
+}
+
+- (BOOL)deleteTable {
+    NSString *querySQL = [NSString stringWithFormat:@"DROP TABLE IF EXISTS CTUserEventLogs;"];
+    __block BOOL success = NO;
+
+    dispatch_sync(_databaseQueue, ^{
+        char *errMsg = NULL;
+        int result = sqlite3_exec(_eventDatabase, [querySQL UTF8String], NULL, NULL, &errMsg);
+        
+        if (result == SQLITE_OK) {
+            success = YES;
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting table CTUserEventLogs: %s", self, errMsg);
+            success = NO;
+        }
+    });
+
+    return success;
+}
+
 @end

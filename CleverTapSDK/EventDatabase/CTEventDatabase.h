@@ -26,4 +26,15 @@
 - (BOOL)eventExists:(NSString *)eventName
         forDeviceID:(NSString *)deviceID;
 
+- (NSInteger)getCountForEventName:(NSString *)eventName
+                         deviceID:(NSString *)deviceID;
+
+- (NSInteger)getFirstTimestampForEventName:(NSString *)eventName
+                                  deviceID:(NSString *)deviceID;
+
+- (NSInteger)getLastTimestampForEventName:(NSString *)eventName
+                                 deviceID:(NSString *)deviceID;
+
+- (BOOL)deleteTable;
+
 @end
