@@ -196,17 +196,30 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)hideFromWindow:(BOOL)animated {
+    [self hideFromWindow:animated withCompletion:nil];
+}
+
+- (void)hideFromWindow:(BOOL)animated withCompletion:(void (^)(void))completion {
+    __weak typeof(self) weakSelf = self;
     void (^completionBlock)(void) = ^ {
-        [self.window removeFromSuperview];
-        self.window = nil;
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
-            [self.delegate notificationDidDismiss:self.notification fromViewController:self];
+        if (!weakSelf) {
+            return;
+        }
+        if (weakSelf.window) {
+            [weakSelf.window removeFromSuperview];
+            weakSelf.window = nil;
+        }
+        if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
+            [weakSelf.delegate notificationDidDismiss:weakSelf.notification fromViewController:weakSelf];
+        }
+        if (completion) {
+            completion();
         }
     };
     
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
-            self.window.alpha = 0;
+            weakSelf.window.alpha = 0;
         } completion:^(BOOL finished) {
             completionBlock();
         }];
@@ -215,7 +228,6 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         completionBlock();
     }
 }
-
 
 #pragma mark - CTInAppPassThroughViewDelegate
 
