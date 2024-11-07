@@ -740,7 +740,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
                                                                         error:nil] mutableCopy];
         
         // Handle Image Interstitial InApp Test
-        if (inapp && [notification[CLTAP_INAPP_PREVIEW_TYPE] isEqualToString:CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE]) {
+        NSString *inAppPreviewType = notification[CLTAP_INAPP_PREVIEW_TYPE];
+        if (inapp && ([inAppPreviewType isEqualToString:CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE] || [inAppPreviewType isEqualToString:CLTAP_INAPP_ADVANCED_BUILDER_TYPE])) {
             NSString *config = [inapp valueForKeyPath:CLTAP_INAPP_IMAGE_INTERSTITIAL_CONFIG];
             NSString *htmlContent = [self wrapImageInterstitialContent:[CTUtils jsonObjectToString:config]];
             if (config && htmlContent) {
