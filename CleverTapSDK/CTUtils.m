@@ -144,6 +144,8 @@
 
 + (NSString * _Nullable)getNormalizedName:(NSString * _Nullable)name {
     if (name) {
+        // Lowercase with English locale for consistent behavior with the backend
+        // and across different device locales.
         NSString *normalizedName = [name stringByReplacingOccurrencesOfString:@" " withString:@""];
         NSLocale *englishLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
         normalizedName = [normalizedName lowercaseStringWithLocale:englishLocale];
