@@ -146,6 +146,22 @@
     XCTAssertFalse(matchNoProps);
 }
 
+- (void)testMatchEventWithNormalizedName {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"Event 1" eventProperties:@{
+        @"prop1": @"clevertap"
+    }];
+    XCTAssertTrue(match);
+}
+
 #pragma mark Charged Event
 
 - (void)testMatchChargedEvent {

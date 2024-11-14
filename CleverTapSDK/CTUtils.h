@@ -14,5 +14,7 @@
 + (double)haversineDistance:(CLLocationCoordinate2D)coordinateA coordinateB:(CLLocationCoordinate2D)coordinateB;
 + (NSNumber * _Nullable)numberFromString:(NSString * _Nullable)string;
 + (NSNumber * _Nullable)numberFromString:(NSString * _Nullable)string withLocale:(NSLocale * _Nullable)locale;
++ (NSString * _Nullable)getNormalizedName:(NSString * _Nullable)name;
++ (BOOL)areEqualNormalizedName:(NSString * _Nullable)firstName andName:(NSString * _Nullable)secondName;
 
 @end

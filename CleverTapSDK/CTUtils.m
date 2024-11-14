@@ -142,4 +142,32 @@
     return nil;
 }
 
++ (NSString * _Nullable)getNormalizedName:(NSString * _Nullable)name {
+    if (name) {
+        NSString *normalizedName = [name stringByReplacingOccurrencesOfString:@" " withString:@""];
+        NSLocale *englishLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+        normalizedName = [normalizedName lowercaseStringWithLocale:englishLocale];
+        normalizedName = [normalizedName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        return normalizedName;
+    }
+    
+    return nil;
+}
+
++ (BOOL)areEqualNormalizedName:(NSString * _Nullable)firstName
+                       andName:(NSString * _Nullable)secondName {
+    if (firstName == nil && secondName == nil) {
+        return YES;
+    }
+    
+    if (firstName == nil || secondName == nil) {
+        return NO;
+    }
+    
+    NSString *normalizedFirstName = [CTUtils getNormalizedName:firstName];
+    NSString *normalizedSecondName = [CTUtils getNormalizedName:secondName];
+    
+    return [normalizedFirstName isEqualToString:normalizedSecondName];
+}
+
 @end
