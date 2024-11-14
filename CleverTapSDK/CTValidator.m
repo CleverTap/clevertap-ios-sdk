@@ -2,6 +2,7 @@
 #import "CTValidationResult.h"
 #import "CTConstants.h"
 #import "CTKnownProfileFields.h"
+#import "CTUtils.h"
 
 static const int kMaxKeyChars = 120;
 static const int kMaxValueChars = 1024;
@@ -231,7 +232,7 @@ static NSArray *discardedEvents;
     NSArray *restrictedNames = @[@"Notification Sent", @"Notification Viewed", @"Notification Clicked",
                                  @"UTM Visited", @"App Launched", @"Stayed", @"App Uninstalled", @"wzrk_d", @"wzrk_fetch", @"SCCampaignOptOut", CLTAP_GEOFENCE_ENTERED_EVENT_NAME, CLTAP_GEOFENCE_EXITED_EVENT_NAME];
     for (NSString *x in restrictedNames)
-        if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
+        if ([CTUtils areEqualNormalizedName:name andName:x]) {
             // The event name is restricted
             CTValidationResult *error = [[CTValidationResult alloc] init];
             [error setErrorCode:513];
@@ -244,7 +245,7 @@ static NSArray *discardedEvents;
 
 + (BOOL)isDiscaredEventName:(NSString *)name {
     for (NSString *x in discardedEvents)
-        if ([name.lowercaseString isEqualToString:x.lowercaseString]) {
+        if ([CTUtils areEqualNormalizedName:name andName:x]) {
             // The event name is discarded
             CTValidationResult *error = [[CTValidationResult alloc] init];
             [error setErrorCode:513];
