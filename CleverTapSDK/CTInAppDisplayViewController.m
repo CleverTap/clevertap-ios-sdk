@@ -315,6 +315,44 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)triggerInAppAction:(CTNotificationAction *)action callToAction:(NSString *)callToAction buttonId:(NSString *)buttonId {
     NSMutableDictionary *extras = [NSMutableDictionary new];
+    if (action.type == CTInAppActionTypeOpenURL) {
+        NSMutableDictionary *mutableParams = [NSMutableDictionary new];
+        NSString *urlString = [action.actionURL absoluteString];
+        NSURL *dl = [NSURL URLWithString:urlString];
+        
+        // Try to extract the parameters from the URL and overrite default dl if applicable
+        NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
+        NSArray *comps = [urlString componentsSeparatedByString:@"?"];
+        if ([comps count] >= 2) {
+            // Extract the parameters and store in params dictionary
+            NSString *query = comps[1];
+            for (NSString *param in [query componentsSeparatedByString:@"&"]) {
+                NSArray *elts = [param componentsSeparatedByString:@"="];
+                if ([elts count] < 2) continue;
+                params[elts[0]] = [elts[1] stringByRemovingPercentEncoding];
+            };
+            mutableParams = [params mutableCopy];
+            
+            // Check for wzrk_c2a key, if present update its value after parsing with __dl__
+            NSString *c2a = params[CLTAP_PROP_WZRK_CTA];
+            if (c2a) {
+                c2a = [c2a stringByRemovingPercentEncoding];
+                NSArray *parts = [c2a componentsSeparatedByString:@"__dl__"];
+                if (parts && [parts count] == 2) {
+                    dl = [NSURL URLWithString:parts[1]];
+                    mutableParams[CLTAP_PROP_WZRK_CTA] = parts[0];
+                    
+                    // Use the url from the callToAction param to update action
+                    action = [[CTNotificationAction alloc] initWithOpenURL:dl];
+                }
+            }
+        }
+        
+        if (mutableParams) {
+            extras = mutableParams;
+        }
+    }
+    
     if (callToAction) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }
