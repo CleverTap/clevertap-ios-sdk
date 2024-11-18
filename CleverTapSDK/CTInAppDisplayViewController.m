@@ -353,10 +353,12 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         }
     }
     
-    if (callToAction) {
+    // Added NSNull class check as we may receive callToAction value as NULL class
+    // when null is passed as value for key callToAction in webView message.
+    if (callToAction && ![callToAction isKindOfClass:[NSNull class]]) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }
-    if (buttonId) {
+    if (buttonId && ![buttonId isKindOfClass:[NSNull class]]) {
         extras[@"button_id"] = buttonId;
     }
     NSString *campaignId = self.notification.campaignId;
