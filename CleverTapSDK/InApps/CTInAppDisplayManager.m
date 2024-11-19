@@ -801,7 +801,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     if (html && content) {
         NSArray *parts = [html componentsSeparatedByString:CLTAP_INAPP_HTML_SPLIT];
         if ([parts count] == 2) {
-            return [NSString stringWithFormat:@"%@'%@'%@", parts[0], content, parts[1]];
+            return [NSString stringWithFormat:@"%@%@%@", parts[0], content, parts[1]];
         }
     }
     return nil;
