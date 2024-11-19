@@ -30,6 +30,7 @@
         self.items = triggerJSON[@"itemProperties"];
         self.geoRadius = triggerJSON[@"geoRadius"];
         self.profileAttrName = triggerJSON[@"profileAttrName"];
+        self.firstTimeOnly = triggerJSON[@"firstTimeOnly"];
     }
     return self;
 }

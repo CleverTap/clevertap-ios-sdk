@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSInteger itemsCount;
 @property (nonatomic, readonly) NSInteger geoRadiusCount;
 @property (nonatomic, strong, readonly) NSString *profileAttrName;
+@property (nonatomic, assign) BOOL firstTimeOnly;
 
 - (CTTriggerCondition * _Nullable)propertyAtIndex:(NSInteger)index;
 - (CTTriggerCondition * _Nullable)itemAtIndex:(NSInteger)index;
