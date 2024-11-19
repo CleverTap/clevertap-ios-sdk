@@ -10,6 +10,7 @@
 #import "CTLocalDataStore.h"
 #import "CTProfileBuilder.h"
 #import "CTConstants.h"
+#import "XCTestCase+XCTestCase_Tests.h"
 
 @interface CTLocalDataStoreTests : XCTestCase
 @property (nonatomic, strong) CTLocalDataStore *dataStore;
@@ -107,6 +108,30 @@
     
     // Verify the mock methods were called
     OCMVerify(mockGetProfileFieldForKey);
+}
+
+- (void)testSetAndGetProfileValueForKey {
+    NSDictionary *profile = @{@"someKey": @"someValue"};
+    sleep(1); // Datastore takes a second to initialise in the background thread
+    [self.dataStore setProfileFields:profile];
+    XCTAssertEqualObjects([self.dataStore getProfileFieldForKey:@"someKey"], @"someValue");
+}
+
+- (void)testSetProfileFieldWithKeyAndValue {
+    sleep(1); // Datastore takes a second to initialise in the background thread
+    [self.dataStore setProfileFieldWithKey:@"someKey" andValue:@"someValue"];
+    XCTAssertEqualObjects([self.dataStore getProfileFieldForKey:@"someKey"], @"someValue");
+}
+
+- (void)testPersistEventAndGetEventDetail {
+    NSString *eventName = [self randomString];
+    NSDictionary *event = @{CLTAP_EVENT_NAME: eventName};
+    [self.dataStore persistEvent:event];
+    sleep(1); 
+    CleverTapEventDetail *eventDetails = [self.dataStore getEventDetail:eventName];
+    XCTAssertEqual(eventDetails.count, 1);
+    XCTAssertGreaterThan(eventDetails.firstTime, 0);
+    XCTAssertGreaterThan(eventDetails.lastTime, 0);
 }
 
 @end
