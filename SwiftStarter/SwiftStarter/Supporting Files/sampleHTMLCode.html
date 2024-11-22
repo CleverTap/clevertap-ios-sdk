@@ -24,6 +24,8 @@
         <p id="profileIncrementValueBy"> </p>
         <button onclick="profileDecrementValueBy()">Decrement profile value</button>
         <p id="profileDecrementValueBy"> </p>
+        <button onclick="promptForPushPermission()">Prompt for push permission</button>
+        <p id="promptForPushPermission"> </p>
         
         <script>
             function myFunction() {
@@ -144,6 +146,18 @@
                     action: 'profileDecrementValueBy',
                     value: 1,
                     key: 'score'
+                };
+                
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.com_clevertap_demo) {
+                    window.webkit.messageHandlers.com_clevertap_demo.postMessage(message);
+                }
+            }
+            
+            function promptForPushPermission() {
+                document.getElementById("promptForPushPermission").innerHTML = 'Prompted for push permission';
+                const message = {
+                    action: 'promptForPushPermission',
+                    showFallbackSettings: true
                 };
                 
                 if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.com_clevertap_demo) {

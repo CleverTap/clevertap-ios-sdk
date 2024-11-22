@@ -9,6 +9,7 @@
 #import "CTInAppDisplayViewController.h"
 
 #import "CleverTapBuildInfo.h"
+#import "CleverTap+PushPermission.h"
 
 @interface CleverTapJSInterface (){}
 
@@ -87,6 +88,8 @@
         [cleverTap profileDecrementValueBy: message[@"value"] forKey: message[@"key"]];
     } else if ([action isEqual: @"triggerInAppAction"]) {
         [self triggerInAppAction:message[@"actionJson"] callToAction:message[@"callToAction"] buttonId:message[@"buttonId"]];
+    } else if ([action isEqual: @"promptForPushPermission"]) {
+        [cleverTap promptForPushPermission:message[@"showFallbackSettings"]];
     }
 }
 
