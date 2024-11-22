@@ -33,5 +33,6 @@ typedef NS_ENUM(NSUInteger, CTInAppActionType){
 + (NSString * _Nonnull)inAppActionTypeString:(CTInAppActionType)type;
 + (NSBundle *_Nullable)bundle;
 + (NSString *_Nullable)getXibNameForControllerName:(NSString *_Nonnull)controllerName;
++ (NSMutableDictionary *_Nonnull)getParametersFromURL:(NSString *_Nonnull)url;
 
 @end
