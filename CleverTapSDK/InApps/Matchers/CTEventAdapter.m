@@ -8,6 +8,7 @@
 
 #import "CTEventAdapter.h"
 #import "CTConstants.h"
+#import "CTUtils.h"
 
 static NSDictionary<NSString*, NSString*> *systemPropToKey;
 
@@ -96,6 +97,14 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
 
 - (id)getActualPropertyValue:(NSString *)propertyName {
     id value = self.eventProperties[propertyName];
+    
+    // Check if event properties name are normalized equal
+    for (NSString *key in self.eventProperties) {
+        if ([CTUtils areEqualNormalizedName:key andName:propertyName]) {
+            value = self.eventProperties[key];
+            break;
+        }
+    }
     if (value == nil) {
         if ([propertyName isEqualToString:CLTAP_PROP_CAMPAIGN_ID]) {
             value = self.eventProperties[CLTAP_PROP_WZRK_ID];

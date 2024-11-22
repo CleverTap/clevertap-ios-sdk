@@ -773,6 +773,44 @@
     XCTAssertFalse(match);
 }
 
+- (void)testMatchEqualsPropertyNameWithNormalization {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"propertyValue": @"test"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"prop 1": @"test"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"Prop  1": @"test"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"E vent1" eventProperties:@{
+        @"Prop  1": @"test"
+    }];
+    XCTAssertTrue(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"Prop.1": @"test"
+    }];
+    XCTAssertFalse(match);
+}
+
+
 - (void)testMatchEqualsExtectedNumberWithActualString {
     NSArray *whenTriggers = @[
         @{
