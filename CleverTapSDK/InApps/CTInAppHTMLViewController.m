@@ -230,34 +230,18 @@ typedef enum {
         return;
     }
     
-    NSMutableDictionary *mutableParams = [NSMutableDictionary new];
     NSString *urlString = [navigationAction.request.URL absoluteString];
     NSURL *dl = [NSURL URLWithString:urlString];
+    NSMutableDictionary *mutableParams = [CTInAppUtils getParametersFromURL:urlString];
     
-    // Try to extract the parameters from the URL and overrite default dl if applicable
-    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
-    NSArray *comps = [urlString componentsSeparatedByString:@"?"];
-    if ([comps count] >= 2) {
-        NSString *query = comps[1];
-        for (NSString *param in [query componentsSeparatedByString:@"&"]) {
-            NSArray *elts = [param componentsSeparatedByString:@"="];
-            if ([elts count] < 2) continue;
-            params[elts[0]] = [elts[1] stringByRemovingPercentEncoding];
-        };
-        mutableParams = [params mutableCopy];
-        NSString *c2a = params[CLTAP_PROP_WZRK_CTA];
-        if (c2a) {
-            c2a = [c2a stringByRemovingPercentEncoding];
-            NSArray *parts = [c2a componentsSeparatedByString:@"__dl__"];
-            if (parts && [parts count] == 2) {
-                dl = [NSURL URLWithString:parts[1]];
-                mutableParams[CLTAP_PROP_WZRK_CTA] = parts[0];
-            }
-        }
+    // Use the url from the callToAction param to update action
+    if (mutableParams[@"deeplink"]) {
+        dl = mutableParams[@"deeplink"];
     }
+    
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
         CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
-        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams];
+        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams[@"params"]];
     }
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
