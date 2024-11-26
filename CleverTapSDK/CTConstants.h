@@ -235,6 +235,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_HTML_SPLIT @"\"##Vars##\""
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_HTML_NAME @"image_interstitial"
 
+#define CLTAP_URL_PARAM_DL_SEPARATOR @"__dl__"
+
 #pragma mark Constants for persisting system data
 #define CLTAP_SYS_CARRIER @"sysCarrier"
 #define CLTAP_SYS_CC @"sysCountryCode"

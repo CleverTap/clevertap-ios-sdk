@@ -350,6 +350,7 @@
 		6B32A0AD2B9DBE31009ADC57 /* CTTemplatePresenterMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A0AC2B9DBE31009ADC57 /* CTTemplatePresenterMock.m */; };
 		6B32A0B02B9DC374009ADC57 /* CTTemplateArgumentTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A0AF2B9DC374009ADC57 /* CTTemplateArgumentTest.m */; };
 		6B32A0B42B9F2E8F009ADC57 /* CTTestTemplateProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B32A0B32B9F2E8F009ADC57 /* CTTestTemplateProducer.m */; };
+		6B453EF92CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B453EF82CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m */; };
 		6B4A0F912B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */; };
 		6B535FB62AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
 		6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
@@ -913,6 +914,8 @@
 		6B32A0B12B9F2A75009ADC57 /* CTCustomTemplatesManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTCustomTemplatesManager+Tests.h"; sourceTree = "<group>"; };
 		6B32A0B22B9F2E8F009ADC57 /* CTTestTemplateProducer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTTestTemplateProducer.h; sourceTree = "<group>"; };
 		6B32A0B32B9F2E8F009ADC57 /* CTTestTemplateProducer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTestTemplateProducer.m; sourceTree = "<group>"; };
+		6B453EF72CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppDisplayViewControllerMock.h; sourceTree = "<group>"; };
+		6B453EF82CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppDisplayViewControllerMock.m; sourceTree = "<group>"; };
 		6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppTriggerManagerTest.m; sourceTree = "<group>"; };
 		6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTMultiDelegateManager.h; sourceTree = "<group>"; };
 		6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManager.m; sourceTree = "<group>"; };
@@ -1474,6 +1477,8 @@
 				6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */,
 				6BB778CF2BEE4C3400A41628 /* CTNotificationActionTest.m */,
 				4806346E2CEB620400E39E9B /* CTInAppDisplayViewControllerTests.m */,
+				6B453EF72CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.h */,
+				6B453EF82CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2528,6 +2533,7 @@
 				6B32A0A32B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m in Sources */,
 				6B9E95B52C29C2F40002D557 /* NSFileManagerMock.m in Sources */,
 				6A7BB8DC29E47CFF00651584 /* CTVarTest.m in Sources */,
+				6B453EF92CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m in Sources */,
 				6B32A0AD2B9DBE31009ADC57 /* CTTemplatePresenterMock.m in Sources */,
 				6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */,
 				6A2E0B9529D49D0200FCEA5F /* CTVariables+Tests.m in Sources */,

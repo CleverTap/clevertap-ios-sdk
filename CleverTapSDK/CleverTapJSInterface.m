@@ -100,6 +100,14 @@
         return;
     }
     
+    // Check for NSNull in case null is passed from the WebView message
+    if ([callToAction isKindOfClass:[NSNull class]]) {
+        callToAction = nil;
+    }
+    if ([buttonId isKindOfClass:[NSNull class]]) {
+        buttonId = nil;
+    }
+    
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithJSON:actionJson];
     if (action && !action.error) {
         [self.controller triggerInAppAction:action callToAction:callToAction buttonId:buttonId];

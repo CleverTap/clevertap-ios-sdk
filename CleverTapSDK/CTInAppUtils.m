@@ -125,8 +125,7 @@ static NSDictionary<NSNumber *, NSString *> *_inAppActionTypeTypeToStringMap;
 }
 
 + (NSMutableDictionary *)getParametersFromURL:(NSString *)urlString {
-    NSMutableDictionary *mutableParams = [NSMutableDictionary new];
-    
+    NSMutableDictionary *mutableParams = [[NSMutableDictionary alloc] init];
     // Try to extract the parameters from the URL and overrite default dl if applicable
     NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
     NSArray *comps = [urlString componentsSeparatedByString:@"?"];
@@ -137,13 +136,13 @@ static NSDictionary<NSNumber *, NSString *> *_inAppActionTypeTypeToStringMap;
             NSArray *elts = [param componentsSeparatedByString:@"="];
             if ([elts count] < 2) continue;
             params[elts[0]] = [elts[1] stringByRemovingPercentEncoding];
-        };
+        }
         
         // Check for wzrk_c2a key, if present update its value after parsing with __dl__
         NSString *c2a = params[CLTAP_PROP_WZRK_CTA];
         if (c2a) {
             c2a = [c2a stringByRemovingPercentEncoding];
-            NSArray *parts = [c2a componentsSeparatedByString:@"__dl__"];
+            NSArray *parts = [c2a componentsSeparatedByString:CLTAP_URL_PARAM_DL_SEPARATOR];
             if (parts && [parts count] == 2) {
                 params[CLTAP_PROP_WZRK_CTA] = parts[0];
                 mutableParams[@"deeplink"] = [NSURL URLWithString:parts[1]];
