@@ -128,7 +128,15 @@ static NSDictionary<NSString*, NSString*> *systemPropToKey;
     }
     NSMutableArray *itemValues = [NSMutableArray new];
     for (NSDictionary *item in self.items) {
-        id value = item[name];
+        
+        // Normalize the keys in the dictionary
+        NSMutableDictionary *normalizedItem = [NSMutableDictionary dictionary];
+        for (NSString *key in item) {
+            NSString *normalizedKey = [CTUtils getNormalizedName:key];
+            normalizedItem[normalizedKey] = item[key];
+        }
+        
+        id value = normalizedItem[[CTUtils getNormalizedName:name]];
         if (value) {
             [itemValues addObject:value];
         }
