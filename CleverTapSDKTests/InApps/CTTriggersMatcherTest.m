@@ -162,6 +162,56 @@
     XCTAssertTrue(match);
 }
 
+#pragma mark Profile Event
+
+- (void)testMatchProfileEvent {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"profile1 changed",
+            @"profileAttrName": @"profile1",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"newValue",
+                    @"operator": @0,
+                    @"propertyValue": @150
+                },
+                @{
+                    @"propertyName": @"oldValue",
+                    @"operator": @1,
+                    @"propertyValue": @"Equals"
+                }
+            ]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    NSDictionary *eventProperties = @{
+        @"newValue": @160,
+        @"oldValue": @"Equals"
+    };
+    
+    CTEventAdapter *eventAdapter = [[CTEventAdapter alloc] initWithEventName:@"profile1_changed" profileAttrName:@"profile1" eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:eventAdapter];
+    XCTAssertTrue(match);
+    
+    eventAdapter = [[CTEventAdapter alloc] initWithEventName:@"profile 1_changed" profileAttrName:@"profile 1" eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:eventAdapter];
+    XCTAssertTrue(match);
+    
+    eventAdapter = [[CTEventAdapter alloc] initWithEventName:@"Profile 1_changed" profileAttrName:@"Profile 1" eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:eventAdapter];
+    XCTAssertTrue(match);
+    
+    eventAdapter = [[CTEventAdapter alloc] initWithEventName:@"profile  1_changed" profileAttrName:@"profile  1" eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:eventAdapter];
+    XCTAssertTrue(match);
+    
+    eventAdapter = [[CTEventAdapter alloc] initWithEventName:@"Profile_1_changed" profileAttrName:@"Profile_1" eventProperties:eventProperties andLocation:kCLLocationCoordinate2DInvalid];
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:eventAdapter];
+    XCTAssertFalse(match);
+}
+
 #pragma mark Charged Event
 
 - (void)testMatchChargedEvent {
