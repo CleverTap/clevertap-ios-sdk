@@ -305,6 +305,44 @@
     XCTAssertTrue(match);
 }
 
+- (void)testMatchChargedEventItemArrayEqualsNormalized {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"eventProperties": @[
+                @{
+                    @"propertyName": @"prop1",
+                    @"operator": @1,
+                    @"propertyValue": @150
+                }],
+            @"itemProperties": @[
+                @{
+                    @"propertyName": @"product name",
+                    @"operator": @1,
+                    @"propertyValue": @[@"product 1"]
+                },
+                @{
+                    @"propertyName": @"price",
+                    @"operator": @1,
+                    @"propertyValue": @[@5.99]
+                }]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
+        @"Prop 1": @150,
+    } items:@[
+        @{
+            @"ProductName": @"product 1",
+            @"Price": @5.99
+        }
+    ]];
+    
+    XCTAssertTrue(match);
+}
+
 - (void)testMatchChargedEventItemArrayContains {
     NSArray *whenTriggers = @[
         @{
@@ -335,6 +373,32 @@
         },
         @{
             @"product_name": @"product 2",
+            @"price": @5.50
+        }
+    ]];
+    
+    XCTAssertTrue(match);
+}
+
+- (void)testMatchChargedEventItemArrayContainsNormalized {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"eventProperties": @[],
+            @"itemProperties": @[
+                @{
+                    @"propertyName": @"product name",
+                    @"operator": @3,
+                    @"propertyValue": @[@"product 1", @"product 2"]
+                }]
+        }
+    ];
+    
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] init];
+    
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{} items:@[
+        @{
+            @"Product Name": @"product 1",
             @"price": @5.50
         }
     ]];
@@ -808,8 +872,20 @@
         @"Prop.1": @"test"
     }];
     XCTAssertFalse(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"Prop  1": @"test1",
+        @"Prop1": @"test",
+    }];
+    XCTAssertFalse(match);
+    
+    match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{
+        @"Prop1": @"test1",
+        @"prop 1": @"test2",
+        @"prop1": @"test",
+    }];
+    XCTAssertTrue(match);
 }
-
 
 - (void)testMatchEqualsExtectedNumberWithActualString {
     NSArray *whenTriggers = @[
