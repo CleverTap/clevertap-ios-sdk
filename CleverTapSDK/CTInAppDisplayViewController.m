@@ -315,6 +315,23 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)triggerInAppAction:(CTNotificationAction *)action callToAction:(NSString *)callToAction buttonId:(NSString *)buttonId {
     NSMutableDictionary *extras = [NSMutableDictionary new];
+    
+    if (action.type == CTInAppActionTypeOpenURL) {
+        NSString *urlString = [action.actionURL absoluteString];
+        NSMutableDictionary *mutableParams = [CTInAppUtils getParametersFromURL:urlString];
+        
+        if (mutableParams[@"params"]) {
+            extras = [mutableParams[@"params"] mutableCopy];
+            
+            // Use the url from the deeplink to update the action if such is set
+            if (mutableParams[@"deeplink"]) {
+                action = [[CTNotificationAction alloc] initWithOpenURL:mutableParams[@"deeplink"]];
+            }
+        }
+    }
+    
+    // callToAction, buttonId and notification id take precedence over
+    // the URL parameters if those have been set in the URL
     if (callToAction) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }
