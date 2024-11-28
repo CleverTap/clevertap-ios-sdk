@@ -11,6 +11,7 @@
 #import "CTTriggerValue.h"
 #import "CTConstants.h"
 #import "CTTriggerEvaluator.h"
+#import "CTUtils.h"
 
 @implementation CTTriggersMatcher
 
@@ -30,9 +31,8 @@
 }
 
 - (BOOL)match:(CTTriggerAdapter *)trigger event:(CTEventAdapter *)event {
-    
-    BOOL eventNameMatch = [[event eventName] isEqualToString:[trigger eventName]];
-    BOOL profileAttrNameMatch = [event profileAttrName] != nil && [[event profileAttrName] isEqualToString:[trigger profileAttrName]];
+    BOOL eventNameMatch = [CTUtils areEqualNormalizedName:[event eventName] andName:[trigger eventName]];
+    BOOL profileAttrNameMatch = [event profileAttrName] != nil && [CTUtils areEqualNormalizedName:[event profileAttrName] andName:[trigger profileAttrName]];
     if (!eventNameMatch && !profileAttrNameMatch) {
         return NO;
     }
