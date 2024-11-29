@@ -26,5 +26,10 @@
                           spikyProxyDomain:(NSString* _Nonnull)spikyProxyDomain
                          isDefaultInstance:(BOOL)isDefault;
 
+- (instancetype _Nonnull)initWithAccountId:(NSString * _Nonnull)accountId
+                     accountToken:(NSString * _Nonnull)accountToken
+                 handshakeDomain:(NSString * _Nonnull)handshakeDomain
+                isDefaultInstance:(BOOL)isDefault;
+
 + (NSString* _Nonnull)dataArchiveFileNameWithAccountId:(NSString* _Nonnull)accountId;
 @end

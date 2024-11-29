@@ -231,9 +231,12 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 
 #define CLTAP_INAPP_PREVIEW_TYPE @"wzrk_inapp_type"
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE @"image-interstitial"
+#define CLTAP_INAPP_ADVANCED_BUILDER_TYPE @"advanced-builder"
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_CONFIG @"imageInterstitialConfig"
 #define CLTAP_INAPP_HTML_SPLIT @"\"##Vars##\""
 #define CLTAP_INAPP_IMAGE_INTERSTITIAL_HTML_NAME @"image_interstitial"
+
+#define CLTAP_URL_PARAM_DL_SEPARATOR @"__dl__"
 
 #pragma mark Constants for persisting system data
 #define CLTAP_SYS_CARRIER @"sysCarrier"

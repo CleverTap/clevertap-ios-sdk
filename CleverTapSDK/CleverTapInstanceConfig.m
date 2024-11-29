@@ -141,6 +141,24 @@
 
 - (instancetype)initWithAccountId:(NSString *)accountId
                      accountToken:(NSString *)accountToken
+                 handshakeDomain:(NSString *)handshakeDomain
+                isDefaultInstance:(BOOL)isDefault {
+    [self checkIfAvailableAccountId:accountId accountToken:accountToken];
+    
+    if (self = [super init]) {
+        _accountId = accountId;
+        _accountToken = accountToken;
+        _handshakeDomain = handshakeDomain;
+        _isDefaultInstance = isDefault;
+        _queueLabel = [NSString stringWithFormat:@"com.clevertap.serialQueue:%@",accountId];
+        
+        [self setupPlistData:isDefault];
+    }
+    return self;
+}
+
+- (instancetype)initWithAccountId:(NSString *)accountId
+                     accountToken:(NSString *)accountToken
                       proxyDomain:(NSString *)proxyDomain
                  spikyProxyDomain:(NSString *)spikyProxyDomain
                 isDefaultInstance:(BOOL)isDefault {

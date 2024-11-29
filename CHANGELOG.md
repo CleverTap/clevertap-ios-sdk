@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.0.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.3) (November 29, 2024)
+
+#### Added
+- Adds a method `setCredentials` for setting custom handshake domains.
+- Adds support for previewing in-apps created through the new dashboard advanced builder.
+- Adds parsing of urls for `open-url` action to track parameters in the url for `Notification Clicked` events in HTML in-app messages.
+- Adds support for `promptForPushPermission` method in JS Interface and HTML in-apps.
+
+#### Fixed
+- Mitigates a potential crash related to the `CTValidationResultStack` class.
+- Mitigates a potential crash on `[CTInAppHTMLViewController hideFromWindow:]`.
+- Changes campaign triggering evaluation of event names, event properties, and profile properties to ignore letter case and whitespace.
+- Fixes an issue where the `wzrk_c2a` value is passed as null to backend when we receive null for `callToAction` value in a webView message handler.
+
 ### [Version 7.0.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.2) (October 10, 2024)
 
 #### Added

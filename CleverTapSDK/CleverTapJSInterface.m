@@ -9,6 +9,7 @@
 #import "CTInAppDisplayViewController.h"
 
 #import "CleverTapBuildInfo.h"
+#import "CleverTap+PushPermission.h"
 
 @interface CleverTapJSInterface (){}
 
@@ -87,6 +88,11 @@
         [cleverTap profileDecrementValueBy: message[@"value"] forKey: message[@"key"]];
     } else if ([action isEqual: @"triggerInAppAction"]) {
         [self triggerInAppAction:message[@"actionJson"] callToAction:message[@"callToAction"] buttonId:message[@"buttonId"]];
+    } else if ([action isEqual: @"promptForPushPermission"]) {
+        if (self.controller) {
+            [self.controller hide:NO];
+        }
+        [cleverTap promptForPushPermission:message[@"showFallbackSettings"]];
     }
 }
 
@@ -98,6 +104,14 @@
     if (!self.controller) {
         CleverTapLogDebug(self.config.logLevel, @"%@: display view controller is nil.", [self class]);
         return;
+    }
+    
+    // Check for NSNull in case null is passed from the WebView message
+    if ([callToAction isKindOfClass:[NSNull class]]) {
+        callToAction = nil;
+    }
+    if ([buttonId isKindOfClass:[NSNull class]]) {
+        buttonId = nil;
     }
     
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithJSON:actionJson];

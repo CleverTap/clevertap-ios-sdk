@@ -196,17 +196,30 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)hideFromWindow:(BOOL)animated {
+    [self hideFromWindow:animated withCompletion:nil];
+}
+
+- (void)hideFromWindow:(BOOL)animated withCompletion:(void (^)(void))completion {
+    __weak typeof(self) weakSelf = self;
     void (^completionBlock)(void) = ^ {
-        [self.window removeFromSuperview];
-        self.window = nil;
-        if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
-            [self.delegate notificationDidDismiss:self.notification fromViewController:self];
+        if (!weakSelf) {
+            return;
+        }
+        if (weakSelf.window) {
+            [weakSelf.window removeFromSuperview];
+            weakSelf.window = nil;
+        }
+        if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(notificationDidDismiss:fromViewController:)]) {
+            [weakSelf.delegate notificationDidDismiss:weakSelf.notification fromViewController:weakSelf];
+        }
+        if (completion) {
+            completion();
         }
     };
     
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
-            self.window.alpha = 0;
+            weakSelf.window.alpha = 0;
         } completion:^(BOOL finished) {
             completionBlock();
         }];
@@ -215,7 +228,6 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         completionBlock();
     }
 }
-
 
 #pragma mark - CTInAppPassThroughViewDelegate
 
@@ -303,6 +315,23 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)triggerInAppAction:(CTNotificationAction *)action callToAction:(NSString *)callToAction buttonId:(NSString *)buttonId {
     NSMutableDictionary *extras = [NSMutableDictionary new];
+    
+    if (action.type == CTInAppActionTypeOpenURL) {
+        NSString *urlString = [action.actionURL absoluteString];
+        NSMutableDictionary *mutableParams = [CTInAppUtils getParametersFromURL:urlString];
+        
+        if (mutableParams[@"params"]) {
+            extras = [mutableParams[@"params"] mutableCopy];
+            
+            // Use the url from the deeplink to update the action if such is set
+            if (mutableParams[@"deeplink"]) {
+                action = [[CTNotificationAction alloc] initWithOpenURL:mutableParams[@"deeplink"]];
+            }
+        }
+    }
+    
+    // callToAction, buttonId and notification id take precedence over
+    // the URL parameters if those have been set in the URL
     if (callToAction) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }

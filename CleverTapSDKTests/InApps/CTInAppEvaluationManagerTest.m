@@ -322,7 +322,6 @@
 }
 
 - (void)testEvaluateUserAttribute {
-    
     self.helper.inAppStore.serverSideInApps = @[
     @{
         @"ti": @1,
@@ -343,19 +342,79 @@
             }],
             @"profileAttrName": @"Customer Type",
         }]
-    },
-    ];
+    }];
+    
     NSDictionary *profile = @{
         @"Customer Type": @{
             @"newValue": @"Gold",
             @"oldValue": @"Premium"
         }
     };
-
-
     [self.evaluationManager evaluateOnUserAttributeChange:profile];
     XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
-    XCTAssertNotEqualObjects((@[@2]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
+}
+
+- (void)testEvaluateUserAttributeNormalized {
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": @"newValue",
+                @"propertyValue": @"Gold",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    }];
+    
+    NSDictionary *profile = @{
+        @"CustomerType": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
+    
+    profile = @{
+        @"customer type": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqualObjects((@[@1, @1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
+}
+
+- (void)testEvaluateUserAttributeNormalizedMultiple {
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": @"newValue",
+                @"propertyValue": @"Gold",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    }];
+    
+    NSDictionary *profile = @{
+        @"CustomerType": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        },
+        @"customer type": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        },
+        @"customerType": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqualObjects((@[@1, @1, @1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
 }
 
 - (void)testEvaluateCharged {

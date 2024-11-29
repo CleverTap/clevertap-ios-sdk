@@ -121,6 +121,14 @@ static NSArray *registeredURLSchemes;
     _spikyProxyDomain = spikyProxyDomain;
 }
 
+- (void)setCredentialsWithAccountID:(NSString * _Nonnull)accountID token:(NSString * _Nonnull)token proxyDomain:(NSString * _Nonnull)proxyDomain spikyProxyDomain:(NSString * _Nullable)spikyProxyDomain handshakeDomain:(NSString*)handshakeDomain {
+    _accountId = accountID;
+    _accountToken = token;
+    _proxyDomain = proxyDomain;
+    _spikyProxyDomain = spikyProxyDomain;
+    _handshakeDomain = handshakeDomain;
+}
+
 - (void)setEncryption:(NSString *)encryptionLevel {
     if (encryptionLevel && [encryptionLevel isEqualToString:@"0"]) {
         _encryptionLevel = CleverTapEncryptionNone;
