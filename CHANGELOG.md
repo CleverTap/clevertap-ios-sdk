@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 #### Added
 - Adds a method `setCredentials` for setting custom handshake domains.
 - Adds support for previewing in-apps created through the new dashboard advanced builder.
+- Adds parsing of urls for `open-url` action to track parameters in the url for `Notification Clicked` events in in-app messages.
 - Adds support for `promptForPushPermission` method in JS Interface and HTML in-apps.
 
 #### Fixed
