@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.0.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.3) (November 28, 2024)
+### [Version 7.0.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.3) (November 29, 2024)
 
 #### Added
 - Adds a method `setCredentials` for setting custom handshake domains.
