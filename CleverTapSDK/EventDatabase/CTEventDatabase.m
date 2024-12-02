@@ -248,6 +248,73 @@
     return lastTs;
 }
 
+- (CleverTapEventDetail *)getEventDetailForEventName:(NSString *)eventName
+                                           deviceID:(NSString *)deviceID {
+    NSString *querySQL = @"SELECT eventName, count, firstTs, lastTs FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?;";
+    __block CleverTapEventDetail *eventDetail = nil;
+    
+    dispatch_sync(_databaseQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(_eventDatabase, [querySQL UTF8String], -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(statement, 1, [eventName UTF8String], -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
+            
+            if (sqlite3_step(statement) == SQLITE_ROW) {
+                const char *eventName = (const char *)sqlite3_column_text(statement, 0);
+                NSInteger count = sqlite3_column_int(statement, 1);
+                NSInteger firstTs = sqlite3_column_int(statement, 2);
+                NSInteger lastTs = sqlite3_column_int(statement, 3);
+                
+                eventDetail = [[CleverTapEventDetail alloc] init];
+                eventDetail.count = count;
+                eventDetail.firstTime = firstTs;
+                eventDetail.lastTime = lastTs;
+                eventDetail.eventName = [NSString stringWithUTF8String:eventName];
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, eventName, deviceID);
+            }
+            sqlite3_finalize(statement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+    });
+    
+    return eventDetail;
+}
+
+- (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID {
+    NSString *querySQL = @"SELECT eventName, count, firstTs, lastTs FROM CTUserEventLogs WHERE deviceID = ?;";
+    __block NSMutableArray *eventDataArray = [NSMutableArray array];
+    
+    dispatch_sync(_databaseQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(_eventDatabase, [querySQL UTF8String], -1, &statement, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(statement, 1, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
+            
+            while (sqlite3_step(statement) == SQLITE_ROW) {
+                const char *eventName = (const char *)sqlite3_column_text(statement, 0);
+                NSInteger count = sqlite3_column_int(statement, 1);
+                NSInteger firstTs = sqlite3_column_int(statement, 2);
+                NSInteger lastTs = sqlite3_column_int(statement, 3);
+                
+                CleverTapEventDetail *ed = [[CleverTapEventDetail alloc] init];
+                ed.count = count;
+                ed.firstTime = firstTs;
+                ed.lastTime = lastTs;
+                ed.eventName = [NSString stringWithUTF8String:eventName];
+                
+                // Adding the CleverTapEventDetail to the result array
+                [eventDataArray addObject:ed];
+            }
+            sqlite3_finalize(statement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+    });
+    
+    return [eventDataArray copy];
+}
+
 - (BOOL)deleteTable {
     NSString *querySQL = [NSString stringWithFormat:@"DROP TABLE IF EXISTS CTUserEventLogs;"];
     __block BOOL success = NO;

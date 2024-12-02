@@ -135,6 +135,32 @@ static NSString *kDeviceID = @"Test Device";
     
 }
 
+- (void)testEventDetailsForDeviceID {
+    NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    
+    CleverTapEventDetail *eventDetail = [self.eventDatabase getEventDetailForEventName:kEventName deviceID:kDeviceID];
+    XCTAssertEqualObjects(eventDetail.eventName, kEventName);
+    XCTAssertEqual(eventDetail.firstTime, currentTs);
+    XCTAssertEqual(eventDetail.lastTime, currentTs);
+    XCTAssertEqual(eventDetail.count, 1);
+}
+
+- (void)testAllEventsForDeviceID {
+    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertData:@"Test Event 1" deviceID:kDeviceID];
+    [self.eventDatabase insertData:@"Test Event 2" deviceID:@"Test Device 1"];
+    
+    NSArray<CleverTapEventDetail *>*  allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
+    XCTAssertEqualObjects(allEvents[0].eventName, kEventName);
+    XCTAssertEqualObjects(allEvents[1].eventName, @"Test Event 1");
+    XCTAssertEqual(allEvents.count, 2);
+    
+    allEvents = [self.eventDatabase getAllEventsForDeviceID:@"Test Device 1"];
+    XCTAssertEqualObjects(allEvents[0].eventName, @"Test Event 2");
+    XCTAssertEqual(allEvents.count, 1);
+}
+
 - (NSString *)databasePath {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];

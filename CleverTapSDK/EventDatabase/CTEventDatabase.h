@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
 #import "CleverTapInstanceConfig.h"
+#import "CleverTapEventDetail.h"
 
 @interface CTEventDatabase : NSObject
 
@@ -34,6 +35,11 @@
 
 - (NSInteger)getLastTimestampForEventName:(NSString *)eventName
                                  deviceID:(NSString *)deviceID;
+
+- (CleverTapEventDetail *)getEventDetailForEventName:(NSString *)eventName
+                                            deviceID:(NSString *)deviceID;
+
+- (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID;
 
 - (BOOL)deleteTable;
 
