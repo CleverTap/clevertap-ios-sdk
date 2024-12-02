@@ -161,6 +161,42 @@ static NSString *kDeviceID = @"Test Device";
     XCTAssertEqual(allEvents.count, 1);
 }
 
+- (void)testLeastRecentlyUsedRowsDeleted {
+    int maxRow = 10;
+    int numberOfRowsToCleanup = 2;
+    int totalRowCount = 13;
+    for (int i = 0; i < totalRowCount; i++) {
+        NSString *eventName = [NSString stringWithFormat:@"Test Event %d", i];
+        [self.eventDatabase insertData:eventName deviceID:kDeviceID];
+    }
+    NSArray<CleverTapEventDetail *>*  allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
+    XCTAssertEqual(allEvents.count, totalRowCount);
+    
+    // When deleteLeastRecentlyUsedRows is called using max row limit and numberOfRowsToCleanup
+    // the deleted row count will be `totalRowCount - (maxRow - numberOfRowsToCleanup)`
+    [self.eventDatabase deleteLeastRecentlyUsedRows:maxRow numberOfRowsToCleanup:numberOfRowsToCleanup];
+    allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
+    int deletedRowCount = totalRowCount - (maxRow - numberOfRowsToCleanup);
+    XCTAssertEqual(allEvents.count, totalRowCount - deletedRowCount);
+}
+
+- (void)testLeastRecentlyUsedRowsNotDeleted {
+    int maxRow = 10;
+    int numberOfRowsToCleanup = 2;
+    int totalRowCount = 7;
+    for (int i = 0; i < totalRowCount; i++) {
+        NSString *eventName = [NSString stringWithFormat:@"Test Event %d", i];
+        [self.eventDatabase insertData:eventName deviceID:kDeviceID];
+    }
+    NSArray<CleverTapEventDetail *>*  allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
+    XCTAssertEqual(allEvents.count, totalRowCount);
+    
+    // Here any row will not be deleted as it is within limit.
+    [self.eventDatabase deleteLeastRecentlyUsedRows:maxRow numberOfRowsToCleanup:numberOfRowsToCleanup];
+    allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
+    XCTAssertEqual(allEvents.count, totalRowCount);
+}
+
 - (NSString *)databasePath {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];

@@ -9,6 +9,9 @@
 #import "CTEventDatabase.h"
 #import "CTConstants.h"
 
+static const NSInteger kMaxRowLimit = (2048 + 256) * 5;
+static const NSInteger kNumberOfRowsToCleanup = 2048 + 256; // (2048 events + 256 profile props = 1 user)
+
 @interface CTEventDatabase()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -34,6 +37,10 @@
         _config = config;
         _databaseQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.eventDatabaseQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_CONCURRENT);
         [self openDatabase];
+        
+        // Perform cleanup/deletion of rows on instance creation if total row count
+        // exceeds mac threshold limit.
+        [self deleteLeastRecentlyUsedRows:kMaxRowLimit numberOfRowsToCleanup:kNumberOfRowsToCleanup];
     }
     return self;
 }
@@ -331,6 +338,69 @@
         }
     });
 
+    return success;
+}
+
+- (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
+              numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup {
+    __block BOOL success = NO;
+    
+    dispatch_sync(_databaseQueue, ^{
+        // Begin a transaction to ensure atomicity
+        sqlite3_exec(_eventDatabase, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+        
+        // Create an index on the `lastTs` column if it doesn't exist which will improve performance
+        // while deletion when table is large
+        const char *createIndexSQL = "CREATE INDEX IF NOT EXISTS idx_lastTs ON CTUserEventLogs(lastTs);";
+        char *errMsg = NULL;
+        int indexResult = sqlite3_exec(_eventDatabase, createIndexSQL, NULL, NULL, &errMsg);
+        
+        if (indexResult != SQLITE_OK) {
+            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to create index on lastTs: %s", self, errMsg);
+            sqlite3_free(errMsg);
+            sqlite3_exec(_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);  // Rollback transaction if index creation fails
+            return;
+        }
+        
+        NSString *countQuerySQL = @"SELECT COUNT(*) FROM CTUserEventLogs;";
+        sqlite3_stmt *countStatement;
+        if (sqlite3_prepare_v2(_eventDatabase, [countQuerySQL UTF8String], -1, &countStatement, NULL) == SQLITE_OK) {
+            if (sqlite3_step(countStatement) == SQLITE_ROW) {
+                NSInteger currentRowCount = sqlite3_column_int(countStatement, 0);
+                
+                // Calculate the number of rows to delete
+                NSInteger rowsToDelete = currentRowCount - (maxRowLimit - numberOfRowsToCleanup);
+                
+                if (rowsToDelete > 0) {
+                    // Delete the least recently used rows based on lastTs
+                    NSString *deleteSQL = [NSString stringWithFormat:
+                                           @"DELETE FROM CTUserEventLogs WHERE (eventName, deviceID) IN ("
+                                           @"SELECT eventName, deviceID FROM CTUserEventLogs ORDER BY lastTs ASC LIMIT %ld);",
+                                           (long)rowsToDelete];
+                    int result = sqlite3_exec(_eventDatabase, [deleteSQL UTF8String], NULL, NULL, &errMsg);
+                    if (result == SQLITE_OK) {
+                        success = YES;
+                    } else {
+                        CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting rows: %s", self, errMsg);
+                        sqlite3_free(errMsg);
+                    }
+                }
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@ Failed to count rows in CTUserEventLogs", self);
+            }
+            sqlite3_finalize(countStatement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+        
+        // Commit or rollback the transaction based on success
+        if (success) {
+            sqlite3_exec(_eventDatabase, "COMMIT;", NULL, NULL, NULL);
+        } else {
+            sqlite3_exec(_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);
+        }
+    });
+    
     return success;
 }
 

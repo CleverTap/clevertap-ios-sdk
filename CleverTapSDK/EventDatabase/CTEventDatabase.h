@@ -43,4 +43,7 @@
 
 - (BOOL)deleteTable;
 
+- (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
+              numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup;
+
 @end
