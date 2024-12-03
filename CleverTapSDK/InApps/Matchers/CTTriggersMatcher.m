@@ -125,7 +125,8 @@
         return YES;
     }
     // TODO: Call IsEventFirstTime from the new db/localDataStore class
-//    return [CTLocalDataStore IsEventFirstTime:eventName];
+//    NSString *nameToCheck = trigger.profileAttrName ?: trigger.eventName;
+//    return [CTLocalDataStore IsEventFirstTime:nameToCheck];
     
     return YES;
 }
