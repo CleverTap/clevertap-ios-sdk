@@ -36,6 +36,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 @property (nonatomic, strong) NSArray *piiKeys;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
 @property (nonatomic, strong) NSMutableSet *userEventLogs;
+@property (nonatomic, strong) CTEventDatabase *dbHelper;
 
 @end
 
@@ -617,16 +618,19 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (BOOL)isEventLoggedFirstTime:(NSString*)eventName {
-    if ([self.userEventLogs containsObject:eventName]) {
-        return NO;
+    @synchronized (self.userEventLogs) {
+        if ([self.userEventLogs containsObject:eventName]) {
+            return NO;
+        }
     }
-    CTEventDatabase *dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
-    NSInteger count = [dbHelper getCountForEventName:eventName deviceID:self.deviceInfo.deviceId];
+    if (!self.dbHelper) {
+        self.dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
+    }
+    NSInteger count = [self.dbHelper getCountForEventName:eventName deviceID:self.deviceInfo.deviceId];
     if (count > 1) {
         @synchronized (self.userEventLogs) {
             [self.userEventLogs addObject:eventName];
         }
-        
     }
     return count == 1;
 }
