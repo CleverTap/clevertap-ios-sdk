@@ -33,36 +33,9 @@
     if (self = [super init]) {
         _config = config;
         _databaseQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.eventDatabaseQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_CONCURRENT);
-        BOOL isDBOpen = [self openDatabase];
-        if (isDBOpen) {
-            [self createTable];
-        }
+        [self openDatabase];
     }
     return self;
-}
-
-- (NSString *)databasePath {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    return [documentsDirectory stringByAppendingPathComponent:@"CleverTap-Events.db"];
-}
-
-- (BOOL)openDatabase {
-    NSString *databasePath = [self databasePath];
-    
-    if (sqlite3_open([databasePath UTF8String], &_eventDatabase) == SQLITE_OK) {
-        return YES;
-    } else {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Failed to open database - CleverTap-Events.db", self);
-        return NO;
-    }
-}
-
-- (void)closeDatabase {
-    if (_eventDatabase) {
-        sqlite3_close(_eventDatabase);
-        _eventDatabase = NULL;
-    }
 }
 
 - (BOOL)createTable {
@@ -73,6 +46,9 @@
         const char *createTableSQL = "CREATE TABLE IF NOT EXISTS CTUserEventLogs (eventName TEXT, count INTEGER, firstTs INTEGER, lastTs INTEGER, deviceID TEXT, PRIMARY KEY (eventName, deviceID))";
         if (sqlite3_exec(self->_eventDatabase, createTableSQL, NULL, NULL, &errMsg) == SQLITE_OK) {
             success = YES;
+            
+            // Set the database version to the initial version, ie 1.
+            [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
         } else {
             CleverTapLogInternal(self.config.logLevel, @"%@ Create Table SQL error: %s", self, errMsg);
             sqlite3_free(errMsg);
@@ -80,6 +56,25 @@
     });
     
     return success;
+}
+
+- (NSInteger)getDatabaseVersion {
+    const char *querySQL = "PRAGMA user_version;";
+    __block NSInteger version = 0;
+
+    dispatch_sync(_databaseQueue, ^{
+        sqlite3_stmt *statement;
+        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+            if (sqlite3_step(statement) == SQLITE_ROW) {
+                version = sqlite3_column_int(statement, 0);
+            }
+            sqlite3_finalize(statement);
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+        }
+    });
+
+    return version;
 }
 
 - (BOOL)insertData:(NSString *)eventName
@@ -335,6 +330,71 @@
     });
 
     return success;
+}
+
+#pragma mark - Private methods
+
+- (BOOL)openDatabase {
+    NSString *databasePath = [self databasePath];
+    
+    if (![self isDatabaseFileExists]) {
+        // If the database file does not exist, create the schema for the first time
+        if (![self createTable]) {
+            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to create database schema for the first time", self);
+            return NO;
+        }
+    }
+    
+    if (sqlite3_open([databasePath UTF8String], &_eventDatabase) == SQLITE_OK) {
+        // After opening, check and update the version if needed
+        [self checkAndUpdateDatabaseVersion];
+        return YES;
+    } else {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Failed to open database - CleverTap-Events.db", self);
+        return NO;
+    }
+}
+
+- (void)closeDatabase {
+    if (_eventDatabase) {
+        sqlite3_close(_eventDatabase);
+        _eventDatabase = NULL;
+    }
+}
+
+- (void)setDatabaseVersion:(NSInteger)version {
+    NSString *updateSQL = [NSString stringWithFormat:@"PRAGMA user_version = %ld;", (long)version];
+    
+    dispatch_sync(_databaseQueue, ^{
+       char *errMsg;
+       int result = sqlite3_exec(_eventDatabase, [updateSQL UTF8String], NULL, NULL, &errMsg);
+       
+       if (result != SQLITE_OK) {
+           CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error: %s", self, errMsg);
+           sqlite3_free(errMsg);
+       }
+   });
+}
+
+- (void)checkAndUpdateDatabaseVersion {
+    NSInteger currentVersion = [self getDatabaseVersion];
+    
+    if (currentVersion < CLTAP_DATABASE_VERSION) {
+        // Handle version changes here in future.
+        [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
+        CleverTapLogInternal(self.config.logLevel, @"%@ Schema migration required. Current version: %ld, Target version: %ld", self, (long)currentVersion, (long)CLTAP_DATABASE_VERSION);
+    }
+}
+
+- (NSString *)databasePath {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    return [documentsDirectory stringByAppendingPathComponent:@"CleverTap-Events.db"];
+}
+
+- (BOOL)isDatabaseFileExists {
+    NSString *databasePath = [self databasePath];
+    return [[NSFileManager defaultManager] fileExistsAtPath:databasePath];
 }
 
 @end

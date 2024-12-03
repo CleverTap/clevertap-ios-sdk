@@ -37,6 +37,11 @@ static NSString *kDeviceID = @"Test Device";
     [self.eventDatabase deleteTable];
 }
 
+- (void)testGetDatabaseVersion {
+    NSInteger dbVersion = [self.eventDatabase getDatabaseVersion];
+    XCTAssertEqual(dbVersion, 1);
+}
+
 - (void)testInsertEventName {
     BOOL insertSuccess = [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
     XCTAssertTrue(insertSuccess);
