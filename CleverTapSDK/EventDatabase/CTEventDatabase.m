@@ -33,7 +33,10 @@
     if (self = [super init]) {
         _config = config;
         _databaseQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.eventDatabaseQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_CONCURRENT);
-        [self openDatabase];
+        BOOL isDBOpen = [self openDatabase];
+        if (isDBOpen) {
+            [self createTable];
+        }
     }
     return self;
 }
