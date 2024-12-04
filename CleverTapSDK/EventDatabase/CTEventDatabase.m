@@ -9,9 +9,6 @@
 #import "CTEventDatabase.h"
 #import "CTConstants.h"
 
-static const NSInteger kMaxRowLimit = (2048 + 256) * 5;
-static const NSInteger kNumberOfRowsToCleanup = 2048 + 256; // (2048 events + 256 profile props = 1 user)
-
 @interface CTEventDatabase()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -40,7 +37,9 @@ static const NSInteger kNumberOfRowsToCleanup = 2048 + 256; // (2048 events + 25
         
         // Perform cleanup/deletion of rows on instance creation if total row count
         // exceeds mac threshold limit.
-        [self deleteLeastRecentlyUsedRows:kMaxRowLimit numberOfRowsToCleanup:kNumberOfRowsToCleanup];
+        NSInteger maxRowLimit = CLTAP_EVENT_DB_MAX_ROW_LIMIT;
+        NSInteger numberOfRowsToCleanup = CLTAP_EVENT_DB_ROWS_TO_CLEANUP;
+        [self deleteLeastRecentlyUsedRows:maxRowLimit numberOfRowsToCleanup:numberOfRowsToCleanup];
     }
     return self;
 }
