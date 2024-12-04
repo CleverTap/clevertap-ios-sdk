@@ -342,6 +342,11 @@
 
 - (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
               numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+    
     __block BOOL success = NO;
     
     dispatch_sync(_databaseQueue, ^{
@@ -366,22 +371,26 @@
         if (sqlite3_prepare_v2(_eventDatabase, [countQuerySQL UTF8String], -1, &countStatement, NULL) == SQLITE_OK) {
             if (sqlite3_step(countStatement) == SQLITE_ROW) {
                 NSInteger currentRowCount = sqlite3_column_int(countStatement, 0);
-                
-                // Calculate the number of rows to delete
-                NSInteger rowsToDelete = currentRowCount - (maxRowLimit - numberOfRowsToCleanup);
-                
-                if (rowsToDelete > 0) {
+                if (currentRowCount > maxRowLimit) {
+                    // Calculate the number of rows to delete
+                    NSInteger rowsToDelete = currentRowCount - (maxRowLimit - numberOfRowsToCleanup);
+                    
                     // Delete the least recently used rows based on lastTs
-                    NSString *deleteSQL = [NSString stringWithFormat:
-                                           @"DELETE FROM CTUserEventLogs WHERE (eventName, deviceID) IN ("
-                                           @"SELECT eventName, deviceID FROM CTUserEventLogs ORDER BY lastTs ASC LIMIT %ld);",
-                                           (long)rowsToDelete];
-                    int result = sqlite3_exec(_eventDatabase, [deleteSQL UTF8String], NULL, NULL, &errMsg);
-                    if (result == SQLITE_OK) {
-                        success = YES;
+                    const char *deleteSQL = "DELETE FROM CTUserEventLogs WHERE (eventName, deviceID) IN (SELECT eventName, deviceID FROM CTUserEventLogs ORDER BY lastTs ASC LIMIT ?);";
+                    sqlite3_stmt *deleteStatement;
+                    if (sqlite3_prepare_v2(_eventDatabase, deleteSQL, -1, &deleteStatement, NULL) == SQLITE_OK) {
+                        sqlite3_bind_int(deleteStatement, 1, (int)rowsToDelete);
+                        
+                        int result = sqlite3_step(deleteStatement);
+                        if (result == SQLITE_DONE) {
+                            success = YES;
+                        } else {
+                            CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting rows: %s", self, sqlite3_errmsg(_eventDatabase));
+                        }
+
+                        sqlite3_finalize(deleteStatement);
                     } else {
-                        CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting rows: %s", self, errMsg);
-                        sqlite3_free(errMsg);
+                        CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
                     }
                 }
             } else {
