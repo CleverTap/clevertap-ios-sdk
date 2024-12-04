@@ -39,6 +39,11 @@
 }
 
 - (BOOL)createTable {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+    
     __block BOOL success = NO;
     
     dispatch_sync(_databaseQueue, ^{
@@ -59,6 +64,11 @@
 }
 
 - (NSInteger)getDatabaseVersion {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return 0;
+    }
+    
     const char *querySQL = "PRAGMA user_version;";
     __block NSInteger version = 0;
 
@@ -79,6 +89,11 @@
 
 - (BOOL)insertData:(NSString *)eventName
           deviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+
     BOOL eventExists = [self eventExists:eventName forDeviceID:deviceID];
     if (eventExists) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Insert SQL - Event name: %@ and DeviceID: %@ already exists.", self, eventName, deviceID);
@@ -118,6 +133,11 @@
 
 - (BOOL)updateEvent:(NSString *)eventName
         forDeviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+
     BOOL eventExists = [self eventExists:eventName forDeviceID:deviceID];
     if (!eventExists) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Update SQL - Event name: %@ and DeviceID: %@ doesn't exists.", self, eventName, deviceID);
@@ -154,6 +174,11 @@
 
 - (BOOL)eventExists:(NSString *)eventName 
         forDeviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+
     const char *query = "SELECT COUNT(*) FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?";
     __block BOOL exists = NO;
     
@@ -190,6 +215,11 @@
 
 - (NSInteger)getCountForEventName:(NSString *)eventName
                          deviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return 0;
+    }
+
     const char *querySQL = "SELECT count FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?";
     __block NSInteger count = 0;
 
@@ -216,6 +246,11 @@
 
 - (NSInteger)getFirstTimestampForEventName:(NSString *)eventName
                                   deviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return 0;
+    }
+
     const char *querySQL = "SELECT firstTs FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?";
     __block NSInteger firstTs = 0;
 
@@ -242,6 +277,11 @@
 
 - (NSInteger)getLastTimestampForEventName:(NSString *)eventName
                                  deviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return 0;
+    }
+
     const char *querySQL = "SELECT lastTs FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?";
     __block NSInteger lastTs = 0;
 
@@ -268,6 +308,11 @@
 
 - (CleverTapEventDetail *)getEventDetailForEventName:(NSString *)eventName
                                            deviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return nil;
+    }
+
     const char *querySQL = "SELECT eventName, count, firstTs, lastTs FROM CTUserEventLogs WHERE eventName = ? AND deviceID = ?";
     __block CleverTapEventDetail *eventDetail = nil;
     
@@ -301,6 +346,11 @@
 }
 
 - (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return nil;
+    }
+
     const char *querySQL = "SELECT eventName, count, firstTs, lastTs FROM CTUserEventLogs WHERE deviceID = ?";
     __block NSMutableArray *eventDataArray = [NSMutableArray array];
     
@@ -334,6 +384,11 @@
 }
 
 - (BOOL)deleteTable {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+
     const char *querySQL = "DROP TABLE IF EXISTS CTUserEventLogs";
     __block BOOL success = NO;
 
@@ -383,11 +438,16 @@
 }
 
 - (void)setDatabaseVersion:(NSInteger)version {
-    const char *updateSQL = "PRAGMA user_version = ?";
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return;
+    }
+
+    NSString *updateSQL = [NSString stringWithFormat:@"PRAGMA user_version = %ld;", (long)version];
     
     dispatch_sync(_databaseQueue, ^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->_eventDatabase, updateSQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, [updateSQL UTF8String], -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_int(statement, 1, (int)version);
             
             int result = sqlite3_step(statement);
