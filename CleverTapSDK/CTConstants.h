@@ -274,3 +274,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_ENCRYPTION_LEVEL @"CleverTapEncryptionLevel"
 #define CLTAP_ENCRYPTION_IV @"__CL3>3Rt#P__1V_"
 #define CLTAP_ENCRYPTION_PII_DATA (@[@"Identity", @"Email", @"Phone", @"Name"]);
+
+#pragma mark Constants for Event Database
+#define CLTAP_DATABASE_VERSION 1
+#define CLTAP_EVENT_DB_MAX_ROW_LIMIT (2048 + 256) * 5;
+#define CLTAP_EVENT_DB_ROWS_TO_CLEANUP 2048 + 256;
