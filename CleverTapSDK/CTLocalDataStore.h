@@ -44,4 +44,6 @@
 
 - (void)changeUser;
 
+- (BOOL)isEventLoggedFirstTime:(NSString*)eventName;
+
 @end

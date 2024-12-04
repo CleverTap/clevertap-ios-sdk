@@ -15,6 +15,7 @@
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
 #import "CTProfileBuilder.h"
+#import "CTEventDatabase.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -34,6 +35,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) NSArray *piiKeys;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
+@property (nonatomic, strong) NSMutableSet *userEventLogs;
+@property (nonatomic, strong) CTEventDatabase *dbHelper;
 
 @end
 
@@ -44,6 +47,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         _config = config;
         _deviceInfo = deviceInfo;
         self.dispatchQueueManager = dispatchQueueManager;
+        self.userEventLogs = [NSMutableSet set];
         localProfileUpdateExpiryStore = [NSMutableDictionary new];
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
@@ -102,6 +106,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             self->localProfileForSession = [self _inflateLocalProfile];
         }
     }];
+    @synchronized (self.userEventLogs) {
+        [self.userEventLogs removeAllObjects];
+    }
     [self clearStoredEvents];
 }
 
@@ -608,6 +615,25 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 - (void)removeProfileFieldsWithKeys:(NSArray *)keys {
     [self removeProfileFieldsWithKeys:keys fromUpstream:NO];
+}
+
+- (BOOL)isEventLoggedFirstTime:(NSString*)eventName {
+    @synchronized (self.userEventLogs) {
+    // TODO: add normalisation 
+        if ([self.userEventLogs containsObject:eventName]) {
+            return NO;
+        }
+    }
+    if (!self.dbHelper) {
+        self.dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
+    }
+    NSInteger count = [self.dbHelper getCountForEventName:eventName deviceID:self.deviceInfo.deviceId];
+    if (count > 1) {
+        @synchronized (self.userEventLogs) {
+            [self.userEventLogs addObject:eventName];
+        }
+    }
+    return count == 1;
 }
 
 
