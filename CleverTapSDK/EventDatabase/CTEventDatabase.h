@@ -18,6 +18,8 @@
 
 - (BOOL)createTable;
 
+- (NSInteger)getDatabaseVersion;
+
 - (BOOL)insertData:(NSString *)eventName
           deviceID:(NSString *)deviceID;
 
