@@ -22,6 +22,7 @@
 
 - (void)showFromWindow:(BOOL)animated;
 - (void)hideFromWindow:(BOOL)animated;
+- (void)hideFromWindow:(BOOL)animated withCompletion:(void (^)(void))completion;
 
 - (void)tappedDismiss;
 - (void)buttonTapped:(UIButton*)button;

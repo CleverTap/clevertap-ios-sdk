@@ -393,6 +393,8 @@ static BOOL sharedInstanceErrorLogged;
             _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain spikyProxyDomain:_plistInfo.spikyProxyDomain isDefaultInstance:YES];
         } else if (_plistInfo.proxyDomain.length > 0) {
             _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
+        } else if (_plistInfo.handshakeDomain.length > 0) {
+            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken handshakeDomain:_plistInfo.handshakeDomain isDefaultInstance:YES];
         } else {
             _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
         }
@@ -3296,6 +3298,19 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
     [_plistInfo setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain spikyProxyDomain:finalSpikyProxyDomain];
+}
+
++ (void)setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token proxyDomain:(NSString *)proxyDomain spikyProxyDomain:(NSString *)spikyProxyDomain handshakeDomain:(NSString *)handshakeDomain {
+    [self _setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain];
+    
+    NSString *finalSpikyProxyDomain;
+    if (spikyProxyDomain != nil && ![spikyProxyDomain isEqualToString:@""]) {
+        finalSpikyProxyDomain = [spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (finalSpikyProxyDomain.length <= 0) {
+            finalSpikyProxyDomain = nil;
+        }
+    }
+    [_plistInfo setCredentialsWithAccountID:accountID token:token proxyDomain:proxyDomain spikyProxyDomain:finalSpikyProxyDomain handshakeDomain:handshakeDomain];
 }
 
 + (void)enablePersonalization {

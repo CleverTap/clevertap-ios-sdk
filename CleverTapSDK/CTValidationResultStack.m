@@ -41,20 +41,26 @@
         CleverTapLogInternal(self.config.logLevel, @"%@: no object in the validation result", self);
         return;
     }
-    [self.pendingValidationResults addObject:vr];
-    if (self.pendingValidationResults && [self.pendingValidationResults count] > 50) {
-        [self.pendingValidationResults removeObjectAtIndex:0];
+    
+    @synchronized (self.pendingValidationResults) {
+        [self.pendingValidationResults addObject:vr];
+        if (self.pendingValidationResults.count > 50) {
+            [self.pendingValidationResults removeObjectAtIndex:0];
+        }
     }
 }
 
 - (CTValidationResult *)popValidationResult {
     CTValidationResult *vr = nil;
-    if (self.pendingValidationResults && [self.pendingValidationResults count] > 0) {
-        vr = self.pendingValidationResults[0];
-        [self.pendingValidationResults removeObjectAtIndex:0];
+    
+    @synchronized (self.pendingValidationResults) {
+        if (self.pendingValidationResults.count > 0) {
+            vr = self.pendingValidationResults[0];
+            [self.pendingValidationResults removeObjectAtIndex:0];
+        }
     }
+    
     return vr;
 }
-
 
 @end

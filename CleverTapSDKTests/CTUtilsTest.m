@@ -176,4 +176,23 @@
     XCTAssertNil([CTUtils numberFromString:@"12.3" withLocale:locale]);
 }
 
+- (void)testGetNormalizedName {
+    XCTAssertNil([CTUtils getNormalizedName:nil]);
+    XCTAssertEqualObjects(@"", [CTUtils getNormalizedName:@""]);
+    XCTAssertEqualObjects(@"event1", [CTUtils getNormalizedName:@"Event 1"]);
+    XCTAssertEqualObjects(@"event1", [CTUtils getNormalizedName:@"EVENT   1"]);
+    XCTAssertEqualObjects(@"event1", [CTUtils getNormalizedName:@"event1"]);
+}
+
+- (void)testAreEqualNormalizedNames {
+    XCTAssertTrue([CTUtils areEqualNormalizedName:nil andName:nil]);
+    XCTAssertTrue([CTUtils areEqualNormalizedName:@"" andName:@""]);
+    XCTAssertTrue([CTUtils areEqualNormalizedName:@"Event 1" andName:@"Event1"]);
+    XCTAssertTrue([CTUtils areEqualNormalizedName:@"Event 1" andName:@"event1"]);
+    XCTAssertTrue([CTUtils areEqualNormalizedName:@"Event 1" andName:@"EVENT    1"]);
+    XCTAssertFalse([CTUtils areEqualNormalizedName:@"" andName:nil]);
+    XCTAssertFalse([CTUtils areEqualNormalizedName:@"Event 1" andName:nil]);
+    XCTAssertFalse([CTUtils areEqualNormalizedName:@"Event 1" andName:@"Event 2"]);
+}
+
 @end
