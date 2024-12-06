@@ -627,7 +627,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!self.dbHelper) {
         self.dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
     }
-    NSInteger count = [self.dbHelper getCountForEventName:eventName deviceID:self.deviceInfo.deviceId];
+    // TODO: Add normalized name here
+    NSInteger count = [self.dbHelper getEventCount:eventName deviceID:self.deviceInfo.deviceId];
     if (count > 1) {
         @synchronized (self.userEventLogs) {
             [self.userEventLogs addObject:eventName];

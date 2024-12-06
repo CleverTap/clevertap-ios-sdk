@@ -20,26 +20,27 @@
 
 - (NSInteger)getDatabaseVersion;
 
-- (BOOL)insertData:(NSString *)eventName
-          deviceID:(NSString *)deviceID;
+- (BOOL)insertEvent:(NSString *)eventName
+normalizedEventName:(NSString *)normalizedEventName
+           deviceID:(NSString *)deviceID;
 
-- (BOOL)updateEvent:(NSString *)eventName
+- (BOOL)updateEvent:(NSString *)normalizedEventName
         forDeviceID:(NSString *)deviceID;
 
-- (BOOL)eventExists:(NSString *)eventName
+- (BOOL)eventExists:(NSString *)normalizedEventName
         forDeviceID:(NSString *)deviceID;
 
-- (NSInteger)getCountForEventName:(NSString *)eventName
-                         deviceID:(NSString *)deviceID;
+- (NSInteger)getEventCount:(NSString *)normalizedEventName
+                  deviceID:(NSString *)deviceID;
 
-- (NSInteger)getFirstTimestampForEventName:(NSString *)eventName
-                                  deviceID:(NSString *)deviceID;
+- (NSInteger)getFirstTimestamp:(NSString *)normalizedEventName
+                      deviceID:(NSString *)deviceID;
 
-- (NSInteger)getLastTimestampForEventName:(NSString *)eventName
-                                 deviceID:(NSString *)deviceID;
+- (NSInteger)getLastTimestamp:(NSString *)normalizedEventName
+                     deviceID:(NSString *)deviceID;
 
-- (CleverTapEventDetail *)getEventDetailForEventName:(NSString *)eventName
-                                            deviceID:(NSString *)deviceID;
+- (CleverTapEventDetail *)getEventDetail:(NSString *)normalizedEventName
+                                deviceID:(NSString *)deviceID;
 
 - (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID;
 
