@@ -25,6 +25,10 @@ normalizedEventName:(NSString *)normalizedEventName
 - (BOOL)updateEvent:(NSString *)normalizedEventName
         forDeviceID:(NSString *)deviceID;
 
+- (BOOL)upsertEvent:(NSString *)eventName
+normalizedEventName:(NSString *)normalizedEventName
+           deviceID:(NSString *)deviceID;
+
 - (BOOL)eventExists:(NSString *)normalizedEventName
         forDeviceID:(NSString *)deviceID;
 

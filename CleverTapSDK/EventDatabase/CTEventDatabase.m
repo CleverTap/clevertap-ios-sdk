@@ -75,12 +75,6 @@ normalizedEventName:(NSString *)normalizedEventName
         CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
         return NO;
     }
-
-    BOOL eventExists = [self eventExists:normalizedEventName forDeviceID:deviceID];
-    if (eventExists) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Insert SQL - Event name: %@ and DeviceID: %@ already exists.", self, eventName, deviceID);
-        return NO;
-    }
     
     __block BOOL success = NO;
     // For new event, set count as 1
@@ -120,12 +114,6 @@ normalizedEventName:(NSString *)normalizedEventName
         CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
         return NO;
     }
-
-    BOOL eventExists = [self eventExists:normalizedEventName forDeviceID:deviceID];
-    if (!eventExists) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Update SQL - Event name: %@ and DeviceID: %@ doesn't exists.", self, normalizedEventName, deviceID);
-        return NO;
-    }
     
     NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
     const char *updateSQL =
@@ -152,6 +140,21 @@ normalizedEventName:(NSString *)normalizedEventName
         }
     });
 
+    return success;
+}
+
+- (BOOL)upsertEvent:(NSString *)eventName
+normalizedEventName:(NSString *)normalizedEventName
+           deviceID:(NSString *)deviceID {
+    BOOL success = NO;
+
+    BOOL eventExists = [self eventExists:normalizedEventName forDeviceID:deviceID];
+    if (!eventExists) {
+        success = [self insertEvent:eventName normalizedEventName:normalizedEventName deviceID:deviceID];
+    } else {
+        success = [self updateEvent:normalizedEventName forDeviceID:deviceID];
+    }
+    
     return success;
 }
 

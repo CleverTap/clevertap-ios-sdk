@@ -103,9 +103,25 @@ static NSString *kDeviceID = @"Test Device";
     XCTAssertTrue(updateSuccess);
 }
 
-- (void)testUpdateEventFailure {
-    BOOL updateSuccess = [self.eventDatabase updateEvent:self.normalizedEventName forDeviceID:kDeviceID];
-    XCTAssertFalse(updateSuccess);
+- (void)testUpsertEventSuccessWhenInsert {
+    BOOL upsertSuccess = [self.eventDatabase upsertEvent:kEventName
+                                     normalizedEventName:self.normalizedEventName
+                                                deviceID:kDeviceID];
+    XCTAssertTrue(upsertSuccess);
+}
+
+- (void)testUpsertEventSuccessWhenUpdate {
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
+
+    BOOL upsertSuccess = [self.eventDatabase upsertEvent:kEventName
+                                     normalizedEventName:self.normalizedEventName
+                                                deviceID:kDeviceID];
+    XCTAssertTrue(upsertSuccess);
+    
+    NSInteger eventCount = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
+    XCTAssertEqual(eventCount, 2);
 }
 
 - (void)testGetCountForEventName {
