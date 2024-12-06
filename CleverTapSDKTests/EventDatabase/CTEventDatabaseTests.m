@@ -30,14 +30,12 @@ static NSString *kDeviceID = @"Test Device";
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     self.eventDatabase = [CTEventDatabase sharedInstanceWithConfig:self.config];
     self.normalizedEventName = [CTUtils getNormalizedName:kEventName];
-    [self.eventDatabase createTable];
-    
 }
 
 - (void)tearDown {
     [super tearDown];
     
-    [self.eventDatabase deleteTable];
+    [self.eventDatabase deleteAllRows];
 }
 
 - (void)testGetDatabaseVersion {
@@ -164,7 +162,7 @@ static NSString *kDeviceID = @"Test Device";
     
 }
 
-- (void)testDeleteTableSuccess {
+- (void)testDeleteAllRowsSuccess {
     [self.eventDatabase insertEvent:kEventName
                 normalizedEventName:self.normalizedEventName
                            deviceID:kDeviceID];
@@ -172,7 +170,7 @@ static NSString *kDeviceID = @"Test Device";
     XCTAssertEqual(eventCount, 1);
     
     // Delete table.
-    BOOL deleteSuccess = [self.eventDatabase deleteTable];
+    BOOL deleteSuccess = [self.eventDatabase deleteAllRows];
     XCTAssertTrue(deleteSuccess);
     NSInteger eventCountAfterDelete = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(eventCountAfterDelete, 0);

@@ -16,8 +16,6 @@
 + (instancetype)sharedInstanceWithConfig:(CleverTapInstanceConfig *)config;
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 
-- (BOOL)createTable;
-
 - (NSInteger)getDatabaseVersion;
 
 - (BOOL)insertEvent:(NSString *)eventName
@@ -44,7 +42,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID;
 
-- (BOOL)deleteTable;
+- (BOOL)deleteAllRows;
 
 - (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
               numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup;

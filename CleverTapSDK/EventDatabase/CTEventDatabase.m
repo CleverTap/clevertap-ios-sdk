@@ -44,31 +44,6 @@
     return self;
 }
 
-- (BOOL)createTable {
-    if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
-        return NO;
-    }
-    
-    __block BOOL success = NO;
-    
-    dispatch_sync(_databaseQueue, ^{
-        char *errMsg;
-        const char *createTableSQL = "CREATE TABLE IF NOT EXISTS CTUserEventLogs (eventName TEXT, normalizedEventName TEXT, count INTEGER, firstTs INTEGER, lastTs INTEGER, deviceID TEXT, PRIMARY KEY (normalizedEventName, deviceID))";
-        if (sqlite3_exec(self->_eventDatabase, createTableSQL, NULL, NULL, &errMsg) == SQLITE_OK) {
-            success = YES;
-            
-            // Set the database version to the initial version, ie 1.
-            [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
-        } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Create Table SQL error: %s", self, errMsg);
-            sqlite3_free(errMsg);
-        }
-    });
-    
-    return success;
-}
-
 - (NSInteger)getDatabaseVersion {
     if (!_eventDatabase) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
@@ -400,13 +375,13 @@ normalizedEventName:(NSString *)normalizedEventName
     return [eventDataArray copy];
 }
 
-- (BOOL)deleteTable {
+- (BOOL)deleteAllRows {
     if (!_eventDatabase) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
         return NO;
     }
 
-    const char *querySQL = "DROP TABLE IF EXISTS CTUserEventLogs";
+    const char *querySQL = "DELETE FROM CTUserEventLogs";
     __block BOOL success = NO;
 
     dispatch_sync(_databaseQueue, ^{
@@ -416,8 +391,7 @@ normalizedEventName:(NSString *)normalizedEventName
         if (result == SQLITE_OK) {
             success = YES;
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting table CTUserEventLogs: %s", self, errMsg);
-            success = NO;
+            CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting all rows from CTUserEventLogs: %s", self, errMsg);
         }
     });
 
@@ -500,23 +474,40 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (BOOL)openDatabase {
     NSString *databasePath = [self databasePath];
-    
-    if (![self isDatabaseFileExists]) {
-        // If the database file does not exist, create the schema for the first time
-        if (![self createTable]) {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to create database schema for the first time", self);
-            return NO;
-        }
-    }
-    
     if (sqlite3_open([databasePath UTF8String], &_eventDatabase) == SQLITE_OK) {
-        // After opening, check and update the version if needed
+        // Create table, check and update the version if needed
+        [self createTable];
         [self checkAndUpdateDatabaseVersion];
         return YES;
     } else {
         CleverTapLogInternal(self.config.logLevel, @"%@ Failed to open database - CleverTap-Events.db", self);
         return NO;
     }
+}
+
+- (BOOL)createTable {
+    if (!_eventDatabase) {
+        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        return NO;
+    }
+    
+    __block BOOL success = NO;
+    
+    dispatch_sync(_databaseQueue, ^{
+        char *errMsg;
+        const char *createTableSQL = "CREATE TABLE IF NOT EXISTS CTUserEventLogs (eventName TEXT, normalizedEventName TEXT, count INTEGER, firstTs INTEGER, lastTs INTEGER, deviceID TEXT, PRIMARY KEY (normalizedEventName, deviceID))";
+        if (sqlite3_exec(self->_eventDatabase, createTableSQL, NULL, NULL, &errMsg) == SQLITE_OK) {
+            success = YES;
+            
+            // Set the database version to the initial version, ie 1.
+            [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
+        } else {
+            CleverTapLogInternal(self.config.logLevel, @"%@ Create Table SQL error: %s", self, errMsg);
+            sqlite3_free(errMsg);
+        }
+    });
+    
+    return success;
 }
 
 - (void)closeDatabase {
@@ -565,11 +556,6 @@ normalizedEventName:(NSString *)normalizedEventName
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     return [documentsDirectory stringByAppendingPathComponent:@"CleverTap-Events.db"];
-}
-
-- (BOOL)isDatabaseFileExists {
-    NSString *databasePath = [self databasePath];
-    return [[NSFileManager defaultManager] fileExistsAtPath:databasePath];
 }
 
 @end
