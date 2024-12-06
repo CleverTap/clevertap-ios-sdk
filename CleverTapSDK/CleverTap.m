@@ -535,7 +535,7 @@ static BOOL sharedInstanceErrorLogged;
                                                                             templatesManager:templatesManager
                                                                               fileDownloader:self.fileDownloader];
     
-    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
+    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager localDataStore:self.localDataStore];
     
     self.customTemplatesManager = templatesManager;
     self.inAppFCManager = inAppFCManager;
