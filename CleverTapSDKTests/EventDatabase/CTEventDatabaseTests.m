@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "CTEventDatabase.h"
 #import "CleverTapInstanceConfig.h"
+#import "CTUtils.h"
 
 static NSString *kEventName = @"Test Event";
 static NSString *kDeviceID = @"Test Device";
@@ -17,6 +18,7 @@ static NSString *kDeviceID = @"Test Device";
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTEventDatabase *eventDatabase;
+@property (nonatomic, strong) NSString *normalizedEventName;
 
 @end
 
@@ -27,14 +29,13 @@ static NSString *kDeviceID = @"Test Device";
     
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
     self.eventDatabase = [CTEventDatabase sharedInstanceWithConfig:self.config];
-    [self.eventDatabase createTable];
-    
+    self.normalizedEventName = [CTUtils getNormalizedName:kEventName];
 }
 
 - (void)tearDown {
     [super tearDown];
     
-    [self.eventDatabase deleteTable];
+    [self.eventDatabase deleteAllRows];
 }
 
 - (void)testGetDatabaseVersion {
@@ -43,126 +44,194 @@ static NSString *kDeviceID = @"Test Device";
 }
 
 - (void)testInsertEventName {
-    BOOL insertSuccess = [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    BOOL insertSuccess = [self.eventDatabase insertEvent:kEventName
+                                     normalizedEventName:self.normalizedEventName
+                                                deviceID:kDeviceID];
     XCTAssertTrue(insertSuccess);
 }
 
 - (void)testInsertEventNameAgain {
-    BOOL insertSuccess = [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    BOOL insertSuccess = [self.eventDatabase insertEvent:kEventName 
+                                     normalizedEventName:self.normalizedEventName
+                                                deviceID:kDeviceID];
     XCTAssertTrue(insertSuccess);
     
     // Insert same eventName and deviceID again
-    BOOL insertSuccessAgain = [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    BOOL insertSuccessAgain = [self.eventDatabase insertEvent:kEventName 
+                                          normalizedEventName:self.normalizedEventName
+                                                     deviceID:kDeviceID];
     XCTAssertFalse(insertSuccessAgain);
 }
 
 - (void)testEventNameExists {
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    BOOL eventExists = [self.eventDatabase eventExists:kEventName forDeviceID:kDeviceID];
+    BOOL eventExists = [self.eventDatabase eventExists:self.normalizedEventName forDeviceID:kDeviceID];
+    XCTAssertTrue(eventExists);
+    
+    NSString *normalizedEventName = [CTUtils getNormalizedName:@"TesT   EveNT"];
+    eventExists = [self.eventDatabase eventExists:normalizedEventName forDeviceID:kDeviceID];
+    XCTAssertTrue(eventExists);
+    
+    normalizedEventName = [CTUtils getNormalizedName:@"TEST EVENT"];
+    eventExists = [self.eventDatabase eventExists:normalizedEventName forDeviceID:kDeviceID];
     XCTAssertTrue(eventExists);
 }
 
 - (void)testEventNameNotExists {
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    BOOL eventExists = [self.eventDatabase eventExists:@"Test Event 1" forDeviceID:kDeviceID];
+    NSString *normalizedEventName = [CTUtils getNormalizedName:@"TesT   EveNT 1"];
+    BOOL eventExists = [self.eventDatabase eventExists:normalizedEventName forDeviceID:kDeviceID];
+    XCTAssertFalse(eventExists);
+    
+    normalizedEventName = [CTUtils getNormalizedName:@"Test.Event"];
+    eventExists = [self.eventDatabase eventExists:normalizedEventName forDeviceID:kDeviceID];
     XCTAssertFalse(eventExists);
 }
 
 - (void)testUpdateEventSuccess {
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    BOOL updateSuccess = [self.eventDatabase updateEvent:kEventName forDeviceID:kDeviceID];
+    BOOL updateSuccess = [self.eventDatabase updateEvent:self.normalizedEventName forDeviceID:kDeviceID];
     XCTAssertTrue(updateSuccess);
 }
 
-- (void)testUpdateEventFailure {
-    BOOL updateSuccess = [self.eventDatabase updateEvent:kEventName forDeviceID:kDeviceID];
-    XCTAssertFalse(updateSuccess);
+- (void)testUpsertEventSuccessWhenInsert {
+    BOOL upsertSuccess = [self.eventDatabase upsertEvent:kEventName
+                                     normalizedEventName:self.normalizedEventName
+                                                deviceID:kDeviceID];
+    XCTAssertTrue(upsertSuccess);
+}
+
+- (void)testUpsertEventSuccessWhenUpdate {
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
+
+    BOOL upsertSuccess = [self.eventDatabase upsertEvent:kEventName
+                                     normalizedEventName:self.normalizedEventName
+                                                deviceID:kDeviceID];
+    XCTAssertTrue(upsertSuccess);
+    
+    NSInteger eventCount = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
+    XCTAssertEqual(eventCount, 2);
 }
 
 - (void)testGetCountForEventName {
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    [self.eventDatabase updateEvent:kEventName forDeviceID:kDeviceID];
+    [self.eventDatabase updateEvent:self.normalizedEventName forDeviceID:kDeviceID];
     
     // count should be 2.
-    NSInteger eventCount = [self.eventDatabase getCountForEventName:kEventName deviceID:kDeviceID];
+    NSInteger eventCount = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(eventCount, 2);
 }
 
 - (void)testGetCountForEventNameNotExists {
     // count should be 0.
-    NSInteger eventCount = [self.eventDatabase getCountForEventName:kEventName deviceID:kDeviceID];
+    NSInteger eventCount = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(eventCount, 0);
 }
 
 - (void)testFirstTimestampForEventName {
     NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    NSInteger firstTs = [self.eventDatabase getFirstTimestampForEventName:kEventName deviceID:kDeviceID];
+    NSInteger firstTs = [self.eventDatabase getFirstTimestamp:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(firstTs, currentTs);
 }
 
 - (void)testLastTimestampForEventName {
     NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    NSInteger lastTs = [self.eventDatabase getLastTimestampForEventName:kEventName deviceID:kDeviceID];
+    NSInteger lastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(lastTs, currentTs);
 }
 
 - (void)testLastTimestampForEventNameUpdated {
     NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    NSInteger lastTs = [self.eventDatabase getLastTimestampForEventName:kEventName deviceID:kDeviceID];
+    NSInteger lastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(lastTs, currentTs);
     
     NSInteger newCurrentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
-    NSInteger newLastTs = [self.eventDatabase getLastTimestampForEventName:kEventName deviceID:kDeviceID];
+    [self.eventDatabase updateEvent:self.normalizedEventName forDeviceID:kDeviceID];
+    NSInteger newLastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(newLastTs, newCurrentTs);
     
 }
 
-- (void)testDeleteTableSuccess {
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
-    NSInteger eventCount = [self.eventDatabase getCountForEventName:kEventName deviceID:kDeviceID];
+- (void)testDeleteAllRowsSuccess {
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
+    NSInteger eventCount = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(eventCount, 1);
     
     // Delete table.
-    BOOL deleteSuccess = [self.eventDatabase deleteTable];
+    BOOL deleteSuccess = [self.eventDatabase deleteAllRows];
     XCTAssertTrue(deleteSuccess);
-    NSInteger eventCountAfterDelete = [self.eventDatabase getCountForEventName:kEventName deviceID:kDeviceID];
+    NSInteger eventCountAfterDelete = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(eventCountAfterDelete, 0);
     
 }
 
 - (void)testEventDetailsForDeviceID {
     NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
     
-    CleverTapEventDetail *eventDetail = [self.eventDatabase getEventDetailForEventName:kEventName deviceID:kDeviceID];
+    CleverTapEventDetail *eventDetail = [self.eventDatabase getEventDetail:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqualObjects(eventDetail.eventName, kEventName);
+    XCTAssertEqualObjects(eventDetail.normalizedEventName, self.normalizedEventName);
     XCTAssertEqual(eventDetail.firstTime, currentTs);
     XCTAssertEqual(eventDetail.lastTime, currentTs);
     XCTAssertEqual(eventDetail.count, 1);
+    XCTAssertEqualObjects(eventDetail.deviceID, kDeviceID);
 }
 
 - (void)testAllEventsForDeviceID {
-    [self.eventDatabase insertData:kEventName deviceID:kDeviceID];
-    [self.eventDatabase insertData:@"Test Event 1" deviceID:kDeviceID];
-    [self.eventDatabase insertData:@"Test Event 2" deviceID:@"Test Device 1"];
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:kDeviceID];
+    
+    // Insert to same device id kDeviceID
+    NSString *eventName = @"Test Event 1";
+    NSString *normalizedName = [CTUtils getNormalizedName:eventName];
+    [self.eventDatabase insertEvent:eventName
+                normalizedEventName:normalizedName
+                           deviceID:kDeviceID];
+    
+    // Insert to different device id
+    [self.eventDatabase insertEvent:kEventName
+                normalizedEventName:self.normalizedEventName
+                           deviceID:@"Test Device 1"];
     
     NSArray<CleverTapEventDetail *>*  allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
     XCTAssertEqualObjects(allEvents[0].eventName, kEventName);
-    XCTAssertEqualObjects(allEvents[1].eventName, @"Test Event 1");
+    XCTAssertEqualObjects(allEvents[1].eventName, eventName);
     XCTAssertEqual(allEvents.count, 2);
     
     allEvents = [self.eventDatabase getAllEventsForDeviceID:@"Test Device 1"];
-    XCTAssertEqualObjects(allEvents[0].eventName, @"Test Event 2");
+    XCTAssertEqualObjects(allEvents[0].eventName, kEventName);
     XCTAssertEqual(allEvents.count, 1);
 }
 
@@ -172,7 +241,10 @@ static NSString *kDeviceID = @"Test Device";
     int totalRowCount = 13;
     for (int i = 0; i < totalRowCount; i++) {
         NSString *eventName = [NSString stringWithFormat:@"Test Event %d", i];
-        [self.eventDatabase insertData:eventName deviceID:kDeviceID];
+        NSString *normalizedName = [CTUtils getNormalizedName:eventName];
+        [self.eventDatabase insertEvent:eventName
+                    normalizedEventName:normalizedName
+                               deviceID:kDeviceID];
     }
     NSArray<CleverTapEventDetail *>*  allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
     XCTAssertEqual(allEvents.count, totalRowCount);
@@ -191,7 +263,10 @@ static NSString *kDeviceID = @"Test Device";
     int totalRowCount = 7;
     for (int i = 0; i < totalRowCount; i++) {
         NSString *eventName = [NSString stringWithFormat:@"Test Event %d", i];
-        [self.eventDatabase insertData:eventName deviceID:kDeviceID];
+        NSString *normalizedName = [CTUtils getNormalizedName:eventName];
+        [self.eventDatabase insertEvent:eventName
+                    normalizedEventName:normalizedName
+                               deviceID:kDeviceID];
     }
     NSArray<CleverTapEventDetail *>*  allEvents = [self.eventDatabase getAllEventsForDeviceID:kDeviceID];
     XCTAssertEqual(allEvents.count, totalRowCount);
