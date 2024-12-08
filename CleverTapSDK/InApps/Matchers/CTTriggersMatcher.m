@@ -52,7 +52,7 @@
         return NO;
     }
     
-    if (![self matchFirstTimeOnly:event trigger:trigger]) {
+    if (![self matchFirstTimeOnlyForTrigger:trigger]) {
         return NO;
     }
     
@@ -131,14 +131,12 @@
     return YES;
 }
 
-- (BOOL)matchFirstTimeOnly:(CTEventAdapter *)event trigger:(CTTriggerAdapter *)trigger {
+- (BOOL)matchFirstTimeOnlyForTrigger:(CTTriggerAdapter *)trigger {
     if (!trigger.firstTimeOnly) {
         return YES;
     }
     NSString *nameToCheck = trigger.profileAttrName ?: trigger.eventName;
     return [self.dataStore isEventLoggedFirstTime:nameToCheck];
-    
-    return YES;
 }
 
 @end
