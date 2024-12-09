@@ -195,6 +195,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong, readwrite) CleverTapInstanceConfig *config;
 @property (nonatomic, assign) NSTimeInterval lastAppLaunchedTime;
+@property (nonatomic, assign) NSTimeInterval userLastVisitTs;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
@@ -473,6 +474,7 @@ static BOOL sharedInstanceErrorLogged;
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
+        _userLastVisitTs = [self getUserEventLogLastTs:@"App Launched"];
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
@@ -3105,6 +3107,50 @@ static BOOL sharedInstanceErrorLogged;
     return [self.localDataStore getEventDetail:event];
 }
 
+#pragma mark - User Event Log Methods
+
+- (int)getUserEventLogCount:(NSString *)eventName {
+    if (!self.config.enablePersonalization) {
+        return -1;
+    }
+    return [self.localDataStore readUserEventLogCount:eventName];
+}
+
+- (CleverTapEventDetail *)getUserEventLog:(NSString *)eventName {
+    if (!self.config.enablePersonalization) {
+        return nil;
+    }
+    return [self.localDataStore readUserEventLog:eventName];
+}
+
+- (NSTimeInterval)getUserEventLogFirstTs:(NSString *)eventName {
+    if (!self.config.enablePersonalization) {
+        return -1;
+    }
+    return [self.localDataStore readUserEventLogFirstTs:eventName];
+}
+
+- (NSTimeInterval)getUserEventLogLastTs:(NSString *)eventName {
+    if (!self.config.enablePersonalization) {
+        return -1;
+    }
+    return [self.localDataStore readUserEventLogFirstTs:eventName];
+}
+
+- (NSDictionary *)getUserEventLogHistory {
+    if (!self.config.enablePersonalization) {
+        return nil;
+    }
+    return [self.localDataStore readUserEventLogs];
+}
+
+- (int)getUserAppLaunchCount {
+    return [self getUserEventLogCount:@"App Launched"];
+}
+
+- (NSTimeInterval)getUserLastVisitTs {
+    return self.userLastVisitTs;
+}
 
 #pragma mark - Session API
 
