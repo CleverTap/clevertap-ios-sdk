@@ -477,7 +477,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (BOOL)openDatabase {
     NSString *databasePath = [self databasePath];
-    if (sqlite3_open([databasePath UTF8String], &_eventDatabase) == SQLITE_OK) {
+    if (sqlite3_open_v2([databasePath UTF8String], &_eventDatabase, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL) == SQLITE_OK) {
         // Create table, check and update the version if needed
         [self createTable];
         [self checkAndUpdateDatabaseVersion];
