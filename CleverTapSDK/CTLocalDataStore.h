@@ -46,4 +46,14 @@
 
 - (BOOL)isEventLoggedFirstTime:(NSString*)eventName;
 
+- (int)readUserEventLogCount:(NSString *)eventName;
+
+- (CleverTapEventDetail *)readUserEventLog:(NSString *)eventName;
+
+- (NSTimeInterval)readUserEventLogFirstTs:(NSString *)eventName;
+
+- (NSTimeInterval)readUserEventLogLastTs:(NSString *)eventName;
+
+- (NSDictionary *)readUserEventLogs;
+
 @end

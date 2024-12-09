@@ -637,6 +637,37 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return count == 1;
 }
 
+#pragma mark - Public APIs for Event log
+
+- (int)readUserEventLogCount:(NSString *)eventName {
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    return (int) [self.dbHelper getEventCount:normalizedEventName deviceID:self.deviceInfo.deviceId];
+}
+
+- (CleverTapEventDetail *)readUserEventLog:(NSString *)eventName {
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    return [self.dbHelper getEventDetail:normalizedEventName deviceID:self.deviceInfo.deviceId];
+}
+
+- (NSTimeInterval)readUserEventLogFirstTs:(NSString *)eventName {
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    return (int) [self.dbHelper getFirstTimestamp:normalizedEventName deviceID:self.deviceInfo.deviceId];
+}
+
+- (NSTimeInterval)readUserEventLogLastTs:(NSString *)eventName {
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    return (int) [self.dbHelper getLastTimestamp:normalizedEventName deviceID:self.deviceInfo.deviceId];
+}
+
+- (NSDictionary *)readUserEventLogs {
+    NSArray<CleverTapEventDetail *> *allEvents = [self.dbHelper getAllEventsForDeviceID:self.deviceInfo.deviceId];
+    NSMutableDictionary *history = [[NSMutableDictionary alloc] init];
+    for (CleverTapEventDetail *event in allEvents) {
+        history[event.eventName] = event;
+    }
+    return history;
+}
+
 
 #pragma mark - Private Local Profile Getters and Setters and disk persistence handling
 
