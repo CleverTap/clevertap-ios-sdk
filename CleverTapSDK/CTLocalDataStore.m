@@ -48,6 +48,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         _deviceInfo = deviceInfo;
         self.dispatchQueueManager = dispatchQueueManager;
         self.userEventLogs = [NSMutableSet set];
+        self.dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
         localProfileUpdateExpiryStore = [NSMutableDictionary new];
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
@@ -191,24 +192,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!event || !event[CLTAP_EVENT_NAME]) return;
     [self runOnBackgroundQueue:^{
         NSString *eventName = event[CLTAP_EVENT_NAME];
-        NSDictionary *storedEvents = [self getStoredEvents];
-        if (!storedEvents) storedEvents = @{};
-        NSTimeInterval now = [[[NSDate alloc] init] timeIntervalSince1970];
-        NSArray *eventData = storedEvents[eventName];
-        if (!eventData || eventData.count < 3) {
-            // This event has been recorded for the very first time
-            // Set the count to 0, first and last to now
-            // Count will be incremented soon after this block
-            eventData = @[@0.0f, @(now), @(now)];
-        }
-        NSMutableArray *eventDataCopy = [eventData mutableCopy];
-        double currentCount = ((NSNumber *) eventDataCopy[0]).doubleValue;
-        currentCount++;
-        eventDataCopy[0] = @(currentCount);
-        eventDataCopy[2] = @(now);
-        NSMutableDictionary *store = [storedEvents mutableCopy];
-        store[eventName] = eventDataCopy;
-        [self setStoredEvents:store];
+        // TODO: add normalisation
+        [self.dbHelper upsertEvent:eventName normalizedEventName:[CTUtils getNormalizedName:eventName]  deviceID:self.deviceInfo.deviceId];
     }];
 }
 
@@ -624,11 +609,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             return NO;
         }
     }
-    if (!self.dbHelper) {
-        self.dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
-    }
     // TODO: Add normalized name here
-    NSInteger count = [self.dbHelper getEventCount:eventName deviceID:self.deviceInfo.deviceId];
+    NSInteger count = [self.dbHelper getEventCount:[CTUtils getNormalizedName:eventName] deviceID:self.deviceInfo.deviceId];
     if (count > 1) {
         @synchronized (self.userEventLogs) {
             [self.userEventLogs addObject:eventName];
@@ -706,7 +688,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         NSArray *systemProfileKeys = @[CLTAP_SYS_CARRIER, CLTAP_SYS_CC, CLTAP_SYS_TZ];
         if (![systemProfileKeys containsObject:key]) {
             NSDictionary *profileEvent = @{CLTAP_EVENT_NAME: key};
-            // TODO: Call appropriate persist method from the new db/localDataStore class
             [self persistEvent:profileEvent];
         }
     }
