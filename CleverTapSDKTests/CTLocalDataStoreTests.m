@@ -128,7 +128,7 @@
     NSDictionary *event = @{CLTAP_EVENT_NAME: eventName};
     [self.dataStore persistEvent:event];
     sleep(1); 
-    CleverTapEventDetail *eventDetails = [self.dataStore getEventDetail:eventName];
+    CleverTapEventDetail *eventDetails = [self.dataStore readUserEventLog:eventName];
     XCTAssertEqual(eventDetails.count, 1);
     XCTAssertGreaterThan(eventDetails.firstTime, 0);
     XCTAssertGreaterThan(eventDetails.lastTime, 0);
