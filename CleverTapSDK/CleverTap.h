@@ -801,7 +801,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  @param event           event name
  */
-- (NSTimeInterval)eventGetFirstTime:(NSString *_Nonnull)event;
+- (NSTimeInterval)eventGetFirstTime:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLogFirstTs instead")));
 
 /*!
  @method
@@ -813,7 +813,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @param event           event name
  */
 
-- (NSTimeInterval)eventGetLastTime:(NSString *_Nonnull)event;
+- (NSTimeInterval)eventGetLastTime:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLogLastTs instead")));
 
 /*!
  @method
@@ -824,7 +824,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  @param event           event name
  */
-- (int)eventGetOccurrences:(NSString *_Nonnull)event;
+- (int)eventGetOccurrences:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLogCount instead")));
 
 /*!
  @method
@@ -838,7 +838,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
  
  */
-- (NSDictionary *_Nullable)userGetEventHistory;
+- (NSDictionary *_Nullable)userGetEventHistory __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLogHistory instead")));
 
 /*!
  @method
@@ -853,7 +853,72 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  @param event           event name
  */
-- (CleverTapEventDetail *_Nullable)eventGetDetail:(NSString *_Nullable)event;
+- (CleverTapEventDetail *_Nullable)eventGetDetail:(NSString *_Nullable)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLog instead")));
+
+/*!
+ @method
+ 
+ @abstract
+ Get the the count of logged events for a specific event name associated with the current user.
+ This operation involves a database query and should be called from a background thread.
+ Be sure to call enablePersonalization prior to invoking this method.
+ 
+ @param eventName           event name
+ */
+- (int)getUserEventLogCount:(NSString *_Nonnull)eventName;
+
+/*!
+ @method
+ 
+ @abstract
+ Get the details for the event.
+ 
+ @discussion
+ Returns a CleverTapEventDetail object (eventName, normalizedEventName, firstTime, lastTime, count, deviceID)
+ This operation involves a database query and should be called from a background thread.
+ Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
+ 
+ @param eventName           event name
+ */
+- (CleverTapEventDetail *_Nullable)getUserEventLog:(NSString *_Nullable)eventName;
+
+/*!
+ @method
+ 
+ @abstract
+ Get the time of the first recording of the event.
+ This operation involves a database query and should be called from a background thread.
+ Be sure to call enablePersonalization prior to invoking this method.
+ 
+ @param eventName           event name
+ */
+- (NSTimeInterval)getUserEventLogFirstTs:(NSString *_Nonnull)eventName;
+
+/*!
+ @method
+ 
+ @abstract
+ Get the time of the last recording of the event.
+ This operation involves a database query and should be called from a background thread.
+ Be sure to call enablePersonalization prior to invoking this method.
+ 
+ @param eventName           event name
+ */
+- (NSTimeInterval)getUserEventLogLastTs:(NSString *_Nonnull)eventName;
+
+/*!
+ @method
+ 
+ @abstract
+ Get the user's event history.
+ 
+ @discussion
+ Returns a dictionary of CleverTapEventDetail objects (eventName, normalizedEventName, firstTime, lastTime, count, deviceID), keyed by eventName.
+ This operation involves a database query and should be called from a background thread.
+ Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
+ 
+ */
+- (NSDictionary *_Nullable)getUserEventLogHistory;
 
 
 #pragma mark Session API
@@ -889,7 +954,17 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
  */
-- (int)userGetTotalVisits;
+- (int)userGetTotalVisits __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserAppLaunchCount instead")));
+
+/*!
+ @method
+ 
+ @abstract
+ Get the total number of visits by this user.
+ This operation involves a database query and should be called from a background thread.
+ Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
+ */
+- (int)getUserAppLaunchCount;
 
 /*!
  @method
@@ -909,7 +984,17 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
  
  */
-- (NSTimeInterval)userGetPreviousVisitTime;
+- (NSTimeInterval)userGetPreviousVisitTime __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserLastVisitTs instead")));
+
+/*!
+ @method
+ 
+ @abstract
+ Get the last prior visit time for this user.
+ Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
+ 
+ */
+- (NSTimeInterval)getUserLastVisitTs;
 
 /* ------------------------------------------------------------------------------------------------------
  * Synchronization
