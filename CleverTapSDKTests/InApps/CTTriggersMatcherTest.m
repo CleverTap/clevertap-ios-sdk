@@ -2020,7 +2020,6 @@
         }
     ];
     
-    // TODO: Update tests after db/localdatastore is updated with db methods
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
     id mockIsEventLoggedFirstTime = OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(YES);
@@ -2051,7 +2050,6 @@
         }
     ];
     
-    // TODO: Update tests after db/localdatastore is updated with db methods
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
     
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);

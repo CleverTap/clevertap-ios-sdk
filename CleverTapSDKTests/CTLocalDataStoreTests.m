@@ -11,6 +11,7 @@
 #import "CTProfileBuilder.h"
 #import "CTConstants.h"
 #import "XCTestCase+XCTestCase_Tests.h"
+#import "CTLocalDataStore+Tests.h"
 
 @interface CTLocalDataStoreTests : XCTestCase
 @property (nonatomic, strong) CTLocalDataStore *dataStore;
@@ -111,14 +112,16 @@
 }
 
 - (void)testSetAndGetProfileValueForKey {
+    
+    [self waitForInitDataStore];
     NSDictionary *profile = @{@"someKey": @"someValue"};
-    sleep(1); // Datastore takes a second to initialise in the background thread
     [self.dataStore setProfileFields:profile];
     XCTAssertEqualObjects([self.dataStore getProfileFieldForKey:@"someKey"], @"someValue");
 }
 
+
 - (void)testSetProfileFieldWithKeyAndValue {
-    sleep(1); // Datastore takes a second to initialise in the background thread
+    [self waitForInitDataStore];
     [self.dataStore setProfileFieldWithKey:@"someKey" andValue:@"someValue"];
     XCTAssertEqualObjects([self.dataStore getProfileFieldForKey:@"someKey"], @"someValue");
 }
@@ -126,12 +129,46 @@
 - (void)testPersistEventAndGetEventDetail {
     NSString *eventName = [self randomString];
     NSDictionary *event = @{CLTAP_EVENT_NAME: eventName};
-    [self.dataStore persistEvent:event];
-    sleep(1); 
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Datastore persist event"];
+    // WAIT FOR DATA STORE TO FINISH INIT
+    dispatch_async(self.dataStore.backgroundQueue, ^{
+        // Wait for the background queue to complete datastore setup.
+        [self.dataStore persistEvent:event];
+        [self.dataStore runOnBackgroundQueue:^{
+            [expectation fulfill];
+        }];
+    });
+
+    [self waitForExpectationsWithTimeout:5 handler:^(NSError * _Nullable error) {
+        if (error) {
+            XCTFail(@"Datastore initialization did not complete in time.");
+        }
+    }];
+    
+    
     CleverTapEventDetail *eventDetails = [self.dataStore readUserEventLog:eventName];
+    XCTAssertEqualObjects(eventDetails.eventName, eventName);
     XCTAssertEqual(eventDetails.count, 1);
     XCTAssertGreaterThan(eventDetails.firstTime, 0);
     XCTAssertGreaterThan(eventDetails.lastTime, 0);
+}
+
+- (void)waitForInitDataStore {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Datastore initialization"];
+
+    // WAIT FOR DATA STORE TO FINISH INIT
+    dispatch_async(self.dataStore.backgroundQueue, ^{
+        // Wait for the background queue to complete datastore setup.
+        [self.dataStore runOnBackgroundQueue:^{
+            [expectation fulfill];
+        }];
+    });
+
+    [self waitForExpectationsWithTimeout:5 handler:^(NSError * _Nullable error) {
+        if (error) {
+            XCTFail(@"Datastore initialization did not complete in time.");
+        }
+    }];
 }
 
 @end

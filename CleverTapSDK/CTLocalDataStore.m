@@ -68,6 +68,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
     return self;
 }
+
 - (void)addObservers {
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [notificationCenter addObserver:self selector:@selector(applicationWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
@@ -157,7 +158,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 # pragma mark - Events
 
-- (NSDictionary *)getStoredEvents {
+- (NSDictionary *)getStoredEvents __attribute__((deprecated("This method is deprecated in favor of the newer CTEventDatabase methods"))) {
     NSDictionary *events = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
     if (self.config.isDefaultInstance) {
         if (!events) {
@@ -171,11 +172,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return events;
 }
 
-- (void)setStoredEvents:(NSDictionary *)store {
+- (void)setStoredEvents:(NSDictionary *)store __attribute__((deprecated("This method is deprecated in favor of the newer CTEventDatabase methods"))) {
     [CTPreferences putObject:store forKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
 }
 
-- (void)clearStoredEvents {
+- (void)clearStoredEvents __attribute__((deprecated("This method is deprecated in favor of the newer CTEventDatabase methods"))) {
     [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
 }
 
@@ -192,7 +193,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!event || !event[CLTAP_EVENT_NAME]) return;
     [self runOnBackgroundQueue:^{
         NSString *eventName = event[CLTAP_EVENT_NAME];
-        // TODO: add normalisation
         [self.dbHelper upsertEvent:eventName normalizedEventName:[CTUtils getNormalizedName:eventName]  deviceID:self.deviceInfo.deviceId];
     }];
 }
@@ -604,12 +604,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 - (BOOL)isEventLoggedFirstTime:(NSString*)eventName {
     @synchronized (self.userEventLogs) {
-    // TODO: add normalisation 
+    // TODO: add normalisation
         if ([self.userEventLogs containsObject:eventName]) {
             return NO;
         }
     }
-    // TODO: Add normalized name here
     NSInteger count = [self.dbHelper getEventCount:[CTUtils getNormalizedName:eventName] deviceID:self.deviceInfo.deviceId];
     if (count > 1) {
         @synchronized (self.userEventLogs) {
