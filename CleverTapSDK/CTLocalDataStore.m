@@ -605,7 +605,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 - (BOOL)isEventLoggedFirstTime:(NSString*)eventName {
     NSString *normalizedName = [CTUtils getNormalizedName:eventName];
     @synchronized (self.userEventLogs) {
-    // TODO: add normalisation
         if ([self.userEventLogs containsObject:normalizedName]) {
             return NO;
         }
