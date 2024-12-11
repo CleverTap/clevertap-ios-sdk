@@ -16,7 +16,7 @@
 + (instancetype)sharedInstanceWithConfig:(CleverTapInstanceConfig *)config;
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 
-- (NSInteger)getDatabaseVersion;
+- (NSInteger)databaseVersion;
 
 - (BOOL)insertEvent:(NSString *)eventName
 normalizedEventName:(NSString *)normalizedEventName

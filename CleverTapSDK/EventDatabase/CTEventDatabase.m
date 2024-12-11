@@ -44,7 +44,7 @@
     return self;
 }
 
-- (NSInteger)getDatabaseVersion {
+- (NSInteger)databaseVersion {
     if (!_eventDatabase) {
         CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
         return 0;
@@ -546,7 +546,7 @@ normalizedEventName:(NSString *)normalizedEventName
 }
 
 - (void)checkAndUpdateDatabaseVersion {
-    NSInteger currentVersion = [self getDatabaseVersion];
+    NSInteger currentVersion = [self databaseVersion];
     
     if (currentVersion < CLTAP_DATABASE_VERSION) {
         // Handle version changes here in future.
