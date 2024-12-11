@@ -603,16 +603,17 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (BOOL)isEventLoggedFirstTime:(NSString*)eventName {
+    NSString *normalizedName = [CTUtils getNormalizedName:eventName];
     @synchronized (self.userEventLogs) {
     // TODO: add normalisation
-        if ([self.userEventLogs containsObject:eventName]) {
+        if ([self.userEventLogs containsObject:normalizedName]) {
             return NO;
         }
     }
-    NSInteger count = [self.dbHelper getEventCount:[CTUtils getNormalizedName:eventName] deviceID:self.deviceInfo.deviceId];
+    NSInteger count = [self.dbHelper getEventCount:normalizedName deviceID:self.deviceInfo.deviceId];
     if (count > 1) {
         @synchronized (self.userEventLogs) {
-            [self.userEventLogs addObject:eventName];
+            [self.userEventLogs addObject:normalizedName];
         }
     }
     return count == 1;
