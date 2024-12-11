@@ -317,7 +317,7 @@ normalizedEventName:(NSString *)normalizedEventName
                 const char *deviceID = (const char *)sqlite3_column_text(statement, 5);
                 
                 eventDetail = [[CleverTapEventDetail alloc] init];
-                eventDetail.eventName = [NSString stringWithUTF8String:eventName];
+                eventDetail.eventName = eventName ? [NSString stringWithUTF8String:eventName] : nil;
                 eventDetail.normalizedEventName = [NSString stringWithUTF8String:normalizedEventName];
                 eventDetail.count = count;
                 eventDetail.firstTime = firstTs;
@@ -362,7 +362,7 @@ normalizedEventName:(NSString *)normalizedEventName
                 ed.count = count;
                 ed.firstTime = firstTs;
                 ed.lastTime = lastTs;
-                ed.eventName = [NSString stringWithUTF8String:eventName];
+                ed.eventName = eventName ? [NSString stringWithUTF8String:eventName] : nil;
                 ed.normalizedEventName = [NSString stringWithUTF8String:normalizedEventName];
                 ed.deviceID = [NSString stringWithUTF8String:deviceID];
                 
