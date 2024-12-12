@@ -8,17 +8,17 @@
 
 #import <XCTest/XCTest.h>
 #import "CTEventDatabase.h"
-#import "CleverTapInstanceConfig.h"
 #import "CTUtils.h"
+#import "CTClockMock.h"
 
 static NSString *kEventName = @"Test Event";
 static NSString *kDeviceID = @"Test Device";
 
 @interface CTEventDatabaseTests : XCTestCase
 
-@property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTEventDatabase *eventDatabase;
 @property (nonatomic, strong) NSString *normalizedEventName;
+@property (nonatomic, strong) CTClockMock *mockClock;
 
 @end
 
@@ -27,8 +27,9 @@ static NSString *kDeviceID = @"Test Device";
 - (void)setUp {
     [super setUp];
     
-    self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    self.eventDatabase = [CTEventDatabase sharedInstanceWithConfig:self.config];
+    CTClockMock *mockClock = [[CTClockMock alloc] initWithCurrentDate:[NSDate date]];
+    self.mockClock = mockClock;
+    self.eventDatabase = [[CTEventDatabase alloc] initWithClock:mockClock];
     self.normalizedEventName = [CTUtils getNormalizedName:kEventName];
 }
 
@@ -39,7 +40,7 @@ static NSString *kDeviceID = @"Test Device";
 }
 
 - (void)testGetDatabaseVersion {
-    NSInteger dbVersion = [self.eventDatabase getDatabaseVersion];
+    NSInteger dbVersion = [self.eventDatabase databaseVersion];
     XCTAssertEqual(dbVersion, 1);
 }
 
@@ -143,7 +144,8 @@ static NSString *kDeviceID = @"Test Device";
 }
 
 - (void)testFirstTimestampForEventName {
-    NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60];
+    NSInteger currentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase insertEvent:kEventName
                 normalizedEventName:self.normalizedEventName
                            deviceID:kDeviceID];
@@ -153,7 +155,8 @@ static NSString *kDeviceID = @"Test Device";
 }
 
 - (void)testLastTimestampForEventName {
-    NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60];
+    NSInteger currentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase insertEvent:kEventName
                 normalizedEventName:self.normalizedEventName
                            deviceID:kDeviceID];
@@ -163,7 +166,8 @@ static NSString *kDeviceID = @"Test Device";
 }
 
 - (void)testLastTimestampForEventNameUpdated {
-    NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60];
+    NSInteger currentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase insertEvent:kEventName
                 normalizedEventName:self.normalizedEventName
                            deviceID:kDeviceID];
@@ -171,7 +175,8 @@ static NSString *kDeviceID = @"Test Device";
     NSInteger lastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(lastTs, currentTs);
     
-    NSInteger newCurrentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60];
+    NSInteger newCurrentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase updateEvent:self.normalizedEventName forDeviceID:kDeviceID];
     NSInteger newLastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
     XCTAssertEqual(newLastTs, newCurrentTs);

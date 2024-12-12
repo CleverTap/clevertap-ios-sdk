@@ -8,10 +8,11 @@
 
 #import "CTEventDatabase.h"
 #import "CTConstants.h"
+#import "CTSystemClock.h"
 
 @interface CTEventDatabase()
 
-@property (nonatomic, strong) CleverTapInstanceConfig *config;
+@property (nonatomic, strong) id <CTClock> clock;
 
 @end
 
@@ -20,19 +21,19 @@
     dispatch_queue_t _databaseQueue;
 }
 
-+ (instancetype)sharedInstanceWithConfig:(CleverTapInstanceConfig *)config {
++ (instancetype)sharedInstance {
     static CTEventDatabase *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] initWithConfig:config];
+        sharedInstance = [[self alloc] initWithClock:[[CTSystemClock alloc] init]];
     });
     return sharedInstance;
 }
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
+- (instancetype)initWithClock:(id<CTClock>)clock {
     if (self = [super init]) {
-        _config = config;
-        _databaseQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.eventDatabaseQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_CONCURRENT);
+        _clock = clock;
+        _databaseQueue = dispatch_queue_create([@"com.clevertap.eventDatabaseQueue" UTF8String], DISPATCH_QUEUE_CONCURRENT);
         [self openDatabase];
         
         // Perform cleanup/deletion of rows on instance creation if total row count
@@ -46,7 +47,7 @@
 
 - (NSInteger)databaseVersion {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return 0;
     }
     
@@ -61,7 +62,7 @@
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
 
@@ -72,14 +73,14 @@
 normalizedEventName:(NSString *)normalizedEventName
            deviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return NO;
     }
     
     __block BOOL success = NO;
     // For new event, set count as 1
     NSInteger count = 1;
-    NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    NSInteger currentTs = [[self.clock timeIntervalSince1970] integerValue];
     const char *insertSQL = "INSERT INTO CTUserEventLogs (eventName, normalizedEventName, count, firstTs, lastTs, deviceID) VALUES (?, ?, ?, ?, ?, ?)";
     
     dispatch_sync(_databaseQueue, ^{
@@ -96,12 +97,12 @@ normalizedEventName:(NSString *)normalizedEventName
             if (result == SQLITE_DONE) {
                 success = YES;
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ Insert Table SQL error: %s", self, sqlite3_errmsg(self->_eventDatabase));
+                CleverTapLogStaticInternal(@"Insert Table SQL error: %s", sqlite3_errmsg(self->_eventDatabase));
             }
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to prepare insert statement: %s", self, sqlite3_errmsg(self->_eventDatabase));
+            CleverTapLogStaticInternal(@"Failed to prepare insert statement: %s", sqlite3_errmsg(self->_eventDatabase));
         }
     });
     
@@ -111,11 +112,11 @@ normalizedEventName:(NSString *)normalizedEventName
 - (BOOL)updateEvent:(NSString *)normalizedEventName
         forDeviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return NO;
     }
     
-    NSInteger currentTs = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    NSInteger currentTs = [[self.clock timeIntervalSince1970] integerValue];
     const char *updateSQL =
             "UPDATE CTUserEventLogs SET count = count + 1, lastTs = ? WHERE normalizedEventName = ? AND deviceID = ?";
     __block BOOL success = NO;
@@ -131,12 +132,12 @@ normalizedEventName:(NSString *)normalizedEventName
             if (result == SQLITE_DONE) {
                 success = YES;
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ Update Table SQL error: %s", self, sqlite3_errmsg(self->_eventDatabase));
+                CleverTapLogStaticInternal(@"Update Table SQL error: %s", sqlite3_errmsg(self->_eventDatabase));
             }
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to prepare update statement: %s", self, sqlite3_errmsg(self->_eventDatabase));
+            CleverTapLogStaticInternal(@"Failed to prepare update statement: %s", sqlite3_errmsg(self->_eventDatabase));
         }
     });
 
@@ -161,7 +162,7 @@ normalizedEventName:(NSString *)normalizedEventName
 - (BOOL)eventExists:(NSString *)normalizedEventName
         forDeviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return NO;
     }
 
@@ -182,11 +183,11 @@ normalizedEventName:(NSString *)normalizedEventName
                     exists = YES;
                 }
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ SQL check query error: %s", self, sqlite3_errmsg(_eventDatabase));
+                CleverTapLogStaticInternal(@"SQL check query error: %s", sqlite3_errmsg(_eventDatabase));
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
     
@@ -202,7 +203,7 @@ normalizedEventName:(NSString *)normalizedEventName
 - (NSInteger)getEventCount:(NSString *)normalizedEventName
                   deviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return 0;
     }
 
@@ -218,12 +219,12 @@ normalizedEventName:(NSString *)normalizedEventName
             if (sqlite3_step(statement) == SQLITE_ROW) {
                 count = sqlite3_column_int(statement, 0);
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, normalizedEventName, deviceID);
+                CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
             }
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
 
@@ -233,7 +234,7 @@ normalizedEventName:(NSString *)normalizedEventName
 - (NSInteger)getFirstTimestamp:(NSString *)normalizedEventName
                       deviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return 0;
     }
 
@@ -249,12 +250,12 @@ normalizedEventName:(NSString *)normalizedEventName
             if (sqlite3_step(statement) == SQLITE_ROW) {
                 firstTs = sqlite3_column_int(statement, 0);
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, normalizedEventName, deviceID);
+                CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
             }
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
 
@@ -264,7 +265,7 @@ normalizedEventName:(NSString *)normalizedEventName
 - (NSInteger)getLastTimestamp:(NSString *)normalizedEventName
                      deviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return 0;
     }
 
@@ -280,12 +281,12 @@ normalizedEventName:(NSString *)normalizedEventName
             if (sqlite3_step(statement) == SQLITE_ROW) {
                 lastTs = sqlite3_column_int(statement, 0);
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, normalizedEventName, deviceID);
+                CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
             }
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
 
@@ -295,7 +296,7 @@ normalizedEventName:(NSString *)normalizedEventName
 - (CleverTapEventDetail *)getEventDetail:(NSString *)normalizedEventName
                                 deviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return nil;
     }
 
@@ -325,11 +326,11 @@ normalizedEventName:(NSString *)normalizedEventName
                 eventDetail.deviceID = [NSString stringWithUTF8String:deviceID];
                 
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ No event found with eventName: %@ and deviceID: %@", self, normalizedEventName, deviceID);
+                CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
     
@@ -338,7 +339,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return nil;
     }
 
@@ -371,7 +372,7 @@ normalizedEventName:(NSString *)normalizedEventName
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
     });
     
@@ -380,7 +381,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (BOOL)deleteAllRows {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return NO;
     }
 
@@ -394,7 +395,7 @@ normalizedEventName:(NSString *)normalizedEventName
         if (result == SQLITE_OK) {
             success = YES;
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting all rows from CTUserEventLogs: %s", self, errMsg);
+            CleverTapLogStaticInternal(@"SQL Error deleting all rows from CTUserEventLogs: %s", errMsg);
         }
     });
 
@@ -404,7 +405,7 @@ normalizedEventName:(NSString *)normalizedEventName
 - (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
               numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return NO;
     }
     
@@ -421,7 +422,7 @@ normalizedEventName:(NSString *)normalizedEventName
         int indexResult = sqlite3_exec(_eventDatabase, createIndexSQL, NULL, NULL, &errMsg);
         
         if (indexResult != SQLITE_OK) {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to create index on lastTs: %s", self, errMsg);
+            CleverTapLogStaticInternal(@"Failed to create index on lastTs: %s", errMsg);
             sqlite3_free(errMsg);
             sqlite3_exec(_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);  // Rollback transaction if index creation fails
             return;
@@ -446,20 +447,20 @@ normalizedEventName:(NSString *)normalizedEventName
                         if (result == SQLITE_DONE) {
                             success = YES;
                         } else {
-                            CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error deleting rows: %s", self, sqlite3_errmsg(_eventDatabase));
+                            CleverTapLogStaticInternal(@"SQL Error deleting rows: %s", sqlite3_errmsg(_eventDatabase));
                         }
 
                         sqlite3_finalize(deleteStatement);
                     } else {
-                        CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+                        CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
                     }
                 }
             } else {
-                CleverTapLogInternal(self.config.logLevel, @"%@ Failed to count rows in CTUserEventLogs", self);
+                CleverTapLogStaticInternal(@"Failed to count rows in CTUserEventLogs");
             }
             sqlite3_finalize(countStatement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ SQL prepare query error: %s", self, sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
         }
         
         // Commit or rollback the transaction based on success
@@ -483,14 +484,14 @@ normalizedEventName:(NSString *)normalizedEventName
         [self checkAndUpdateDatabaseVersion];
         return YES;
     } else {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Failed to open database - CleverTap-Events.db", self);
+        CleverTapLogStaticInternal(@"Failed to open database - CleverTap-Events.db");
         return NO;
     }
 }
 
 - (BOOL)createTable {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return NO;
     }
     
@@ -505,7 +506,7 @@ normalizedEventName:(NSString *)normalizedEventName
             // Set the database version to the initial version, ie 1.
             [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Create Table SQL error: %s", self, errMsg);
+            CleverTapLogStaticInternal(@"Create Table SQL error: %s", errMsg);
             sqlite3_free(errMsg);
         }
     });
@@ -522,7 +523,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (void)setDatabaseVersion:(NSInteger)version {
     if (!_eventDatabase) {
-        CleverTapLogInternal(self.config.logLevel, @"%@ Event database is not open, cannot execute SQL.", self);
+        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
         return;
     }
 
@@ -535,12 +536,12 @@ normalizedEventName:(NSString *)normalizedEventName
             
             int result = sqlite3_step(statement);
             if (result != SQLITE_OK) {
-                CleverTapLogInternal(self.config.logLevel, @"%@ SQL Error: %s", self, sqlite3_errmsg(self->_eventDatabase));
+                CleverTapLogStaticInternal(@"SQL Error: %s", sqlite3_errmsg(self->_eventDatabase));
             }
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogInternal(self.config.logLevel, @"%@ Failed to prepare update statement: %s", self, sqlite3_errmsg(self->_eventDatabase));
+            CleverTapLogStaticInternal(@"Failed to prepare update statement: %s", sqlite3_errmsg(self->_eventDatabase));
         }
    });
 }
@@ -551,7 +552,7 @@ normalizedEventName:(NSString *)normalizedEventName
     if (currentVersion < CLTAP_DATABASE_VERSION) {
         // Handle version changes here in future.
         [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
-        CleverTapLogInternal(self.config.logLevel, @"%@ Schema migration required. Current version: %ld, Target version: %ld", self, (long)currentVersion, (long)CLTAP_DATABASE_VERSION);
+        CleverTapLogStaticInternal(@"Schema migration required. Current version: %ld, Target version: %ld", (long)currentVersion, (long)CLTAP_DATABASE_VERSION);
     }
 }
 

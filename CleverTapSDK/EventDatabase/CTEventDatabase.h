@@ -8,13 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
-#import "CleverTapInstanceConfig.h"
 #import "CleverTapEventDetail.h"
+#import "CTClock.h"
 
 @interface CTEventDatabase : NSObject
 
-+ (instancetype)sharedInstanceWithConfig:(CleverTapInstanceConfig *)config;
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
++ (instancetype)sharedInstance;
+- (instancetype)initWithClock:(id <CTClock>)clock;
 
 - (NSInteger)databaseVersion;
 

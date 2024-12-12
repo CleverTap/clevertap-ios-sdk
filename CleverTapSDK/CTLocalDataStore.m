@@ -48,7 +48,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         _deviceInfo = deviceInfo;
         self.dispatchQueueManager = dispatchQueueManager;
         self.userEventLogs = [NSMutableSet set];
-        self.dbHelper = [CTEventDatabase sharedInstanceWithConfig:self.config];
+        self.dbHelper = [CTEventDatabase sharedInstance];
         localProfileUpdateExpiryStore = [NSMutableDictionary new];
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
