@@ -12,69 +12,74 @@
 
 @interface CTEventDatabase()
 
+@property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
 @property (nonatomic, strong) id <CTClock> clock;
 
 @end
 
 @implementation CTEventDatabase {
     sqlite3 *_eventDatabase;
-    dispatch_queue_t _databaseQueue;
 }
 
-+ (instancetype)sharedInstance {
++ (instancetype)sharedInstanceWithDispatchQueueManager:(CTDispatchQueueManager*)dispatchQueueManager {
     static CTEventDatabase *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] initWithClock:[[CTSystemClock alloc] init]];
+        sharedInstance = [[self alloc] initWithDispatchQueueManager:dispatchQueueManager
+                                                              clock:[[CTSystemClock alloc] init]];
     });
     return sharedInstance;
 }
 
-- (instancetype)initWithClock:(id<CTClock>)clock {
+- (instancetype)initWithDispatchQueueManager:(CTDispatchQueueManager*)dispatchQueueManager
+                                       clock:(id<CTClock>)clock {
     if (self = [super init]) {
+        _dispatchQueueManager = dispatchQueueManager;
         _clock = clock;
-        _databaseQueue = dispatch_queue_create([@"com.clevertap.eventDatabaseQueue" UTF8String], DISPATCH_QUEUE_CONCURRENT);
         [self openDatabase];
         
         // Perform cleanup/deletion of rows on instance creation if total row count
         // exceeds mac threshold limit.
         NSInteger maxRowLimit = CLTAP_EVENT_DB_MAX_ROW_LIMIT;
         NSInteger numberOfRowsToCleanup = CLTAP_EVENT_DB_ROWS_TO_CLEANUP;
-        [self deleteLeastRecentlyUsedRows:maxRowLimit numberOfRowsToCleanup:numberOfRowsToCleanup];
+        [self deleteLeastRecentlyUsedRows:maxRowLimit numberOfRowsToCleanup:numberOfRowsToCleanup completion:nil];
     }
     return self;
 }
 
-- (NSInteger)databaseVersion {
+- (void)databaseVersionWithCompletion:(void (^)(NSInteger version))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return 0;
+        return;
     }
     
     const char *querySQL = "PRAGMA user_version;";
     __block NSInteger version = 0;
 
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             if (sqlite3_step(statement) == SQLITE_ROW) {
                 version = sqlite3_column_int(statement, 0);
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
-
-    return version;
+        
+        if (completion) {
+            completion(version);
+        }
+    }];
 }
 
-- (BOOL)insertEvent:(NSString *)eventName
+- (void)insertEvent:(NSString *)eventName
 normalizedEventName:(NSString *)normalizedEventName
-           deviceID:(NSString *)deviceID {
+           deviceID:(NSString *)deviceID
+         completion:(void (^)(BOOL success))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return NO;
+        return;
     }
     
     __block BOOL success = NO;
@@ -83,9 +88,9 @@ normalizedEventName:(NSString *)normalizedEventName
     NSInteger currentTs = [[self.clock timeIntervalSince1970] integerValue];
     const char *insertSQL = "INSERT INTO CTUserEventLogs (eventName, normalizedEventName, count, firstTs, lastTs, deviceID) VALUES (?, ?, ?, ?, ?, ?)";
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, insertSQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, insertSQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [eventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_int(statement, 3, (int)count);
@@ -104,16 +109,19 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"Failed to prepare insert statement: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
-    
-    return success;
+        
+        if (completion) {
+            completion(success);
+        }
+    }];
 }
 
-- (BOOL)updateEvent:(NSString *)normalizedEventName
-        forDeviceID:(NSString *)deviceID {
+- (void)updateEvent:(NSString *)normalizedEventName
+        forDeviceID:(NSString *)deviceID
+         completion:(void (^)(BOOL success))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return NO;
+        return;
     }
     
     NSInteger currentTs = [[self.clock timeIntervalSince1970] integerValue];
@@ -121,9 +129,9 @@ normalizedEventName:(NSString *)normalizedEventName
             "UPDATE CTUserEventLogs SET count = count + 1, lastTs = ? WHERE normalizedEventName = ? AND deviceID = ?";
     __block BOOL success = NO;
 
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, updateSQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, updateSQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_int(statement, 1, (int)currentTs);
             sqlite3_bind_text(statement, 2, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 3, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
@@ -139,40 +147,47 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"Failed to prepare update statement: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
-
-    return success;
+        
+        if (completion) {
+            completion(success);
+        }
+    }];
 }
 
-- (BOOL)upsertEvent:(NSString *)eventName
+- (void)upsertEvent:(NSString *)eventName
 normalizedEventName:(NSString *)normalizedEventName
            deviceID:(NSString *)deviceID {
-    BOOL success = NO;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
-    BOOL eventExists = [self eventExists:normalizedEventName forDeviceID:deviceID];
-    if (!eventExists) {
-        success = [self insertEvent:eventName normalizedEventName:normalizedEventName deviceID:deviceID];
-    } else {
-        success = [self updateEvent:normalizedEventName forDeviceID:deviceID];
-    }
-    
-    return success;
+    [self.dispatchQueueManager runSerialAsync:^{
+        [self eventExists:normalizedEventName forDeviceID:deviceID completion:^(BOOL exists) {
+            if (!exists) {
+                [self insertEvent:eventName normalizedEventName:normalizedEventName deviceID:deviceID completion:nil];
+            } else {
+                [self updateEvent:normalizedEventName forDeviceID:deviceID completion:nil];
+            }
+            dispatch_semaphore_signal(semaphore);
+        }];
+    }];
+
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (BOOL)eventExists:(NSString *)normalizedEventName
-        forDeviceID:(NSString *)deviceID {
+- (void)eventExists:(NSString *)normalizedEventName
+        forDeviceID:(NSString *)deviceID
+         completion:(void (^)(BOOL exists))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return NO;
+        return;
     }
 
     const char *query = "SELECT COUNT(*) FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block BOOL exists = NO;
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
         
-        if (sqlite3_prepare_v2(_eventDatabase, query, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, query, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
             
@@ -183,21 +198,23 @@ normalizedEventName:(NSString *)normalizedEventName
                     exists = YES;
                 }
             } else {
-                CleverTapLogStaticInternal(@"SQL check query error: %s", sqlite3_errmsg(_eventDatabase));
+                CleverTapLogStaticInternal(@"SQL check query error: %s", sqlite3_errmsg(self->_eventDatabase));
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
-    
-    return exists;
+
+        if (completion) {
+            completion(exists);
+        }
+    }];
 }
 
 - (void)dealloc {
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         [self closeDatabase];
-    });
+    }];
 }
 
 - (NSInteger)getEventCount:(NSString *)normalizedEventName
@@ -209,10 +226,11 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT count FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block NSInteger count = 0;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
             
@@ -224,10 +242,12 @@ normalizedEventName:(NSString *)normalizedEventName
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
+        dispatch_semaphore_signal(semaphore);
+    }];
 
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     return count;
 }
 
@@ -240,10 +260,11 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT firstTs FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block NSInteger firstTs = 0;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
             
@@ -255,10 +276,12 @@ normalizedEventName:(NSString *)normalizedEventName
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
-
+        dispatch_semaphore_signal(semaphore);
+    }];
+    
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     return firstTs;
 }
 
@@ -271,10 +294,11 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT lastTs FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block NSInteger lastTs = 0;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
             
@@ -286,10 +310,12 @@ normalizedEventName:(NSString *)normalizedEventName
             
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
-
+        dispatch_semaphore_signal(semaphore);
+    }];
+    
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     return lastTs;
 }
 
@@ -302,10 +328,11 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT eventName, normalizedEventName, count, firstTs, lastTs, deviceID FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block CleverTapEventDetail *eventDetail = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
             
@@ -330,10 +357,12 @@ normalizedEventName:(NSString *)normalizedEventName
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
+        dispatch_semaphore_signal(semaphore);
+    }];
     
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     return eventDetail;
 }
 
@@ -345,10 +374,11 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT eventName, normalizedEventName, count, firstTs, lastTs, deviceID FROM CTUserEventLogs WHERE deviceID = ?";
     __block NSMutableArray *eventDataArray = [NSMutableArray array];
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
             
             while (sqlite3_step(statement) == SQLITE_ROW) {
@@ -372,65 +402,70 @@ normalizedEventName:(NSString *)normalizedEventName
             }
             sqlite3_finalize(statement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-    });
+        dispatch_semaphore_signal(semaphore);
+    }];
     
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     return [eventDataArray copy];
 }
 
-- (BOOL)deleteAllRows {
+- (void)deleteAllRowsWithCompletion:(void (^)(BOOL success))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return NO;
+        return;
     }
 
     const char *querySQL = "DELETE FROM CTUserEventLogs";
     __block BOOL success = NO;
 
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         char *errMsg = NULL;
-        int result = sqlite3_exec(_eventDatabase, querySQL, NULL, NULL, &errMsg);
+        int result = sqlite3_exec(self->_eventDatabase, querySQL, NULL, NULL, &errMsg);
         
         if (result == SQLITE_OK) {
             success = YES;
         } else {
             CleverTapLogStaticInternal(@"SQL Error deleting all rows from CTUserEventLogs: %s", errMsg);
         }
-    });
-
-    return success;
+        
+        if (completion) {
+            completion(success);
+        }
+    }];
 }
 
-- (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
-              numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup {
+- (void)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
+              numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup
+                         completion:(void (^)(BOOL success))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return NO;
+        return;
     }
     
     __block BOOL success = NO;
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         // Begin a transaction to ensure atomicity
-        sqlite3_exec(_eventDatabase, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+        sqlite3_exec(self->_eventDatabase, "BEGIN TRANSACTION;", NULL, NULL, NULL);
         
         // Create an index on the `lastTs` column if it doesn't exist which will improve performance
         // while deletion when table is large
         const char *createIndexSQL = "CREATE INDEX IF NOT EXISTS idx_lastTs ON CTUserEventLogs(lastTs);";
         char *errMsg = NULL;
-        int indexResult = sqlite3_exec(_eventDatabase, createIndexSQL, NULL, NULL, &errMsg);
+        int indexResult = sqlite3_exec(self->_eventDatabase, createIndexSQL, NULL, NULL, &errMsg);
         
         if (indexResult != SQLITE_OK) {
             CleverTapLogStaticInternal(@"Failed to create index on lastTs: %s", errMsg);
             sqlite3_free(errMsg);
-            sqlite3_exec(_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);  // Rollback transaction if index creation fails
+            sqlite3_exec(self->_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);  // Rollback transaction if index creation fails
             return;
         }
         
         NSString *countQuerySQL = @"SELECT COUNT(*) FROM CTUserEventLogs;";
         sqlite3_stmt *countStatement;
-        if (sqlite3_prepare_v2(_eventDatabase, [countQuerySQL UTF8String], -1, &countStatement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, [countQuerySQL UTF8String], -1, &countStatement, NULL) == SQLITE_OK) {
             if (sqlite3_step(countStatement) == SQLITE_ROW) {
                 NSInteger currentRowCount = sqlite3_column_int(countStatement, 0);
                 if (currentRowCount > maxRowLimit) {
@@ -440,19 +475,19 @@ normalizedEventName:(NSString *)normalizedEventName
                     // Delete the least recently used rows based on lastTs
                     const char *deleteSQL = "DELETE FROM CTUserEventLogs WHERE (normalizedEventName, deviceID) IN (SELECT normalizedEventName, deviceID FROM CTUserEventLogs ORDER BY lastTs ASC LIMIT ?);";
                     sqlite3_stmt *deleteStatement;
-                    if (sqlite3_prepare_v2(_eventDatabase, deleteSQL, -1, &deleteStatement, NULL) == SQLITE_OK) {
+                    if (sqlite3_prepare_v2(self->_eventDatabase, deleteSQL, -1, &deleteStatement, NULL) == SQLITE_OK) {
                         sqlite3_bind_int(deleteStatement, 1, (int)rowsToDelete);
                         
                         int result = sqlite3_step(deleteStatement);
                         if (result == SQLITE_DONE) {
                             success = YES;
                         } else {
-                            CleverTapLogStaticInternal(@"SQL Error deleting rows: %s", sqlite3_errmsg(_eventDatabase));
+                            CleverTapLogStaticInternal(@"SQL Error deleting rows: %s", sqlite3_errmsg(self->_eventDatabase));
                         }
 
                         sqlite3_finalize(deleteStatement);
                     } else {
-                        CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+                        CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
                     }
                 }
             } else {
@@ -460,44 +495,51 @@ normalizedEventName:(NSString *)normalizedEventName
             }
             sqlite3_finalize(countStatement);
         } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(_eventDatabase));
+            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
         
         // Commit or rollback the transaction based on success
         if (success) {
-            sqlite3_exec(_eventDatabase, "COMMIT;", NULL, NULL, NULL);
+            sqlite3_exec(self->_eventDatabase, "COMMIT;", NULL, NULL, NULL);
         } else {
-            sqlite3_exec(_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);
+            sqlite3_exec(self->_eventDatabase, "ROLLBACK;", NULL, NULL, NULL);
         }
-    });
-    
-    return success;
+        
+        if (completion) {
+            completion(success);
+        }
+    }];
 }
 
 #pragma mark - Private methods
 
-- (BOOL)openDatabase {
+- (void)openDatabase {
     NSString *databasePath = [self databasePath];
-    if (sqlite3_open_v2([databasePath UTF8String], &_eventDatabase, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL) == SQLITE_OK) {
-        // Create table, check and update the version if needed
-        [self createTable];
-        [self checkAndUpdateDatabaseVersion];
-        return YES;
-    } else {
-        CleverTapLogStaticInternal(@"Failed to open database - CleverTap-Events.db");
-        return NO;
-    }
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+
+    [self.dispatchQueueManager runSerialAsync:^{
+        if (sqlite3_open_v2([databasePath UTF8String], &self->_eventDatabase, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL) == SQLITE_OK) {
+            // Create table, check and update the version if needed
+            [self createTableWithCompletion:^(BOOL exists) {
+                [self checkAndUpdateDatabaseVersion];
+            }];
+        } else {
+            CleverTapLogStaticInternal(@"Failed to open database - CleverTap-Events.db");
+        }
+        dispatch_semaphore_signal(semaphore);
+    }];
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (BOOL)createTable {
+- (void)createTableWithCompletion:(void (^)(BOOL success))completion {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return NO;
+        return;
     }
     
     __block BOOL success = NO;
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         char *errMsg;
         const char *createTableSQL = "CREATE TABLE IF NOT EXISTS CTUserEventLogs (eventName TEXT, normalizedEventName TEXT, count INTEGER, firstTs INTEGER, lastTs INTEGER, deviceID TEXT, PRIMARY KEY (normalizedEventName, deviceID))";
         if (sqlite3_exec(self->_eventDatabase, createTableSQL, NULL, NULL, &errMsg) == SQLITE_OK) {
@@ -509,9 +551,11 @@ normalizedEventName:(NSString *)normalizedEventName
             CleverTapLogStaticInternal(@"Create Table SQL error: %s", errMsg);
             sqlite3_free(errMsg);
         }
-    });
-    
-    return success;
+        
+        if (completion) {
+            completion(success);
+        }
+    }];
 }
 
 - (void)closeDatabase {
@@ -529,7 +573,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
     NSString *updateSQL = [NSString stringWithFormat:@"PRAGMA user_version = %ld;", (long)version];
     
-    dispatch_sync(_databaseQueue, ^{
+    [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(self->_eventDatabase, [updateSQL UTF8String], -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_int(statement, 1, (int)version);
@@ -543,17 +587,17 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"Failed to prepare update statement: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-   });
+   }];
 }
 
 - (void)checkAndUpdateDatabaseVersion {
-    NSInteger currentVersion = [self databaseVersion];
-    
-    if (currentVersion < CLTAP_DATABASE_VERSION) {
-        // Handle version changes here in future.
-        [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
-        CleverTapLogStaticInternal(@"Schema migration required. Current version: %ld, Target version: %ld", (long)currentVersion, (long)CLTAP_DATABASE_VERSION);
-    }
+    [self databaseVersionWithCompletion:^(NSInteger currentVersion) {
+        if (currentVersion < CLTAP_DATABASE_VERSION) {
+            // Handle version changes here in future.
+            [self setDatabaseVersion:CLTAP_DATABASE_VERSION];
+            CleverTapLogStaticInternal(@"Schema migration required. Current version: %ld, Target version: %ld", (long)currentVersion, (long)CLTAP_DATABASE_VERSION);
+        }
+    }];
 }
 
 - (NSString *)databasePath {

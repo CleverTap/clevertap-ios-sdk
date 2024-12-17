@@ -1959,7 +1959,9 @@ static BOOL sharedInstanceErrorLogged;
         }
         
         if (eventType == CleverTapEventTypeRaised || eventType == CleverTapEventTypeNotificationViewed) {
-            [self.localDataStore persistEvent:mutableEvent];
+            [self.dispatchQueueManager runSerialAsync:^{
+                [self.localDataStore persistEvent:mutableEvent];
+            }];
         }
         
         if (eventType == CleverTapEventTypeProfile) {
@@ -3134,7 +3136,7 @@ static BOOL sharedInstanceErrorLogged;
     if (!self.config.enablePersonalization) {
         return -1;
     }
-    return [self.localDataStore readUserEventLogFirstTs:eventName];
+    return [self.localDataStore readUserEventLogLastTs:eventName];
 }
 
 - (NSDictionary *)getUserEventLogHistory {

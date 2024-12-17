@@ -10,27 +10,32 @@
 #import <sqlite3.h>
 #import "CleverTapEventDetail.h"
 #import "CTClock.h"
+#import "CTDispatchQueueManager.h"
 
 @interface CTEventDatabase : NSObject
 
-+ (instancetype)sharedInstance;
-- (instancetype)initWithClock:(id <CTClock>)clock;
++ (instancetype)sharedInstanceWithDispatchQueueManager:(CTDispatchQueueManager*)dispatchQueueManager;
+- (instancetype)initWithDispatchQueueManager:(CTDispatchQueueManager*)dispatchQueueManager
+                                       clock:(id<CTClock>)clock;
 
-- (NSInteger)databaseVersion;
+- (void)databaseVersionWithCompletion:(void (^)(NSInteger version))completion;
 
-- (BOOL)insertEvent:(NSString *)eventName
+- (void)insertEvent:(NSString *)eventName
+normalizedEventName:(NSString *)normalizedEventName
+           deviceID:(NSString *)deviceID
+         completion:(void (^)(BOOL success))completion;
+
+- (void)updateEvent:(NSString *)normalizedEventName
+        forDeviceID:(NSString *)deviceID
+         completion:(void (^)(BOOL success))completion;
+
+- (void)upsertEvent:(NSString *)eventName
 normalizedEventName:(NSString *)normalizedEventName
            deviceID:(NSString *)deviceID;
 
-- (BOOL)updateEvent:(NSString *)normalizedEventName
-        forDeviceID:(NSString *)deviceID;
-
-- (BOOL)upsertEvent:(NSString *)eventName
-normalizedEventName:(NSString *)normalizedEventName
-           deviceID:(NSString *)deviceID;
-
-- (BOOL)eventExists:(NSString *)normalizedEventName
-        forDeviceID:(NSString *)deviceID;
+- (void)eventExists:(NSString *)normalizedEventName
+        forDeviceID:(NSString *)deviceID
+         completion:(void (^)(BOOL exists))completion;
 
 - (NSInteger)getEventCount:(NSString *)normalizedEventName
                   deviceID:(NSString *)deviceID;
@@ -46,9 +51,10 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (NSArray<CleverTapEventDetail *> *)getAllEventsForDeviceID:(NSString *)deviceID;
 
-- (BOOL)deleteAllRows;
+- (void)deleteAllRowsWithCompletion:(void (^)(BOOL success))completion;
 
-- (BOOL)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
-              numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup;
+- (void)deleteLeastRecentlyUsedRows:(NSInteger)maxRowLimit
+              numberOfRowsToCleanup:(NSInteger)numberOfRowsToCleanup
+                         completion:(void (^)(BOOL success))completion;
 
 @end
