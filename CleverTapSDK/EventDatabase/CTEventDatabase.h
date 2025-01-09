@@ -15,8 +15,6 @@
 @interface CTEventDatabase : NSObject
 
 + (instancetype)sharedInstanceWithDispatchQueueManager:(CTDispatchQueueManager*)dispatchQueueManager;
-- (instancetype)initWithDispatchQueueManager:(CTDispatchQueueManager*)dispatchQueueManager
-                                       clock:(id<CTClock>)clock;
 
 - (void)databaseVersionWithCompletion:(void (^)(NSInteger version))completion;
 

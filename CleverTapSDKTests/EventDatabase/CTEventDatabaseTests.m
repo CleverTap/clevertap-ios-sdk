@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "CTEventDatabase.h"
+#import "CTEventDatabase+Tests.h"
 #import "CTUtils.h"
 #import "CTClockMock.h"
 
