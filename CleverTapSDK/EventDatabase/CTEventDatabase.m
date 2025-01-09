@@ -157,8 +157,6 @@ normalizedEventName:(NSString *)normalizedEventName
 - (void)upsertEvent:(NSString *)eventName
 normalizedEventName:(NSString *)normalizedEventName
            deviceID:(NSString *)deviceID {
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-
     [self.dispatchQueueManager runSerialAsync:^{
         [self eventExists:normalizedEventName forDeviceID:deviceID completion:^(BOOL exists) {
             if (!exists) {
@@ -166,11 +164,8 @@ normalizedEventName:(NSString *)normalizedEventName
             } else {
                 [self updateEvent:normalizedEventName forDeviceID:deviceID completion:nil];
             }
-            dispatch_semaphore_signal(semaphore);
         }];
     }];
-
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
 - (void)eventExists:(NSString *)normalizedEventName
@@ -221,11 +216,11 @@ normalizedEventName:(NSString *)normalizedEventName
                   deviceID:(NSString *)deviceID {
     if (!_eventDatabase) {
         CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return 0;
+        return -1;
     }
 
     const char *querySQL = "SELECT count FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
-    __block NSInteger count = 0;
+    __block NSInteger count = -1;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
     [self.dispatchQueueManager runSerialAsync:^{
@@ -237,6 +232,7 @@ normalizedEventName:(NSString *)normalizedEventName
             if (sqlite3_step(statement) == SQLITE_ROW) {
                 count = sqlite3_column_int(statement, 0);
             } else {
+                count = 0;
                 CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
             }
             
@@ -249,74 +245,6 @@ normalizedEventName:(NSString *)normalizedEventName
 
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     return count;
-}
-
-- (NSInteger)getFirstTimestamp:(NSString *)normalizedEventName
-                      deviceID:(NSString *)deviceID {
-    if (!_eventDatabase) {
-        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return 0;
-    }
-
-    const char *querySQL = "SELECT firstTs FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
-    __block NSInteger firstTs = 0;
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-
-    [self.dispatchQueueManager runSerialAsync:^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
-            sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
-            
-            if (sqlite3_step(statement) == SQLITE_ROW) {
-                firstTs = sqlite3_column_int(statement, 0);
-            } else {
-                CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
-            }
-            
-            sqlite3_finalize(statement);
-        } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
-        }
-        dispatch_semaphore_signal(semaphore);
-    }];
-    
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-    return firstTs;
-}
-
-- (NSInteger)getLastTimestamp:(NSString *)normalizedEventName
-                     deviceID:(NSString *)deviceID {
-    if (!_eventDatabase) {
-        CleverTapLogStaticInternal(@"Event database is not open, cannot execute SQL.");
-        return 0;
-    }
-
-    const char *querySQL = "SELECT lastTs FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
-    __block NSInteger lastTs = 0;
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-
-    [self.dispatchQueueManager runSerialAsync:^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
-            sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(statement, 2, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
-            
-            if (sqlite3_step(statement) == SQLITE_ROW) {
-                lastTs = sqlite3_column_int(statement, 0);
-            } else {
-                CleverTapLogStaticInternal(@"No event found with eventName: %@ and deviceID: %@", normalizedEventName, deviceID);
-            }
-            
-            sqlite3_finalize(statement);
-        } else {
-            CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
-        }
-        dispatch_semaphore_signal(semaphore);
-    }];
-    
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-    return lastTs;
 }
 
 - (CleverTapEventDetail *)getEventDetail:(NSString *)normalizedEventName

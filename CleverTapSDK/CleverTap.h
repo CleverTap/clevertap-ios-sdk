@@ -801,7 +801,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  @param event           event name
  */
-- (NSTimeInterval)eventGetFirstTime:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLogFirstTs instead")));
+- (NSTimeInterval)eventGetFirstTime:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLog instead")));
 
 /*!
  @method
@@ -813,7 +813,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @param event           event name
  */
 
-- (NSTimeInterval)eventGetLastTime:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLogLastTs instead")));
+- (NSTimeInterval)eventGetLastTime:(NSString *_Nonnull)event __attribute__((deprecated("Deprecated as of version 7.1.0, use getUserEventLog instead")));
 
 /*!
  @method
@@ -881,30 +881,6 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @param eventName           event name
  */
 - (CleverTapEventDetail *_Nullable)getUserEventLog:(NSString *_Nullable)eventName;
-
-/*!
- @method
- 
- @abstract
- Get the time of the first recording of the event.
- This operation involves a database query and should be called from a background thread.
- Be sure to call enablePersonalization prior to invoking this method.
- 
- @param eventName           event name
- */
-- (NSTimeInterval)getUserEventLogFirstTs:(NSString *_Nonnull)eventName;
-
-/*!
- @method
- 
- @abstract
- Get the time of the last recording of the event.
- This operation involves a database query and should be called from a background thread.
- Be sure to call enablePersonalization prior to invoking this method.
- 
- @param eventName           event name
- */
-- (NSTimeInterval)getUserEventLogLastTs:(NSString *_Nonnull)eventName;
 
 /*!
  @method

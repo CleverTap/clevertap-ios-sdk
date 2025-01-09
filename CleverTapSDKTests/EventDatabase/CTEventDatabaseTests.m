@@ -151,7 +151,8 @@ static NSString *kDeviceID = @"Test Device";
     NSInteger currentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase upsertEvent:kEventName normalizedEventName:self.normalizedEventName deviceID:kDeviceID];
     
-    NSInteger firstTs = [self.eventDatabase getFirstTimestamp:self.normalizedEventName deviceID:kDeviceID];
+    CleverTapEventDetail *event = [self.eventDatabase getEventDetail:self.normalizedEventName deviceID:kDeviceID];
+    NSInteger firstTs = event.firstTime;
     XCTAssertEqual(firstTs, currentTs);
 }
 
@@ -160,7 +161,8 @@ static NSString *kDeviceID = @"Test Device";
     NSInteger currentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase upsertEvent:kEventName normalizedEventName:self.normalizedEventName deviceID:kDeviceID];
     
-    NSInteger lastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
+    CleverTapEventDetail *event = [self.eventDatabase getEventDetail:self.normalizedEventName deviceID:kDeviceID];
+    NSInteger lastTs = event.lastTime;
     XCTAssertEqual(lastTs, currentTs);
 }
 
@@ -169,13 +171,15 @@ static NSString *kDeviceID = @"Test Device";
     NSInteger currentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase upsertEvent:kEventName normalizedEventName:self.normalizedEventName deviceID:kDeviceID];
     
-    NSInteger lastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
+    CleverTapEventDetail *event = [self.eventDatabase getEventDetail:self.normalizedEventName deviceID:kDeviceID];
+    NSInteger lastTs = event.lastTime;
     XCTAssertEqual(lastTs, currentTs);
     
     self.mockClock.currentDate = [self.mockClock.currentDate dateByAddingTimeInterval:5 * 60];
     NSInteger newCurrentTs = [self.mockClock.currentDate timeIntervalSince1970];
     [self.eventDatabase upsertEvent:kEventName normalizedEventName:self.normalizedEventName deviceID:kDeviceID];
-    NSInteger newLastTs = [self.eventDatabase getLastTimestamp:self.normalizedEventName deviceID:kDeviceID];
+    CleverTapEventDetail *newEvent = [self.eventDatabase getEventDetail:self.normalizedEventName deviceID:kDeviceID];
+    NSInteger newLastTs = newEvent.lastTime;
     XCTAssertEqual(newLastTs, newCurrentTs);
     
 }

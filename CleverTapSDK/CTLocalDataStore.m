@@ -629,16 +629,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return [self.dbHelper getEventDetail:normalizedEventName deviceID:self.deviceInfo.deviceId];
 }
 
-- (NSTimeInterval)readUserEventLogFirstTs:(NSString *)eventName {
-    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
-    return (int) [self.dbHelper getFirstTimestamp:normalizedEventName deviceID:self.deviceInfo.deviceId];
-}
-
-- (NSTimeInterval)readUserEventLogLastTs:(NSString *)eventName {
-    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
-    return (int) [self.dbHelper getLastTimestamp:normalizedEventName deviceID:self.deviceInfo.deviceId];
-}
-
 - (NSDictionary *)readUserEventLogs {
     NSArray<CleverTapEventDetail *> *allEvents = [self.dbHelper getAllEventsForDeviceID:self.deviceInfo.deviceId];
     NSMutableDictionary *history = [[NSMutableDictionary alloc] init];
@@ -686,7 +676,10 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         NSArray *systemProfileKeys = @[CLTAP_SYS_CARRIER, CLTAP_SYS_CC, CLTAP_SYS_TZ];
         if (![systemProfileKeys containsObject:key]) {
             NSDictionary *profileEvent = @{CLTAP_EVENT_NAME: key};
-            [self persistEvent:profileEvent];
+            [self.dispatchQueueManager runSerialAsync:^{
+                [self persistEvent:profileEvent];
+            }];
+            
         }
     }
     @catch (NSException *exception) {

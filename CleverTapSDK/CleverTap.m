@@ -474,7 +474,8 @@ static BOOL sharedInstanceErrorLogged;
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
-        _userLastVisitTs = [self getUserEventLogLastTs:@"App Launched"];
+        CleverTapEventDetail *eventDetails = [self getUserEventLog:@"App Launched"];
+        _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
@@ -3123,20 +3124,6 @@ static BOOL sharedInstanceErrorLogged;
         return nil;
     }
     return [self.localDataStore readUserEventLog:eventName];
-}
-
-- (NSTimeInterval)getUserEventLogFirstTs:(NSString *)eventName {
-    if (!self.config.enablePersonalization) {
-        return -1;
-    }
-    return [self.localDataStore readUserEventLogFirstTs:eventName];
-}
-
-- (NSTimeInterval)getUserEventLogLastTs:(NSString *)eventName {
-    if (!self.config.enablePersonalization) {
-        return -1;
-    }
-    return [self.localDataStore readUserEventLogLastTs:eventName];
 }
 
 - (NSDictionary *)getUserEventLogHistory {
