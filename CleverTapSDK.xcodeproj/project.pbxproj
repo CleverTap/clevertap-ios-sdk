@@ -173,6 +173,12 @@
 		48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */; };
 		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
+		48DC69B42D3FDF1F000E7BE4 /* CTEventDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 4847D16C2CCB90E0008DC327 /* CTEventDatabase.h */; };
+		48DC69B52D3FDF23000E7BE4 /* CTEventDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4847D16E2CCB90F5008DC327 /* CTEventDatabase.m */; };
+		48DC69B62D3FDF35000E7BE4 /* CTNotificationAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778C92BED21CE00A41628 /* CTNotificationAction.h */; };
+		48DC69B72D3FDF39000E7BE4 /* CTNotificationAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB778CA2BED21CE00A41628 /* CTNotificationAction.m */; };
+		48DC69B82D3FDF4D000E7BE4 /* CTCustomTemplateInAppData.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778C52BECEC2700A41628 /* CTCustomTemplateInAppData.h */; };
+		48DC69B92D3FDF55000E7BE4 /* CTCustomTemplateInAppData.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB778C62BECEC2700A41628 /* CTCustomTemplateInAppData.m */; };
 		48F9FD092C208F7100617770 /* CTInAppStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427D72ABCE5EB0098866F /* CTInAppStore.m */; };
 		48F9FD1D2C3D30BF00617770 /* CTFileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48F9FD182C3D30B600617770 /* CTFileDownloadManager.m */; };
 		48F9FD1E2C3D30BF00617770 /* CTFileDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 48F9FD192C3D30B600617770 /* CTFileDownloader.m */; };
@@ -1952,6 +1958,7 @@
 				4E25E3D22788889F0008C888 /* CTLoginInfoProvider.h in Headers */,
 				D0BD75AF241769E40006EE55 /* CleverTap+ProductConfig.h in Headers */,
 				D014B8F020E2FAB1001E0780 /* CTPlistInfo.h in Headers */,
+				48DC69B42D3FDF1F000E7BE4 /* CTEventDatabase.h in Headers */,
 				6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */,
 				4E8B81702AD2BB8A00714BB4 /* CTDispatchQueueManager.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
@@ -1983,6 +1990,7 @@
 				D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */,
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
 				4E4E17842B500079009E2F1E /* CTAES.h in Headers */,
+				48DC69B62D3FDF35000E7BE4 /* CTNotificationAction.h in Headers */,
 				D014B90420E2FB59001E0780 /* CTValidator.h in Headers */,
 				4E8B81692AD2ADAE00714BB4 /* CTSwizzleManager.h in Headers */,
 				4E6383D8296DE9A8001E83E3 /* CTRequestSender.h in Headers */,
@@ -1991,6 +1999,7 @@
 				D014B8F420E2FACA001E0780 /* CTSwizzle.h in Headers */,
 				4EF0D5462AD84BCA0044C48F /* CTSessionManager.h in Headers */,
 				6A775C3429BE78C7007790E0 /* CTVariables.h in Headers */,
+				48DC69B82D3FDF4D000E7BE4 /* CTCustomTemplateInAppData.h in Headers */,
 				D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */,
 				6BEEC2C72AE9B02100BD4EC5 /* CTSystemClock.h in Headers */,
 				4E41FD99294F46510001FBED /* CTVarCache.h in Headers */,
@@ -2501,6 +2510,7 @@
 				4E6383DA296DE9A8001E83E3 /* CTRequestSender.m in Sources */,
 				D014B8ED20E2FAA2001E0780 /* CleverTapTrackedViewController.m in Sources */,
 				4E5A02DF2A4C5FD800DE242A /* LeanplumCT.m in Sources */,
+				48DC69B92D3FDF55000E7BE4 /* CTCustomTemplateInAppData.m in Sources */,
 				6BD334ED2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */,
 				D014B8F120E2FAB9001E0780 /* CTPlistInfo.m in Sources */,
 				4E25E3D12788889F0008C888 /* CTLoginInfoProvider.m in Sources */,
@@ -2543,6 +2553,8 @@
 				D014B8FF20E2FB40001E0780 /* CTLogger.m in Sources */,
 				6B535FB92AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */,
 				6BD334F62AF7FC660099E33E /* CTTriggerRadius.m in Sources */,
+				48DC69B52D3FDF23000E7BE4 /* CTEventDatabase.m in Sources */,
+				48DC69B72D3FDF39000E7BE4 /* CTNotificationAction.m in Sources */,
 				D014B8FD20E2FB18001E0780 /* CTPreferences.m in Sources */,
 				4E49AE56275D24570074A774 /* CTValidationResultStack.m in Sources */,
 				6BAFFEAA2C45244100654CAF /* CTFileDownloader.m in Sources */,
