@@ -85,7 +85,7 @@
         }
 
         self.inAppStore = inAppStore;
-        self.triggersMatcher = [[CTTriggersMatcher alloc]initWithDataStore:dataStore];
+        self.triggersMatcher = [[CTTriggersMatcher alloc] initWithDataStore:dataStore];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = inAppTriggerManager;
 

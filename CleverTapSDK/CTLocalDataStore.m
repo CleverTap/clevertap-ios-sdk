@@ -37,6 +37,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
 @property (nonatomic, strong) NSMutableSet *userEventLogs;
 @property (nonatomic, strong) CTEventDatabase *dbHelper;
+@property (nonatomic, strong) NSArray *systemProfileKeys;
 
 @end
 
@@ -54,6 +55,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
         lastProfilePersistenceTime = 0;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
+        _systemProfileKeys = @[CLTAP_SYS_CARRIER, CLTAP_SYS_CC, CLTAP_SYS_TZ];
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
                 // migrate to new persisted ct-accid-guid-userprofile
@@ -193,7 +195,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!event || !event[CLTAP_EVENT_NAME]) return;
 
     NSString *eventName = event[CLTAP_EVENT_NAME];
-    [self.dbHelper upsertEvent:eventName normalizedEventName:[CTUtils getNormalizedName:eventName]  deviceID:self.deviceInfo.deviceId];
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    [self.dbHelper upsertEvent:eventName normalizedEventName:normalizedEventName deviceID:self.deviceInfo.deviceId];
 }
 
 /*!
@@ -673,13 +676,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }
         
         // PERSIST PROFILE KEY AS EVENT
-        NSArray *systemProfileKeys = @[CLTAP_SYS_CARRIER, CLTAP_SYS_CC, CLTAP_SYS_TZ];
-        if (![systemProfileKeys containsObject:key]) {
+        if (![_systemProfileKeys containsObject:key]) {
             NSDictionary *profileEvent = @{CLTAP_EVENT_NAME: key};
             [self.dispatchQueueManager runSerialAsync:^{
                 [self persistEvent:profileEvent];
             }];
-            
         }
     }
     @catch (NSException *exception) {

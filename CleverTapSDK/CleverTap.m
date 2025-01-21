@@ -473,8 +473,8 @@ static BOOL sharedInstanceErrorLogged;
         
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
-        _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
-        CleverTapEventDetail *eventDetails = [self getUserEventLog:@"App Launched"];
+        _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
+        CleverTapEventDetail *eventDetails = [self getUserEventLog:CLTAP_APP_LAUNCHED_EVENT];
         _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
@@ -3134,7 +3134,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (int)getUserAppLaunchCount {
-    return [self getUserEventLogCount:@"App Launched"];
+    return [self getUserEventLogCount:CLTAP_APP_LAUNCHED_EVENT];
 }
 
 - (NSTimeInterval)getUserLastVisitTs {
@@ -3157,7 +3157,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (int)userGetTotalVisits {
-    return [self eventGetOccurrences:@"App Launched"];
+    return [self eventGetOccurrences:CLTAP_APP_LAUNCHED_EVENT];
 }
 
 - (int)userGetScreenCount {
