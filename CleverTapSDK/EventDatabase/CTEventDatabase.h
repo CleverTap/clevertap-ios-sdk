@@ -38,12 +38,6 @@ normalizedEventName:(NSString *)normalizedEventName
 - (NSInteger)getEventCount:(NSString *)normalizedEventName
                   deviceID:(NSString *)deviceID;
 
-- (NSInteger)getFirstTimestamp:(NSString *)normalizedEventName
-                      deviceID:(NSString *)deviceID;
-
-- (NSInteger)getLastTimestamp:(NSString *)normalizedEventName
-                     deviceID:(NSString *)deviceID;
-
 - (CleverTapEventDetail *)getEventDetail:(NSString *)normalizedEventName
                                 deviceID:(NSString *)deviceID;
 

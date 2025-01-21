@@ -221,9 +221,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT count FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block NSInteger count = -1;
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-
-    [self.dispatchQueueManager runSerialAsync:^{
+    void (^taskBlock)(void) = ^{
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
@@ -240,10 +238,24 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-        dispatch_semaphore_signal(semaphore);
-    }];
+    };
 
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    if ([self.dispatchQueueManager inSerialQueue]) {
+        // If already on the serial queue, execute directly without semaphore
+        taskBlock();
+    } else {
+        // Otherwise, use semaphore for synchronous execution
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        [self.dispatchQueueManager runSerialAsync:^{
+            taskBlock();
+            dispatch_semaphore_signal(semaphore);
+        }];
+        if (dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3)) != 0) {
+            CleverTapLogStaticInternal(@"Timeout occurred while getting event count.");
+            return -1;
+        }
+    }
+
     return count;
 }
 
@@ -256,9 +268,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT eventName, normalizedEventName, count, firstTs, lastTs, deviceID FROM CTUserEventLogs WHERE normalizedEventName = ? AND deviceID = ?";
     __block CleverTapEventDetail *eventDetail = nil;
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    
-    [self.dispatchQueueManager runSerialAsync:^{
+    void (^taskBlock)(void) = ^{
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [normalizedEventName UTF8String], -1, SQLITE_TRANSIENT);
@@ -287,10 +297,24 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-        dispatch_semaphore_signal(semaphore);
-    }];
+    };
     
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    if ([self.dispatchQueueManager inSerialQueue]) {
+        // If already on the serial queue, execute directly without semaphore
+        taskBlock();
+    } else {
+        // Otherwise, use semaphore for synchronous execution
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        [self.dispatchQueueManager runSerialAsync:^{
+            taskBlock();
+            dispatch_semaphore_signal(semaphore);
+        }];
+        if (dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3)) != 0) {
+            CleverTapLogStaticInternal(@"Timeout occurred while getting event detail.");
+            return nil;
+        }
+    }
+
     return eventDetail;
 }
 
@@ -302,9 +326,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
     const char *querySQL = "SELECT eventName, normalizedEventName, count, firstTs, lastTs, deviceID FROM CTUserEventLogs WHERE deviceID = ?";
     __block NSMutableArray *eventDataArray = [NSMutableArray array];
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    
-    [self.dispatchQueueManager runSerialAsync:^{
+    void (^taskBlock)(void) = ^{
         sqlite3_stmt *statement;
         if (sqlite3_prepare_v2(self->_eventDatabase, querySQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_text(statement, 1, [deviceID UTF8String], -1, SQLITE_TRANSIENT);
@@ -332,10 +354,23 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
         }
-        dispatch_semaphore_signal(semaphore);
-    }];
+    };
     
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    if ([self.dispatchQueueManager inSerialQueue]) {
+        // If already on the serial queue, execute directly without semaphore
+        taskBlock();
+    } else {
+        // Otherwise, use semaphore for synchronous execution
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        [self.dispatchQueueManager runSerialAsync:^{
+            taskBlock();
+            dispatch_semaphore_signal(semaphore);
+        }];
+        if (dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3)) != 0) {
+            CleverTapLogStaticInternal(@"Timeout occurred while getting all event details.");
+            return nil;
+        }
+    }
     return [eventDataArray copy];
 }
 
@@ -443,9 +478,7 @@ normalizedEventName:(NSString *)normalizedEventName
 
 - (void)openDatabase {
     NSString *databasePath = [self databasePath];
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-
-    [self.dispatchQueueManager runSerialAsync:^{
+    void (^taskBlock)(void) = ^{
         if (sqlite3_open_v2([databasePath UTF8String], &self->_eventDatabase, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL) == SQLITE_OK) {
             // Create table, check and update the version if needed
             [self createTableWithCompletion:^(BOOL exists) {
@@ -454,9 +487,22 @@ normalizedEventName:(NSString *)normalizedEventName
         } else {
             CleverTapLogStaticInternal(@"Failed to open database - CleverTap-Events.db");
         }
-        dispatch_semaphore_signal(semaphore);
-    }];
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    };
+    
+    if ([self.dispatchQueueManager inSerialQueue]) {
+        // If already on the serial queue, execute directly without semaphore
+        taskBlock();
+    } else {
+        // Otherwise, use semaphore for synchronous execution
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        [self.dispatchQueueManager runSerialAsync:^{
+            taskBlock();
+            dispatch_semaphore_signal(semaphore);
+        }];
+        if (dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 3)) != 0) {
+            CleverTapLogStaticInternal(@"Timeout occurred while opening database.");
+        }
+    }
 }
 
 - (void)createTableWithCompletion:(void (^)(BOOL success))completion {
