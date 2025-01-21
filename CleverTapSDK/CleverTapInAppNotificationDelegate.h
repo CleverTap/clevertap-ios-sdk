@@ -38,4 +38,13 @@
 @optional
 - (void)inAppNotificationButtonTappedWithCustomExtras:(NSDictionary *)customExtras;
 
+/*!
+ @discussion
+ This is called when an in-app notification is rendered.
+ 
+ @param notification The notification JSON object for this notification.
+ */
+@optional
+- (void)inAppNotificationDidShow:(NSDictionary *)notification;
+
 @end
