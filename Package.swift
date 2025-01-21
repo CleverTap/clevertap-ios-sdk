@@ -58,7 +58,8 @@ let package = Package(
                 .headerSearchPath("ProductExperiences/"),
                 .headerSearchPath("Session/"),
                 .headerSearchPath("Swizzling/"),
-                .headerSearchPath("FileDownload/")
+                .headerSearchPath("FileDownload/"),
+                .headerSearchPath("EventDatabase/")
             ],
             linkerSettings: [
                 .linkedFramework("AVFoundation"),
