@@ -31,7 +31,8 @@ if (event) {
     NSTimeInterval firstTime = event.firstTime;
     NSTimeInterval lastTime = event.lastTime;
     NSInteger eventCount = event.count;
-    NSString *deviceId = event.deviceID;NSLog(@"eventName: %@, firstTime: %f, lastTime: %f, count: %ld, deviceID: %@", eventName, firstTime, lastTime, (long)eventCount, deviceId);
+    NSString *deviceId = event.deviceID;
+    NSLog(@"eventName: %@, firstTime: %f, lastTime: %f, count: %ld, deviceID: %@", eventName, firstTime, lastTime, (long)eventCount, deviceId);
 } else {
     NSLog(@"Event not exists");
 }
