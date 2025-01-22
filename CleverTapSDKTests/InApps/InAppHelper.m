@@ -67,6 +67,10 @@ NSString *const CLTAP_TEST_CAMPAIGN_ID = @"testCampaignId";
                                                      impressionManager:self.impressionManager
                                                    inAppTriggerManager:self.inAppTriggerManager];
         
+        CTDeviceInfo *deviceInfo = [[CTDeviceInfo alloc] initWithConfig:self.config andCleverTapID:CLTAP_TEST_DEVICE_ID];
+        CTDispatchQueueManager *queueManager = [[CTDispatchQueueManager alloc] initWithConfig:self.config];
+        self.dataStore = [[CTLocalDataStore alloc] initWithConfig:self.config profileValues:[NSMutableDictionary new] andDeviceInfo:deviceInfo dispatchQueueManager:queueManager];
+        
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
         // Initialize when needed, requires CleverTap instance
@@ -79,7 +83,7 @@ NSString *const CLTAP_TEST_CAMPAIGN_ID = @"testCampaignId";
                                                                         impressionManager:self.impressionManager
                                                                       inAppDisplayManager:self.inAppDisplayManager
                                                                                inAppStore:self.inAppStore
-                                                                      inAppTriggerManager:self.inAppTriggerManager];
+                                                                      inAppTriggerManager:self.inAppTriggerManager localDataStore:self.dataStore];
     }
     return self;
 }

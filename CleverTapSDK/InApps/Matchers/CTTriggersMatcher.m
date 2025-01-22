@@ -13,7 +13,18 @@
 #import "CTTriggerEvaluator.h"
 #import "CTUtils.h"
 
+@interface CTTriggersMatcher () {}
+@property (nonatomic, strong) CTLocalDataStore *dataStore;
+@end
+
 @implementation CTTriggersMatcher
+
+- (instancetype)initWithDataStore:(CTLocalDataStore *)dataStore {
+    if (self = [super init]) {
+        self.dataStore = dataStore;
+    }
+    return self;
+}
 
 - (BOOL)matchEventWhenTriggers:(NSArray *)whenTriggers event:(CTEventAdapter *)event {
     // Events in the array are OR-ed
@@ -38,6 +49,10 @@
     }
     
     if (![self matchProperties:event trigger:trigger]) {
+        return NO;
+    }
+    
+    if (![self matchFirstTimeOnlyForTrigger:trigger]) {
         return NO;
     }
     
@@ -114,6 +129,14 @@
         }
     }
     return YES;
+}
+
+- (BOOL)matchFirstTimeOnlyForTrigger:(CTTriggerAdapter *)trigger {
+    if (!trigger.firstTimeOnly) {
+        return YES;
+    }
+    NSString *nameToCheck = trigger.profileAttrName ?: trigger.eventName;
+    return [self.dataStore isEventLoggedFirstTime:nameToCheck];
 }
 
 @end

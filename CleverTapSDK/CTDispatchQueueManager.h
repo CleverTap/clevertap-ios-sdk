@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig*)config;
 - (void)runSerialAsync:(void (^)(void))taskBlock;
 - (void)runOnNotificationQueue:(void (^)(void))taskBlock;
+- (BOOL)inSerialQueue;
 
 @end
 
