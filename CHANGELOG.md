@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.0) (January 21, 2024)
+
+#### Added
+- Adds support for triggering InApps based on first-time event filtering in multiple triggers. Now you can create campaign triggers that combine recurring and first-time events. For example: Trigger a campaign when "Charged" occurs (every time) OR "App Launched" occurs (first time only).
+- Adds new user-level event log tracking system to store and manage user event history. New APIs include:
+  - `getUserEventLog(:)`: Get details about a specific event
+  - `getUserEventLogCount(:)`: Get count of times an event occurred
+  - `getUserLastVisitTs()`: Get timestamp of user's last app visit
+  - `getUserAppLaunchCount()`: Get total number of times user has launched the app
+  - `getUserEventLogHistory()`: Get full event history for current user
+
+#### API Changes
+
+- **Deprecated:**  The old event tracking APIs tracked events at the device level rather than the user level, making it difficult to maintain accurate user-specific event histories, especially in multi-user scenarios. The following methods have been deprecated in favor of new user-specific event tracking APIs that provide more accurate, user-level analytics. These deprecated methods will be removed in future versions with prior notice:
+  - `eventGetDetail(:)`: Use `getUserEventLog()` instead for user-specific event details
+  - `eventGetOccurrences(:)`: Use `getUserEventLogCount()` instead for user-specific event counts
+  - `eventGetFirstTime(:)`: Use `getUserEventLog()` instead for user-specific first occurrence timestamp
+  - `eventGetLastTime(:)`: Use `getUserEventLog()` instead for user-specific last occurrence timestamp
+  - `userGetPreviousVisitTime()`: Use `getUserLastVisitTs()` instead for user-specific last visit timestamp
+  - `userGetTotalVisits()`: Use `getUserAppLaunchCount()` instead for user-specific app launch count
+  - `userGetEventHistory()`: Use `getUserEventLogHistory()` instead for user-specific event history
+
 ### [Version 7.0.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.0.3) (November 29, 2024)
 
 #### Added

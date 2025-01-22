@@ -15,6 +15,7 @@
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
 #import "CTProfileBuilder.h"
+#import "CTEventDatabase.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -34,6 +35,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) NSArray *piiKeys;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
+@property (nonatomic, strong) NSMutableSet *userEventLogs;
+@property (nonatomic, strong) CTEventDatabase *dbHelper;
+@property (nonatomic, strong) NSArray *systemProfileKeys;
 
 @end
 
@@ -44,11 +48,14 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         _config = config;
         _deviceInfo = deviceInfo;
         self.dispatchQueueManager = dispatchQueueManager;
+        self.userEventLogs = [NSMutableSet set];
+        self.dbHelper = [CTEventDatabase sharedInstanceWithDispatchQueueManager:dispatchQueueManager];
         localProfileUpdateExpiryStore = [NSMutableDictionary new];
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
         lastProfilePersistenceTime = 0;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
+        _systemProfileKeys = @[CLTAP_SYS_CARRIER, CLTAP_SYS_CC, CLTAP_SYS_TZ];
         [self runOnBackgroundQueue:^{
             @synchronized (self->localProfileForSession) {
                 // migrate to new persisted ct-accid-guid-userprofile
@@ -63,6 +70,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
     return self;
 }
+
 - (void)addObservers {
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [notificationCenter addObserver:self selector:@selector(applicationWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
@@ -102,6 +110,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             self->localProfileForSession = [self _inflateLocalProfile];
         }
     }];
+    @synchronized (self.userEventLogs) {
+        [self.userEventLogs removeAllObjects];
+    }
     [self clearStoredEvents];
 }
 
@@ -149,7 +160,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 
 # pragma mark - Events
 
-- (NSDictionary *)getStoredEvents {
+- (NSDictionary *)getStoredEvents __attribute__((deprecated("This method is deprecated in favor of the newer CTEventDatabase methods"))) {
     NSDictionary *events = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
     if (self.config.isDefaultInstance) {
         if (!events) {
@@ -163,11 +174,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return events;
 }
 
-- (void)setStoredEvents:(NSDictionary *)store {
+- (void)setStoredEvents:(NSDictionary *)store __attribute__((deprecated("This method is deprecated in favor of the newer CTEventDatabase methods"))) {
     [CTPreferences putObject:store forKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
 }
 
-- (void)clearStoredEvents {
+- (void)clearStoredEvents __attribute__((deprecated("This method is deprecated in favor of the newer CTEventDatabase methods"))) {
     [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:kWR_KEY_EVENTS]];
 }
 
@@ -182,27 +193,10 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
  */
 - (void)persistEvent:(NSDictionary *)event  {
     if (!event || !event[CLTAP_EVENT_NAME]) return;
-    [self runOnBackgroundQueue:^{
-        NSString *eventName = event[CLTAP_EVENT_NAME];
-        NSDictionary *s = [self getStoredEvents];
-        if (!s) s = @{};
-        NSTimeInterval now = [[[NSDate alloc] init] timeIntervalSince1970];
-        NSArray *ed = s[eventName];
-        if (!ed || ed.count < 3) {
-            // This event has been recorded for the very first time
-            // Set the count to 0, first and last to now
-            // Count will be incremented soon after this block
-            ed = @[@0.0f, @(now), @(now)];
-        }
-        NSMutableArray *ped = [ed mutableCopy];
-        double currentCount = ((NSNumber *) ped[0]).doubleValue;
-        currentCount++;
-        ped[0] = @(currentCount);
-        ped[2] = @(now);
-        NSMutableDictionary *store = [s mutableCopy];
-        store[eventName] = ped;
-        [self setStoredEvents:store];
-    }];
+
+    NSString *eventName = event[CLTAP_EVENT_NAME];
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    [self.dbHelper upsertEvent:eventName normalizedEventName:normalizedEventName deviceID:self.deviceInfo.deviceId];
 }
 
 /*!
@@ -610,6 +604,43 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     [self removeProfileFieldsWithKeys:keys fromUpstream:NO];
 }
 
+- (BOOL)isEventLoggedFirstTime:(NSString*)eventName {
+    NSString *normalizedName = [CTUtils getNormalizedName:eventName];
+    @synchronized (self.userEventLogs) {
+        if ([self.userEventLogs containsObject:normalizedName]) {
+            return NO;
+        }
+    }
+    NSInteger count = [self.dbHelper getEventCount:normalizedName deviceID:self.deviceInfo.deviceId];
+    if (count > 1) {
+        @synchronized (self.userEventLogs) {
+            [self.userEventLogs addObject:normalizedName];
+        }
+    }
+    return count == 1;
+}
+
+#pragma mark - Public APIs for Event log
+
+- (int)readUserEventLogCount:(NSString *)eventName {
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    return (int) [self.dbHelper getEventCount:normalizedEventName deviceID:self.deviceInfo.deviceId];
+}
+
+- (CleverTapEventDetail *)readUserEventLog:(NSString *)eventName {
+    NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
+    return [self.dbHelper getEventDetail:normalizedEventName deviceID:self.deviceInfo.deviceId];
+}
+
+- (NSDictionary *)readUserEventLogs {
+    NSArray<CleverTapEventDetail *> *allEvents = [self.dbHelper getAllEventsForDeviceID:self.deviceInfo.deviceId];
+    NSMutableDictionary *history = [[NSMutableDictionary alloc] init];
+    for (CleverTapEventDetail *event in allEvents) {
+        history[event.eventName] = event;
+    }
+    return history;
+}
+
 
 #pragma mark - Private Local Profile Getters and Setters and disk persistence handling
 
@@ -642,6 +673,14 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }
         if (!fromUpstream) {
             [self updateLocalProfileUpdateExpiryTimeForKey:key];
+        }
+        
+        // PERSIST PROFILE KEY AS EVENT
+        if (![_systemProfileKeys containsObject:key]) {
+            NSDictionary *profileEvent = @{CLTAP_EVENT_NAME: key};
+            [self.dispatchQueueManager runSerialAsync:^{
+                [self persistEvent:profileEvent];
+            }];
         }
     }
     @catch (NSException *exception) {

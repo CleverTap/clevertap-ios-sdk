@@ -195,6 +195,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong, readwrite) CleverTapInstanceConfig *config;
 @property (nonatomic, assign) NSTimeInterval lastAppLaunchedTime;
+@property (nonatomic, assign) NSTimeInterval userLastVisitTs;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
@@ -472,7 +473,9 @@ static BOOL sharedInstanceErrorLogged;
         
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
-        _lastAppLaunchedTime = [self eventGetLastTime:@"App Launched"];
+        _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
+        CleverTapEventDetail *eventDetails = [self getUserEventLog:CLTAP_APP_LAUNCHED_EVENT];
+        _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
         self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
@@ -535,7 +538,7 @@ static BOOL sharedInstanceErrorLogged;
                                                                             templatesManager:templatesManager
                                                                               fileDownloader:self.fileDownloader];
     
-    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager];
+    CTInAppEvaluationManager *evaluationManager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.config.accountId deviceId:self.deviceInfo.deviceId delegateManager:self.delegateManager impressionManager:impressionManager inAppDisplayManager:displayManager inAppStore:inAppStore inAppTriggerManager:triggerManager localDataStore:self.localDataStore];
     
     self.customTemplatesManager = templatesManager;
     self.inAppFCManager = inAppFCManager;
@@ -1957,7 +1960,9 @@ static BOOL sharedInstanceErrorLogged;
         }
         
         if (eventType == CleverTapEventTypeRaised || eventType == CleverTapEventTypeNotificationViewed) {
-            [self.localDataStore persistEvent:mutableEvent];
+            [self.dispatchQueueManager runSerialAsync:^{
+                [self.localDataStore persistEvent:mutableEvent];
+            }];
         }
         
         if (eventType == CleverTapEventTypeProfile) {
@@ -3105,6 +3110,36 @@ static BOOL sharedInstanceErrorLogged;
     return [self.localDataStore getEventDetail:event];
 }
 
+#pragma mark - User Event Log Methods
+
+- (int)getUserEventLogCount:(NSString *)eventName {
+    if (!self.config.enablePersonalization) {
+        return -1;
+    }
+    return [self.localDataStore readUserEventLogCount:eventName];
+}
+
+- (CleverTapEventDetail *)getUserEventLog:(NSString *)eventName {
+    if (!self.config.enablePersonalization) {
+        return nil;
+    }
+    return [self.localDataStore readUserEventLog:eventName];
+}
+
+- (NSDictionary *)getUserEventLogHistory {
+    if (!self.config.enablePersonalization) {
+        return nil;
+    }
+    return [self.localDataStore readUserEventLogs];
+}
+
+- (int)getUserAppLaunchCount {
+    return [self getUserEventLogCount:CLTAP_APP_LAUNCHED_EVENT];
+}
+
+- (NSTimeInterval)getUserLastVisitTs {
+    return self.userLastVisitTs;
+}
 
 #pragma mark - Session API
 
@@ -3122,7 +3157,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (int)userGetTotalVisits {
-    return [self eventGetOccurrences:@"App Launched"];
+    return [self eventGetOccurrences:CLTAP_APP_LAUNCHED_EVENT];
 }
 
 - (int)userGetScreenCount {
