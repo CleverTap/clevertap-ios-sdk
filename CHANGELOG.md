@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
   - `getUserLastVisitTs()`: Get timestamp of user's last app visit
   - `getUserAppLaunchCount()`: Get total number of times user has launched the app
   - `getUserEventLogHistory()`: Get full event history for current user
+- Adds `inAppNotificationDidShow:` to the `CleverTapInAppNotificationDelegate` delegate.
 
 #### API Changes
 

@@ -514,6 +514,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 #endif
 }
 
+- (void)notifyNotificationDidShow:(CTInAppNotification *)notification {
+    if (self.inAppNotificationDelegate && [self.inAppNotificationDelegate respondsToSelector:@selector(inAppNotificationDidShow:)]) {
+        [self.inAppNotificationDelegate inAppNotificationDidShow:notification.jsonDescription];
+    }
+}
+
 - (void)notifyNotificationDismissed:(CTInAppNotification *)notification {
     if (self.inAppNotificationDelegate && [self.inAppNotificationDelegate respondsToSelector:@selector(inAppNotificationDismissedWithExtras:andActionExtras:)]) {
         NSDictionary *extras;
@@ -589,6 +595,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     CleverTapLogInternal(self.config.logLevel, @"%@: InApp did show: %@", self, notification.campaignId);
     [self.instance recordInAppNotificationStateEvent:NO forNotification:notification andQueryParameters:nil];
     [self.inAppFCManager didShow:notification];
+    [self notifyNotificationDidShow:notification];
 }
 
 - (void)notifyNotificationButtonTappedWithCustomExtras:(NSDictionary *)customExtras {
