@@ -9,7 +9,6 @@
 #import "CTImpressionManager.h"
 #import "CTPreferences.h"
 #import "CleverTapInternal.h"
-#import "CTSystemClock.h"
 
 @interface CTImpressionManager()
 
