@@ -453,6 +453,8 @@ normalizedEventName:(NSString *)normalizedEventName
                     } else {
                         CleverTapLogStaticInternal(@"SQL prepare query error: %s", sqlite3_errmsg(self->_eventDatabase));
                     }
+                } else {
+                    success = YES;
                 }
             } else {
                 CleverTapLogStaticInternal(@"Failed to count rows in CTUserEventLogs");
