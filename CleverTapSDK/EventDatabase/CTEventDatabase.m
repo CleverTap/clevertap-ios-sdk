@@ -553,7 +553,7 @@ normalizedEventName:(NSString *)normalizedEventName
             sqlite3_bind_int(statement, 1, (int)version);
             
             int result = sqlite3_step(statement);
-            if (result != SQLITE_OK) {
+            if (result != SQLITE_DONE) {
                 CleverTapLogStaticInternal(@"SQL Error: %s", sqlite3_errmsg(self->_eventDatabase));
             }
             
