@@ -391,6 +391,7 @@ normalizedEventName:(NSString *)normalizedEventName
             success = YES;
         } else {
             CleverTapLogStaticInternal(@"SQL Error deleting all rows from CTUserEventLogs: %s", errMsg);
+            sqlite3_free(errMsg);
         }
         
         if (completion) {
