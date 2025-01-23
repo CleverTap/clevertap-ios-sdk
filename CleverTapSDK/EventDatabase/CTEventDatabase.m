@@ -545,11 +545,11 @@ normalizedEventName:(NSString *)normalizedEventName
         return;
     }
 
-    NSString *updateSQL = [NSString stringWithFormat:@"PRAGMA user_version = %ld;", (long)version];
+    const char *updateSQL = "PRAGMA user_version = ?";
     
     [self.dispatchQueueManager runSerialAsync:^{
         sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->_eventDatabase, [updateSQL UTF8String], -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(self->_eventDatabase, updateSQL, -1, &statement, NULL) == SQLITE_OK) {
             sqlite3_bind_int(statement, 1, (int)version);
             
             int result = sqlite3_step(statement);
