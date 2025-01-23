@@ -75,6 +75,10 @@ CleverTap iOS SDK supports creating remote config variables, refer to [Remote Co
 
 CleverTap iOS SDK supports creating Custom Code Templates for in-app notifications, refer to [Custom Code Templates](/docs/CustomCodeTemplates.md) for more details and usage examples.
 
+## 🕹️ User Event Logging APIs
+
+CleverTap iOS SDK supports user-level event log APIs, refer to [User Event Logging](/docs/UserEventLogging.md) for more details and usage examples.
+
 ## 𝌡 Example Usage
 * A [demo application](/ObjCStarter) showing the integration of our SDK in Objective-C language.
 * A [demo application](/SwiftStarter) showing the integration of our SDK in Swift language.

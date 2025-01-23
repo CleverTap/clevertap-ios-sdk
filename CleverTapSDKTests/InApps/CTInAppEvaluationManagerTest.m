@@ -778,7 +778,7 @@
     NSUInteger batchHeaderDelegatesCount = [[delegateManager attachToHeaderDelegates] count];
     NSUInteger batchSentDelegatesCount = [[delegateManager batchSentDelegates] count];
 
-    __unused CTInAppEvaluationManager *manager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.helper.accountId deviceId:self.helper.deviceId delegateManager:delegateManager impressionManager:self.helper.impressionManager inAppDisplayManager:self.helper.inAppDisplayManager inAppStore:self.helper.inAppStore inAppTriggerManager:self.helper.inAppTriggerManager];
+    __unused CTInAppEvaluationManager *manager = [[CTInAppEvaluationManager alloc] initWithAccountId:self.helper.accountId deviceId:self.helper.deviceId delegateManager:delegateManager impressionManager:self.helper.impressionManager inAppDisplayManager:self.helper.inAppDisplayManager inAppStore:self.helper.inAppStore inAppTriggerManager:self.helper.inAppTriggerManager localDataStore:self.helper.dataStore];
     
     XCTAssertEqual([[delegateManager attachToHeaderDelegates] count], batchHeaderDelegatesCount + 1);
     XCTAssertEqual([[delegateManager batchSentDelegates] count], batchSentDelegatesCount + 1);

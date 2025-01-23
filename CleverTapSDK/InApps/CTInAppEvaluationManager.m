@@ -52,7 +52,8 @@
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
                        inAppStore:(CTInAppStore *)inAppStore
-              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager {
+              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager
+                   localDataStore:(CTLocalDataStore *)dataStore {
     if (self = [super init]) {
         self.accountId = accountId;
         self.deviceId = deviceId;
@@ -84,7 +85,7 @@
         }
 
         self.inAppStore = inAppStore;
-        self.triggersMatcher = [CTTriggersMatcher new];
+        self.triggersMatcher = [[CTTriggersMatcher alloc] initWithDataStore:dataStore];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = inAppTriggerManager;
 

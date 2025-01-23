@@ -10,6 +10,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "CTBatchSentDelegate.h"
 #import "CTAttachToBatchHeaderDelegate.h"
+#import "CTLocalDataStore.h"
 
 @class CTMultiDelegateManager;
 @class CTImpressionManager;
@@ -30,7 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
                        inAppStore:(CTInAppStore *)inAppStore
-              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager;
+              inAppTriggerManager:(CTInAppTriggerManager *)inAppTriggerManager
+                   localDataStore:(CTLocalDataStore *)dataStore;
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties;
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items;
