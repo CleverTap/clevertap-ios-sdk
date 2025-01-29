@@ -4,6 +4,13 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
+
+
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
@@ -133,6 +140,12 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
                                                key:[self generateKeyPassword]
                                         identifier:CLTAP_ENCRYPTION_IV
                                               data:data];
+    if (@available(iOS 13, *)) {
+        CTEncryptor *encryptor = [[CTEncryptor alloc] init];
+        [encryptor performEncryptionDecryption];
+    } else {
+        // Fallback on earlier versions
+    }
     return outputData;
 }
 
