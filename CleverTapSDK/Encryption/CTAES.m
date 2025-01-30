@@ -3,12 +3,8 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
-
-#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
-#import <CleverTapSDK/CleverTapSDK-Swift.h>
-#else
-#import "CleverTapSDK-Swift.h"
-#endif
+#import "AESCrypt.h"
+#import "CTEncryptor.h"
 
 
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
@@ -136,59 +132,20 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (NSData *)convertData:(NSData *)data
           withOperation:(CCOperation)operation {
-    NSData *outputData = [self AES128WithOperation:operation
-                                               key:[self generateKeyPassword]
-                                        identifier:CLTAP_ENCRYPTION_IV
-                                              data:data];
-    if (@available(iOS 13, *)) {
-        CTEncryptor *encryptor = [[CTEncryptor alloc] init];
-        [encryptor performEncryptionDecryption];
-    } else {
-        // Fallback on earlier versions
+//    NSData *outputData = [AESCrypt AES128WithOperation:operation
+//                                                   key:[self generateKeyPassword]
+//                                            identifier:CLTAP_ENCRYPTION_IV
+//                                                  data:data];
+    NSError *error = nil;
+    BOOL keyGenerated = [CTEncryptor generateKeyWithError:&error];
+    if (!keyGenerated) {
+        NSLog(@"Error generating key: %@", error);
+    }
+    NSData *outputData = [CTEncryptor performCryptOperation:data error:&error];
+    if (error) {
+        NSLog(@"Encryption failed: %@", error.localizedDescription);
     }
     return outputData;
-}
-
-- (NSData *)AES128WithOperation:(CCOperation)operation
-                            key:(NSString *)key
-                     identifier:(NSString *)identifier
-                           data:(NSData *)data {
-    // Note: The key will be 0's but we intentionally are keeping it this way to maintain
-    // compatibility. The correct code is:
-    // char keyPtr[[key length] + 1];
-    char keyCString[kCCKeySizeAES128 + 1];
-    memset(keyCString, 0, sizeof(keyCString));
-    [key getCString:keyCString maxLength:sizeof(keyCString) encoding:NSUTF8StringEncoding];
-    
-    char identifierCString[kCCBlockSizeAES128 + 1];
-    memset(identifierCString, 0, sizeof(identifierCString));
-    [identifier getCString:identifierCString
-                 maxLength:sizeof(identifierCString)
-                  encoding:NSUTF8StringEncoding];
-    
-    size_t outputAvailableSize = [data length] + kCCBlockSizeAES128;
-    void *output = malloc(outputAvailableSize);
-    
-    size_t outputMovedSize = 0;
-    CCCryptorStatus cryptStatus = CCCrypt(operation,
-                                          kCCAlgorithmAES128,
-                                          kCCOptionPKCS7Padding,
-                                          keyCString,
-                                          kCCBlockSizeAES128,
-                                          identifierCString,
-                                          [data bytes],
-                                          [data length],
-                                          output,
-                                          outputAvailableSize,
-                                          &outputMovedSize);
-    
-    if (cryptStatus != kCCSuccess) {
-        CleverTapLogStaticInternal(@"Failed to encode/deocde the string with error code: %d", cryptStatus);
-        free(output);
-        return nil;
-    }
-    
-    return [NSData dataWithBytesNoCopy:output length:outputMovedSize];
 }
 
 - (NSString *)getCachedKey:(NSString *)value {
