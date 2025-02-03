@@ -118,7 +118,7 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     NSString *decryptedString = identifier;
     @try {
         NSData *dataValue = [[NSData alloc] initWithBase64EncodedString:identifier options:kNilOptions];
-        NSData *decryptedData = [self convertData:dataValue withOperation:kCCDecrypt];
+        NSData *decryptedData = [self convertData2:dataValue withOperation:kCCDecrypt];
         if (decryptedData && decryptedData.length > 0) {
             NSString *utf8EncodedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
             if (utf8EncodedString) {
@@ -134,11 +134,31 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (NSData *)convertData:(NSData *)data
           withOperation:(CCOperation)operation {
-    NSData *outputData = [self AES128WithOperation:operation
-                                               key:[self generateKeyPassword]
-                                        identifier:CLTAP_ENCRYPTION_IV
-                                              data:data];
-    return outputData;
+    if (@available(iOS 13.0, *)) {
+        CTEncryptionManager *encryptionManager = [[CTEncryptionManager alloc] initWithKeychainTag:@"EncryptionKey"];
+        NSError *error = nil;
+        NSData *encryptedData = [encryptionManager encryptString:data error:&error];
+        
+        return encryptedData;
+    }
+    return nil;
+}
+
+- (NSData *)convertData2:(NSData *)data
+          withOperation:(CCOperation)operation {
+    if (@available(iOS 13.0, *)) {
+        CTEncryptionManager *encryptionManager = [[CTEncryptionManager alloc] initWithKeychainTag:@"EncryptionKey"];
+        NSError *error = nil;
+        NSData *decryptedData = [encryptionManager decryptString:data error:&error];
+        
+//
+//        NSData *outputData = [self AES128WithOperation:operation
+//                            key:[self generateKeyPassword]
+//                     identifier:CLTAP_ENCRYPTION_IV
+//                           data:data];
+        return decryptedData;
+    }
+    return nil;
 }
 
 - (NSData *)AES128WithOperation:(CCOperation)operation

@@ -1,70 +1,48 @@
-//
-//  CTKeychainManager.swift
-//  CleverTapSDK
-//
-//  Created by Kushagra Mishra on 03/02/25.
-//  Copyright © 2025 CleverTap. All rights reserved.
-//
-
 import Foundation
 import Security
-import CryptoKit
 
-@objc public enum KeychainErrorCode: Int {
-    case keyGenerationFailed
-    case keychainError
-    case keyNotFound
-}
-
-@objc public class CTKeychainManager: NSObject {
-    // MARK: - Constants
-    private static let keyAlias = "com.clevertap.encryption.key"
+class CTKeychainManager {
+    private let keychainTag: String
     
-    @objc(getOrGenerateKeyAndReturnError:)
-        public static func getOrGenerateKey() throws -> Data {
-            // First try to load existing key
-            if let existingKey = try? loadKeyFromKeychain() {
-                return existingKey
-            }
-            
-            // If no key exists, generate and store new one
-            return try generateAndStoreKey()
-        }
+    init(keychainTag: String) {
+        self.keychainTag = keychainTag
+    }
     
-    private static func generateAndStoreKey() throws -> Data {
-        // Generate random key data
-        var keyData = Data(count: 32) // 256 bits
-        let result = keyData.withUnsafeMutableBytes { bytes in
-            SecRandomCopyBytes(kSecRandomDefault, 32, bytes.baseAddress!)
-        }
-        
-        guard result == errSecSuccess else {
-            throw NSError(domain: "KeychainManager", code: KeychainErrorCode.keyGenerationFailed.rawValue)
-        }
-        
-        // Store key in keychain
+    func saveKey(_ key: Data) throws {
         let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: keyAlias,
-            kSecValueData as String: keyData,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
-            kSecAttrService as String: Bundle.main.bundleIdentifier ?? "com.default.app"
+            kSecClass as String: kSecClassKey,
+            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
+            kSecValueData as String: key,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         ]
         
         let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw NSError(domain: "KeychainManager", code: KeychainErrorCode.keychainError.rawValue)
-        }
         
-        return keyData
+        if status == errSecDuplicateItem {
+            // Update existing key
+            let updateQuery: [String: Any] = [
+                kSecClass as String: kSecClassKey,
+                kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!
+            ]
+            
+            let attributesToUpdate: [String: Any] = [
+                kSecValueData as String: key
+            ]
+            
+            let updateStatus = SecItemUpdate(updateQuery as CFDictionary, attributesToUpdate as CFDictionary)
+            guard updateStatus == errSecSuccess else {
+                throw KeychainError.unableToStoreKey
+            }
+        } else if status != errSecSuccess {
+            throw KeychainError.unableToStoreKey
+        }
     }
     
-    @objc public static func loadKeyFromKeychain() throws -> Data {
+    func retrieveKey() throws -> Data {
         let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: keyAlias,
-            kSecReturnData as String: true,
-            kSecAttrService as String: Bundle.main.bundleIdentifier ?? "com.default.app"
+            kSecClass as String: kSecClassKey,
+            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
+            kSecReturnData as String: true
         ]
         
         var result: AnyObject?
@@ -72,23 +50,21 @@ import CryptoKit
         
         guard status == errSecSuccess,
               let keyData = result as? Data else {
-            throw NSError(domain: "KeychainManager", code: KeychainErrorCode.keyNotFound.rawValue)
+            throw KeychainError.unableToRetrieveKey
         }
         
         return keyData
     }
     
-    @objc(deleteKeyAndReturnError:)
-        public static func deleteKey() throws {
-            let query: [String: Any] = [
-                kSecClass as String: kSecClassGenericPassword,
-                kSecAttrAccount as String: keyAlias,
-                kSecAttrService as String: Bundle.main.bundleIdentifier ?? "com.default.app"
-            ]
-            
-            let status = SecItemDelete(query as CFDictionary)
-            guard status == errSecSuccess || status == errSecItemNotFound else {
-                throw NSError(domain: "KeychainManager", code: KeychainErrorCode.keychainError.rawValue)
-            }
+    func deleteKey() throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassKey,
+            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!
+        ]
+        
+        let status = SecItemDelete(query as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw KeychainError.unableToDeleteKey
         }
+    }
 }
