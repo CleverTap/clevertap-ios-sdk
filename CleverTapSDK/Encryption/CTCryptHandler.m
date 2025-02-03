@@ -3,6 +3,11 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";

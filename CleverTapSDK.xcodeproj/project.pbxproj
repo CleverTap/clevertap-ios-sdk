@@ -151,6 +151,12 @@
 		07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */; };
 		07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */; };
 		0B5564562C25946C00B87284 /* CTUserInfoMigratorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B5564552C25946C00B87284 /* CTUserInfoMigratorTest.m */; };
+		0B75722C2D50AB6B004C3B2B /* CTAES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B75722B2D50AB6B004C3B2B /* CTAES.swift */; };
+		0B75722D2D50AB6B004C3B2B /* CTAES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B75722B2D50AB6B004C3B2B /* CTAES.swift */; };
+		0B75722F2D50AB79004C3B2B /* CTAESGCM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B75722E2D50AB79004C3B2B /* CTAESGCM.swift */; };
+		0B7572302D50AB79004C3B2B /* CTAESGCM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B75722E2D50AB79004C3B2B /* CTAESGCM.swift */; };
+		0B7572322D50AB87004C3B2B /* CTKeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */; };
+		0B7572332D50AB87004C3B2B /* CTKeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */; };
 		0B995A4A2C36AEDC00AF6006 /* CTLocalDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */; };
 		1F1C18806B7F29B3374F2448 /* libPods-shared-CleverTapSDKTestsApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E303560B5EE1D154C1E3D9EF /* libPods-shared-CleverTapSDKTestsApp.a */; };
 		32394C1F29FA251E00956058 /* CTEventBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C1E29FA251E00956058 /* CTEventBuilderTest.m */; };
@@ -769,6 +775,9 @@
 		07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverViewController~iphoneland.xib"; sourceTree = "<group>"; };
 		07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverViewController~ipadland.xib"; sourceTree = "<group>"; };
 		0B5564552C25946C00B87284 /* CTUserInfoMigratorTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUserInfoMigratorTest.m; sourceTree = "<group>"; };
+		0B75722B2D50AB6B004C3B2B /* CTAES.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAES.swift; sourceTree = "<group>"; };
+		0B75722E2D50AB79004C3B2B /* CTAESGCM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAESGCM.swift; sourceTree = "<group>"; };
+		0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTKeychainManager.swift; sourceTree = "<group>"; };
 		0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStoreTests.m; sourceTree = "<group>"; };
 		0CA46771B6F202E37DAC9F70 /* Pods-shared-CleverTapSDKTestsApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTestsApp.debug.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTestsApp/Pods-shared-CleverTapSDKTestsApp.debug.xcconfig"; sourceTree = "<group>"; };
 		129AEC403AFA828F591B756E /* Pods-shared-CleverTapSDKTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -1335,6 +1344,9 @@
 			children = (
 				4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */,
 				480395192A7ABAD200C4D254 /* CTCryptHandler.m */,
+				0B75722B2D50AB6B004C3B2B /* CTAES.swift */,
+				0B75722E2D50AB79004C3B2B /* CTAESGCM.swift */,
+				0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */,
 			);
 			path = Encryption;
 			sourceTree = "<group>";
@@ -2304,6 +2316,7 @@
 					};
 					D0C7BBBC207D82C0001345EF = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 1610;
 					};
 				};
 			};
@@ -2547,12 +2560,15 @@
 				D014B8F520E2FAD0001E0780 /* CTSwizzle.m in Sources */,
 				6AA1357C2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */,
 				D014B8EF20E2FAAD001E0780 /* CleverTapUTMDetail.m in Sources */,
+				0B75722D2D50AB6B004C3B2B /* CTAES.swift in Sources */,
 				4E41FD9D294F46510001FBED /* CTVarCache.m in Sources */,
+				0B7572332D50AB87004C3B2B /* CTKeychainManager.swift in Sources */,
 				4EB3638C2C087A8200C00AE2 /* CTUserInfoMigrator.m in Sources */,
 				4E4E17852B50007D009E2F1E /* CTCryptHandler.m in Sources */,
 				D014B91D20E2FBD6001E0780 /* CTCertificatePinning.m in Sources */,
 				D014B90920E2FB71001E0780 /* CTLocalDataStore.m in Sources */,
 				D0BD75A7241769440006EE55 /* CleverTapProductConfig.m in Sources */,
+				0B7572302D50AB79004C3B2B /* CTAESGCM.swift in Sources */,
 				D014B8EA20E2FA8D001E0780 /* CleverTapEventDetail.m in Sources */,
 				D014B90320E2FB55001E0780 /* CTEventBuilder.m in Sources */,
 				4E8B81722AD2BB8A00714BB4 /* CTDispatchQueueManager.m in Sources */,
@@ -2714,6 +2730,7 @@
 				6BF5A59E2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m in Sources */,
 				072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */,
 				6A4427D12AB9D8C30098866F /* CTInAppFCManager+Legacy.m in Sources */,
+				0B75722C2D50AB6B004C3B2B /* CTAES.swift in Sources */,
 				6BEEC2C82AE9B02100BD4EC5 /* CTSystemClock.m in Sources */,
 				6BD334F52AF7FC660099E33E /* CTTriggerRadius.m in Sources */,
 				6A3EBD332AA0703A00CE97D4 /* CTEventAdapter.m in Sources */,
@@ -2775,6 +2792,7 @@
 				078C63AA22420321001FDDB8 /* CleverTapJSInterface.m in Sources */,
 				4847D16F2CCB90F5008DC327 /* CTEventDatabase.m in Sources */,
 				4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */,
+				0B7572322D50AB87004C3B2B /* CTKeychainManager.swift in Sources */,
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
 				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
 				6BB778C82BECEC2700A41628 /* CTCustomTemplateInAppData.m in Sources */,
@@ -2788,6 +2806,7 @@
 				4E8B81662AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
 				071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */,
 				48F9FD1D2C3D30BF00617770 /* CTFileDownloadManager.m in Sources */,
+				0B75722F2D50AB79004C3B2B /* CTAESGCM.swift in Sources */,
 				D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3219,6 +3238,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
@@ -3257,6 +3277,8 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -3265,6 +3287,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
@@ -3294,6 +3317,7 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
