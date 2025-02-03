@@ -99,7 +99,7 @@ static NSArray *sslCertNames;
 
 #import "NSDictionary+Extensions.h"
 
-#import "CTAES.h"
+#import "CTCryptHandler.h"
 
 #import <objc/runtime.h>
 
@@ -557,7 +557,7 @@ static BOOL sharedInstanceErrorLogged;
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
     if (!_instances || [_instances count] <= 0) {
-        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTCryptHandler class], [NSArray class], [NSString class], nil];
         CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofTypes:allowedClasses removeFile:NO];
         return [CleverTap instanceWithConfig:config];
     }

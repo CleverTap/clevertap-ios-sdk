@@ -1,4 +1,4 @@
-#import "CTAES.h"
+#import "CTCryptHandler.h"
 #import <CommonCrypto/CommonCryptor.h>
 #import "CTConstants.h"
 #import "CTPreferences.h"
@@ -9,13 +9,13 @@ NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 NSString *const kCacheGUIDS = @"CachedGUIDS";
 
-@interface CTAES () {}
+@interface CTCryptHandler () {}
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
 @property (nonatomic, assign) BOOL isDefaultInstance;
 @end
 
-@implementation CTAES
+@implementation CTCryptHandler
 
 - (instancetype)initWithAccountID:(NSString *)accountID
                   encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel

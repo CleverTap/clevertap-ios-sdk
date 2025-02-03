@@ -10,7 +10,7 @@
 #import "CTPreferences.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfigPrivate.h"
-#import "CTAES.h"
+#import "CTCryptHandler.h"
 
 NSString *const kCachedGUIDS = @"CachedGUIDS";
 NSString *const kCachedIdentities = @"CachedIdentities";
@@ -39,8 +39,8 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
 
     NSString *encryptedIdentifier = identifier;
-    if (self.config.aesCrypt) {
-        encryptedIdentifier = [self.config.aesCrypt getEncryptedString:identifier];
+    if (self.config.cryptHandler) {
+        encryptedIdentifier = [self.config.cryptHandler getEncryptedString:identifier];
     }
     NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
     newCache[cacheKey] = guid;
@@ -78,8 +78,8 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     
     NSDictionary *cache = [self getCachedGUIDs];
     NSString *encryptedIdentifier = identifier;
-    if (self.config.aesCrypt) {
-        encryptedIdentifier = [self.config.aesCrypt getEncryptedString:identifier];
+    if (self.config.cryptHandler) {
+        encryptedIdentifier = [self.config.cryptHandler getEncryptedString:identifier];
     }
     NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
     if (!cache) return nil;

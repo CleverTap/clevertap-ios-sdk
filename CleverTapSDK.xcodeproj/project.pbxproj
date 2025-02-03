@@ -160,8 +160,8 @@
 		3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */; };
 		32790957299CC099001FE140 /* CTUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790956299CC099001FE140 /* CTUtilsTest.m */; };
 		32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790958299F4B29001FE140 /* CTDeviceInfoTest.m */; };
-		4803951B2A7ABAD200C4D254 /* CTAES.m in Sources */ = {isa = PBXBuildFile; fileRef = 480395192A7ABAD200C4D254 /* CTAES.m */; };
-		4803951C2A7ABAD200C4D254 /* CTAES.h in Headers */ = {isa = PBXBuildFile; fileRef = 4803951A2A7ABAD200C4D254 /* CTAES.h */; };
+		4803951B2A7ABAD200C4D254 /* CTCryptHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 480395192A7ABAD200C4D254 /* CTCryptHandler.m */; };
+		4803951C2A7ABAD200C4D254 /* CTCryptHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */; };
 		4806346F2CEB620400E39E9B /* CTInAppDisplayViewControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4806346E2CEB620400E39E9B /* CTInAppDisplayViewControllerTests.m */; };
 		4808030E292EB4FB00C06E2F /* CleverTap+PushPermission.h in Headers */ = {isa = PBXBuildFile; fileRef = 4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */; };
 		48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 4808030F292EB50D00C06E2F /* CTLocalInApp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -235,8 +235,8 @@
 		4E49AE54275D24570074A774 /* CTValidationResultStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE51275D24570074A774 /* CTValidationResultStack.h */; };
 		4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE52275D24570074A774 /* CTValidationResultStack.m */; };
 		4E49AE56275D24570074A774 /* CTValidationResultStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE52275D24570074A774 /* CTValidationResultStack.m */; };
-		4E4E17842B500079009E2F1E /* CTAES.h in Headers */ = {isa = PBXBuildFile; fileRef = 4803951A2A7ABAD200C4D254 /* CTAES.h */; };
-		4E4E17852B50007D009E2F1E /* CTAES.m in Sources */ = {isa = PBXBuildFile; fileRef = 480395192A7ABAD200C4D254 /* CTAES.m */; };
+		4E4E17842B500079009E2F1E /* CTCryptHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */; };
+		4E4E17852B50007D009E2F1E /* CTCryptHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 480395192A7ABAD200C4D254 /* CTCryptHandler.m */; };
 		4E5A02DC2A4C5FD100DE242A /* LeanplumCT.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E5A02DD2A4C5FD100DE242A /* LeanplumCT.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E5A02DE2A4C5FD800DE242A /* LeanplumCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */; };
@@ -780,8 +780,8 @@
 		3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		32790956299CC099001FE140 /* CTUtilsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUtilsTest.m; sourceTree = "<group>"; };
 		32790958299F4B29001FE140 /* CTDeviceInfoTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDeviceInfoTest.m; sourceTree = "<group>"; };
-		480395192A7ABAD200C4D254 /* CTAES.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTAES.m; sourceTree = "<group>"; };
-		4803951A2A7ABAD200C4D254 /* CTAES.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTAES.h; sourceTree = "<group>"; };
+		480395192A7ABAD200C4D254 /* CTCryptHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTCryptHandler.m; sourceTree = "<group>"; };
+		4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTCryptHandler.h; sourceTree = "<group>"; };
 		4806346E2CEB620400E39E9B /* CTInAppDisplayViewControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppDisplayViewControllerTests.m; sourceTree = "<group>"; };
 		4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+PushPermission.h"; sourceTree = "<group>"; };
 		4808030F292EB50D00C06E2F /* CTLocalInApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTLocalInApp.h; sourceTree = "<group>"; };
@@ -1330,6 +1330,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		0B75722A2D50A875004C3B2B /* Encryption */ = {
+			isa = PBXGroup;
+			children = (
+				4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */,
+				480395192A7ABAD200C4D254 /* CTCryptHandler.m */,
+			);
+			path = Encryption;
+			sourceTree = "<group>";
+		};
 		4847D16B2CCB9018008DC327 /* EventDatabase */ = {
 			isa = PBXGroup;
 			children = (
@@ -1754,11 +1763,10 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				0B75722A2D50A875004C3B2B /* Encryption */,
 				4847D16B2CCB9018008DC327 /* EventDatabase */,
 				6B9E95B62C2AE6740002D557 /* FileDownload */,
 				3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */,
-				4803951A2A7ABAD200C4D254 /* CTAES.h */,
-				480395192A7ABAD200C4D254 /* CTAES.m */,
 				4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */,
 				4E838C4429A0C94B00ED0875 /* CleverTap+CTVar.h */,
 				4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */,
@@ -1989,7 +1997,7 @@
 				4EA64A2D296C1190001D9B22 /* CTRequest.h in Headers */,
 				D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */,
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
-				4E4E17842B500079009E2F1E /* CTAES.h in Headers */,
+				4E4E17842B500079009E2F1E /* CTCryptHandler.h in Headers */,
 				48DC69B62D3FDF35000E7BE4 /* CTNotificationAction.h in Headers */,
 				D014B90420E2FB59001E0780 /* CTValidator.h in Headers */,
 				4E8B81692AD2ADAE00714BB4 /* CTSwizzleManager.h in Headers */,
@@ -2140,7 +2148,7 @@
 				071EB4F9217F6427008F0FAB /* CTNotificationButton.h in Headers */,
 				48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */,
 				6BB778CB2BED21CE00A41628 /* CTNotificationAction.h in Headers */,
-				4803951C2A7ABAD200C4D254 /* CTAES.h in Headers */,
+				4803951C2A7ABAD200C4D254 /* CTCryptHandler.h in Headers */,
 				D0213D4D207D905800FE5740 /* CleverTapTrackedViewController.h in Headers */,
 				4E25E3C5278887A70008C888 /* CTFlexibleIdentityRepo.h in Headers */,
 				6BB727262B8E5839009CE7D0 /* CTTemplateContext-Internal.h in Headers */,
@@ -2541,7 +2549,7 @@
 				D014B8EF20E2FAAD001E0780 /* CleverTapUTMDetail.m in Sources */,
 				4E41FD9D294F46510001FBED /* CTVarCache.m in Sources */,
 				4EB3638C2C087A8200C00AE2 /* CTUserInfoMigrator.m in Sources */,
-				4E4E17852B50007D009E2F1E /* CTAES.m in Sources */,
+				4E4E17852B50007D009E2F1E /* CTCryptHandler.m in Sources */,
 				D014B91D20E2FBD6001E0780 /* CTCertificatePinning.m in Sources */,
 				D014B90920E2FB71001E0780 /* CTLocalDataStore.m in Sources */,
 				D0BD75A7241769440006EE55 /* CleverTapProductConfig.m in Sources */,
@@ -2730,7 +2738,7 @@
 				07B9454D219EA34300D4C542 /* Inbox.xcdatamodeld in Sources */,
 				D0213D51207D905800FE5740 /* CleverTapUTMDetail.m in Sources */,
 				D0596EFB208A6A9000A80753 /* CTSwizzle.m in Sources */,
-				4803951B2A7ABAD200C4D254 /* CTAES.m in Sources */,
+				4803951B2A7ABAD200C4D254 /* CTCryptHandler.m in Sources */,
 				D032F3A92093EC9700F98D74 /* CTValidationResult.m in Sources */,
 				071EB501217F6427008F0FAB /* CTFooterViewController.m in Sources */,
 				6A4427C92AB05CF00098866F /* CTInAppTriggerManager.m in Sources */,
