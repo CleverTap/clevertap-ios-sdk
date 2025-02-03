@@ -33,7 +33,7 @@ class CTEncryptionManager: NSObject {
     }
     
     @objc
-    func encryptString(_ data: Data) throws -> Data {
+    func encryptData(_ data: Data) throws -> Data {
         let key = try getOrCreateKey()
         let encrypted = try aesGCM.encrypt(data, using: key)
         
@@ -47,7 +47,43 @@ class CTEncryptionManager: NSObject {
     }
     
     @objc
-    func decryptString(_ combinedData: Data) throws -> Data {
+    func decryptData(_ combinedData: Data) throws -> Data {
+        guard combinedData.count >= 28 else { // 12 (nonce) + 16 (tag) minimum
+            throw EncryptionError.invalidInput
+        }
+        
+        let nonceData = combinedData.prefix(12)
+        let tagData = combinedData.suffix(16)
+        let ciphertextData = combinedData.dropFirst(12).dropLast(16)
+        
+        let nonce = try AES.GCM.Nonce(data: nonceData)
+        let encryptedData = EncryptedData(
+            ciphertext: ciphertextData,
+            nonce: nonce,
+            tag: tagData
+        )
+        
+        let key = try getOrCreateKey()
+        let decryptedData = try aesGCM.decrypt(encryptedData, using: key)
+        return decryptedData
+    }
+    
+    @objc
+    func encryptDataWithAES(_ data: Data) throws -> Data {
+        let key = try getOrCreateKey()
+        let encrypted = try aesGCM.encrypt(data, using: key)
+        
+        // Combine nonce, ciphertext, and tag
+        var combinedData = Data()
+        combinedData.append(encrypted.nonce.withUnsafeBytes { Data($0) }) // Fixed: proper nonce data conversion
+        combinedData.append(encrypted.ciphertext)
+        combinedData.append(encrypted.tag)
+        
+        return combinedData
+    }
+    
+    @objc
+    func decryptDataWithAES(_ combinedData: Data) throws -> Data {
         guard combinedData.count >= 28 else { // 12 (nonce) + 16 (tag) minimum
             throw EncryptionError.invalidInput
         }
