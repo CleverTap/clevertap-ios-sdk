@@ -1357,15 +1357,15 @@
 		0B75722A2D50A875004C3B2B /* Encryption */ = {
 			isa = PBXGroup;
 			children = (
-				0B6AB3082D51E943009EE1BA /* CTCryptMigrator.m */,
-				0B6AB3052D51E937009EE1BA /* CTCryptMigrator.h */,
-				0B6AB3022D51E336009EE1BA /* CTAESCrypt.m */,
-				0B6AB2FF2D51E32A009EE1BA /* CTAESCrypt.h */,
 				4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */,
 				480395192A7ABAD200C4D254 /* CTCryptHandler.m */,
+				0B6AB2FF2D51E32A009EE1BA /* CTAESCrypt.h */,
+				0B6AB3022D51E336009EE1BA /* CTAESCrypt.m */,
 				0B75722E2D50AB79004C3B2B /* CTAESGCMCrypt.swift */,
 				0B7572372D50E303004C3B2B /* CTEncryptionManager.swift */,
 				0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */,
+				0B6AB3052D51E937009EE1BA /* CTCryptMigrator.h */,
+				0B6AB3082D51E943009EE1BA /* CTCryptMigrator.m */,
 				0B7572342D50E237004C3B2B /* CTCryptModel.swift */,
 			);
 			path = Encryption;
