@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 
-@interface CTAES : NSObject <NSSecureCoding>
+@interface CTCryptHandler : NSObject <NSSecureCoding>
 
 /**
  * Returns AES128 encrypted string using the crypto framework.

@@ -1,21 +1,27 @@
-#import "CTAES.h"
+#import "CTCryptHandler.h"
 #import <CommonCrypto/CommonCryptor.h>
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
+#import "CTAESCrypt.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 NSString *const kCacheGUIDS = @"CachedGUIDS";
 
-@interface CTAES () {}
+@interface CTCryptHandler () {}
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
 @property (nonatomic, assign) BOOL isDefaultInstance;
 @end
 
-@implementation CTAES
+@implementation CTCryptHandler
 
 - (instancetype)initWithAccountID:(NSString *)accountID
                   encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel
@@ -129,53 +135,39 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 - (NSData *)convertData:(NSData *)data
           withOperation:(CCOperation)operation {
-    NSData *outputData = [self AES128WithOperation:operation
-                                               key:[self generateKeyPassword]
-                                        identifier:CLTAP_ENCRYPTION_IV
-                                              data:data];
-    return outputData;
-}
-
-- (NSData *)AES128WithOperation:(CCOperation)operation
-                            key:(NSString *)key
-                     identifier:(NSString *)identifier
-                           data:(NSData *)data {
-    // Note: The key will be 0's but we intentionally are keeping it this way to maintain
-    // compatibility. The correct code is:
-    // char keyPtr[[key length] + 1];
-    char keyCString[kCCKeySizeAES128 + 1];
-    memset(keyCString, 0, sizeof(keyCString));
-    [key getCString:keyCString maxLength:sizeof(keyCString) encoding:NSUTF8StringEncoding];
-    
-    char identifierCString[kCCBlockSizeAES128 + 1];
-    memset(identifierCString, 0, sizeof(identifierCString));
-    [identifier getCString:identifierCString
-                 maxLength:sizeof(identifierCString)
-                  encoding:NSUTF8StringEncoding];
-    
-    size_t outputAvailableSize = [data length] + kCCBlockSizeAES128;
-    void *output = malloc(outputAvailableSize);
-    
-    size_t outputMovedSize = 0;
-    CCCryptorStatus cryptStatus = CCCrypt(operation,
-                                          kCCAlgorithmAES128,
-                                          kCCOptionPKCS7Padding,
-                                          keyCString,
-                                          kCCBlockSizeAES128,
-                                          identifierCString,
-                                          [data bytes],
-                                          [data length],
-                                          output,
-                                          outputAvailableSize,
-                                          &outputMovedSize);
-    
-    if (cryptStatus != kCCSuccess) {
-        CleverTapLogStaticInternal(@"Failed to encode/deocde the string with error code: %d", cryptStatus);
-        free(output);
-        return nil;
+    if (@available(iOS 13.0, *)) {
+        CTEncryptionManager *encryptionManager = [[CTEncryptionManager alloc] initWithKeychainTag:@"EncryptionKey"];
+        NSError *error = nil;
+        NSData *processedData = nil;
+        
+        switch (operation) {
+            case kCCEncrypt:
+                processedData = [encryptionManager encryptData:data error:&error];
+                break;
+            case kCCDecrypt:
+                processedData = [encryptionManager decryptData:data error:&error];
+                break;
+            default:
+                NSLog(@"Unsupported operation");
+                break;
+        }
+        
+        if (error) {
+            NSLog(@"Encryption/Decryption error: %@", error);
+            return nil;
+        }
+        
+        return processedData;
+    } else {
+        CTAESCrypt *aesCrypt = [[CTAESCrypt alloc] init];
+        NSData *outputData = [aesCrypt
+                            AES128WithOperation:operation
+                            key:[aesCrypt generateKeyPassword]
+                            identifier:CLTAP_ENCRYPTION_IV
+                            data:data];
+        return outputData;
     }
-    
-    return [NSData dataWithBytesNoCopy:output length:outputMovedSize];
+    return nil;
 }
 
 - (NSString *)getCachedKey:(NSString *)value {
