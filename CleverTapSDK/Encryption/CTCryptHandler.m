@@ -1,3 +1,10 @@
+//
+//  CTCryptHandler.m
+//  CleverTapSDK
+//
+//  Created by Kushagra Mishra on 07/02/25.
+//  Copyright © 2025 CleverTap. All rights reserved.
+//
 #import "CTCryptHandler.h"
 #import <CommonCrypto/CommonCryptor.h>
 #import "CTConstants.h"
