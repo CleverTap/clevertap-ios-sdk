@@ -9,22 +9,32 @@
 #import "CTAESCrypt.h"
 #import "CTConstants.h"
 
+NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
+NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
+
+@interface CTAESCrypt () {}
+@property (nonatomic, strong) NSString *accountID;
+@end
+
 @implementation CTAESCrypt
 
 - (nullable NSData *)AES128WithOperation:(CCOperation)operation
-                                   key:(NSString *)key
-                            identifier:(NSString *)identifier
-                                  data:(NSData *)data {
+                               accountID:(NSString *)accountID
+                                    data:(NSData *)data {
     // Note: The key will be 0's but we intentionally are keeping it this way to maintain
     // compatibility. The correct code is:
     // char keyPtr[[key length] + 1];
     char keyCString[kCCKeySizeAES128 + 1];
     memset(keyCString, 0, sizeof(keyCString));
+    //The encryption/decryption key
+    NSString *key = [self generateKeyPassword];
     [key getCString:keyCString maxLength:sizeof(keyCString) encoding:NSUTF8StringEncoding];
     
     char identifierCString[kCCBlockSizeAES128 + 1];
     memset(identifierCString, 0, sizeof(identifierCString));
-    [identifier getCString:identifierCString
+    //The initialization vector
+    NSString *iv = CLTAP_ENCRYPTION_IV;
+    [iv getCString:identifierCString
                  maxLength:sizeof(identifierCString)
                   encoding:NSUTF8StringEncoding];
     
@@ -54,9 +64,8 @@
 }
 
 - (NSString *)generateKeyPassword {
-    // Add your implementation here
-    // Return the key password string
-    return @"key";
+    NSString *keyPassword = [NSString stringWithFormat:@"%@%@%@",kCRYPT_KEY_PREFIX, _accountID, kCRYPT_KEY_SUFFIX];
+    return keyPassword;
 }
 
 @end

@@ -14,6 +14,8 @@ import CryptoKit
 class CTEncryptionManager: NSObject {
     private let keychainManager: CTKeychainManager
     private let aesGCM: CTAESGCMCrypt
+    private let AES_GCM_PREFIX = "<ct<"
+    private let AES_GCM_SUFFIX = ">ct>"
 
     @objc
     init(keychainTag: String) {
@@ -39,22 +41,48 @@ class CTEncryptionManager: NSObject {
 
         // Combine nonce, ciphertext, and tag
         var combinedData = Data()
-        combinedData.append(encrypted.nonce.withUnsafeBytes { Data($0) }) // Fixed: proper nonce data conversion
+        
+        // Add prefix
+        if let prefixData = AES_GCM_PREFIX.data(using: .utf8) {
+            combinedData.append(prefixData)
+        }
+        
+        combinedData.append(encrypted.nonce.withUnsafeBytes { Data($0) })
         combinedData.append(encrypted.ciphertext)
         combinedData.append(encrypted.tag)
-
+        
+        // Add suffix
+        if let suffixData = AES_GCM_SUFFIX.data(using: .utf8) {
+            combinedData.append(suffixData)
+        }
         return combinedData
     }
 
     @objc
     func decryptData(_ combinedData: Data) throws -> Data {
-        guard combinedData.count >= 28 else { // 12 (nonce) + 16 (tag) minimum
+        // Check for prefix and suffix
+        guard let prefix = AES_GCM_PREFIX.data(using: .utf8),
+              let suffix = AES_GCM_SUFFIX.data(using: .utf8) else {
+            throw EncryptionError.invalidInput
+        }
+        
+        // Verify prefix and suffix
+        guard combinedData.starts(with: prefix),
+              combinedData.suffix(suffix.count) == suffix else {
+            throw EncryptionError.invalidInput
+        }
+        
+        // Remove prefix and suffix
+        let strippedData = combinedData.dropFirst(prefix.count).dropLast(suffix.count)
+        
+        // Verify minimum length (12 for nonce + 16 for tag + actual data)
+        guard strippedData.count >= 28 else {
             throw EncryptionError.invalidInput
         }
 
-        let nonceData = combinedData.prefix(12)
-        let tagData = combinedData.suffix(16)
-        let ciphertextData = combinedData.dropFirst(12).dropLast(16)
+        let nonceData = strippedData.prefix(12)
+        let tagData = strippedData.suffix(16)
+        let ciphertextData = strippedData.dropFirst(12).dropLast(16)
 
         let nonce = try AES.GCM.Nonce(data: nonceData)
         let encryptedData = EncryptedData(

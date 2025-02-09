@@ -10,9 +10,9 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTAESCrypt.h"
-
-NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
-NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
+//
+//NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
+//NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 
 @interface CTCryptMigrator () {}
 @property (nonatomic, strong) NSString *accountID;
@@ -58,8 +58,7 @@ NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 }
 
 - (NSString *)generateKeyPassword {
-    NSString *keyPassword = [NSString stringWithFormat:@"%@%@%@",kCRYPT_KEY_PREFIX, _accountID, kCRYPT_KEY_SUFFIX];
-    return keyPassword;
+    return @"key";
 }
 
 @end

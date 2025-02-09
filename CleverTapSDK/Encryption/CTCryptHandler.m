@@ -18,8 +18,6 @@
 #endif
 
 NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
-NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
-NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 @interface CTCryptHandler () {}
@@ -169,8 +167,7 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
         CTAESCrypt *aesCrypt = [[CTAESCrypt alloc] init];
         NSData *outputData = [aesCrypt
                             AES128WithOperation:operation
-                            key:[aesCrypt generateKeyPassword]
-                            identifier:CLTAP_ENCRYPTION_IV
+                            accountID:_accountID
                             data:data];
         return outputData;
     }
@@ -193,11 +190,6 @@ NSString *const kCacheGUIDS = @"CachedGUIDS";
     } else {
         return nil;
     }
-}
-
-- (NSString *)generateKeyPassword {
-    NSString *keyPassword = [NSString stringWithFormat:@"%@%@%@",kCRYPT_KEY_PREFIX, _accountID, kCRYPT_KEY_SUFFIX];
-    return keyPassword;
 }
 
 - (NSString *)getEncryptedBase64String:(id)objectToEncrypt {
