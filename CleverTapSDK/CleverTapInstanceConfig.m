@@ -2,7 +2,7 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTPlistInfo.h"
 #import "CTConstants.h"
-#import "CTCryptHandler.h"
+#import "CTEncryptionManager.h"
 
 @implementation CleverTapInstanceConfig
 
@@ -27,7 +27,7 @@
     [coder encodeBool: _beta forKey:@"beta"];
     [coder encodeBool: _wv_init forKey:@"wv_init"];
     [coder encodeInt: _encryptionLevel forKey:@"encryptionLevel"];
-    [coder encodeObject: _cryptHandler forKey:@"cryptHandler"];
+    [coder encodeObject: _cryptManager forKey:@"cryptManager"];
     [coder encodeBool:_enableFileProtection forKey:@"enableFileProtection"];
     [coder encodeObject:_handshakeDomain forKey:@"handshakeDomain"];
 }
@@ -53,7 +53,7 @@
         _beta = [coder decodeBoolForKey:@"beta"];
         _wv_init = [coder decodeBoolForKey:@"wv_init"];
         _encryptionLevel = [coder decodeIntForKey:@"encryptionLevel"];
-        _cryptHandler = [coder decodeObjectForKey:@"cryptHandler"];
+        _cryptManager = [coder decodeObjectForKey:@"cryptManager"];
         _enableFileProtection = [coder decodeBoolForKey:@"enableFileProtection"];
         _handshakeDomain = [coder decodeObjectForKey:@"handshakeDomain"];
     }
@@ -204,7 +204,7 @@
     copy.identityKeys = self.identityKeys;
     copy.beta = self.beta;
     copy.encryptionLevel = self.encryptionLevel;
-    copy.cryptHandler = self.cryptHandler;
+    copy.cryptManager = self.cryptManager;
     copy.enableFileProtection = self.enableFileProtection;
     copy.handshakeDomain = self.handshakeDomain;
     return copy;
@@ -232,7 +232,7 @@
     _enableFileProtection = isDefault ? plist.enableFileProtection : NO;
     _handshakeDomain = isDefault ? plist.handshakeDomain : nil;
     if (isDefault) {
-        _cryptHandler = [[CTCryptHandler alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
+        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
     }
 }
 
@@ -250,7 +250,7 @@
 - (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
     if (!_isDefaultInstance) {
         _encryptionLevel = encryptionLevel;
-        _cryptHandler = [[CTCryptHandler alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:_isDefaultInstance];
+        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:_isDefaultInstance];
     } else {
         CleverTapLogStaticInfo("CleverTap Encryption level for default instance can't be updated from setEncryptionLevel method");
     }

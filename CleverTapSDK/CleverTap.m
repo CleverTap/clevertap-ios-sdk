@@ -32,6 +32,7 @@
 #import "CTMultiDelegateManager.h"
 #import "CTSessionManager.h"
 #import "CTFileDownloader.h"
+#import "CTCryptMigrator.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppFCManager.h"
@@ -99,7 +100,7 @@ static NSArray *sslCertNames;
 
 #import "NSDictionary+Extensions.h"
 
-#import "CTCryptHandler.h"
+#import "CTEncryptionManager.h"
 
 #import <objc/runtime.h>
 
@@ -199,6 +200,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
+@property (nonatomic, strong) CTCryptMigrator *cryptMigrator;
 
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
 @property (nonatomic, strong) NSMutableArray *profileQueue;
@@ -471,6 +473,8 @@ static BOOL sharedInstanceErrorLogged;
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
+        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo: _deviceInfo profileValues:initialProfileValues];
+        
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
@@ -557,7 +561,7 @@ static BOOL sharedInstanceErrorLogged;
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
     if (!_instances || [_instances count] <= 0) {
-        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTCryptHandler class], [NSArray class], [NSString class], nil];
+        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTEncryptionManager class], [NSArray class], [NSString class], nil];
         CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofTypes:allowedClasses removeFile:NO];
         return [CleverTap instanceWithConfig:config];
     }

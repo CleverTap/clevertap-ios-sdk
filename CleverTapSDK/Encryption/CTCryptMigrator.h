@@ -1,23 +1,20 @@
 //
 //  CTCryptMigrator.h
-//  CleverTapSDK
+//  Pods
 //
-//  Created by Kushagra Mishra on 07/02/25.
-//  Copyright © 2025 CleverTap. All rights reserved.
+//  Created by Kushagra Mishra on 16/02/25.
 //
+
 #import <Foundation/Foundation.h>
-#import <CommonCrypto/CommonCrypto.h>
+#import "CTDeviceInfo.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@class CleverTapInstanceConfig;
+@class CleverTapEventDetail;
 
-@interface CTCryptMigrator : NSObject <NSSecureCoding>
+@interface CTCryptMigrator : NSObject
 
-- (instancetype)initWithAccountID:(NSString *)accountID isDefaultInstance:(BOOL)isDefaultInstance;
-
-- (instancetype)initWithAccountID:(NSString *)accountID;
-
-- (NSString *)generateKeyPassword;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                 andDeviceInfo:(CTDeviceInfo*)deviceInfo
+                 profileValues:(NSDictionary*)profileValues;
 
 @end
-
-NS_ASSUME_NONNULL_END

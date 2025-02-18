@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CleverTap.h"
-#import "CTCryptHandler.h"
+#import "CTAES.h"
 
 @interface CTEncryptionTests : XCTestCase
 @end
@@ -20,10 +20,10 @@
     NSData *inAppData = [NSData dataWithContentsOfFile:[bundle pathForResource:@"inapp_interstitial" ofType:@"json"]];
     NSError *error;
     NSArray *objectToEncrypt = [NSJSONSerialization JSONObjectWithData:inAppData options:kNilOptions error:&error];
-    CTCryptHandler *ctCrypt = [[CTCryptHandler alloc] initWithAccountID:@"test"];
+    CTAES *ctAES = [[CTAES alloc] initWithAccountID:@"test"];
     
-    NSString *encryptedString = [ctCrypt getEncryptedBase64String:objectToEncrypt];
-    NSArray *decryptedObject = [ctCrypt getDecryptedObject:encryptedString];
+    NSString *encryptedString = [ctAES getEncryptedBase64String:objectToEncrypt];
+    NSArray *decryptedObject = [ctAES getDecryptedObject:encryptedString];
     XCTAssertEqualObjects(objectToEncrypt, decryptedObject);
 }
 

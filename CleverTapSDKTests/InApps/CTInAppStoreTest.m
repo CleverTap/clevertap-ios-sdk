@@ -14,14 +14,14 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppStore+Tests.h"
 #import "InAppHelper.h"
-#import "CTCryptHandler.h"
+#import "CTAES.h"
 #import "CTMultiDelegateManager+Tests.h"
 
 @interface CTInAppStoreTest : XCTestCase
 
 @property (nonatomic, weak) CTInAppStore *store;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, strong) CTCryptHandler *ctCrypt;
+@property (nonatomic, strong) CTAES *ctAES;
 @property (nonatomic, strong) NSArray *inApps;
 @property (nonatomic, strong) InAppHelper *helper;
 
@@ -37,7 +37,7 @@
     self.helper = helper;
     self.config = helper.config;
     self.store = helper.inAppStore;
-    self.ctCrypt = [[CTCryptHandler alloc] initWithAccountID:helper.accountId];
+    self.ctAES = [[CTAES alloc] initWithAccountID:helper.accountId];
 
     self.inApps = @[
         @{
@@ -103,7 +103,7 @@
 - (NSArray *)inAppsFromStorage:(NSString *)key {
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
     if (encryptedString) {
-        NSArray *arr = [self.ctCrypt getDecryptedObject:encryptedString];
+        NSArray *arr = [self.ctAES getDecryptedObject:encryptedString];
         if (arr) {
             return arr;
         }
@@ -202,14 +202,14 @@
 - (void)testStoreClientSideInAppsEncrypted {
     [self.store storeClientSideInApps:self.inApps];
     NSString *storedString = [CTPreferences getObjectForKey:[self storageKeyCS]];
-    NSString *encrypted = [self.ctCrypt getEncryptedBase64String:self.inApps];
+    NSString *encrypted = [self.ctAES getEncryptedBase64String:self.inApps];
     XCTAssertEqualObjects(storedString, encrypted);
 }
 
 - (void)testStoreServerSideInAppsEncrypted {
     [self.store storeServerSideInApps:self.inApps];
     NSString *storedString = [CTPreferences getObjectForKey:[self storageKeySS]];
-    NSString *encrypted = [self.ctCrypt getEncryptedBase64String:self.inApps];
+    NSString *encrypted = [self.ctAES getEncryptedBase64String:self.inApps];
     XCTAssertEqualObjects(storedString, encrypted);
 }
 

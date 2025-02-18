@@ -9,7 +9,7 @@
 #import "CTInAppStore.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
-#import "CTCryptHandler.h"
+#import "CTEncryptionManager.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTMultiDelegateManager.h"
@@ -22,7 +22,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *accountId;
 @property (nonatomic, strong) NSString *deviceId;
-@property (nonatomic, strong) CTCryptHandler *ctCrypt;
+@property (nonatomic, strong) CTEncryptionManager *cryptManager;
 
 @property (nonatomic, strong) NSArray *inAppsQueue;
 @property (nonatomic, strong) NSArray *clientSideInApps;
@@ -42,7 +42,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         self.config = config;
         self.accountId = config.accountId;
         self.deviceId = deviceId;
-        self.ctCrypt = [[CTCryptHandler alloc] initWithAccountID:config.accountId];
+        self.cryptManager = [[CTEncryptionManager alloc] initWithAccountID:config.accountId];
         
         [delegateManager addSwitchUserDelegate:self];
         [self migrateInAppQueueKeys];
@@ -58,7 +58,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         if (data) {
             if ([data isKindOfClass:[NSArray class]]) {
                 _inAppsQueue = data;
-                NSString *encryptedString = [self.ctCrypt getEncryptedBase64String:data];
+                NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:data];
                 NSString *newStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
                 [CTPreferences putString:encryptedString forKey:newStorageKey];
             }
@@ -82,7 +82,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _inAppsQueue = inApps;
         
-        NSString *encryptedString = [self.ctCrypt getEncryptedBase64String:inApps];
+        NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:inApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -95,7 +95,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         id data = [CTPreferences getObjectForKey:storageKey];
         if ([data isKindOfClass:[NSString class]]) {
-            NSArray *arr = [self.ctCrypt getDecryptedObject:data];
+            NSArray *arr = [self.cryptManager decryptObjectWithAESGCM:data];
             if (arr) {
                 _inAppsQueue = arr;
             }
@@ -198,7 +198,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = clientSideInApps;
         
-        NSString *encryptedString = [self.ctCrypt getEncryptedBase64String:clientSideInApps];
+        NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:clientSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -228,7 +228,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _serverSideInApps = serverSideInApps;
         
-        NSString *encryptedString = [self.ctCrypt getEncryptedBase64String:serverSideInApps];
+        NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:serverSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -248,7 +248,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
     if (encryptedString) {
-        NSArray *arr = [self.ctCrypt getDecryptedObject:encryptedString];
+        NSArray *arr = [self.cryptManager decryptObjectWithAESGCM:encryptedString];
         if (arr) {
             return arr;
         }

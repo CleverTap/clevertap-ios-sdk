@@ -7,7 +7,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTLoginInfoProvider.h"
-#import "CTCryptHandler.h"
+#import "CTEncryptionManager.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
@@ -966,13 +966,13 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 - (NSMutableDictionary *)decryptPIIDataIfEncrypted:(NSMutableDictionary *)profile {
     long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CT_ENCRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
     [CTPreferences putInt:self.config.encryptionLevel forKey:[CTUtils getKeyWithSuffix:CT_ENCRYPTION_KEY accountID:self.config.accountId]];
-    if (lastEncryptionLevel == CleverTapEncryptionMedium && self.config.cryptHandler) {
+    if (lastEncryptionLevel == CleverTapEncryptionMedium && self.config.cryptManager) {
         // Always store the local profile data in decrypted values.
         NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
                 NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                NSString *decryptedString = [self.config.cryptHandler getDecryptedString:value];
+                NSString *decryptedString = [self.config.cryptManager decryptStringWithAESGCM:value];
                 updatedProfile[key] = decryptedString;
             } else {
                 updatedProfile[key] = profile[key];
@@ -985,12 +985,12 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (NSMutableDictionary *)cryptValuesIfNeeded:(NSMutableDictionary *)profile {
-    if (self.config.encryptionLevel == CleverTapEncryptionMedium && self.config.cryptHandler) {
+    if (self.config.encryptionLevel == CleverTapEncryptionMedium && self.config.cryptManager) {
         NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
                 NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                updatedProfile[key] = [self.config.cryptHandler getEncryptedString:value];
+                updatedProfile[key] = [self.config.cryptManager encryptStringWithAESGCM:value];
             } else {
                 updatedProfile[key] = profile[key];
             }

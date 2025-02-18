@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
-@class CTCryptHandler;
+@class CTEncryptionManager;
 
 @interface CleverTapInstanceConfig : NSObject
 
@@ -21,7 +21,7 @@
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 @property (nonatomic, strong, nullable) NSArray *identityKeys;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
-@property (nonatomic, strong, nullable) CTCryptHandler *cryptHandler;
+@property (nonatomic, strong, nullable) CTEncryptionManager *cryptManager;
 
 
 - (instancetype _Nonnull) init __unavailable;
