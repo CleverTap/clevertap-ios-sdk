@@ -972,7 +972,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
                 NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                NSString *decryptedString = [self.config.cryptManager decryptStringWithAESGCM:value];
+                NSString *decryptedString = [self.config.cryptManager decryptString:value];
                 updatedProfile[key] = decryptedString;
             } else {
                 updatedProfile[key] = profile[key];
@@ -990,7 +990,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
                 NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                updatedProfile[key] = [self.config.cryptManager encryptStringWithAESGCM:value];
+                updatedProfile[key] = [self.config.cryptManager encryptString:value];
             } else {
                 updatedProfile[key] = profile[key];
             }

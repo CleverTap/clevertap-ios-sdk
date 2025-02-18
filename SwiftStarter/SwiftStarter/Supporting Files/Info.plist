@@ -23,7 +23,7 @@
 	<key>CleverTapToken</key>
 	<string>aa2-032</string>
 	<key>CleverTapEncryptionLevel</key>
-	<true/>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

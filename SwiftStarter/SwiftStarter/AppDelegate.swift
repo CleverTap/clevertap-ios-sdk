@@ -30,9 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // watchOS session
         checkSession()
-        let path: [AnyObject] = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true) as [AnyObject]
-                let folder: String = path[0] as! String
-                NSLog("Your NSUserDefaults are stored in this folder: %@/Preferences", folder)
         
         return true
     }

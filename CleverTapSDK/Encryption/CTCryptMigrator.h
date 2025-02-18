@@ -14,7 +14,6 @@
 @interface CTCryptMigrator : NSObject
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                 andDeviceInfo:(CTDeviceInfo*)deviceInfo
-                 profileValues:(NSDictionary*)profileValues;
+                 andDeviceInfo:(CTDeviceInfo*)deviceInfo;
 
 @end

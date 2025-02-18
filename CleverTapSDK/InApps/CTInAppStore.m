@@ -58,7 +58,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         if (data) {
             if ([data isKindOfClass:[NSArray class]]) {
                 _inAppsQueue = data;
-                NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:data];
+                NSString *encryptedString = [self.cryptManager encryptObject:data];
                 NSString *newStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
                 [CTPreferences putString:encryptedString forKey:newStorageKey];
             }
@@ -82,7 +82,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _inAppsQueue = inApps;
         
-        NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:inApps];
+        NSString *encryptedString = [self.cryptManager encryptObject:inApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -95,7 +95,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         id data = [CTPreferences getObjectForKey:storageKey];
         if ([data isKindOfClass:[NSString class]]) {
-            NSArray *arr = [self.cryptManager decryptObjectWithAESGCM:data];
+            NSArray *arr = [self.cryptManager decryptObject:data];
             if (arr) {
                 _inAppsQueue = arr;
             }
@@ -198,7 +198,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = clientSideInApps;
         
-        NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:clientSideInApps];
+        NSString *encryptedString = [self.cryptManager encryptObject:clientSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -228,7 +228,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _serverSideInApps = serverSideInApps;
         
-        NSString *encryptedString = [self.cryptManager encryptObjectWithAESGCM:serverSideInApps];
+        NSString *encryptedString = [self.cryptManager encryptObject:serverSideInApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -248,7 +248,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
     if (encryptedString) {
-        NSArray *arr = [self.cryptManager decryptObjectWithAESGCM:encryptedString];
+        NSArray *arr = [self.cryptManager decryptObject:encryptedString];
         if (arr) {
             return arr;
         }
