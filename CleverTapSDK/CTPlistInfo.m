@@ -96,6 +96,9 @@ static NSArray *registeredURLSchemes;
         
         _handshakeDomain = [CTPlistInfo getMetaDataForAttribute:CLTAP_HANDSHAKE_DOMAIN];
         
+        _pubkey = [CTPlistInfo getMetaDataForAttribute:CLTAP_PUBKEY];
+        _pubkeyVersion = [CTPlistInfo getMetaDataForAttribute:CLTAP_PUBKEY_VERSION];
+        
         NSString *encryptionLevel = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_LEVEL];
         [self setEncryption:encryptionLevel];
     }

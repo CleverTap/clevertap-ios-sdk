@@ -104,6 +104,11 @@ static NSArray *sslCertNames;
 #import "CTEncryptionManager.h"
 
 #import <objc/runtime.h>
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
@@ -478,6 +483,10 @@ static BOOL sharedInstanceErrorLogged;
         
         // save config to defaults
         [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
+        
+        // Initialise a session/symmetric key only if encryption in transit is enabled.
+        if ([config encryptionInTransitEnabled]) {
+        }
         
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
@@ -2080,12 +2089,29 @@ static BOOL sharedInstanceErrorLogged;
         NSUInteger batchSize = ([queue count] > kMaxBatchSize) ? kMaxBatchSize : [queue count];
         NSArray *batch = [queue subarrayWithRange:NSMakeRange(0, batchSize)];
         NSArray *batchWithHeader = [self insertHeader:header inBatch:batch];
+        id finalPayload = [batchWithHeader copy];
+        NSMutableDictionary *additionalHeaders = [NSMutableDictionary dictionary];
         
         CleverTapLogInternal(self.config.logLevel, @"%@: Pending events batch contains: %d items", self, (int) [batch count]);
         
         @try {
-            NSString *jsonBody = [CTUtils jsonObjectToString:batchWithHeader];
-            
+            if ([_config encryptionInTransitEnabled]) {
+                // Encrypt the payload if pubkey is provided.
+                NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
+                if (encryptedDict.count > 0) {
+                    additionalHeaders[ENCRYPTION_HEADER] = @"true";
+                    
+                    NSString *encryptedPayload = encryptedDict[@"encodedPayload"];
+                    NSData *nonceData = encryptedDict[@"nonceData"];
+                    finalPayload = @{
+                        @"encryptedPayload": encryptedPayload,
+                        @"key": [[NetworkEncryptionManager shared]getEncryptedSessionKeyWithBase64PublicKey:self.config.pubkey],
+                        @"keyVersion": self.config.pubkeyVersion,
+                        @"iv": [nonceData base64EncodedStringWithOptions:kNilOptions]
+                    };
+                }
+            }
+            NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
             CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
             
             // update endpoint for current timestamp
@@ -2096,6 +2122,7 @@ static BOOL sharedInstanceErrorLogged;
             }
             
             __block BOOL success = NO;
+            __block BOOL responseEncrypted = NO;
             __block NSData *responseData;
             
             __block BOOL redirect = NO;
@@ -2103,7 +2130,7 @@ static BOOL sharedInstanceErrorLogged;
             // Need to simulate a synchronous request
             dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
             
-            CTRequest *ctRequest = [CTRequestFactory eventRequestWithConfig:self.config params:batchWithHeader url:endpoint];
+            CTRequest *ctRequest = [CTRequestFactory eventRequestWithConfig:self.config params:finalPayload url:endpoint additionalHeaders:additionalHeaders];
             [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
                 responseData = data;
                 
@@ -2111,14 +2138,30 @@ static BOOL sharedInstanceErrorLogged;
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                     
                     success = (httpResponse.statusCode == 200);
+                    responseEncrypted = ([httpResponse.allHeaderFields[ENCRYPTION_HEADER]isEqual:@"true"]);
                     
                     NSDictionary *headers = httpResponse.allHeaderFields;
                     if (success) {
                         [self.domainFactory updateDomainFromResponseHeaders:headers];
                         [self.domainFactory updateNotificationViewedDomainFromResponseHeaders:headers];
                         [self.domainFactory updateMutedFromResponseHeaders:headers];
+                        if (queue == self->_notificationsQueue) {
+                            redirect = [self updateStateFromResponseHeadersShouldRedirectForNotif: httpResponse.allHeaderFields];
+                        } else {
+                            redirect = [self updateStateFromResponseHeadersShouldRedirect: httpResponse.allHeaderFields];
+                        }
                     } else {
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
+                    }
+                    
+                    if (responseEncrypted) {
+                        NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
+                        if (decryptedData.length > 0) {
+                            responseData = decryptedData;
+                        }
+                        else {
+                            CleverTapLogDebug(self.config.logLevel, @"%@: Response decryption failed. Parsing normally.", self);
+                        }
                     }
                 }
                 
@@ -2152,6 +2195,7 @@ static BOOL sharedInstanceErrorLogged;
             }
             
             [queue removeObjectsInArray:batch];
+            
             
             [self parseResponse:responseData];
             

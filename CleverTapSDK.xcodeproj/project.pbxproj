@@ -319,6 +319,8 @@
 		4ED6D50E2DC0B866009820A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED6D4FF2DC0B866009820A3 /* AppDelegate.swift */; };
 		4ED6D50F2DC0B866009820A3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED6D5062DC0B866009820A3 /* SceneDelegate.swift */; };
 		4ED6D5102DC0B866009820A3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED6D5082DC0B866009820A3 /* ViewController.swift */; };
+		4ED923B42DC73AC100E3AC7D /* NetworkEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED923B22DC73AC100E3AC7D /* NetworkEncryptionManager.swift */; };
+		4ED923B52DC73AC100E3AC7D /* NetworkEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED923B22DC73AC100E3AC7D /* NetworkEncryptionManager.swift */; };
 		4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */; };
 		4EF0D5452AD84BCA0044C48F /* CTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */; };
 		4EF0D5462AD84BCA0044C48F /* CTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */; };
@@ -879,6 +881,7 @@
 		4E8B816E2AD2BB8A00714BB4 /* CTDispatchQueueManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDispatchQueueManager.m; sourceTree = "<group>"; };
 		4E8B81762AD2CB4E00714BB4 /* CTPushPrimerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTPushPrimerManager.h; sourceTree = "<group>"; };
 		4E8B81772AD2CB4E00714BB4 /* CTPushPrimerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTPushPrimerManager.m; sourceTree = "<group>"; };
+		4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkEncryptionManager.swift; sourceTree = "<group>"; };
 		4EA64A24296C115E001D9B22 /* CTRequestFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTRequestFactory.h; sourceTree = "<group>"; };
 		4EA64A25296C115E001D9B22 /* CTRequestFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTRequestFactory.m; sourceTree = "<group>"; };
 		4EA64A2A296C1190001D9B22 /* CTRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTRequest.h; sourceTree = "<group>"; };
@@ -889,14 +892,15 @@
 		4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTriggerEvaluator.m; sourceTree = "<group>"; };
 		4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityManagementTests.m; sourceTree = "<group>"; };
 		4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSessionManagerTests.m; sourceTree = "<group>"; };
-		4ED6D4FF2DC0B866009820A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4ED6D5002DC0B866009820A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		4ED6D5012DC0B866009820A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4ED6D4FF2DC0B866009820A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = TestHost_iOS/AppDelegate.swift; sourceTree = "<group>"; };
+		4ED6D5002DC0B866009820A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = TestHost_iOS/Assets.xcassets; sourceTree = "<group>"; };
+		4ED6D5012DC0B866009820A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = TestHost_iOS/Info.plist; sourceTree = "<group>"; };
 		4ED6D5022DC0B866009820A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4ED6D5042DC0B866009820A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		4ED6D5062DC0B866009820A3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		4ED6D5072DC0B866009820A3 /* TestHost_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TestHost_iOS.entitlements; sourceTree = "<group>"; };
-		4ED6D5082DC0B866009820A3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		4ED6D5062DC0B866009820A3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = TestHost_iOS/SceneDelegate.swift; sourceTree = "<group>"; };
+		4ED6D5072DC0B866009820A3 /* TestHost_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = TestHost_iOS.entitlements; path = TestHost_iOS/TestHost_iOS.entitlements; sourceTree = "<group>"; };
+		4ED6D5082DC0B866009820A3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = TestHost_iOS/ViewController.swift; sourceTree = "<group>"; };
+		4ED923B22DC73AC100E3AC7D /* NetworkEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkEncryptionManager.swift; sourceTree = "<group>"; };
 		4EDCDE4D278AC4DF0065E699 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTVarCacheTest.m; sourceTree = "<group>"; };
 		4EEF4A382ADD05B600F090EB /* CTSessionManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTSessionManager+Tests.h"; sourceTree = "<group>"; };
@@ -1530,14 +1534,6 @@
 			path = Swizzling;
 			sourceTree = "<group>";
 		};
-		4ED6D4ED2DC0B856009820A3 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				EBDBB2459E78CE4140898DEB /* Pods_shared_CleverTapSDKTests.framework */,
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
 		4ED6D5092DC0B866009820A3 /* TestHost_iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -1551,6 +1547,23 @@
 				4ED6D5082DC0B866009820A3 /* ViewController.swift */,
 			);
 			path = TestHost_iOS;
+			sourceTree = "<unknown>";
+		};
+		4ED923B12DC73A2900E3AC7D /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */,
+				EBDBB2459E78CE4140898DEB /* Pods_shared_CleverTapSDKTests.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		4ED923B32DC73AC100E3AC7D /* Encryption */ = {
+			isa = PBXGroup;
+			children = (
+				4ED923B22DC73AC100E3AC7D /* NetworkEncryptionManager.swift */,
+			);
+			path = Encryption;
 			sourceTree = "<group>";
 		};
 		4EF0D5422AD84BAA0044C48F /* Session */ = {
@@ -1818,7 +1831,7 @@
 				D0C7BBBE207D82C0001345EF /* Products */,
 				07B94551219EA44100D4C542 /* Frameworks */,
 				D434C7AF6001883FD5FD16AD /* Pods */,
-				4ED6D4ED2DC0B856009820A3 /* Recovered References */,
+				4ED923B12DC73A2900E3AC7D /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1837,6 +1850,7 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				4ED923B32DC73AC100E3AC7D /* Encryption */,
 				4847D16B2CCB9018008DC327 /* EventDatabase */,
 				6B9E95B62C2AE6740002D557 /* FileDownload */,
 				3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */,
@@ -2627,6 +2641,7 @@
 				D014B90520E2FB5F001E0780 /* CTValidator.m in Sources */,
 				4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
 				4E25E3CE278887A80008C888 /* CTIdentityRepoFactory.m in Sources */,
+				4ED923B42DC73AC100E3AC7D /* NetworkEncryptionManager.swift in Sources */,
 				49C189A0243B08860003E4D4 /* CTProductConfigController.m in Sources */,
 				4EF0D5482AD84BCA0044C48F /* CTSessionManager.m in Sources */,
 				D014B8F720E2FADA001E0780 /* CTConstants.m in Sources */,
@@ -2791,6 +2806,7 @@
 				6B32A09F2B9901AA009ADC57 /* CTCustomTemplateBuilder.m in Sources */,
 				49C189A2243B08A40003E4D4 /* CTFeatureFlagsController.m in Sources */,
 				6A3EBD2E2AA06EB300CE97D4 /* CTInAppEvaluationManager.m in Sources */,
+				4ED923B52DC73AC100E3AC7D /* NetworkEncryptionManager.swift in Sources */,
 				4E838C42299F419900ED0875 /* ContentMerger.m in Sources */,
 				071EB513217F6427008F0FAB /* CTInAppNotification.m in Sources */,
 				6BB727342B8F787D009CE7D0 /* CTCustomTemplatesManager.m in Sources */,
