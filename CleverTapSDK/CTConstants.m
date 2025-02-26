@@ -6,6 +6,7 @@ NSString *const kHANDSHAKE_URL = @"https://clevertap-prod.com/hello";
 NSString *const kHANDSHAKE_DOMAIN_HEADER =@"X-CleverTap-Handshake-Domain";
 NSString *const ACCOUNT_ID_HEADER = @"X-CleverTap-Account-Id";
 NSString *const ACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
+NSString *const ENCRYPTION_HEADER = @"X-Clevertap-Encryption-Enabled";
 
 NSString *const REDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
 NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";

@@ -17,6 +17,8 @@
 @property (nonatomic, assign) BOOL disableIDFV;
 @property (nonatomic, assign) BOOL enableFileProtection;
 @property (nonatomic, strong, nullable) NSString *handshakeDomain;
+@property (nonatomic, strong, nullable) NSString *pubkey;
+@property (nonatomic, strong, nullable) NSString *pubkeyVersion;
 
 @property (nonatomic, assign) CleverTapLogLevel logLevel;
 @property (nonatomic, strong, nullable) NSArray *identityKeys;
