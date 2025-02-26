@@ -282,6 +282,8 @@
 		4E8B81722AD2BB8A00714BB4 /* CTDispatchQueueManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B816E2AD2BB8A00714BB4 /* CTDispatchQueueManager.m */; };
 		4E8B81782AD2CB4E00714BB4 /* CTPushPrimerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E8B81762AD2CB4E00714BB4 /* CTPushPrimerManager.h */; };
 		4E8B81792AD2CB4E00714BB4 /* CTPushPrimerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81772AD2CB4E00714BB4 /* CTPushPrimerManager.m */; };
+		4E93B3752D54AC810016F687 /* NetworkEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */; };
+		4E93B3762D54AC810016F687 /* NetworkEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */; };
 		4EA64A26296C115E001D9B22 /* CTRequestFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A24296C115E001D9B22 /* CTRequestFactory.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4EA64A27296C115E001D9B22 /* CTRequestFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A24296C115E001D9B22 /* CTRequestFactory.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4EA64A28296C115E001D9B22 /* CTRequestFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EA64A25296C115E001D9B22 /* CTRequestFactory.m */; };
@@ -861,6 +863,7 @@
 		4E8B816E2AD2BB8A00714BB4 /* CTDispatchQueueManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDispatchQueueManager.m; sourceTree = "<group>"; };
 		4E8B81762AD2CB4E00714BB4 /* CTPushPrimerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTPushPrimerManager.h; sourceTree = "<group>"; };
 		4E8B81772AD2CB4E00714BB4 /* CTPushPrimerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTPushPrimerManager.m; sourceTree = "<group>"; };
+		4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkEncryptionManager.swift; sourceTree = "<group>"; };
 		4EA64A24296C115E001D9B22 /* CTRequestFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTRequestFactory.h; sourceTree = "<group>"; };
 		4EA64A25296C115E001D9B22 /* CTRequestFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTRequestFactory.m; sourceTree = "<group>"; };
 		4EA64A2A296C1190001D9B22 /* CTRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTRequest.h; sourceTree = "<group>"; };
@@ -1347,6 +1350,14 @@
 				0B1678FE2D64645E0017E74C /* CTAESGCMCrypt.swift */,
 				0B1679072D64651A0017E74C /* CTEncryptionManager.h */,
 				0B1679082D64651A0017E74C /* CTEncryptionManager.m */,
+				4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */,
+				480395192A7ABAD200C4D254 /* CTCryptHandler.m */,
+				0B75722B2D50AB6B004C3B2B /* CTAESCrypt.swift */,
+				0B75722E2D50AB79004C3B2B /* CTAESGCMCrypt.swift */,
+				0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */,
+				0B7572342D50E237004C3B2B /* CTCryptModel.swift */,
+				0B7572372D50E303004C3B2B /* CTEncryptionManager.swift */,
+				4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */,
 			);
 			path = Encryption;
 			sourceTree = "<group>";
@@ -2536,6 +2547,7 @@
 				D014B8ED20E2FAA2001E0780 /* CleverTapTrackedViewController.m in Sources */,
 				4E5A02DF2A4C5FD800DE242A /* LeanplumCT.m in Sources */,
 				48DC69B92D3FDF55000E7BE4 /* CTCustomTemplateInAppData.m in Sources */,
+				4E93B3762D54AC810016F687 /* NetworkEncryptionManager.swift in Sources */,
 				6BD334ED2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */,
 				D014B8F120E2FAB9001E0780 /* CTPlistInfo.m in Sources */,
 				4E25E3D12788889F0008C888 /* CTLoginInfoProvider.m in Sources */,
@@ -2770,6 +2782,7 @@
 				071EB4D4217F6427008F0FAB /* CTBaseHeaderFooterViewController.m in Sources */,
 				D06F052921E802D400D1B6BD /* CTInboxBaseMessageCell.m in Sources */,
 				07B9453F219EA34300D4C542 /* CleverTapInboxStyleConfig.m in Sources */,
+				4E93B3752D54AC810016F687 /* NetworkEncryptionManager.swift in Sources */,
 				6BB7271A2B8E469B009CE7D0 /* CTInAppTemplateBuilder.m in Sources */,
 				6A775C3529BE78C7007790E0 /* CTVariables.m in Sources */,
 				4E7929FB29799E8F00B81F3C /* CTDomainFactory.m in Sources */,

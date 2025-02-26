@@ -6,6 +6,7 @@ extern NSString *const kHANDSHAKE_URL;
 extern NSString *const kHANDSHAKE_DOMAIN_HEADER;
 extern NSString *const ACCOUNT_ID_HEADER;
 extern NSString *const ACCOUNT_TOKEN_HEADER;
+extern NSString *const ENCRYPTION_HEADER;
 
 extern NSString *const REDIRECT_DOMAIN_KEY;
 extern NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY;
@@ -40,6 +41,8 @@ extern NSString *const kSessionId;
 #define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
 #define CLTAP_ENABLE_FILE_PROTECTION @"CleverTapEnableFileProtection"
 #define CLTAP_HANDSHAKE_DOMAIN @"CleverTapHandshakeDomain"
+#define CLTAP_PUBKEY @"CleverTapPubKey"
+#define CLTAP_PUBKEY_VERSION @"CleverTapPubKeyVersion"
 #define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"
