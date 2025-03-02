@@ -9,8 +9,10 @@ framework module CleverTapSDK {
     header "CleverTapUTMDetail.h"
     header "CleverTapTrackedViewController.h"
     header "CleverTapInstanceConfig.h"
-    header "CleverTap+CTVar.h"
     header "CTVar.h"
+    header "CleverTap+CTVar.h"
     header "LeanplumCT.h"
     export *
+    
+    // Private headers for swift
 }

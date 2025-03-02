@@ -1,4 +1,4 @@
-framework module CleverTapSDK {    
+framework module CleverTapSDK {
     header "CleverTap.h"
     header "CleverTap+Inbox.h"
     header "CleverTap+FeatureFlags.h"
@@ -29,5 +29,8 @@ framework module CleverTapSDK {
     header "CTCustomTemplate.h"
     header "CTTemplateContext.h"
     header "CTCustomTemplatesManager.h"
+    header "CleverTap+PushPermission.h"
     export *
+    
+    // Private headers for swift
 }
