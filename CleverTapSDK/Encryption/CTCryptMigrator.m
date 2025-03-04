@@ -11,8 +11,7 @@
 NSString *const CT_DECRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
-@interface CTCryptMigrator() {
-}
+@interface CTCryptMigrator()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
@@ -30,7 +29,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId];
-        if ([self isMigrationNeeded]){
+        if ([self isMigrationNeeded]) {
             [self performMigration];
         }
     }
@@ -38,28 +37,36 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 }
 
 - (BOOL)isMigrationNeeded {
-    return (BOOL) [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_REQUIRED withResetValue:YES];
+    return (BOOL) [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:YES];
 }
 
 - (void)performMigration {
+    NSMutableArray *failures = [NSMutableArray new];
     BOOL migratedGUIDSuccesfully = NO;
     BOOL migratedUserProfileDataSuccesfully = NO;
     BOOL migratedInAppDataSuccesfully = NO;
     
-    if (_config.encryptionLevel == CleverTapEncryptionMedium){
+    if (_config.encryptionLevel == CleverTapEncryptionMedium) {
         migratedGUIDSuccesfully = [self migrateGUIDS];
+        if (!migratedGUIDSuccesfully) [failures addObject:@"GUID migration failed"];
+        
         migratedUserProfileDataSuccesfully = [self migrateUserProfileData];
+        if (!migratedUserProfileDataSuccesfully) [failures addObject:@"User profile migration failed"];
     }
-    migratedInAppDataSuccesfully = [self migrateInAppData];
     
-    if (migratedGUIDSuccesfully && migratedUserProfileDataSuccesfully && migratedInAppDataSuccesfully){
-        [CTPreferences putInt:0 forKey:CLTAP_ENCRYPTION_MIGRATION_REQUIRED];
+    migratedInAppDataSuccesfully = [self migrateInAppData];
+    if (!migratedInAppDataSuccesfully) [failures addObject:@"In-app data migration failed"];
+    
+    if (migratedGUIDSuccesfully && migratedUserProfileDataSuccesfully && migratedInAppDataSuccesfully) {
+        [CTPreferences putInt:0 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
+        CleverTapLogDebug(_config.logLevel, @"%@: Migration completed successfully", self);
     } else {
-        [CTPreferences putInt:1 forKey:CLTAP_ENCRYPTION_MIGRATION_REQUIRED];
+        [CTPreferences putInt:1 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
+        CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, [failures componentsJoinedByString:@", "]);
     }
 }
 
-#pragma mark - CGK Migration
+#pragma mark - GUID Migration
 
 - (BOOL)migrateGUIDS {
     NSString *cacheKey = [CTUtils getKeyWithSuffix:kCachedGUIDSKey accountID:_config.accountId];
@@ -67,23 +74,18 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
     if (!cachedGUIDS) return NO;
     
     NSMutableDictionary *newCache = [NSMutableDictionary new];
-    [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString* cachedKey,
-                                                    NSString* value,
-                                                    BOOL* stop) {
+    [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString* cachedKey, NSString* value, BOOL* stop) {
         NSArray *components = [cachedKey componentsSeparatedByString:@"_"];
         if (components.count != 2) return;
         
         NSString *key = components[0];
         NSString *identifier = components[1];
-        BOOL isCryptAESGCMEncrypted = NO;
-        if (identifier != nil && [identifier isKindOfClass:[NSString class]]) {
-            isCryptAESGCMEncrypted = [_cryptManager isTextAESGCMEncrypted:identifier];
-            if (!isCryptAESGCMEncrypted) {
-                NSString *decryptedString = [_cryptManager decryptString:identifier encryptionAlgorithm:AES];
-                if (decryptedString) {
-                    NSString *migratedEncryptedString = [_cryptManager encryptString:decryptedString];
-                    newCache[[NSString stringWithFormat:@"%@_%@", key, migratedEncryptedString]] = value;
-                }
+        
+        if (identifier && ![_cryptManager isTextAESGCMEncrypted:identifier]) {
+            NSString *decryptedString = [_cryptManager decryptString:identifier encryptionAlgorithm:AES];
+            if (decryptedString) {
+                NSString *migratedEncryptedString = [_cryptManager encryptString:decryptedString];
+                newCache[[NSString stringWithFormat:@"%@_%@", key, migratedEncryptedString]] = value;
             }
         }
     }];
@@ -94,24 +96,21 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 #pragma mark - In-app Migration
 
-- (BOOL) migrateInAppData {
-   return ([self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY] &&
-    [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS] &&
-           [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS]);
+- (BOOL)migrateInAppData {
+    return ([self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY] &&
+            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS] &&
+            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS]);
 }
 
 - (BOOL)migrateInAppsWithKeySuffix:(NSString *)keySuffix {
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
-    BOOL isCryptAESGCMEncrypted = NO;
-    if (encryptedString != nil && [encryptedString isKindOfClass:[NSString class]]) {
-        isCryptAESGCMEncrypted = [_cryptManager isTextAESGCMEncrypted:encryptedString];
-        if (!isCryptAESGCMEncrypted) {
-            NSArray *arr = [_cryptManager decryptObject:encryptedString encryptionAlgorithm:AES];
-            if (arr) {
-                NSString *migratedEncryptedString = [_cryptManager encryptObject:arr];
-                [CTPreferences putString:migratedEncryptedString forKey:keySuffix];
-            }
+    
+    if (encryptedString && ![_cryptManager isTextAESGCMEncrypted:encryptedString]) {
+        NSArray *arr = [_cryptManager decryptObject:encryptedString encryptionAlgorithm:AES];
+        if (arr) {
+            NSString *migratedEncryptedString = [_cryptManager encryptObject:arr];
+            [CTPreferences putString:migratedEncryptedString forKey:keySuffix];
         }
     }
     return YES;
@@ -121,36 +120,26 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
     return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceInfo.deviceId, suffix];
 }
 
-#pragma mark - User Profile Cache migration
+#pragma mark - User Profile Migration
 
 - (BOOL)migrateUserProfileData {
-    NSSet *allowedClasses = [NSSet setWithObjects:[NSArray class], [NSString class], [NSDictionary class], [NSNumber class], nil];
-    NSMutableDictionary *_profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofTypes:allowedClasses removeFile:NO];
-    if (!_profile) {
-        _profile = [NSMutableDictionary dictionary];
-    }
-    NSMutableDictionary *updatedProfile = [self decryptOldPIIData:_profile];
+    NSMutableDictionary *profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofTypes:[NSSet setWithObjects:[NSArray class], [NSString class], [NSDictionary class], [NSNumber class], nil] removeFile:NO] ?: [NSMutableDictionary dictionary];
+    NSMutableDictionary *updatedProfile = [self decryptOldPIIData:profile];
     [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName] config:self->_config];
     return YES;
 }
 
 - (NSMutableDictionary *)decryptOldPIIData:(NSMutableDictionary *)profile {
     long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CT_DECRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
+    
     if (lastEncryptionLevel == CleverTapEncryptionMedium && _cryptManager) {
-        // Always store the local profile data in decrypted values.
         NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
         for (NSString *key in profile) {
-            if ([_piiKeys containsObject:key]) {
-                NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                BOOL isCryptAESGCMEncrypted = NO;
-                if (value != nil && [value isKindOfClass:[NSString class]]) {
-                    isCryptAESGCMEncrypted = [_cryptManager isTextAESGCMEncrypted:value];
-                    if (!isCryptAESGCMEncrypted) {
-                        NSString *decryptedString = [_cryptManager decryptString:value encryptionAlgorithm:AES];
-                        NSString *encryptedAESGCMString = [_cryptManager encryptString:decryptedString];
-                        updatedProfile[key] = encryptedAESGCMString;
-                    }
-                }
+            NSString *value = [NSString stringWithFormat:@"%@", profile[key]];
+            
+            if ([_piiKeys containsObject:key] && value && ![_cryptManager isTextAESGCMEncrypted:value]) {
+                NSString *decryptedString = [_cryptManager decryptString:value encryptionAlgorithm:AES];
+                updatedProfile[key] = [_cryptManager encryptString:decryptedString];
             } else {
                 updatedProfile[key] = profile[key];
             }

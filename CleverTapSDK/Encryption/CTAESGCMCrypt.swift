@@ -5,6 +5,7 @@ import Security
 @available(iOSApplicationExtension 13.0, *)
 @objc(CTAESGCMCrypt)
 public class AESGCMCrypt: NSObject {
+    // MARK: - Properties
     private let keychainTag: String
     private let AES_GCM_PREFIX = "<ct<"
     private let AES_GCM_SUFFIX = ">ct>"
@@ -16,55 +17,44 @@ public class AESGCMCrypt: NSObject {
     
     // MARK: - Public Methods
     
-    @objc public func encryptString(_ message: String, error: NSErrorPointer) -> String? {
+    /// Encrypts a string and returns a base64 encoded string with a prefix and suffix.
+    @objc public func encryptString(_ message: String, error errorPointer: NSErrorPointer) -> String? {
         guard let data = message.data(using: .utf8) else {
-            if let error = error {
-                error.pointee = NSError(domain: "AESGCMCrypt",
-                                        code: -1,
-                                        userInfo: [NSLocalizedDescriptionKey: "Failed to convert string to data"])
-            }
+            setNSError(errorPointer, cryptError: .stringToDataConversionFailed)
             return nil
         }
-        return encryptData(data, error: error)
+        return encryptData(data, error: errorPointer)
     }
     
-    @objc public func encryptData(_ data: Data, error: NSErrorPointer) -> String? {
-        
+    /// Encrypts data using AES-GCM and returns a formatted string.
+    @objc public func encryptData(_ data: Data, error errorPointer: NSErrorPointer) -> String? {
         do {
             let key = try getKey()
             let nonce = AES.GCM.Nonce()
-            
-            guard let sealedBox = try? AES.GCM.seal(data, using: key, nonce: nonce) else {
-                throw NSError(domain: "AESGCMCrypt",
-                              code: -1,
-                              userInfo: [NSLocalizedDescriptionKey: "Encryption failed"])
-            }
+            let sealedBox = try AES.GCM.seal(data, using: key, nonce: nonce)
             
             let nonceData = nonce.withUnsafeBytes { Data($0) }
             let combinedData = nonceData + sealedBox.ciphertext + sealedBox.tag
             let base64String = combinedData.base64EncodedString()
             return "\(AES_GCM_PREFIX)\(base64String)\(AES_GCM_SUFFIX)"
-            
-        } catch let catchError as NSError {
-            if let error = error {
-                error.pointee = catchError
-            }
+        } catch {
+            setNSError(errorPointer, cryptError: .encryptionFailed)
             return nil
         }
     }
     
-    @objc public func decryptString(_ encryptedString: String, error: NSErrorPointer) -> String? {
-    
-        guard let decryptedData = decryptData(encryptedString, error: error),
+    /// Decrypts an encrypted string and returns the original string.
+    @objc public func decryptString(_ encryptedString: String, error errorPointer: NSErrorPointer) -> String? {
+        guard let decryptedData = decryptData(encryptedString, error: errorPointer),
               let decryptedString = String(data: decryptedData, encoding: .utf8) else {
             return nil
         }
         return decryptedString
     }
     
-    @objc public func decryptData(_ encryptedString: String, error: NSErrorPointer) -> Data? {
-        
-        guard let combinedData = extractCombinedData(from: encryptedString, error: error) else {
+    /// Decrypts an encrypted string and returns the original data.
+    @objc public func decryptData(_ encryptedString: String, error errorPointer: NSErrorPointer) -> Data? {
+        guard let combinedData = extractCombinedData(from: encryptedString, error: errorPointer) else {
             return nil
         }
         let nonceLength = 12
@@ -76,53 +66,30 @@ public class AESGCMCrypt: NSObject {
             let tag = combinedData.suffix(tagLength)
             
             let key = try getKey()
+            let nonceBytes = try AES.GCM.Nonce(data: nonce)
+            let sealedBox = try AES.GCM.SealedBox(nonce: nonceBytes, ciphertext: ciphertext, tag: tag)
             
-            guard let nonceBytes = try? AES.GCM.Nonce(data: nonce) else {
-                throw NSError(domain: "AESGCMCrypt",
-                              code: -1,
-                              userInfo: [NSLocalizedDescriptionKey: "Invalid nonce"])
-            }
-            
-            let sealedBox = try AES.GCM.SealedBox(nonce: nonceBytes,
-                                                  ciphertext: ciphertext,
-                                                  tag: tag)
-            
-            guard let decryptedData = try? AES.GCM.open(sealedBox, using: key) else {
-                throw NSError(domain: "AESGCMCrypt",
-                              code: -1,
-                              userInfo: [NSLocalizedDescriptionKey: "Decryption failed"])
-            }
-            
-            return decryptedData
-            
-        } catch let catchError as NSError {
-            if let error = error {
-                error.pointee = catchError
-            }
+            return try AES.GCM.open(sealedBox, using: key)
+        } catch {
+            setNSError(errorPointer, cryptError: .decryptionFailed)
             return nil
         }
     }
     
-    private func extractCombinedData(from encryptedString: String, error: NSErrorPointer) -> Data? {
+    // MARK: - Private Helpers
+    
+    /// Extracts and validates the base64 encoded encrypted data.
+    private func extractCombinedData(from encryptedString: String, error errorPointer: NSErrorPointer) -> Data? {
         guard encryptedString.hasPrefix(AES_GCM_PREFIX),
               encryptedString.hasSuffix(AES_GCM_SUFFIX) else {
-            if let error = error {
-                error.pointee = NSError(domain: "AESGCMCrypt",
-                                        code: -1,
-                                        userInfo: [NSLocalizedDescriptionKey: "Invalid format"])
-            }
+            setNSError(errorPointer, cryptError: .invalidFormat)
             return nil
         }
-        let startIndex = encryptedString.index(encryptedString.startIndex, offsetBy: AES_GCM_PREFIX.count)
-        let endIndex = encryptedString.index(encryptedString.endIndex, offsetBy: -AES_GCM_SUFFIX.count)
-        let base64String = String(encryptedString[startIndex..<endIndex])
+        
+        let base64String = String(encryptedString.dropFirst(AES_GCM_PREFIX.count).dropLast(AES_GCM_SUFFIX.count))
         
         guard let combinedData = Data(base64Encoded: base64String) else {
-            if let error = error {
-                error.pointee = NSError(domain: "AESGCMCrypt",
-                                        code: -1,
-                                        userInfo: [NSLocalizedDescriptionKey: "Invalid base64 data"])
-            }
+            setNSError(errorPointer, cryptError: .invalidBase64)
             return nil
         }
         
@@ -130,11 +97,7 @@ public class AESGCMCrypt: NSObject {
         let tagLength = 16
         
         guard combinedData.count > nonceLength + tagLength else {
-            if let error = error {
-                error.pointee = NSError(domain: "AESGCMCrypt",
-                                        code: -1,
-                                        userInfo: [NSLocalizedDescriptionKey: "Invalid data length"])
-            }
+            setNSError(errorPointer, cryptError: .invalidDataLength)
             return nil
         }
         return combinedData
@@ -142,18 +105,18 @@ public class AESGCMCrypt: NSObject {
     
     // MARK: - Keychain Operations
     
+    /// Retrieves or generates an AES key and stores it securely in the Keychain.
     @available(iOS 13.0, *)
     private func getKey() throws -> SymmetricKey {
-        
         if let existingKey = try retrieveKeyFromKeychain() {
             return existingKey
         }
-        
         let newKey = SymmetricKey(size: .bits256)
         try saveKeyToKeychain(newKey)
         return newKey
     }
     
+    /// Saves the AES key to the Keychain.
     @available(iOS 13.0, *)
     private func saveKeyToKeychain(_ key: SymmetricKey) throws {
         let query: [String: Any] = [
@@ -164,38 +127,78 @@ public class AESGCMCrypt: NSObject {
         ]
         
         SecItemDelete(query as CFDictionary)
-        
         let status = SecItemAdd(query as CFDictionary, nil)
         guard status == errSecSuccess else {
-            throw CryptError.keychainError
+            throw CryptError.keychainSaveFailed
         }
     }
     
+    /// Retrieves the AES key from the Keychain if available.
     @available(iOS 13.0, *)
     private func retrieveKeyFromKeychain() throws -> SymmetricKey? {
-        
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
-            kSecReturnData as String: true
+            kSecReturnData as String: true,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
         
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         
-        guard status == errSecSuccess,
-              let keyData = result as? Data else {
+        guard status == errSecSuccess, let keyData = result as? Data else {
             return nil
         }
-        
         return SymmetricKey(data: keyData)
     }
     
-}
-    // MARK: - Error Types
+    // MARK: - Error Handling
     
     private enum CryptError: Error {
+        case stringToDataConversionFailed
+        case encryptionFailed
+        case decryptionFailed
         case invalidFormat
-        case keychainError
+        case invalidBase64
+        case invalidDataLength
+        case keyRetrievalFailed
+        case keychainSaveFailed
     }
-
+    
+    /// Converts CryptError to NSError and assigns it to the provided error pointer.
+    private func setNSError(_ errorPointer: NSErrorPointer?, cryptError: CryptError) {
+        guard let errorPointer = errorPointer else { return }
+        
+        let errorMessage: String
+        let errorCode: Int
+        
+        switch cryptError {
+        case .stringToDataConversionFailed:
+            errorMessage = "Failed to convert string to Data."
+            errorCode = 1001
+        case .encryptionFailed:
+            errorMessage = "Encryption process failed."
+            errorCode = 1002
+        case .decryptionFailed:
+            errorMessage = "Decryption process failed."
+            errorCode = 1003
+        case .invalidFormat:
+            errorMessage = "Invalid format of encrypted data."
+            errorCode = 1004
+        case .invalidBase64:
+            errorMessage = "Base64 decoding failed."
+            errorCode = 1005
+        case .invalidDataLength:
+            errorMessage = "Data length is invalid."
+            errorCode = 1006
+        case .keyRetrievalFailed:
+            errorMessage = "Failed to retrieve key from keychain."
+            errorCode = 1007
+        case .keychainSaveFailed:
+            errorMessage = "Failed to save key to keychain."
+            errorCode = 1008
+        }
+        
+        errorPointer?.pointee = NSError(domain: "AESGCMCrypt", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+    }
+}

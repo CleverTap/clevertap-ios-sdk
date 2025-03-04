@@ -67,12 +67,6 @@ typedef NS_ENUM(int, CleverTapEncryptionLevel) {
     CleverTapEncryptionMedium = 1
 };
 
-typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
-    PlainText = 0,
-    AES = 1,
-    AES_GCM = 2
-};
-
 typedef void (^CleverTapFetchInAppsBlock)(BOOL success);
 
 @interface CleverTap : NSObject
