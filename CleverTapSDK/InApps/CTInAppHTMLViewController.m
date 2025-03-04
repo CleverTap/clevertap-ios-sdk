@@ -90,6 +90,8 @@ typedef enum {
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
+    // Set translatesAutoresizingMaskIntoConstraints to NO to use Auto Layout
+    webView.translatesAutoresizingMaskIntoConstraints = NO;
     webView.scrollView.scrollEnabled = NO;
     webView.backgroundColor = [UIColor clearColor];
     webView.opaque = NO;
@@ -107,6 +109,18 @@ typedef enum {
 
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
+    
+    if (@available(iOS 11.0, *)) {
+        [NSLayoutConstraint activateConstraints:@[
+            // Use the safe area layout guide to position the view
+            [webView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+            [webView.leftAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leftAnchor],
+            [webView.rightAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.rightAnchor],
+            [webView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
+        ]];
+    } else {
+        // Fallback on earlier versions
+    }
     if (self.notification.url) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
         webView.navigationDelegate = nil;
