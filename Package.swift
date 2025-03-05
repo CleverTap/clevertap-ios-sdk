@@ -48,6 +48,7 @@ let package = Package(
                 "SDWebImage"
             ],
             path: "CleverTapSDKWrapper",
+            // TODO: Will remove linkerSettings if not needed
             linkerSettings: [
                 .linkedLibrary("sqlite3"),
                 .linkedLibrary("c++"),

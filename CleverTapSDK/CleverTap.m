@@ -100,7 +100,7 @@ static NSArray *sslCertNames;
 #import "NSDictionary+Extensions.h"
 
 #import "CTAES.h"
-
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
@@ -295,6 +295,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Lifecycle
 
 + (void)load {
+    [[[CTNewFeature alloc]init]newFeature];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidFinishLaunchingNotification:) name:UIApplicationDidFinishLaunchingNotification object:nil];
 }
 

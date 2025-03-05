@@ -201,6 +201,8 @@
 		4E1F156627709304009387AE /* inapp_interstitial.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156427709304009387AE /* inapp_interstitial.json */; };
 		4E1F156827709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
 		4E1F156927709849009387AE /* app_inbox.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E1F156727709848009387AE /* app_inbox.json */; };
+		4E23D7C72D780F4C008E6707 /* CTNewFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23D7C62D780F4C008E6707 /* CTNewFeature.swift */; };
+		4E23D7C82D780F4C008E6707 /* CTNewFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23D7C62D780F4C008E6707 /* CTNewFeature.swift */; };
 		4E25E3C1278887A70008C888 /* CTIdentityRepo.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE42275D00E80074A774 /* CTIdentityRepo.h */; };
 		4E25E3C2278887A70008C888 /* CTIdentityRepoFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E49AE57275D31910074A774 /* CTIdentityRepoFactory.h */; };
 		4E25E3C3278887A70008C888 /* CTFlexibleIdentityRepo.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E49AE4C275D08C50074A774 /* CTFlexibleIdentityRepo.m */; };
@@ -811,6 +813,7 @@
 		4E1F1561277090D6009387AE /* inapp_alert.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_alert.json; sourceTree = "<group>"; };
 		4E1F156427709304009387AE /* inapp_interstitial.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = inapp_interstitial.json; sourceTree = "<group>"; };
 		4E1F156727709848009387AE /* app_inbox.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = app_inbox.json; sourceTree = "<group>"; };
+		4E23D7C62D780F4C008E6707 /* CTNewFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTNewFeature.swift; sourceTree = "<group>"; };
 		4E2BFB9A2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+XCTestCase_Tests.h"; sourceTree = "<group>"; };
 		4E2BFB9B2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+XCTestCase_Tests.m"; sourceTree = "<group>"; };
 		4E2CF1432AC56D8F00441E8B /* CTEncryptionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEncryptionTests.m; sourceTree = "<group>"; };
@@ -1772,6 +1775,7 @@
 				071EB476217F6427008F0FAB /* InApps */,
 				D0C7BBC8207D8837001345EF /* CleverTap.h */,
 				D0C7BBC9207D8837001345EF /* CleverTap.m */,
+				4E23D7C62D780F4C008E6707 /* CTNewFeature.swift */,
 				4E8B816A2AD2B2FD00714BB4 /* CleverTapInternal.h */,
 				4E8B81762AD2CB4E00714BB4 /* CTPushPrimerManager.h */,
 				4E8B81772AD2CB4E00714BB4 /* CTPushPrimerManager.m */,
@@ -2524,6 +2528,7 @@
 				4E838C43299F419900ED0875 /* ContentMerger.m in Sources */,
 				4E7929FC29799E8F00B81F3C /* CTDomainFactory.m in Sources */,
 				D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */,
+				4E23D7C72D780F4C008E6707 /* CTNewFeature.swift in Sources */,
 				D014B90120E2FB4C001E0780 /* CTValidationResult.m in Sources */,
 				4E25E3CB278887A80008C888 /* CTLegacyIdentityRepo.m in Sources */,
 				4E25E3CA278887A80008C888 /* CTFlexibleIdentityRepo.m in Sources */,
@@ -2770,6 +2775,7 @@
 				4847D16F2CCB90F5008DC327 /* CTEventDatabase.m in Sources */,
 				4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */,
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
+				4E23D7C82D780F4C008E6707 /* CTNewFeature.swift in Sources */,
 				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
 				6BB778C82BECEC2700A41628 /* CTCustomTemplateInAppData.m in Sources */,
 				4EF0D5472AD84BCA0044C48F /* CTSessionManager.m in Sources */,
