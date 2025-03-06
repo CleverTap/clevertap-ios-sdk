@@ -122,8 +122,7 @@ public class AESGCMCrypt: NSObject {
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
-            kSecValueData as String: key.withUnsafeBytes { Data($0) },
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+            kSecValueData as String: key.withUnsafeBytes { Data($0) }
         ]
         
         SecItemDelete(query as CFDictionary)
@@ -139,8 +138,7 @@ public class AESGCMCrypt: NSObject {
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
-            kSecReturnData as String: true,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+            kSecReturnData as String: true
         ]
         
         var result: AnyObject?

@@ -8,7 +8,6 @@
 #import "CTUtils.h"
 #import "CTCryptMigrator.h"
 
-NSString *const CT_DECRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 @interface CTCryptMigrator()
@@ -17,6 +16,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) NSArray *piiKeys;
 @property (nonatomic, strong) CTEncryptionManager *cryptManager;
+@property (nonatomic, assign) CleverTapEncryptionLevel lastEncryptionLevel;
 
 @end
 
@@ -37,32 +37,43 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 }
 
 - (BOOL)isMigrationNeeded {
-    return (BOOL) [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:YES];
+    self.lastEncryptionLevel = (CleverTapEncryptionLevel)[CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_config.accountId] withResetValue:CleverTapEncryptionNone];
+
+    long migrationRequired = [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:YES];
+
+    return (_lastEncryptionLevel == CleverTapEncryptionMedium && migrationRequired == 1);
 }
 
 - (void)performMigration {
-    NSMutableArray *failures = [NSMutableArray new];
-    BOOL migratedGUIDSuccesfully = NO;
-    BOOL migratedUserProfileDataSuccesfully = NO;
-    BOOL migratedInAppDataSuccesfully = NO;
+    NSString *migrationErrors = @"";
     
-    if (_config.encryptionLevel == CleverTapEncryptionMedium) {
-        migratedGUIDSuccesfully = [self migrateGUIDS];
-        if (!migratedGUIDSuccesfully) [failures addObject:@"GUID migration failed"];
-        
-        migratedUserProfileDataSuccesfully = [self migrateUserProfileData];
-        if (!migratedUserProfileDataSuccesfully) [failures addObject:@"User profile migration failed"];
+    BOOL isGUIDMigrationSuccessful = [self migrateGUIDS];
+    if (!isGUIDMigrationSuccessful) {
+        migrationErrors = [migrationErrors stringByAppendingFormat:@"%@%@",
+                           migrationErrors.length > 0 ? @", " : @"",
+                           @"GUID migration failed"];
     }
     
-    migratedInAppDataSuccesfully = [self migrateInAppData];
-    if (!migratedInAppDataSuccesfully) [failures addObject:@"In-app data migration failed"];
+    BOOL isUserProfileMigrationSuccessful = [self migrateUserProfileData];
+    if (!isUserProfileMigrationSuccessful) {
+        migrationErrors = [migrationErrors stringByAppendingFormat:@"%@%@",
+                           migrationErrors.length > 0 ? @", " : @"",
+                           @"User profile migration failed"];
+    }
     
-    if (migratedGUIDSuccesfully && migratedUserProfileDataSuccesfully && migratedInAppDataSuccesfully) {
+    BOOL isInAppDataMigrationSuccessful = [self migrateInAppData];
+    if (!isInAppDataMigrationSuccessful) {
+        migrationErrors = [migrationErrors stringByAppendingFormat:@"%@%@",
+                           migrationErrors.length > 0 ? @", " : @"",
+                           @"In-app data migration failed"];
+    }
+    
+    if (isGUIDMigrationSuccessful && isUserProfileMigrationSuccessful && isInAppDataMigrationSuccessful) {
         [CTPreferences putInt:0 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
         CleverTapLogDebug(_config.logLevel, @"%@: Migration completed successfully", self);
     } else {
         [CTPreferences putInt:1 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
-        CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, [failures componentsJoinedByString:@", "]);
+        CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, migrationErrors);
     }
 }
 
@@ -71,27 +82,53 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 - (BOOL)migrateGUIDS {
     NSString *cacheKey = [CTUtils getKeyWithSuffix:kCachedGUIDSKey accountID:_config.accountId];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
-    if (!cachedGUIDS) return NO;
-    
-    NSMutableDictionary *newCache = [NSMutableDictionary new];
-    [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString* cachedKey, NSString* value, BOOL* stop) {
+
+    if (!cachedGUIDS || cachedGUIDS.count == 0) {
+        CleverTapLogInfo(self.config.logLevel, @"No cached GUIDs found for migration.");
+        return NO;
+    }
+
+    NSMutableDictionary *updatedCache = [NSMutableDictionary new];
+    __block BOOL migrationSuccessful = NO;
+
+    [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString *cachedKey, NSString *value, BOOL *stop) {
         NSArray *components = [cachedKey componentsSeparatedByString:@"_"];
-        if (components.count != 2) return;
-        
+        if (components.count != 2) {
+            CleverTapLogInfo(self.config.logLevel, @"Skipping invalid GUID format: %@", cachedKey);
+            return;
+        }
+
         NSString *key = components[0];
-        NSString *identifier = components[1];
-        
-        if (identifier && ![_cryptManager isTextAESGCMEncrypted:identifier]) {
-            NSString *decryptedString = [_cryptManager decryptString:identifier encryptionAlgorithm:AES];
-            if (decryptedString) {
-                NSString *migratedEncryptedString = [_cryptManager encryptString:decryptedString];
-                newCache[[NSString stringWithFormat:@"%@_%@", key, migratedEncryptedString]] = value;
+        NSString *encryptedIdentifier = components[1];
+
+        if (encryptedIdentifier && ![_cryptManager isTextAESGCMEncrypted:encryptedIdentifier]) {
+            NSString *partiallyDecryptedIdentifier = [_cryptManager decryptString:encryptedIdentifier encryptionAlgorithm:AES];
+            NSString *fullyDecryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
+
+            if (fullyDecryptedIdentifier) {
+                NSString *finalIdentifier = fullyDecryptedIdentifier;
+
+                if (_config.encryptionLevel == CleverTapEncryptionMedium) {
+                    NSString *partiallyEncryptedIdentifier = [_cryptManager encryptString:fullyDecryptedIdentifier];
+                    finalIdentifier = [_cryptManager encryptString:partiallyEncryptedIdentifier];
+                }
+
+                updatedCache[[NSString stringWithFormat:@"%@_%@", key, finalIdentifier]] = value;
+                migrationSuccessful = YES;
+            } else {
+                CleverTapLogInfo(self.config.logLevel, @"Failed to decrypt GUID for key: %@", cachedKey);
             }
         }
     }];
-    
-    [CTPreferences putObject:newCache forKey:cacheKey];
-    return YES;
+
+    if (migrationSuccessful) {
+        [CTPreferences putObject:updatedCache forKey:cacheKey];
+        CleverTapLogInfo(self.config.logLevel, @"GUID migration completed successfully.");
+        return YES;
+    } else {
+        CleverTapLogInfo(self.config.logLevel, @"GUID migration failed or no valid data to migrate.");
+        return NO;
+    }
 }
 
 #pragma mark - In-app Migration
@@ -104,7 +141,16 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 - (BOOL)migrateInAppsWithKeySuffix:(NSString *)keySuffix {
     NSString *key = [self storageKeyWithSuffix:keySuffix];
-    NSString *encryptedString = [CTPreferences getObjectForKey:key];
+    id value = [CTPreferences getObjectForKey:key];
+
+    NSString *encryptedString = nil;
+    if ([value isKindOfClass:[NSString class]]) {
+        encryptedString = (NSString *)value;
+    } else if ([value isKindOfClass:[NSArray class]]) {
+        NSArray *arrayValue = (NSArray *)value;
+        // Handle the array case appropriately, e.g., join into a string or take first value
+        encryptedString = arrayValue.count > 0 ? [arrayValue firstObject] : nil;
+    }
     
     if (encryptedString && ![_cryptManager isTextAESGCMEncrypted:encryptedString]) {
         NSArray *arr = [_cryptManager decryptObject:encryptedString encryptionAlgorithm:AES];
@@ -130,7 +176,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 }
 
 - (NSMutableDictionary *)decryptOldPIIData:(NSMutableDictionary *)profile {
-    long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CT_DECRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
+    long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
     
     if (lastEncryptionLevel == CleverTapEncryptionMedium && _cryptManager) {
         NSMutableDictionary *updatedProfile = [NSMutableDictionary new];

@@ -17,7 +17,6 @@
  * AES-GCM (Galois/Counter Mode) encryption providing both confidentiality and authenticity.
  */
 typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
-    PlainText = 0,  ///< No encryption
     AES = 1,        ///< AES encryption mode
     AES_GCM = 2     ///< AES-GCM encryption mode
 };
@@ -58,15 +57,6 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
 - (NSString *)encryptString:(NSString *)plaintext;
 
 /**
- * Encrypts a given string using a specified encryption algorithm.
- *
- * @param plaintext The string to be encrypted.
- * @param algorithm The encryption algorithm to use.
- * @return The encrypted string.
- */
-- (NSString *)encryptString:(NSString *)plaintext encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm;
-
-/**
  * Decrypts an AES128 encrypted string.
  *
  * @param ciphertext The encrypted string.
@@ -90,15 +80,6 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
  * @return The encrypted string representation of the object.
  */
 - (NSString *)encryptObject:(id)object;
-
-/**
- * Encrypts an object using a specified encryption algorithm.
- *
- * @param object The object to be encrypted.
- * @param algorithm The encryption algorithm to use.
- * @return The encrypted string representation of the object.
- */
-- (NSString *)encryptObject:(id)object encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm;
 
 /**
  * Decrypts an encrypted object string and returns the original object.

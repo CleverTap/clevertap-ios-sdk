@@ -278,6 +278,10 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_ENCRYPTION_IV @"__CL3>3Rt#P__1V_"
 #define CLTAP_ENCRYPTION_PII_DATA (@[@"Identity", @"Email", @"Phone", @"Name"]);
 #define CLTAP_ENCRYPTION_MIGRATION_STATUS @"crypt_migration"
+#define CLTAP_ENCRYPTION_AES_GCM @"crypt_aes_gcm"
+#define kENCRYPTION_KEY @"CLTAP_ENCRYPTION_KEY"
+#define AES_GCM_PREFIX @"<ct<"
+#define AES_GCM_SUFFIX @">ct>"
 
 #pragma mark Constants for Event Database
 #define CLTAP_DATABASE_VERSION 1

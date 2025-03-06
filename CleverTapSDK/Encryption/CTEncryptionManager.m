@@ -9,21 +9,19 @@
 #import "CleverTapSDK-Swift.h"
 #endif
 
-static NSString *const kENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 static NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 static NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 static NSString *const kCacheGUIDS = @"CachedGUIDS";
 
+API_AVAILABLE(ios(13.0))
 @interface CTEncryptionManager () {}
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
 @property (nonatomic, assign) BOOL isDefaultInstance;
+@property (nonatomic, strong) CTAESGCMCrypt *ctaesgcm;
 @end
 
 @implementation CTEncryptionManager
-
-static NSString * const AES_GCM_PREFIX = @"<ct<";
-static NSString * const AES_GCM_SUFFIX = @">ct>";
 
 #pragma mark - Initialization & Coding
 
@@ -33,6 +31,7 @@ static NSString * const AES_GCM_SUFFIX = @">ct>";
     if (self = [super init]) {
         _accountID = accountID;
         _isDefaultInstance = isDefaultInstance;
+        [self setupEncryptionWithLevel];
         [self updateEncryptionLevel:encryptionLevel];
     }
     return self;
@@ -41,8 +40,15 @@ static NSString * const AES_GCM_SUFFIX = @">ct>";
 - (instancetype)initWithAccountID:(NSString *)accountID {
     if (self = [super init]) {
         _accountID = accountID;
+        [self setupEncryptionWithLevel];
     }
     return self;
+}
+
+- (void)setupEncryptionWithLevel {
+    if (@available(iOS 13.0, *)) {
+        _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
+    }
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -88,30 +94,48 @@ static NSString * const AES_GCM_SUFFIX = @">ct>";
 }
 
 - (NSString *)encryptString:(NSString *)plaintext encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm {
-    if (_encryptionLevel != CleverTapEncryptionMedium || !plaintext) return plaintext;
-    
-    if (algorithm == AES) {
-        @try {
-            NSData *data = [plaintext dataUsingEncoding:NSUTF8StringEncoding];
-            NSData *encryptedData = [self processData:data operation:kCCEncrypt];
-            return encryptedData ? [encryptedData base64EncodedStringWithOptions:0] : plaintext;
-        } @catch (NSException *e) {
-            CleverTapLogStaticInternal(@"Encryption error: %@", e.debugDescription);
-            return plaintext;
+    if (!plaintext || plaintext.length == 0) {
+        return plaintext; // Return as is for empty or nil input
+    }
+
+    long migrationRequired = [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:YES];
+
+    // Skip encryption if migration isn't required and encryption level isn't Medium
+    if (!migrationRequired && _encryptionLevel != CleverTapEncryptionMedium) {
+        return plaintext;
+    }
+
+    switch (algorithm) {
+        case AES_GCM: {
+            if (@available(iOS 13.0, *)) {
+                NSError *encryptError = nil;
+                NSString *encryptedString = [_ctaesgcm encryptString:plaintext error:&encryptError];
+
+                if (encryptError) {
+                    CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
+                    return plaintext;
+                }
+                return encryptedString;
+            }
+            
+            // Fallback to AES if iOS < 13
+            CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES encryption.");
+            // Intentional fallthrough to AES case
         }
-    } else if (algorithm == AES_GCM) {
-        if (@available(iOS 13.0, *)) {
-            CTAESGCMCrypt *ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
-            NSError *encryptError = nil;
-            NSString *encryptedString = [ctaesgcm encryptString:plaintext error:&encryptError];
-            if (!encryptedString) {
-                NSLog(@"Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
+        case AES: {
+            @try {
+                NSData *data = [plaintext dataUsingEncoding:NSUTF8StringEncoding];
+                NSData *encryptedData = [self processData:data operation:kCCEncrypt];
+                return encryptedData ? [encryptedData base64EncodedStringWithOptions:0] : plaintext;
+            } @catch (NSException *exception) {
+                CleverTapLogStaticInternal(@"AES Encryption error: %@", exception.debugDescription);
                 return plaintext;
             }
-            return encryptedString;
         }
+        default:
+            CleverTapLogStaticInternal(@"Unsupported encryption algorithm: %ld", (long)algorithm);
+            return plaintext;
     }
-    return nil;
 }
 
 - (NSString *)decryptString:(NSString *)ciphertext {
@@ -120,32 +144,42 @@ static NSString * const AES_GCM_SUFFIX = @">ct>";
 }
 
 - (NSString *)decryptString:(NSString *)ciphertext encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm {
-    if (!ciphertext) return nil;
-    if (algorithm == AES) {
-        @try {
-            NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
-            NSData *decryptedData = [self processData:data operation:kCCDecrypt];
-            return decryptedData ? [[NSString alloc] initWithData:decryptedData
-                                                         encoding:NSUTF8StringEncoding] : ciphertext;
-        } @catch (NSException *e) {
-            CleverTapLogStaticInternal(@"Decryption error: %@", e.debugDescription);
-            return ciphertext;
-        }
-    } else if (algorithm == AES_GCM) {
-        if (@available(iOS 13.0, *)) {
-            CTAESGCMCrypt *ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
+    if (!ciphertext || ciphertext.length == 0) {
+        return ciphertext; // Return as is for empty or nil input
+    }
 
-            NSError *encryptError = nil;
-            NSString *decryptedString = [ctaesgcm decryptString:ciphertext error:&encryptError];
-            
-            if (!decryptedString) {
-                NSLog(@"Decryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
+    switch (algorithm) {
+        case AES_GCM: {
+            if (@available(iOS 13.0, *)) {
+                NSError *decryptError = nil;
+                NSString *decryptedString = [_ctaesgcm decryptString:ciphertext error:&decryptError];
+
+                if (decryptError) {
+                    CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
+                    return ciphertext;
+                }
+                return decryptedString;
+            }
+
+            // Fallback to AES if iOS < 13
+            CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES decryption.");
+            // Intentional fallthrough to AES case
+        }
+        case AES: {
+            @try {
+                NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
+                NSData *decryptedData = [self processData:data operation:kCCDecrypt];
+                NSString *decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
+                return decryptedString ? decryptedString : ciphertext;
+            } @catch (NSException *exception) {
+                CleverTapLogStaticInternal(@"AES Decryption error: %@", exception.debugDescription);
                 return ciphertext;
             }
-            return decryptedString;
         }
+        default:
+            CleverTapLogStaticInternal(@"Unsupported decryption algorithm: %ld", (long)algorithm);
+            return ciphertext;
     }
-    return nil;
 }
 
 #pragma mark - Object Encryption
@@ -154,63 +188,90 @@ static NSString * const AES_GCM_SUFFIX = @">ct>";
     return [self encryptObject:object encryptionAlgorithm:AES_GCM];
 }
 
-- (NSString *)encryptObject:(id)object encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm{
-    if (!object) return nil;
-    if (algorithm == AES) {
-        @try {
-            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
-            NSData *encryptedData = [self processData:data operation:kCCEncrypt];
-            return encryptedData ? [encryptedData base64EncodedStringWithOptions:0] : nil;
-        } @catch (NSException *e) {
-            CleverTapLogStaticInternal(@"Object encryption error: %@", e.debugDescription);
+- (NSString *)encryptObject:(id)object encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm {
+    if (!object) {
+        return nil; // Return nil for a null object
+    }
+    
+    @try {
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
+        if (!data) {
+            CleverTapLogStaticInternal(@"Failed to serialize object for encryption.");
             return nil;
         }
-    } else if (algorithm == AES_GCM) {
-        if (@available(iOS 13.0, *)) {
-            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
-            CTAESGCMCrypt *ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
-            NSError *encryptError = nil;
-            NSString *encryptedData = [ctaesgcm encryptData:data error:&encryptError];
-            if (!encryptedData) {
-                NSLog(@"Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
-                return object;
+
+        switch (algorithm) {
+            case AES_GCM: {
+                if (@available(iOS 13.0, *)) {
+                    NSError *encryptError = nil;
+                    NSString *encryptedString = [_ctaesgcm encryptData:data error:&encryptError];
+
+                    if (encryptError) {
+                        CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
+                        return nil;
+                    }
+                    return encryptedString;
+                }
+
+                // Fallback to AES if iOS < 13
+                CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES encryption.");
+                // Intentional fallthrough to AES case
             }
-            return encryptedData;
+            case AES: {
+                NSData *encryptedData = [self processData:data operation:kCCEncrypt];
+                return encryptedData ? [encryptedData base64EncodedStringWithOptions:0] : nil;
+            }
+            default:
+                CleverTapLogStaticInternal(@"Unsupported encryption algorithm: %ld", (long)algorithm);
+                return nil;
         }
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"Object encryption error: %@", exception.debugDescription);
+        return nil;
     }
-    return nil;
 }
+
 
 - (id)decryptObject:(NSString *)ciphertext {
     return [self decryptObject:ciphertext encryptionAlgorithm:AES_GCM];
 }
 
 - (id)decryptObject:(NSString *)ciphertext encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm {
-    if (!ciphertext) return nil;
-    if (algorithm == AES) {
-        @try {
-            NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
-            NSData *decryptedData = [self processData:data operation:kCCDecrypt];
-            return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
-        } @catch (NSException *e) {
-            CleverTapLogStaticInternal(@"Object decryption error: %@", e.debugDescription);
-            return nil;
-        }
-    } else if (algorithm == AES_GCM) {
-        if (@available(iOS 13.0, *)) {
-            CTAESGCMCrypt *ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
-
-            NSError *encryptError = nil;
-            NSData *decryptedData = [ctaesgcm decryptData:ciphertext error:&encryptError];
-            
-            if (!decryptedData) {
-                NSLog(@"Decryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
-                return ciphertext;
-            }
-            return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
-        }
+    if (!ciphertext) {
+        return nil; // Return nil if ciphertext is null
     }
-    return nil;
+
+    @try {
+        switch (algorithm) {
+            case AES_GCM: {
+                if (@available(iOS 13.0, *)) {
+                    NSError *decryptError = nil;
+                    NSData *decryptedData = [_ctaesgcm decryptData:ciphertext error:&decryptError];
+
+                    if (decryptError) {
+                        CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
+                        return nil;
+                    }
+                    return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
+                }
+
+                // Fallback to AES if iOS < 13
+                CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES decryption.");
+                // Intentional fallthrough to AES case
+            }
+            case AES: {
+                NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
+                NSData *decryptedData = [self processData:data operation:kCCDecrypt];
+                return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
+            }
+            default:
+                CleverTapLogStaticInternal(@"Unsupported decryption algorithm: %ld", (long)algorithm);
+                return nil;
+        }
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"Object decryption error: %@", exception.debugDescription);
+        return nil;
+    }
 }
 
 #pragma mark - Private Methods
