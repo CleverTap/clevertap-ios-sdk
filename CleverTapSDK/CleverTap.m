@@ -100,7 +100,12 @@ static NSArray *sslCertNames;
 #import "NSDictionary+Extensions.h"
 
 #import "CTAES.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
+
 #import <objc/runtime.h>
 
 static const void *const kQueueKey = &kQueueKey;
