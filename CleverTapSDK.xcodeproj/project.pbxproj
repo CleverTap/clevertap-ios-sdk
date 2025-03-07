@@ -278,12 +278,12 @@
 		4E8B81722AD2BB8A00714BB4 /* CTDispatchQueueManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B816E2AD2BB8A00714BB4 /* CTDispatchQueueManager.m */; };
 		4E8B81782AD2CB4E00714BB4 /* CTPushPrimerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E8B81762AD2CB4E00714BB4 /* CTPushPrimerManager.h */; };
 		4E8B81792AD2CB4E00714BB4 /* CTPushPrimerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81772AD2CB4E00714BB4 /* CTPushPrimerManager.m */; };
-		4EA64A26296C115E001D9B22 /* CTRequestFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A24296C115E001D9B22 /* CTRequestFactory.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		4EA64A27296C115E001D9B22 /* CTRequestFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A24296C115E001D9B22 /* CTRequestFactory.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		4EA64A26296C115E001D9B22 /* CTRequestFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A24296C115E001D9B22 /* CTRequestFactory.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4EA64A27296C115E001D9B22 /* CTRequestFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A24296C115E001D9B22 /* CTRequestFactory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4EA64A28296C115E001D9B22 /* CTRequestFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EA64A25296C115E001D9B22 /* CTRequestFactory.m */; };
 		4EA64A29296C115E001D9B22 /* CTRequestFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EA64A25296C115E001D9B22 /* CTRequestFactory.m */; };
-		4EA64A2C296C1190001D9B22 /* CTRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A2A296C1190001D9B22 /* CTRequest.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		4EA64A2D296C1190001D9B22 /* CTRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A2A296C1190001D9B22 /* CTRequest.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		4EA64A2C296C1190001D9B22 /* CTRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A2A296C1190001D9B22 /* CTRequest.h */; };
+		4EA64A2D296C1190001D9B22 /* CTRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EA64A2A296C1190001D9B22 /* CTRequest.h */; };
 		4EA64A2E296C1190001D9B22 /* CTRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EA64A2B296C1190001D9B22 /* CTRequest.m */; };
 		4EA64A2F296C1190001D9B22 /* CTRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EA64A2B296C1190001D9B22 /* CTRequest.m */; };
 		4EAF05022A495DD5009D9D61 /* CleverTapInstanceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F154E27691CA0009387AE /* CleverTapInstanceTests.m */; };

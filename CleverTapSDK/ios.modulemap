@@ -30,7 +30,10 @@ framework module CleverTapSDK {
     header "CTTemplateContext.h"
     header "CTCustomTemplatesManager.h"
     header "CleverTap+PushPermission.h"
+    header "CTRequestFactory.h"
     export *
     
     // Private headers for swift
+//    header "CTRequestFactory.h"
+//    header "CTRequest.h"
 }

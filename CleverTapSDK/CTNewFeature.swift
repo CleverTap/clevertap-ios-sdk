@@ -7,9 +7,9 @@
 //
 
 import Foundation
-//@_implementationOnly import CleverTapSDK.Private
 
 @objc public class CTNewFeature: NSObject {
     @objc public func newFeature() {
+        CTRequestFactory.description()
     }
 }
