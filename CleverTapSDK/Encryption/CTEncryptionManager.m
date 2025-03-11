@@ -45,6 +45,15 @@ API_AVAILABLE(ios(13.0))
     return self;
 }
 
+- (instancetype)initWithAccountID:(NSString *)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
+    if (self = [super init]) {
+        _accountID = accountID;
+        _encryptionLevel = encryptionLevel;
+        [self setupEncryptionWithLevel];
+    }
+    return self;
+}
+
 - (void)setupEncryptionWithLevel {
     if (@available(iOS 13.0, *)) {
         _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
@@ -98,13 +107,10 @@ API_AVAILABLE(ios(13.0))
         return plaintext; // Return as is for empty or nil input
     }
 
-    long migrationRequired = [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:YES];
-
-    // Skip encryption if migration isn't required and encryption level isn't Medium
-    if (!migrationRequired && _encryptionLevel != CleverTapEncryptionMedium) {
+    if (_encryptionLevel == CleverTapEncryptionNone) {
         return plaintext;
     }
-
+    
     switch (algorithm) {
         case AES_GCM: {
             if (@available(iOS 13.0, *)) {

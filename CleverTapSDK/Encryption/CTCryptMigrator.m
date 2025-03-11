@@ -28,7 +28,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
         _config = config;
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
-        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId];
+        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel isDefaultInstance:YES];
         if ([self isMigrationNeeded]) {
             [self performMigration];
         }
@@ -38,10 +38,14 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 - (BOOL)isMigrationNeeded {
     self.lastEncryptionLevel = (CleverTapEncryptionLevel)[CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_config.accountId] withResetValue:CleverTapEncryptionNone];
-
-    long migrationRequired = [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:YES];
-
-    return (_lastEncryptionLevel == CleverTapEncryptionMedium && migrationRequired == 1);
+    
+    long migrationDone = [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:0];
+    
+    if (_lastEncryptionLevel == CleverTapEncryptionMedium && migrationDone == 0){
+        return YES;
+    }
+    
+    return NO;
 }
 
 - (void)performMigration {
@@ -69,10 +73,9 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
     }
     
     if (isGUIDMigrationSuccessful && isUserProfileMigrationSuccessful && isInAppDataMigrationSuccessful) {
-        [CTPreferences putInt:0 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
+        [CTPreferences putInt:1 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
         CleverTapLogDebug(_config.logLevel, @"%@: Migration completed successfully", self);
     } else {
-        [CTPreferences putInt:1 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
         CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, migrationErrors);
     }
 }
@@ -102,18 +105,16 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
         NSString *encryptedIdentifier = components[1];
 
         if (encryptedIdentifier && ![_cryptManager isTextAESGCMEncrypted:encryptedIdentifier]) {
-            NSString *partiallyDecryptedIdentifier = [_cryptManager decryptString:encryptedIdentifier encryptionAlgorithm:AES];
-            NSString *fullyDecryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
+            NSString *decryptedIdentifier = [_cryptManager decryptString:encryptedIdentifier encryptionAlgorithm:AES];
 
-            if (fullyDecryptedIdentifier) {
-                NSString *finalIdentifier = fullyDecryptedIdentifier;
-
+            if (decryptedIdentifier) {
+                NSString *finalEncryptedIdentifier = decryptedIdentifier;
+                
                 if (_config.encryptionLevel == CleverTapEncryptionMedium) {
-                    NSString *partiallyEncryptedIdentifier = [_cryptManager encryptString:fullyDecryptedIdentifier];
-                    finalIdentifier = [_cryptManager encryptString:partiallyEncryptedIdentifier];
+                    finalEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
                 }
 
-                updatedCache[[NSString stringWithFormat:@"%@_%@", key, finalIdentifier]] = value;
+                updatedCache[[NSString stringWithFormat:@"%@_%@", key, finalEncryptedIdentifier]] = value;
                 migrationSuccessful = YES;
             } else {
                 CleverTapLogInfo(self.config.logLevel, @"Failed to decrypt GUID for key: %@", cachedKey);

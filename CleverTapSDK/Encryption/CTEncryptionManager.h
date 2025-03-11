@@ -49,6 +49,16 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
              isDefaultInstance:(BOOL)isDefaultInstance;
 
 /**
+ * Initializes the encryption manager with an account ID, encryption level, and instance type.
+ *
+ * @param accountID The account identifier.
+ * @param encryptionLevel The encryption level to be used.
+ * @return An instance of CTEncryptionManager.
+ */
+- (instancetype)initWithAccountID:(NSString *)accountID
+                  encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel;
+
+/**
  * Encrypts a given string using the default AES128 encryption.
  *
  * @param plaintext The string to be encrypted.
