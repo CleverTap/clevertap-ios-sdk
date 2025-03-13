@@ -88,6 +88,8 @@
         [cleverTap profileDecrementValueBy: message[@"value"] forKey: message[@"key"]];
     } else if ([action isEqual: @"triggerInAppAction"]) {
         [self triggerInAppAction:message[@"actionJson"] callToAction:message[@"callToAction"] buttonId:message[@"buttonId"]];
+    } else if ([action isEqual: @"dismissInAppNotification"]) {
+        [self.controller hide:YES];
     } else if ([action isEqual: @"promptForPushPermission"]) {
         if (self.controller) {
             [self.controller hide:NO];

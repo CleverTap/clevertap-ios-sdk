@@ -638,9 +638,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
     // record the notification clicked event
-    if (!action.keyValues[@"shouldEmitNotificationClickedEvent"]) {
         [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
-    }
     
     // add the action extras so they can be passed to the dismissedWithExtras delegate
     if (extras) {
