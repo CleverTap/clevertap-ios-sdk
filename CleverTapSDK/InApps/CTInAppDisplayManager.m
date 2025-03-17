@@ -312,10 +312,41 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         
         [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
+                [self checkOrientationSupport:notification];
+                if (notification.error) {
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Device orientation not supported for inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
+                    return;
+                }
+                
                 [self notificationReady:notification];
             }];
         }];
     }];
+}
+
+- (void)checkOrientationSupport:(CTInAppNotification *)notification {
+    if (notification.inAppType == CTInAppTypeCustom) {
+        // The in-app orientation support depends on the custom in-app presenter.
+        return;
+    }
+    
+    if (notification.hasPortrait && !notification.hasLandscape && [self deviceOrientationIsLandscape]) {
+        notification.error = [NSString stringWithFormat:@"The InApp Notification supports %@ only, the app orientation is %@ dismissing the in-app.", @"portrait", @"landscape"];
+        return;
+    }
+    
+    if (notification.hasLandscape && !notification.hasPortrait && ![self deviceOrientationIsLandscape]) {
+        notification.error = [NSString stringWithFormat:@"The InApp Notification supports %@ only, the app orientation is %@ dismissing the in-app.", @"landscape", @"portrait"];
+        return;
+    }
+}
+
+- (BOOL)deviceOrientationIsLandscape {
+#if (TARGET_OS_TV)
+    return nil;
+#else
+    return [CTUIUtils isDeviceOrientationLandscape];
+#endif
 }
 
 - (void)prepareNotification:(CTInAppNotification *)notification withCompletion:(void (^)(void))completionHandler {
