@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.1) (March 17, 2024)
+
+#### Added
+- Adds `dismissInAppNotification` action to dismiss custom HTML in-Apps
+
+#### Fixed
+- Fixes custom in-app device orientation check
+
 ### [Version 7.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.0) (January 21, 2024)
 
 #### Added
