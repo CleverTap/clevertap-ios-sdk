@@ -58,21 +58,21 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          tag: v$(cat clevertap-ios-sdk/sdk-version.txt)
-          name: "Release v$(cat clevertap-ios-sdk/sdk-version.txt)"
+          tag: v$(cat sdk-version.txt)
+          name: "Release v$(cat sdk-version.txt)"
           draft: true
           body: "Auto-generated draft release"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload XCFramework to Release
         run: |
-          gh release upload v$(cat clevertap-ios-sdk/sdk-version.txt) CleverTapSDK.xcframework.zip
+          gh release upload v$(cat sdk-version.txt) CleverTapSDK.xcframework.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Package.swift
         run: |
-          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v$(cat clevertap-ios-sdk/sdk-version.txt)/CleverTapSDK.xcframework.zip\"|g" Package.swift
+          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v$(cat sdk-version.txt)/CleverTapSDK.xcframework.zip\"|g" Package.swift
           sed -i '' "s|checksum: \"<calculated-checksum>\"|checksum: \"$CHECKSUM\"|g" Package.swift
 
       - name: Commit Updated Package.swift
