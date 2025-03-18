@@ -1,0 +1,84 @@
+name: Build and Release XCFramework
+
+on:
+  workflow_dispatch: # Manual trigger for testing
+  push:
+    branches:
+      - SDK-4101-swift-support # For testing before merging to main
+
+permissions:
+  contents: write # Required to push changes to the repo      
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.0.app
+          swift --version
+
+      - name: Build iOS Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK \
+            -sdk iphoneos \
+            -archivePath ./build/CleverTapSDK-iOS \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Build iOS Simulator Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK \
+            -sdk iphonesimulator \
+            -archivePath ./build/CleverTapSDK-iOSSimulator \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework ./build/CleverTapSDK-iOS.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -framework ./build/CleverTapSDK-iOSSimulator.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -output CleverTapSDK.xcframework
+
+          zip -r CleverTapSDK.xcframework.zip CleverTapSDK.xcframework
+
+      - name: Compute Checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum CleverTapSDK.xcframework.zip)
+          echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+
+      - name: Create Draft Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v$(cat clevertap-ios-sdk/sdk-version.txt)
+          name: "Release v$(cat clevertap-ios-sdk/sdk-version.txt)"
+          draft: true
+          body: "Auto-generated draft release"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload XCFramework to Release
+        run: |
+          gh release upload v$(cat clevertap-ios-sdk/sdk-version.txt) CleverTapSDK.xcframework.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Package.swift
+        run: |
+          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v$(cat clevertap-ios-sdk/sdk-version.txt)/CleverTapSDK.xcframework.zip\"|g" Package.swift
+          sed -i '' "s|checksum: \"<calculated-checksum>\"|checksum: \"$CHECKSUM\"|g" Package.swift
+
+      - name: Commit Updated Package.swift
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Package.swift
+          git commit -m "Update Package.swift with new release URL and checksum"
+          git push origin SDK-4101-swift-support
