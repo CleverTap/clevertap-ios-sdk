@@ -86,8 +86,8 @@ jobs:
 
       - name: Update Package.swift
         run: |
-          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v${{ env.VERSION }}/CleverTapSDK.xcframework.zip\"|g" Package.swift
-          sed -i '' "s|checksum: \"<calculated-checksum>\"|checksum: \"$CHECKSUM\"|g" Package.swift
+          sed -i '' "/\.binaryTarget( *name: \"CleverTapSDK\"/,/url:/ s|url: \".*\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v$(cat sdk-version.txt)/CleverTapSDK.xcframework.zip\"|g" Package.swift
+          sed -i '' "/\.binaryTarget( *name: \"CleverTapSDK\"/,/checksum:/ s|checksum: \".*\"|checksum: \"$CHECKSUM\"|g" Package.swift
 
       - name: Commit Updated Package.swift
         run: |
