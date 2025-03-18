@@ -1,7 +1,8 @@
 project 'CleverTapSDK'
 
 abstract_target 'shared' do
-  
+  use_modular_headers!  
+
   target 'CleverTapSDKTests' do
       platform :ios, '10.0'
       pod 'OCMock', '~> 3.2.1'

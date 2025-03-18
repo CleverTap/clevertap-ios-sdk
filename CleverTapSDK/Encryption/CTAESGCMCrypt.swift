@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 import Security
 
-@available(iOSApplicationExtension 13.0, *)
+@available(iOS 13.0, *)
 @objc(CTAESGCMCrypt)
 public class AESGCMCrypt: NSObject {
     // MARK: - Properties
