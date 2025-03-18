@@ -1,4 +1,5 @@
 project 'CleverTapSDK'
+use_frameworks!
 
 abstract_target 'shared' do
   
