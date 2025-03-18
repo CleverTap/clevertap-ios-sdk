@@ -20,13 +20,13 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SDWebImage",
-            url: "https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v8.0.0/CleverTapSDK.xcframework.zip",
+            url: "https://github.com/SDWebImage/SDWebImage/releases/download/5.21.0/SDWebImage-dynamic.xcframework.zip",
             checksum: "e034ea04f5e86866bc3081d009941bd5b2a2ed705b3a06336656484514116638"
         ),
         .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v8.0.0/CleverTapSDK.xcframework.zip",
-            checksum: "6363c4b2ecced48f4dc4c62a56507bb34c3b1c4a50e98a5e77ee58a6936818a4"
+            url: "https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip",
+            checksum: "<calculated-checksum>"
         ),
         .target(
             name: "CleverTapLocation",

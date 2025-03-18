@@ -73,9 +73,9 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ env.VERSION }}
-          name: "Release v${{ env.VERSION }}"
+          name: "Release CleverTap iOS SDK ${{ env.VERSION }}"
           draft: true
-          body: "Auto-generated draft release"
+          body: "CleverTap iOS SDK ${{ env.VERSION }} Release Notes"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload XCFramework to Release
@@ -86,7 +86,7 @@ jobs:
 
       - name: Update Package.swift
         run: |
-          sed -i '' "s|url: \".*\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v${{ env.VERSION }}/CleverTapSDK.xcframework.zip\"|g" Package.swift
+          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v${{ env.VERSION }}/CleverTapSDK.xcframework.zip\"|g" Package.swift
           sed -i '' "s|checksum: \"<calculated-checksum>\"|checksum: \"$CHECKSUM\"|g" Package.swift
 
       - name: Commit Updated Package.swift
