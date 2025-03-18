@@ -54,25 +54,39 @@ jobs:
           CHECKSUM=$(swift package compute-checksum CleverTapSDK.xcframework.zip)
           echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
 
+      - name: Verify Version File
+        run: |
+          if [ ! -f sdk-version.txt ]; then
+            echo "❌ Error: sdk-version.txt file not found."
+            exit 1
+          fi
+
+          VERSION=$(cat sdk-version.txt | tr -d '[:space:]')
+          if [ -z "$VERSION" ]; then
+            echo "❌ Error: sdk-version.txt is empty."
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Create Draft Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          tag: v$(cat sdk-version.txt)
-          name: "Release v$(cat sdk-version.txt)"
+          tag: v${{ env.VERSION }}
+          name: "Release v${{ env.VERSION }}"
           draft: true
           body: "Auto-generated draft release"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload XCFramework to Release
         run: |
-          gh release upload v$(cat sdk-version.txt) CleverTapSDK.xcframework.zip
+          gh release upload "v${{ env.VERSION }}" CleverTapSDK.xcframework.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Package.swift
         run: |
-          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/<version>/CleverTapSDK.xcframework.zip\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v$(cat sdk-version.txt)/CleverTapSDK.xcframework.zip\"|g" Package.swift
+          sed -i '' "s|url: \".*\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/v${{ env.VERSION }}/CleverTapSDK.xcframework.zip\"|g" Package.swift
           sed -i '' "s|checksum: \"<calculated-checksum>\"|checksum: \"$CHECKSUM\"|g" Package.swift
 
       - name: Commit Updated Package.swift
