@@ -66,6 +66,12 @@ jobs:
           TEST_RELEASE_NAME="CleverTap iOS SDK $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+          # Create a tag locally if it doesn't exist
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+
           # Check for existing draft release with the test name
           EXISTING_TAG=$(gh release list --json name,tagName --jq ".[] | select(.name == \"$TEST_RELEASE_NAME\") | .tagName")
 
@@ -76,12 +82,6 @@ jobs:
             echo "✅ Updated existing draft release."
           else
             echo "🟢 No existing draft found. Creating new one..."
-
-            # Create a tag locally if it doesn't exist
-            if ! git rev-parse "$TAG" >/dev/null 2>&1; then
-              git tag "$TAG"
-              git push origin "$TAG"
-            fi
 
             gh release create "$TAG" \
               --title "$TEST_RELEASE_NAME" \
