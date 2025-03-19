@@ -60,30 +60,28 @@ jobs:
           echo "🔢 Checksum computed: $CHECKSUM"
 
       - name: Create or Update Draft Release
-        id: create_or_update_release
         run: |
           TEST_RELEASE_NAME="Test Release - SDK-4101-swift-support"
-    
-          # Check if draft release with the same name already exists
+          TAG="test-draft"
+
+          # Check for existing draft release with the test name
           EXISTING_TAG=$(gh release list --json name,tagName --jq ".[] | select(.name == \"$TEST_RELEASE_NAME\") | .tagName")
 
-          if [ -z "$EXISTING_TAG" ]; then
-            # Create a new draft release if none exists
-            gh release create "" \
+          if [ -n "$EXISTING_TAG" ]; then
+            echo "🟠 Draft release found. Updating assets..."
+            gh release delete-asset "$EXISTING_TAG" CleverTapSDK.xcframework.zip || true
+            gh release upload "$EXISTING_TAG" CleverTapSDK.xcframework.zip
+            echo "✅ Updated existing draft release."
+          else
+            echo "🟢 No existing draft found. Creating new one..."
+            gh release create "$TAG" \
               --title "$TEST_RELEASE_NAME" \
               --notes "Auto-generated test release" \
               --target "SDK-4101-swift-support" \
               --draft
-            echo "🚀 New draft release created: $TEST_RELEASE_NAME"
-          else
-            # Remove old XCFramework if release already exists
-            gh release delete-asset "$EXISTING_TAG" CleverTapSDK.xcframework.zip || true
-            echo "🗑️ Old asset removed from draft release: $TEST_RELEASE_NAME"
+            gh release upload "$TAG" CleverTapSDK.xcframework.zip
+            echo "✅ New draft release created."
           fi
-
-          # Upload the new XCFramework asset
-          gh release upload "$EXISTING_TAG" CleverTapSDK.xcframework.zip
-          echo "📤 New XCFramework uploaded to draft release: $TEST_RELEASE_NAME"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
