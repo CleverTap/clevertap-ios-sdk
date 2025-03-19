@@ -82,15 +82,14 @@ jobs:
             gh release upload "$TAG" CleverTapSDK.xcframework.zip
             echo "✅ New draft release created."
           fi
-          echo "TEST_RELEASE_NAME=$TEST_RELEASE_NAME" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract Uploaded Asset URL
         id: get_asset_url
         run: |
-          ASSET_URL=$(gh release view "$TEST_RELEASE_NAME" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
-          
+          ASSET_URL=$(gh release view "test-draft" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
+
           if [ -z "$ASSET_URL" ]; then
             echo "❌ Error: Asset URL not found in the draft release."
             exit 1
