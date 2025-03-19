@@ -89,8 +89,16 @@ jobs:
         id: get_asset_url
         run: |
           ASSET_URL=$(gh release view "$TEST_RELEASE_NAME" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
+          
+          if [ -z "$ASSET_URL" ]; then
+            echo "❌ Error: Asset URL not found in the draft release."
+            exit 1
+          fi
+
           echo "ASSET_URL=$ASSET_URL" >> $GITHUB_ENV
           echo "🔗 Asset URL extracted: $ASSET_URL"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Package.swift
         run: |
