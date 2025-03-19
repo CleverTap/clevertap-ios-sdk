@@ -82,6 +82,7 @@ jobs:
             gh release upload "$TAG" CleverTapSDK.xcframework.zip
             echo "✅ New draft release created."
           fi
+          echo "TEST_RELEASE_NAME=$TEST_RELEASE_NAME" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
