@@ -1,13 +1,13 @@
 name: Build and Release XCFramework
 
 on:
-  workflow_dispatch: # Manual trigger for testing
+  workflow_dispatch:
   push:
     branches:
-      - SDK-4101-swift-support # For testing before merging to main
+      - SDK-4101-swift-support
 
 permissions:
-  contents: write # Required to push changes to the repo      
+  contents: write      
 
 jobs:
   build:
@@ -20,6 +20,7 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_15.0.app
           swift --version
+          echo "✅ Dependencies installed successfully"
 
       - name: Build iOS Framework
         run: |
@@ -29,6 +30,7 @@ jobs:
             -archivePath ./build/CleverTapSDK-iOS \
             SKIP_INSTALL=NO \
             BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          echo "📱 iOS framework built successfully"
 
       - name: Build iOS Simulator Framework
         run: |
@@ -38,6 +40,7 @@ jobs:
             -archivePath ./build/CleverTapSDK-iOSSimulator \
             SKIP_INSTALL=NO \
             BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          echo "🖥️ iOS Simulator framework built successfully"
 
       - name: Create XCFramework
         run: |
@@ -47,52 +50,61 @@ jobs:
             -output CleverTapSDK.xcframework
 
           zip -r CleverTapSDK.xcframework.zip CleverTapSDK.xcframework
+          echo "📦 XCFramework created and zipped successfully"
 
       - name: Compute Checksum
         id: checksum
         run: |
           CHECKSUM=$(swift package compute-checksum CleverTapSDK.xcframework.zip)
           echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+          echo "🔢 Checksum computed: $CHECKSUM"
 
-      - name: Verify Version File
+      - name: Create or Update Draft Release
+        id: create_or_update_release
         run: |
-          if [ ! -f sdk-version.txt ]; then
-            echo "❌ Error: sdk-version.txt file not found."
-            exit 1
+          TEST_RELEASE_NAME="Test Release - SDK-4101-swift-support"
+          
+          # Check if draft release with the same name already exists
+          EXISTING_RELEASE_ID=$(gh release list --json name,id --jq ".[] | select(.name == \"$TEST_RELEASE_NAME\") | .id")
+
+          if [ -z "$EXISTING_RELEASE_ID" ]; then
+            # Create a new draft release if none exists
+            gh release create "" \
+              --title "$TEST_RELEASE_NAME" \
+              --notes "Auto-generated test release" \
+              --target "SDK-4101-swift-support" \
+              --draft
+            echo "🚀 New draft release created: $TEST_RELEASE_NAME"
+          else
+            # Remove old XCFramework if release already exists
+            gh release delete-asset "$EXISTING_RELEASE_ID" CleverTapSDK.xcframework.zip || true
+            echo "🗑️ Old asset removed from draft release: $TEST_RELEASE_NAME"
           fi
 
-          VERSION=$(cat sdk-version.txt | tr -d '[:space:]')
-          if [ -z "$VERSION" ]; then
-            echo "❌ Error: sdk-version.txt is empty."
-            exit 1
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Create Draft Release
-        id: create_release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: v${{ env.VERSION }}
-          name: "Release CleverTap iOS SDK ${{ env.VERSION }}"
-          draft: true
-          body: "CleverTap iOS SDK ${{ env.VERSION }} Release Notes"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload XCFramework to Release
-        run: |
-          gh release upload "v${{ env.VERSION }}" CleverTapSDK.xcframework.zip
+          # Upload the new XCFramework asset
+          gh release upload "$EXISTING_RELEASE_ID" CleverTapSDK.xcframework.zip
+          echo "📤 New XCFramework uploaded to draft release: $TEST_RELEASE_NAME"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract Uploaded Asset URL
+        id: get_asset_url
+        run: |
+          ASSET_URL=$(gh release view "$TEST_RELEASE_NAME" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
+          echo "ASSET_URL=$ASSET_URL" >> $GITHUB_ENV
+          echo "🔗 Asset URL extracted: $ASSET_URL"
+
       - name: Update Package.swift
         run: |
-          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/.*\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/$(cat sdk-version.txt)/CleverTapSDK.xcframework.zip\"|g" Package.swift
+          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/.*\"|url: \"$ASSET_URL\"|g" Package.swift
           sed -i '' "/\.binaryTarget( *name: \"CleverTapSDK\"/,/checksum:/ s|checksum: \".*\"|checksum: \"$CHECKSUM\"|g" Package.swift
+          echo "📝 Package.swift updated successfully"
 
       - name: Commit Updated Package.swift
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add Package.swift
-          git commit -m "Update Package.swift with new release URL and checksum"
+          git commit -m "Update Package.swift with uploaded asset URL and checksum"
           git push origin SDK-4101-swift-support
+          echo "✅ Package.swift changes committed and pushed successfully"
