@@ -90,6 +90,7 @@ jobs:
               CleverTapSDK.xcframework.zip
 
             echo "✅ New draft release created."
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
