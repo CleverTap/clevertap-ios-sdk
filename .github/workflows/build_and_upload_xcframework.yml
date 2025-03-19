@@ -62,24 +62,33 @@ jobs:
       - name: Create or Update Draft Release
         run: |
           TEST_RELEASE_NAME="Test Release - SDK-4101-swift-support"
-          TAG="test-draft"
+          VERSION=$(cat sdk-version.txt)  # Read the version from sdk-version.txt
+          TAG="$VERSION"
 
           # Check for existing draft release with the test name
           EXISTING_TAG=$(gh release list --json name,tagName --jq ".[] | select(.name == \"$TEST_RELEASE_NAME\") | .tagName")
 
           if [ -n "$EXISTING_TAG" ]; then
             echo "🟠 Draft release found. Updating assets..."
-            gh release delete-asset "$EXISTING_TAG" CleverTapSDK.xcframework.zip || true
+            gh release delete-asset "$EXISTING_TAG" CleverTapSDK.xcframework.zip 2>/dev/null || true
             gh release upload "$EXISTING_TAG" CleverTapSDK.xcframework.zip
             echo "✅ Updated existing draft release."
           else
             echo "🟢 No existing draft found. Creating new one..."
+
+            # Create a tag locally if it doesn't exist
+            if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+              git tag "$TAG"
+              git push origin "$TAG"
+            fi
+
             gh release create "$TAG" \
               --title "$TEST_RELEASE_NAME" \
               --notes "Auto-generated test release" \
               --target "SDK-4101-swift-support" \
-              --draft
-            gh release upload "$TAG" CleverTapSDK.xcframework.zip
+              --draft \
+              CleverTapSDK.xcframework.zip
+
             echo "✅ New draft release created."
           fi
         env:
@@ -88,7 +97,7 @@ jobs:
       - name: Extract Uploaded Asset URL
         id: get_asset_url
         run: |
-          ASSET_URL=$(gh release view "test-draft" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
+          ASSET_URL=$(gh release view "$VERSION" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
 
           if [ -z "$ASSET_URL" ]; then
             echo "❌ Error: Asset URL not found in the draft release."
