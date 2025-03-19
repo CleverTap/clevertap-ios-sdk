@@ -46,7 +46,7 @@
 @property (nonatomic, readwrite) int maxPerSession;
 @property (nonatomic, readwrite) int totalLifetimeCount;
 @property (nonatomic, readwrite) int totalDailyCount;
-@property (nonatomic, readwrite) NSInteger timeToLive;
+@property (nonatomic, readwrite) NSTimeInterval timeToLive;
 @property (nonatomic, assign, readwrite) char position;
 @property (nonatomic, assign, readwrite) float height;
 @property (nonatomic, assign, readwrite) float heightPercent;
@@ -113,9 +113,7 @@
             } else {
                 NSDate *now = [NSDate date];
                 NSDate *timeToLiveDate = [now dateByAddingTimeInterval:(48 * 60 * 60)];
-                NSTimeInterval timeToLiveEpoch = [timeToLiveDate timeIntervalSince1970];
-                NSInteger defaultTimeToLive = (long)timeToLiveEpoch;
-                _timeToLive = defaultTimeToLive;
+                _timeToLive = [timeToLiveDate timeIntervalSince1970];
             }
         } @catch (NSException *e) {
             self.error = e.debugDescription;
