@@ -61,9 +61,10 @@ jobs:
 
       - name: Create or Update Draft Release
         run: |
-          TEST_RELEASE_NAME="Test Release - SDK-4101-swift-support"
           VERSION=$(cat sdk-version.txt)  # Read the version from sdk-version.txt
           TAG="$VERSION"
+          TEST_RELEASE_NAME="CleverTap iOS SDK $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
           # Check for existing draft release with the test name
           EXISTING_TAG=$(gh release list --json name,tagName --jq ".[] | select(.name == \"$TEST_RELEASE_NAME\") | .tagName")
@@ -90,7 +91,6 @@ jobs:
               CleverTapSDK.xcframework.zip
 
             echo "✅ New draft release created."
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
