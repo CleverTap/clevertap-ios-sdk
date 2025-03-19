@@ -105,17 +105,21 @@ jobs:
           sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/.*\"|url: \"$ASSET_URL\"|g" Package.swift
           
           # Update Checksum
-          awk -v checksum="$CHECKSUM" 'BEGIN{found=0; inTarget=0}
-          {
-            if ($0 ~ /\.binaryTarget\(/) inTarget=1
-            if (inTarget && $0 ~ /name: "CleverTapSDK"/) found=1
-            if (found==1 && $0 ~ /checksum:/) {
-              gsub(/"[a-f0-9]+"/, "\""checksum"\"", $0)
-              found=0
+          awk -v checksum="$CHECKSUM" '
+            BEGIN { 
+              found=0; 
+              inTarget=0 
             }
-            if ($0 ~ /\),/) inTarget=0
-            print $0
-          }' Package.swift > Package.swift.tmp && mv Package.swift.tmp Package.swift
+            {
+              if ($0 ~ /\.binaryTarget\(/) inTarget=1
+              if (inTarget && $0 ~ /name: "CleverTapSDK"/) found=1
+              if (found==1 && $0 ~ /checksum:/) {
+                sub(/checksum: "[^"]+"/, "checksum: \""checksum"\"", $0)
+                found=0
+              }
+              if ($0 ~ /\),/) inTarget=0
+              print $0
+            }' Package.swift > Package.swift.tmp && mv Package.swift.tmp Package.swift
           echo "📝 Package.swift updated successfully"
 
       - name: Commit Updated Package.swift
