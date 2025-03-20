@@ -173,6 +173,10 @@
 		487C71842D8AC11D0052986F /* CTAppFunctionBuilder-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71832D8AC11D0052986F /* CTAppFunctionBuilder-Internal.h */; };
 		487C71872D8AD1580052986F /* CTSystemAppFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71862D8AD1580052986F /* CTSystemAppFunction.h */; };
 		487C71892D8AD18B0052986F /* CTSystemAppFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71882D8AD18B0052986F /* CTSystemAppFunction.m */; };
+		487C718D2D8BFC230052986F /* CTPushPermissionSystemAppFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C718C2D8BFC230052986F /* CTPushPermissionSystemAppFunction.h */; };
+		487C718F2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C718E2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m */; };
+		487C71932D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71922D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h */; };
+		487C71952D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */; };
 		48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */; };
 		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
@@ -796,6 +800,10 @@
 		487C71832D8AC11D0052986F /* CTAppFunctionBuilder-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTAppFunctionBuilder-Internal.h"; sourceTree = "<group>"; };
 		487C71862D8AD1580052986F /* CTSystemAppFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemAppFunction.h; sourceTree = "<group>"; };
 		487C71882D8AD18B0052986F /* CTSystemAppFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemAppFunction.m; sourceTree = "<group>"; };
+		487C718C2D8BFC230052986F /* CTPushPermissionSystemAppFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPushPermissionSystemAppFunction.h; sourceTree = "<group>"; };
+		487C718E2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPushPermissionSystemAppFunction.m; sourceTree = "<group>"; };
+		487C71922D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemAppFunctionPresenter.h; sourceTree = "<group>"; };
+		487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemAppFunctionPresenter.m; sourceTree = "<group>"; };
 		48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sampleTXTStub.txt; sourceTree = "<group>"; };
 		48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = samplePDFStub.pdf; sourceTree = "<group>"; };
 		48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManagerTests.m; sourceTree = "<group>"; };
@@ -1359,6 +1367,10 @@
 			children = (
 				487C71862D8AD1580052986F /* CTSystemAppFunction.h */,
 				487C71882D8AD18B0052986F /* CTSystemAppFunction.m */,
+				487C718C2D8BFC230052986F /* CTPushPermissionSystemAppFunction.h */,
+				487C718E2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m */,
+				487C71922D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h */,
+				487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */,
 			);
 			path = SystemAppFunction;
 			sourceTree = "<group>";
@@ -2078,6 +2090,7 @@
 				6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */,
 				D0A84ADC209136D500191B1F /* CTLogger.h in Headers */,
 				4E41FD98294F46510001FBED /* CTVarCache.h in Headers */,
+				487C718D2D8BFC230052986F /* CTPushPermissionSystemAppFunction.h in Headers */,
 				6BEEC2CB2AEBDF5800BD4EC5 /* CTClock.h in Headers */,
 				4E8B816B2AD2B2FD00714BB4 /* CleverTapInternal.h in Headers */,
 				07B94541219EA34300D4C542 /* CleverTapInboxViewControllerPrivate.h in Headers */,
@@ -2090,6 +2103,7 @@
 				071EB511217F6427008F0FAB /* CTUIUtils.h in Headers */,
 				6BF5A5A12AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h in Headers */,
 				6BD334F32AF7FC660099E33E /* CTTriggerRadius.h in Headers */,
+				487C71932D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h in Headers */,
 				D01651AE2097B38400660178 /* CTEventBuilder.h in Headers */,
 				6BB7272E2B8F3D79009CE7D0 /* CTCustomTemplate-Internal.h in Headers */,
 				072F9E3D21B1368000BC6313 /* CTInboxIconMessageCell.h in Headers */,
@@ -2689,6 +2703,7 @@
 				07B9454C219EA34300D4C542 /* CTMessageMO.m in Sources */,
 				6B12F7662C94312D0045D743 /* CTJsonTemplateProducer.m in Sources */,
 				48F9FD1E2C3D30BF00617770 /* CTFileDownloader.m in Sources */,
+				487C718F2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m in Sources */,
 				D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */,
 				4E5A02DE2A4C5FD800DE242A /* LeanplumCT.m in Sources */,
 				6AA1357B2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */,
@@ -2790,6 +2805,7 @@
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
 				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
 				6BB778C82BECEC2700A41628 /* CTCustomTemplateInAppData.m in Sources */,
+				487C71952D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m in Sources */,
 				4EF0D5472AD84BCA0044C48F /* CTSessionManager.m in Sources */,
 				4EB3638B2C087A8200C00AE2 /* CTUserInfoMigrator.m in Sources */,
 				4EB4C8BF2AAD91AC00B7F045 /* CTTriggerEvaluator.m in Sources */,

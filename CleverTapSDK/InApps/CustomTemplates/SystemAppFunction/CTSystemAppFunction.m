@@ -8,13 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "CTSystemAppFunction.h"
+#import "CTConstants.h"
+#import "CTPushPermissionSystemAppFunction.h"
 
 @implementation CTSystemAppFunction
 
 + (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
-    // Build all system app function here.
-
+    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplate];
     return systemAppFunctions;
 }
 
