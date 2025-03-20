@@ -27,6 +27,7 @@ extern NSString *const kSessionId;
 [CTLogger logInternalError:e]; }
 
 #define CLTAP_CUSTOM_TEMPLATE_EXCEPTION @"CleverTapCustomTemplateException"
+#define CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION @"CleverTapSystemAppFunctionException"
 
 #pragma mark Constants for General data
 #define CLTAP_REQUEST_TIME_OUT_INTERVAL 10

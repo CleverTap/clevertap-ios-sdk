@@ -16,6 +16,7 @@
 @property (nonatomic, strong) NSString *templateType;
 @property (nonatomic, strong) NSArray<CTTemplateArgument *> *arguments;
 @property (nonatomic, strong) id<CTTemplatePresenter> presenter;
+@property (nonatomic) BOOL isSystemDefined;
 
 @end
 
@@ -25,13 +26,15 @@
                         templateType:(NSString *)templateType
                             isVisual:(BOOL)isVisual
                            arguments:(NSArray *)arguments
-                           presenter:(id<CTTemplatePresenter>)presenter {
+                           presenter:(id<CTTemplatePresenter>)presenter
+                     isSystemDefined:(BOOL)isSystemDefined {
     if (self = [super init]) {
         _name = [templateName copy];
         _templateType = [templateType copy];
         _isVisual = isVisual;
         _arguments = arguments;
         _presenter = presenter;
+        _isSystemDefined = isSystemDefined;
     }
     return self;
 }

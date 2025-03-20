@@ -14,15 +14,24 @@
 
 @implementation CTCustomTemplateBuilder
 
-- (instancetype)initWithType:(nonnull NSString *)type isVisual:(BOOL)isVisual {
-    return [self initWithType:type isVisual:isVisual nullableArgumentTypes:[NSSet setWithObject:@(CTTemplateArgumentTypeFile)]];
+- (instancetype)initWithType:(nonnull NSString *)type
+                    isVisual:(BOOL)isVisual
+             isSystemDefined:(BOOL)isSystemDefined {
+    return [self initWithType:type
+                     isVisual:isVisual
+        nullableArgumentTypes:[NSSet setWithObject:@(CTTemplateArgumentTypeFile)]
+              isSystemDefined:isSystemDefined];
 }
 
-- (instancetype)initWithType:(nonnull NSString *)type isVisual:(BOOL)isVisual nullableArgumentTypes:(NSSet *)nullableArgumentTypes {
+- (instancetype)initWithType:(nonnull NSString *)type
+                    isVisual:(BOOL)isVisual
+       nullableArgumentTypes:(NSSet *)nullableArgumentTypes
+             isSystemDefined:(BOOL)isSystemDefined {
     self = [super init];
     if (self) {
         _templateType = [type copy];
         _isVisual = isVisual;
+        _isSystemDefined = isSystemDefined;
         
         _nullableArgumentTypes = [NSSet setWithObject:@(CTTemplateArgumentTypeFile)];
         if (nullableArgumentTypes && [nullableArgumentTypes count] > 0) {
@@ -192,7 +201,8 @@
                                              templateType:self.templateType
                                                  isVisual:self.isVisual
                                                 arguments:self.arguments
-                                                presenter:self.presenter];
+                                                presenter:self.presenter
+                                          isSystemDefined:self.isSystemDefined];
 }
 
 @end

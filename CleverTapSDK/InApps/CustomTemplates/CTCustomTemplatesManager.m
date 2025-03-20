@@ -12,6 +12,7 @@
 #import "CTConstants.h"
 #import "CTInAppNotification.h"
 #import "CTTemplateContext-Internal.h"
+#import "CTCustomTemplate-Internal.h"
 
 @interface CTCustomTemplatesManager () <CTTemplateContextDismissDelegate>
 
@@ -39,7 +40,8 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     [templateProducers removeAllObjects];
 }
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig
+            systemAppFunctions:(NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
     self = [super init];
     if (self) {
         self.activeContexts = [NSMutableDictionary dictionary];
@@ -47,16 +49,29 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
         for (id producer in templateProducers) {
             NSSet *customTemplates = [producer defineTemplates:instanceConfig];
             for (CTCustomTemplate *template in customTemplates) {
-                if (!self.templates[template.name]) {
-                    self.templates[template.name] = template;
-                } else {
+                if(template.isSystemDefined) {
+                    @throw([NSException
+                            exceptionWithName:CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION
+                            reason:[NSString stringWithFormat:@"CleverTap: Cannot define system template with a name: %@.", template.name]
+                            userInfo:nil]);
+                } else if([[systemAppFunctions allKeys] containsObject:template.name]) {
+                    @throw([NSException
+                            exceptionWithName:CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION
+                            reason:[NSString stringWithFormat:@"CleverTap: CustomTemplate with name: %@ is a System template.", template.name]
+                            userInfo:nil]);
+                } else if(self.templates[template.name]) {
                     @throw([NSException
                             exceptionWithName:CLTAP_CUSTOM_TEMPLATE_EXCEPTION
                             reason:[NSString stringWithFormat:@"CleverTap: Template with name: %@ is already defined.", template.name]
                             userInfo:nil]);
+                } else {
+                    self.templates[template.name] = template;
                 }
             }
         }
+        
+        // Add all System App Functions
+        [self.templates addEntriesFromDictionary:systemAppFunctions];
     }
     return self;
 }

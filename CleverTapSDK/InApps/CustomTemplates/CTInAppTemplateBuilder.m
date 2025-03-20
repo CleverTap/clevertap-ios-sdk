@@ -13,7 +13,7 @@
 
 - (instancetype)init {
     NSSet *nullableTypes = [NSSet setWithObjects:@(CTTemplateArgumentTypeAction), nil];
-    self = [super initWithType:TEMPLATE_TYPE isVisual:YES nullableArgumentTypes:nullableTypes];
+    self = [super initWithType:TEMPLATE_TYPE isVisual:YES nullableArgumentTypes:nullableTypes isSystemDefined:NO];
     return self;
 }
 
