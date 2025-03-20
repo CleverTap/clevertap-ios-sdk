@@ -27,9 +27,9 @@ jobs:
           git fetch origin
           if [ "${{ inputs.force_build }}" == 'true' ]; then
             echo "🟠 Force build triggered. Continuing..."
-          elif git diff --quiet origin/SDK-4101-swift-support HEAD -- sdk-version.txt; then
+          elif git diff --quiet HEAD^ HEAD -- sdk-version.txt; then
             echo "❌ No changes in sdk-version.txt. Exiting..."
-            exit 0
+            exit 1
           fi
           echo "✅ sdk-version.txt has changed. Continuing..."
 
