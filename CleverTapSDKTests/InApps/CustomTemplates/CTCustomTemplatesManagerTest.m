@@ -391,7 +391,7 @@
     XCTAssertFalse([manager isRegisteredTemplateWithName:@"non-existent"]);
     
     CleverTapInstanceConfig *config2 = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId2" accountToken:@"testAccountToken2"];
-    CTCustomTemplatesManager *managerWithNewConfig = [[CTCustomTemplatesManager alloc] initWithConfig:config2];
+    CTCustomTemplatesManager *managerWithNewConfig = [[CTCustomTemplatesManager alloc] initWithConfig:config2 systemAppFunctions:@{}];
     
     XCTAssertTrue([managerWithNewConfig isRegisteredTemplateWithName:templateName1]);
     XCTAssertTrue([managerWithNewConfig isRegisteredTemplateWithName:templateName2]);
@@ -413,7 +413,7 @@
     [CTCustomTemplatesManager registerTemplateProducer:producer];
     
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:config systemAppFunctions:@{}], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testPresenterOnPresent {
@@ -586,7 +586,7 @@
 }
 
 - (CTCustomTemplatesManager *)templatesManager {
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig];
+    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:@{}];
     return manager;
 }
 
