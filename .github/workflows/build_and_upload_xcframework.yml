@@ -2,12 +2,17 @@ name: Build and Release XCFramework
 
 on:
   workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if sdk-version.txt has not changed'
+        required: false
+        default: 'false'
   push:
     branches:
       - SDK-4101-swift-support
 
 permissions:
-  contents: write      
+  contents: write
 
 jobs:
   build:
@@ -15,6 +20,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Check for sdk-version.txt Change
+        id: check_version
+        run: |
+          git fetch origin
+          if [ "${{ inputs.force_build }}" == 'true' ]; then
+            echo "🟠 Force build triggered. Continuing..."
+          elif git diff --quiet origin/SDK-4101-swift-support HEAD -- sdk-version.txt; then
+            echo "❌ No changes in sdk-version.txt. Exiting..."
+            exit 0
+          fi
+          echo "✅ sdk-version.txt has changed. Continuing..."
 
       - name: Install dependencies
         run: |
@@ -59,65 +76,15 @@ jobs:
           echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
           echo "🔢 Checksum computed: $CHECKSUM"
 
-      - name: Create or Update Draft Release
-        run: |
-          VERSION=$(cat sdk-version.txt)  # Read the version from sdk-version.txt
-          TAG="$VERSION"
-          TEST_RELEASE_NAME="CleverTap iOS SDK $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-          # Create a tag locally if it doesn't exist
-          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
-            git tag "$TAG"
-            git push origin "$TAG"
-          fi
-
-          # Check for existing draft release with the test name
-          EXISTING_TAG=$(gh release list --json name,tagName --jq ".[] | select(.name == \"$TEST_RELEASE_NAME\") | .tagName")
-
-          if [ -n "$EXISTING_TAG" ]; then
-            echo "🟠 Draft release found. Updating assets..."
-            gh release delete-asset "$EXISTING_TAG" CleverTapSDK.xcframework.zip 2>/dev/null || true
-            gh release upload "$EXISTING_TAG" CleverTapSDK.xcframework.zip
-            echo "✅ Updated existing draft release."
-          else
-            echo "🟢 No existing draft found. Creating new one..."
-
-            gh release create "$TAG" \
-              --title "$TEST_RELEASE_NAME" \
-              --notes "Auto-generated test release" \
-              --target "SDK-4101-swift-support" \
-              --draft \
-              CleverTapSDK.xcframework.zip
-
-            echo "✅ New draft release created."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract Uploaded Asset URL
-        id: get_asset_url
-        run: |
-          ASSET_URL=$(gh release view "$VERSION" --json assets --jq ".assets[] | select(.name == \"CleverTapSDK.xcframework.zip\") | .url")
-
-          if [ -z "$ASSET_URL" ]; then
-            echo "❌ Error: Asset URL not found in the draft release."
-            exit 1
-          fi
-
-          echo "ASSET_URL=$ASSET_URL" >> $GITHUB_ENV
-          echo "🔗 Asset URL extracted: $ASSET_URL"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Pull Latest Changes
         run: |
           git pull origin SDK-4101-swift-support --rebase || true
-      
+
       - name: Update Package.swift
         run: |
-          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/.*\"|url: \"$ASSET_URL\"|g" Package.swift
-          
+          VERSION=$(cat sdk-version.txt)
+          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/.*\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/$VERSION/CleverTapSDK.xcframework.zip\"|g" Package.swift
+
           # Update Checksum
           awk -v checksum="$CHECKSUM" '
             BEGIN { 
