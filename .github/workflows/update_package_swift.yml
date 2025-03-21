@@ -1,4 +1,4 @@
-name: Build and Release XCFramework
+name: Update Package.swift with URL and checksum
 
 on:
   workflow_dispatch:
