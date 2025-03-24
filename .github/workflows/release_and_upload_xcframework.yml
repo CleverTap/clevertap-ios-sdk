@@ -1,0 +1,103 @@
+name: Upload XCFramework to a draft release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: "Force build even if sdk-version.txt has not changed"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for sdk-version.txt Change
+        id: check_version
+        run: |
+          git fetch origin
+          if [ "${{ github.event.inputs.force_build }}" == 'true' ]; then
+            echo "🟠 Force build triggered. Continuing..."
+          elif git diff --quiet HEAD^ HEAD -- sdk-version.txt; then
+            echo "❌ No changes in sdk-version.txt. Exiting..."
+            exit 1
+          fi
+          echo "✅ sdk-version.txt has changed. Continuing..."
+
+      - name: Install dependencies
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.0.app
+          swift --version
+          echo "✅ Dependencies installed successfully"
+
+      - name: Build iOS Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK \
+            -sdk iphoneos \
+            -archivePath ./build/CleverTapSDK-iOS \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          echo "📱 iOS framework built successfully"
+
+      - name: Build iOS Simulator Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK \
+            -sdk iphonesimulator \
+            -archivePath ./build/CleverTapSDK-iOSSimulator \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+            FRAMEWORK_SEARCH_PATHS="./Vendors/simulator"
+          echo "🖥️ iOS Simulator framework built successfully"
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework ./build/CleverTapSDK-iOS.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -framework ./build/CleverTapSDK-iOSSimulator.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -output CleverTapSDK.xcframework
+
+          zip -r CleverTapSDK.xcframework.zip CleverTapSDK.xcframework
+          echo "📦 XCFramework created and zipped successfully"
+
+      - name: Create or Update Draft Release
+        run: |
+          VERSION=$(cat sdk-version.txt)  # Read the version from sdk-version.txt
+          TAG="$VERSION"
+          RELEASE_NAME="CleverTap iOS SDK $VERSION"
+
+          # Check if the tag exists
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+
+          # Check if a draft release already exists
+          EXISTING_RELEASE=$(gh release list --json name,tagName --jq ".[] | select(.tagName == \"$TAG\") | .tagName")
+
+          if [ -n "$EXISTING_RELEASE" ]; then
+            echo "🟠 Draft release found. Updating assets..."
+            gh release delete-asset "$TAG" CleverTapSDK.xcframework.zip 2>/dev/null || true
+            gh release upload "$TAG" CleverTapSDK.xcframework.zip
+            echo "✅ Updated existing draft release."
+          else
+            echo "🟢 No existing draft found. Creating new one..."
+            gh release create "$TAG" \
+              --title "$RELEASE_NAME" \
+              --notes "Auto-generated release for version $VERSION" \
+              --draft \
+              CleverTapSDK.xcframework.zip
+            echo "✅ New draft release created."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

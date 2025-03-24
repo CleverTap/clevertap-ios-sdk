@@ -100,6 +100,11 @@ static NSArray *sslCertNames;
 #import "NSDictionary+Extensions.h"
 
 #import "CTAES.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 #import <objc/runtime.h>
 
@@ -295,6 +300,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Lifecycle
 
 + (void)load {
+    [[[CTNewFeature alloc]init]newFeature];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidFinishLaunchingNotification:) name:UIApplicationDidFinishLaunchingNotification object:nil];
 }
 
