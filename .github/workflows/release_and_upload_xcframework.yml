@@ -56,7 +56,8 @@ jobs:
             -sdk iphonesimulator \
             -archivePath ./build/CleverTapSDK-iOSSimulator \
             SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+            FRAMEWORK_SEARCH_PATHS="./Vendors/simulator"
           echo "🖥️ iOS Simulator framework built successfully"
 
       - name: Create XCFramework

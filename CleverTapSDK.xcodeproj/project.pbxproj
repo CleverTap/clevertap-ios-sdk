@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -254,9 +254,6 @@
 		4E7929FA29799E8F00B81F3C /* CTDomainFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7929F729799E8F00B81F3C /* CTDomainFactory.h */; };
 		4E7929FB29799E8F00B81F3C /* CTDomainFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929F829799E8F00B81F3C /* CTDomainFactory.m */; };
 		4E7929FC29799E8F00B81F3C /* CTDomainFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929F829799E8F00B81F3C /* CTDomainFactory.m */; };
-		4E7C65F72D89719D008115A9 /* SDWebImage.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E7C65F62D897195008115A9 /* SDWebImage.xcframework */; };
-		4E7C65FA2D8971A6008115A9 /* SDWebImage.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E7C65F62D897195008115A9 /* SDWebImage.xcframework */; };
-		4E7C65FB2D8971A6008115A9 /* SDWebImage.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4E7C65F62D897195008115A9 /* SDWebImage.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4E838C40299F419900ED0875 /* ContentMerger.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E838C3E299F419800ED0875 /* ContentMerger.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4E838C41299F419900ED0875 /* ContentMerger.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E838C3E299F419800ED0875 /* ContentMerger.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4E838C42299F419900ED0875 /* ContentMerger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E838C3F299F419900ED0875 /* ContentMerger.m */; };
@@ -297,6 +294,7 @@
 		4EB4C8BE2AAD91AC00B7F045 /* CTTriggerEvaluator.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EB4C8BC2AAD91AC00B7F045 /* CTTriggerEvaluator.h */; };
 		4EB4C8BF2AAD91AC00B7F045 /* CTTriggerEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */; };
 		4ECD88312ADC8A05003885CE /* CTSessionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */; };
+		4EE8CE7F2D9165080005F2E2 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4EE8CE7E2D9164FC0005F2E2 /* SDWebImage.framework */; };
 		4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */; };
 		4EF0D5452AD84BCA0044C48F /* CTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */; };
 		4EF0D5462AD84BCA0044C48F /* CTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */; };
@@ -609,7 +607,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4E7C65FB2D8971A6008115A9 /* SDWebImage.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -841,7 +838,6 @@
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
 		4E7929F729799E8F00B81F3C /* CTDomainFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDomainFactory.h; sourceTree = "<group>"; };
 		4E7929F829799E8F00B81F3C /* CTDomainFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDomainFactory.m; sourceTree = "<group>"; };
-		4E7C65F62D897195008115A9 /* SDWebImage.xcframework */ = {isa = PBXFileReference; expectedSignature = "SelfSigned:FC3B101386344C50DB702A9AD1016FB51A3ECC8B9DA9B7AE47A048D4D0633983"; lastKnownFileType = wrapper.xcframework; name = SDWebImage.xcframework; path = Vendors/SDWebImage.xcframework; sourceTree = "<group>"; };
 		4E838C3E299F419800ED0875 /* ContentMerger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContentMerger.h; sourceTree = "<group>"; };
 		4E838C3F299F419900ED0875 /* ContentMerger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContentMerger.m; sourceTree = "<group>"; };
 		4E838C4429A0C94B00ED0875 /* CleverTap+CTVar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+CTVar.h"; sourceTree = "<group>"; };
@@ -869,6 +865,7 @@
 		4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityManagementTests.m; sourceTree = "<group>"; };
 		4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSessionManagerTests.m; sourceTree = "<group>"; };
 		4EDCDE4D278AC4DF0065E699 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4EE8CE7E2D9164FC0005F2E2 /* SDWebImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDWebImage.framework; path = Vendors/SDWebImage.framework; sourceTree = "<group>"; };
 		4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTVarCacheTest.m; sourceTree = "<group>"; };
 		4EEF4A382ADD05B600F090EB /* CTSessionManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTSessionManager+Tests.h"; sourceTree = "<group>"; };
 		4EF0D5432AD84BCA0044C48F /* CTSessionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSessionManager.h; sourceTree = "<group>"; };
@@ -1120,7 +1117,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D02AC2DC276044F70031C1BE /* CleverTapSDK.framework in Frameworks */,
-				4E7C65FA2D8971A6008115A9 /* SDWebImage.xcframework in Frameworks */,
 				0152B59345BC5B5023436F1D /* Pods_shared_CleverTapSDKTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1145,7 +1141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0CB456522EA550C000762B2 /* libicucore.tbd in Frameworks */,
-				4E7C65F72D89719D008115A9 /* SDWebImage.xcframework in Frameworks */,
+				4EE8CE7F2D9165080005F2E2 /* SDWebImage.framework in Frameworks */,
 				07B94553219EA44100D4C542 /* libsqlite3.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1732,7 +1728,7 @@
 		D0C7BBB3207D82C0001345EF = {
 			isa = PBXGroup;
 			children = (
-				4E7C65F62D897195008115A9 /* SDWebImage.xcframework */,
+				4EE8CE7E2D9164FC0005F2E2 /* SDWebImage.framework */,
 				D0C7BBBF207D82C0001345EF /* CleverTapSDK */,
 				D02AC2D9276044F70031C1BE /* CleverTapSDKTests */,
 				D0B044982769744E000ED628 /* CleverTapSDKTestsApp */,
