@@ -34,6 +34,74 @@
 
 @implementation CTInAppDisplayViewController
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    [self updateWindowFrame];
+}
+
+- (void) updateWindowFrame {
+    // Check if the device is in portrait mode
+    if (@available(iOS 13, tvOS 13.0, *)) {
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+        for (UIScene *scene in connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *windowScene = (UIWindowScene *)scene;
+                //adjust size of window using aspect ratio eg 1.25
+                //calculate width with percentage
+                CGFloat inAppWidth = windowScene.coordinateSpace.bounds.size.width;
+                CGFloat aspectRatio = self.notification.aspectRatio;
+                CGFloat safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
+                CGFloat inAppHeight = windowScene.coordinateSpace.bounds.size.height;
+                
+                if (aspectRatio > 0.0) {
+                    inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
+                }
+                CGFloat originY = (windowScene.coordinateSpace.bounds.size.height - inAppHeight);
+                CGRect frame;
+                
+                switch (self.notification.position) {
+                    case CLTAP_INAPP_POSITION_TOP:
+                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+                        break;
+                    case CLTAP_INAPP_POSITION_BOTTOM:
+                        frame = CGRectMake(0, originY, inAppWidth, inAppHeight);
+                        break;
+                    case CLTAP_INAPP_POSITION_CENTER:
+                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+                        break;
+                    default:
+                        frame = windowScene.coordinateSpace.bounds;
+                        break;
+                }
+                self.window.frame = frame;
+            }
+        }
+    } else {
+        CGFloat width = [UIScreen mainScreen].bounds.size.width;
+        CGFloat inAppHeight = [UIScreen mainScreen].bounds.size.height;
+        CGFloat aspectRatio = self.notification.aspectRatio;
+        
+        if (aspectRatio > 0.0) {
+            inAppHeight = width / aspectRatio;
+        }
+        CGFloat originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
+        
+        CGRect frame;
+        switch (self.notification.position) {
+            case CLTAP_INAPP_POSITION_TOP:
+                frame = CGRectMake(0, 0, width, inAppHeight);
+                break;
+            case CLTAP_INAPP_POSITION_BOTTOM:
+                frame = CGRectMake(0, originY, width, inAppHeight);
+                break;
+            default:
+                frame = CGRectMake(0, 0, width, inAppHeight);
+                break;
+        }
+        self.window.frame = frame;
+    }
+}
+
 - (instancetype)initWithNotification:(CTInAppNotification *)notification {
     self = [super init];
     if (self) {
@@ -129,18 +197,73 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
+    boolean_t fixedWidth = false, fixedHeight = false;
+
+    //    consider width height percent
     if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
-                self.window = [[windowClass alloc] initWithFrame:
-                               windowScene.coordinateSpace.bounds];
+                
+                float aspectRatio = self.notification.aspectRatio;
+                float safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
+                float inAppWidth = windowScene.coordinateSpace.bounds.size.width;
+                if (self.notification.width > 0) {
+                    // Ignore Constants.INAPP_X_PERCENT
+                    inAppWidth = self.notification.width;
+                    fixedWidth = true;
+                } else {
+                    float percent = self.notification.widthPercent;
+                    inAppWidth = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
+                }
+                
+                float inAppHeight = windowScene.coordinateSpace.bounds.size.height;
+                if (aspectRatio > 0.0) {
+                    inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
+                }
+                CGFloat originY = (windowScene.coordinateSpace.bounds.size.height - inAppHeight);
+                CGRect frame;
+                switch (self.notification.position) {
+                    case CLTAP_INAPP_POSITION_TOP:
+                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+                        break;
+                    case CLTAP_INAPP_POSITION_BOTTOM:
+                        frame = CGRectMake(0, originY, inAppWidth, inAppHeight);
+                        break;
+                    case CLTAP_INAPP_POSITION_CENTER:
+                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+                        break;
+                    default:
+                        frame = windowScene.coordinateSpace.bounds;
+                        break;
+                }
+                self.window = [[windowClass alloc] initWithFrame:frame];
                 self.window.windowScene = windowScene;
             }
         }
     } else {
-        self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        CGFloat width = [UIScreen mainScreen].bounds.size.width;
+        CGFloat inAppHeight = [UIScreen mainScreen].bounds.size.height;
+        CGFloat aspectRatio = self.notification.aspectRatio ?: 1.25;
+        if (self.notification.aspectRatio > 0.0) {
+            inAppHeight = width / self.notification.aspectRatio;
+        }
+        CGFloat originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
+        
+        CGRect frame;
+        switch (self.notification.position) {
+            case CLTAP_INAPP_POSITION_TOP:
+                frame = CGRectMake(0, 0, width, inAppHeight);
+                break;
+            case CLTAP_INAPP_POSITION_BOTTOM:
+                frame = CGRectMake(0, originY, width, inAppHeight);
+                break;
+            default:
+                frame = CGRectMake(0, 0, width, inAppHeight);
+                break;
+        }
+        self.window = [[windowClass alloc] initWithFrame:frame];
     }
     
     if (!self.window) {
