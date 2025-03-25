@@ -111,15 +111,22 @@ typedef enum {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     
     if (@available(iOS 11.0, *)) {
+        UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
         [NSLayoutConstraint activateConstraints:@[
             // Use the safe area layout guide to position the view
-            [webView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-            [webView.leftAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leftAnchor],
-            [webView.rightAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.rightAnchor],
-            [webView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
+            [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
+            [webView.leftAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
+            [webView.rightAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
+            [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
         ]];
     } else {
         // Fallback on earlier versions
+        [NSLayoutConstraint activateConstraints:@[
+                [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.bottomAnchor],
+                [webView.leftAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+                [webView.rightAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+                [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.topAnchor]
+            ]];
     }
     if (self.notification.url) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
