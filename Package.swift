@@ -25,8 +25,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://github.com/CleverTap/clevertap-ios-sdk/releases/download/7.1.2/CleverTapSDK.xcframework.zip",
-            checksum: "996f87520349fde3618f60b5fca8e69a9043fa4073be000068853c1987cd5b66"
+            url: "https://akashvercetti.s3.ap-south-1.amazonaws.com/CleverTapSDK.xcframework.zip",
+            checksum: "a98c928461e249ca1d270464bb5f712027593969ec91854cfcec0497b2c69a74"
         ),
         .target(
             name: "CleverTapLocation",
@@ -49,11 +49,8 @@ let package = Package(
                 "SDWebImage"
             ],
             path: "CleverTapSDKWrapper",
-            // TODO: Will remove linkerSettings if not needed
             linkerSettings: [
                 .linkedLibrary("sqlite3"),
-                .linkedLibrary("c++"),
-                .linkedLibrary("z"),
                 .linkedFramework("SDWebImage", .when(platforms: [.iOS]))
             ]
         )
