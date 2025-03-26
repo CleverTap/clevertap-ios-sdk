@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "CTRequest.h"
-#import "CleverTapInstanceConfig.h"
 
 @interface CTRequestFactory : NSObject
 
