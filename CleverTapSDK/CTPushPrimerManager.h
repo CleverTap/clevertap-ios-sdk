@@ -12,11 +12,18 @@
 #import "CTDispatchQueueManager.h"
 @class CTInAppDisplayManager;
 
+typedef NS_ENUM(NSInteger, CTPushPermissionStatus){
+    CTPushNotKnown = -1,
+    CTPushDisabled = 0,
+    CTPushEnabled = 1
+};
+
 @interface CTPushPrimerManager : NSObject {
     CTInAppDisplayManager *inAppDisplayManager;
 }
 
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> _Nullable pushPermissionDelegate;
+@property (nonatomic, readonly) CTPushPermissionStatus pushPermissionStatus;
 
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig* _Nonnull)config inAppDisplayManager:(CTInAppDisplayManager* _Nonnull)inAppDisplayManagerObj dispatchQueueManager:(CTDispatchQueueManager* _Nonnull)dispatchQueueManager;
 

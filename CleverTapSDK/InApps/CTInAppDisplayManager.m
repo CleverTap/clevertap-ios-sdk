@@ -156,6 +156,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
         NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
+        if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
+            filteredInAppNotifs = [self filterRFPInApps:filteredInAppNotifs];
+        }
         [self.inAppStore enqueueInApps:filteredInAppNotifs];
         
         [CTUtils runSyncMainQueue:^{
@@ -851,6 +854,27 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the image-interstitial notification", self);
         return nil;
     }
+}
+
+#pragma mark - Request for Push Permission
+
+- (NSArray *)filterRFPInApps:(NSArray *)inappNotifs {
+    // Don't add inapps in queue if it is RFP inapp and push is enabled.
+    NSMutableArray *filteredInAppNotifs = [NSMutableArray new];
+    for (NSDictionary *inAppJSON in inappNotifs) {
+        if (![self isRFPInApp:inAppJSON]) {
+            [filteredInAppNotifs addObject:inAppJSON];
+        }
+    }
+    return filteredInAppNotifs;
+}
+
+- (BOOL)isRFPInApp:(NSDictionary *)inAppJSON {
+    BOOL isRFP = inAppJSON[@"rfp"] ? [inAppJSON[@"rfp"] boolValue] : NO;
+    if (isRFP) {
+        return YES;
+    }
+    return NO;
 }
 
 @end
