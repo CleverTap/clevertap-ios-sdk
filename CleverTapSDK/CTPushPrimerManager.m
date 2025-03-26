@@ -93,6 +93,13 @@
     if (self.pushPermissionDelegate && [self.pushPermissionDelegate respondsToSelector:@selector(onPushPermissionResponse:)]) {
         [self.pushPermissionDelegate onPushPermissionResponse:accepted];
     }
+    
+    // Update push permission status if it has changed.
+    if (accepted) {
+        self.pushPermissionStatus = CTPushEnabled;
+    } else {
+        self.pushPermissionStatus = CTPushDisabled;
+    }
 }
 
 - (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
