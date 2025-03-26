@@ -39,7 +39,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 - (BOOL)isMigrationNeeded {
     self.lastEncryptionLevel = (CleverTapEncryptionLevel)[CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_config.accountId] withResetValue:CleverTapEncryptionNone];
     
-    long migrationDone = [CTPreferences getIntForKey:CLTAP_ENCRYPTION_MIGRATION_STATUS withResetValue:0];
+    long migrationDone = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_MIGRATION_STATUS accountID:_config.accountId] withResetValue:0];
     
     if (_lastEncryptionLevel == CleverTapEncryptionMedium && migrationDone == 0){
         return YES;
@@ -73,7 +73,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
     }
     
     if (isGUIDMigrationSuccessful && isUserProfileMigrationSuccessful && isInAppDataMigrationSuccessful) {
-        [CTPreferences putInt:1 forKey:CLTAP_ENCRYPTION_MIGRATION_STATUS];
+        [CTPreferences putInt:1 forKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_MIGRATION_STATUS accountID:_config.accountId]];
         CleverTapLogDebug(_config.logLevel, @"%@: Migration completed successfully", self);
     } else {
         CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, migrationErrors);
