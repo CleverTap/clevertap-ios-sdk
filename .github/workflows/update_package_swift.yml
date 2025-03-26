@@ -1,4 +1,4 @@
-name: Update Package.swift with URL and checksum
+name: Update Package.swift with checksum in S3 bucket
 
 on:
   workflow_dispatch:
@@ -79,16 +79,22 @@ jobs:
           echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
           echo "🔢 Checksum computed: $CHECKSUM"
 
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        run: |
+          aws s3 cp CleverTapSDK.xcframework.zip s3://$S3_BUCKET_NAME/CleverTapSDK.xcframework.zip --acl public-read
+          echo "✅ Uploaded to S3 successfully"
+
       - name: Pull Latest Changes
         run: |
           git pull origin SDK-4101-swift-support --rebase || true
 
-      - name: Update Package.swift
+      - name: Update Checksum in Package.swift
         run: |
-          VERSION=$(cat sdk-version.txt)
-          sed -i '' "s|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/.*\"|url: \"https://github.com/CleverTap/clevertap-ios-sdk/releases/download/$VERSION/CleverTapSDK.xcframework.zip\"|g" Package.swift
-
-          # Update Checksum
           awk -v checksum="$CHECKSUM" '
             BEGIN { 
               found=0; 
@@ -111,6 +117,6 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add Package.swift
-          git commit -m "Update Package.swift with new release URL and checksum" || echo "🟡 No changes to commit."
+          git commit -m "Update Package.swift with new S3 URL and checksum" || echo "🟡 No changes to commit."
           git push origin SDK-4101-swift-support
           echo "✅ Package.swift changes committed and pushed successfully"
