@@ -105,13 +105,15 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
         NSString *encryptedIdentifier = components[1];
 
         if (encryptedIdentifier && ![_cryptManager isTextAESGCMEncrypted:encryptedIdentifier]) {
-            NSString *decryptedIdentifier = [_cryptManager decryptString:encryptedIdentifier encryptionAlgorithm:AES];
+            NSString *partiallyDecryptedIdentifier = [_cryptManager decryptString:encryptedIdentifier encryptionAlgorithm:AES];
+            NSString *decryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
 
             if (decryptedIdentifier) {
                 NSString *finalEncryptedIdentifier = decryptedIdentifier;
                 
                 if (_config.encryptionLevel == CleverTapEncryptionMedium) {
-                    finalEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
+                    NSString *partiallyEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
+                    finalEncryptedIdentifier = [_cryptManager encryptString:partiallyEncryptedIdentifier];
                 }
 
                 updatedCache[[NSString stringWithFormat:@"%@_%@", key, finalEncryptedIdentifier]] = value;
@@ -141,25 +143,66 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 }
 
 - (BOOL)migrateInAppsWithKeySuffix:(NSString *)keySuffix {
+    if (!keySuffix || keySuffix.length == 0) {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Key suffix is nil or empty.");
+        return NO;
+    }
+    
     NSString *key = [self storageKeyWithSuffix:keySuffix];
+    if (!key) {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Failed to generate storage key.");
+        return NO;
+    }
+    
     id value = [CTPreferences getObjectForKey:key];
+    
+    if (!value) {
+        CleverTapLogInfo(self.config.logLevel, @"Warning: No value found for key: %@", key);
+        return YES; // No value to migrate, but not a failure
+    }
 
     NSString *encryptedString = nil;
+    
     if ([value isKindOfClass:[NSString class]]) {
         encryptedString = (NSString *)value;
     } else if ([value isKindOfClass:[NSArray class]]) {
         NSArray *arrayValue = (NSArray *)value;
-        // Handle the array case appropriately, e.g., join into a string or take first value
-        encryptedString = arrayValue.count > 0 ? [arrayValue firstObject] : nil;
-    }
-    
-    if (encryptedString && ![_cryptManager isTextAESGCMEncrypted:encryptedString]) {
-        NSArray *arr = [_cryptManager decryptObject:encryptedString encryptionAlgorithm:AES];
-        if (arr) {
-            NSString *migratedEncryptedString = [_cryptManager encryptObject:arr];
-            [CTPreferences putString:migratedEncryptedString forKey:keySuffix];
+        if (arrayValue.count > 0 && [arrayValue.firstObject isKindOfClass:[NSString class]]) {
+            encryptedString = arrayValue.firstObject;
+        } else {
+            CleverTapLogInfo(self.config.logLevel, @"Error: Array value is empty or contains non-string elements.");
+            return NO;
         }
+    } else {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Unsupported value type: %@", [value class]);
+        return NO;
     }
+
+    if (!encryptedString) {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Encrypted string is nil.");
+        return NO;
+    }
+
+    if (![_cryptManager isTextAESGCMEncrypted:encryptedString]) {
+        NSArray *arr = [_cryptManager decryptObject:encryptedString encryptionAlgorithm:AES];
+        if (!arr) {
+            CleverTapLogInfo(self.config.logLevel, @"Error: Decryption failed for string: %@", encryptedString);
+            return NO;
+        }
+        
+        NSString *migratedEncryptedString = [_cryptManager encryptObject:arr];
+        if (!migratedEncryptedString) {
+            CleverTapLogInfo(self.config.logLevel, @"Error: Encryption failed after decryption.");
+            return NO;
+        }
+        NSString *newStorageKey = [self storageKeyWithSuffix:keySuffix];
+        [CTPreferences putString:migratedEncryptedString forKey:newStorageKey];
+        
+        CleverTapLogInfo(self.config.logLevel, @"GUID migration completed successfully for key: %@", keySuffix);
+    } else {
+        CleverTapLogInfo(self.config.logLevel, @"Value is already AES-GCM encrypted, no migration needed for key: %@", keySuffix);
+    }
+
     return YES;
 }
 
@@ -170,31 +213,87 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 #pragma mark - User Profile Migration
 
 - (BOOL)migrateUserProfileData {
-    NSMutableDictionary *profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:[self profileFileName] ofTypes:[NSSet setWithObjects:[NSArray class], [NSString class], [NSDictionary class], [NSNumber class], nil] removeFile:NO] ?: [NSMutableDictionary dictionary];
+    NSString *profileFileName = [self profileFileName];
+    
+    if (!profileFileName || profileFileName.length == 0) {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Profile file name is nil or empty.");
+        return NO;
+    }
+    
+    NSMutableDictionary *profile = (NSMutableDictionary *)[CTPreferences unarchiveFromFile:profileFileName
+                                                                                   ofTypes:[NSSet setWithObjects:[NSArray class], [NSString class], [NSDictionary class], [NSNumber class], nil]
+                                                                                removeFile:NO];
+    
+    if (!profile) {
+        CleverTapLogInfo(self.config.logLevel, @"Warning: No profile data found. Using empty dictionary.");
+        profile = [NSMutableDictionary dictionary];
+    }
+    
     NSMutableDictionary *updatedProfile = [self decryptOldPIIData:profile];
-    [CTPreferences archiveObject:updatedProfile forFileName:[self profileFileName] config:self->_config];
+    
+    if (!updatedProfile) {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Failed to decrypt or update profile data.");
+        return NO;
+    }
+    
+    BOOL success = [CTPreferences archiveObject:updatedProfile forFileName:profileFileName config:self->_config];
+    
+    if (!success) {
+        CleverTapLogInfo(self.config.logLevel, @"Error: Failed to archive updated profile data.");
+        return NO;
+    }
+
+    CleverTapLogInfo(self.config.logLevel, @"User profile data migration completed successfully.");
     return YES;
 }
 
 - (NSMutableDictionary *)decryptOldPIIData:(NSMutableDictionary *)profile {
+    if (!profile || profile.count == 0) {
+        CleverTapLogInfo(self.config.logLevel, @"Warning: Profile dictionary is nil or empty. Skipping decryption.");
+        return [NSMutableDictionary dictionary];
+    }
+
     long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
     
-    if (lastEncryptionLevel == CleverTapEncryptionMedium && _cryptManager) {
-        NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
-        for (NSString *key in profile) {
-            NSString *value = [NSString stringWithFormat:@"%@", profile[key]];
-            
-            if ([_piiKeys containsObject:key] && value && ![_cryptManager isTextAESGCMEncrypted:value]) {
-                NSString *decryptedString = [_cryptManager decryptString:value encryptionAlgorithm:AES];
-                updatedProfile[key] = [_cryptManager encryptString:decryptedString];
-            } else {
-                updatedProfile[key] = profile[key];
-            }
-        }
-        return updatedProfile;
+    if (lastEncryptionLevel != CleverTapEncryptionMedium || !_cryptManager) {
+        CleverTapLogInfo(self.config.logLevel, @"No decryption needed or CryptManager is nil.");
+        return profile;
     }
-    return profile;
+
+    NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+
+    for (NSString *key in profile) {
+        if (![key isKindOfClass:[NSString class]]) {
+            CleverTapLogInfo(self.config.logLevel, @"Error: Non-string key found in profile. Skipping.");
+            continue;
+        }
+
+        NSString *value = [NSString stringWithFormat:@"%@", profile[key]];
+        
+        if ([_piiKeys containsObject:key] && value && ![_cryptManager isTextAESGCMEncrypted:value]) {
+            NSString *decryptedString = [_cryptManager decryptString:value encryptionAlgorithm:AES];
+            
+            if (!decryptedString) {
+                CleverTapLogInfo(self.config.logLevel, @"Error: Decryption failed for key: %@", key);
+                updatedProfile[key] = profile[key];
+            } else {
+                NSString *encryptedString = [_cryptManager encryptString:decryptedString];
+                if (!encryptedString) {
+                    CleverTapLogInfo(self.config.logLevel, @"Error: Re-encryption failed for key: %@", key);
+                    updatedProfile[key] = profile[key];
+                } else {
+                    updatedProfile[key] = encryptedString;
+                }
+            }
+        } else {
+            updatedProfile[key] = profile[key];
+        }
+    }
+
+    CleverTapLogInfo(self.config.logLevel, @"Decryption of old PII data completed successfully.");
+    return updatedProfile;
 }
+
 
 - (NSString *)profileFileName {
     return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceInfo.deviceId];
