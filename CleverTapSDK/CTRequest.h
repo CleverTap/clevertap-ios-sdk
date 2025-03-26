@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CleverTapInstanceConfig.h"
+#import <CleverTapSDK/CleverTapInstanceConfig.h>
 
 typedef void (^CTNetworkResponseBlock)(NSData * _Nullable data, NSURLResponse *_Nullable response);
 typedef void (^CTNetworkResponseErrorBlock)(NSError * _Nullable error);
