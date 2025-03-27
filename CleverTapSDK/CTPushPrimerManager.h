@@ -32,5 +32,6 @@ typedef NS_ENUM(NSInteger, CTPushPermissionStatus){
 - (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings andSkipSettingsAlert:(BOOL)skipSettingsAlert;
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^_Nonnull)(UNAuthorizationStatus))completion;
 - (void)notifyPushPermissionResponse:(BOOL)accepted;
+- (void)checkAndUpdatePushPermissionStatus;
 @end
 

@@ -1204,6 +1204,9 @@ static BOOL sharedInstanceErrorLogged;
     if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
     }
+    
+    // Update push permission status for current session.
+    [self.pushPrimerManager checkAndUpdatePushPermissionStatus];
 #endif
 }
 
