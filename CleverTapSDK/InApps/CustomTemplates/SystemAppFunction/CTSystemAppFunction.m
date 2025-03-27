@@ -10,6 +10,7 @@
 #import "CTSystemAppFunction.h"
 #import "CTConstants.h"
 #import "CTPushPermissionSystemAppFunction.h"
+#import "CTOpenUrlSystemAppFunction.h"
 
 @interface CTSystemAppFunction ()
 
@@ -30,6 +31,7 @@
 - (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
     systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
     return systemAppFunctions;
 }
 
