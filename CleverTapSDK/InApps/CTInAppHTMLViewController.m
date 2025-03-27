@@ -128,7 +128,6 @@ typedef enum {
         [webView loadHTMLString:self.notification.html baseURL:nil];
     }
     
-    //check condition and add function
     if (self.notification.aspectRatio) {
         [self updateWebViewForAdvanceInApps];
     } else {
@@ -137,10 +136,7 @@ typedef enum {
 }
 
 - (void)updateWebViewForAdvanceInApps {
-    webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
-    webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleRightMargin;
-    webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
-
+    webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
     
     if (self.notification.darkenScreen) {
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
@@ -149,16 +145,6 @@ typedef enum {
     self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
     UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
     | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-    
-    if (self.notification.showClose) {
-        _closeButton = [CTDismissButton new];
-        [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
-        _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
-        [self.view addSubview:_closeButton];
-    }
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleWidth;
-
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleHeight;
 }
 
 - (void)updateWebView {
