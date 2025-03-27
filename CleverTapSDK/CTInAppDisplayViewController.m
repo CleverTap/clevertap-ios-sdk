@@ -40,25 +40,26 @@
 }
 
 - (void) updateWindowFrame {
-    // Check if the device is in portrait mode
+    float aspectRatio = self.notification.aspectRatio;
+    float percent = self.notification.widthPercent;
+    
     if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
-                //adjust size of window using aspect ratio eg 1.25
-                //calculate width with percentage
-                CGFloat inAppWidth = windowScene.coordinateSpace.bounds.size.width;
-                CGFloat aspectRatio = self.notification.aspectRatio;
-                CGFloat safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
-                CGFloat inAppHeight = windowScene.coordinateSpace.bounds.size.height;
                 
+                float safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
+                float inAppWidth = windowScene.coordinateSpace.bounds.size.width;
+                float inAppHeight = windowScene.coordinateSpace.bounds.size.height;
+                
+                inAppWidth = ceil(inAppWidth * (percent / 100.0));
+
                 if (aspectRatio > 0.0) {
                     inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
                 }
                 CGFloat originY = (windowScene.coordinateSpace.bounds.size.height - inAppHeight);
                 CGRect frame;
-                
                 switch (self.notification.position) {
                     case CLTAP_INAPP_POSITION_TOP:
                         frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
@@ -77,14 +78,13 @@
             }
         }
     } else {
-        CGFloat width = [UIScreen mainScreen].bounds.size.width;
-        CGFloat inAppHeight = [UIScreen mainScreen].bounds.size.height;
-        CGFloat aspectRatio = self.notification.aspectRatio;
+        float width = [UIScreen mainScreen].bounds.size.width;
+        float inAppHeight = [UIScreen mainScreen].bounds.size.height;
         
         if (aspectRatio > 0.0) {
             inAppHeight = width / aspectRatio;
         }
-        CGFloat originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
+        float originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
         
         CGRect frame;
         switch (self.notification.position) {
@@ -197,28 +197,21 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
-    boolean_t fixedWidth = false, fixedHeight = false;
-
-    //    consider width height percent
+    float aspectRatio = self.notification.aspectRatio;
+    float percent = self.notification.widthPercent;
+    
     if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
                 
-                float aspectRatio = self.notification.aspectRatio;
                 float safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
                 float inAppWidth = windowScene.coordinateSpace.bounds.size.width;
-                if (self.notification.width > 0) {
-                    // Ignore Constants.INAPP_X_PERCENT
-                    inAppWidth = self.notification.width;
-                    fixedWidth = true;
-                } else {
-                    float percent = self.notification.widthPercent;
-                    inAppWidth = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
-                }
-                
                 float inAppHeight = windowScene.coordinateSpace.bounds.size.height;
+                
+                inAppWidth = ceil(inAppWidth * (percent / 100.0));
+
                 if (aspectRatio > 0.0) {
                     inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
                 }
@@ -243,11 +236,11 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             }
         }
     } else {
-        CGFloat width = [UIScreen mainScreen].bounds.size.width;
-        CGFloat inAppHeight = [UIScreen mainScreen].bounds.size.height;
-        CGFloat aspectRatio = self.notification.aspectRatio ?: 1.25;
-        if (self.notification.aspectRatio > 0.0) {
-            inAppHeight = width / self.notification.aspectRatio;
+        float width = [UIScreen mainScreen].bounds.size.width;
+        float inAppHeight = [UIScreen mainScreen].bounds.size.height;
+        
+        if (aspectRatio > 0.0) {
+            inAppHeight = width / aspectRatio;
         }
         CGFloat originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
         
