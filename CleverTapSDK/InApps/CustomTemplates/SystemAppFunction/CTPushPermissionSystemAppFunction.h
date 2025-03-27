@@ -9,10 +9,11 @@
 #ifndef CTPushPermissionSystemAppFunction_h
 #define CTPushPermissionSystemAppFunction_h
 #import "CTCustomTemplate.h"
+#import "CTSystemTemplateActionHandler.h"
 
 @interface CTPushPermissionSystemAppFunction : NSObject
 
-+ (CTCustomTemplate *)buildTemplate;
++ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
 
 @end
 

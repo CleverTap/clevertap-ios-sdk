@@ -11,11 +11,25 @@
 #import "CTConstants.h"
 #import "CTPushPermissionSystemAppFunction.h"
 
+@interface CTSystemAppFunction ()
+
+@property (nonatomic, strong) CTSystemTemplateActionHandler *systemTemplateActionHandler;
+
+@end
+
 @implementation CTSystemAppFunction
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
+- (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
+    self = [super init];
+    if (self) {
+        self.systemTemplateActionHandler = systemTemplateActionHandler;
+    }
+    return self;
+}
+
+- (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
-    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplate];
+    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
     return systemAppFunctions;
 }
 

@@ -177,6 +177,8 @@
 		487C718F2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C718E2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m */; };
 		487C71932D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71922D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h */; };
 		487C71952D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */; };
+		487C719F2D9485290052986F /* CTSystemTemplateActionHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C719E2D9485290052986F /* CTSystemTemplateActionHandler.h */; };
+		487C71A12D9485340052986F /* CTSystemTemplateActionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */; };
 		48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */; };
 		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
@@ -804,6 +806,8 @@
 		487C718E2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPushPermissionSystemAppFunction.m; sourceTree = "<group>"; };
 		487C71922D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemAppFunctionPresenter.h; sourceTree = "<group>"; };
 		487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemAppFunctionPresenter.m; sourceTree = "<group>"; };
+		487C719E2D9485290052986F /* CTSystemTemplateActionHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemTemplateActionHandler.h; sourceTree = "<group>"; };
+		487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemTemplateActionHandler.m; sourceTree = "<group>"; };
 		48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sampleTXTStub.txt; sourceTree = "<group>"; };
 		48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = samplePDFStub.pdf; sourceTree = "<group>"; };
 		48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManagerTests.m; sourceTree = "<group>"; };
@@ -1371,6 +1375,8 @@
 				487C718E2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m */,
 				487C71922D8BFEFA0052986F /* CTSystemAppFunctionPresenter.h */,
 				487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */,
+				487C719E2D9485290052986F /* CTSystemTemplateActionHandler.h */,
+				487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */,
 			);
 			path = SystemAppFunction;
 			sourceTree = "<group>";
@@ -2085,6 +2091,7 @@
 				6BB778D92BFD277400A41628 /* CTCustomTemplatesManager-Internal.h in Headers */,
 				07B94546219EA34300D4C542 /* CTMessageMO+CoreDataProperties.h in Headers */,
 				6BB727332B8F787D009CE7D0 /* CTCustomTemplatesManager.h in Headers */,
+				487C719F2D9485290052986F /* CTSystemTemplateActionHandler.h in Headers */,
 				6BA3B2DB2B03E926004E834B /* CTQueueType.h in Headers */,
 				D01651B22097B42C00660178 /* CTValidator.h in Headers */,
 				6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */,
@@ -2701,6 +2708,7 @@
 				D01651AF2097B38400660178 /* CTEventBuilder.m in Sources */,
 				D020C929209006AD0073F61E /* CTUriHelper.m in Sources */,
 				07B9454C219EA34300D4C542 /* CTMessageMO.m in Sources */,
+				487C71A12D9485340052986F /* CTSystemTemplateActionHandler.m in Sources */,
 				6B12F7662C94312D0045D743 /* CTJsonTemplateProducer.m in Sources */,
 				48F9FD1E2C3D30BF00617770 /* CTFileDownloader.m in Sources */,
 				487C718F2D8BFC460052986F /* CTPushPermissionSystemAppFunction.m in Sources */,

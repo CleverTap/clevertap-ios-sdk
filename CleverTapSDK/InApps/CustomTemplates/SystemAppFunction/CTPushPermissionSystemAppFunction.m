@@ -14,11 +14,11 @@
 
 @implementation CTPushPermissionSystemAppFunction
 
-+ (CTCustomTemplate *)buildTemplate {
++ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
     CTCustomTemplateBuilder *pushPermissionbuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
     [pushPermissionbuilder setName:CLTAP_PUSH_PERMISSION_TEMPLATE_NAME];
     [pushPermissionbuilder addArgument:CLTAP_FB_SETTINGS_KEY withBool:YES];
-    CTSystemAppFunctionPresenter *presenter = [[CTSystemAppFunctionPresenter alloc] init];
+    CTSystemAppFunctionPresenter *presenter = [[CTSystemAppFunctionPresenter alloc] initWithSystemTemplateActionHandler:systemTemplateActionHandler];
     [pushPermissionbuilder setPresenter:presenter];
 
     CTCustomTemplate *pushPermissionTemplate = [pushPermissionbuilder build];

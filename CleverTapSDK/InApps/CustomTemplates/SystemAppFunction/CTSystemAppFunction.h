@@ -11,10 +11,13 @@
 
 #import <Foundation/Foundation.h>
 #import "CTCustomTemplate.h"
+#import "CTSystemTemplateActionHandler.h"
 
 @interface CTSystemAppFunction : NSObject
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions;
+- (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
+
+- (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions;
 
 @end
 

@@ -249,6 +249,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, strong, readwrite) CTCustomTemplatesManager *customTemplatesManager;
+@property (nonatomic, strong, readwrite) CTSystemTemplateActionHandler *systemTemplateActionHandler;
 #endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
@@ -529,7 +530,9 @@ static BOOL sharedInstanceErrorLogged;
     
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
-    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunction getSystemAppFunctions];
+    self.systemTemplateActionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    CTSystemAppFunction *systemAppFunction = [[CTSystemAppFunction alloc] initWithSystemTemplateActionHandler:self.systemTemplateActionHandler];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [systemAppFunction getSystemAppFunctions];
     CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config
                                                                                systemAppFunctions:systemAppFunctions];
     
@@ -554,6 +557,7 @@ static BOOL sharedInstanceErrorLogged;
     
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
+    [self.systemTemplateActionHandler setPushPrimerManager:self.pushPrimerManager];
 }
 #endif
 

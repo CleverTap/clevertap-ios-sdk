@@ -10,8 +10,11 @@
 #define CTSystemAppFunctionPresenter_h
 
 #import "CTTemplatePresenter.h"
+#import "CTSystemTemplateActionHandler.h"
 
 @interface CTSystemAppFunctionPresenter :  NSObject <CTTemplatePresenter>
+
+- (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
 
 @end
 
