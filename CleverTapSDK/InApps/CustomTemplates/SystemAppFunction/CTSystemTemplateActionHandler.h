@@ -19,7 +19,7 @@
 
 - (void)promptPushPermission:(BOOL)fbSettings;
 
-- (void)handleOpenURL:(NSString *_Nullable)actionURL;
+- (void)handleOpenURL:(NSString *_Nullable)action;
 
 @end
 

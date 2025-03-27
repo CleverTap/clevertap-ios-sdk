@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "CTSystemTemplateActionHandler.h"
 #import "CTConstants.h"
+#import "CTUtils.h"
+#import "CTUIUtils.h"
 
 @implementation CTSystemTemplateActionHandler
 
@@ -27,8 +29,21 @@
     [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings andSkipSettingsAlert:YES];
 }
 
-- (void)handleOpenURL:(NSString *)actionURL {
-    // Add logic to open url here.
+#pragma mark Open Url System App Function
+
+- (void)handleOpenURL:(NSString *)action {
+    if (action && action.length > 0) {
+        @try {
+            NSURL *actionURL = [NSURL URLWithString:action];
+            [CTUtils runSyncMainQueue:^{
+                [CTUIUtils openURL:actionURL forModule:@"OpenUrl System Template"];
+            }];
+        } @catch (NSException *e) {
+            CleverTapLogStaticDebug(@"Error while getting URL: %@", [e debugDescription]);
+        }
+    } else {
+        CleverTapLogStaticDebug(@"Open url system template doesn't have action URL");
+    }
 }
 
 @end
