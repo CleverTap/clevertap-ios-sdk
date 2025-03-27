@@ -107,6 +107,11 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
                                            andFileDownloader:fileDownloader];
     self.activeContexts[template.name] = context;
     [template.presenter onPresent:context];
+    
+    if (template.isSystemDefined) {
+        // Don't set currentlyDisplayingNotification when template is system defined.
+        return NO;
+    }
     return YES;
 }
 
