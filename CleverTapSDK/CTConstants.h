@@ -285,5 +285,5 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_EVENT_DB_ROWS_TO_CLEANUP 2048 + 256;
 
 #pragma mark Constants for System App Functions
-#define CLTAP_PUSH_PERMISSION_TEMPLATE_NAME @"Push Permission"
+#define CLTAP_PUSH_PERMISSION_TEMPLATE_NAME @"ctsystem_pushpermission"
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
