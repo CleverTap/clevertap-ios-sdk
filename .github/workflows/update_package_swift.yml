@@ -86,15 +86,41 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
-          aws s3 cp CleverTapSDK.xcframework.zip s3://$S3_BUCKET_NAME/CleverTapSDK.xcframework.zip --acl public-read
-          echo "✅ Uploaded to S3 successfully"
+          VERSION=$(cat sdk-version.txt)
+          S3_FILENAME="CleverTapSDK-${VERSION}.xcframework.zip"
+
+          aws s3 cp CleverTapSDK.xcframework.zip s3://$S3_BUCKET_NAME/$S3_FILENAME --acl public-read
+          
+          echo "S3_FILENAME=$S3_FILENAME" >> $GITHUB_ENV
+          echo "✅ Uploaded to S3 as $S3_FILENAME"
 
       - name: Pull Latest Changes
         run: |
           git pull origin SDK-4101-swift-support --rebase || true
 
-      - name: Update Checksum in Package.swift
+      - name: Update Package.swift
         run: |
+          # Update Checksum
+          VERSION=$(cat sdk-version.txt)
+          S3_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.${{ secrets.AWS_REGION }}.amazonaws.com/CleverTapSDK-${VERSION}.xcframework.zip"
+
+          awk -v url="$S3_URL" '
+            BEGIN { 
+              found=0; 
+              inTarget=0 
+            }
+            {
+              if ($0 ~ /\.binaryTarget\(/) inTarget=1
+              if (inTarget && $0 ~ /name: "CleverTapSDK"/) found=1
+              if (found==1 && $0 ~ /url:/) {
+                sub(/url: "[^"]+"/, "url: \""url"\"", $0)
+                found=0
+              }
+              if ($0 ~ /\),/) inTarget=0
+              print $0
+            }' Package.swift > Package.swift.tmp && mv Package.swift.tmp Package.swift
+
+          # Update Checksum
           awk -v checksum="$CHECKSUM" '
             BEGIN { 
               found=0; 
