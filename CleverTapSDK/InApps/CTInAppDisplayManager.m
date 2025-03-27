@@ -864,6 +864,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     for (NSDictionary *inAppJSON in inappNotifs) {
         if (![self isRFPInApp:inAppJSON]) {
             [filteredInAppNotifs addObject:inAppJSON];
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Not adding InApp having Push Permission action button in queue as Push Notification permission is already granted: %@", self, inAppJSON[@"wzrk_id"]);
         }
     }
     return filteredInAppNotifs;
