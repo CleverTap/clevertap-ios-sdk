@@ -134,6 +134,27 @@ typedef enum {
     } else{
         [webView loadHTMLString:self.notification.html baseURL:nil];
     }
+    
+    if (self.notification.aspectRatio) {
+        [self updateWebViewForAdvanceInApps];
+    } else {
+        [self updateWebView];
+    }
+}
+
+- (void)updateWebViewForAdvanceInApps {
+    webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+    
+    if (self.notification.darkenScreen) {
+        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
+    }
+    
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
+    UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
+    | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+}
+
+- (void)updateWebView {
     boolean_t fixedWidth = false, fixedHeight = false;
     
     CGSize size = CGSizeZero;

@@ -52,6 +52,7 @@
 @property (nonatomic, assign, readwrite) float heightPercent;
 @property (nonatomic, assign, readwrite) float width;
 @property (nonatomic, assign, readwrite) float widthPercent;
+@property (nonatomic, assign, readwrite) float aspectRatio;
 
 @property (nonatomic, readwrite) NSArray<CTNotificationButton *> *buttons;
 
@@ -274,6 +275,7 @@
         self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
         self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
         self.maxPerSession = displayParams[CLTAP_INAPP_MAX_PER_SESSION] ? [displayParams[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
+        self.aspectRatio = [displayParams[CLTAP_INAPP_NOTIF_ASPECT_RATIO] floatValue] ?: 0.0;
     }
 }
 
