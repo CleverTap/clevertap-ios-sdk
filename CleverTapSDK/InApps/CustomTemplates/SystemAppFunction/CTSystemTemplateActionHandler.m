@@ -27,4 +27,8 @@
     [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings andSkipSettingsAlert:YES];
 }
 
+- (void)handleOpenURL:(NSString *)actionURL {
+    // Add logic to open url here.
+}
+
 @end

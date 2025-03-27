@@ -34,8 +34,11 @@
     if ([context.templateName isEqual: CLTAP_PUSH_PERMISSION_TEMPLATE_NAME]) {
         BOOL fbSettings = [context boolNamed:CLTAP_FB_SETTINGS_KEY];
         [self.systemTemplateActionHandler promptPushPermission:fbSettings];
-        [context dismissed];
+    } else if ([context.templateName isEqual:CLTAP_OPEN_URL_TEMPLATE_NAME]) {
+        NSString *actionURL = [context stringNamed:CLTAP_OPEN_URL_ACTION_KEY];
+        [self.systemTemplateActionHandler handleOpenURL:actionURL];
     }
+    [context dismissed];
 }
 
 @end

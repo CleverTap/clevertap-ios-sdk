@@ -179,6 +179,8 @@
 		487C71952D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */; };
 		487C719F2D9485290052986F /* CTSystemTemplateActionHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C719E2D9485290052986F /* CTSystemTemplateActionHandler.h */; };
 		487C71A12D9485340052986F /* CTSystemTemplateActionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */; };
+		487C71A52D9567E40052986F /* CTOpenUrlSystemAppFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71A42D9567E40052986F /* CTOpenUrlSystemAppFunction.h */; };
+		487C71A72D9567F00052986F /* CTOpenUrlSystemAppFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71A62D9567F00052986F /* CTOpenUrlSystemAppFunction.m */; };
 		48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */; };
 		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
@@ -808,6 +810,8 @@
 		487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemAppFunctionPresenter.m; sourceTree = "<group>"; };
 		487C719E2D9485290052986F /* CTSystemTemplateActionHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTSystemTemplateActionHandler.h; sourceTree = "<group>"; };
 		487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemTemplateActionHandler.m; sourceTree = "<group>"; };
+		487C71A42D9567E40052986F /* CTOpenUrlSystemAppFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTOpenUrlSystemAppFunction.h; sourceTree = "<group>"; };
+		487C71A62D9567F00052986F /* CTOpenUrlSystemAppFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTOpenUrlSystemAppFunction.m; sourceTree = "<group>"; };
 		48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sampleTXTStub.txt; sourceTree = "<group>"; };
 		48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = samplePDFStub.pdf; sourceTree = "<group>"; };
 		48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManagerTests.m; sourceTree = "<group>"; };
@@ -1377,6 +1381,8 @@
 				487C71942D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m */,
 				487C719E2D9485290052986F /* CTSystemTemplateActionHandler.h */,
 				487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */,
+				487C71A42D9567E40052986F /* CTOpenUrlSystemAppFunction.h */,
+				487C71A62D9567F00052986F /* CTOpenUrlSystemAppFunction.m */,
 			);
 			path = SystemAppFunction;
 			sourceTree = "<group>";
@@ -2177,6 +2183,7 @@
 				07B94550219EA39000D4C542 /* CleverTap+Inbox.h in Headers */,
 				6BD334EA2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */,
 				071EB4F9217F6427008F0FAB /* CTNotificationButton.h in Headers */,
+				487C71A52D9567E40052986F /* CTOpenUrlSystemAppFunction.h in Headers */,
 				48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */,
 				6BB778CB2BED21CE00A41628 /* CTNotificationAction.h in Headers */,
 				4803951C2A7ABAD200C4D254 /* CTAES.h in Headers */,
@@ -2759,6 +2766,7 @@
 				D0213D4E207D905800FE5740 /* CleverTapTrackedViewController.m in Sources */,
 				07961B7621B50A4C0081953E /* CleverTapInboxMessageContent.m in Sources */,
 				D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */,
+				487C71A72D9567F00052986F /* CTOpenUrlSystemAppFunction.m in Sources */,
 				071EB4CC217F6427008F0FAB /* CTHalfInterstitialViewController.m in Sources */,
 				07B94549219EA34300D4C542 /* CTMessageMO+CoreDataProperties.m in Sources */,
 				6A4427BE2AA394ED0098866F /* CTTriggersMatcher.m in Sources */,

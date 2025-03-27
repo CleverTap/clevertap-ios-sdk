@@ -19,6 +19,8 @@
 
 - (void)promptPushPermission:(BOOL)fbSettings;
 
+- (void)handleOpenURL:(NSString *_Nullable)actionURL;
+
 @end
 
 #endif /* CTSystemTemplateActionHandler_h */
