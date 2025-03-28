@@ -1,4 +1,4 @@
-name: Upload XCFramework to a draft release
+name: Create draft release
 
 on:
   push:
@@ -39,42 +39,12 @@ jobs:
           swift --version
           echo "✅ Dependencies installed successfully"
 
-      - name: Build iOS Framework
-        run: |
-          xcodebuild archive \
-            -scheme CleverTapSDK \
-            -sdk iphoneos \
-            -archivePath ./build/CleverTapSDK-iOS \
-            SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
-          echo "📱 iOS framework built successfully"
-
-      - name: Build iOS Simulator Framework
-        run: |
-          xcodebuild archive \
-            -scheme CleverTapSDK \
-            -sdk iphonesimulator \
-            -archivePath ./build/CleverTapSDK-iOSSimulator \
-            SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-            FRAMEWORK_SEARCH_PATHS="./Vendors/simulator"
-          echo "🖥️ iOS Simulator framework built successfully"
-
-      - name: Create XCFramework
-        run: |
-          xcodebuild -create-xcframework \
-            -framework ./build/CleverTapSDK-iOS.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
-            -framework ./build/CleverTapSDK-iOSSimulator.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
-            -output CleverTapSDK.xcframework
-
-          zip -r CleverTapSDK.xcframework.zip CleverTapSDK.xcframework
-          echo "📦 XCFramework created and zipped successfully"
-
       - name: Create or Update Draft Release
         run: |
           VERSION=$(cat sdk-version.txt)  # Read the version from sdk-version.txt
           TAG="$VERSION"
           RELEASE_NAME="CleverTap iOS SDK $VERSION"
+          RELEASE_NOTES="CleverTap iOS SDK $VERSION Release Notes"
 
           # Check if the tag exists
           if ! git rev-parse "$TAG" >/dev/null 2>&1; then
@@ -86,17 +56,13 @@ jobs:
           EXISTING_RELEASE=$(gh release list --json name,tagName --jq ".[] | select(.tagName == \"$TAG\") | .tagName")
 
           if [ -n "$EXISTING_RELEASE" ]; then
-            echo "🟠 Draft release found. Updating assets..."
-            gh release delete-asset "$TAG" CleverTapSDK.xcframework.zip 2>/dev/null || true
-            gh release upload "$TAG" CleverTapSDK.xcframework.zip
-            echo "✅ Updated existing draft release."
+            echo "🟠 Draft release found. Skipping asset upload as S3 is used."
           else
             echo "🟢 No existing draft found. Creating new one..."
             gh release create "$TAG" \
               --title "$RELEASE_NAME" \
-              --notes "Auto-generated release for version $VERSION" \
-              --draft \
-              CleverTapSDK.xcframework.zip
+              --notes "$RELEASE_NOTES" \
+              --draft
             echo "✅ New draft release created."
           fi
         env:
