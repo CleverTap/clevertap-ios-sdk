@@ -11,6 +11,7 @@
 #import "CTConstants.h"
 #import "CTPushPermissionSystemAppFunction.h"
 #import "CTOpenUrlSystemAppFunction.h"
+#import "CTAppRatingSystemAppFunction.h"
 
 @interface CTSystemAppFunction ()
 
@@ -32,6 +33,7 @@
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
     systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
     systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_APP_RATING_TEMPLATE_NAME] = [CTAppRatingSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
     return systemAppFunctions;
 }
 

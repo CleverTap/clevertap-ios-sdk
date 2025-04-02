@@ -46,4 +46,10 @@
     }
 }
 
+#pragma mark App Rating System App Function
+
+- (void)promptAppRating {
+    // Add logic for app rating here.
+}
+
 @end

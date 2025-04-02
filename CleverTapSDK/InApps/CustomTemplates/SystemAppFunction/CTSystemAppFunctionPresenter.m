@@ -37,6 +37,8 @@
     } else if ([context.templateName isEqual:CLTAP_OPEN_URL_TEMPLATE_NAME]) {
         NSString *action = [context stringNamed:CLTAP_OPEN_URL_ACTION_KEY];
         [self.systemTemplateActionHandler handleOpenURL:action];
+    } else if ([context.templateName isEqual:CLTAP_APP_RATING_TEMPLATE_NAME]) {
+        [self.systemTemplateActionHandler promptAppRating];
     }
     [context dismissed];
 }

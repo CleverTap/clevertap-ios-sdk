@@ -21,6 +21,8 @@
 
 - (void)handleOpenURL:(NSString *_Nullable)action;
 
+- (void)promptAppRating;
+
 @end
 
 #endif /* CTSystemTemplateActionHandler_h */

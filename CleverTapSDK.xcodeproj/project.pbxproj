@@ -181,6 +181,8 @@
 		487C71A12D9485340052986F /* CTSystemTemplateActionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */; };
 		487C71A52D9567E40052986F /* CTOpenUrlSystemAppFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71A42D9567E40052986F /* CTOpenUrlSystemAppFunction.h */; };
 		487C71A72D9567F00052986F /* CTOpenUrlSystemAppFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71A62D9567F00052986F /* CTOpenUrlSystemAppFunction.m */; };
+		487C71A92D96CC150052986F /* CTAppRatingSystemAppFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 487C71A82D96CC150052986F /* CTAppRatingSystemAppFunction.h */; };
+		487C71AB2D96CC310052986F /* CTAppRatingSystemAppFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71AA2D96CC310052986F /* CTAppRatingSystemAppFunction.m */; };
 		48A2C4B92BD67DDC006C61BC /* sampleTXTStub.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */; };
 		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
@@ -812,6 +814,8 @@
 		487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemTemplateActionHandler.m; sourceTree = "<group>"; };
 		487C71A42D9567E40052986F /* CTOpenUrlSystemAppFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTOpenUrlSystemAppFunction.h; sourceTree = "<group>"; };
 		487C71A62D9567F00052986F /* CTOpenUrlSystemAppFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTOpenUrlSystemAppFunction.m; sourceTree = "<group>"; };
+		487C71A82D96CC150052986F /* CTAppRatingSystemAppFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTAppRatingSystemAppFunction.h; sourceTree = "<group>"; };
+		487C71AA2D96CC310052986F /* CTAppRatingSystemAppFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTAppRatingSystemAppFunction.m; sourceTree = "<group>"; };
 		48A2C4B72BD67DDB006C61BC /* sampleTXTStub.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sampleTXTStub.txt; sourceTree = "<group>"; };
 		48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = samplePDFStub.pdf; sourceTree = "<group>"; };
 		48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManagerTests.m; sourceTree = "<group>"; };
@@ -1383,6 +1387,8 @@
 				487C71A02D9485340052986F /* CTSystemTemplateActionHandler.m */,
 				487C71A42D9567E40052986F /* CTOpenUrlSystemAppFunction.h */,
 				487C71A62D9567F00052986F /* CTOpenUrlSystemAppFunction.m */,
+				487C71A82D96CC150052986F /* CTAppRatingSystemAppFunction.h */,
+				487C71AA2D96CC310052986F /* CTAppRatingSystemAppFunction.m */,
 			);
 			path = SystemAppFunction;
 			sourceTree = "<group>";
@@ -2182,6 +2188,7 @@
 				D0213D50207D905800FE5740 /* CleverTapEventDetail.h in Headers */,
 				07B94550219EA39000D4C542 /* CleverTap+Inbox.h in Headers */,
 				6BD334EA2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */,
+				487C71A92D96CC150052986F /* CTAppRatingSystemAppFunction.h in Headers */,
 				071EB4F9217F6427008F0FAB /* CTNotificationButton.h in Headers */,
 				487C71A52D9567E40052986F /* CTOpenUrlSystemAppFunction.h in Headers */,
 				48080311292EB50D00C06E2F /* CTLocalInApp.h in Headers */,
@@ -2730,6 +2737,7 @@
 				6BB778CC2BED21CE00A41628 /* CTNotificationAction.m in Sources */,
 				4E25E3C7278887A70008C888 /* CTIdentityRepoFactory.m in Sources */,
 				6BB7271E2B8E46AB009CE7D0 /* CTAppFunctionBuilder.m in Sources */,
+				487C71AB2D96CC310052986F /* CTAppRatingSystemAppFunction.m in Sources */,
 				4E41FD94294F46510001FBED /* CTVar.m in Sources */,
 				071EB505217F6427008F0FAB /* CTCoverViewController.m in Sources */,
 				071EB4CD217F6427008F0FAB /* CTInAppUtils.m in Sources */,
