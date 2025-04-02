@@ -30,6 +30,7 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             -enableCodeCoverage YES \
             -resultBundlePath TestResults.xcresult \
+            FRAMEWORK_SEARCH_PATHS="./Vendors/simulator" \
             | xcpretty --color && exit ${PIPESTATUS[0]}
 
       - name: Generate Code Coverage Report with Slather
