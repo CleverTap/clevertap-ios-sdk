@@ -26,7 +26,7 @@ jobs:
         run: |
           xcodebuild test \
             -workspace CleverTapSDK.xcworkspace \
-            -scheme CleverTapSDK \
+            -scheme CleverTapSDKTests \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             -enableCodeCoverage YES \
             -resultBundlePath TestResults.xcresult \
