@@ -31,9 +31,9 @@
 
 - (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
-    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
-    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
-    systemAppFunctions[CLTAP_APP_RATING_TEMPLATE_NAME] = [CTAppRatingSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_APP_RATING_TEMPLATE_NAME] = [CTAppRatingSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
     return systemAppFunctions;
 }
 

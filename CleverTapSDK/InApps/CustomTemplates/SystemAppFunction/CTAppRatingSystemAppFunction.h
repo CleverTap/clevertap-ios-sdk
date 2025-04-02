@@ -13,7 +13,7 @@
 
 @interface CTAppRatingSystemAppFunction : NSObject
 
-+ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
++ (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
 
 @end
 

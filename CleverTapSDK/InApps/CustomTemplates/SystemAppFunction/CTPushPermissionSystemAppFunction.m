@@ -14,7 +14,7 @@
 
 @implementation CTPushPermissionSystemAppFunction
 
-+ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
++ (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
     CTCustomTemplateBuilder *pushPermissionbuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
     [pushPermissionbuilder setName:CLTAP_PUSH_PERMISSION_TEMPLATE_NAME];
     [pushPermissionbuilder addArgument:CLTAP_FB_SETTINGS_KEY withBool:YES];

@@ -13,7 +13,7 @@
 
 @interface CTPushPermissionSystemAppFunction : NSObject
 
-+ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
++ (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
 
 @end
 

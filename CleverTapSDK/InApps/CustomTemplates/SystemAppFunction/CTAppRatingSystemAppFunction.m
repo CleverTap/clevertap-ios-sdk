@@ -14,7 +14,7 @@
 
 @implementation CTAppRatingSystemAppFunction
 
-+ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
++ (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
     CTCustomTemplateBuilder *appRatingbuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
     [appRatingbuilder setName:CLTAP_APP_RATING_TEMPLATE_NAME];
     CTSystemAppFunctionPresenter *presenter = [[CTSystemAppFunctionPresenter alloc] initWithSystemTemplateActionHandler:systemTemplateActionHandler];
