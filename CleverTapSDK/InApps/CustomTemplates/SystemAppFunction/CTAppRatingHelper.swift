@@ -17,13 +17,7 @@ public class CTAppRatingHelper : NSObject {
         DispatchQueue.main.async {
             if #available(iOS 14.0, *) {
                 if let sharedApplication = CTAppRatingHelper.getSharedApplication() {
-                    var activeScene: UIScene?
-                    for scene in sharedApplication.connectedScenes {
-                        if scene.activationState == .foregroundActive {
-                            activeScene = scene
-                            break
-                        }
-                    }
+                    let activeScene: UIScene? = sharedApplication.connectedScenes.first(where: { $0.activationState == .foregroundActive })
                     
                     guard let windowScene = activeScene as? UIWindowScene else {
                         print("[CleverTap]: Cannot request for App rating prompt as there is no active scene present.")

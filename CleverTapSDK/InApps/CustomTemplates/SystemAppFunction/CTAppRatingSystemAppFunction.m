@@ -15,12 +15,12 @@
 @implementation CTAppRatingSystemAppFunction
 
 + (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
-    CTCustomTemplateBuilder *appRatingbuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
-    [appRatingbuilder setName:CLTAP_APP_RATING_TEMPLATE_NAME];
+    CTCustomTemplateBuilder *appRatingBuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
+    [appRatingBuilder setName:CLTAP_APP_RATING_TEMPLATE_NAME];
     CTSystemAppFunctionPresenter *presenter = [[CTSystemAppFunctionPresenter alloc] initWithSystemTemplateActionHandler:systemTemplateActionHandler];
-    [appRatingbuilder setPresenter:presenter];
+    [appRatingBuilder setPresenter:presenter];
 
-    CTCustomTemplate *appRatingTemplate = [appRatingbuilder build];
+    CTCustomTemplate *appRatingTemplate = [appRatingBuilder build];
     return appRatingTemplate;
 }
 
