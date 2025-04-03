@@ -40,65 +40,20 @@
 }
 
 - (void) updateWindowFrame {
-    float aspectRatio = self.notification.aspectRatio;
-    float percent = self.notification.widthPercent;
-    
     if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
                 
-                float safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
-                float inAppWidth = windowScene.coordinateSpace.bounds.size.width;
-                float inAppHeight = windowScene.coordinateSpace.bounds.size.height;
-                
-                inAppWidth = ceil(inAppWidth * (percent / 100.0));
-
-                if (aspectRatio > 0.0) {
-                    inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
-                }
-                CGFloat originY = (windowScene.coordinateSpace.bounds.size.height - inAppHeight);
-                CGRect frame;
-                switch (self.notification.position) {
-                    case CLTAP_INAPP_POSITION_TOP:
-                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
-                        break;
-                    case CLTAP_INAPP_POSITION_BOTTOM:
-                        frame = CGRectMake(0, originY, inAppWidth, inAppHeight);
-                        break;
-                    case CLTAP_INAPP_POSITION_CENTER:
-                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
-                        break;
-                    default:
-                        frame = windowScene.coordinateSpace.bounds;
-                        break;
-                }
-                self.window.frame = frame;
+                CGRect windowFrame = [self getWindowSceneFrame:windowScene];
+                self.window.frame = windowFrame;
+                break;
             }
         }
     } else {
-        float width = [UIScreen mainScreen].bounds.size.width;
-        float inAppHeight = [UIScreen mainScreen].bounds.size.height;
-        
-        if (aspectRatio > 0.0) {
-            inAppHeight = width / aspectRatio;
-        }
-        float originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
-        
-        CGRect frame;
-        switch (self.notification.position) {
-            case CLTAP_INAPP_POSITION_TOP:
-                frame = CGRectMake(0, 0, width, inAppHeight);
-                break;
-            case CLTAP_INAPP_POSITION_BOTTOM:
-                frame = CGRectMake(0, originY, width, inAppHeight);
-                break;
-            default:
-                frame = CGRectMake(0, 0, width, inAppHeight);
-                break;
-        }
-        self.window.frame = frame;
+        CGRect windowFrame = [self getWindowFrame];
+        self.window.frame = windowFrame;
     }
 }
 
@@ -196,67 +151,91 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     NSAssert(false, @"Override in sub-class");
 }
 
-- (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
+- (CGRect)getWindowSceneFrame:(UIWindowScene *)windowScene  API_AVAILABLE(ios(13.0), tvos(13.0)) {
+    NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+    CGRect frame = windowScene.coordinateSpace.bounds;
+    
+    for (UIScene *scene in connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive &&
+            [scene isKindOfClass:[UIWindowScene class]]) {
+            
+            UIWindowScene *activeWindowScene = (UIWindowScene *)scene; // Avoid shadowing the parameter
+            
+            float aspectRatio = self.notification.aspectRatio;
+            float percent = self.notification.widthPercent;
+            
+            float safeAreaTop = activeWindowScene.windows.firstObject.safeAreaInsets.top;
+            float inAppWidth = activeWindowScene.coordinateSpace.bounds.size.width;
+            float inAppHeight = activeWindowScene.coordinateSpace.bounds.size.height;
+            
+            inAppWidth = ceil(inAppWidth * (percent / 100.0));
+            
+            if (aspectRatio > 0.0) {
+                inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
+            }
+            CGFloat originY = (activeWindowScene.coordinateSpace.bounds.size.height - inAppHeight);
+            
+            switch (self.notification.position) {
+                case CLTAP_INAPP_POSITION_TOP:
+                    frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+                    break;
+                case CLTAP_INAPP_POSITION_BOTTOM:
+                    frame = CGRectMake(0, originY, inAppWidth, inAppHeight);
+                    break;
+                default:
+                    frame = activeWindowScene.coordinateSpace.bounds;
+                    break;
+            }
+            break; // Stop looping after finding the first active foreground scene
+        }
+    }
+    return frame;
+}
+
+- (CGRect)getWindowFrame {
     float aspectRatio = self.notification.aspectRatio;
     float percent = self.notification.widthPercent;
     
+    float inAppWidth = [UIScreen mainScreen].bounds.size.width;
+    float inAppHeight = [UIScreen mainScreen].bounds.size.height;
+    
+    inAppWidth = ceil(inAppWidth * (percent / 100.0));
+    
+    if (aspectRatio > 0.0) {
+        inAppHeight = inAppWidth / aspectRatio;
+    }
+    float originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
+    
+    CGRect frame;
+    switch (self.notification.position) {
+        case CLTAP_INAPP_POSITION_TOP:
+            frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+            break;
+        case CLTAP_INAPP_POSITION_BOTTOM:
+            frame = CGRectMake(0, originY, inAppWidth, inAppHeight);
+            break;
+        default:
+            frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
+            break;
+    }
+    return frame;
+}
+
+- (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
     if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
                 
-                float safeAreaTop = windowScene.windows.firstObject.safeAreaInsets.top;
-                float inAppWidth = windowScene.coordinateSpace.bounds.size.width;
-                float inAppHeight = windowScene.coordinateSpace.bounds.size.height;
-                
-                inAppWidth = ceil(inAppWidth * (percent / 100.0));
-
-                if (aspectRatio > 0.0) {
-                    inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
-                }
-                CGFloat originY = (windowScene.coordinateSpace.bounds.size.height - inAppHeight);
-                CGRect frame;
-                switch (self.notification.position) {
-                    case CLTAP_INAPP_POSITION_TOP:
-                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
-                        break;
-                    case CLTAP_INAPP_POSITION_BOTTOM:
-                        frame = CGRectMake(0, originY, inAppWidth, inAppHeight);
-                        break;
-                    case CLTAP_INAPP_POSITION_CENTER:
-                        frame = CGRectMake(0, 0, inAppWidth, inAppHeight);
-                        break;
-                    default:
-                        frame = windowScene.coordinateSpace.bounds;
-                        break;
-                }
-                self.window = [[windowClass alloc] initWithFrame:frame];
+                CGRect windowFrame = [self getWindowSceneFrame:windowScene];
+                self.window = [[windowClass alloc] initWithFrame:windowFrame];
                 self.window.windowScene = windowScene;
             }
         }
     } else {
-        float width = [UIScreen mainScreen].bounds.size.width;
-        float inAppHeight = [UIScreen mainScreen].bounds.size.height;
-        
-        if (aspectRatio > 0.0) {
-            inAppHeight = width / aspectRatio;
-        }
-        CGFloat originY = ([UIScreen mainScreen].bounds.size.height - inAppHeight);
-        
-        CGRect frame;
-        switch (self.notification.position) {
-            case CLTAP_INAPP_POSITION_TOP:
-                frame = CGRectMake(0, 0, width, inAppHeight);
-                break;
-            case CLTAP_INAPP_POSITION_BOTTOM:
-                frame = CGRectMake(0, originY, width, inAppHeight);
-                break;
-            default:
-                frame = CGRectMake(0, 0, width, inAppHeight);
-                break;
-        }
-        self.window = [[windowClass alloc] initWithFrame:frame];
+        CGRect windowFrame = [self getWindowFrame];
+        self.window = [[windowClass alloc] initWithFrame: windowFrame];
     }
     
     if (!self.window) {
