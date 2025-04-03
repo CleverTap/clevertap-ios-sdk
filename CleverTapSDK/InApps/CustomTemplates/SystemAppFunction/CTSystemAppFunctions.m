@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTSystemAppFunction.h"
+#import "CTSystemAppFunctions.h"
 
-@implementation CTSystemAppFunction
+@implementation CTSystemAppFunctions
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
++ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
     // Build all system app function here.
 

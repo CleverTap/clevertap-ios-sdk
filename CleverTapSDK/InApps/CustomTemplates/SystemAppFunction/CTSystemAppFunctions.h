@@ -1,5 +1,5 @@
 //
-//  CTSystemAppFunction.h
+//  CTSystemAppFunctions.h
 //  CleverTapSDK
 //
 //  Created by Nishant Kumar on 19/03/25.
@@ -12,9 +12,9 @@
 #import <Foundation/Foundation.h>
 #import "CTCustomTemplate.h"
 
-@interface CTSystemAppFunction : NSObject
+@interface CTSystemAppFunctions : NSObject
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions;
++ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions;
 
 @end
 

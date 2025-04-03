@@ -58,7 +58,7 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppTriggerManager.h"
 #import "CTCustomTemplatesManager-Internal.h"
-#import "CTSystemAppFunction.h"
+#import "CTSystemAppFunctions.h"
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -529,7 +529,7 @@ static BOOL sharedInstanceErrorLogged;
     
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
-    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunction getSystemAppFunctions];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunctions systemAppFunctions];
     CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config
                                                                                systemAppFunctions:systemAppFunctions];
     
