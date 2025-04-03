@@ -11,6 +11,11 @@
 #import "CTConstants.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CTSystemTemplateActionHandler
 
@@ -49,7 +54,8 @@
 #pragma mark App Rating System App Function
 
 - (void)promptAppRating {
-    // Add logic for app rating here.
+    CTAppRatingHelper *appRatingHelper = [[CTAppRatingHelper alloc] init];
+    [appRatingHelper requestRating];
 }
 
 @end
