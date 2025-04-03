@@ -531,8 +531,8 @@ static BOOL sharedInstanceErrorLogged;
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
     self.systemTemplateActionHandler = [[CTSystemTemplateActionHandler alloc] init];
-    CTSystemAppFunction *systemAppFunction = [[CTSystemAppFunction alloc] initWithSystemTemplateActionHandler:self.systemTemplateActionHandler];
-    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunctions systemAppFunctions];
+    CTSystemAppFunctions *systemAppFunction = [[CTSystemAppFunctions alloc] initWithSystemTemplateActionHandler:self.systemTemplateActionHandler];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [systemAppFunction systemAppFunctions];
     CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config
                                                                                systemAppFunctions:systemAppFunctions];
     

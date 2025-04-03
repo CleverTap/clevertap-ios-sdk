@@ -27,7 +27,7 @@
     return self;
 }
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
+- (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
     systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
     return systemAppFunctions;

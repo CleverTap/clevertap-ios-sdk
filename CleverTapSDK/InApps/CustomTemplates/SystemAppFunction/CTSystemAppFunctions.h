@@ -17,7 +17,7 @@
 
 - (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions;
+- (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions;
 
 @end
 
