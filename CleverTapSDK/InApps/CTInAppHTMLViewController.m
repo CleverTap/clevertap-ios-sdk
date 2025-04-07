@@ -44,8 +44,6 @@ typedef enum {
 
 @implementation CTInAppHTMLViewController
 
-NSArray *safeAreaConstraints;
-
 - (instancetype)initWithNotification:(CTInAppNotification *)notification config:(CleverTapInstanceConfig *)config {
     self = [super initWithNotification:notification];
     if (self) {
@@ -114,24 +112,22 @@ NSArray *safeAreaConstraints;
     
     if (@available(iOS 11.0, *)) {
         UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
-        // Store constraints to deactivate them before frame manipulation
-        safeAreaConstraints = @[
+        [NSLayoutConstraint activateConstraints:@[
+            // Use the safe area layout guide to position the view
             [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
             [webView.leadingAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
             [webView.trailingAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
             [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
-        ];
+        ]];
     } else {
         // Fallback on earlier versions
-        safeAreaConstraints = @[
-            [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.bottomAnchor],
-            [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-            [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-            [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.topAnchor]
-        ];
+        [NSLayoutConstraint activateConstraints:@[
+                [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
+                [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+                [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+                [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
+            ]];
     }
-    
-    [NSLayoutConstraint activateConstraints:safeAreaConstraints];
     if (self.notification.url) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
         webView.navigationDelegate = nil;
@@ -306,7 +302,6 @@ NSArray *safeAreaConstraints;
 
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
     //begin pan...
-    [NSLayoutConstraint deactivateConstraints:safeAreaConstraints];
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         self.initialTouchPositionX = [recognizer locationInView:self.view].x;
         self.initialHorizontalCenter = webView.center.x;
