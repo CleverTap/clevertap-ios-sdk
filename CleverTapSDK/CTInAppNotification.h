@@ -63,7 +63,6 @@
 @property (nonatomic, readonly) BOOL isLocalInApp;
 @property (nonatomic, readonly) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readonly) BOOL fallBackToNotificationSettings;
-@property (nonatomic, readonly) BOOL skipSettingsAlert;
 
 @property (nonatomic, readonly) CTCustomTemplateInAppData *customTemplateInAppData;
 

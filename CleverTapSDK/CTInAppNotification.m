@@ -61,7 +61,6 @@
 @property (nonatomic, readwrite) BOOL isLocalInApp;
 @property (nonatomic, readwrite) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readwrite) BOOL fallBackToNotificationSettings;
-@property (nonatomic, readwrite) BOOL skipSettingsAlert;
 
 @property (nonatomic, readwrite) CTCustomTemplateInAppData *customTemplateInAppData;
 
@@ -91,7 +90,6 @@
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
-            self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
             NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
             if (inAppId) {
                 self.Id = inAppId;

@@ -1205,7 +1205,7 @@ static BOOL sharedInstanceErrorLogged;
         [self.inAppFCManager checkUpdateDailyLimits];
     }
     
-    // Update push permission status for current session.
+    // Update push permission status everytime app is resumed.
     [self.pushPrimerManager checkAndUpdatePushPermissionStatus];
 #endif
 }
@@ -3795,8 +3795,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings
-                                       andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings];
 #endif
 }
 
@@ -4346,7 +4345,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {

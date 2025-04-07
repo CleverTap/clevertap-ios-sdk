@@ -24,7 +24,7 @@
         return;
     }
     
-    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings andSkipSettingsAlert:YES];
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings];
 }
 
 @end

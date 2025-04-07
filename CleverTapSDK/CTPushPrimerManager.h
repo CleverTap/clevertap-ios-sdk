@@ -29,8 +29,8 @@ typedef NS_ENUM(NSInteger, CTPushPermissionStatus){
 
 - (void)setPushPermissionDelegate:(id<CleverTapPushPermissionDelegate> _Nullable)delegate;
 - (void)promptPushPrimer:(NSDictionary *_Nonnull)json;
-- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings andSkipSettingsAlert:(BOOL)skipSettingsAlert;
-- (void)getNotificationPermissionStatusWithCompletionHandler:(void (^_Nonnull)(UNAuthorizationStatus))completion;
+- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings;
+- (void)getNotificationPermissionStatusWithCompletionHandler:(void (^_Nonnull)(UNAuthorizationStatus))completion API_AVAILABLE(ios(10.0));
 - (void)notifyPushPermissionResponse:(BOOL)accepted;
 - (void)checkAndUpdatePushPermissionStatus;
 @end

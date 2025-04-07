@@ -752,8 +752,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
            fromViewController:(CTInAppDisplayViewController *)controller
        withFallbackToSettings:(BOOL)isFallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: InApp Push Primer Accepted:", self);
-    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
-                                       andSkipSettingsAlert:notification.skipSettingsAlert];
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings];
     
 }
 
@@ -873,10 +872,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (BOOL)isRFPInApp:(NSDictionary *)inAppJSON {
     BOOL isRFP = inAppJSON[@"rfp"] ? [inAppJSON[@"rfp"] boolValue] : NO;
-    if (isRFP) {
-        return YES;
-    }
-    return NO;
+    return isRFP;
 }
 
 @end

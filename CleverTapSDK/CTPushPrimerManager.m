@@ -68,8 +68,7 @@
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
-                                       andSkipSettingsAlert:NO];
+    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
@@ -100,8 +99,7 @@
     }
 }
 
-- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
-                                     andSkipSettingsAlert:(BOOL)skipSettingsAlert {
+- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings {
     if (@available(iOS 10.0, *)) {
         [self.dispatchQueueManager runSerialAsync:^{
             UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -129,11 +127,7 @@
                     }];
                 } else if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
                     if (isFallbackToSettings) {
-                        if (skipSettingsAlert) {
-                            [self openAppSettingsForPushNotification];
-                        } else {
-                            [self showFallbackToSettingsAlertDialog];
-                        }
+                        [self openAppSettingsForPushNotification];
                     } else {
                         CleverTapLogDebug(self.config.logLevel, @"%@: Notification permission is denied. Please grant notification permission access in your app's settings to send notifications.", self);
                     }
@@ -148,25 +142,6 @@
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
     }
-}
-
-- (void)showFallbackToSettingsAlertDialog {
-    NSString *alertTitle = @"Permission Not Available";
-    NSString *alertMessage = @"You have previously denied notification permission. Please go to settings to enable notifications.";
-    NSString *positiveBtnText = @"Settings";
-    NSString *negativeBtntext = @"Cancel";
-    CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:ALERT
-                                                                    titleText:alertTitle
-                                                                  messageText:alertMessage
-                                                      followDeviceOrientation:YES
-                                                              positiveBtnText:positiveBtnText
-                                                              negativeBtnText:negativeBtntext];
-    [localInAppBuilder setFallbackToSettings:YES];
-    [localInAppBuilder setSkipSettingsAlert:YES];
-    NSMutableDictionary *alertSettings = [NSMutableDictionary dictionaryWithDictionary:localInAppBuilder.getLocalInAppSettings];
-    // Update isPushSettingsSoftAlert key as it is internal alert in-app, so that local in-app count will not increase.
-    alertSettings[@"isPushSettingsSoftAlert"] = @1;
-    [inAppDisplayManager prepareNotificationForDisplay:alertSettings];
 }
 
 - (void)openAppSettingsForPushNotification {
