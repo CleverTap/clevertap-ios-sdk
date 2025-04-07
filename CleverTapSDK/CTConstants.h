@@ -289,4 +289,4 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_OPEN_URL_TEMPLATE_NAME @"ctsystem_openurl"
 #define CLTAP_APP_RATING_TEMPLATE_NAME @"ctsystem_apprating"
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
-#define CLTAP_OPEN_URL_ACTION_KEY @"ios"
+#define CLTAP_OPEN_URL_ACTION_KEY @"iOS"

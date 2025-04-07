@@ -1,5 +1,5 @@
 //
-//  CTSystemAppFunction.m
+//  CTSystemAppFunctions.m
 //  CleverTapSDK
 //
 //  Created by Nishant Kumar on 19/03/25.
@@ -7,19 +7,19 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTSystemAppFunction.h"
+#import "CTSystemAppFunctions.h"
 #import "CTConstants.h"
 #import "CTPushPermissionSystemAppFunction.h"
 #import "CTOpenUrlSystemAppFunction.h"
 #import "CTAppRatingSystemAppFunction.h"
 
-@interface CTSystemAppFunction ()
+@interface CTSystemAppFunctions ()
 
 @property (nonatomic, strong) CTSystemTemplateActionHandler *systemTemplateActionHandler;
 
 @end
 
-@implementation CTSystemAppFunction
+@implementation CTSystemAppFunctions
 
 - (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
     self = [super init];
@@ -29,7 +29,7 @@
     return self;
 }
 
-- (NSDictionary<NSString *, CTCustomTemplate *> *)getSystemAppFunctions {
+- (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
     systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
     systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
