@@ -13,8 +13,7 @@
 @class CTInAppDisplayManager;
 
 typedef NS_ENUM(NSInteger, CTPushPermissionStatus){
-    CTPushNotKnown = -1,
-    CTPushDisabled = 0,
+    CTPushNotKnown = 0,
     CTPushEnabled = 1
 };
 

@@ -95,7 +95,7 @@
     if (accepted) {
         self.pushPermissionStatus = CTPushEnabled;
     } else {
-        self.pushPermissionStatus = CTPushDisabled;
+        self.pushPermissionStatus = CTPushNotKnown;
     }
 }
 
@@ -134,9 +134,6 @@
                 } else {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
                 }
-                
-                // Update push permission status if changed in same session.
-                [self checkAndUpdatePushPermissionStatus];
             }];
         }];
     } else {
@@ -160,7 +157,7 @@
     if (@available(iOS 10.0, *)) {
         [self getNotificationPermissionStatusWithCompletionHandler: ^(UNAuthorizationStatus status) {
             if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
-                self.pushPermissionStatus = CTPushDisabled;
+                self.pushPermissionStatus = CTPushNotKnown;
             } else {
                 self.pushPermissionStatus = CTPushEnabled;
             }
