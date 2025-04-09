@@ -1138,6 +1138,14 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     [self _appEnteredForeground];
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push permission status everytime app is resumed.
+    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
+    [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+        self.pushPrimerManager.pushPermissionStatus = status;
+    }];
+#endif
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
@@ -1203,17 +1211,16 @@ static BOOL sharedInstanceErrorLogged;
     if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
     }
-    
-    // Update push permission status everytime app is resumed.
-    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
-    [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
-        self.pushPrimerManager.pushPermissionStatus = status;
-    }];
 #endif
 }
 
 - (void)_appEnteredBackground {
     self.isAppForeground = NO;
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push status as CTPushNotKnown as it is again updated when app is resumed.
+    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
+#endif
     
     UIApplication *application = [CTUIUtils getSharedApplication];
     UIBackgroundTaskIdentifier __block backgroundTask;
