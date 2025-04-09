@@ -112,6 +112,27 @@ typedef enum {
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     
+    [self configureWebViewConstraints];
+    
+    if (self.notification.url) {
+        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
+        webView.navigationDelegate = nil;
+    } else{
+        [webView loadHTMLString:self.notification.html baseURL:nil];
+    }
+    
+    if (self.notification.darkenScreen) {
+        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
+    }
+    
+    if ([self isInAppAdvanceBuilder]) {
+        [self configureViewAutoresizing];
+    } else {
+        [self updateWebView];
+    }
+}
+
+- (void) configureWebViewConstraints {
     if (@available(iOS 11.0, *)) {
         UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
         [NSLayoutConstraint activateConstraints:@[
@@ -124,32 +145,17 @@ typedef enum {
     } else {
         // Fallback on earlier versions
         [NSLayoutConstraint activateConstraints:@[
-                [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
-                [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-                [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-                [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
-            ]];
-    }
-    if (self.notification.url) {
-        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
-        webView.navigationDelegate = nil;
-    } else{
-        [webView loadHTMLString:self.notification.html baseURL:nil];
-    }
-    
-    if ([self isInAppAdvanceBuilder]) {
-        [self updateWebViewForAdvanceInApps];
-    } else {
-        [self updateWebView];
+            [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
+            [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+            [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+            [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
+        ]];
     }
 }
 
-- (void)updateWebViewForAdvanceInApps {
+//Added to handle webview for Advance Builder InApps
+- (void)configureViewAutoresizing {
     webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-    
-    if (self.notification.darkenScreen) {
-        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
-    }
     
     self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
     UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
@@ -238,10 +244,6 @@ typedef enum {
     frame.origin.y = frame.origin.y < 0.0f ? 0.0f : frame.origin.y;
     webView.frame = frame;
     _originalCenter = frame.origin.x + frame.size.width / 2.0f;
-    
-    if (self.notification.darkenScreen) {
-        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
-    }
     
     self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
     UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
