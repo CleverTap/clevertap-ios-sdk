@@ -91,7 +91,9 @@ typedef enum {
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
     // Set translatesAutoresizingMaskIntoConstraints to NO to use Auto Layout
-    webView.translatesAutoresizingMaskIntoConstraints = NO;
+    if ([self isInAppAdvanceBuilder]) {
+        webView.translatesAutoresizingMaskIntoConstraints = NO;
+    }
     webView.scrollView.scrollEnabled = NO;
     webView.backgroundColor = [UIColor clearColor];
     webView.opaque = NO;
@@ -135,7 +137,7 @@ typedef enum {
         [webView loadHTMLString:self.notification.html baseURL:nil];
     }
     
-    if (self.notification.aspectRatio) {
+    if ([self isInAppAdvanceBuilder]) {
         [self updateWebViewForAdvanceInApps];
     } else {
         [self updateWebView];

@@ -36,7 +36,10 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    [self updateWindowFrame];
+    if ([self isInAppAdvanceBuilder]) {
+        [self updateWindowFrame];
+    }
+    
 }
 
 - (void) updateWindowFrame {
@@ -228,14 +231,24 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
                 
-                CGRect windowFrame = [self getWindowSceneFrame:windowScene];
-                self.window = [[windowClass alloc] initWithFrame:windowFrame];
-                self.window.windowScene = windowScene;
+                if ([self isInAppAdvanceBuilder]) {
+                    CGRect windowFrame = [self getWindowSceneFrame:windowScene];
+                    self.window = [[windowClass alloc] initWithFrame:windowFrame];
+                    self.window.windowScene = windowScene;
+                } else {
+                    self.window = [[windowClass alloc] initWithFrame:
+                                                    windowScene.coordinateSpace.bounds];
+                    self.window.windowScene = windowScene;
+                }
             }
         }
     } else {
-        CGRect windowFrame = [self getWindowFrame];
-        self.window = [[windowClass alloc] initWithFrame: windowFrame];
+        if ([self isInAppAdvanceBuilder]) {
+            CGRect windowFrame = [self getWindowFrame];
+            self.window = [[windowClass alloc] initWithFrame: windowFrame];
+        } else {
+            self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        }
     }
     
     if (!self.window) {
@@ -350,6 +363,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     return buttonView;
 }
 
+#pragma mark - Util functions
+
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
     return nil;
@@ -358,6 +373,9 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 #endif
 }
 
+- (BOOL)isInAppAdvanceBuilder {
+    return self.notification.aspectRatio > 0;
+}
 
 #pragma mark - Actions
 
