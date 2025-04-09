@@ -456,6 +456,27 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
     
+    if (notification.isRFP) {
+        // If push permission is already enabled, do not show inapp.
+        if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, permission is already granted.", self);
+            return;
+        }
+
+        // If push permission status is not known yet, check for status and on callback show the inapp is push is not enabled.
+        if (pushPrimerManager.pushPermissionStatus == CTPushNotKnown) {
+            [pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+                self->pushPrimerManager.pushPermissionStatus = status;
+                if (status == CTPushNotEnabled) {
+                    [self displayNotification:notification];
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, status: %ld", self, (long)status);
+                }
+            }];
+            return;
+        }
+    }
+    
     // if we are currently displaying a notification, cache this notification for later display
     if (currentlyDisplayingNotification) {
         if (self.config.accountId && notification) {

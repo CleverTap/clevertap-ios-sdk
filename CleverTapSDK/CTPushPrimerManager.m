@@ -16,7 +16,6 @@
 @interface CTPushPrimerManager () 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
-@property (nonatomic, readwrite) CTPushPermissionStatus pushPermissionStatus;
 @end
 
 @implementation CTPushPrimerManager
@@ -32,7 +31,9 @@
         self.dispatchQueueManager = dispatchQueueManager;
 
         self.pushPermissionStatus = CTPushNotKnown;
-        [self checkAndUpdatePushPermissionStatus];
+        [self checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+            self.pushPermissionStatus = status;
+        }];
     }
     return self;
 }
@@ -95,7 +96,7 @@
     if (accepted) {
         self.pushPermissionStatus = CTPushEnabled;
     } else {
-        self.pushPermissionStatus = CTPushNotKnown;
+        self.pushPermissionStatus = CTPushNotEnabled;
     }
 }
 
@@ -153,15 +154,17 @@
     }];
 }
 
-- (void)checkAndUpdatePushPermissionStatus {
+- (void)checkAndUpdatePushPermissionStatusWithCompletion:(void (^_Nonnull)(CTPushPermissionStatus status))completionHandler {
     if (@available(iOS 10.0, *)) {
         [self getNotificationPermissionStatusWithCompletionHandler: ^(UNAuthorizationStatus status) {
             if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
-                self.pushPermissionStatus = CTPushNotKnown;
+                completionHandler(CTPushNotEnabled);
             } else {
-                self.pushPermissionStatus = CTPushEnabled;
+                completionHandler(CTPushEnabled);
             }
         }];
+    } else {
+        completionHandler(CTPushNotKnown);
     }
 }
 #endif

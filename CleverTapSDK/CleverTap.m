@@ -1205,7 +1205,10 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     // Update push permission status everytime app is resumed.
-    [self.pushPrimerManager checkAndUpdatePushPermissionStatus];
+    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
+    [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+        self.pushPrimerManager.pushPermissionStatus = status;
+    }];
 #endif
 }
 
