@@ -15,5 +15,4 @@
 - (void)getLastBatchHeader:(void (^)(NSDictionary*))handler;
 - (void)stubRequestsWithName:(NSString*)name;
 - (void)getLastEventWithStubName: (NSString*)stubName eventName: (NSString*)eventName eventType:(NSString*)eventType handler:(void (^)(NSDictionary *))handler;
-- (NSString*)randomString;
 @end
