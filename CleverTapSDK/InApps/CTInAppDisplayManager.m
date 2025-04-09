@@ -456,7 +456,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
     
-    if (notification.isRFP) {
+    if (notification.isRequestForPushPermission) {
         // If push permission is already enabled, do not show inapp.
         if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, permission is already granted.", self);
