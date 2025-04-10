@@ -1141,7 +1141,6 @@ static BOOL sharedInstanceErrorLogged;
     
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     // Update push permission status everytime app is resumed.
-    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
     [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
         self.pushPrimerManager.pushPermissionStatus = status;
     }];
