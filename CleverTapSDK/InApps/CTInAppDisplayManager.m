@@ -539,11 +539,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
-            if ([self.templatesManager presentNotification:notification 
+            currentlyDisplayingNotification = notification;
+            if (![self.templatesManager presentNotification:notification
                                               withDelegate:self
                                          andFileDownloader:self.fileDownloader]) {
-                currentlyDisplayingNotification = notification;
-            } else {
+                currentlyDisplayingNotification = nil;
                 errorString = [NSString stringWithFormat:@"Cannot present custom notification with template name: %@.",
                                notification.customTemplateInAppData.templateName];
             }
