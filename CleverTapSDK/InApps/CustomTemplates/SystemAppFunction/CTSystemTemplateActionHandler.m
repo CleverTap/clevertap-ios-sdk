@@ -18,13 +18,14 @@
     pushPrimerManager = pushPrimerManagerObj;
 }
 
-- (void)promptPushPermission:(BOOL)fbSettings {
+- (void)promptPushPermission:(BOOL)fbSettings withCompletionBlock:(void (^_Nonnull)(BOOL presented))completion {
     if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
         CleverTapLogStaticDebug(@"Push Notification permission is already granted.");
+        completion(NO);
         return;
     }
     
-    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings];
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings withCompletionBlock:completion];
 }
 
 @end

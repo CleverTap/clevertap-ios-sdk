@@ -69,7 +69,7 @@
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings];
+    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
@@ -100,12 +100,15 @@
     }
 }
 
-- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings {
+- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
+                                      withCompletionBlock:(void (^_Nullable)(BOOL presented))completion {
+    __block BOOL pushPermissionPresented = NO;
     if (@available(iOS 10.0, *)) {
         [self.dispatchQueueManager runSerialAsync:^{
             UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
             [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
                 if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
+                    pushPermissionPresented = YES;
                     [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error) {
                         if (granted) {
                             [self notifyPushPermissionResponse:YES];
@@ -135,10 +138,12 @@
                 } else {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
                 }
+                completion(pushPermissionPresented);
             }];
         }];
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
+        completion(NO);
     }
 }
 

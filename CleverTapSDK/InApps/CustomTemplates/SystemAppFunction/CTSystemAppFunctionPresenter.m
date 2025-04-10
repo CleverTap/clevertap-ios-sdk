@@ -33,8 +33,13 @@
 - (void)onPresent:(nonnull CTTemplateContext *)context { 
     if ([context.templateName isEqual: CLTAP_PUSH_PERMISSION_TEMPLATE_NAME]) {
         BOOL fbSettings = [context boolNamed:CLTAP_FB_SETTINGS_KEY];
-        [self.systemTemplateActionHandler promptPushPermission:fbSettings];
-        [context dismissed];
+        [self.systemTemplateActionHandler promptPushPermission:fbSettings withCompletionBlock:^(BOOL presented) {
+            if (presented) {
+                // Added this to record Notification Viewed event for OS push permission.
+                [context presented];
+            }
+            [context dismissed];
+        }];
     }
 }
 

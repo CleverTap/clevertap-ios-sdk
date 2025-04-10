@@ -773,7 +773,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
            fromViewController:(CTInAppDisplayViewController *)controller
        withFallbackToSettings:(BOOL)isFallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: InApp Push Primer Accepted:", self);
-    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings];
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
     
 }
 

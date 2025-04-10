@@ -17,7 +17,7 @@
 
 - (void)setPushPrimerManager:(CTPushPrimerManager* _Nonnull)pushPrimerManagerObj;
 
-- (void)promptPushPermission:(BOOL)fbSettings;
+- (void)promptPushPermission:(BOOL)fbSettings withCompletionBlock:(void (^_Nonnull)(BOOL presented))completion;
 
 @end
 

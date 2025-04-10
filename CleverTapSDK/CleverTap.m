@@ -3803,7 +3803,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings withCompletionBlock:nil];
 #endif
 }
 
@@ -4353,7 +4353,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
