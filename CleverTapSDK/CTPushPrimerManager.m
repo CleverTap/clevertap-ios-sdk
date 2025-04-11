@@ -16,7 +16,6 @@
 @interface CTPushPrimerManager () 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
-@property (nonatomic, readwrite) CTPushPermissionStatus pushPermissionStatus;
 @end
 
 @implementation CTPushPrimerManager
@@ -32,7 +31,9 @@
         self.dispatchQueueManager = dispatchQueueManager;
 
         self.pushPermissionStatus = CTPushNotKnown;
-        [self checkAndUpdatePushPermissionStatus];
+        [self checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+            self.pushPermissionStatus = status;
+        }];
     }
     return self;
 }
@@ -68,8 +69,7 @@
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
-                                       andSkipSettingsAlert:NO];
+    [self promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
@@ -96,17 +96,19 @@
     if (accepted) {
         self.pushPermissionStatus = CTPushEnabled;
     } else {
-        self.pushPermissionStatus = CTPushDisabled;
+        self.pushPermissionStatus = CTPushNotEnabled;
     }
 }
 
 - (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
-                                     andSkipSettingsAlert:(BOOL)skipSettingsAlert {
+                                      withCompletionBlock:(void (^_Nullable)(BOOL presented))completion {
+    __block BOOL pushPermissionPresented = NO;
     if (@available(iOS 10.0, *)) {
         [self.dispatchQueueManager runSerialAsync:^{
             UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
             [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
                 if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
+                    pushPermissionPresented = YES;
                     [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error) {
                         if (granted) {
                             [self notifyPushPermissionResponse:YES];
@@ -129,44 +131,20 @@
                     }];
                 } else if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
                     if (isFallbackToSettings) {
-                        if (skipSettingsAlert) {
-                            [self openAppSettingsForPushNotification];
-                        } else {
-                            [self showFallbackToSettingsAlertDialog];
-                        }
+                        [self openAppSettingsForPushNotification];
                     } else {
                         CleverTapLogDebug(self.config.logLevel, @"%@: Notification permission is denied. Please grant notification permission access in your app's settings to send notifications.", self);
                     }
                 } else {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
                 }
-                
-                // Update push permission status if changed in same session.
-                [self checkAndUpdatePushPermissionStatus];
+                completion(pushPermissionPresented);
             }];
         }];
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
+        completion(NO);
     }
-}
-
-- (void)showFallbackToSettingsAlertDialog {
-    NSString *alertTitle = @"Permission Not Available";
-    NSString *alertMessage = @"You have previously denied notification permission. Please go to settings to enable notifications.";
-    NSString *positiveBtnText = @"Settings";
-    NSString *negativeBtntext = @"Cancel";
-    CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:ALERT
-                                                                    titleText:alertTitle
-                                                                  messageText:alertMessage
-                                                      followDeviceOrientation:YES
-                                                              positiveBtnText:positiveBtnText
-                                                              negativeBtnText:negativeBtntext];
-    [localInAppBuilder setFallbackToSettings:YES];
-    [localInAppBuilder setSkipSettingsAlert:YES];
-    NSMutableDictionary *alertSettings = [NSMutableDictionary dictionaryWithDictionary:localInAppBuilder.getLocalInAppSettings];
-    // Update isPushSettingsSoftAlert key as it is internal alert in-app, so that local in-app count will not increase.
-    alertSettings[@"isPushSettingsSoftAlert"] = @1;
-    [inAppDisplayManager prepareNotificationForDisplay:alertSettings];
 }
 
 - (void)openAppSettingsForPushNotification {
@@ -181,15 +159,17 @@
     }];
 }
 
-- (void)checkAndUpdatePushPermissionStatus {
+- (void)checkAndUpdatePushPermissionStatusWithCompletion:(void (^_Nonnull)(CTPushPermissionStatus status))completionHandler {
     if (@available(iOS 10.0, *)) {
         [self getNotificationPermissionStatusWithCompletionHandler: ^(UNAuthorizationStatus status) {
             if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
-                self.pushPermissionStatus = CTPushDisabled;
+                completionHandler(CTPushNotEnabled);
             } else {
-                self.pushPermissionStatus = CTPushEnabled;
+                completionHandler(CTPushEnabled);
             }
         }];
+    } else {
+        completionHandler(CTPushNotKnown);
     }
 }
 #endif

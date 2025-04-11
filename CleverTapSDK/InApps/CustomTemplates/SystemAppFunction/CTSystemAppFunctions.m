@@ -13,27 +13,13 @@
 #import "CTOpenUrlSystemAppFunction.h"
 #import "CTAppRatingSystemAppFunction.h"
 
-@interface CTSystemAppFunctions ()
-
-@property (nonatomic, strong) CTSystemTemplateActionHandler *systemTemplateActionHandler;
-
-@end
-
 @implementation CTSystemAppFunctions
 
-- (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
-    self = [super init];
-    if (self) {
-        self.systemTemplateActionHandler = systemTemplateActionHandler;
-    }
-    return self;
-}
-
-- (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
++ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctionsWithHandler:(CTSystemTemplateActionHandler *)handler {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
-    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
-    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
-    systemAppFunctions[CLTAP_APP_RATING_TEMPLATE_NAME] = [CTAppRatingSystemAppFunction buildTemplateWithHandler:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:handler];
+    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHanlder:handler];
+    systemAppFunctions[CLTAP_APP_RATING_TEMPLATE_NAME] = [CTAppRatingSystemAppFunction buildTemplateWithHandler:handler];
     return systemAppFunctions;
 }
 

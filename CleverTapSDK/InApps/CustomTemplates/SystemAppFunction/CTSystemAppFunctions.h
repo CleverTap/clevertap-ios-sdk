@@ -15,9 +15,7 @@
 
 @interface CTSystemAppFunctions : NSObject
 
-- (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
-
-- (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions;
++ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctionsWithHandler:(CTSystemTemplateActionHandler *)handler;
 
 @end
 

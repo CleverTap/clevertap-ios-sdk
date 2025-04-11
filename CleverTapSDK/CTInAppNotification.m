@@ -58,10 +58,10 @@
 @property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
 @property (nonatomic, copy, readwrite) NSDictionary *customExtras;
 
+@property (nonatomic, readwrite) BOOL isRequestForPushPermission;
 @property (nonatomic, readwrite) BOOL isLocalInApp;
 @property (nonatomic, readwrite) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readwrite) BOOL fallBackToNotificationSettings;
-@property (nonatomic, readwrite) BOOL skipSettingsAlert;
 
 @property (nonatomic, readwrite) CTCustomTemplateInAppData *customTemplateInAppData;
 
@@ -88,10 +88,10 @@
             self.maxPerSession = jsonObject[CLTAP_INAPP_MAX_PER_SESSION] ? [jsonObject[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
             self.totalLifetimeCount = jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] intValue] : -1;
             self.totalDailyCount = jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] intValue] : -1;
+            self.isRequestForPushPermission = jsonObject[@"rfp"] ? [jsonObject[@"rfp"] boolValue] : NO;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
-            self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
             NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
             if (inAppId) {
                 self.Id = inAppId;
