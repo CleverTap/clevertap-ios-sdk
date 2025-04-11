@@ -490,7 +490,9 @@ typedef enum {
                 self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
             }
                              completion:^(BOOL finished) {
-                [self hide:NO];
+                //add record event
+                CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
+                [self triggerInAppAction:action callToAction: CLTAP_CTA_SWIPE_DISMISS buttonId:nil];
             }];
         }];
     }];

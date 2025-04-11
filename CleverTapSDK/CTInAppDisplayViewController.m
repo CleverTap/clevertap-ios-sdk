@@ -460,7 +460,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
     }
-    [self hide:YES];
+    BOOL shouldAnimate = ![callToAction isEqualToString: CLTAP_CTA_SWIPE_DISMISS];
+    [self hide: shouldAnimate];
 }
 
 - (void)handleImageTapGesture {
