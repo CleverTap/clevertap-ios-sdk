@@ -42,7 +42,11 @@
         }];
     } else if ([context.templateName isEqual:CLTAP_OPEN_URL_TEMPLATE_NAME]) {
         NSString *action = [context stringNamed:CLTAP_OPEN_URL_ACTION_KEY];
-        [self.systemTemplateActionHandler handleOpenURL:action];
+        BOOL success = [self.systemTemplateActionHandler handleOpenURL:action];
+        if (success) {
+            // Added this to record Notification Viewed event for Open Url.
+            [context presented];
+        }
         [context dismissed];
     }
 }
