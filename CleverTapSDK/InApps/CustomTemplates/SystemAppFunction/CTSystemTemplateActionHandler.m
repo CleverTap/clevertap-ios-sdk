@@ -33,18 +33,20 @@
 #pragma mark Open Url System App Function
 
 - (void)handleOpenURL:(NSString *)action {
-    if (action && action.length > 0) {
-        @try {
-            NSURL *actionURL = [NSURL URLWithString:action];
-            [CTUtils runSyncMainQueue:^{
-                [CTUIUtils openURL:actionURL forModule:@"OpenUrl System Template"];
-            }];
-        } @catch (NSException *e) {
-            CleverTapLogStaticDebug(@"Error while getting URL: %@", [e debugDescription]);
-        }
-    } else {
-        CleverTapLogStaticDebug(@"Open url system template doesn't have action URL");
+    if (!(action && action.length > 0)) {
+        CleverTapLogStaticDebug(@"Open URL system template doesn't have an action URL");
+        return;
     }
+    
+    NSURL *actionURL = [NSURL URLWithString:action];
+    if (!actionURL) {
+        CleverTapLogStaticDebug(@"Unable to retrieve URL from Open Url action string: %@", action);
+        return;
+    }
+    
+    [CTUtils runSyncMainQueue:^{
+        [CTUIUtils openURL:actionURL forModule:@"OpenUrl System Template"];
+    }];
 }
 
 @end
