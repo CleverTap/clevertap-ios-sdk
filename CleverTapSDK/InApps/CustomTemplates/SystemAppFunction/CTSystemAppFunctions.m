@@ -12,26 +12,12 @@
 #import "CTPushPermissionSystemAppFunction.h"
 #import "CTOpenUrlSystemAppFunction.h"
 
-@interface CTSystemAppFunctions ()
-
-@property (nonatomic, strong) CTSystemTemplateActionHandler *systemTemplateActionHandler;
-
-@end
-
 @implementation CTSystemAppFunctions
 
-- (instancetype)initWithSystemTemplateActionHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
-    self = [super init];
-    if (self) {
-        self.systemTemplateActionHandler = systemTemplateActionHandler;
-    }
-    return self;
-}
-
-- (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions {
++ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctionsWithHandler:(CTSystemTemplateActionHandler *)handler {
     NSMutableDictionary *systemAppFunctions = [NSMutableDictionary new];
-    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
-    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHanlder:self.systemTemplateActionHandler];
+    systemAppFunctions[CLTAP_PUSH_PERMISSION_TEMPLATE_NAME] = [CTPushPermissionSystemAppFunction buildTemplateWithHanlder:handler];
+    systemAppFunctions[CLTAP_OPEN_URL_TEMPLATE_NAME] = [CTOpenUrlSystemAppFunction buildTemplateWithHanlder:handler];
     return systemAppFunctions;
 }
 

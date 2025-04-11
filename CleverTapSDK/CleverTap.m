@@ -531,8 +531,7 @@ static BOOL sharedInstanceErrorLogged;
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
     self.systemTemplateActionHandler = [[CTSystemTemplateActionHandler alloc] init];
-    CTSystemAppFunctions *systemAppFunction = [[CTSystemAppFunctions alloc] initWithSystemTemplateActionHandler:self.systemTemplateActionHandler];
-    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [systemAppFunction systemAppFunctions];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:self.systemTemplateActionHandler];
     CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config
                                                                                systemAppFunctions:systemAppFunctions];
     
@@ -1139,6 +1138,13 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     [self _appEnteredForeground];
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push permission status everytime app is resumed.
+    [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+        self.pushPrimerManager.pushPermissionStatus = status;
+    }];
+#endif
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
@@ -1204,14 +1210,16 @@ static BOOL sharedInstanceErrorLogged;
     if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
     }
-    
-    // Update push permission status for current session.
-    [self.pushPrimerManager checkAndUpdatePushPermissionStatus];
 #endif
 }
 
 - (void)_appEnteredBackground {
     self.isAppForeground = NO;
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push status as CTPushNotKnown as it is again updated when app is resumed.
+    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
+#endif
     
     UIApplication *application = [CTUIUtils getSharedApplication];
     UIBackgroundTaskIdentifier __block backgroundTask;
@@ -3795,8 +3803,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings
-                                       andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings withCompletionBlock:nil];
 #endif
 }
 
@@ -4346,7 +4353,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {

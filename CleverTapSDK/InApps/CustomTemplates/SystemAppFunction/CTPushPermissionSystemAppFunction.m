@@ -17,7 +17,7 @@
 + (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
     CTCustomTemplateBuilder *pushPermissionbuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
     [pushPermissionbuilder setName:CLTAP_PUSH_PERMISSION_TEMPLATE_NAME];
-    [pushPermissionbuilder addArgument:CLTAP_FB_SETTINGS_KEY withBool:YES];
+    [pushPermissionbuilder addArgument:CLTAP_FB_SETTINGS_KEY withBool:NO];
     CTSystemAppFunctionPresenter *presenter = [[CTSystemAppFunctionPresenter alloc] initWithSystemTemplateActionHandler:systemTemplateActionHandler];
     [pushPermissionbuilder setPresenter:presenter];
 

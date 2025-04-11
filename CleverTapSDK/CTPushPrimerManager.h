@@ -13,9 +13,9 @@
 @class CTInAppDisplayManager;
 
 typedef NS_ENUM(NSInteger, CTPushPermissionStatus){
-    CTPushNotKnown = -1,
-    CTPushDisabled = 0,
-    CTPushEnabled = 1
+    CTPushNotKnown = 0,
+    CTPushEnabled = 1,
+    CTPushNotEnabled = 2
 };
 
 @interface CTPushPrimerManager : NSObject {
@@ -23,15 +23,16 @@ typedef NS_ENUM(NSInteger, CTPushPermissionStatus){
 }
 
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> _Nullable pushPermissionDelegate;
-@property (nonatomic, readonly) CTPushPermissionStatus pushPermissionStatus;
+@property (nonatomic) CTPushPermissionStatus pushPermissionStatus;
 
 - (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig* _Nonnull)config inAppDisplayManager:(CTInAppDisplayManager* _Nonnull)inAppDisplayManagerObj dispatchQueueManager:(CTDispatchQueueManager* _Nonnull)dispatchQueueManager;
 
 - (void)setPushPermissionDelegate:(id<CleverTapPushPermissionDelegate> _Nullable)delegate;
 - (void)promptPushPrimer:(NSDictionary *_Nonnull)json;
-- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings andSkipSettingsAlert:(BOOL)skipSettingsAlert;
-- (void)getNotificationPermissionStatusWithCompletionHandler:(void (^_Nonnull)(UNAuthorizationStatus))completion;
+- (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
+                                      withCompletionBlock:(void (^_Nullable)(BOOL presented))completion;
+- (void)getNotificationPermissionStatusWithCompletionHandler:(void (^_Nonnull)(UNAuthorizationStatus))completion API_AVAILABLE(ios(10.0));
 - (void)notifyPushPermissionResponse:(BOOL)accepted;
-- (void)checkAndUpdatePushPermissionStatus;
+- (void)checkAndUpdatePushPermissionStatusWithCompletion:(void (^_Nonnull)(CTPushPermissionStatus status))completionHandler;
 @end
 

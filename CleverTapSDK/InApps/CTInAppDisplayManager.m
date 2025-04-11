@@ -456,6 +456,27 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
     
+    if (notification.isRequestForPushPermission) {
+        // If push permission is already enabled, do not show inapp.
+        if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, permission is already granted.", self);
+            return;
+        }
+
+        // If push permission status is not known yet, check for status and on callback show the inapp is push is not enabled.
+        if (pushPrimerManager.pushPermissionStatus == CTPushNotKnown) {
+            [pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+                self->pushPrimerManager.pushPermissionStatus = status;
+                if (status == CTPushNotEnabled) {
+                    [self displayNotification:notification];
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, status: %ld", self, (long)status);
+                }
+            }];
+            return;
+        }
+    }
+    
     // if we are currently displaying a notification, cache this notification for later display
     if (currentlyDisplayingNotification) {
         if (self.config.accountId && notification) {
@@ -518,11 +539,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
-            if ([self.templatesManager presentNotification:notification 
+            currentlyDisplayingNotification = notification;
+            if (![self.templatesManager presentNotification:notification
                                               withDelegate:self
                                          andFileDownloader:self.fileDownloader]) {
-                currentlyDisplayingNotification = notification;
-            } else {
+                currentlyDisplayingNotification = nil;
                 errorString = [NSString stringWithFormat:@"Cannot present custom notification with template name: %@.",
                                notification.customTemplateInAppData.templateName];
             }
@@ -752,8 +773,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
            fromViewController:(CTInAppDisplayViewController *)controller
        withFallbackToSettings:(BOOL)isFallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: InApp Push Primer Accepted:", self);
-    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
-                                       andSkipSettingsAlert:notification.skipSettingsAlert];
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
     
 }
 
@@ -873,10 +893,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (BOOL)isRFPInApp:(NSDictionary *)inAppJSON {
     BOOL isRFP = inAppJSON[@"rfp"] ? [inAppJSON[@"rfp"] boolValue] : NO;
-    if (isRFP) {
-        return YES;
-    }
-    return NO;
+    return isRFP;
 }
 
 @end

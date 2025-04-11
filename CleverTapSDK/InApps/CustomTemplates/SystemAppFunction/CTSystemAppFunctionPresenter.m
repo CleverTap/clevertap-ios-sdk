@@ -33,12 +33,18 @@
 - (void)onPresent:(nonnull CTTemplateContext *)context { 
     if ([context.templateName isEqual: CLTAP_PUSH_PERMISSION_TEMPLATE_NAME]) {
         BOOL fbSettings = [context boolNamed:CLTAP_FB_SETTINGS_KEY];
-        [self.systemTemplateActionHandler promptPushPermission:fbSettings];
+        [self.systemTemplateActionHandler promptPushPermission:fbSettings withCompletionBlock:^(BOOL presented) {
+            if (presented) {
+                // Added this to record Notification Viewed event for OS push permission.
+                [context presented];
+            }
+            [context dismissed];
+        }];
     } else if ([context.templateName isEqual:CLTAP_OPEN_URL_TEMPLATE_NAME]) {
         NSString *action = [context stringNamed:CLTAP_OPEN_URL_ACTION_KEY];
         [self.systemTemplateActionHandler handleOpenURL:action];
+        [context dismissed];
     }
-    [context dismissed];
 }
 
 @end
