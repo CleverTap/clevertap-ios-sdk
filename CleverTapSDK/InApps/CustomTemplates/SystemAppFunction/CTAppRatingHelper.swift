@@ -53,6 +53,7 @@ public class CTAppRatingHelper : NSObject {
         return application
     }
     
+    @MainActor
     class private func runSyncMainQueue(_ block: @escaping () -> Void) {
         if Thread.isMainThread {
             block()
