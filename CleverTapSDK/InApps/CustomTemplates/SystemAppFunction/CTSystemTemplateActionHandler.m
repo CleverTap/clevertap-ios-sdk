@@ -58,8 +58,7 @@
 #pragma mark App Rating System App Function
 
 - (void)promptAppRating {
-    CTAppRatingHelper *appRatingHelper = [[CTAppRatingHelper alloc] init];
-    [appRatingHelper requestRating];
+    [CTAppRatingHelper requestRating];
 }
 
 @end

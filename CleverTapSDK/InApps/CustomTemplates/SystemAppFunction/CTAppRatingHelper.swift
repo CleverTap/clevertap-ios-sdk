@@ -13,14 +13,15 @@ import StoreKit
 @objc(CTAppRatingHelper)
 public class CTAppRatingHelper : NSObject {
 
-    @objc public func requestRating() {
-        DispatchQueue.main.async {
+    @MainActor
+    @objc class public func requestRating() {
+        CTAppRatingHelper.runSyncMainQueue {
             if #available(iOS 14.0, *) {
                 if let sharedApplication = CTAppRatingHelper.getSharedApplication() {
                     let activeScene: UIScene? = sharedApplication.connectedScenes.first(where: { $0.activationState == .foregroundActive })
                     
                     guard let windowScene = activeScene as? UIWindowScene else {
-                        print("[CleverTap]: Cannot request for App rating prompt as there is no active scene present.")
+                        NSLog("[CleverTap]: Cannot request for App rating prompt as there is no active scene present.")
                         return
                     }
                     
@@ -29,13 +30,13 @@ public class CTAppRatingHelper : NSObject {
                     } else {
                         SKStoreReviewController.requestReview(in: windowScene)
                     }
-                    print("[CleverTap]: App rating request successful.")
+                    NSLog("[CleverTap]: App rating request successful.")
                 }
             } else if #available(iOS 10.3, *) {
                 SKStoreReviewController.requestReview()
-                print("[CleverTap]: App rating request successful.")
+                NSLog("[CleverTap]: App rating request successful.")
             } else {
-                print("[CleverTap]: Cannot request for App rating prompt for iOS version 10.2 and below.")
+                NSLog("[CleverTap]: Cannot request for App rating prompt for iOS version 10.2 and below.")
             }
         }
     }
@@ -45,10 +46,20 @@ public class CTAppRatingHelper : NSObject {
         guard UIApplication.responds(to: sharedSelector),
                 let shared = UIApplication.perform(sharedSelector),
                 let application = shared.takeUnretainedValue() as? UIApplication else {
-            print("[CleverTap]: Failed to get shared application.")
+            NSLog("[CleverTap]: Failed to get shared application.")
             return nil
         }
 
         return application
+    }
+    
+    class private func runSyncMainQueue(_ block: @escaping () -> Void) {
+        if Thread.isMainThread {
+            block()
+        } else {
+            DispatchQueue.main.async {
+                block()
+            }
+        }
     }
 }
