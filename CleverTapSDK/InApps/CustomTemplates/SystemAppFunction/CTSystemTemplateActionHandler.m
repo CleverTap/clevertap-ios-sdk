@@ -11,6 +11,11 @@
 #import "CTConstants.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CTSystemTemplateActionHandler
 
@@ -48,6 +53,12 @@
         [CTUIUtils openURL:actionURL forModule:@"OpenUrl System Template"];
     }];
     return YES;
+}
+
+#pragma mark App Rating System App Function
+
+- (void)promptAppRating {
+    [CTAppRatingHelper requestRating];
 }
 
 @end

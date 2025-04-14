@@ -14,7 +14,7 @@
 
 @implementation CTOpenUrlSystemAppFunction
 
-+ (CTCustomTemplate *)buildTemplateWithHanlder:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
++ (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler {
     CTCustomTemplateBuilder *openUrlbuilder = [[CTAppFunctionBuilder alloc] initWithIsVisual:NO isSystemDefined:YES];
     [openUrlbuilder setName:CLTAP_OPEN_URL_TEMPLATE_NAME];
     [openUrlbuilder addArgument:CLTAP_OPEN_URL_ACTION_KEY withString:@""];

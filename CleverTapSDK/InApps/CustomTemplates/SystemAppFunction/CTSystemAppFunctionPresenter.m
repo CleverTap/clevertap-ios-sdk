@@ -48,6 +48,9 @@
             [context presented];
         }
         [context dismissed];
+    } else if ([context.templateName isEqual:CLTAP_APP_RATING_TEMPLATE_NAME]) {
+        [self.systemTemplateActionHandler promptAppRating];
+        [context dismissed];
     }
 }
 

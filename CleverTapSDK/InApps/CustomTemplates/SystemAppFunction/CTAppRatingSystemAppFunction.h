@@ -1,20 +1,21 @@
 //
-//  CTOpenUrlSystemAppFunction.h
+//  CTAppRatingSystemAppFunction.h
 //  CleverTapSDK
 //
-//  Created by Nishant Kumar on 27/03/25.
+//  Created by Nishant Kumar on 28/03/25.
 //  Copyright © 2025 CleverTap. All rights reserved.
 //
 
-#ifndef CTOpenUrlSystemAppFunction_h
-#define CTOpenUrlSystemAppFunction_h
+#ifndef CTAppRatingSystemAppFunction_h
+#define CTAppRatingSystemAppFunction_h
 #import "CTCustomTemplate.h"
 #import "CTSystemTemplateActionHandler.h"
 
-@interface CTOpenUrlSystemAppFunction : NSObject
+@interface CTAppRatingSystemAppFunction : NSObject
 
 + (CTCustomTemplate *)buildTemplateWithHandler:(CTSystemTemplateActionHandler *)systemTemplateActionHandler;
 
 @end
 
-#endif /* CTOpenUrlSystemAppFunction_h */
+
+#endif /* CTAppRatingSystemAppFunction_h */
