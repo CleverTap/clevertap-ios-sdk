@@ -55,4 +55,11 @@
     return self;
 }
 
+- (nonnull instancetype)initWithCloseAction {
+    if (self = [super init]) {
+        self.type = CTInAppActionTypeClose;
+    }
+    return self;
+}
+
 @end
