@@ -286,4 +286,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 
 #pragma mark Constants for System App Functions
 #define CLTAP_PUSH_PERMISSION_TEMPLATE_NAME @"ctsystem_pushpermission"
+#define CLTAP_OPEN_URL_TEMPLATE_NAME @"ctsystem_openurl"
+#define CLTAP_APP_RATING_TEMPLATE_NAME @"ctsystem_apprating"
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
+#define CLTAP_OPEN_URL_ACTION_KEY @"iOS"

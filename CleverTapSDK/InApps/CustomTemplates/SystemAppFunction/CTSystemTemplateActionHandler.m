@@ -9,6 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "CTSystemTemplateActionHandler.h"
 #import "CTConstants.h"
+#import "CTUtils.h"
+#import "CTUIUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CTSystemTemplateActionHandler
 
@@ -26,6 +33,32 @@
     }
     
     [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fbSettings withCompletionBlock:completion];
+}
+
+#pragma mark Open Url System App Function
+
+- (BOOL)handleOpenURL:(NSString *)action {
+    if (!(action && action.length > 0)) {
+        CleverTapLogStaticDebug(@"Open URL system template doesn't have an action URL");
+        return NO;
+    }
+    
+    NSURL *actionURL = [NSURL URLWithString:action];
+    if (!actionURL) {
+        CleverTapLogStaticDebug(@"Unable to retrieve URL from Open Url action string: %@", action);
+        return NO;
+    }
+    
+    [CTUtils runSyncMainQueue:^{
+        [CTUIUtils openURL:actionURL forModule:@"OpenUrl System Template"];
+    }];
+    return YES;
+}
+
+#pragma mark App Rating System App Function
+
+- (void)promptAppRating {
+    [CTAppRatingHelper requestRating];
 }
 
 @end

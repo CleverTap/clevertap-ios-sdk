@@ -19,6 +19,10 @@
 
 - (void)promptPushPermission:(BOOL)fbSettings withCompletionBlock:(void (^_Nonnull)(BOOL presented))completion;
 
+- (BOOL)handleOpenURL:(NSString *_Nullable)action;
+
+- (void)promptAppRating;
+
 @end
 
 #endif /* CTSystemTemplateActionHandler_h */
