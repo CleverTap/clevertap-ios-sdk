@@ -6,17 +6,18 @@
 //  Copyright © 2025 CleverTap. All rights reserved.
 //
 
-#ifndef CTSystemAppFunction_h
-#define CTSystemAppFunction_h
+#ifndef CTSystemAppFunctions_h
+#define CTSystemAppFunctions_h
 
 #import <Foundation/Foundation.h>
 #import "CTCustomTemplate.h"
+#import "CTSystemTemplateActionHandler.h"
 
 @interface CTSystemAppFunctions : NSObject
 
-+ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions;
++ (NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctionsWithHandler:(CTSystemTemplateActionHandler *)handler;
 
 @end
 
 
-#endif /* CTSystemAppFunction_h */
+#endif /* CTSystemAppFunctions_h */

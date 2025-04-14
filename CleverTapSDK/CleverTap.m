@@ -249,6 +249,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, strong, readwrite) CTCustomTemplatesManager *customTemplatesManager;
+@property (nonatomic, strong, readwrite) CTSystemTemplateActionHandler *systemTemplateActionHandler;
 #endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
@@ -529,7 +530,8 @@ static BOOL sharedInstanceErrorLogged;
     
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
-    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunctions systemAppFunctions];
+    self.systemTemplateActionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:self.systemTemplateActionHandler];
     CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config
                                                                                systemAppFunctions:systemAppFunctions];
     
@@ -554,6 +556,7 @@ static BOOL sharedInstanceErrorLogged;
     
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
+    [self.systemTemplateActionHandler setPushPrimerManager:self.pushPrimerManager];
 }
 #endif
 
@@ -1135,6 +1138,13 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     [self _appEnteredForeground];
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push permission status everytime app is resumed.
+    [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+        self.pushPrimerManager.pushPermissionStatus = status;
+    }];
+#endif
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
@@ -1205,6 +1215,11 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_appEnteredBackground {
     self.isAppForeground = NO;
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push status as CTPushNotKnown as it is again updated when app is resumed.
+    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
+#endif
     
     UIApplication *application = [CTUIUtils getSharedApplication];
     UIBackgroundTaskIdentifier __block backgroundTask;
@@ -3788,8 +3803,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings
-                                       andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings withCompletionBlock:nil];
 #endif
 }
 
@@ -4339,7 +4353,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
