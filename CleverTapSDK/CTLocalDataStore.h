@@ -54,4 +54,13 @@
 
 - (NSDictionary *)readUserEventLogs;
 
+/**
+ * Deletes a specific user profile file using account ID and device ID
+ * @param accountId The CleverTap account ID
+ * @param deviceId The device ID
+ * @return BOOL indicating if the deletion was successful
+ */
++ (BOOL)deleteUserProfileWithAccountId:(NSString *)accountId deviceId:(NSString *)deviceId;
+
+
 @end

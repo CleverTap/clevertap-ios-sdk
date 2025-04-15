@@ -124,6 +124,15 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
                 migrationSuccessful = YES;
             } else {
                 [CTPreferences removeObjectForKey:cacheKey];
+                BOOL success = [CTLocalDataStore deleteUserProfileWithAccountId:_config.accountId
+                                                                       deviceId:_deviceInfo.deviceId];
+                if (success) {
+                    // Profile was successfully deleted
+                    CleverTapLogInfo(self.config.logLevel, @"Profile successfully deleted: %@", cachedKey);
+                } else {
+                    // Failed to delete the profile
+                    CleverTapLogInfo(self.config.logLevel, @"Profile Failed to delete the profile: %@", cachedKey);
+                }
                 CleverTapLogInfo(self.config.logLevel, @"Failed to decrypt GUID for key: %@", cachedKey);
             }
         }
