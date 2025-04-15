@@ -20,6 +20,7 @@ API_AVAILABLE(ios(10.0))
 @property (nonatomic, strong) CTSystemTemplateActionHandler *actionHandler;
 @property (nonatomic, strong) CTPushPrimerManagerMock *pushPrimerManager;
 @property (nonatomic, strong) InAppHelper *helper;
+@property (nonatomic, strong) id mockCTUIUtils;
 
 @end
 
@@ -36,11 +37,13 @@ API_AVAILABLE(ios(10.0))
     [self.actionHandler setPushPrimerManager:self.pushPrimerManager];
     
     // Mock CTUIUtils openURL method to not open any url.
-    id mockCTUIUtils = OCMClassMock([CTUIUtils class]);
-    OCMStub([mockCTUIUtils openURL:OCMOCK_ANY forModule:@"OpenUrl System Template"]);
+    self.mockCTUIUtils = OCMClassMock([CTUIUtils class]);
+    OCMStub([self.mockCTUIUtils openURL:OCMOCK_ANY forModule:@"OpenUrl System Template"]);
 }
 
 - (void)tearDown {
+    [self.mockCTUIUtils stopMocking];
+    self.mockCTUIUtils = nil;
     self.actionHandler = nil;
 
     [super tearDown];
