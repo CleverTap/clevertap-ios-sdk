@@ -14,30 +14,33 @@ import StoreKit
 public class CTAppRatingHelper : NSObject {
 
     @MainActor
-    @objc class public func requestRating() {
+    @objc class public func requestRating(completion: @escaping (Bool) -> Void) {
         CTAppRatingHelper.runSyncMainQueue {
+            var presented: Bool = false
             if #available(iOS 14.0, *) {
-                if let sharedApplication = CTAppRatingHelper.getSharedApplication() {
-                    let activeScene: UIScene? = sharedApplication.connectedScenes.first(where: { $0.activationState == .foregroundActive })
-                    
-                    guard let windowScene = activeScene as? UIWindowScene else {
-                        NSLog("[CleverTap]: Cannot request for App rating prompt as there is no active scene present.")
-                        return
-                    }
-                    
-                    if #available(iOS 18.0, *) {
-                        AppStore.requestReview(in: windowScene)
-                    } else {
-                        SKStoreReviewController.requestReview(in: windowScene)
-                    }
-                    NSLog("[CleverTap]: App rating request successful.")
+                guard let sharedApplication = CTAppRatingHelper.getSharedApplication(),
+                      let activeScene: UIScene = sharedApplication.connectedScenes.first(where: { $0.activationState == .foregroundActive }),
+                      let windowScene = activeScene as? UIWindowScene else {
+                    NSLog("[CleverTap]: Cannot request for App rating prompt as there is no active scene present.")
+                    completion(presented)
+                    return
                 }
+                
+                presented = true
+                if #available(iOS 18.0, *) {
+                    AppStore.requestReview(in: windowScene)
+                } else {
+                    SKStoreReviewController.requestReview(in: windowScene)
+                }
+                NSLog("[CleverTap]: App rating request successful.")
             } else if #available(iOS 10.3, *) {
+                presented = true
                 SKStoreReviewController.requestReview()
                 NSLog("[CleverTap]: App rating request successful.")
             } else {
                 NSLog("[CleverTap]: Cannot request for App rating prompt for iOS version 10.2 and below.")
             }
+            completion(presented)
         }
     }
     
