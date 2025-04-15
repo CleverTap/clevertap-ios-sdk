@@ -8,9 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <OCMock/OCMock.h>
 #import "CTSystemTemplateActionHandler.h"
 #import "CTPushPrimerManagerMock.h"
 #import "InAppHelper.h"
+#import "CTUIUtils.h"
 
 API_AVAILABLE(ios(10.0))
 @interface CTSystemTemplateActionHandlerTest : XCTestCase
@@ -32,6 +34,10 @@ API_AVAILABLE(ios(10.0))
                                                          inAppDisplayManager:self.helper.inAppDisplayManager
                                                         dispatchQueueManager:queueManager];
     [self.actionHandler setPushPrimerManager:self.pushPrimerManager];
+    
+    // Mock CTUIUtils openURL method to not open any url.
+    id mockCTUIUtils = OCMClassMock([CTUIUtils class]);
+    OCMStub([mockCTUIUtils openURL:OCMOCK_ANY forModule:@"OpenUrl System Template"]);
 }
 
 - (void)tearDown {
