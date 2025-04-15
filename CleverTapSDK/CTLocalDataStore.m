@@ -1010,10 +1010,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     // Build the file name based on the account ID and device ID
     NSString *fileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", accountId, deviceId];
     
-    // Get path to the Documents directory where profile files are stored
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *filePath = [documentsDirectory stringByAppendingPathComponent:fileName];
+    // Get path to the Library directory where profile files are stored
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+    NSString *libraryDirectory = [paths objectAtIndex:0];
+    NSString *filePath = [libraryDirectory stringByAppendingPathComponent:fileName];
     
     // Check if the file exists
     if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
