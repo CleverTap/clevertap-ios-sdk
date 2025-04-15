@@ -49,8 +49,13 @@
         }
         [context dismissed];
     } else if ([context.templateName isEqual:CLTAP_APP_RATING_TEMPLATE_NAME]) {
-        [self.systemTemplateActionHandler promptAppRating];
-        [context dismissed];
+        [self.systemTemplateActionHandler promptAppRatingWithCompletionBlock:^(BOOL presented) {
+            if (presented) {
+                // Added this to record Notification Viewed event for OS App Rating.
+                [context presented];
+            }
+            [context dismissed];
+        }];
     }
 }
 

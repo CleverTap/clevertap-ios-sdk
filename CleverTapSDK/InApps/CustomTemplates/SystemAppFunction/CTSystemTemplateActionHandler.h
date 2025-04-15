@@ -21,7 +21,7 @@
 
 - (BOOL)handleOpenURL:(NSString *_Nullable)action;
 
-- (void)promptAppRating;
+- (void)promptAppRatingWithCompletionBlock:(void (^_Nonnull)(BOOL presented))completion;
 
 @end
 

@@ -57,8 +57,8 @@
 
 #pragma mark App Rating System App Function
 
-- (void)promptAppRating {
-    [CTAppRatingHelper requestRating];
+- (void)promptAppRatingWithCompletionBlock:(void (^_Nonnull)(BOOL presented))completion; {
+    [CTAppRatingHelper requestRatingWithCompletion:completion];
 }
 
 @end
