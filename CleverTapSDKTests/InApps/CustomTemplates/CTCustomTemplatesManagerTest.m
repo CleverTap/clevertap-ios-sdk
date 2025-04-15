@@ -582,49 +582,25 @@
 }
 
 - (void)testUserDefinedPushTemplateThrowsException {
-    NSString *templateName1 = CLTAP_PUSH_PERMISSION_TEMPLATE_NAME;
+    [self registerTemplate:CLTAP_PUSH_PERMISSION_TEMPLATE_NAME];
     CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
     NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
-    
-    NSMutableSet *templates = [NSMutableSet set];
-    CTInAppTemplateBuilder *templateBuilder1 = [CTInAppTemplateBuilder new];
-    [templateBuilder1 setName:templateName1];
-    [templateBuilder1 setPresenter:[CTTemplatePresenterMock new]];
-    [templates addObject:[templateBuilder1 build]];
-    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
-    [CTCustomTemplatesManager registerTemplateProducer:producer];
     
     XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions], NSException, CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION);
 }
 
 - (void)testUserDefinedOpenUrlTemplateThrowsException {
-    NSString *templateName1 = CLTAP_OPEN_URL_TEMPLATE_NAME;
+    [self registerTemplate:CLTAP_OPEN_URL_TEMPLATE_NAME];
     CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
     NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
-    
-    NSMutableSet *templates = [NSMutableSet set];
-    CTInAppTemplateBuilder *templateBuilder1 = [CTInAppTemplateBuilder new];
-    [templateBuilder1 setName:templateName1];
-    [templateBuilder1 setPresenter:[CTTemplatePresenterMock new]];
-    [templates addObject:[templateBuilder1 build]];
-    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
-    [CTCustomTemplatesManager registerTemplateProducer:producer];
     
     XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions], NSException, CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION);
 }
 
 - (void)testUserDefinedAppRatingTemplateThrowsException {
-    NSString *templateName1 = CLTAP_APP_RATING_TEMPLATE_NAME;
+    [self registerTemplate:CLTAP_APP_RATING_TEMPLATE_NAME];
     CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
     NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
-    
-    NSMutableSet *templates = [NSMutableSet set];
-    CTInAppTemplateBuilder *templateBuilder1 = [CTInAppTemplateBuilder new];
-    [templateBuilder1 setName:templateName1];
-    [templateBuilder1 setPresenter:[CTTemplatePresenterMock new]];
-    [templates addObject:[templateBuilder1 build]];
-    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
-    [CTCustomTemplatesManager registerTemplateProducer:producer];
     
     XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions], NSException, CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION);
 }
@@ -666,6 +642,16 @@
         @"type": @"custom-code",
         @"vars": @{}
     };
+}
+
+- (void)registerTemplate:(NSString *)templateName {
+    NSMutableSet *templates = [NSMutableSet set];
+    CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
+    [templateBuilder setName:templateName];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder build]];
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
 }
 
 static NSString * const TEMPLATE_NAME = @"Template 1";

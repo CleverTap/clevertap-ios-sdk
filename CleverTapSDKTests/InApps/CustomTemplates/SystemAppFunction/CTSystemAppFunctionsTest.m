@@ -54,6 +54,4 @@
     XCTAssertEqual(appRatingTemplate.arguments.count, 0);
 }
 
-
-
 @end
