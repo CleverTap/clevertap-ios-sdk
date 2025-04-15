@@ -199,6 +199,7 @@
 		48FA82C32DAD17E300AB8651 /* CTSystemAppFunctionsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FA82C22DAD17E300AB8651 /* CTSystemAppFunctionsTest.m */; };
 		48FA82C52DAD3D9100AB8651 /* CTPushPrimerManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FA82C42DAD3D9100AB8651 /* CTPushPrimerManagerTests.m */; };
 		48FA82C82DAD63A900AB8651 /* CTPushPrimerManagerMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FA82C72DAD63A900AB8651 /* CTPushPrimerManagerMock.m */; };
+		48FA82CA2DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FA82C92DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m */; };
 		4987C665251B5E79003E6BE8 /* CTImageInAppViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 4987C663251B5E79003E6BE8 /* CTImageInAppViewController.h */; };
 		4987C666251B5E79003E6BE8 /* CTImageInAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */; };
 		4987C668251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4987C667251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h */; };
@@ -834,6 +835,7 @@
 		48FA82C42DAD3D9100AB8651 /* CTPushPrimerManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPushPrimerManagerTests.m; sourceTree = "<group>"; };
 		48FA82C62DAD638700AB8651 /* CTPushPrimerManagerMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPushPrimerManagerMock.h; sourceTree = "<group>"; };
 		48FA82C72DAD63A900AB8651 /* CTPushPrimerManagerMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPushPrimerManagerMock.m; sourceTree = "<group>"; };
+		48FA82C92DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemTemplateActionHandlerTest.m; sourceTree = "<group>"; };
 		48FC50F02D2FB0E100E57914 /* CTEventDatabase+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTEventDatabase+Tests.h"; sourceTree = "<group>"; };
 		4987C663251B5E79003E6BE8 /* CTImageInAppViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImageInAppViewController.h; sourceTree = "<group>"; };
 		4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImageInAppViewController.m; sourceTree = "<group>"; };
@@ -1410,6 +1412,7 @@
 			isa = PBXGroup;
 			children = (
 				48FA82C22DAD17E300AB8651 /* CTSystemAppFunctionsTest.m */,
+				48FA82C92DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m */,
 			);
 			path = SystemAppFunction;
 			sourceTree = "<group>";
@@ -2677,6 +2680,7 @@
 				6B4A0F912B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m in Sources */,
 				4EFC642B2AB44CF900F01414 /* CTLimitsMatcherTest.m in Sources */,
 				4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */,
+				48FA82CA2DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m in Sources */,
 				6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */,
 				6B32A0A32B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m in Sources */,
 				6B9E95B52C29C2F40002D557 /* NSFileManagerMock.m in Sources */,
