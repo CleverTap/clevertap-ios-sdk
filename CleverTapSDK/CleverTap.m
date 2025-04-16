@@ -458,9 +458,6 @@ static BOOL sharedInstanceErrorLogged;
         if (_config.analyticsOnly) {
             CleverTapLogDebug(_config.logLevel, @"%@ is configured as analytics only!", self);
         }
-        
-        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config];
-        
         _deviceInfo = [[CTDeviceInfo alloc] initWithConfig:_config andCleverTapID:cleverTapID];
         NSMutableDictionary *initialProfileValues = [NSMutableDictionary new];
         if (_deviceInfo.carrier && ![_deviceInfo.carrier isEqualToString:@""]) {
@@ -475,6 +472,8 @@ static BOOL sharedInstanceErrorLogged;
         
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
+        
+        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo: _deviceInfo];
         
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         

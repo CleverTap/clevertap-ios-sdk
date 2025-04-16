@@ -9,12 +9,11 @@
 #import "CTCryptMigrator.h"
 
 NSString *const kCachedGUIDSKey = @"CachedGUIDS";
-NSString *const kCLTAP_DEVICE_ID = @"deviceId";
 
 @interface CTCryptMigrator()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, strong) NSString *deviceID;
+@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) NSArray *piiKeys;
 @property (nonatomic, strong) CTEncryptionManager *cryptManager;
 @property (nonatomic, assign) CleverTapEncryptionLevel lastEncryptionLevel;
@@ -23,10 +22,11 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
 
 @implementation CTCryptMigrator
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
+                 andDeviceInfo:(CTDeviceInfo*)deviceInfo {
     if (self = [super init]) {
         _config = config;
-        _deviceID = [CTPreferences getStringForKey:[self deviceIdStorageKey] withResetValue:nil];
+        _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel isDefaultInstance:YES];
         if ([self isMigrationNeeded]) {
@@ -34,10 +34,6 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
         }
     }
     return self;
-}
-
-- (NSString *)deviceIdStorageKey {
-    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_DEVICE_ID];
 }
 
 - (BOOL)isMigrationNeeded {
@@ -128,16 +124,6 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
                 migrationSuccessful = YES;
             } else {
                 [CTPreferences removeObjectForKey:cacheKey];
-                BOOL success = [CTLocalDataStore deleteUserProfileWithAccountId:_config.accountId
-                                                                       deviceId:_deviceID];
-                [CTPreferences removeObjectForKey:[self deviceIdStorageKey]];
-                if (success) {
-                    // Profile was successfully deleted
-                    CleverTapLogInfo(self.config.logLevel, @"Profile successfully deleted: %@", cachedKey);
-                } else {
-                    // Failed to delete the profile
-                    CleverTapLogInfo(self.config.logLevel, @"Profile Failed to delete the profile: %@", cachedKey);
-                }
                 CleverTapLogInfo(self.config.logLevel, @"Failed to decrypt GUID for key: %@", cachedKey);
             }
         }
@@ -226,7 +212,7 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
 }
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceID, suffix];
+    return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceInfo.deviceId, suffix];
 }
 
 #pragma mark - User Profile Migration
@@ -315,7 +301,7 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
 
 
 - (NSString *)profileFileName {
-    return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceID];
+    return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceInfo.deviceId];
 }
 
 @end

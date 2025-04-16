@@ -1001,38 +1001,4 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return profile;
 }
 
-+ (BOOL)deleteUserProfileWithAccountId:(NSString *)accountId deviceId:(NSString *)deviceId {
-    if (!accountId || !deviceId) {
-        NSLog(@"Cannot delete user profile: accountId or deviceId is nil");
-        return NO;
-    }
-    
-    // Build the file name based on the account ID and device ID
-    NSString *fileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", accountId, deviceId];
-    
-    // Get path to the Library directory where profile files are stored
-    
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
-    NSString *libraryDirectory = [paths objectAtIndex:0];
-    NSString *filePath = [libraryDirectory stringByAppendingPathComponent:fileName];
-    
-    // Check if the file exists
-    if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSLog(@"No user profile file exists at path: %@", filePath);
-        return NO;
-    }
-    
-    // Attempt to delete the file
-    NSError *error = nil;
-    BOOL success = [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
-    
-    if (!success) {
-        NSLog(@"Failed to delete user profile file: %@", [error localizedDescription]);
-        return NO;
-    }
-    
-    NSLog(@"Successfully deleted user profile file for account: %@ device: %@", accountId, deviceId);
-    return YES;
-}
-
 @end
