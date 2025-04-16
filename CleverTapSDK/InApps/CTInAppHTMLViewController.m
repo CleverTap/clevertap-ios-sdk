@@ -91,7 +91,7 @@ typedef enum {
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
     // Set translatesAutoresizingMaskIntoConstraints to NO to use Auto Layout
-    if ([self isInAppAdvanceBuilder]) {
+    if ([self isInAppAdvancedBuilder]) {
         webView.translatesAutoresizingMaskIntoConstraints = NO;
     }
     webView.scrollView.scrollEnabled = NO;
@@ -125,14 +125,14 @@ typedef enum {
         self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     }
     
-    if ([self isInAppAdvanceBuilder]) {
+    if ([self isInAppAdvancedBuilder]) {
         [self configureViewAutoresizing];
     } else {
         [self updateWebView];
     }
 }
 
-- (void) configureWebViewConstraints {
+- (void)configureWebViewConstraints {
     if (@available(iOS 11.0, *)) {
         UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
         [NSLayoutConstraint activateConstraints:@[
@@ -153,7 +153,7 @@ typedef enum {
     }
 }
 
-//Added to handle webview for Advance Builder InApps
+// Added to handle webview for Advanced Builder InApps
 - (void)configureViewAutoresizing {
     webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
     

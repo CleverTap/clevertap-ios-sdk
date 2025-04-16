@@ -36,26 +36,25 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    if ([self isInAppAdvanceBuilder]) {
+    if ([self isInAppAdvancedBuilder]) {
         [self updateWindowFrame];
     }
-    
 }
 
-- (void) updateWindowFrame {
+- (void)updateWindowFrame {
     if (@available(iOS 13, tvOS 13.0, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
                 
-                CGRect windowFrame = [self getWindowSceneFrame:windowScene];
+                CGRect windowFrame = [self windowSceneFrame:windowScene];
                 self.window.frame = windowFrame;
                 break;
             }
         }
     } else {
-        CGRect windowFrame = [self getWindowFrame];
+        CGRect windowFrame = [self windowFrame];
         self.window.frame = windowFrame;
     }
 }
@@ -154,7 +153,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     NSAssert(false, @"Override in sub-class");
 }
 
-- (CGRect)getWindowSceneFrame:(UIWindowScene *)windowScene  API_AVAILABLE(ios(13.0), tvos(13.0)) {
+- (CGRect)windowSceneFrame:(UIWindowScene *)windowScene  API_AVAILABLE(ios(13.0), tvos(13.0)) {
     NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
     CGRect frame = windowScene.coordinateSpace.bounds;
     
@@ -195,7 +194,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     return frame;
 }
 
-- (CGRect)getWindowFrame {
+- (CGRect)windowFrame {
     float aspectRatio = self.notification.aspectRatio;
     float percent = self.notification.widthPercent;
     
@@ -231,8 +230,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *windowScene = (UIWindowScene *)scene;
                 
-                if ([self isInAppAdvanceBuilder]) {
-                    CGRect windowFrame = [self getWindowSceneFrame:windowScene];
+                if ([self isInAppAdvancedBuilder]) {
+                    CGRect windowFrame = [self windowSceneFrame:windowScene];
                     self.window = [[windowClass alloc] initWithFrame:windowFrame];
                     self.window.windowScene = windowScene;
                 } else {
@@ -243,8 +242,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             }
         }
     } else {
-        if ([self isInAppAdvanceBuilder]) {
-            CGRect windowFrame = [self getWindowFrame];
+        if ([self isInAppAdvancedBuilder]) {
+            CGRect windowFrame = [self windowFrame];
             self.window = [[windowClass alloc] initWithFrame: windowFrame];
         } else {
             self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
@@ -373,7 +372,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 #endif
 }
 
-- (BOOL)isInAppAdvanceBuilder {
+- (BOOL)isInAppAdvancedBuilder {
     return self.notification.aspectRatio > 0;
 }
 
