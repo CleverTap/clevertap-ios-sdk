@@ -177,10 +177,10 @@ API_AVAILABLE(ios(13.0))
                 NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
                 NSData *decryptedData = [self processData:data operation:kCCDecrypt];
                 NSString *decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
-                return decryptedString ? decryptedString : ciphertext;
+                return decryptedString ? decryptedString : nil;
             } @catch (NSException *exception) {
                 CleverTapLogStaticInternal(@"AES Decryption error: %@", exception.debugDescription);
-                return ciphertext;
+                return nil;
             }
         }
         default:
