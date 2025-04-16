@@ -106,11 +106,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
         if (encryptedIdentifier && ![_cryptManager isTextAESGCMEncrypted:encryptedIdentifier]) {
             NSString *partiallyDecryptedIdentifier = [_cryptManager decryptString:encryptedIdentifier encryptionAlgorithm:AES];
-            NSString *decryptedIdentifier = nil;
-
-            if (partiallyDecryptedIdentifier != nil) {
-                decryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
-            }
+            NSString *decryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
 
             if (decryptedIdentifier) {
                 NSString *finalEncryptedIdentifier = decryptedIdentifier;
@@ -123,7 +119,6 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
                 updatedCache[[NSString stringWithFormat:@"%@_%@", key, finalEncryptedIdentifier]] = value;
                 migrationSuccessful = YES;
             } else {
-                [CTPreferences removeObjectForKey:cacheKey];
                 CleverTapLogInfo(self.config.logLevel, @"Failed to decrypt GUID for key: %@", cachedKey);
             }
         }
