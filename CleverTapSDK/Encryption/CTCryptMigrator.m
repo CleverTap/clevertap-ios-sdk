@@ -26,7 +26,7 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
     if (self = [super init]) {
         _config = config;
-        _deviceID = [CTPreferences getStringForKey:kCLTAP_DEVICE_ID withResetValue:nil];
+        _deviceID = [CTPreferences getStringForKey:[self deviceIdStorageKey] withResetValue:nil];
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel isDefaultInstance:YES];
         if ([self isMigrationNeeded]) {
@@ -34,6 +34,10 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
         }
     }
     return self;
+}
+
+- (NSString *)deviceIdStorageKey {
+    return [NSString stringWithFormat:@"%@:%@", self.config.accountId, kCLTAP_DEVICE_ID];
 }
 
 - (BOOL)isMigrationNeeded {
