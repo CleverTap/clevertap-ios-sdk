@@ -28,7 +28,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
         _config = config;
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
-        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel isDefaultInstance:YES];
+        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel];
         if ([self isMigrationNeeded]) {
             [self performMigration];
         }
