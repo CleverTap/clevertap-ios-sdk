@@ -9,11 +9,12 @@
 #import "CTCryptMigrator.h"
 
 NSString *const kCachedGUIDSKey = @"CachedGUIDS";
+NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
 
 @interface CTCryptMigrator()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, strong) CTDeviceInfo *deviceInfo;
+@property (nonatomic, strong) NSString *deviceID;
 @property (nonatomic, strong) NSArray *piiKeys;
 @property (nonatomic, strong) CTEncryptionManager *cryptManager;
 @property (nonatomic, assign) CleverTapEncryptionLevel lastEncryptionLevel;
@@ -22,11 +23,10 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 @implementation CTCryptMigrator
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
-                 andDeviceInfo:(CTDeviceInfo*)deviceInfo {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
     if (self = [super init]) {
         _config = config;
-        _deviceInfo = deviceInfo;
+        _deviceID = [CTPreferences getStringForKey:kCLTAP_DEVICE_ID_TAG withResetValue:nil];
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel isDefaultInstance:YES];
         if ([self isMigrationNeeded]) {
@@ -125,7 +125,8 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
             } else {
                 [CTPreferences removeObjectForKey:cacheKey];
                 BOOL success = [CTLocalDataStore deleteUserProfileWithAccountId:_config.accountId
-                                                                       deviceId:_deviceInfo.deviceId];
+                                                                       deviceId:_deviceID];
+                [CTPreferences removeObjectForKey:_deviceID];
                 if (success) {
                     // Profile was successfully deleted
                     CleverTapLogInfo(self.config.logLevel, @"Profile successfully deleted: %@", cachedKey);
@@ -221,7 +222,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 }
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceInfo.deviceId, suffix];
+    return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceID, suffix];
 }
 
 #pragma mark - User Profile Migration
@@ -310,7 +311,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 
 - (NSString *)profileFileName {
-    return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceInfo.deviceId];
+    return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceID];
 }
 
 @end
