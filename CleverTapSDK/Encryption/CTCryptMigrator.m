@@ -9,7 +9,7 @@
 #import "CTCryptMigrator.h"
 
 NSString *const kCachedGUIDSKey = @"CachedGUIDS";
-NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
+NSString *const kCLTAP_DEVICE_ID = @"deviceId";
 
 @interface CTCryptMigrator()
 
@@ -26,7 +26,7 @@ NSString *const kCLTAP_DEVICE_ID_TAG = @"deviceId";
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
     if (self = [super init]) {
         _config = config;
-        _deviceID = [CTPreferences getStringForKey:kCLTAP_DEVICE_ID_TAG withResetValue:nil];
+        _deviceID = [CTPreferences getStringForKey:kCLTAP_DEVICE_ID withResetValue:nil];
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel isDefaultInstance:YES];
         if ([self isMigrationNeeded]) {
