@@ -30,20 +30,72 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     return self;
 }
 
+//- (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
+//    if (!guid) guid = self.deviceInfo.deviceId;
+//    if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
+//    
+//    NSDictionary *cache = [self getCachedGUIDs];
+//    if (!cache) cache = @{};
+//    NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
+//
+//    NSString *encryptedIdentifier = identifier;
+//    if (self.config.cryptManager) {
+//        encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
+//    }
+//    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
+//    newCache[cacheKey] = guid;
+//    [self setCachedGUIDs:newCache];
+//}
+
 - (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
     if (!guid) guid = self.deviceInfo.deviceId;
     if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
     
+    // Get current cache
     NSDictionary *cache = [self getCachedGUIDs];
     if (!cache) cache = @{};
     NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
-
-    NSString *encryptedIdentifier = identifier;
+    
+    // Check if a GUID already exists for this key and identifier (decrypted)
+    NSString *keyPrefix = [NSString stringWithFormat:@"%@_", key];
+    BOOL existingEntryFound = NO;
+    NSString *existingCacheKey = nil;
+    
     if (self.config.cryptManager) {
-        encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
+        for (NSString *cacheKey in cache.allKeys) {
+            if ([cacheKey hasPrefix:keyPrefix]) {
+                NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
+                
+                @try {
+                    NSString *decryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+                    
+                    // If we found a match, update that entry instead of creating a new one
+                    if ([decryptedIdentifier isEqualToString:identifier]) {
+                        existingEntryFound = YES;
+                        existingCacheKey = cacheKey;
+                        break;
+                    }
+                } @catch (NSException *exception) {
+                    // Continue to next key if decryption fails
+                    continue;
+                }
+            }
+        }
     }
-    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
-    newCache[cacheKey] = guid;
+    
+    if (existingEntryFound && existingCacheKey) {
+        // Update the existing entry
+        newCache[existingCacheKey] = guid;
+    } else {
+        // Create a new entry with the newly encrypted identifier
+        NSString *encryptedIdentifier = identifier;
+        if (self.config.cryptManager) {
+            encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
+        }
+        NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
+        newCache[cacheKey] = guid;
+    }
+    
     [self setCachedGUIDs:newCache];
 }
 
@@ -73,19 +125,48 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     return cachedIdentities;
 }
 
+//- (NSString *)getGUIDforKey:(NSString *)key andIdentifier:(NSString *)identifier {
+//    if (!key || !identifier) return nil;
+//    
+//    NSDictionary *cache = [self getCachedGUIDs];
+//    NSString *encryptedIdentifier = identifier;
+//    if (self.config.cryptManager) {
+//        encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
+//    }
+//    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
+//    if (!cache) return nil;
+//    else return cache[cacheKey];
+//}
+
 - (NSString *)getGUIDforKey:(NSString *)key andIdentifier:(NSString *)identifier {
     if (!key || !identifier) return nil;
+    if (!self.config.cryptManager) return nil;
     
     NSDictionary *cache = [self getCachedGUIDs];
-    NSString *encryptedIdentifier = identifier;
-    if (self.config.cryptManager) {
-        encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
-    }
-    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
     if (!cache) return nil;
-    else return cache[cacheKey];
+    
+    NSString *keyPrefix = [NSString stringWithFormat:@"%@_", key];
+    
+    // Iterate through all cache keys
+    for (NSString *cacheKey in cache.allKeys) {
+        // Check if the current key starts with the correct prefix (e.g., "Email_")
+        if ([cacheKey hasPrefix:keyPrefix]) {
+            // Extract the encrypted part (everything after "Email_")
+            NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
+            
+            // Decrypt the encrypted identifier
+            NSString *decryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+            
+            // Check if the decrypted identifier matches our input identifier
+            if ([decryptedIdentifier isEqualToString:identifier]) {
+                return cache[cacheKey];
+            }
+        }
+    }
+    
+    // No match found
+    return nil;
 }
-
 - (BOOL)isAnonymousDevice {
     NSDictionary *cache = [self getCachedGUIDs];
     if (!cache) cache = @{};
