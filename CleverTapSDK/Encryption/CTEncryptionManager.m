@@ -121,6 +121,7 @@ API_AVAILABLE(ios(13.0))
                     CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
                     return plaintext;
                 }
+                [CTPreferences putInt:1 forKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_ALGORITHM accountID:_accountID]];
                 return encryptedString;
             }
             
