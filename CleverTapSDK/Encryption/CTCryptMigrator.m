@@ -130,7 +130,7 @@ NSString *const kCLTAP_DEVICE_ID = @"deviceId";
                 [CTPreferences removeObjectForKey:cacheKey];
                 BOOL success = [CTLocalDataStore deleteUserProfileWithAccountId:_config.accountId
                                                                        deviceId:_deviceID];
-                [CTPreferences removeObjectForKey:_deviceID];
+                [CTPreferences removeObjectForKey:[self deviceIdStorageKey]];
                 if (success) {
                     // Profile was successfully deleted
                     CleverTapLogInfo(self.config.logLevel, @"Profile successfully deleted: %@", cachedKey);
