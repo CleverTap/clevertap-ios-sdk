@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.1) (March 17, 2024)
+### [Version 7.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.1) (March 17, 2025)
 
 #### Added
 - Adds `dismissInAppNotification` action to dismiss custom HTML in-Apps
@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 #### Fixed
 - Fixes custom in-app device orientation check
 
-### [Version 7.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.0) (January 21, 2024)
+### [Version 7.1.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.0) (January 21, 2025)
 
 #### Added
 - Adds support for triggering InApps based on first-time event filtering in multiple triggers. Now you can create campaign triggers that combine recurring and first-time events. For example: Trigger a campaign when "Charged" occurs (every time) OR "App Launched" occurs (first time only).
