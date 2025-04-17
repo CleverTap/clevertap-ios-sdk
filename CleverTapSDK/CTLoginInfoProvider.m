@@ -67,7 +67,10 @@ NSString *const kCachedIdentities = @"CachedIdentities";
                 NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
                 
                 @try {
-                    NSString *decryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+                    
+                    NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+                    
+                    NSString *decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
                     
                     // If we found a match, update that entry instead of creating a new one
                     if ([decryptedIdentifier isEqualToString:identifier]) {
@@ -155,8 +158,9 @@ NSString *const kCachedIdentities = @"CachedIdentities";
             NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
             
             // Decrypt the encrypted identifier
-            NSString *decryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+            NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
             
+            NSString *decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
             // Check if the decrypted identifier matches our input identifier
             if ([decryptedIdentifier isEqualToString:identifier]) {
                 return cache[cacheKey];
