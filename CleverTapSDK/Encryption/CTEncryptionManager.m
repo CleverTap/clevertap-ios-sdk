@@ -25,7 +25,7 @@ API_AVAILABLE(ios(13.0))
 
 #pragma mark - Initialization & Coding
 
-- (instancetype)initWithAccountID:(NSString *)accountID
+- (instancetype)initWithAccountID:(NSString * _Nonnull)accountID
                   encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel
                 isDefaultInstance:(BOOL)isDefaultInstance {
     if (self = [super init]) {
@@ -37,7 +37,7 @@ API_AVAILABLE(ios(13.0))
     return self;
 }
 
-- (instancetype)initWithAccountID:(NSString *)accountID {
+- (instancetype)initWithAccountID:(NSString * _Nonnull)accountID {
     if (self = [super init]) {
         _accountID = accountID;
         [self setupEncryptionWithLevel];
@@ -45,7 +45,7 @@ API_AVAILABLE(ios(13.0))
     return self;
 }
 
-- (instancetype)initWithAccountID:(NSString *)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
+- (instancetype)initWithAccountID:(NSString * _Nonnull)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
     if (self = [super init]) {
         _accountID = accountID;
         _encryptionLevel = encryptionLevel;
@@ -121,7 +121,6 @@ API_AVAILABLE(ios(13.0))
                     CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
                     return plaintext;
                 }
-                [CTPreferences putInt:1 forKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_ALGORITHM accountID:_accountID]];
                 return encryptedString;
             }
             

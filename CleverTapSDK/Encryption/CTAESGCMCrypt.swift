@@ -69,7 +69,15 @@ public class AESGCMCrypt: NSObject {
             let nonceBytes = try AES.GCM.Nonce(data: nonce)
             let sealedBox = try AES.GCM.SealedBox(nonce: nonceBytes, ciphertext: ciphertext, tag: tag)
             
-            return try AES.GCM.open(sealedBox, using: key)
+            do {
+                return try AES.GCM.open(sealedBox, using: key)
+            } catch {
+                if error.localizedDescription.contains("authentication") {
+                    throw CryptError.authenticationFailed
+                } else {
+                    throw CryptError.decryptionFailed
+                }
+            }
         } catch {
             setNSError(errorPointer, cryptError: .decryptionFailed)
             return nil
@@ -143,7 +151,11 @@ public class AESGCMCrypt: NSObject {
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         
-        guard status == errSecSuccess, let keyData = result as? Data else {
+        guard status == errSecSuccess else {
+            throw CryptError.keyRetrievalFailed
+        }
+        
+        guard let keyData = result as? Data else {
             return nil
         }
         return SymmetricKey(data: keyData)
@@ -159,6 +171,7 @@ public class AESGCMCrypt: NSObject {
         case invalidDataLength
         case keyRetrievalFailed
         case keychainSaveFailed
+        case authenticationFailed
     }
     
     /// Converts CryptError to NSError and assigns it to the provided error pointer.
@@ -190,6 +203,9 @@ public class AESGCMCrypt: NSObject {
         case .keychainSaveFailed:
             errorMessage = "Failed to save key to keychain."
             errorCode = 1007
+        case .authenticationFailed:
+            errorMessage = "Authentication failed."
+            errorCode = 1008
         }
         
         errorPointer?.pointee = NSError(domain: "AESGCMCrypt", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])

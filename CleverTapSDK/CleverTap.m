@@ -444,7 +444,7 @@ static BOOL sharedInstanceErrorLogged;
 #endif
         }
     } else {
-        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
+        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useOrTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
             [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
         }
     }
