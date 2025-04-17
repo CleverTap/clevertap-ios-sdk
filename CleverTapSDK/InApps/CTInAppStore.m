@@ -58,7 +58,19 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         if (data) {
             if ([data isKindOfClass:[NSArray class]]) {
                 _inAppsQueue = data;
-                NSString *encryptedString = [self.cryptManager encryptObject:data];
+                
+                NSString *encryptedString = nil;
+                @try {
+                    encryptedString = [self.cryptManager encryptObject:data];
+                    if (!encryptedString) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed", self);
+                        return;
+                    }
+                } @catch (NSException *exception) {
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error: %@", self, exception);
+                    return;
+                }
+                
                 NSString *newStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
                 [CTPreferences putString:encryptedString forKey:newStorageKey];
             }
@@ -198,7 +210,18 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = clientSideInApps;
         
-        NSString *encryptedString = [self.cryptManager encryptObject:clientSideInApps];
+        NSString *encryptedString = nil;
+        @try {
+            encryptedString = [self.cryptManager encryptObject:clientSideInApps];
+            if (!encryptedString) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed for client side InApps", self);
+                return;
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for client side InApps: %@", self, exception);
+            return;
+        }
+        
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -208,7 +231,17 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized(self) {
         if (_clientSideInApps) return _clientSideInApps;
         
-        _clientSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS];
+        @try {
+            _clientSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS];
+            if (!_clientSideInApps) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to retrieve client side InApps", self);
+                _clientSideInApps = [NSArray new];
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving client side InApps: %@", self, exception);
+            _clientSideInApps = [NSArray new];
+        }
+        
         return _clientSideInApps;
     }
 }
@@ -228,7 +261,18 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _serverSideInApps = serverSideInApps;
         
-        NSString *encryptedString = [self.cryptManager encryptObject:serverSideInApps];
+        NSString *encryptedString = nil;
+        @try {
+            encryptedString = [self.cryptManager encryptObject:serverSideInApps];
+            if (!encryptedString) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed for server side InApps", self);
+                return;
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for server side InApps: %@", self, exception);
+            return;
+        }
+        
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -238,7 +282,17 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized(self) {
         if (_serverSideInApps) return _serverSideInApps;
         
-        _serverSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS];
+        @try {
+            _serverSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS];
+            if (!_serverSideInApps) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to retrieve server side InApps", self);
+                _serverSideInApps = [NSArray new];
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving server side InApps: %@", self, exception);
+            _serverSideInApps = [NSArray new];
+        }
+        
         return _serverSideInApps;
     }
 }
@@ -247,12 +301,23 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 - (NSArray *)decryptInAppsWithKeySuffix:(NSString *)keySuffix {
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
+    
     if (encryptedString) {
-        NSArray *arr = [self.cryptManager decryptObject:encryptedString];
-        if (arr) {
-            return arr;
+        NSArray *arr = nil;
+        @try {
+            arr = [self.cryptManager decryptObject:encryptedString];
+            if (!arr) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Decryption failed", self);
+                return [NSArray new];
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Decryption error: %@", self, exception);
+            return [NSArray new];
         }
+        
+        return arr;
     }
+    
     return [NSArray new];
 }
 

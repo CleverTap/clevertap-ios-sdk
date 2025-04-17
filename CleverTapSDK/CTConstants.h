@@ -282,6 +282,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define kENCRYPTION_KEY @"CLTAP_ENCRYPTION_KEY"
 #define AES_GCM_PREFIX @"<ct<"
 #define AES_GCM_SUFFIX @">ct>"
+#define CLTAP_ENCRYPTION_ALGORITHM @"encryption_algo"
 
 #pragma mark Constants for Event Database
 #define CLTAP_DATABASE_VERSION 1
