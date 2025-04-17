@@ -30,23 +30,6 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     return self;
 }
 
-//- (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
-//    if (!guid) guid = self.deviceInfo.deviceId;
-//    if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
-//    
-//    NSDictionary *cache = [self getCachedGUIDs];
-//    if (!cache) cache = @{};
-//    NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
-//
-//    NSString *encryptedIdentifier = identifier;
-//    if (self.config.cryptManager) {
-//        encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
-//    }
-//    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
-//    newCache[cacheKey] = guid;
-//    [self setCachedGUIDs:newCache];
-//}
-
 - (void)cacheGUID:(NSString *)guid forKey:(NSString *)key andIdentifier:(NSString *)identifier {
     if (!guid) guid = self.deviceInfo.deviceId;
     if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
@@ -127,19 +110,6 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     }
     return cachedIdentities;
 }
-
-//- (NSString *)getGUIDforKey:(NSString *)key andIdentifier:(NSString *)identifier {
-//    if (!key || !identifier) return nil;
-//    
-//    NSDictionary *cache = [self getCachedGUIDs];
-//    NSString *encryptedIdentifier = identifier;
-//    if (self.config.cryptManager) {
-//        encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
-//    }
-//    NSString *cacheKey = [NSString stringWithFormat:@"%@_%@", key, encryptedIdentifier];
-//    if (!cache) return nil;
-//    else return cache[cacheKey];
-//}
 
 - (NSString *)getGUIDforKey:(NSString *)key andIdentifier:(NSString *)identifier {
     if (!key || !identifier) return nil;

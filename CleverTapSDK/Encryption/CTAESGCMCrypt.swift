@@ -82,7 +82,6 @@ public class AESGCMCrypt: NSObject {
     private func extractCombinedData(from encryptedString: String, error errorPointer: NSErrorPointer) -> Data? {
         guard encryptedString.hasPrefix(AES_GCM_PREFIX),
               encryptedString.hasSuffix(AES_GCM_SUFFIX) else {
-            setNSError(errorPointer, cryptError: .invalidFormat)
             return nil
         }
         
@@ -156,7 +155,6 @@ public class AESGCMCrypt: NSObject {
         case stringToDataConversionFailed
         case encryptionFailed
         case decryptionFailed
-        case invalidFormat
         case invalidBase64
         case invalidDataLength
         case keyRetrievalFailed
@@ -180,21 +178,18 @@ public class AESGCMCrypt: NSObject {
         case .decryptionFailed:
             errorMessage = "Decryption process failed."
             errorCode = 1003
-        case .invalidFormat:
-            errorMessage = "Invalid format of encrypted data."
-            errorCode = 1004
         case .invalidBase64:
             errorMessage = "Base64 decoding failed."
-            errorCode = 1005
+            errorCode = 1004
         case .invalidDataLength:
             errorMessage = "Data length is invalid."
-            errorCode = 1006
+            errorCode = 1005
         case .keyRetrievalFailed:
             errorMessage = "Failed to retrieve key from keychain."
-            errorCode = 1007
+            errorCode = 1006
         case .keychainSaveFailed:
             errorMessage = "Failed to save key to keychain."
-            errorCode = 1008
+            errorCode = 1007
         }
         
         errorPointer?.pointee = NSError(domain: "AESGCMCrypt", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
