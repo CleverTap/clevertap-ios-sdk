@@ -24,11 +24,18 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  andDeviceInfo:(CTDeviceInfo*)deviceInfo {
+    
+    if (!config || !deviceInfo) {
+        return nil;
+    }
     if (self = [super init]) {
         _config = config;
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel];
+        if (!_cryptManager) {
+            return nil;
+        }
         if ([self isMigrationNeeded]) {
             [self performMigration];
         }
