@@ -12,7 +12,6 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTEncryptionManager.h"
 
-NSString *const kCachedGUIDS = @"CachedGUIDS";
 NSString *const kCachedIdentities = @"CachedIdentities";
 
 @interface CTLoginInfoProvider () {}
@@ -95,15 +94,15 @@ NSString *const kCachedIdentities = @"CachedIdentities";
 }
 
 - (NSDictionary *)getCachedGUIDs {
-    NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:kCachedGUIDS config: self.config]];
+    NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:[CTPreferences storageKeyWithSuffix:CLTAP_CachedGUIDSKey config: self.config]];
     if (!cachedGUIDS && self.config.isDefaultInstance) {
-        cachedGUIDS = [CTPreferences getObjectForKey:kCachedGUIDS];
+        cachedGUIDS = [CTPreferences getObjectForKey:CLTAP_CachedGUIDSKey];
     }
     return cachedGUIDS;
 }
 
 - (void)setCachedGUIDs:(NSDictionary *)cache {
-    [CTPreferences putObject:cache forKey:[CTPreferences storageKeyWithSuffix:kCachedGUIDS config: self.config]];
+    [CTPreferences putObject:cache forKey:[CTPreferences storageKeyWithSuffix:CLTAP_CachedGUIDSKey config: self.config]];
 }
 
 - (NSString *)getCachedIdentities {

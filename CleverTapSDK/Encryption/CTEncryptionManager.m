@@ -11,7 +11,6 @@
 
 static NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 static NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
-static NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 API_AVAILABLE(ios(13.0))
 @interface CTEncryptionManager () {}
@@ -329,7 +328,7 @@ API_AVAILABLE(ios(13.0))
 #pragma mark - Private Methods
 
 - (void)updateCachedGUIDS {
-    NSString *cacheKey = [CTUtils getKeyWithSuffix:kCacheGUIDS accountID:_accountID];
+    NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:_accountID];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
     if (!cachedGUIDS) return;
     

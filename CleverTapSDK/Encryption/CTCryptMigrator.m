@@ -8,8 +8,6 @@
 #import "CTUtils.h"
 #import "CTCryptMigrator.h"
 
-NSString *const kCachedGUIDSKey = @"CachedGUIDS";
-
 @interface CTCryptMigrator()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -97,7 +95,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 #pragma mark - GUID Migration
 
 - (BOOL)migrateGUIDS {
-    NSString *cacheKey = [CTUtils getKeyWithSuffix:kCachedGUIDSKey accountID:_config.accountId];
+    NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:_config.accountId];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
 
     if (!cachedGUIDS || cachedGUIDS.count == 0) {
