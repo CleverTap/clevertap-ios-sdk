@@ -280,6 +280,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_ENCRYPTION_MIGRATION_STATUS @"crypt_migration"
 #define CLTAP_ENCRYPTION_AES_GCM @"crypt_aes_gcm"
 #define kENCRYPTION_KEY @"CLTAP_ENCRYPTION_KEY"
+#define ENCRYPTION_KEY_TAG @"EncryptionKey"
 #define AES_GCM_PREFIX @"<ct<"
 #define AES_GCM_SUFFIX @">ct>"
 #define CLTAP_ENCRYPTION_ALGORITHM @"encryption_algo"

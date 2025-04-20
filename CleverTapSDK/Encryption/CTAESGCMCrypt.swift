@@ -127,15 +127,36 @@ public class AESGCMCrypt: NSObject {
     /// Saves the AES key to the Keychain.
     @available(iOS 13.0, *)
     private func saveKeyToKeychain(_ key: SymmetricKey) throws {
+        let keyData = key.withUnsafeBytes { Data($0) }
+        
+        // Query to identify the item
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
-            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
-            kSecValueData as String: key.withUnsafeBytes { Data($0) }
+            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!
         ]
         
-        SecItemDelete(query as CFDictionary)
-        let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
+        // Attributes to update
+        let attributes: [String: Any] = [
+            kSecValueData as String: keyData
+        ]
+        
+        let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        
+        if updateStatus == errSecSuccess {
+            // Item was successfully updated
+            return
+        } else if updateStatus == errSecItemNotFound {
+            // Item doesn't exist, so add it
+            let addQuery: [String: Any] = query.merging([
+                kSecValueData as String: keyData
+            ]) { (_, new) in new }
+            
+            let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
+            guard addStatus == errSecSuccess else {
+                throw CryptError.keychainSaveFailed
+            }
+        } else {
+            // Some other error occurred during update
             throw CryptError.keychainSaveFailed
         }
     }

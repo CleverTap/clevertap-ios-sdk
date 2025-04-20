@@ -56,7 +56,7 @@ API_AVAILABLE(ios(13.0))
 
 - (void)setupEncryptionWithLevel {
     if (@available(iOS 13.0, *)) {
-        _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
+        _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:ENCRYPTION_KEY_TAG];
     }
 }
 
@@ -200,10 +200,24 @@ API_AVAILABLE(ios(13.0))
     }
     
     @try {
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
-        if (!data) {
-            CleverTapLogStaticInternal(@"Failed to serialize object for encryption.");
-            return nil;
+        NSData *data;
+                
+        if (@available(iOS 11.0, tvOS 11.0, *)) {
+            NSError *archiveError = nil;
+            data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
+            
+            if (!data || archiveError) {
+                CleverTapLogStaticInternal(@"Failed to serialize object for encryption: %@", archiveError);
+                return nil;
+            }
+        } else {
+            // Fallback for iOS/tvOS versions below 11.0
+            data = [NSKeyedArchiver archivedDataWithRootObject:object];
+            
+            if (!data) {
+                CleverTapLogStaticInternal(@"Failed to serialize object for encryption.");
+                return nil;
+            }
         }
 
         switch (algorithm) {
@@ -258,7 +272,23 @@ API_AVAILABLE(ios(13.0))
                         CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
                         return nil;
                     }
-                    return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
+                    
+                    if (decryptedData) {
+                        if (@available(iOS 11.0, tvOS 11.0, *)) {
+                            NSError *unarchiveError = nil;
+                            id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class]] fromData:decryptedData error:&unarchiveError];
+                            
+                            if (unarchiveError) {
+                                CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
+                                return nil;
+                            }
+                            return unarchived;
+                        } else {
+                            // Fallback for iOS/tvOS versions below 11.0
+                            return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+                        }
+                    }
+                    return nil;
                 }
 
                 // Fallback to AES if iOS < 13
@@ -268,7 +298,23 @@ API_AVAILABLE(ios(13.0))
             case AES: {
                 NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
                 NSData *decryptedData = [self processData:data operation:kCCDecrypt];
-                return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
+                
+                if (decryptedData) {
+                    if (@available(iOS 11.0, tvOS 11.0, *)) {
+                        NSError *unarchiveError = nil;
+                        id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class]] fromData:decryptedData error:&unarchiveError];
+                        
+                        if (unarchiveError) {
+                            CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
+                            return nil;
+                        }
+                        return unarchived;
+                    } else {
+                        // Fallback for iOS/tvOS versions below 11.0
+                        return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+                    }
+                }
+                return nil;
             }
             default:
                 CleverTapLogStaticInternal(@"Unsupported decryption algorithm: %ld", (long)algorithm);
