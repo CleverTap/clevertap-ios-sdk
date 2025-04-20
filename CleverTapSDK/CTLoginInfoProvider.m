@@ -48,19 +48,22 @@ NSString *const kCachedIdentities = @"CachedIdentities";
         for (NSString *cacheKey in cache.allKeys) {
             if ([cacheKey hasPrefix:keyPrefix]) {
                 NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
-                
+                NSString *decryptedIdentifier = encryptedIdentifier;
                 @try {
                     
-                    NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
-                    
-                    NSString *decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
-                    
-                    // If we found a match, update that entry instead of creating a new one
+                    if (_config.encryptionLevel == CleverTapEncryptionMedium) {
+                        NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+                        
+                        decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
+                    }
+                        // If we found a match, update that entry instead of creating a new one
                     if ([decryptedIdentifier isEqualToString:identifier]) {
                         existingEntryFound = YES;
                         existingCacheKey = cacheKey;
                         break;
                     }
+                    
+                    
                 } @catch (NSException *exception) {
                     // Continue to next key if decryption fails
                     continue;
@@ -126,11 +129,13 @@ NSString *const kCachedIdentities = @"CachedIdentities";
         if ([cacheKey hasPrefix:keyPrefix]) {
             // Extract the encrypted part (everything after "Email_")
             NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
-            
-            // Decrypt the encrypted identifier
-            NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
-            
-            NSString *decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
+            NSString *decryptedIdentifier = encryptedIdentifier;
+            if (_config.encryptionLevel == CleverTapEncryptionMedium) {
+                // Decrypt the encrypted identifier
+                NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+                
+                decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
+            }
             // Check if the decrypted identifier matches our input identifier
             if ([decryptedIdentifier isEqualToString:identifier]) {
                 return cache[cacheKey];
