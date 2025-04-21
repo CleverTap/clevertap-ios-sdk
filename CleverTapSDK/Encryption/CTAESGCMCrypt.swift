@@ -69,7 +69,15 @@ public class AESGCMCrypt: NSObject {
             let nonceBytes = try AES.GCM.Nonce(data: nonce)
             let sealedBox = try AES.GCM.SealedBox(nonce: nonceBytes, ciphertext: ciphertext, tag: tag)
             
-            return try AES.GCM.open(sealedBox, using: key)
+            do {
+                return try AES.GCM.open(sealedBox, using: key)
+            } catch {
+                if error.localizedDescription.contains("authentication") {
+                    throw CryptError.authenticationFailed
+                } else {
+                    throw CryptError.decryptionFailed
+                }
+            }
         } catch {
             setNSError(errorPointer, cryptError: .decryptionFailed)
             return nil
@@ -119,15 +127,36 @@ public class AESGCMCrypt: NSObject {
     /// Saves the AES key to the Keychain.
     @available(iOS 13.0, *)
     private func saveKeyToKeychain(_ key: SymmetricKey) throws {
+        let keyData = key.withUnsafeBytes { Data($0) }
+        
+        // Query to identify the item
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
-            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!,
-            kSecValueData as String: key.withUnsafeBytes { Data($0) }
+            kSecAttrApplicationTag as String: keychainTag.data(using: .utf8)!
         ]
         
-        SecItemDelete(query as CFDictionary)
-        let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
+        // Attributes to update
+        let attributes: [String: Any] = [
+            kSecValueData as String: keyData
+        ]
+        
+        let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        
+        if updateStatus == errSecSuccess {
+            // Item was successfully updated
+            return
+        } else if updateStatus == errSecItemNotFound {
+            // Item doesn't exist, so add it
+            let addQuery: [String: Any] = query.merging([
+                kSecValueData as String: keyData
+            ]) { (_, new) in new }
+            
+            let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
+            guard addStatus == errSecSuccess else {
+                throw CryptError.keychainSaveFailed
+            }
+        } else {
+            // Some other error occurred during update
             throw CryptError.keychainSaveFailed
         }
     }
@@ -144,7 +173,11 @@ public class AESGCMCrypt: NSObject {
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         
-        guard status == errSecSuccess, let keyData = result as? Data else {
+        guard status == errSecSuccess else {
+            throw CryptError.keyRetrievalFailed
+        }
+        
+        guard let keyData = result as? Data else {
             return nil
         }
         return SymmetricKey(data: keyData)
@@ -161,6 +194,7 @@ public class AESGCMCrypt: NSObject {
         case invalidDataLength
         case keyRetrievalFailed
         case keychainSaveFailed
+        case authenticationFailed
     }
     
     /// Converts CryptError to NSError and assigns it to the provided error pointer.
@@ -195,6 +229,9 @@ public class AESGCMCrypt: NSObject {
         case .keychainSaveFailed:
             errorMessage = "Failed to save key to keychain."
             errorCode = 1008
+        case .authenticationFailed:
+            errorMessage = "Authentication failed."
+            errorCode = 1009
         }
         
         errorPointer?.pointee = NSError(domain: "AESGCMCrypt", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])

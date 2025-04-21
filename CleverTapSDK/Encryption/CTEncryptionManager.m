@@ -11,7 +11,6 @@
 
 static NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 static NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
-static NSString *const kCacheGUIDS = @"CachedGUIDS";
 
 API_AVAILABLE(ios(13.0))
 @interface CTEncryptionManager () {}
@@ -25,7 +24,7 @@ API_AVAILABLE(ios(13.0))
 
 #pragma mark - Initialization & Coding
 
-- (instancetype)initWithAccountID:(NSString *)accountID
+- (instancetype)initWithAccountID:(NSString * _Nonnull)accountID
                   encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel
                 isDefaultInstance:(BOOL)isDefaultInstance {
     if (self = [super init]) {
@@ -37,7 +36,7 @@ API_AVAILABLE(ios(13.0))
     return self;
 }
 
-- (instancetype)initWithAccountID:(NSString *)accountID {
+- (instancetype)initWithAccountID:(NSString * _Nonnull)accountID {
     if (self = [super init]) {
         _accountID = accountID;
         [self setupEncryptionWithLevel];
@@ -45,7 +44,7 @@ API_AVAILABLE(ios(13.0))
     return self;
 }
 
-- (instancetype)initWithAccountID:(NSString *)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
+- (instancetype)initWithAccountID:(NSString * _Nonnull)accountID encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel {
     if (self = [super init]) {
         _accountID = accountID;
         _encryptionLevel = encryptionLevel;
@@ -56,7 +55,7 @@ API_AVAILABLE(ios(13.0))
 
 - (void)setupEncryptionWithLevel {
     if (@available(iOS 13.0, *)) {
-        _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:@"EncryptionKey"];
+        _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:ENCRYPTION_KEY_TAG];
     }
 }
 
@@ -176,10 +175,10 @@ API_AVAILABLE(ios(13.0))
                 NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
                 NSData *decryptedData = [self processData:data operation:kCCDecrypt];
                 NSString *decryptedString = [[NSString alloc] initWithData:decryptedData encoding:NSUTF8StringEncoding];
-                return decryptedString ? decryptedString : ciphertext;
+                return decryptedString ? decryptedString : nil;
             } @catch (NSException *exception) {
                 CleverTapLogStaticInternal(@"AES Decryption error: %@", exception.debugDescription);
-                return ciphertext;
+                return nil;
             }
         }
         default:
@@ -200,10 +199,24 @@ API_AVAILABLE(ios(13.0))
     }
     
     @try {
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
-        if (!data) {
-            CleverTapLogStaticInternal(@"Failed to serialize object for encryption.");
-            return nil;
+        NSData *data;
+                
+        if (@available(iOS 11.0, tvOS 11.0, *)) {
+            NSError *archiveError = nil;
+            data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
+            
+            if (!data || archiveError) {
+                CleverTapLogStaticInternal(@"Failed to serialize object for encryption: %@", archiveError);
+                return nil;
+            }
+        } else {
+            // Fallback for iOS/tvOS versions below 11.0
+            data = [NSKeyedArchiver archivedDataWithRootObject:object];
+            
+            if (!data) {
+                CleverTapLogStaticInternal(@"Failed to serialize object for encryption.");
+                return nil;
+            }
         }
 
         switch (algorithm) {
@@ -258,7 +271,23 @@ API_AVAILABLE(ios(13.0))
                         CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
                         return nil;
                     }
-                    return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
+                    
+                    if (decryptedData) {
+                        if (@available(iOS 11.0, tvOS 11.0, *)) {
+                            NSError *unarchiveError = nil;
+                            id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class]] fromData:decryptedData error:&unarchiveError];
+                            
+                            if (unarchiveError) {
+                                CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
+                                return nil;
+                            }
+                            return unarchived;
+                        } else {
+                            // Fallback for iOS/tvOS versions below 11.0
+                            return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+                        }
+                    }
+                    return nil;
                 }
 
                 // Fallback to AES if iOS < 13
@@ -268,7 +297,23 @@ API_AVAILABLE(ios(13.0))
             case AES: {
                 NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
                 NSData *decryptedData = [self processData:data operation:kCCDecrypt];
-                return decryptedData ? [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData] : nil;
+                
+                if (decryptedData) {
+                    if (@available(iOS 11.0, tvOS 11.0, *)) {
+                        NSError *unarchiveError = nil;
+                        id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class]] fromData:decryptedData error:&unarchiveError];
+                        
+                        if (unarchiveError) {
+                            CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
+                            return nil;
+                        }
+                        return unarchived;
+                    } else {
+                        // Fallback for iOS/tvOS versions below 11.0
+                        return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+                    }
+                }
+                return nil;
             }
             default:
                 CleverTapLogStaticInternal(@"Unsupported decryption algorithm: %ld", (long)algorithm);
@@ -283,7 +328,7 @@ API_AVAILABLE(ios(13.0))
 #pragma mark - Private Methods
 
 - (void)updateCachedGUIDS {
-    NSString *cacheKey = [CTUtils getKeyWithSuffix:kCacheGUIDS accountID:_accountID];
+    NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:_accountID];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
     if (!cachedGUIDS) return;
     
