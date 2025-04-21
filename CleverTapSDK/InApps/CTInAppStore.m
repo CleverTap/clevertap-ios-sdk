@@ -106,11 +106,35 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         id data = [CTPreferences getObjectForKey:storageKey];
+        
         if ([data isKindOfClass:[NSString class]]) {
-            NSArray *arr = [self.cryptManager decryptObject:data];
-            if (arr) {
-                _inAppsQueue = arr;
+            @try {
+                if (!self.cryptManager) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Cannot decrypt inApps queue - cryptManager is nil", self);
+                    _inAppsQueue = [NSArray new];
+                    return _inAppsQueue;
+                }
+                
+                NSArray *arr = [self.cryptManager decryptObject:data];
+                if (arr) {
+                    if ([arr isKindOfClass:[NSArray class]]) {
+                        _inAppsQueue = arr;
+                    } else {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Decrypted inApps queue is not an NSArray type: %@", self, [arr class]);
+                        _inAppsQueue = [NSArray new];
+                    }
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to decrypt inApps queue", self);
+                    _inAppsQueue = [NSArray new];
+                }
+            } @catch (NSException *exception) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Exception during inApps queue decryption: %@", self, exception);
+                _inAppsQueue = [NSArray new];
             }
+        } else if (data) {
+            // Log if data exists but is not a string (unexpected type)
+            CleverTapLogDebug(self.config.logLevel, @"%@: Found inApps queue data of unexpected type: %@", self, [data class]);
+            _inAppsQueue = [NSArray new];
         }
         
         if (!_inAppsQueue) {

@@ -8,8 +8,6 @@
 #import "CTUtils.h"
 #import "CTCryptMigrator.h"
 
-NSString *const kCachedGUIDSKey = @"CachedGUIDS";
-
 @interface CTCryptMigrator()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -24,18 +22,11 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  andDeviceInfo:(CTDeviceInfo*)deviceInfo {
-    
-    if (!config || !deviceInfo) {
-        return nil;
-    }
     if (self = [super init]) {
         _config = config;
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel];
-        if (!_cryptManager) {
-            return nil;
-        }
         if ([self isMigrationNeeded]) {
             [self performMigration];
         }
@@ -104,7 +95,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
 #pragma mark - GUID Migration
 
 - (BOOL)migrateGUIDS {
-    NSString *cacheKey = [CTUtils getKeyWithSuffix:kCachedGUIDSKey accountID:_config.accountId];
+    NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:_config.accountId];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
 
     if (!cachedGUIDS || cachedGUIDS.count == 0) {
@@ -174,7 +165,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
         return NO;
     }
     
-    NSString *key = [self storageKeyWithSuffix:keySuffix];
+    NSString *key = [self inAppTypeWithSuffix:keySuffix];
     if (!key) {
         CleverTapLogInfo(self.config.logLevel, @"Error: Failed to generate storage key.");
         return NO;
@@ -221,7 +212,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
             CleverTapLogInfo(self.config.logLevel, @"Error: Encryption failed after decryption.");
             return NO;
         }
-        NSString *newStorageKey = [self storageKeyWithSuffix:keySuffix];
+        NSString *newStorageKey = [self inAppTypeWithSuffix:keySuffix];
         [CTPreferences putString:migratedEncryptedString forKey:newStorageKey];
         
         CleverTapLogInfo(self.config.logLevel, @"GUID migration completed successfully for key: %@", keySuffix);
@@ -232,7 +223,7 @@ NSString *const kCachedGUIDSKey = @"CachedGUIDS";
     return YES;
 }
 
-- (NSString *)storageKeyWithSuffix:(NSString *)suffix {
+- (NSString *)inAppTypeWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceInfo.deviceId, suffix];
 }
 

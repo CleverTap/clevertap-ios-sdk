@@ -90,6 +90,7 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 #define CLTAP_DATE_PREFIX @"$D_"
+#define CLTAP_CachedGUIDSKey @"CachedGUIDS"
 
 // profile commands
 static NSString *const kCLTAP_COMMAND_SET = @"$set";
