@@ -144,19 +144,26 @@ public class AESGCMCrypt: NSObject {
         
         if updateStatus == errSecSuccess {
             // Item was successfully updated
+            print("Keychain item successfully updated")
             return
         } else if updateStatus == errSecItemNotFound {
             // Item doesn't exist, so add it
+            print("Keychain item not found, attempting to add")
             let addQuery: [String: Any] = query.merging([
-                kSecValueData as String: keyData
+                kSecValueData as String: keyData,
+                kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
             ]) { (_, new) in new }
             
             let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
-            guard addStatus == errSecSuccess else {
+            if addStatus == errSecSuccess {
+                print("Keychain item successfully added")
+            } else {
+                print("Failed to add keychain item, error: \(addStatus)")
                 throw CryptError.keychainSaveFailed
             }
         } else {
             // Some other error occurred during update
+            print("Failed to update keychain item, error: \(updateStatus)")
             throw CryptError.keychainSaveFailed
         }
     }
@@ -172,12 +179,13 @@ public class AESGCMCrypt: NSObject {
         
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
-        guard status == errSecSuccess else {
-            throw CryptError.keyRetrievalFailed
-        }
-        
-        guard let keyData = result as? Data else {
+        guard status == errSecSuccess, let keyData = result as? Data else {
+
+//        guard status == errSecSuccess else {
+//            throw CryptError.keyRetrievalFailed
+//        }
+//        
+//        guard let keyData = result as? Data else {
             return nil
         }
         return SymmetricKey(data: keyData)
