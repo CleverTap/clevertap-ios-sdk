@@ -104,7 +104,7 @@ jobs:
         run: |
           # Update Checksum
           VERSION=$(cat sdk-version.txt)
-          S3_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.${{ secrets.AWS_REGION }}.amazonaws.com/CleverTapSDK-${VERSION}.xcframework.zip"
+          S3_URL="https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-${VERSION}.xcframework.zip"
 
           awk -v url="$S3_URL" '
             BEGIN { 
