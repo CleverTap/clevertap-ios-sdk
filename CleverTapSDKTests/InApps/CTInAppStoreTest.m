@@ -200,17 +200,37 @@
 }
 
 - (void)testStoreClientSideInAppsEncrypted {
+    // Store the in-apps
     [self.store storeClientSideInApps:self.inApps];
+    
+    // Get the stored encrypted string
     NSString *storedString = [CTPreferences getObjectForKey:[self storageKeyCS]];
-    NSString *encrypted = [self.ctCryptManager encryptObject:self.inApps];
-    XCTAssertEqualObjects(storedString, encrypted);
+    
+    // Verify encryption occurred
+    XCTAssertNotNil(storedString, @"Stored string should not be nil");
+    XCTAssertGreaterThan(storedString.length, 0, @"Stored string should not be empty");
+    
+    // Decrypt the stored string and verify it matches the original inApps
+    NSArray *decryptedInApps = [self.ctCryptManager decryptObject:storedString];
+    XCTAssertNotNil(decryptedInApps, @"Decrypted in-apps should not be nil");
+    XCTAssertEqualObjects(decryptedInApps, self.inApps, @"Decrypted in-apps should match original");
 }
 
 - (void)testStoreServerSideInAppsEncrypted {
+    // Store the in-apps
     [self.store storeServerSideInApps:self.inApps];
+    
+    // Get the stored encrypted string
     NSString *storedString = [CTPreferences getObjectForKey:[self storageKeySS]];
-    NSString *encrypted = [self.ctCryptManager encryptObject:self.inApps];
-    XCTAssertEqualObjects(storedString, encrypted);
+    
+    // Verify encryption occurred
+    XCTAssertNotNil(storedString, @"Stored string should not be nil");
+    XCTAssertGreaterThan(storedString.length, 0, @"Stored string should not be empty");
+    
+    // Decrypt the stored string and verify it matches the original inApps
+    NSArray *decryptedInApps = [self.ctCryptManager decryptObject:storedString];
+    XCTAssertNotNil(decryptedInApps, @"Decrypted in-apps should not be nil");
+    XCTAssertEqualObjects(decryptedInApps, self.inApps, @"Decrypted in-apps should match original");
 }
 
 - (void)testStoreClientSideEmptyArray {

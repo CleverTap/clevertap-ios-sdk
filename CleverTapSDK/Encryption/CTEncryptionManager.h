@@ -67,6 +67,14 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
 - (NSString *)encryptString:(NSString *)plaintext;
 
 /**
+ * Encrypts a given string using the default AES128 encryption.
+ *
+ * @param plaintext The string to be encrypted.
+ * @return The encrypted string.
+ */
+- (NSString *)encryptString:(NSString *)plaintext encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm;
+
+/**
  * Decrypts an AES128 encrypted string.
  *
  * @param ciphertext The encrypted string.
@@ -90,6 +98,14 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
  * @return The encrypted string representation of the object.
  */
 - (NSString *)encryptObject:(id)object;
+
+/**
+ * Encrypts an object and returns the encrypted representation.
+ *
+ * @param object The object to be encrypted.
+ * @return The encrypted string representation of the object.
+ */
+- (NSString *)encryptObject:(id)object encryptionAlgorithm:(CleverTapEncryptionAlgorithm)algorithm;
 
 /**
  * Decrypts an encrypted object string and returns the original object.
