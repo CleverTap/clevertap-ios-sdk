@@ -91,7 +91,7 @@ jobs:
           VERSION=$(cat sdk-version.txt)
           S3_FILENAME="CleverTapSDK-${VERSION}.xcframework.zip"
 
-          aws s3 cp CleverTapSDK.xcframework.zip s3://$S3_BUCKET_NAME/$S3_FILENAME --acl public-read
+          aws s3 cp CleverTapSDK.xcframework.zip s3://$S3_BUCKET_NAME/$S3_FILENAME
           
           echo "S3_FILENAME=$S3_FILENAME" >> $GITHUB_ENV
           echo "✅ Uploaded to S3 as $S3_FILENAME"
