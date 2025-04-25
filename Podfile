@@ -10,12 +10,6 @@ abstract_target 'shared' do
   
   end
 
-  target 'CleverTapSDKTestsApp' do
-      platform :ios, '10.0'
-      pod 'OHHTTPStubs'
-      pod 'CleverTap-iOS-SDK', :path =>'./'
-  end
-
 end
 
 post_install do |installer|
