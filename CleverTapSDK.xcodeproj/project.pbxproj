@@ -1356,16 +1356,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		0B03FA342DD4C3F900545F66 /* Encryption */ = {
-			isa = PBXGroup;
-			children = (
-				0B03FA352DD4C40B00545F66 /* CTEncryptionManager+Tests.h */,
-				4E2CF1432AC56D8F00441E8B /* CTEncryptionManagerTests.m */,
-				0B1FCD162DB8E0070039D424 /* CTCryptMigrationTests.m */,
-			);
-			path = Encryption;
-			sourceTree = "<group>";
-		};
 		0B1678FD2D6464420017E74C /* Encryption */ = {
 			isa = PBXGroup;
 			children = (
@@ -1374,6 +1364,7 @@
 				0B1678FE2D64645E0017E74C /* CTAESGCMCrypt.swift */,
 				0B1679072D64651A0017E74C /* CTEncryptionManager.h */,
 				0B1679082D64651A0017E74C /* CTEncryptionManager.m */,
+				4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */,
 			);
 			path = Encryption;
 			sourceTree = "<group>";
