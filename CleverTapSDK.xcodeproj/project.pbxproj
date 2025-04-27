@@ -1350,13 +1350,6 @@
 				0B1678FE2D64645E0017E74C /* CTAESGCMCrypt.swift */,
 				0B1679072D64651A0017E74C /* CTEncryptionManager.h */,
 				0B1679082D64651A0017E74C /* CTEncryptionManager.m */,
-				4803951A2A7ABAD200C4D254 /* CTCryptHandler.h */,
-				480395192A7ABAD200C4D254 /* CTCryptHandler.m */,
-				0B75722B2D50AB6B004C3B2B /* CTAESCrypt.swift */,
-				0B75722E2D50AB79004C3B2B /* CTAESGCMCrypt.swift */,
-				0B7572312D50AB87004C3B2B /* CTKeychainManager.swift */,
-				0B7572342D50E237004C3B2B /* CTCryptModel.swift */,
-				0B7572372D50E303004C3B2B /* CTEncryptionManager.swift */,
 				4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */,
 			);
 			path = Encryption;
@@ -2901,7 +2894,7 @@
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 			};
@@ -2936,7 +2929,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 			};
@@ -3297,7 +3290,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -3336,7 +3329,7 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

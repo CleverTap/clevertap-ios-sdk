@@ -2210,20 +2210,25 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogInternal(self.config.logLevel, @"%@: Pending events batch contains: %d items", self, (int) [batch count]);
         
         @try {
-            if ([_config encryptionInTransitEnabled]) {
-                // Encrypt the payload if pubkey is provided.
-                NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
-                if (encryptedDict.count > 0) {
-                    additionalHeaders[ENCRYPTION_HEADER] = @"true";
-                    
-                    NSString *encryptedPayload = encryptedDict[@"encodedPayload"];
-                    NSData *nonceData = encryptedDict[@"nonceData"];
-                    finalPayload = @{
-                        @"encryptedPayload": encryptedPayload,
-                        @"key": [[NetworkEncryptionManager shared]getEncryptedSessionKeyWithBase64PublicKey:self.config.pubkey],
-                        @"keyVersion": self.config.pubkeyVersion,
-                        @"iv": [nonceData base64EncodedStringWithOptions:kNilOptions]
-                    };
+            if (_config.encryptionInTransitEnabled) {
+                if (@available(iOS 13.0, *)) {
+                    // Encrypt the payload if pubkey is provided.
+                    NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
+                    if (encryptedDict.count > 0) {
+                        additionalHeaders[ENCRYPTION_HEADER] = @"true";
+                        additionalHeaders[ENCRYPTION_HEADER_ALGORITHM] = AES_HEADER;
+                        
+                        NSString *encryptedPayload = encryptedDict[@"encodedPayload"];
+                        NSData *nonceData = encryptedDict[@"nonceData"];
+                        finalPayload = @{
+                            @"itp": encryptedPayload,
+                            @"itk": [[NetworkEncryptionManager shared]getSessionKeyBase64],
+                            @"itv": [nonceData base64EncodedStringWithOptions:kNilOptions]
+                        };
+                    }
+                }
+                else {
+                    CleverTapLogStaticDebug(@"Encryption in transit is only available from iOS 13 and above.");
                 }
             }
             NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
@@ -2266,12 +2271,11 @@ static BOOL sharedInstanceErrorLogged;
                     }
                     
                     if (responseEncrypted) {
-                        NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
-                        if (decryptedData.length > 0) {
-                            responseData = decryptedData;
-                        }
-                        else {
-                            CleverTapLogDebug(self.config.logLevel, @"%@: Response decryption failed. Parsing normally.", self);
+                        if (@available(iOS 13.0, *)) {
+                            NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
+                            if (decryptedData.length > 0) {
+                                responseData = decryptedData;
+                            }
                         }
                     }
                 }

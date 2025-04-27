@@ -30,8 +30,7 @@
     [coder encodeObject: _cryptManager forKey:@"cryptManager"];
     [coder encodeBool:_enableFileProtection forKey:@"enableFileProtection"];
     [coder encodeObject:_handshakeDomain forKey:@"handshakeDomain"];
-    [coder encodeObject:_pubkey forKey:@"pubkey"];
-    [coder encodeObject:_pubkeyVersion forKey:@"pubkeyVersion"];
+    [coder encodeBool: _encryptionInTransitEnabled forKey:@"encryptionInTransitEnabled"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -58,8 +57,7 @@
         _cryptManager = [coder decodeObjectForKey:@"cryptManager"];
         _enableFileProtection = [coder decodeBoolForKey:@"enableFileProtection"];
         _handshakeDomain = [coder decodeObjectForKey:@"handshakeDomain"];
-        _pubkey = [coder decodeObjectForKey:@"pubkey"];
-        _pubkeyVersion = [coder decodeObjectForKey:@"pubkeyVersion"];
+        _encryptionInTransitEnabled = [coder decodeBoolForKey:@"encryptionInTransitEnabled"];
     }
     return self;
 }
@@ -235,8 +233,7 @@
     _encryptionLevel = isDefault ? plist.encryptionLevel : CleverTapEncryptionNone;
     _enableFileProtection = isDefault ? plist.enableFileProtection : NO;
     _handshakeDomain = isDefault ? plist.handshakeDomain : nil;
-    _pubkey = isDefault ? plist.pubkey : nil;
-    _pubkeyVersion = isDefault ? plist.pubkeyVersion : nil;
+    _encryptionInTransitEnabled = isDefault ? plist.encryptionInTransitEnabled : NO;
     if (isDefault) {
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
     }
@@ -278,23 +275,12 @@
     }
 }
 
-- (void)setPubkey:(NSString *)pubkey {
+- (void)setEncryptionInTransitEnabled:(BOOL)encryptionInTransitEnabled {
     if (!_isDefaultInstance) {
-        _pubkey = pubkey;
+        _encryptionInTransitEnabled = encryptionInTransitEnabled;
     } else {
         CleverTapLogStaticInfo("CleverTap public key for default instance can't be updated from setPubkey method");
     }
 }
 
-- (void)setPubkeyVersion:(NSString *)pubkeyVersion {
-    if (!_isDefaultInstance) {
-        _pubkeyVersion = pubkeyVersion;
-    } else {
-        CleverTapLogStaticInfo("CleverTap public key version for default instance can't be updated from setPubkeyVersion method");
-    }
-}
-
-- (BOOL)encryptionInTransitEnabled {
-    return ((_pubkey && _pubkey.length > 0) && (_pubkeyVersion && _pubkeyVersion.length > 0));
-}
 @end
