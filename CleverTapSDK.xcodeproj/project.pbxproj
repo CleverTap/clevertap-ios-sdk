@@ -1334,6 +1334,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		0B1678FD2D6464420017E74C /* Encryption */ = {
+			isa = PBXGroup;
+			children = (
+				4E93B3742D54AC810016F687 /* NetworkEncryptionManager.swift */,
+			);
+			path = Encryption;
+			sourceTree = "<group>";
+		};
 		4847D16B2CCB9018008DC327 /* EventDatabase */ = {
 			isa = PBXGroup;
 			children = (
@@ -2882,6 +2890,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
@@ -3275,6 +3284,7 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

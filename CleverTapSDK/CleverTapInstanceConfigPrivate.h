@@ -33,5 +33,4 @@
 
 + (NSString* _Nonnull)dataArchiveFileNameWithAccountId:(NSString* _Nonnull)accountId;
 
-- (BOOL)encryptionInTransitEnabled;
 @end
