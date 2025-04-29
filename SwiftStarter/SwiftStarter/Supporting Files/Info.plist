@@ -22,6 +22,8 @@
 	<string>RKW-R77-KW6Z</string>
 	<key>CleverTapToken</key>
 	<string>aa2-032</string>
+	<key>CleverTapEncryptionLevel</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

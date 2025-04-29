@@ -11,7 +11,7 @@
 
 #import "CleverTapInstanceConfig.h"
 #import "CTPreferences.h"
-#import "CTAES.h"
+#import "CTEncryptionManager.h"
 
 @interface CleverTapInstanceConfig (Tests)
 + (NSString*)dataArchiveFileNameWithAccountId:(NSString*)accountId;
@@ -36,7 +36,7 @@
 
     [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
 
-    NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+    NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTEncryptionManager class], [NSArray class], [NSString class], nil];
     CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofTypes:allowedClasses removeFile:YES];
     
     XCTAssertNotNil(cachedConfig);
@@ -60,7 +60,7 @@
 
     [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
 
-    NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+    NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTEncryptionManager class], [NSArray class], [NSString class], nil];
     CleverTapInstanceConfig *cachedConfig = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] ofTypes:allowedClasses removeFile:YES];
     
     XCTAssertNotNil(cachedConfig);
