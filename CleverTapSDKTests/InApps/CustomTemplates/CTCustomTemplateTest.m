@@ -18,10 +18,10 @@
 @implementation CTCustomTemplateTest
 
 - (void)testEqual {
-    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil];
-    CTCustomTemplate *sameTemplate = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil];
-    CTCustomTemplate *sameName = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:FUNCTION_TYPE isVisual:true arguments:@[] presenter:nil];
-    CTCustomTemplate *differentName = [[CTCustomTemplate alloc] initWithTemplateName:@"template1" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil];
+    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    CTCustomTemplate *sameTemplate = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    CTCustomTemplate *sameName = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:FUNCTION_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    CTCustomTemplate *differentName = [[CTCustomTemplate alloc] initWithTemplateName:@"template1" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
     XCTAssertEqualObjects(template, template);
     XCTAssertEqualObjects(template, sameTemplate);
     XCTAssertEqualObjects(template, sameName);
@@ -30,10 +30,10 @@
 }
 
 - (void)testHash {
-    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil];
-    CTCustomTemplate *sameTemplate = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil];
-    CTCustomTemplate *sameName = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:FUNCTION_TYPE isVisual:true arguments:@[] presenter:nil];
-    CTCustomTemplate *differentName = [[CTCustomTemplate alloc] initWithTemplateName:@"template1" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil];
+    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    CTCustomTemplate *sameTemplate = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    CTCustomTemplate *sameName = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:FUNCTION_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    CTCustomTemplate *differentName = [[CTCustomTemplate alloc] initWithTemplateName:@"template1" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
     XCTAssertEqual([template hash], [sameTemplate hash]);
     XCTAssertEqual([template hash], [sameName hash]);
     XCTAssertNotEqual([template hash], [differentName hash]);

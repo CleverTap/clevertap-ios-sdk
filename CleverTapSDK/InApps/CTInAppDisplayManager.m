@@ -156,6 +156,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
         NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
+        if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
+            filteredInAppNotifs = [self filterRFPInApps:filteredInAppNotifs];
+        }
         [self.inAppStore enqueueInApps:filteredInAppNotifs];
         
         [CTUtils runSyncMainQueue:^{
@@ -304,7 +307,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             return;
         }
 
-        NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
+        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
         if (now > notification.timeToLive) {
             CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
             return;
@@ -312,10 +315,41 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         
         [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
+                [self checkOrientationSupport:notification];
+                if (notification.error) {
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Device orientation not supported for inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
+                    return;
+                }
+                
                 [self notificationReady:notification];
             }];
         }];
     }];
+}
+
+- (void)checkOrientationSupport:(CTInAppNotification *)notification {
+    if (notification.inAppType == CTInAppTypeCustom) {
+        // The in-app orientation support depends on the custom in-app presenter.
+        return;
+    }
+    
+    if (notification.hasPortrait && !notification.hasLandscape && [self deviceOrientationIsLandscape]) {
+        notification.error = [NSString stringWithFormat:@"The InApp Notification supports %@ only, the app orientation is %@ dismissing the in-app.", @"portrait", @"landscape"];
+        return;
+    }
+    
+    if (notification.hasLandscape && !notification.hasPortrait && ![self deviceOrientationIsLandscape]) {
+        notification.error = [NSString stringWithFormat:@"The InApp Notification supports %@ only, the app orientation is %@ dismissing the in-app.", @"landscape", @"portrait"];
+        return;
+    }
+}
+
+- (BOOL)deviceOrientationIsLandscape {
+#if (TARGET_OS_TV)
+    return nil;
+#else
+    return [CTUIUtils isDeviceOrientationLandscape];
+#endif
 }
 
 - (void)prepareNotification:(CTInAppNotification *)notification withCompletion:(void (^)(void))completionHandler {
@@ -422,6 +456,27 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
     
+    if (notification.isRequestForPushPermission) {
+        // If push permission is already enabled, do not show inapp.
+        if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, permission is already granted.", self);
+            return;
+        }
+
+        // If push permission status is not known yet, check for status and on callback show the inapp is push is not enabled.
+        if (pushPrimerManager.pushPermissionStatus == CTPushNotKnown) {
+            [pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+                self->pushPrimerManager.pushPermissionStatus = status;
+                if (status == CTPushNotEnabled) {
+                    [self displayNotification:notification];
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Not showing push permission request, status: %ld", self, (long)status);
+                }
+            }];
+            return;
+        }
+    }
+    
     // if we are currently displaying a notification, cache this notification for later display
     if (currentlyDisplayingNotification) {
         if (self.config.accountId && notification) {
@@ -484,11 +539,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
-            if ([self.templatesManager presentNotification:notification 
+            currentlyDisplayingNotification = notification;
+            if (![self.templatesManager presentNotification:notification
                                               withDelegate:self
                                          andFileDownloader:self.fileDownloader]) {
-                currentlyDisplayingNotification = notification;
-            } else {
+                currentlyDisplayingNotification = nil;
                 errorString = [NSString stringWithFormat:@"Cannot present custom notification with template name: %@.",
                                notification.customTemplateInAppData.templateName];
             }
@@ -718,8 +773,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
            fromViewController:(CTInAppDisplayViewController *)controller
        withFallbackToSettings:(BOOL)isFallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: InApp Push Primer Accepted:", self);
-    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings
-                                       andSkipSettingsAlert:notification.skipSettingsAlert];
+    [pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
     
 }
 
@@ -820,6 +874,26 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the image-interstitial notification", self);
         return nil;
     }
+}
+
+#pragma mark - Request for Push Permission
+
+- (NSArray *)filterRFPInApps:(NSArray *)inappNotifs {
+    // Don't add inapps in queue if it is RFP inapp and push is enabled.
+    NSMutableArray *filteredInAppNotifs = [NSMutableArray new];
+    for (NSDictionary *inAppJSON in inappNotifs) {
+        if (![self isRFPInApp:inAppJSON]) {
+            [filteredInAppNotifs addObject:inAppJSON];
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Not adding InApp having Push Permission action button in queue as Push Notification permission is already granted: %@", self, inAppJSON[@"wzrk_id"]);
+        }
+    }
+    return filteredInAppNotifs;
+}
+
+- (BOOL)isRFPInApp:(NSDictionary *)inAppJSON {
+    BOOL isRFP = inAppJSON[@"rfp"] ? [inAppJSON[@"rfp"] boolValue] : NO;
+    return isRFP;
 }
 
 @end

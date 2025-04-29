@@ -19,6 +19,19 @@
     OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
 }
 
+- (void)onStubActivation:(NSURLRequest * _Nonnull)request stub:(id<HTTPStubsDescriptor> _Nonnull)stub {
+    NSData *body = [request OHHTTPStubs_HTTPBody];
+    if (body) {
+        NSArray *data = [NSJSONSerialization JSONObjectWithData:[request OHHTTPStubs_HTTPBody] options:NSJSONReadingMutableContainers error:nil];
+        if (data && data.count > 1) {
+            self.lastBatchHeader = [data objectAtIndex:0];
+            self.lastEvent = [data objectAtIndex:1];
+            [self.eventDetails addObject:[[EventDetail alloc]initWithEvent:[data objectAtIndex:1] name:stub.name]];
+            NSLog(@"LAST EVENT for %@", stub.name);
+        }
+    }
+}
+
 - (void)setUp {
     [CleverTap setDebugLevel:3];
     BOOL cleverTapInitialized = [[CleverTap sharedInstance] profileGetCleverTapID] != nil;
@@ -36,12 +49,11 @@
     self.responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] }; // TODO
     self.responseHeaders = @{@"Content-Type":@"application/json"};
     
+    __weak typeof(self) weakSelf = self;
     [HTTPStubs onStubActivation:^(NSURLRequest * _Nonnull request, id<HTTPStubsDescriptor>  _Nonnull stub, HTTPStubsResponse * _Nonnull responseStub) {
-        NSArray *data = [NSJSONSerialization JSONObjectWithData:[request OHHTTPStubs_HTTPBody] options:NSJSONReadingMutableContainers error:nil];
-        self.lastBatchHeader = [data objectAtIndex:0];
-        self.lastEvent = [data objectAtIndex:1];
-        [self.eventDetails addObject:[[EventDetail alloc]initWithEvent:[data objectAtIndex:1] name:stub.name]];
-        NSLog(@"LAST EVENT for %@", stub.name);
+        if (weakSelf) {
+            [weakSelf onStubActivation:request stub:stub];
+        }
     }];
     if (!cleverTapInitialized) {
         [CleverTap notfityTestAppLaunch];
@@ -123,20 +135,6 @@
     }];
     NSArray *filteredEvents = [self.eventDetails filteredArrayUsingPredicate: pred];
     return (filteredEvents && [filteredEvents count] > 0) ? (EventDetail*)filteredEvents[0] : nil;
-}
-
-#pragma mark - Utils
-
-- (NSString*)randomString {
-    NSString *letters = @"abcdefghijklmnopqrstuvwxyz";
-
-    NSMutableString *randomString = [NSMutableString stringWithCapacity: 4];
-
-        for (int i=0; i<4; i++) {
-             [randomString appendFormat: @"%C", [letters characterAtIndex: arc4random_uniform([letters length])]];
-        }
-
-        return randomString;
 }
 
 @end

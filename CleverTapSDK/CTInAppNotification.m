@@ -46,22 +46,23 @@
 @property (nonatomic, readwrite) int maxPerSession;
 @property (nonatomic, readwrite) int totalLifetimeCount;
 @property (nonatomic, readwrite) int totalDailyCount;
-@property (nonatomic, readwrite) NSInteger timeToLive;
+@property (nonatomic, readwrite) NSTimeInterval timeToLive;
 @property (nonatomic, assign, readwrite) char position;
 @property (nonatomic, assign, readwrite) float height;
 @property (nonatomic, assign, readwrite) float heightPercent;
 @property (nonatomic, assign, readwrite) float width;
 @property (nonatomic, assign, readwrite) float widthPercent;
+@property (nonatomic, assign, readwrite) float aspectRatio;
 
 @property (nonatomic, readwrite) NSArray<CTNotificationButton *> *buttons;
 
 @property (nonatomic, copy, readwrite) NSDictionary *jsonDescription;
 @property (nonatomic, copy, readwrite) NSDictionary *customExtras;
 
+@property (nonatomic, readwrite) BOOL isRequestForPushPermission;
 @property (nonatomic, readwrite) BOOL isLocalInApp;
 @property (nonatomic, readwrite) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readwrite) BOOL fallBackToNotificationSettings;
-@property (nonatomic, readwrite) BOOL skipSettingsAlert;
 
 @property (nonatomic, readwrite) CTCustomTemplateInAppData *customTemplateInAppData;
 
@@ -88,10 +89,10 @@
             self.maxPerSession = jsonObject[CLTAP_INAPP_MAX_PER_SESSION] ? [jsonObject[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
             self.totalLifetimeCount = jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] intValue] : -1;
             self.totalDailyCount = jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] ? [jsonObject[CLTAP_INAPP_TOTAL_DAILY_COUNT] intValue] : -1;
+            self.isRequestForPushPermission = jsonObject[@"rfp"] ? [jsonObject[@"rfp"] boolValue] : NO;
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
-            self.skipSettingsAlert = jsonObject[@"skipSettingsAlert"] ? [jsonObject[@"skipSettingsAlert"] boolValue] : NO;
             NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
             if (inAppId) {
                 self.Id = inAppId;
@@ -113,9 +114,7 @@
             } else {
                 NSDate *now = [NSDate date];
                 NSDate *timeToLiveDate = [now dateByAddingTimeInterval:(48 * 60 * 60)];
-                NSTimeInterval timeToLiveEpoch = [timeToLiveDate timeIntervalSince1970];
-                NSInteger defaultTimeToLive = (long)timeToLiveEpoch;
-                _timeToLive = defaultTimeToLive;
+                _timeToLive = [timeToLiveDate timeIntervalSince1970];
             }
         } @catch (NSException *e) {
             self.error = e.debugDescription;
@@ -197,18 +196,6 @@
     }
     self.buttons = _buttons;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.hasPortrait && !self.hasLandscape && [self deviceOrientationIsLandscape]) {
-            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"portrait", @"landscape"];
-            return;
-        }
-        
-        if (self.hasLandscape && !self.hasPortrait && ![self deviceOrientationIsLandscape]) {
-            self.error = [NSString stringWithFormat:@"The in-app in %@, dismissing %@ InApp Notification.", @"landscape", @"portrait"];
-            return;
-        }
-    });
-    
     switch (self.inAppType) {
         case CTInAppTypeHeader:
         case CTInAppTypeFooter:
@@ -274,6 +261,7 @@
         self.height = displayParams[CLTAP_INAPP_Y_DP] ? [displayParams[CLTAP_INAPP_Y_DP] floatValue] : 0.0;
         self.heightPercent = displayParams[CLTAP_INAPP_Y_PERCENT] ? [displayParams[CLTAP_INAPP_Y_PERCENT] floatValue] : 0.0;
         self.maxPerSession = displayParams[CLTAP_INAPP_MAX_PER_SESSION] ? [displayParams[CLTAP_INAPP_MAX_PER_SESSION] intValue] : -1;
+        self.aspectRatio = [displayParams[CLTAP_INAPP_NOTIF_ASPECT_RATIO] floatValue] ?: 0.0;
     }
 }
 
@@ -290,14 +278,6 @@
 
 - (BOOL)mediaIsVideo {
     return _mediaIsVideo;
-}
-
-- (BOOL)deviceOrientationIsLandscape {
-#if (TARGET_OS_TV)
-    return nil;
-#else
-    return [CTUIUtils isDeviceOrientationLandscape];
-#endif
 }
 
 - (void)setPreparedInAppImage:(UIImage *)inAppImage

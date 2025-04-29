@@ -1,5 +1,6 @@
 project 'CleverTapSDK'
 
+use_frameworks!
 abstract_target 'shared' do
   use_modular_headers!  
 
