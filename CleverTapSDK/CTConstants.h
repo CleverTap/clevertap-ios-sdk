@@ -179,6 +179,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_VARIANT @"Variant"
 #define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
 #define CLTAP_PROP_WZRK_CTA @"wzrk_c2a"
+#define CLTAP_CTA_SWIPE_DISMISS @"swipe-dismiss"
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"
@@ -219,6 +220,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_POSITION_CENTER 'c'
 #define CLTAP_INAPP_NOTIF_DARKEN_SCREEN @"dk"
 #define CLTAP_INAPP_NOTIF_SHOW_CLOSE @"sc"
+#define CLTAP_INAPP_NOTIF_ASPECT_RATIO @"aspectRatio"
 
 #define CLTAP_INAPP_HTML_TYPE @"custom-html"
 

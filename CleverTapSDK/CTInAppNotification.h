@@ -26,6 +26,7 @@
 @property (nonatomic, assign, readonly) float heightPercent;
 @property (nonatomic, assign, readonly) float width;
 @property (nonatomic, assign, readonly) float widthPercent;
+@property (nonatomic, assign, readonly) float aspectRatio;
 
 @property (nonatomic, copy, readonly) NSString *landscapeContentType;
 @property (nonatomic, readonly) UIImage *inAppImage;
