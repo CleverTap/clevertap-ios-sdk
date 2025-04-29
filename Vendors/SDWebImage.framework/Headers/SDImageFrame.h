@@ -24,11 +24,6 @@
  */
 @property (nonatomic, readonly, assign) NSTimeInterval duration;
 
-/// Create a frame instance with specify image and duration
-/// @param image current frame's image
-/// @param duration current frame's duration
-- (nonnull instancetype)initWithImage:(nonnull UIImage *)image duration:(NSTimeInterval)duration;
-
 /**
  Create a frame instance with specify image and duration
 
@@ -36,9 +31,6 @@
  @param duration current frame's duration
  @return frame instance
  */
-+ (nonnull instancetype)frameWithImage:(nonnull UIImage *)image duration:(NSTimeInterval)duration;
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new  NS_UNAVAILABLE;
++ (instancetype _Nonnull)frameWithImage:(UIImage * _Nonnull)image duration:(NSTimeInterval)duration;
 
 @end

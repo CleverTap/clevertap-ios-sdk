@@ -6,14 +6,12 @@
  * file that was distributed with this source code.
  */
 
-#import <Foundation/Foundation.h>
 #import "SDWebImageCompat.h"
+#import "SDImageAPNGCoder.h"
 
-@interface SDWeakProxy : NSProxy
+@interface SDImageAPNGCoder ()
 
-@property (nonatomic, weak, readonly, nullable) id target;
-
-- (nonnull instancetype)initWithTarget:(nonnull id)target;
-+ (nonnull instancetype)proxyWithTarget:(nonnull id)target;
+- (float)sd_frameDurationAtIndex:(NSUInteger)index source:(nonnull CGImageSourceRef)source;
+- (NSUInteger)sd_imageLoopCountWithSource:(nonnull CGImageSourceRef)source;
 
 @end

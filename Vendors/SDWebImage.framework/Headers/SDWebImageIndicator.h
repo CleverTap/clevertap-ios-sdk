@@ -66,7 +66,6 @@
  */
 @interface SDWebImageActivityIndicator (Conveniences)
 
-#if !SD_VISION
 /// These indicator use the fixed color without dark mode support
 /// gray-style activity indicator
 @property (nonatomic, class, nonnull, readonly) SDWebImageActivityIndicator *grayIndicator;
@@ -76,7 +75,6 @@
 @property (nonatomic, class, nonnull, readonly) SDWebImageActivityIndicator *whiteIndicator;
 /// large white-style activity indicator
 @property (nonatomic, class, nonnull, readonly) SDWebImageActivityIndicator *whiteLargeIndicator;
-#endif
 /// These indicator use the system style, supports dark mode if available (iOS 13+/macOS 10.14+)
 /// large activity indicator
 @property (nonatomic, class, nonnull, readonly) SDWebImageActivityIndicator *largeIndicator;
@@ -109,10 +107,8 @@
 
 /// default-style progress indicator
 @property (nonatomic, class, nonnull, readonly) SDWebImageProgressIndicator *defaultIndicator;
-#if SD_UIKIT
 /// bar-style progress indicator
-@property (nonatomic, class, nonnull, readonly) SDWebImageProgressIndicator *barIndicator API_UNAVAILABLE(tvos);
-#endif
+@property (nonatomic, class, nonnull, readonly) SDWebImageProgressIndicator *barIndicator API_UNAVAILABLE(macos, tvos);
 
 @end
 

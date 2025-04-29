@@ -38,9 +38,6 @@ typedef SDWebImageOptionsResult * _Nullable(^SDWebImageOptionsProcessorBlock)(NS
  */
 - (nonnull instancetype)initWithOptions:(SDWebImageOptions)options context:(nullable SDWebImageContext *)context;
 
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new  NS_UNAVAILABLE;
-
 @end
 
 /**
@@ -71,8 +68,5 @@ typedef SDWebImageOptionsResult * _Nullable(^SDWebImageOptionsProcessorBlock)(NS
 
 - (nonnull instancetype)initWithBlock:(nonnull SDWebImageOptionsProcessorBlock)block;
 + (nonnull instancetype)optionsProcessorWithBlock:(nonnull SDWebImageOptionsProcessorBlock)block;
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new  NS_UNAVAILABLE;
 
 @end

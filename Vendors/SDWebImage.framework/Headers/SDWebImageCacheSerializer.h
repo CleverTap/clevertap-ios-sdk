@@ -17,10 +17,6 @@ typedef NSData * _Nullable(^SDWebImageCacheSerializerBlock)(UIImage * _Nonnull i
  */
 @protocol SDWebImageCacheSerializer <NSObject>
 
-/// Provide the image data associated to the image and store to disk cache
-/// @param image The loaded image
-/// @param data The original loaded image data. May be nil when image is transformed (UIImage.sd_isTransformed = YES)
-/// @param imageURL The image URL
 - (nullable NSData *)cacheDataWithImage:(nonnull UIImage *)image originalData:(nullable NSData *)data imageURL:(nullable NSURL *)imageURL;
 
 @end
@@ -32,8 +28,5 @@ typedef NSData * _Nullable(^SDWebImageCacheSerializerBlock)(UIImage * _Nonnull i
 
 - (nonnull instancetype)initWithBlock:(nonnull SDWebImageCacheSerializerBlock)block;
 + (nonnull instancetype)cacheSerializerWithBlock:(nonnull SDWebImageCacheSerializerBlock)block;
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new  NS_UNAVAILABLE;
 
 @end

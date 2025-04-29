@@ -55,26 +55,6 @@
 - (void)setData:(nullable NSData *)data forKey:(nonnull NSString *)key;
 
 /**
- Returns the extended data associated with a given key.
- This method may blocks the calling thread until file read finished.
- 
- @param key A string identifying the data. If nil, just return nil.
- @return The value associated with key, or nil if no value is associated with key.
- */
-- (nullable NSData *)extendedDataForKey:(nonnull NSString *)key;
-
-/**
- Set extended data with a given key.
- 
- @discussion You can set any extended data to exist cache key. Without override the exist disk file data.
- on UNIX, the common way for this is to use the Extended file attributes (xattr)
- 
- @param extendedData The extended data (pass nil to remove).
- @param key The key with which to associate the value. If nil, this method has no effect.
-*/
-- (void)setExtendedData:(nullable NSData *)extendedData forKey:(nonnull NSString *)key;
-
-/**
  Removes the value of the specified key in the cache.
  This method may blocks the calling thread until file delete finished.
  
@@ -129,7 +109,6 @@
 @property (nonatomic, strong, readonly, nonnull) SDImageCacheConfig *config;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new  NS_UNAVAILABLE;
 
 /**
  Move the cache directory from old location to new location, the old location will be removed after finish.

@@ -8,7 +8,7 @@
 
 #import "SDWebImageCompat.h"
 
-@interface UIColor (SDHexString)
+@interface UIColor (HexString)
 
 /**
  Convenience way to get hex string from color. The output should always be 32-bit RGBA hex string like `#00000000`.

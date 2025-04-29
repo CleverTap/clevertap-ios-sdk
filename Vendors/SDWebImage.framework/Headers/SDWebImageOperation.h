@@ -11,13 +11,7 @@
 /// A protocol represents cancelable operation.
 @protocol SDWebImageOperation <NSObject>
 
-/// Cancel the operation
 - (void)cancel;
-
-@optional
-
-/// Whether the operation has been cancelled.
-@property (nonatomic, assign, readonly, getter=isCancelled) BOOL cancelled;
 
 @end
 

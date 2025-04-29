@@ -12,7 +12,7 @@
 
 #import "UIImage+Transform.h"
 
-@interface NSBezierPath (SDRoundedCorners)
+@interface NSBezierPath (RoundedCorners)
 
 /**
  Convenience way to create a bezier path with the specify rounding corners on macOS. Same as the one on `UIBezierPath`.
