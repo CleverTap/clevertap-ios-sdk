@@ -1,5 +1,5 @@
 # System In-App Functions
-CleverTap iOS SDK 7.2.0+ supports a set of built-in in-app functions. They can be assigned to in-app notification button actions or can be used as stand-alone campaigns. To learn more about them see the CleverTap documentation.
+The CleverTap iOS SDK (v7.2.0 and above) supports a set of built-in system in-app functions. These can be triggered either via in-app notification button actions or launched as stand-alone campaigns. For more details, refer to the [CleverTap Documentation](https://developer.clevertap.com/docs/)
 
 ## Open URL
 This function will open url or deeplink for `iOS` URL configured through the CleverTap Dashboard while selecting function as stand-alone in-app template. `Notification Viewed` event is raised for valid URL.
@@ -49,3 +49,6 @@ flowchart TD
     E --- |Notification Clicked event for in-app campaign itself is raised| F([In-app notification dismissed])
     F --> G([App Rating system prompt displayed])
 ```
+
+| :bulb:  Apple limits amount of time you can prompt app review to three times in one year, also avoid showing a request for a review immediately when a user launches your app, even if it isn’t the first time it launches. Refer to the [apple documentation](https://developer.apple.com/documentation/storekit/requesting-app-store-reviews#Overview) for more details. |
+|-----------------------------------------|
