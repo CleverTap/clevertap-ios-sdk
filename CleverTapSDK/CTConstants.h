@@ -27,6 +27,7 @@ extern NSString *const kSessionId;
 [CTLogger logInternalError:e]; }
 
 #define CLTAP_CUSTOM_TEMPLATE_EXCEPTION @"CleverTapCustomTemplateException"
+#define CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION @"CleverTapSystemAppFunctionException"
 
 #pragma mark Constants for General data
 #define CLTAP_REQUEST_TIME_OUT_INTERVAL 10
@@ -284,3 +285,10 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_DATABASE_VERSION 1
 #define CLTAP_EVENT_DB_MAX_ROW_LIMIT (2048 + 256) * 5;
 #define CLTAP_EVENT_DB_ROWS_TO_CLEANUP 2048 + 256;
+
+#pragma mark Constants for System App Functions
+#define CLTAP_PUSH_PERMISSION_TEMPLATE_NAME @"ctsystem_pushpermission"
+#define CLTAP_OPEN_URL_TEMPLATE_NAME @"ctsystem_openurl"
+#define CLTAP_APP_RATING_TEMPLATE_NAME @"ctsystem_apprating"
+#define CLTAP_FB_SETTINGS_KEY @"fbSettings"
+#define CLTAP_OPEN_URL_ACTION_KEY @"iOS"
