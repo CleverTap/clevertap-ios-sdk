@@ -16,6 +16,7 @@
 #import "CTInAppNotificationDisplayDelegateMock.h"
 #import "CTFileDownloaderCustomTemplatesMock.h"
 #import "CTConstants.h"
+#import "CTSystemAppFunctions.h"
 
 @interface CTCustomTemplatesManagerTest : XCTestCase
 
@@ -391,7 +392,7 @@
     XCTAssertFalse([manager isRegisteredTemplateWithName:@"non-existent"]);
     
     CleverTapInstanceConfig *config2 = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId2" accountToken:@"testAccountToken2"];
-    CTCustomTemplatesManager *managerWithNewConfig = [[CTCustomTemplatesManager alloc] initWithConfig:config2];
+    CTCustomTemplatesManager *managerWithNewConfig = [[CTCustomTemplatesManager alloc] initWithConfig:config2 systemAppFunctions:@{}];
     
     XCTAssertTrue([managerWithNewConfig isRegisteredTemplateWithName:templateName1]);
     XCTAssertTrue([managerWithNewConfig isRegisteredTemplateWithName:templateName2]);
@@ -413,7 +414,7 @@
     [CTCustomTemplatesManager registerTemplateProducer:producer];
     
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId" accountToken:@"testAccountToken"];
-    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:config], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
+    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:config systemAppFunctions:@{}], NSException, CLTAP_CUSTOM_TEMPLATE_EXCEPTION);
 }
 
 - (void)testPresenterOnPresent {
@@ -567,6 +568,43 @@
     XCTAssertEqualObjects(expected, actualFromJSON);
 }
 
+#pragma mark - System App Functions
+
+- (void)testSystemTemplatesRegistered {
+    CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
+    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions];
+    
+    XCTAssertTrue([manager isRegisteredTemplateWithName:CLTAP_PUSH_PERMISSION_TEMPLATE_NAME]);
+    XCTAssertTrue([manager isRegisteredTemplateWithName:CLTAP_OPEN_URL_TEMPLATE_NAME]);
+    XCTAssertTrue([manager isRegisteredTemplateWithName:CLTAP_APP_RATING_TEMPLATE_NAME]);
+    XCTAssertFalse([manager isRegisteredTemplateWithName:@"non-existent"]);
+}
+
+- (void)testUserDefinedPushTemplateThrowsException {
+    [self registerTemplate:CLTAP_PUSH_PERMISSION_TEMPLATE_NAME];
+    CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
+    
+    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions], NSException, CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION);
+}
+
+- (void)testUserDefinedOpenUrlTemplateThrowsException {
+    [self registerTemplate:CLTAP_OPEN_URL_TEMPLATE_NAME];
+    CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
+    
+    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions], NSException, CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION);
+}
+
+- (void)testUserDefinedAppRatingTemplateThrowsException {
+    [self registerTemplate:CLTAP_APP_RATING_TEMPLATE_NAME];
+    CTSystemTemplateActionHandler *actionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:actionHandler];
+    
+    XCTAssertThrowsSpecificNamed([[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:systemFunctions], NSException, CLTAP_SYSTEM_APP_FUNCTION_EXCEPTION);
+}
+
 - (CTTemplatePresenterMock *)registerTemplate {
     NSMutableSet *templates = [NSMutableSet set];
     CTTemplatePresenterMock *templatePresenter = [CTTemplatePresenterMock new];
@@ -586,7 +624,7 @@
 }
 
 - (CTCustomTemplatesManager *)templatesManager {
-    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig];
+    CTCustomTemplatesManager *manager = [[CTCustomTemplatesManager alloc] initWithConfig:self.instanceConfig systemAppFunctions:@{}];
     return manager;
 }
 
@@ -604,6 +642,16 @@
         @"type": @"custom-code",
         @"vars": @{}
     };
+}
+
+- (void)registerTemplate:(NSString *)templateName {
+    NSMutableSet *templates = [NSMutableSet set];
+    CTInAppTemplateBuilder *templateBuilder = [CTInAppTemplateBuilder new];
+    [templateBuilder setName:templateName];
+    [templateBuilder setPresenter:[CTTemplatePresenterMock new]];
+    [templates addObject:[templateBuilder build]];
+    CTTestTemplateProducer *producer = [[CTTestTemplateProducer alloc] initWithTemplates:templates];
+    [CTCustomTemplatesManager registerTemplateProducer:producer];
 }
 
 static NSString * const TEMPLATE_NAME = @"Template 1";

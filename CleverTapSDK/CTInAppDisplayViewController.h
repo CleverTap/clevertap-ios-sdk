@@ -18,6 +18,7 @@
 - (void)show:(BOOL)animated;
 - (void)hide:(BOOL)animated;
 - (BOOL)deviceOrientationIsLandscape;
+- (BOOL)isInAppAdvancedBuilder;
 
 - (void)triggerInAppAction:(CTNotificationAction *)action callToAction:(NSString *)callToAction buttonId:(NSString *)buttonId;
 
