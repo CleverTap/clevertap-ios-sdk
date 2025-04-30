@@ -44,7 +44,6 @@
     long encryptionDone = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_ALGORITHM accountID:_config.accountId]
                                         withResetValue:0];
     
-    // If encryption is done, mark migration as complete and return
     if (encryptionDone) {
         [CTPreferences putInt:1 forKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_MIGRATION_STATUS accountID:_config.accountId]];
         return NO;
@@ -122,14 +121,24 @@
 
             if (partiallyDecryptedIdentifier != nil) {
                 decryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
+                
+                if (decryptedIdentifier == nil) {
+                    decryptedIdentifier = partiallyDecryptedIdentifier;
+                }
             }
             
             if (decryptedIdentifier) {
-                NSString *finalEncryptedIdentifier = decryptedIdentifier;
+                NSString *finalEncryptedIdentifier = nil;
                 
                 if (_config.encryptionLevel == CleverTapEncryptionMedium) {
-                    NSString *partiallyEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
-                    finalEncryptedIdentifier = [_cryptManager encryptString:partiallyEncryptedIdentifier];
+                    if (decryptedIdentifier == partiallyDecryptedIdentifier) {
+                        finalEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
+                    } else {
+                        NSString *partiallyEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
+                        finalEncryptedIdentifier = [_cryptManager encryptString:partiallyEncryptedIdentifier];
+                    }
+                } else {
+                    finalEncryptedIdentifier = decryptedIdentifier;
                 }
 
                 updatedCache[[NSString stringWithFormat:@"%@_%@", key, finalEncryptedIdentifier]] = value;
