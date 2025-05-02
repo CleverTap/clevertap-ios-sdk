@@ -2208,7 +2208,6 @@ static BOOL sharedInstanceErrorLogged;
         @try {
             if (_config.encryptionInTransitEnabled) {
                 if (@available(iOS 13.0, *)) {
-                    // Encrypt the payload if pubkey is provided.
                     NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
                     if (encryptedDict.count > 0) {
                         additionalHeaders[ENCRYPTION_HEADER] = @"true";
