@@ -3,9 +3,13 @@ import CryptoKit
 import Security
 
 @available(iOSApplicationExtension 13.0, *)
+
 @objc class NetworkEncryptionManager: NSObject {
     
     @objc static let shared = NetworkEncryptionManager()
+    @objc static let ITP = "itp"
+    @objc static let ITK = "itk"
+    @objc static let ITV = "itv"
     private override init() {}
     
     private let keyQueue = DispatchQueue(label: "com.clevertap.NetworkEncryptionManager.keyqueue")
@@ -56,9 +60,9 @@ import Security
     @objc func decrypt(responseData: Data) -> Data {
         guard let response = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
             JSONSerialization.isValidJSONObject(response),
-              let nonce = response["iv"] as? String,
+              let nonce = response[NetworkEncryptionManager.ITV] as? String,
               let nonceData = Data(base64Encoded: nonce),
-              let encryptedPayload = response["encryptedPayload"] as? String,
+              let encryptedPayload = response[NetworkEncryptionManager.ITP] as? String,
               let encryptedData = Data(base64Encoded: encryptedPayload)
         else {
             return Data()

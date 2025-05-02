@@ -491,10 +491,6 @@ static BOOL sharedInstanceErrorLogged;
         // save config to defaults
         [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
         
-        // Initialise a session/symmetric key only if encryption in transit is enabled.
-        if ([config encryptionInTransitEnabled]) {
-        }
-        
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
         [self initNetworking];
@@ -2216,14 +2212,13 @@ static BOOL sharedInstanceErrorLogged;
                     NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
                     if (encryptedDict.count > 0) {
                         additionalHeaders[ENCRYPTION_HEADER] = @"true";
-                        additionalHeaders[ENCRYPTION_HEADER_ALGORITHM] = AES_HEADER;
                         
                         NSString *encryptedPayload = encryptedDict[@"encodedPayload"];
                         NSData *nonceData = encryptedDict[@"nonceData"];
                         finalPayload = @{
-                            @"itp": encryptedPayload,
-                            @"itk": [[NetworkEncryptionManager shared]getSessionKeyBase64],
-                            @"itv": [nonceData base64EncodedStringWithOptions:kNilOptions]
+                            NetworkEncryptionManager.ITP: encryptedPayload,
+                            NetworkEncryptionManager.ITK: [[NetworkEncryptionManager shared]getSessionKeyBase64],
+                            NetworkEncryptionManager.ITV: [nonceData base64EncodedStringWithOptions:kNilOptions]
                         };
                     }
                 }
