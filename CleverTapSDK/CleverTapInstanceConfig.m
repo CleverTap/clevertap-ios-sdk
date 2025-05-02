@@ -279,7 +279,7 @@
     if (!_isDefaultInstance) {
         _encryptionInTransitEnabled = encryptionInTransitEnabled;
     } else {
-        CleverTapLogStaticInfo("CleverTap public key for default instance can't be updated from setPubkey method");
+        CleverTapLogStaticInfo("CleverTap encryptionInTransitEnabled for default instance can't be enabled from setEncryptionInTransitEnabled method");
     }
 }
 
