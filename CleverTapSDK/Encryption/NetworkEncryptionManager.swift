@@ -2,20 +2,19 @@ import Foundation
 import CryptoKit
 import Security
 
-@available(iOSApplicationExtension 13.0, *)
-
-@objc class NetworkEncryptionManager: NSObject {
+@available(iOS 13.0, *)
+@objc public class NetworkEncryptionManager: NSObject {
     
-    @objc static let shared = NetworkEncryptionManager()
-    @objc static let ITP = "itp"
-    @objc static let ITK = "itk"
-    @objc static let ITV = "itv"
+    @objc public static let shared = NetworkEncryptionManager()
+    @objc public static let ITP = "itp"
+    @objc public static let ITK = "itk"
+    @objc public static let ITV = "itv"
     private override init() {}
     
     private let keyQueue = DispatchQueue(label: "com.clevertap.NetworkEncryptionManager.keyqueue")
     private var sessionKey: SymmetricKey?
     
-    private func getOrGenerateSessionKey() -> SymmetricKey {
+    func getOrGenerateSessionKey() -> SymmetricKey {
         return keyQueue.sync {
             if let key = sessionKey {
                 return key
@@ -28,13 +27,13 @@ import Security
         }
     }
     
-    @objc func getSessionKeyBase64() -> String? {
+    @objc public func getSessionKeyBase64() -> String? {
         let key = getOrGenerateSessionKey()
         let keyData = key.withUnsafeBytes { Data($0) }
         return keyData.base64EncodedString()
     }
     
-    @objc func encrypt(object: Any) -> [String: Any] {
+    @objc public func encrypt(object: Any) -> [String: Any] {
         do {
             guard JSONSerialization.isValidJSONObject(object),
                   let data = try? JSONSerialization.data(withJSONObject: object, options: []) else {
@@ -45,11 +44,11 @@ import Security
             let nonceData = Data(nonce)
             let sealedBox = try AES.GCM.seal(data, using: getOrGenerateSessionKey(), nonce: nonce)
             
-            // Combine Ciphertext + Tag (this is what Java expects)
+            // Combine Ciphertext + Tag because the server expects it this way
             let combinedData = sealedBox.ciphertext + sealedBox.tag
-            let encodedPayload = combinedData.base64EncodedString()
+            let encryptedPayload = combinedData.base64EncodedString()
             
-            return ["encodedPayload": encodedPayload, "nonceData": nonceData]
+            return ["encryptedPayload": encryptedPayload, "nonceData": nonceData]
         }
         catch {
             NSLog("Encryption in transit error", error.localizedDescription)
@@ -57,9 +56,9 @@ import Security
         }
     }
     
-    @objc func decrypt(responseData: Data) -> Data {
+    @objc public func decrypt(responseData: Data) -> Data {
         guard let response = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
-            JSONSerialization.isValidJSONObject(response),
+              JSONSerialization.isValidJSONObject(response),
               let nonce = response[NetworkEncryptionManager.ITV] as? String,
               let nonceData = Data(base64Encoded: nonce),
               let encryptedPayload = response[NetworkEncryptionManager.ITP] as? String,
