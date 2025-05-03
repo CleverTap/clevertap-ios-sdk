@@ -2212,7 +2212,7 @@ static BOOL sharedInstanceErrorLogged;
                     if (encryptedDict.count > 0) {
                         additionalHeaders[ENCRYPTION_HEADER] = @"true";
                         
-                        NSString *encryptedPayload = encryptedDict[@"encodedPayload"];
+                        NSString *encryptedPayload = encryptedDict[@"encryptedPayload"];
                         NSData *nonceData = encryptedDict[@"nonceData"];
                         finalPayload = @{
                             NetworkEncryptionManager.ITP: encryptedPayload,
