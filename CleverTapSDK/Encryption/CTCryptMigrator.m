@@ -339,7 +339,7 @@
         if ([_piiKeys containsObject:key] && value && ![_cryptManager isTextAESGCMEncrypted:value]) {
             NSString *decryptedString = [_cryptManager decryptString:value encryptionAlgorithm:AES];
             
-            if (!decryptedString) {
+            if (decryptedString == nil || [decryptedString isEqual: @""]) {
                 CleverTapLogInfo(self.config.logLevel, @"Error: Decryption failed for key: %@", key);
                 updatedProfile[key] = profile[key];
             } else {
