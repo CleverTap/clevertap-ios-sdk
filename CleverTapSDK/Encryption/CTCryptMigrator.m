@@ -252,7 +252,16 @@
 
 - (BOOL)migrateUserProfileData {
     NSString *profileFileName = [self profileFileName];
-    
+    return [self migrateProfileWithFileName:profileFileName];
+}
+
+- (BOOL)migrateOldUserIfNeeded:(NSString *)newDeviceID {
+    NSString *profileFileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, newDeviceID];
+    return [self migrateProfileWithFileName:profileFileName];
+}
+
+// Helper method containing the common migration logic
+- (BOOL)migrateProfileWithFileName:(NSString *)profileFileName {
     if (!profileFileName || profileFileName.length == 0) {
         CleverTapLogInfo(self.config.logLevel, @"Error: Profile file name is nil or empty.");
         return NO;
@@ -286,6 +295,8 @@
 }
 
 - (NSMutableDictionary *)decryptOldPIIData:(NSMutableDictionary *)profile {
+    // This method is already well-defined and doesn't need changes
+    // Code remains the same as in the original
     if (!profile || profile.count == 0) {
         CleverTapLogInfo(self.config.logLevel, @"Warning: Profile dictionary is nil or empty. Skipping decryption.");
         return [NSMutableDictionary dictionary];
@@ -331,7 +342,6 @@
     CleverTapLogInfo(self.config.logLevel, @"Decryption of old PII data completed successfully.");
     return updatedProfile;
 }
-
 
 - (NSString *)profileFileName {
     return [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, _deviceInfo.deviceId];
