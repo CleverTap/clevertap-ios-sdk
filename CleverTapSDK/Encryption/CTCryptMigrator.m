@@ -134,7 +134,7 @@
             if (partiallyDecryptedIdentifier != nil) {
                 decryptedIdentifier = [_cryptManager decryptString:partiallyDecryptedIdentifier encryptionAlgorithm:AES];
                 
-                if (decryptedIdentifier == nil) {
+                if (decryptedIdentifier == nil || [decryptedIdentifier isEqual: @""]) {
                     decryptedIdentifier = partiallyDecryptedIdentifier;
                 }
             }
