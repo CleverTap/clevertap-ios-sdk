@@ -2629,9 +2629,9 @@ static BOOL sharedInstanceErrorLogged;
         
         if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
+            [self.cryptMigrator migrateOldUserIfNeeded:cachedGUID];
         } else if (self.config.useCustomCleverTapId){
             [self.deviceInfo forceUpdateCustomDeviceID:cleverTapID];
-            [self.cryptMigrator migrateOldUserIfNeeded:cachedGUID];
         } else {
             [self.deviceInfo forceNewDeviceID];
         }

@@ -172,21 +172,28 @@
     }
 }
 
-#pragma mark - In-app Migration
+#pragma mark - In-App Data Migration
 
 - (BOOL)migrateInAppData {
-    return ([self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY] &&
-            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS] &&
-            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS]);
+    return ([self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY deviceID:_deviceInfo.deviceId] &&
+            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS deviceID:_deviceInfo.deviceId] &&
+            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS deviceID:_deviceInfo.deviceId]);
 }
 
-- (BOOL)migrateInAppsWithKeySuffix:(NSString *)keySuffix {
+- (BOOL)migrateInAppDataForOldProfileData:(NSString *)newDeviceID {
+    return ([self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY deviceID:newDeviceID] &&
+            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_CS deviceID:newDeviceID] &&
+            [self migrateInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS deviceID:newDeviceID]);
+}
+
+// Unified method that handles both current and new device ID scenarios
+- (BOOL)migrateInAppsWithKeySuffix:(NSString *)keySuffix deviceID:(NSString *)deviceID {
     if (!keySuffix || keySuffix.length == 0) {
         CleverTapLogInfo(self.config.logLevel, @"Error: Key suffix is nil or empty.");
         return NO;
     }
     
-    NSString *key = [self inAppTypeWithSuffix:keySuffix];
+    NSString *key = [self inAppTypeWithSuffix:keySuffix deviceID:deviceID];
     if (!key) {
         CleverTapLogInfo(self.config.logLevel, @"Error: Failed to generate storage key.");
         return NO;
@@ -233,7 +240,9 @@
             CleverTapLogInfo(self.config.logLevel, @"Error: Encryption failed after decryption.");
             return NO;
         }
-        NSString *newStorageKey = [self inAppTypeWithSuffix:keySuffix];
+        
+        // Here we use the current device ID for the new storage key
+        NSString *newStorageKey = [self inAppTypeWithSuffix:keySuffix deviceID:_deviceInfo.deviceId];
         [CTPreferences putString:migratedEncryptedString forKey:newStorageKey];
         
         CleverTapLogInfo(self.config.logLevel, @"GUID migration completed successfully for key: %@", keySuffix);
@@ -244,19 +253,27 @@
     return YES;
 }
 
+// Unified method for generating the storage key with any device ID
+- (NSString *)inAppTypeWithSuffix:(NSString *)suffix deviceID:(NSString *)deviceID {
+    return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, deviceID, suffix];
+}
+
+// For backward compatibility
 - (NSString *)inAppTypeWithSuffix:(NSString *)suffix {
-    return [NSString stringWithFormat:@"%@:%@:%@", _config.accountId, _deviceInfo.deviceId, suffix];
+    return [self inAppTypeWithSuffix:suffix deviceID:_deviceInfo.deviceId];
+}
+
+- (void)migrateOldUserIfNeeded:(NSString *)newDeviceID {
+    NSString *profileFileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, newDeviceID];
+    [self migrateInAppDataForOldProfileData:newDeviceID];
+    [self migrateProfileWithFileName:profileFileName];
+    return;
 }
 
 #pragma mark - User Profile Migration
 
 - (BOOL)migrateUserProfileData {
     NSString *profileFileName = [self profileFileName];
-    return [self migrateProfileWithFileName:profileFileName];
-}
-
-- (BOOL)migrateOldUserIfNeeded:(NSString *)newDeviceID {
-    NSString *profileFileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, newDeviceID];
     return [self migrateProfileWithFileName:profileFileName];
 }
 
