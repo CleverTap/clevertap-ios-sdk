@@ -27,6 +27,7 @@
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel];
+        [self performMigrationForInApps];
         if ([self isMigrationNeeded]) {
             [self performMigration];
         }
@@ -59,6 +60,23 @@
     return NO;
 }
 
+- (void)performMigrationForInApps {
+    NSString *inAppMigrationError = @"";
+    BOOL isInAppDataMigrationSuccessful = [self migrateInAppData];
+    if (!isInAppDataMigrationSuccessful) {
+        inAppMigrationError = [inAppMigrationError stringByAppendingFormat:@"%@%@",
+                               inAppMigrationError.length > 0 ? @", " : @"",
+                           @"In-app data migration failed"];
+    }
+    
+    if (isInAppDataMigrationSuccessful) {
+        CleverTapLogDebug(_config.logLevel, @"%@: inApp Migration completed successfully", self);
+    }
+    else {
+        CleverTapLogDebug(_config.logLevel, @"%@:inApp Migration failed: %@", self, inAppMigrationError);
+    }
+}
+
 - (void)performMigration {
     NSString *migrationErrors = @"";
     
@@ -76,17 +94,11 @@
                            @"User profile migration failed"];
     }
     
-    BOOL isInAppDataMigrationSuccessful = [self migrateInAppData];
-    if (!isInAppDataMigrationSuccessful) {
-        migrationErrors = [migrationErrors stringByAppendingFormat:@"%@%@",
-                           migrationErrors.length > 0 ? @", " : @"",
-                           @"In-app data migration failed"];
-    }
-    
-    if (isGUIDMigrationSuccessful && isUserProfileMigrationSuccessful && isInAppDataMigrationSuccessful) {
+    if (isGUIDMigrationSuccessful && isUserProfileMigrationSuccessful) {
         [CTPreferences putInt:1 forKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_MIGRATION_STATUS accountID:_config.accountId]];
         CleverTapLogDebug(_config.logLevel, @"%@: Migration completed successfully", self);
-    } else {
+    }
+    else {
         CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, migrationErrors);
     }
 }
