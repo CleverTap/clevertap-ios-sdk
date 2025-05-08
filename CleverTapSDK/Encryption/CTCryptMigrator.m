@@ -27,12 +27,47 @@
         _deviceInfo = deviceInfo;
         _piiKeys = CLTAP_ENCRYPTION_PII_DATA;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_config.accountId encryptionLevel:_config.encryptionLevel];
-        [self performMigrationForInApps];
+        if ([self isInAppsMigrationNeeded]) {
+            [self performMigrationForInApps];
+        }
         if ([self isMigrationNeeded]) {
             [self performMigration];
         }
     }
     return self;
+}
+
+- (BOOL)isInAppsMigrationNeeded {
+    // Check if InApps migration has already been done
+    NSString *inAppsMigrationKey = [CTUtils getKeyWithSuffix:@"inapp_migration_done" accountID:_config.accountId];
+    long inAppsMigrationDone = [CTPreferences getIntForKey:inAppsMigrationKey withResetValue:0];
+    
+    if (inAppsMigrationDone == 1) {
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)performMigrationForInApps {
+    NSString *inAppMigrationError = @"";
+    BOOL isInAppDataMigrationSuccessful = [self migrateInAppData:nil];
+    if (!isInAppDataMigrationSuccessful) {
+        inAppMigrationError = [inAppMigrationError stringByAppendingFormat:@"%@%@",
+                               inAppMigrationError.length > 0 ? @", " : @"",
+                           @"In-app data migration failed"];
+    }
+    
+    if (isInAppDataMigrationSuccessful) {
+        CleverTapLogDebug(_config.logLevel, @"%@: inApp Migration completed successfully", self);
+        
+        // Mark InApps migration as done
+        NSString *inAppsMigrationKey = [CTUtils getKeyWithSuffix:@"inapp_migration_done" accountID:_config.accountId];
+        [CTPreferences putInt:1 forKey:inAppsMigrationKey];
+    }
+    else {
+        CleverTapLogDebug(_config.logLevel, @"%@:inApp Migration failed: %@", self, inAppMigrationError);
+    }
 }
 
 - (BOOL)isMigrationNeeded {
@@ -58,23 +93,6 @@
     }
     
     return NO;
-}
-
-- (void)performMigrationForInApps {
-    NSString *inAppMigrationError = @"";
-    BOOL isInAppDataMigrationSuccessful = [self migrateInAppData:nil];
-    if (!isInAppDataMigrationSuccessful) {
-        inAppMigrationError = [inAppMigrationError stringByAppendingFormat:@"%@%@",
-                               inAppMigrationError.length > 0 ? @", " : @"",
-                           @"In-app data migration failed"];
-    }
-    
-    if (isInAppDataMigrationSuccessful) {
-        CleverTapLogDebug(_config.logLevel, @"%@: inApp Migration completed successfully", self);
-    }
-    else {
-        CleverTapLogDebug(_config.logLevel, @"%@:inApp Migration failed: %@", self, inAppMigrationError);
-    }
 }
 
 - (void)performMigration {
