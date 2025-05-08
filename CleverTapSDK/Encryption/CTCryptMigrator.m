@@ -97,8 +97,7 @@
     if (isGUIDMigrationSuccessful && isUserProfileMigrationSuccessful) {
         [CTPreferences putInt:1 forKey:[CTUtils getKeyWithSuffix:CLTAP_ENCRYPTION_MIGRATION_STATUS accountID:_config.accountId]];
         CleverTapLogDebug(_config.logLevel, @"%@: Migration completed successfully", self);
-    }
-    else {
+    } else {
         CleverTapLogDebug(_config.logLevel, @"%@: Migration failed: %@", self, migrationErrors);
     }
 }
@@ -143,7 +142,7 @@
                 NSString *finalEncryptedIdentifier = nil;
                 
                 if (_config.encryptionLevel == CleverTapEncryptionMedium) {
-                    if (decryptedIdentifier == partiallyDecryptedIdentifier) {
+                    if ([decryptedIdentifier isEqualToString:partiallyDecryptedIdentifier]) {
                         finalEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
                     } else {
                         NSString *partiallyEncryptedIdentifier = [_cryptManager encryptString:decryptedIdentifier];
@@ -245,7 +244,7 @@
         NSString *newStorageKey = [self inAppTypeWithSuffix:keySuffix deviceID:_deviceInfo.deviceId];
         [CTPreferences putString:migratedEncryptedString forKey:newStorageKey];
         
-        CleverTapLogInfo(self.config.logLevel, @"GUID migration completed successfully for key: %@", keySuffix);
+        CleverTapLogInfo(self.config.logLevel, @"inApp migration completed successfully for key: %@", keySuffix);
     } else {
         CleverTapLogInfo(self.config.logLevel, @"Value is already AES-GCM encrypted, no migration needed for key: %@", keySuffix);
     }
@@ -263,7 +262,7 @@
     return [self inAppTypeWithSuffix:suffix deviceID:_deviceInfo.deviceId];
 }
 
-- (void)migrateOldUserIfNeeded:(NSString *)newDeviceID {
+- (void)migrateCachedUserIfNeeded:(NSString *)newDeviceID {
     NSString *profileFileName = [NSString stringWithFormat:@"clevertap-%@-%@-userprofile.plist", self.config.accountId, newDeviceID];
     [self migrateInAppDataForOldProfileData:newDeviceID];
     [self migrateProfileWithFileName:profileFileName];
@@ -293,7 +292,7 @@
         profile = [NSMutableDictionary dictionary];
     }
     
-    NSMutableDictionary *updatedProfile = [self decryptOldPIIData:profile];
+    NSMutableDictionary *updatedProfile = [self decryptCachedPIIData:profile];
     
     if (!updatedProfile) {
         CleverTapLogInfo(self.config.logLevel, @"Error: Failed to decrypt or update profile data.");
@@ -311,9 +310,7 @@
     return YES;
 }
 
-- (NSMutableDictionary *)decryptOldPIIData:(NSMutableDictionary *)profile {
-    // This method is already well-defined and doesn't need changes
-    // Code remains the same as in the original
+- (NSMutableDictionary *)decryptCachedPIIData:(NSMutableDictionary *)profile {
     if (!profile || profile.count == 0) {
         CleverTapLogInfo(self.config.logLevel, @"Warning: Profile dictionary is nil or empty. Skipping decryption.");
         return [NSMutableDictionary dictionary];

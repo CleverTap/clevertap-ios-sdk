@@ -18,9 +18,6 @@ class AESGCMCryptTests: XCTestCase {
         super.setUp()
         // Create a fresh instance for each test
         crypter = AESGCMCrypt(keychainTag: testKeychainTag)
-        
-        // Clear keychain between tests to ensure clean state
-        clearKeychain()
     }
     
     override func tearDown() {
