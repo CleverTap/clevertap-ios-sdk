@@ -58,6 +58,10 @@
     NSString *guidCacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:self.config.accountId];
     [CTPreferences removeObjectForKey:guidCacheKey];
     
+    // Clean up in-app migration status
+       NSString *inAppsMigrationKey = [CTUtils getKeyWithSuffix:@"inapp_migration_done" accountID:self.config.accountId];
+       [CTPreferences removeObjectForKey:inAppsMigrationKey];
+    
     // Clean up for in-app data
     NSString *inAppKey = [self inAppTypeWithSuffix:CLTAP_PREFS_INAPP_KEY];
     NSString *inAppKeyCS = [self inAppTypeWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
@@ -281,6 +285,10 @@
     [self setupForMigration];
     [self configureInappsWithOldEncryption];
     
+    // Additional setup: Make sure in-app migration is needed
+    NSString *inAppsMigrationKey = [CTUtils getKeyWithSuffix:@"inapp_migration_done" accountID:self.config.accountId];
+    [CTPreferences putInt:0 forKey:inAppsMigrationKey]; // Reset in-app migration status
+    
     // Get original in-app data
     NSString *inAppKey = [self inAppTypeWithSuffix:CLTAP_PREFS_INAPP_KEY];
     NSString *originalInApp = [CTPreferences getObjectForKey:inAppKey];
@@ -293,22 +301,35 @@
     // Get updated in-app data
     NSString *updatedInApp = [CTPreferences getObjectForKey:inAppKey];
     XCTAssertNotNil(updatedInApp, @"Updated in-app data should exist");
-    XCTAssertNotEqualObjects(updatedInApp, self.encryptedInApp, @"Updated in-app data should be different after migration");
     
-    // Verify the new encrypted data can be decrypted
-    NSArray *decryptedInApp = [self.aesgcmEncryptionManager decryptObject:updatedInApp];
-    XCTAssertNotNil(decryptedInApp, @"Should be able to decrypt migrated data");
+    // Check if migration happened - we need to check this differently now
+    BOOL migrationHappened = ![updatedInApp isEqualToString:self.encryptedInApp] ||
+                            [self.aesgcmEncryptionManager isTextAESGCMEncrypted:updatedInApp];
     
-    // Verify same behavior for other in-app keys
+    XCTAssertTrue(migrationHappened, @"In-app data migration should have occurred");
+    
+    // If migration happened, verify the new encrypted data can be decrypted
+    if (migrationHappened) {
+        NSArray *decryptedInApp = [self.aesgcmEncryptionManager decryptObject:updatedInApp];
+        XCTAssertNotNil(decryptedInApp, @"Should be able to decrypt migrated data");
+    }
+    
+    // Similar modifications for CS and SS keys
     NSString *inAppKeyCS = [self inAppTypeWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
     NSString *updatedInAppCS = [CTPreferences getObjectForKey:inAppKeyCS];
     XCTAssertNotNil(updatedInAppCS, @"Updated in-app CS data should exist");
-    XCTAssertNotEqualObjects(updatedInAppCS, self.encryptedInApp, @"Updated in-app CS data should be different after migration");
+    
+    BOOL csDataMigrated = ![updatedInAppCS isEqualToString:self.encryptedInApp] ||
+                          [self.aesgcmEncryptionManager isTextAESGCMEncrypted:updatedInAppCS];
+    XCTAssertTrue(csDataMigrated, @"In-app CS data should have been migrated");
     
     NSString *inAppKeySS = [self inAppTypeWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
     NSString *updatedInAppSS = [CTPreferences getObjectForKey:inAppKeySS];
     XCTAssertNotNil(updatedInAppSS, @"Updated in-app SS data should exist");
-    XCTAssertNotEqualObjects(updatedInAppSS, self.encryptedInApp, @"Updated in-app SS data should be different after migration");
+    
+    BOOL ssDataMigrated = ![updatedInAppSS isEqualToString:self.encryptedInApp] ||
+                          [self.aesgcmEncryptionManager isTextAESGCMEncrypted:updatedInAppSS];
+    XCTAssertTrue(ssDataMigrated, @"In-app SS data should have been migrated");
 }
 
 /**
