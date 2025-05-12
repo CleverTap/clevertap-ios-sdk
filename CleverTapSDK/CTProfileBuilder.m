@@ -385,7 +385,8 @@
 }
 
 + (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id)cachedValue {
-    NSNumber *newValue;
+    // Set the new value to be the increment/decrement value in case there is no cached value
+    NSNumber *newValue = value;
     if ([cachedValue isKindOfClass: [NSNumber class]]) {
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
         CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
