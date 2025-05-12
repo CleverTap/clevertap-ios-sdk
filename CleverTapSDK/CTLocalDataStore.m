@@ -516,7 +516,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
 }
 
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
+- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)userAttributeChangeProperties:(NSDictionary *)event {
     NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
     NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
     NSDictionary *profile = event[CLTAP_PROFILE];
@@ -544,7 +544,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
                      [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
                      [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
-                newValue = [CTProfileBuilder _constructLocalMultiValueWithOriginalValues:value forKey:key usingCommand:commandIdentifier localDataStore:self];
+                // Multi values are not supported as user property triggers
+                // The multi values changes are already persisted locally when building the event
             }
         } else if ([newValue isKindOfClass:[NSString class]]) {
             // Remove the date prefix before evaluation and persisting
@@ -569,6 +570,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             [fieldsToPersistLocally setObject:newValue forKey:key];
         }
     }
+    // Persist the changes
     [self updateProfileFieldsLocally:fieldsToPersistLocally];
     return userAttributesChangeProperties;
 }
