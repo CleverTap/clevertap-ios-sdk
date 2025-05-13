@@ -36,13 +36,13 @@
 
 - (void)testGetUserAttributeChangePropertiesWithEmptyEvent {
     NSDictionary *event = @{};
-    NSDictionary *result = [self.dataStore getUserAttributeChangeProperties:event];
+    NSDictionary *result = [self.dataStore userAttributeChangeProperties:event];
     XCTAssertEqual(result.count, 0);
 }
 
 - (void)testGetUserAttributeChangePropertiesWithNoProfile {
     NSDictionary *event = @{@"someKey": @"someValue"};
-    NSDictionary *result = [self.dataStore getUserAttributeChangeProperties:event];
+    NSDictionary *result = [self.dataStore userAttributeChangeProperties:event];
     XCTAssertEqual(result.count, 0);
 }
 
@@ -66,7 +66,7 @@
     id mockGetProfileFieldForKeyAge = OCMStub([dataStoreMock getProfileFieldForKey:@"age"]).andReturn(mockOldValueForAge);
     
     // Call the method and get the result
-    NSDictionary *result = [dataStoreMock getUserAttributeChangeProperties:event];
+    NSDictionary *result = [dataStoreMock userAttributeChangeProperties:event];
     
     // Verify the result dictionary
     XCTAssertEqual(result.count, 2);
@@ -100,7 +100,7 @@
     id mockGetProfileFieldForKey = OCMStub([dataStoreMock getProfileFieldForKey:@"points"]).andReturn(mockOldValue);
     
     // Call the method and get the result
-    NSDictionary *result = [dataStoreMock getUserAttributeChangeProperties:event];
+    NSDictionary *result = [dataStoreMock userAttributeChangeProperties:event];
     
     // Verify the result dictionary
     XCTAssertEqual(result.count, 1);

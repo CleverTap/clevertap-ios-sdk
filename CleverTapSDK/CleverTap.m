@@ -2011,8 +2011,12 @@ static BOOL sharedInstanceErrorLogged;
         [self.dispatchQueueManager runSerialAsync:^{
             [self evaluateOnEvent:event withType: eventType];
         }];
+#else
+        // persist the profile changes
+        if (eventType == CleverTapEventTypeProfile) {
+            [self.localDataStore userAttributeChangeProperties:event];
+        }
 #endif
-        
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];
         } else {
@@ -2035,7 +2039,7 @@ static BOOL sharedInstanceErrorLogged;
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
-        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore getUserAttributeChangeProperties:event];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:event];
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
@@ -2896,7 +2900,6 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildAddMultiValue:value forKey:key
                           localDataStore:self.localDataStore
                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
@@ -2905,7 +2908,6 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildAddMultiValues:values forKey:key
                            localDataStore:self.localDataStore
                         completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
@@ -2914,7 +2916,6 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildRemoveMultiValue:value forKey:key
                              localDataStore:self.localDataStore
                           completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
@@ -2927,26 +2928,25 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
-    [CTProfileBuilder buildIncrementValueBy: value forKey: key
-                             localDataStore: _localDataStore
-                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+    [CTProfileBuilder buildIncrementValueBy:value forKey:key
+                             localDataStore:_localDataStore
+                          completionHandler:^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey:operatorDict errors:errors];
     }];
 }
 
 - (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     [CTProfileBuilder buildDecrementValueBy: value forKey: key
                              localDataStore: _localDataStore
-                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey:operatorDict errors:errors];
     }];
 }
 
 
 #pragma mark - Private Profile API
 
-- (void)_handleIncrementDecrementProfilePushForKey:(NSString *)key updatedValue:(NSNumber *)updatedValue operatorDict: (NSDictionary *)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
-    
+- (void)_handleIncrementDecrementProfilePushForKey:(NSDictionary *)operatorDict errors:(NSArray<CTValidationResult*>*)errors {
     if (errors) {
         [self.validationResultStack pushValidationResults:errors];
         return;
@@ -2964,7 +2964,6 @@ static BOOL sharedInstanceErrorLogged;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;
     [self queueEvent:event withType:CleverTapEventTypeProfile];
-    
 }
 
 - (void)_handleMultiValueProfilePush:(NSDictionary*)customFields updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
