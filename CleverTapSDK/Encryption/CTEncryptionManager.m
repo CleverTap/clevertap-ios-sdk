@@ -275,7 +275,7 @@ API_AVAILABLE(ios(13.0))
                     if (decryptedData) {
                         if (@available(iOS 11.0, tvOS 11.0, *)) {
                             NSError *unarchiveError = nil;
-                            id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class]] fromData:decryptedData error:&unarchiveError];
+                            id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class, NSNull.class]] fromData:decryptedData error:&unarchiveError];
                             
                             if (unarchiveError) {
                                 CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
@@ -301,7 +301,7 @@ API_AVAILABLE(ios(13.0))
                 if (decryptedData) {
                     if (@available(iOS 11.0, tvOS 11.0, *)) {
                         NSError *unarchiveError = nil;
-                        id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class]] fromData:decryptedData error:&unarchiveError];
+                        id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class, NSNull.class]] fromData:decryptedData error:&unarchiveError];
                         
                         if (unarchiveError) {
                             CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);

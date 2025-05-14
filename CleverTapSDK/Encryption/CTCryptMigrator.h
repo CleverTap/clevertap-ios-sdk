@@ -28,4 +28,6 @@
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  andDeviceInfo:(CTDeviceInfo*)deviceInfo;
 
+- (void)migrateCachedUserIfNeeded:(NSString *)newDeviceID;
+
 @end
