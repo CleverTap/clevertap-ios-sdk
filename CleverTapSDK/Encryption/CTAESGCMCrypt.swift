@@ -180,12 +180,6 @@ public class AESGCMCrypt: NSObject {
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         guard status == errSecSuccess, let keyData = result as? Data else {
-
-//        guard status == errSecSuccess else {
-//            throw CryptError.keyRetrievalFailed
-//        }
-//        
-//        guard let keyData = result as? Data else {
             return nil
         }
         return SymmetricKey(data: keyData)
@@ -200,7 +194,6 @@ public class AESGCMCrypt: NSObject {
         case invalidFormat
         case invalidBase64
         case invalidDataLength
-        case keyRetrievalFailed
         case keychainSaveFailed
         case authenticationFailed
     }
@@ -231,15 +224,13 @@ public class AESGCMCrypt: NSObject {
         case .invalidDataLength:
             errorMessage = "Data length is invalid."
             errorCode = 1006
-        case .keyRetrievalFailed:
-            errorMessage = "Failed to retrieve key from keychain."
-            errorCode = 1007
+
         case .keychainSaveFailed:
             errorMessage = "Failed to save key to keychain."
-            errorCode = 1008
+            errorCode = 1007
         case .authenticationFailed:
             errorMessage = "Authentication failed."
-            errorCode = 1009
+            errorCode = 1008
         }
         
         errorPointer?.pointee = NSError(domain: "AESGCMCrypt", code: errorCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])

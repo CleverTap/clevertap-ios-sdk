@@ -21,6 +21,7 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
     AES_GCM = 2     ///< AES-GCM encryption mode
 };
 
+NS_ASSUME_NONNULL_BEGIN
 /**
  * @class CTEncryptionManager
  *
@@ -133,3 +134,5 @@ typedef NS_ENUM(int, CleverTapEncryptionAlgorithm) {
 - (BOOL)isTextAESGCMEncrypted:(NSString *)encryptedText;
 
 @end
+
+NS_ASSUME_NONNULL_END

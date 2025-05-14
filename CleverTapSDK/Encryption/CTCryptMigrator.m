@@ -128,7 +128,7 @@
 
     if (!cachedGUIDS || cachedGUIDS.count == 0) {
         CleverTapLogInfo(self.config.logLevel, @"No cached GUIDs found for migration.");
-        return NO;
+        return YES;
     }
 
     NSMutableDictionary *updatedCache = [NSMutableDictionary new];
@@ -203,10 +203,6 @@
 
 // Unified method that handles both current and new device ID scenarios
 - (BOOL)migrateInAppsWithKeySuffix:(NSString *)keySuffix deviceID:(NSString *)deviceID {
-    if (!keySuffix || keySuffix.length == 0) {
-        CleverTapLogInfo(self.config.logLevel, @"Error: Key suffix is nil or empty.");
-        return NO;
-    }
     
     NSString *key = [self inAppTypeWithSuffix:keySuffix deviceID:deviceID];
     if (!key) {
