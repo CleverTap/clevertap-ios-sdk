@@ -182,9 +182,6 @@
     // Create test user profile with PII data
     NSMutableDictionary *profileData = [NSMutableDictionary dictionary];
     
-    // Add PII data encrypted with old algorithm
-    NSArray *piiKeys = CLTAP_ENCRYPTION_PII_DATA; // @[@"Identity", @"Email", @"Phone", @"Name"]
-    
     profileData[@"Identity"] = [self.aesEncryptionManager encryptString:@"user123" encryptionAlgorithm:AES];
     profileData[@"Email"] = [self.aesEncryptionManager encryptString:@"user@example.com" encryptionAlgorithm:AES];
     profileData[@"Phone"] = [self.aesEncryptionManager encryptString:@"+1234567890" encryptionAlgorithm:AES];
@@ -197,7 +194,10 @@
     
     // Save to profile file
     NSString *profileFileName = [self profileFileName];
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wnonnull"
     [CTPreferences archiveObject:profileData forFileName:profileFileName config:nil];
+    #pragma clang diagnostic pop
 }
 
 #pragma mark - Test Cases

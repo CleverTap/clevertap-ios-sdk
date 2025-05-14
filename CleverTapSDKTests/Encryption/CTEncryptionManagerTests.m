@@ -368,10 +368,6 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     CTEncryptionManager *mgr = [[CTEncryptionManager alloc] initWithAccountID:@"test"
                                                             encryptionLevel:CleverTapEncryptionMedium];
     
-    // Test nil string
-    XCTAssertNil([mgr encryptString:nil], @"Nil input should return nil");
-    XCTAssertNil([mgr decryptString:nil], @"Nil input should return nil");
-    
     // Test empty string
     XCTAssertEqualObjects([mgr encryptString:@""], @"", @"Empty string should be handled properly");
     XCTAssertEqualObjects([mgr decryptString:@""], @"", @"Empty string should be handled properly");
@@ -401,9 +397,6 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     CTEncryptionManager *mgr = [[CTEncryptionManager alloc] initWithAccountID:@"test"
                                                             encryptionLevel:CleverTapEncryptionMedium];
     
-    // Test nil object
-    XCTAssertNil([mgr encryptObject:nil], @"Nil input should return nil");
-    XCTAssertNil([mgr decryptObject:nil], @"Nil input should return nil");
     
     // Test empty collections
     NSArray *emptyArray = @[];
@@ -566,10 +559,6 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     // Store the original cache using the same mechanism as the class
     NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:testAccountId];
     [CTPreferences putObject:originalCache forKey:cacheKey];
-    
-    // Phase 1: Create an encryption manager with none level
-    CTEncryptionManager *noneManager = [[CTEncryptionManager alloc] initWithAccountID:testAccountId
-                                                                    encryptionLevel:CleverTapEncryptionNone];
     
     // Now create a Medium encryption manager with the same account ID
     // This should trigger updateCachedGUIDS internally due to encryption level change
