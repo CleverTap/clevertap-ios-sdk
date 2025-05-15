@@ -174,6 +174,10 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             
             if (aspectRatio > 0.0) {
                 inAppHeight = safeAreaTop + (inAppWidth / aspectRatio);
+                float screenHeight = activeWindowScene.coordinateSpace.bounds.size.height;
+                if (inAppHeight > screenHeight) {
+                    inAppHeight = screenHeight;
+                }
             }
             CGFloat originY = (activeWindowScene.coordinateSpace.bounds.size.height - inAppHeight);
             
