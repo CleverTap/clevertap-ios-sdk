@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad12_9rounded" orientation="landscape">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad12_9rounded" orientation="landscape" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -30,8 +28,9 @@
                             <subviews>
                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VJl-sd-Bwg">
                                     <rect key="frame" x="0.0" y="0.0" width="1253" height="704"/>
-                                    <accessibility key="accessibilityConfiguration">
+                                    <accessibility key="accessibilityConfiguration" identifier="inapp_bg_img">
                                         <accessibilityTraits key="traits" image="YES" notEnabled="YES"/>
+                                        <bool key="isElement" value="YES"/>
                                     </accessibility>
                                 </imageView>
                             </subviews>
@@ -56,8 +55,9 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="miN-Dj-q0M" customClass="CTDismissButton">
                     <rect key="frame" x="1294.5" y="145" width="30" height="30"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    <accessibility key="accessibilityConfiguration">
+                    <accessibility key="accessibilityConfiguration" identifier="inapp_close_btn">
                         <accessibilityTraits key="traits" button="YES"/>
+                        <bool key="isElement" value="YES"/>
                     </accessibility>
                     <constraints>
                         <constraint firstAttribute="height" constant="30" id="HLs-NS-P2z"/>
@@ -76,6 +76,7 @@
                 <constraint firstAttribute="bottom" secondItem="d2N-AV-T2i" secondAttribute="bottom" priority="750" constant="160" id="n8U-Fy-TIv"/>
                 <constraint firstItem="d2N-AV-T2i" firstAttribute="centerX" secondItem="Btf-45-s0W" secondAttribute="centerX" id="nb8-1b-ki0"/>
             </constraints>
+            <point key="canvasLocation" x="21" y="12"/>
         </view>
     </objects>
 </document>
