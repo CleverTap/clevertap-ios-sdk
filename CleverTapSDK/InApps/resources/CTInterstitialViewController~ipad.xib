@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad9_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -34,6 +32,7 @@
                     <subviews>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="89O-XH-LuZ">
                             <rect key="frame" x="40" y="60" width="368" height="26.5"/>
+                            <accessibility key="accessibilityConfiguration" identifier="inapp_title"/>
                             <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
@@ -47,8 +46,9 @@
                                 </view>
                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lGp-jE-jtn" customClass="SDAnimatedImageView">
                                     <rect key="frame" x="0.0" y="0.0" width="368" height="207"/>
-                                    <accessibility key="accessibilityConfiguration">
+                                    <accessibility key="accessibilityConfiguration" identifier="inapp_bg_img">
                                         <accessibilityTraits key="traits" image="YES" notEnabled="YES"/>
+                                        <bool key="isElement" value="YES"/>
                                     </accessibility>
                                 </imageView>
                             </subviews>
@@ -66,6 +66,7 @@
                         </view>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CeH-TW-Bdl">
                             <rect key="frame" x="40" y="353.5" width="368" height="21.5"/>
+                            <accessibility key="accessibilityConfiguration" identifier="inapp_message"/>
                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
@@ -73,8 +74,9 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UJJ-Bb-uyT">
                             <rect key="frame" x="40" y="625" width="368" height="112"/>
                             <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Sou-0L-cUH">
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Sou-0L-cUH">
                                     <rect key="frame" x="0.0" y="0.0" width="368" height="48"/>
+                                    <accessibility key="accessibilityConfiguration" identifier="inapp_btn1"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="48" id="6qJ-OA-lUQ"/>
                                     </constraints>
@@ -84,8 +86,9 @@
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FxD-hz-xFp">
                                     <rect key="frame" x="0.0" y="48" width="368" height="64"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LBu-nV-PVe">
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LBu-nV-PVe">
                                             <rect key="frame" x="0.0" y="16" width="368" height="48"/>
+                                            <accessibility key="accessibilityConfiguration" identifier="inapp_btn2"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                             <state key="normal" title="Button"/>
                                         </button>
@@ -133,6 +136,7 @@
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ukk-N0-fz7" customClass="CTDismissButton">
                     <rect key="frame" x="593" y="98.5" width="30" height="30"/>
+                    <accessibility key="accessibilityConfiguration" identifier="inapp_close_btn"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="30" id="Cqa-DU-f3S"/>
                         <constraint firstAttribute="width" constant="30" id="WJf-2T-qXq"/>
@@ -152,6 +156,7 @@
                 <constraint firstItem="Abw-BQ-gZu" firstAttribute="top" secondItem="Ukk-N0-fz7" secondAttribute="bottom" constant="-15" id="YV9-hq-HA5"/>
                 <constraint firstAttribute="trailing" secondItem="Abw-BQ-gZu" secondAttribute="trailing" priority="750" constant="160" id="zvk-5g-6uL"/>
             </constraints>
+            <point key="canvasLocation" x="14" y="-10"/>
         </view>
     </objects>
 </document>
