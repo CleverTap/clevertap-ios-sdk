@@ -969,14 +969,14 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Timestamp bookkeeping helpers
 
 - (void)setLastRequestTimestamp:(double)ts {
-    [CTPreferences putInt:ts forKey:LAST_TS_KEY];
+    [CTPreferences putInt:ts forKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config]];
 }
 
 - (NSTimeInterval)getLastRequestTimeStamp {
     if (self.config.isDefaultInstance) {
-        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:LAST_TS_KEY withResetValue:0]];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config:self.config] withResetValue:[CTPreferences getIntForKey:LAST_TS_KEY withResetValue:0]];
     } else {
-        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config] withResetValue:0];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config:self.config] withResetValue:0];
     }
 }
 
