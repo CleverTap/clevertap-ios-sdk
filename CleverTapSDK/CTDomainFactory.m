@@ -12,6 +12,8 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTRequestFactory.h"
 #import "CleverTap+SCDomain.h"
+#import "CTRequestSender.h"
+#import "CTDispatchQueueManager.h"
 
 NSString *const kREDIRECT_HEADER = @"X-WZRK-RD";
 NSString *const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
@@ -88,16 +90,16 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     if (region) {
         region = [region stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
         if (region.length > 0) {
-            self.explictEndpointDomain = [NSString stringWithFormat:@"%@.%@", region, kCTApiDomain];
-            return self.explictEndpointDomain;
+            self.explicitEndpointDomain = [NSString stringWithFormat:@"%@.%@", region, kCTApiDomain];
+            return self.explicitEndpointDomain;
         }
     }
     NSString *proxyDomain = self.config.proxyDomain;
     if (proxyDomain) {
         proxyDomain = [proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
         if (proxyDomain.length > 0) {
-            self.explictEndpointDomain = proxyDomain;
-            return self.explictEndpointDomain;
+            self.explicitEndpointDomain = proxyDomain;
+            return self.explicitEndpointDomain;
         }
     }
     
@@ -115,16 +117,16 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     if (region) {
         region = [region stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
         if (region.length > 0) {
-            self.explictNotifViewedEndpointDomain = [NSString stringWithFormat:@"%@-%@", region, kCTNotifViewedApiDomain];
-            return self.explictNotifViewedEndpointDomain;
+            self.explicitNotifViewedEndpointDomain = [NSString stringWithFormat:@"%@-%@", region, kCTNotifViewedApiDomain];
+            return self.explicitNotifViewedEndpointDomain;
         }
     }
     NSString *spikyProxyDomain = self.config.spikyProxyDomain;
     if (spikyProxyDomain) {
         spikyProxyDomain = [spikyProxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].lowercaseString;
         if (spikyProxyDomain.length > 0) {
-            self.explictNotifViewedEndpointDomain = spikyProxyDomain;
-            return self.explictNotifViewedEndpointDomain;
+            self.explicitNotifViewedEndpointDomain = spikyProxyDomain;
+            return self.explicitNotifViewedEndpointDomain;
         }
     }
     NSString *domain = nil;
@@ -168,7 +170,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 #pragma mark - Handshake Handling
 
 - (BOOL)needsHandshake {
-    if ([self isMuted] || self.explictEndpointDomain) {
+    if ([self isMuted] || self.explicitEndpointDomain) {
         return NO;
     }
     return self.redirectDomain == nil;
@@ -200,8 +202,8 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200) {
                 NSDictionary *headers = httpResponse.allHeaderFields;
-                BOOL redirectUpdated = [self updateStateFromResponseHeaders:headers];
-                BOOL notifViewedRedirectUpdated = [self updateStateForNotificationsFromResponseHeaders:headers];
+                BOOL redirectUpdated = [self updateDomainFromResponseHeaders:headers];
+                BOOL notifViewedRedirectUpdated = [self updateNotificationViewedDomainFromResponseHeaders:headers];
                 [self updateMutedFromResponseHeaders:headers];
                 [self handleHandshakeSuccess];
                 
@@ -245,7 +247,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     }
 }
 
-- (BOOL)updateStateFromResponseHeaders:(NSDictionary *)headers {
+- (BOOL)updateDomainFromResponseHeaders:(NSDictionary *)headers {
     CleverTapLogInternal(self.config.logLevel, @"%@: Processing response with headers:%@", self, headers);
     BOOL shouldRedirect = NO;
     
@@ -268,7 +270,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     return shouldRedirect;
 }
 
-- (BOOL)updateStateForNotificationsFromResponseHeaders:(NSDictionary *)headers {
+- (BOOL)updateNotificationViewedDomainFromResponseHeaders:(NSDictionary *)headers {
     CleverTapLogInternal(self.config.logLevel, @"%@: Processing response with headers:%@", self, headers);
     BOOL shouldRedirect = NO;
     

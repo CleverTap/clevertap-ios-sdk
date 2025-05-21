@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "CleverTapInstanceConfig.h"
-#import "CTRequestSender.h"
-#import "CTDispatchQueueManager.h"
+@class CTRequestSender;
+@class CTDispatchQueueManager;
 #if CLEVERTAP_SSL_PINNING
 #import "CTPinnedNSURLSessionDelegate.h"
 #endif
@@ -26,9 +26,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTDomainFactory : NSObject
 
 @property (nonatomic, strong, nullable) NSString *redirectDomain;
-@property (nonatomic, strong, nullable) NSString *explictEndpointDomain;
+@property (nonatomic, strong, nullable) NSString *explicitEndpointDomain;
 @property (nonatomic, strong, nullable) NSString *redirectNotifViewedDomain;
-@property (nonatomic, strong, nullable) NSString *explictNotifViewedEndpointDomain;
+@property (nonatomic, strong, nullable) NSString *explicitNotifViewedEndpointDomain;
 @property (nonatomic, strong, nullable) NSString *signedCallDomain;
 
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
@@ -47,8 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isMuted;
 - (BOOL)needsHandshake;
 - (void)runSerialAsyncEnsureHandshake:(void(^)(BOOL success))block;
-- (BOOL)updateStateFromResponseHeaders:(NSDictionary *)headers;
-- (BOOL)updateStateForNotificationsFromResponseHeaders:(NSDictionary *)headers;
+- (BOOL)updateDomainFromResponseHeaders:(NSDictionary *)headers;
+- (BOOL)updateNotificationViewedDomainFromResponseHeaders:(NSDictionary *)headers;
 - (void)setRequestSender:(CTRequestSender *)requestSender;
 - (NSString *)domainString;
 
