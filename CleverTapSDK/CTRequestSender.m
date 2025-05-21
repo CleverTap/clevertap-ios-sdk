@@ -85,7 +85,10 @@
                                   dataTaskWithRequest:ctRequest.urlRequest
                                   completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error) {
-            ctRequest.errorBlock(error);
+            if (ctRequest.errorBlock) {
+                ctRequest.errorBlock(error);
+            }
+            return;
         }
         ctRequest.responseBlock(data, response);
     }];
