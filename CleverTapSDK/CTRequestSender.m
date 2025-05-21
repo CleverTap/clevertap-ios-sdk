@@ -26,7 +26,7 @@
 
 @implementation CTRequestSender
 
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nonnull)redirectDomain {
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nullable)redirectDomain {
     if ((self = [super init])) {
         self.config = config;
         self.redirectDomain = redirectDomain;
@@ -36,7 +36,7 @@
 }
 
 #if CLEVERTAP_SSL_PINNING
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nonnull)redirectDomain pinnedNSURLSessionDelegate:(CTPinnedNSURLSessionDelegate * _Nonnull)pinnedNSURLSessionDelegate sslCertNames:(NSArray * _Nonnull)sslCertNames {
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nullable)redirectDomain pinnedNSURLSessionDelegate:(CTPinnedNSURLSessionDelegate * _Nonnull)pinnedNSURLSessionDelegate sslCertNames:(NSArray * _Nonnull)sslCertNames {
     if ((self = [super init])) {
         self.config = config;
         self.urlSessionDelegate = pinnedNSURLSessionDelegate;

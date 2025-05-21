@@ -20,6 +20,7 @@ NSString *const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
 NSString *const kMUTE_HEADER = @"X-WZRK-MUTE";
 
 NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
+NSTimeInterval const kMUTE_SECONDS = 24 * 60 * 60;
 
 @interface CTDomainFactory ()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -63,6 +64,9 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 
 - (void)setRequestSender:(CTRequestSender *)requestSender {
     _requestSender = requestSender;
+    if (_requestSender && self.redirectDomain) {
+        _requestSender.redirectDomain = self.redirectDomain;
+    }
 }
 
 - (void)loadMutedTs {
@@ -74,7 +78,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 }
 
 - (BOOL)isMuted {
-    return [NSDate new].timeIntervalSince1970 - self.lastMutedTs < 24 * 60 * 60;
+    return [NSDate new].timeIntervalSince1970 - self.lastMutedTs < kMUTE_SECONDS;
 }
 
 - (void)clearRedirectDomain {
@@ -253,7 +257,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     
     @try {
         NSString *redirectDomain = headers[kREDIRECT_HEADER];
-        if (redirectDomain != nil) {
+        if (redirectDomain != nil && [redirectDomain isKindOfClass:[NSString class]] && redirectDomain.length > 0) {
             NSString *currentDomain = self.redirectDomain;
             self.redirectDomain = redirectDomain;
             if (![self.redirectDomain isEqualToString:currentDomain]) {
@@ -277,7 +281,9 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     
     @try {
         NSString *redirectNotifViewedDomain = headers[kREDIRECT_NOTIF_VIEWED_HEADER];
-        if (redirectNotifViewedDomain != nil) {
+        if (redirectNotifViewedDomain != nil &&
+            [redirectNotifViewedDomain isKindOfClass:[NSString class]] &&
+            redirectNotifViewedDomain.length > 0) {
             NSString *currentDomain = self.redirectNotifViewedDomain;
             self.redirectNotifViewedDomain = redirectNotifViewedDomain;
             if (![self.redirectNotifViewedDomain isEqualToString:currentDomain]) {
@@ -340,18 +346,18 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
 // Updates the format of the domain.
 // From `in1.clevertap-prod.com` to region.auth.domain (i.e. in1.auth.clevertap-prod.com)
 - (NSString *)domainString {
-    if (self.redirectDomain != nil) {
-        NSArray *listItems = [self.redirectDomain componentsSeparatedByString:@"."];
-        NSString *domainItem = [listItems[0] stringByAppendingString:@".auth"];
-        for (int i = 1; i < listItems.count; i++ ) {
-            NSString *dotString = [@"." stringByAppendingString: listItems[i]];
-            domainItem = [domainItem stringByAppendingString: dotString];
-        }
-        self.signedCallDomain = domainItem;
-        return domainItem;
-    } else {
+    if (self.redirectDomain == nil) {
         return nil;
     }
+    
+    NSArray *listItems = [self.redirectDomain componentsSeparatedByString:@"."];
+    NSString *domainItem = [listItems[0] stringByAppendingString:@".auth"];
+    for (int i = 1; i < listItems.count; i++ ) {
+        NSString *dotString = [@"." stringByAppendingString: listItems[i]];
+        domainItem = [domainItem stringByAppendingString: dotString];
+    }
+    self.signedCallDomain = domainItem;
+    return domainItem;
 }
 
 @end

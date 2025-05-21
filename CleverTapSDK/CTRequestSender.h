@@ -13,12 +13,12 @@
 #endif
 
 @interface CTRequestSender : NSObject
-@property (nonatomic, strong, nullable) NSString *redirectDomain;
+@property (nonatomic, copy, nullable) NSString *redirectDomain;
 
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nonnull)redirectDomain;
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nullable)redirectDomain;
 
 #if CLEVERTAP_SSL_PINNING
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nonnull)redirectDomain pinnedNSURLSessionDelegate:(CTPinnedNSURLSessionDelegate * _Nonnull)pinnedNSURLSessionDelegate sslCertNames:(NSArray * _Nonnull)sslCertNames;
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nullable)redirectDomain pinnedNSURLSessionDelegate:(CTPinnedNSURLSessionDelegate * _Nonnull)pinnedNSURLSessionDelegate sslCertNames:(NSArray * _Nonnull)sslCertNames;
 #endif
 
 - (void)send:(CTRequest * _Nonnull)ctRequest;
