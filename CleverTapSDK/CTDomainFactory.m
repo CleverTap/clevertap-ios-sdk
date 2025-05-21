@@ -258,6 +258,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
             self.redirectDomain = redirectDomain;
             if (![self.redirectDomain isEqualToString:currentDomain]) {
                 shouldRedirect = YES;
+                [self.requestSender setRedirectDomain:self.redirectDomain];
                 [self persistRedirectDomain];
                 CleverTapLogInternal(self.config.logLevel, @"%@: Redirect domain updated to: %@", self, redirectDomain);
                 [self onDomainAvailable];
@@ -300,7 +301,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
     }
 }
 
-- (void)runSerialAsyncEnsureHandshake:(void(^)(BOOL success))block {
+- (void)runSerialAsyncEnsureHandshake:(void(^ _Nullable)(BOOL success))block {
     [self.dispatchQueueManager runSerialAsync:^{
         if (![self needsHandshake]) {
             if (block) {

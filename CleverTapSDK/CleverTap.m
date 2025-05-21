@@ -658,7 +658,7 @@ static BOOL sharedInstanceErrorLogged;
     
     // Set the request sender in the domain factory so it can perform handshakes
     [self.domainFactory setRequestSender:self.requestSender];
-    // ensure the dispatchQueueManager is initialized
+    // Ensure the dispatchQueueManager is initialized
     [self.domainFactory setDispatchQueueManager:self.dispatchQueueManager];
     [self.domainFactory setDomainDelegate:self.domainDelegate];
     [self.domainFactory setDomainResolverDelegate:self];

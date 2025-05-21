@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)isMuted;
 - (BOOL)needsHandshake;
-- (void)runSerialAsyncEnsureHandshake:(void(^)(BOOL success))block;
+- (void)runSerialAsyncEnsureHandshake:(void(^ _Nullable)(BOOL success))block;
 - (BOOL)updateDomainFromResponseHeaders:(NSDictionary *)headers;
 - (BOOL)updateNotificationViewedDomainFromResponseHeaders:(NSDictionary *)headers;
 - (void)setRequestSender:(CTRequestSender *)requestSender;
