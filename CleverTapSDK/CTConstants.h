@@ -10,6 +10,9 @@ extern NSString *const ACCOUNT_TOKEN_HEADER;
 extern NSString *const REDIRECT_DOMAIN_KEY;
 extern NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY;
 
+extern NSString *const LAST_TS_KEY;
+extern NSString *const FIRST_TS_KEY;
+
 extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;

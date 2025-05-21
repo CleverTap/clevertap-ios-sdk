@@ -115,20 +115,8 @@ NSString *const kQUEUE_NAME_PROFILE = @"net_queue_profile";
 NSString *const kQUEUE_NAME_EVENTS = @"events";
 NSString *const kQUEUE_NAME_NOTIFICATIONS = @"notifications";
 
-NSString *const kREDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
-NSString *const kREDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
-NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
-
-NSString *const kREDIRECT_HEADER = @"X-WZRK-RD";
-NSString *const kREDIRECT_NOTIF_VIEWED_HEADER = @"X-WZRK-SPIKY-RD";
-NSString *const kMUTE_HEADER = @"X-WZRK-MUTE";
-
-
 NSString *const kI_KEY = @"CLTAP_I_KEY";
 NSString *const kJ_KEY = @"CLTAP_J_KEY";
-
-NSString *const kFIRST_TS_KEY = @"CLTAP_FIRST_TS_KEY";
-NSString *const kLAST_TS_KEY = @"CLTAP_LAST_TS_KEY";
 
 NSString *const kMultiUserPrefix = @"mt_";
 
@@ -188,6 +176,9 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (atomic, strong) CTProductConfigController *productConfigController;
 @property (atomic, strong, readwrite, nonnull) CleverTapProductConfig *productConfig;
 
+@end
+
+@interface CleverTap () <CTDomainResolverDelegate> {}
 @end
 
 #import <UserNotifications/UserNotifications.h>
@@ -386,37 +377,37 @@ static BOOL sharedInstanceErrorLogged;
 + (nullable instancetype)_sharedInstanceWithCleverTapID:(NSString *)cleverTapID {
     @try {
         [instanceLock lock];
-    if (_defaultInstanceConfig == nil) {
-        if (!_plistInfo.accountId || !_plistInfo.accountToken) {
-            if (!sharedInstanceErrorLogged) {
-                sharedInstanceErrorLogged = YES;
-                CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
-            }
-            return nil;
-        }
-        if (_plistInfo.proxyDomain.length > 0 && _plistInfo.spikyProxyDomain.length > 0) {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain spikyProxyDomain:_plistInfo.spikyProxyDomain isDefaultInstance:YES];
-        } else if (_plistInfo.proxyDomain.length > 0) {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
-        } else if (_plistInfo.handshakeDomain.length > 0) {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken handshakeDomain:_plistInfo.handshakeDomain isDefaultInstance:YES];
-        } else {
-            _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
-        }
-        
         if (_defaultInstanceConfig == nil) {
-            return nil;
+            if (!_plistInfo.accountId || !_plistInfo.accountToken) {
+                if (!sharedInstanceErrorLogged) {
+                    sharedInstanceErrorLogged = YES;
+                    CleverTapLogStaticInfo(@"Unable to initialize default CleverTap SDK instance. %@: %@ %@: %@", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken);
+                }
+                return nil;
+            }
+            if (_plistInfo.proxyDomain.length > 0 && _plistInfo.spikyProxyDomain.length > 0) {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain spikyProxyDomain:_plistInfo.spikyProxyDomain isDefaultInstance:YES];
+            } else if (_plistInfo.proxyDomain.length > 0) {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken proxyDomain:_plistInfo.proxyDomain isDefaultInstance:YES];
+            } else if (_plistInfo.handshakeDomain.length > 0) {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken handshakeDomain:_plistInfo.handshakeDomain isDefaultInstance:YES];
+            } else {
+                _defaultInstanceConfig = [[CleverTapInstanceConfig alloc] initWithAccountId:_plistInfo.accountId accountToken:_plistInfo.accountToken accountRegion:_plistInfo.accountRegion isDefaultInstance:YES];
+            }
+            
+            if (_defaultInstanceConfig == nil) {
+                return nil;
+            }
+            _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
+            _defaultInstanceConfig.logLevel = [self getDebugLevel];
+            _defaultInstanceConfig.enableFileProtection = _plistInfo.enableFileProtection;
+            _defaultInstanceConfig.handshakeDomain = _plistInfo.handshakeDomain;
+            NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
+            NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
+            NSString *spikyProxyDomainLog = (!_plistInfo.spikyProxyDomain || _plistInfo.spikyProxyDomain.length < 1) ? @"" : _plistInfo.spikyProxyDomain;
+            CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@ %@: %d", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog, CLTAP_ENABLE_FILE_PROTECTION, _plistInfo.enableFileProtection);
         }
-        _defaultInstanceConfig.enablePersonalization = [CleverTap isPersonalizationEnabled];
-        _defaultInstanceConfig.logLevel = [self getDebugLevel];
-        _defaultInstanceConfig.enableFileProtection = _plistInfo.enableFileProtection;
-        _defaultInstanceConfig.handshakeDomain = _plistInfo.handshakeDomain;
-        NSString *regionLog = (!_plistInfo.accountRegion || _plistInfo.accountRegion.length < 1) ? @"default" : _plistInfo.accountRegion;
-        NSString *proxyDomainLog = (!_plistInfo.proxyDomain || _plistInfo.proxyDomain.length < 1) ? @"" : _plistInfo.proxyDomain;
-        NSString *spikyProxyDomainLog = (!_plistInfo.spikyProxyDomain || _plistInfo.spikyProxyDomain.length < 1) ? @"" : _plistInfo.spikyProxyDomain;
-        CleverTapLogStaticInfo(@"Initializing default CleverTap SDK instance. %@: %@ %@: %@ %@: %@ %@: %@ %@: %@ %@: %d", CLTAP_ACCOUNT_ID_LABEL, _plistInfo.accountId, CLTAP_TOKEN_LABEL, _plistInfo.accountToken, CLTAP_REGION_LABEL, regionLog, CLTAP_PROXY_DOMAIN_LABEL, proxyDomainLog, CLTAP_SPIKY_PROXY_DOMAIN_LABEL, spikyProxyDomainLog, CLTAP_ENABLE_FILE_PROTECTION, _plistInfo.enableFileProtection);
-    }
-    return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
+        return [self _instanceWithConfig:_defaultInstanceConfig andCleverTapID:cleverTapID];
     } @finally {
         [instanceLock unlock];
     }
@@ -627,12 +618,12 @@ static BOOL sharedInstanceErrorLogged;
 + (void)_setCredentialsWithAccountID:(NSString *)accountID token:(NSString *)token {
     @try {
         [instanceLock lock];
-    if (_defaultInstanceConfig) {
-        CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
-        return;
-    }
-    accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (_defaultInstanceConfig) {
+            CleverTapLogStaticDebug(@"CleverTap SDK already initialized with accountID: %@ and token: %@. Cannot change credentials to %@ : %@", _defaultInstanceConfig.accountId, _defaultInstanceConfig.accountToken, accountID, token);
+            return;
+        }
+        accountID = [accountID stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        token = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     } @finally {
         [instanceLock unlock];
     }
@@ -656,22 +647,24 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)initNetworking {
-    if (self.config.isDefaultInstance) {
-        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kMUTED_TS_KEY withResetValue:0]];
-    } else {
-        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:0];
-    }
-
 #if CLEVERTAP_SSL_PINNING
-     self.urlSessionDelegate = [[CTPinnedNSURLSessionDelegate alloc] initWithConfig:self.config];
-    self.domainFactory = [[CTDomainFactory alloc]initWithConfig:self.config pinnedNSURLSessionDelegate: self.urlSessionDelegate sslCertNames: sslCertNames];
-    self.requestSender = [[CTRequestSender alloc]initWithConfig:self.config redirectDomain:self.domainFactory.redirectDomain pinnedNSURLSessionDelegate: self.urlSessionDelegate sslCertNames: sslCertNames];
+    self.urlSessionDelegate = [[CTPinnedNSURLSessionDelegate alloc] initWithConfig:self.config];
+    self.domainFactory = [[CTDomainFactory alloc] initWithConfig:self.config pinnedNSURLSessionDelegate:self.urlSessionDelegate sslCertNames: sslCertNames];
+    self.requestSender = [[CTRequestSender alloc] initWithConfig:self.config redirectDomain:self.domainFactory.redirectDomain pinnedNSURLSessionDelegate:self.urlSessionDelegate sslCertNames:sslCertNames];
 #else
-    self.domainFactory = [[CTDomainFactory alloc]initWithConfig:self.config];
-    
-    self.requestSender = [[CTRequestSender alloc]initWithConfig:self.config redirectDomain:self.domainFactory.redirectDomain];
+    self.domainFactory = [[CTDomainFactory alloc] initWithConfig:self.config];
+    self.requestSender = [[CTRequestSender alloc] initWithConfig:self.config redirectDomain:self.domainFactory.redirectDomain];
 #endif
-    [self doHandshakeAsyncWithCompletion:nil];
+    
+    // Set the request sender in the domain factory so it can perform handshakes
+    [self.domainFactory setRequestSender:self.requestSender];
+    // ensure the dispatchQueueManager is initialized
+    [self.domainFactory setDispatchQueueManager:self.dispatchQueueManager];
+    [self.domainFactory setDomainDelegate:self.domainDelegate];
+    [self.domainFactory setDomainResolverDelegate:self];
+    
+    // Perform handshake if needed
+    [self.domainFactory runSerialAsyncEnsureHandshake:nil];
 }
 
 - (void)setUserSetLocation:(CLLocationCoordinate2D)location {
@@ -693,138 +686,14 @@ static BOOL sharedInstanceErrorLogged;
     return _userSetLocation;
 }
 
-
 # pragma mark - Handshake Handling
 
-- (void)persistMutedTs {
-    self.lastMutedTs = [NSDate new].timeIntervalSince1970;
-    [CTPreferences putInt:self.lastMutedTs forKey:[CTPreferences storageKeyWithSuffix:kMUTED_TS_KEY config: self.config]];
-}
-
-- (BOOL)needHandshake {
-    if ([self isMuted] || self.domainFactory.explictEndpointDomain) {
-        return NO;
-    }
-    return self.domainFactory.redirectDomain == nil;
-}
-
-- (void)doHandshakeAsyncWithCompletion:(void (^ _Nullable )(void))taskBlock {
-    [self.dispatchQueueManager runSerialAsync:^{
-        if (![self needHandshake]) {
-            //self.domainFactory.redirectDomain contains value
-            [self onDomainAvailable];
-            if (taskBlock) {
-                taskBlock();
-            }
-            return;
-        }
-        CleverTapLogInternal(self.config.logLevel, @"%@: starting handshake with %@", self, kHANDSHAKE_URL);
-        
-        // Need to simulate a synchronous request
-        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-        
-        CTRequest *ctRequest = [CTRequestFactory helloRequestWithConfig:self.config];
-        [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
-            
-            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-                NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-                if (httpResponse.statusCode == 200) {
-                    [self updateStateFromResponseHeadersShouldRedirect:httpResponse.allHeaderFields];
-                    [self updateStateFromResponseHeadersShouldRedirectForNotif:httpResponse.allHeaderFields];
-                    [self handleHandshakeSuccess];
-                } else {
-                    [self onDomainUnavailable];
-                }
-            } else {
-                [self onDomainUnavailable];
-            }
-            if (taskBlock) {
-                taskBlock();
-            }
-                
-            dispatch_semaphore_signal(semaphore);
-        }];
-        [ctRequest onError:^(NSError * _Nullable error) {
-            [self onDomainUnavailable];
-            dispatch_semaphore_signal(semaphore);
-        }];
-        [self.requestSender send:ctRequest];
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-    }];
-}
-
-- (void)runSerialAsyncEnsureHandshake:(void(^)(void))block {
-    if ([self needHandshake]) {
-        [self.dispatchQueueManager runSerialAsync:^{
-            [self doHandshakeAsyncWithCompletion:^{
-                block();
-            }];
-        }];
-    }
-    else {
-        [self.dispatchQueueManager runSerialAsync:^{
-            block();
-        }];
-    }
-}
-
-- (BOOL)updateStateFromResponseHeadersShouldRedirectForNotif:(NSDictionary *)headers {
-    CleverTapLogInternal(self.config.logLevel, @"%@: processing response with headers:%@", self, headers);
-    BOOL shouldRedirect = NO;
-    @try {
-        NSString *redirectNotifViewedDomain = headers[kREDIRECT_NOTIF_VIEWED_HEADER];
-        if (redirectNotifViewedDomain != nil) {
-            NSString *currentDomain = self.domainFactory.redirectNotifViewedDomain;
-            self.domainFactory.redirectNotifViewedDomain = redirectNotifViewedDomain;
-            if (![self.domainFactory.redirectNotifViewedDomain isEqualToString:currentDomain]) {
-                shouldRedirect = YES;
-                self.domainFactory.redirectNotifViewedDomain = redirectNotifViewedDomain;
-                [self.domainFactory persistRedirectNotifViewedDomain];
-            }
-        }
-        NSString *mutedString = headers[kMUTE_HEADER];
-        BOOL muted = (mutedString == nil ? NO : [mutedString boolValue]);
-        if (muted) {
-            [self persistMutedTs];
-            [self clearQueues];
-        }
-    } @catch(NSException *e) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Error processing Notification Viewed response headers: %@", self, e.debugDescription);
-    }
-    return shouldRedirect;
-}
-
-- (BOOL)updateStateFromResponseHeadersShouldRedirect:(NSDictionary *)headers {
-    CleverTapLogInternal(self.config.logLevel, @"%@: processing response with headers:%@", self, headers);
-    BOOL shouldRedirect = NO;
-    @try {
-        NSString *redirectDomain = headers[kREDIRECT_HEADER];
-        if (redirectDomain != nil) {
-            NSString *currentDomain = self.domainFactory.redirectDomain;
-            self.domainFactory.redirectDomain = redirectDomain;
-            if (![self.domainFactory.redirectDomain isEqualToString:currentDomain]) {
-                shouldRedirect = YES;
-                self.domainFactory.redirectDomain = redirectDomain;
-                [self.domainFactory persistRedirectDomain];
-                //domain changed
-                [self onDomainAvailable];
-            }
-        }
-        NSString *mutedString = headers[kMUTE_HEADER];
-        BOOL muted = (mutedString == nil ? NO : [mutedString boolValue]);
-        if (muted) {
-            [self persistMutedTs];
-            [self clearQueues];
-        }
-    } @catch(NSException *e) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Error processing response headers: %@", self, e.debugDescription);
-    }
-    return shouldRedirect;
-}
-
-- (void)handleHandshakeSuccess {
-    CleverTapLogInternal(self.config.logLevel, @"%@: handshake success", self);
+- (void)onHandshakeSuccess {
     [self resetFailsCounter];
+}
+
+- (void)onMute {
+    [self clearQueues];
 }
 
 - (void)resetFailsCounter {
@@ -1022,9 +891,9 @@ static BOOL sharedInstanceErrorLogged;
         evtData[@"locale"] = [self.deviceInfo.systemLocale localeIdentifier];
     }
     
-    #if CLEVERTAP_SSL_PINNING
-        evtData[@"sslpin"] = @YES;
-    #endif
+#if CLEVERTAP_SSL_PINNING
+    evtData[@"sslpin"] = @YES;
+#endif
     
     NSString *proxyDomain = [self.config.proxyDomain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (proxyDomain != nil && proxyDomain.length > 0) {
@@ -1100,41 +969,41 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Timestamp bookkeeping helpers
 
 - (void)setLastRequestTimestamp:(double)ts {
-    [CTPreferences putInt:ts forKey:kLAST_TS_KEY];
+    [CTPreferences putInt:ts forKey:LAST_TS_KEY];
 }
 
 - (NSTimeInterval)getLastRequestTimeStamp {
     if (self.config.isDefaultInstance) {
-        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kLAST_TS_KEY withResetValue:0]];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:LAST_TS_KEY withResetValue:0]];
     } else {
-        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config] withResetValue:0];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config] withResetValue:0];
     }
 }
 
 - (void)clearLastRequestTimestamp {
-    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:kLAST_TS_KEY config: self.config]];
+    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config]];
 }
 
 - (void)setFirstRequestTimestampIfNeeded:(double)ts {
     NSTimeInterval firstRequestTS = [self getFirstRequestTimestamp];
     if (firstRequestTS > 0) return;
-    [CTPreferences putInt:ts forKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config]];
+    [CTPreferences putInt:ts forKey:[CTPreferences storageKeyWithSuffix:FIRST_TS_KEY config: self.config]];
 }
 
 - (NSTimeInterval)getFirstRequestTimestamp {
     if (self.config.isDefaultInstance) {
-        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kFIRST_TS_KEY withResetValue:0]];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:FIRST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:FIRST_TS_KEY withResetValue:0]];
     } else {
-        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config] withResetValue:0];
+        return [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:FIRST_TS_KEY config: self.config] withResetValue:0];
     }
 }
 
 - (void)clearFirstRequestTimestamp {
-    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:kFIRST_TS_KEY config: self.config]];
+    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:FIRST_TS_KEY config: self.config]];
 }
 
 - (BOOL)isMuted {
-    return [NSDate new].timeIntervalSince1970 - _lastMutedTs < 24 * 60 * 60;
+    return [self.domainFactory isMuted];
 }
 
 
@@ -1162,9 +1031,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)applicationWillEnterForeground:(NSNotificationCenter *)notification {
-    if ([self needHandshake]) {
-        [self doHandshakeAsyncWithCompletion:nil];
-    }
+    [self.domainFactory runSerialAsyncEnsureHandshake:nil];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
@@ -2056,11 +1923,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)flushQueue {
-    if ([self needHandshake]) {
-        [self.dispatchQueueManager runSerialAsync:^{
-            [self doHandshakeAsyncWithCompletion:nil];
-        }];
-    }
+    [self.domainFactory runSerialAsyncEnsureHandshake:nil];
     [self.dispatchQueueManager runSerialAsync:^{
         if ([self isMuted]) {
             [self clearQueues];
@@ -2251,9 +2114,9 @@ static BOOL sharedInstanceErrorLogged;
                     
                     if (success) {
                         if (queue == self->_notificationsQueue) {
-                            redirect = [self updateStateFromResponseHeadersShouldRedirectForNotif: httpResponse.allHeaderFields];
+                            redirect = [self.domainFactory updateStateFromResponseHeaders:httpResponse.allHeaderFields];
                         } else {
-                            redirect = [self updateStateFromResponseHeadersShouldRedirect: httpResponse.allHeaderFields];
+                            redirect = [self.domainFactory updateStateForNotificationsFromResponseHeaders:httpResponse.allHeaderFields];
                         }
                         
                     } else {
@@ -4247,7 +4110,6 @@ static BOOL sharedInstanceErrorLogged;
     return nil;
 }
 
-
 #pragma mark - Geofence Public APIs
 
 - (void)didFailToRegisterForGeofencesWithError:(NSError *)error {
@@ -4304,40 +4166,18 @@ static BOOL sharedInstanceErrorLogged;
     }
     if (delegate && [delegate conformsToProtocol:@protocol(CleverTapDomainDelegate)]) {
         _domainDelegate = delegate;
+        [self.domainFactory setDomainDelegate:delegate];
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap Domain Delegate does not conform to the CleverTapDomainDelegate protocol", self);
     }
 }
 
-- (void)onDomainAvailable {
-    NSString *dcDomain = [self getDomainString];
-    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onSCDomainAvailable:)]) {
-        [self.domainDelegate onSCDomainAvailable: dcDomain];
-    } else if (dcDomain == nil) {
-        [self onDomainUnavailable];
-    }
+- (NSString *)signedCallDomain {
+    return self.domainFactory.signedCallDomain;
 }
 
-- (void)onDomainUnavailable {
-    if (self.domainDelegate && [self.domainDelegate respondsToSelector:@selector(onSCDomainUnavailable)]) {
-        [self.domainDelegate onSCDomainUnavailable];
-    }
-}
-
-//Updates the format of the domain - from `in1.clevertap-prod.com` to region.auth.domain (i.e. in1.auth.clevertap-prod.com)
 - (NSString *)getDomainString {
-    if (self.domainFactory.redirectDomain != nil) {
-        NSArray *listItems = [self.domainFactory.redirectDomain componentsSeparatedByString:@"."];
-        NSString *domainItem = [listItems[0] stringByAppendingString:@".auth"];
-        for (int i = 1; i < listItems.count; i++ ) {
-            NSString *dotString = [@"." stringByAppendingString: listItems[i]];
-            domainItem = [domainItem stringByAppendingString: dotString];
-        }
-        self.signedCallDomain = domainItem;
-        return domainItem;
-    } else {
-        return nil;
-    }
+    return [self.domainFactory domainString];
 }
 
 #pragma mark - Push Permission
@@ -4386,7 +4226,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)syncVariables:(BOOL)isProduction {
     NSDictionary *varsPayload = [[self variables] varsPayload];
-    [self syncWithBlock:^{
+    [self syncWithBlock:^(BOOL success) {
         NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
         CTRequest *ctRequest = [CTRequestFactory syncVarsRequestWithConfig:self.config params:@[meta, varsPayload] domain:self.domainFactory.redirectDomain];
         [self syncRequest:ctRequest logMessage:@"Vars sync"];
@@ -4400,7 +4240,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)syncCustomTemplates:(BOOL)isProduction {
     NSDictionary *syncPayload = [[self customTemplatesManager] syncPayload];
-    [self syncWithBlock:^{
+    [self syncWithBlock:^(BOOL success) {
         NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
         CTRequest *ctRequest = [CTRequestFactory syncTemplatesRequestWithConfig:self.config params:@[meta, syncPayload] domain:self.domainFactory.redirectDomain];
         [self syncRequest:ctRequest logMessage:@"Define Custom Templates"];
@@ -4408,17 +4248,17 @@ static BOOL sharedInstanceErrorLogged;
 }
 #endif
 
-- (void)syncWithBlock:(void(^)(void))syncBlock methodName:(NSString *)methodName isProduction:(BOOL)isProduction {
+- (void)syncWithBlock:(void(^)(BOOL success))syncBlock methodName:(NSString *)methodName isProduction:(BOOL)isProduction {
     if (isProduction) {
 #if DEBUG
         CleverTapLogInfo(_config.logLevel, @"%@: Calling %@ with isProduction:YES from Debug configuration/build. Do not use isProduction:YES in this case", self, methodName);
 #else
         CleverTapLogInfo(_config.logLevel, @"%@: Calling %@ with isProduction:YES from Release configuration/build. Do not release this build and use with caution", self, methodName);
 #endif
-        [self runSerialAsyncEnsureHandshake:syncBlock];
+        [self.domainFactory runSerialAsyncEnsureHandshake:syncBlock];
     } else {
 #if DEBUG
-        [self runSerialAsyncEnsureHandshake:syncBlock];
+        [self.domainFactory runSerialAsyncEnsureHandshake:syncBlock];
 #else
         CleverTapLogInfo(_config.logLevel, @"%@: %@ can only be called from Debug configurations/builds", self, methodName);
 #endif
