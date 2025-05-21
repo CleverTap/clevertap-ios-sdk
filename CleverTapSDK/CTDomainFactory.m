@@ -202,8 +202,8 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200) {
                 NSDictionary *headers = httpResponse.allHeaderFields;
-                BOOL redirectUpdated = [self updateDomainFromResponseHeaders:headers];
-                BOOL notifViewedRedirectUpdated = [self updateNotificationViewedDomainFromResponseHeaders:headers];
+                [self updateDomainFromResponseHeaders:headers];
+                [self updateNotificationViewedDomainFromResponseHeaders:headers];
                 [self updateMutedFromResponseHeaders:headers];
                 [self handleHandshakeSuccess];
                 
