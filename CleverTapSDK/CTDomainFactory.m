@@ -208,7 +208,7 @@ NSString *const kMUTED_TS_KEY = @"CLTAP_MUTED_TS_KEY";
                 [self handleHandshakeSuccess];
                 
                 if (completion) {
-                    completion(redirectUpdated || notifViewedRedirectUpdated);
+                    completion(YES);
                 }
             } else {
                 [self onDomainUnavailable];
