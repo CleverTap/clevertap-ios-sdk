@@ -11,10 +11,10 @@
 
 @implementation CTRequestFactory
 
-+ (CTRequest *_Nonnull)helloRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config {
++ (CTRequest *_Nonnull)helloRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config {
     NSString *helloUrl = kHANDSHAKE_URL;
     if (config.handshakeDomain) {
-        helloUrl = [NSString stringWithFormat:@"https://%@/hello",config.handshakeDomain];
+        helloUrl = [NSString stringWithFormat:@"https://%@/hello", config.handshakeDomain];
     }
     CTRequest *request = [[CTRequest alloc] initWithHttpMethod:@"GET" config:config params:nil url:helloUrl];
     if (config.handshakeDomain) {
@@ -23,16 +23,21 @@
     return request;
 }
 
-+ (CTRequest *_Nonnull)eventRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url {
++ (CTRequest *_Nonnull)eventRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url {
     return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
 }
 
-+ (CTRequest *_Nonnull)syncVarsRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params domain:(NSString *_Nonnull)domain {
++ (CTRequest *_Nonnull)contentRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params domain:(NSString * _Nonnull)domain {
+    NSString *url = [self urlWithDomain:domain andPath:@"content"];
+    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params:params url:url];
+}
+
++ (CTRequest * _Nonnull)syncVarsRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params domain:(NSString * _Nonnull)domain {
     NSString *url = [self urlWithDomain:domain andPath:@"defineVars"];
     return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
 }
 
-+ (CTRequest *_Nonnull)syncTemplatesRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params domain:(NSString *_Nonnull)domain {
++ (CTRequest * _Nonnull)syncTemplatesRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params domain:(NSString * _Nonnull)domain {
     NSString *url = [self urlWithDomain:domain andPath:@"defineTemplates"];
     return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
 }
