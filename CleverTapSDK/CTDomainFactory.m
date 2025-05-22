@@ -71,9 +71,9 @@ NSTimeInterval const kMUTE_SECONDS = 24 * 60 * 60;
 
 - (void)loadMutedTs {
     if (self.config.isDefaultInstance) {
-        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kMUTED_TS_KEY withResetValue:0]];
+        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kMUTED_TS_KEY config: self.config] withResetValue:[CTPreferences getIntForKey:kMUTED_TS_KEY withResetValue:0]];
     } else {
-        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:LAST_TS_KEY config: self.config] withResetValue:0];
+        self.lastMutedTs = [CTPreferences getIntForKey:[CTPreferences storageKeyWithSuffix:kMUTED_TS_KEY config: self.config] withResetValue:0];
     }
 }
 
