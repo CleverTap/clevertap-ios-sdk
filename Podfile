@@ -1,18 +1,14 @@
 project 'CleverTapSDK'
 
+use_frameworks!
 abstract_target 'shared' do
-  
+  use_modular_headers!  
+
   target 'CleverTapSDKTests' do
       platform :ios, '10.0'
       pod 'OCMock', '~> 3.2.1'
       pod 'OHHTTPStubs'
   
-  end
-
-  target 'CleverTapSDKTestsApp' do
-      platform :ios, '10.0'
-      pod 'OHHTTPStubs'
-      pod 'CleverTap-iOS-SDK', :path =>'./'
   end
 
 end

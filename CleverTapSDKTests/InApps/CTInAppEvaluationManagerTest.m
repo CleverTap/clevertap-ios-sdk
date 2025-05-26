@@ -740,7 +740,7 @@
     
     [CTCustomTemplatesManager registerTemplateProducer:producer];
     
-    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.helper.config];
+    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.helper.config systemAppFunctions:@{}];
     
     // Initialize with the templatesManager to register the template
     self.mockDisplayManager = [[CTInAppDisplayManagerMock alloc] initWithTemplateManager:templatesManager];

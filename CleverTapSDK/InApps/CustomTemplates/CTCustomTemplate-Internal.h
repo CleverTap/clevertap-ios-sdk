@@ -15,6 +15,7 @@
 
 @interface CTCustomTemplate (Internal)
 
+@property (nonatomic) BOOL isSystemDefined;
 @property (nonatomic, strong, readonly) NSString *templateType;
 @property (nonatomic, strong, readonly) NSArray<CTTemplateArgument *> *arguments;
 @property (nonatomic, strong, readonly) id<CTTemplatePresenter> presenter;
@@ -23,7 +24,8 @@
                         templateType:(NSString *)templateType
                             isVisual:(BOOL)isVisual
                            arguments:(NSArray *)arguments
-                           presenter:(id<CTTemplatePresenter>)presenter;
+                           presenter:(id<CTTemplatePresenter>)presenter
+                     isSystemDefined:(BOOL)isSystemDefined;
 
 @end
 

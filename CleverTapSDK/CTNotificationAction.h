@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (instancetype)initWithJSON:(NSDictionary *)json;
 - (instancetype)initWithOpenURL:(NSURL *)url;
+- (instancetype)initWithCloseAction;
 #endif
 
 @end
