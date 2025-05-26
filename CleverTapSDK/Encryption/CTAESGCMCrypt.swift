@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 import Security
 
-@available(iOS 13.0, *)
+@available(iOS 13.0, tvOS 13.0, *)
 @objc(CTAESGCMCrypt)
 public class AESGCMCrypt: NSObject {
     // MARK: - Properties
@@ -114,7 +114,7 @@ public class AESGCMCrypt: NSObject {
     // MARK: - Keychain Operations
     
     /// Retrieves or generates an AES key and stores it securely in the Keychain.
-    @available(iOS 13.0, *)
+    @available(iOS 13.0, tvOS 13.0, *)
     private func getKey() throws -> SymmetricKey {
         if let existingKey = try retrieveKeyFromKeychain() {
             return existingKey
