@@ -305,3 +305,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_APP_RATING_TEMPLATE_NAME @"ctsystem_apprating"
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
 #define CLTAP_OPEN_URL_ACTION_KEY @"iOS"
+
+#pragma mark HTTP Codes
+#define HTTP_OK 200
+#define HTTP_EXPIRED 419
+

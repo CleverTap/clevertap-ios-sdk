@@ -2091,7 +2091,8 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogInternal(self.config.logLevel, @"%@: Pending events batch contains: %d items", self, (int) [batch count]);
         
         @try {
-            if (_config.encryptionInTransitEnabled) {
+            // Encrypt in transit only if the config/plist flag is true and server side encryption hasn't failed yet.
+            if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed) {
                 if (@available(iOS 13.0, *)) {
                     NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
                     if (encryptedDict.count > 0) {
@@ -2136,7 +2137,7 @@ static BOOL sharedInstanceErrorLogged;
                 if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                     
-                    success = (httpResponse.statusCode == 200);
+                    success = (httpResponse.statusCode == HTTP_OK);
                     responseEncrypted = ([httpResponse.allHeaderFields[ENCRYPTION_HEADER]isEqual:@"true"]);
                     
                     NSDictionary *headers = httpResponse.allHeaderFields;
@@ -2144,12 +2145,12 @@ static BOOL sharedInstanceErrorLogged;
                         [self.domainFactory updateDomainFromResponseHeaders:headers];
                         [self.domainFactory updateNotificationViewedDomainFromResponseHeaders:headers];
                         [self.domainFactory updateMutedFromResponseHeaders:headers];
-                        if (queue == self->_notificationsQueue) {
-                            redirect = [self updateStateFromResponseHeadersShouldRedirectForNotif: httpResponse.allHeaderFields];
-                        } else {
-                            redirect = [self updateStateFromResponseHeadersShouldRedirect: httpResponse.allHeaderFields];
+                    }
+                    else {
+                        if (httpResponse.statusCode == HTTP_EXPIRED) {
+                            self.sessionManager.encryptionInTransitFailed = YES;
                         }
-                    } else {
+                            
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
                     
@@ -4323,7 +4324,7 @@ static BOOL sharedInstanceErrorLogged;
                      logMessage:(NSString *)logMessage {
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-        if (httpResponse.statusCode == 200) {
+        if (httpResponse.statusCode == HTTP_OK) {
             CleverTapLogDebug(self->_config.logLevel, @"%@: %@ successful.", self, logMessage);
         }
         else if (httpResponse.statusCode == 401) {
