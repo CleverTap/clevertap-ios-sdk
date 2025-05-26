@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ### [Version 7.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.1) (May 26, 2025)
 
 #### Added
-- Introduces System App Functions (Open Url, App Rating, Push Permission Request - as mentioned [here](SystemInAppFunctions.md)) which can be triggered either as a button action within an in-app message or as a standalone campaign action in CleverTap, enriching client workflows.
+- Introduces System App Functions (Open Url, App Rating, Push Permission Request - as mentioned [here](/docs/SystemInAppFunctions.md)) which can be triggered either as a button action within an in-app message or as a standalone campaign action in CleverTap, enriching client workflows.
 - Adds support for Advanced InApp Builder templates. This feature enables easy creation of visually appealing in-app messages that seamlessly integrate with your app's look and feel. It includes support for non-intrusive HTML banners with flexible configuration options, triggered via in-app event-based actions.
 - Upgrades the algorithm used for [encryption of PII data](https://github.com/CleverTap/clevertap-ios-sdk/blob/master/docs/Encryption.md), making it compliant with [OWASP](https://mas.owasp.org/MASTG/0x04g-Testing-Cryptography/). Uses Keychain for securely backing up encryption key on iOS 13+.
 
