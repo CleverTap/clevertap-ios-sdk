@@ -14,6 +14,7 @@ After upgrading the SDK to v7.2.0+, do not downgrade in subsequent app releases 
 #### Fixed
 - Fixes a bug where the TTL of in-app messages was compared with an int instead of NSTimeInterval.
 - Improves in-app content display with updated layout guidelines, ensuring HTML views respect safe area boundaries on devices with notches and other screen features.
+- Fixes a bug where certain webview resources were not cleaned up after HTML in-app messages were dismissed.
 
 ### [Version 7.1.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.1.1) (March 17, 2025)
 
