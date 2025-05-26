@@ -98,7 +98,7 @@ jobs:
 
       - name: Pull Latest Changes
         run: |
-          git pull origin SDK-4101-swift-support --rebase || true
+          git pull origin develop --rebase || true
 
       - name: Update Package.swift
         run: |
@@ -146,5 +146,5 @@ jobs:
           git config user.email "github-actions@github.com"
           git add Package.swift
           git commit -m "Update Package.swift with new S3 URL and checksum" || echo "🟡 No changes to commit."
-          git push origin SDK-4101-swift-support
+          git push origin develop
           echo "✅ Package.swift changes committed and pushed successfully"
