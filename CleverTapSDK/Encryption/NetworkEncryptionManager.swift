@@ -51,7 +51,7 @@ import Security
             return ["encryptedPayload": encryptedPayload, "nonceData": nonceData]
         }
         catch {
-            NSLog("Encryption in transit error", error.localizedDescription)
+            NSLog("[CleverTap]: Encryption in transit error", error.localizedDescription)
             return [:]
         }
     }
@@ -67,6 +67,7 @@ import Security
             return Data()
         }
         do {
+            NSLog("[CleverTap]: Encrypted Response: %@", response)
             let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonceData),
                                                   ciphertext: encryptedData.dropLast(16), // Excluding the tag
                                                   tag: encryptedData.suffix(16)) // Last 16 bytes are the authentication tag
@@ -74,7 +75,7 @@ import Security
             let decryptedData = try AES.GCM.open(sealedBox, using: getOrGenerateSessionKey())
             return decryptedData
         } catch {
-            NSLog("Decryption in transit error", error.localizedDescription)
+            NSLog("[CleverTap]: Decryption in transit error", error.localizedDescription)
             return Data()
         }
     }

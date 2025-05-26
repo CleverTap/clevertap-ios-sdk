@@ -2089,6 +2089,8 @@ static BOOL sharedInstanceErrorLogged;
         NSMutableDictionary *additionalHeaders = [NSMutableDictionary dictionary];
         
         CleverTapLogInternal(self.config.logLevel, @"%@: Pending events batch contains: %d items", self, (int) [batch count]);
+        NSString *jsonBody = [CTUtils jsonObjectToString:batchWithHeader];
+        CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
         
         @try {
             // Encrypt in transit only if the config/plist flag is true and server side encryption hasn't failed yet.
@@ -2105,14 +2107,14 @@ static BOOL sharedInstanceErrorLogged;
                             NetworkEncryptionManager.ITK: [[NetworkEncryptionManager shared]getSessionKeyBase64],
                             NetworkEncryptionManager.ITV: [nonceData base64EncodedStringWithOptions:kNilOptions]
                         };
+                        NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Encrypted request: %@", self, jsonBody);
                     }
                 }
                 else {
                     CleverTapLogStaticDebug(@"Encryption in transit is only available from iOS 13 and above.");
                 }
             }
-            NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
-            CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
             
             // update endpoint for current timestamp
             endpoint = [self endpointForQueue:queue];
@@ -2153,15 +2155,6 @@ static BOOL sharedInstanceErrorLogged;
                             
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
-                    
-                    if (responseEncrypted) {
-                        if (@available(iOS 13.0, *)) {
-                            NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
-                            if (decryptedData.length > 0) {
-                                responseData = decryptedData;
-                            }
-                        }
-                    }
                 }
                 
                 dispatch_semaphore_signal(semaphore);
@@ -2196,7 +2189,7 @@ static BOOL sharedInstanceErrorLogged;
             [queue removeObjectsInArray:batch];
             
             
-            [self parseResponse:responseData];
+            [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
             [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES withQueueType:queueType];
 
@@ -2211,9 +2204,18 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark Response Handling
 
-- (void)parseResponse:(NSData *)responseData {
+- (void)parseResponse:(NSData *)responseData responseEncrypted:(BOOL)responseEncrypted {
     if (responseData) {
         @try {
+            if (responseEncrypted) {
+                if (@available(iOS 13.0, *)) {
+                    NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
+                    if (decryptedData.length > 0) {
+                        responseData = decryptedData;
+                    }
+                }
+            }
+            
             id jsonResp = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
             CleverTapLogInternal(self.config.logLevel, @"%@: Response: %@", self, jsonResp);
             
