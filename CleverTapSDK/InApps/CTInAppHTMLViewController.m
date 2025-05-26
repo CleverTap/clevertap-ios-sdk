@@ -386,6 +386,26 @@ typedef enum {
     }
 }
 
+- (void)cleanupWebViewResources {
+    if (webView) {
+        webView.navigationDelegate = nil;
+        [webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
+        
+        if (_panGesture) {
+            [webView removeGestureRecognizer:_panGesture];
+            _panGesture.delegate = nil;
+            _panGesture = nil;
+        }
+        
+        [webView removeFromSuperview];
+        webView = nil;
+    }
+    _jsInterface = nil;
+}
+
+- (void)dealloc {
+    [self cleanupWebViewResources];
+}
 
 #pragma mark - Revealing Setter
 
@@ -549,14 +569,8 @@ typedef enum {
 }
 
 - (void)hide:(BOOL)animated {
-    __weak typeof(self) weakSelf = self;
-    [self hideFromWindow:animated withCompletion:^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        [strongSelf->webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
-    }];
+    [self cleanupWebViewResources];
+    [super hideFromWindow:animated];
 }
 
 @end
