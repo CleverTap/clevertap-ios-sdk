@@ -309,4 +309,4 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #pragma mark HTTP Codes
 #define HTTP_OK 200
 #define HTTP_EXPIRED 419
-
+#define HTTP_UNAUTHORIZED 401

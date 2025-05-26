@@ -4327,7 +4327,7 @@ static BOOL sharedInstanceErrorLogged;
         if (httpResponse.statusCode == HTTP_OK) {
             CleverTapLogDebug(self->_config.logLevel, @"%@: %@ successful.", self, logMessage);
         }
-        else if (httpResponse.statusCode == 401) {
+        else if (httpResponse.statusCode == HTTP_UNAUTHORIZED) {
             CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test profile. Please mark this profile as a test profile from the CleverTap dashboard.", self);
         }
     }
