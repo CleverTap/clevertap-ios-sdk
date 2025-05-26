@@ -96,7 +96,8 @@ static NSArray *registeredURLSchemes;
         
         _handshakeDomain = [CTPlistInfo getMetaDataForAttribute:CLTAP_HANDSHAKE_DOMAIN];
         
-        _encryptionInTransitEnabled = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_IN_TRANSIT_ENABLED];
+        NSString *encryptionInTransitEnabled = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_IN_TRANSIT_ENABLED];
+        _encryptionInTransitEnabled = (encryptionInTransitEnabled && [encryptionInTransitEnabled isEqualToString:@"1"]);
         
         NSString *encryptionLevel = [CTPlistInfo getMetaDataForAttribute:CLTAP_ENCRYPTION_LEVEL];
         [self setEncryption:encryptionLevel];
