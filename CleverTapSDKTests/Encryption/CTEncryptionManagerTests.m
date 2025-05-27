@@ -290,7 +290,7 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
 #pragma mark - Encryption Algorithm Tests
 
 - (void)testAESGCMEncryption {
-    if (@available(iOS 13.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         CTEncryptionManager *mgr = [[CTEncryptionManager alloc] initWithAccountID:@"test"
                                                                 encryptionLevel:CleverTapEncryptionMedium];
         
@@ -354,7 +354,7 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     NSString *aesEncrypted = [mgr encryptString:plainText encryptionAlgorithm:AES];
     NSString *decrypted = [mgr decryptString:aesEncrypted]; // Default decryption
     
-    if (@available(iOS 13.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         // Encrypt with AES_GCM but try to decrypt with default method
         NSString *gcmEncrypted = [mgr encryptString:plainText encryptionAlgorithm:AES_GCM];
         decrypted = [mgr decryptString:gcmEncrypted]; // Default decryption
@@ -442,7 +442,7 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     XCTAssertEqualObjects(aesDecrypted, testObject, @"AES object decryption failed");
     
     // Test AES_GCM (if iOS 13+)
-    if (@available(iOS 13.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         NSString *aesgcmEncrypted = [mgr encryptObject:testObject encryptionAlgorithm:AES_GCM];
         XCTAssertNotNil(aesgcmEncrypted, @"AES_GCM object encryption failed");
         NSArray *aesgcmDecrypted = [mgr decryptObject:aesgcmEncrypted encryptionAlgorithm:AES_GCM];

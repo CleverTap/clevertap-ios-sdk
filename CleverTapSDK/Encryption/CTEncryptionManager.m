@@ -54,7 +54,7 @@ API_AVAILABLE(ios(13.0))
 }
 
 - (void)setupEncryptionWithLevel {
-    if (@available(iOS 13.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:ENCRYPTION_KEY_TAG];
     }
 }
@@ -112,7 +112,7 @@ API_AVAILABLE(ios(13.0))
     
     switch (algorithm) {
         case AES_GCM: {
-            if (@available(iOS 13.0, *)) {
+            if (@available(iOS 13.0, tvOS 13.0, *)) {
                 NSError *encryptError = nil;
                 NSString *encryptedString = [_ctaesgcm encryptString:plaintext error:&encryptError];
 
@@ -155,7 +155,7 @@ API_AVAILABLE(ios(13.0))
 
     switch (algorithm) {
         case AES_GCM: {
-            if (@available(iOS 13.0, *)) {
+            if (@available(iOS 13.0, tvOS 13.0, *)) {
                 NSError *decryptError = nil;
                 NSString *decryptedString = [_ctaesgcm decryptString:ciphertext error:&decryptError];
 
@@ -221,7 +221,7 @@ API_AVAILABLE(ios(13.0))
 
         switch (algorithm) {
             case AES_GCM: {
-                if (@available(iOS 13.0, *)) {
+                if (@available(iOS 13.0, tvOS 13.0, *)) {
                     NSError *encryptError = nil;
                     NSString *encryptedString = [_ctaesgcm encryptData:data error:&encryptError];
 
@@ -263,7 +263,7 @@ API_AVAILABLE(ios(13.0))
     @try {
         switch (algorithm) {
             case AES_GCM: {
-                if (@available(iOS 13.0, *)) {
+                if (@available(iOS 13.0, tvOS 13.0, *)) {
                     NSError *decryptError = nil;
                     NSData *decryptedData = [_ctaesgcm decryptData:ciphertext error:&decryptError];
 
