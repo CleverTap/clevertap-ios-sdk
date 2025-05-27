@@ -61,11 +61,6 @@ typedef NS_ENUM(NSUInteger, CTLocalInAppType) {
  */
 - (void)setFallbackToSettings:(BOOL)fallbackToSettings;
 
-/**
- If skipAlert is YES, then we skip the settings alert dialog shown before opening app notification settings.
- */
-- (void)setSkipSettingsAlert:(BOOL)skipAlert;
-
 @end
 
 NS_ASSUME_NONNULL_END

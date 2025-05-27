@@ -122,10 +122,6 @@ static NSDictionary *_inAppTypeMap;
     }
 }
 
-- (void)setSkipSettingsAlert:(BOOL)skipAlert {
-    self.inAppSettings[@"skipSettingsAlert"] = skipAlert ? @1 : @0;
-}
-
 - (NSDictionary *)getLocalInAppSettings {
     return self.inAppSettings;
 }

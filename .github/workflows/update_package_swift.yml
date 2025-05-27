@@ -1,0 +1,150 @@
+name: Update Package.swift with checksum in S3 bucket
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if sdk-version.txt has not changed'
+        required: false
+        default: 'false'
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for sdk-version.txt Change
+        id: check_version
+        run: |
+          git fetch origin
+          if [ "${{ inputs.force_build }}" == 'true' ]; then
+            echo "🟠 Force build triggered. Continuing..."
+          elif git diff --quiet HEAD^ HEAD -- sdk-version.txt; then
+            echo "❌ No changes in sdk-version.txt. Exiting..."
+            exit 1
+          fi
+          echo "✅ sdk-version.txt has changed. Continuing..."
+
+      - name: Install dependencies
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.0.app
+          swift --version
+          echo "✅ Dependencies installed successfully"
+
+      - name: Build iOS Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK \
+            -sdk iphoneos \
+            -destination generic/platform=iOS \
+            -archivePath ./build/CleverTapSDK-iOS.xcarchive \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          echo "📱 iOS framework built successfully"
+
+      - name: Build iOS Simulator Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -archivePath ./build/CleverTapSDK-iOSSimulator.xcarchive \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+            FRAMEWORK_SEARCH_PATHS="./Vendors/simulator"
+          echo "🖥️ iOS Simulator framework built successfully"
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework ./build/CleverTapSDK-iOS.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -framework ./build/CleverTapSDK-iOSSimulator.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -output CleverTapSDK.xcframework
+
+          zip -r CleverTapSDK.xcframework.zip CleverTapSDK.xcframework
+          echo "📦 XCFramework created and zipped successfully"
+
+      - name: Compute Checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum CleverTapSDK.xcframework.zip)
+          echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+          echo "🔢 Checksum computed: $CHECKSUM"
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+        run: |
+          VERSION=$(cat sdk-version.txt)
+          S3_FILENAME="CleverTapSDK-${VERSION}.xcframework.zip"
+
+          aws s3 cp CleverTapSDK.xcframework.zip s3://$S3_BUCKET_NAME/$S3_FILENAME
+          
+          echo "S3_FILENAME=$S3_FILENAME" >> $GITHUB_ENV
+          echo "✅ Uploaded to S3 as $S3_FILENAME"
+
+      - name: Pull Latest Changes
+        run: |
+          git pull origin develop --rebase || true
+
+      - name: Update Package.swift
+        run: |
+          # Update Checksum
+          VERSION=$(cat sdk-version.txt)
+          S3_URL="https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-${VERSION}.xcframework.zip"
+
+          awk -v url="$S3_URL" '
+            BEGIN { 
+              found=0; 
+              inTarget=0 
+            }
+            {
+              if ($0 ~ /\.binaryTarget\(/) inTarget=1
+              if (inTarget && $0 ~ /name: "CleverTapSDK"/) found=1
+              if (found==1 && $0 ~ /url:/) {
+                sub(/url: "[^"]+"/, "url: \""url"\"", $0)
+                found=0
+              }
+              if ($0 ~ /\),/) inTarget=0
+              print $0
+            }' Package.swift > Package.swift.tmp && mv Package.swift.tmp Package.swift
+
+          # Update Checksum
+          awk -v checksum="$CHECKSUM" '
+            BEGIN { 
+              found=0; 
+              inTarget=0 
+            }
+            {
+              if ($0 ~ /\.binaryTarget\(/) inTarget=1
+              if (inTarget && $0 ~ /name: "CleverTapSDK"/) found=1
+              if (found==1 && $0 ~ /checksum:/) {
+                sub(/checksum: "[^"]+"/, "checksum: \""checksum"\"", $0)
+                found=0
+              }
+              if ($0 ~ /\),/) inTarget=0
+              print $0
+            }' Package.swift > Package.swift.tmp && mv Package.swift.tmp Package.swift
+          echo "📝 Package.swift updated successfully"
+
+      - name: Commit Updated Package.swift
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Package.swift
+          git commit -m "Update Package.swift with new S3 URL and checksum" || echo "🟡 No changes to commit."
+          git push origin develop
+          echo "✅ Package.swift changes committed and pushed successfully"

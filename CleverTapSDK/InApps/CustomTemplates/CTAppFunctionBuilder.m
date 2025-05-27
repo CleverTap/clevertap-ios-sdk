@@ -14,8 +14,12 @@
 @implementation CTAppFunctionBuilder
 
 - (nonnull instancetype)initWithIsVisual:(BOOL)isVisual {
-    self = [super initWithType:FUNCTION_TYPE isVisual:isVisual];
-    return self;
+    return [self initWithIsVisual:isVisual isSystemDefined:NO];
+}
+
+- (nonnull instancetype)initWithIsVisual:(BOOL)isVisual
+                         isSystemDefined:(BOOL)isSystemDefined {
+    return [super initWithType:FUNCTION_TYPE isVisual:isVisual isSystemDefined:isSystemDefined];
 }
 
 @end

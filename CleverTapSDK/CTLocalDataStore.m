@@ -7,7 +7,7 @@
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTLoginInfoProvider.h"
-#import "CTAES.h"
+#import "CTEncryptionManager.h"
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
@@ -516,7 +516,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
 }
 
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event {
+- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)userAttributeChangeProperties:(NSDictionary *)event {
     NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
     NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
     NSDictionary *profile = event[CLTAP_PROFILE];
@@ -544,7 +544,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
                      [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
                      [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
-                newValue = [CTProfileBuilder _constructLocalMultiValueWithOriginalValues:value forKey:key usingCommand:commandIdentifier localDataStore:self];
+                // Multi values are not supported as user property triggers
+                // The multi values changes are already persisted locally when building the event
             }
         } else if ([newValue isKindOfClass:[NSString class]]) {
             // Remove the date prefix before evaluation and persisting
@@ -569,6 +570,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             [fieldsToPersistLocally setObject:newValue forKey:key];
         }
     }
+    // Persist the changes
     [self updateProfileFieldsLocally:fieldsToPersistLocally];
     return userAttributesChangeProperties;
 }
@@ -966,18 +968,55 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 - (NSMutableDictionary *)decryptPIIDataIfEncrypted:(NSMutableDictionary *)profile {
     long lastEncryptionLevel = [CTPreferences getIntForKey:[CTUtils getKeyWithSuffix:CT_ENCRYPTION_KEY accountID:self.config.accountId] withResetValue:0];
     [CTPreferences putInt:self.config.encryptionLevel forKey:[CTUtils getKeyWithSuffix:CT_ENCRYPTION_KEY accountID:self.config.accountId]];
-    if (lastEncryptionLevel == CleverTapEncryptionMedium && self.config.aesCrypt) {
+    
+    // Check for valid input
+    if (!profile) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Cannot decrypt nil profile", self);
+        return [NSMutableDictionary new];
+    }
+    
+    if (lastEncryptionLevel == CleverTapEncryptionMedium && self.config.cryptManager) {
         // Always store the local profile data in decrypted values.
         NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+        
+        // Check if _piiKeys is valid
+        if (!_piiKeys || _piiKeys.count == 0) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: No PII keys defined for decryption", self);
+            return profile;
+        }
+        
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
-                NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                NSString *decryptedString = [self.config.aesCrypt getDecryptedString:value];
-                updatedProfile[key] = decryptedString;
+                @try {
+                    // Validate the value before attempting to decrypt
+                    id value = profile[key];
+                    if (!value || ![value isKindOfClass:[NSString class]]) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Invalid value for PII key: %@, skipping decryption", self, key);
+                        updatedProfile[key] = value ?: [NSNull null];
+                        continue;
+                    }
+                    
+                    NSString *stringValue = [NSString stringWithFormat:@"%@", value];
+                    NSString *decryptedString = [self.config.cryptManager decryptString:stringValue];
+                    
+                    // Validate decryption result
+                    if (!decryptedString) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to decrypt PII data for key: %@", self, key);
+                        // Return original value if decryption fails
+                        updatedProfile[key] = stringValue;
+                    } else {
+                        updatedProfile[key] = decryptedString;
+                    }
+                } @catch (NSException *e) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Exception during PII decryption for key %@: %@", self, key, e);
+                    // Add original value to avoid data loss
+                    updatedProfile[key] = profile[key];
+                }
             } else {
                 updatedProfile[key] = profile[key];
             }
         }
+        
         return updatedProfile;
     }
     
@@ -985,12 +1024,12 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (NSMutableDictionary *)cryptValuesIfNeeded:(NSMutableDictionary *)profile {
-    if (self.config.encryptionLevel == CleverTapEncryptionMedium && self.config.aesCrypt) {
+    if (self.config.encryptionLevel == CleverTapEncryptionMedium && self.config.cryptManager) {
         NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
         for (NSString *key in profile) {
             if ([_piiKeys containsObject:key]) {
                 NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
-                updatedProfile[key] = [self.config.aesCrypt getEncryptedString:value];
+                updatedProfile[key] = [self.config.cryptManager encryptString:value];
             } else {
                 updatedProfile[key] = profile[key];
             }

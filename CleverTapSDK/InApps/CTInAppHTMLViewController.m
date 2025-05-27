@@ -90,6 +90,10 @@ typedef enum {
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
+    // Set translatesAutoresizingMaskIntoConstraints to NO to use Auto Layout
+    if ([self isInAppAdvancedBuilder]) {
+        webView.translatesAutoresizingMaskIntoConstraints = NO;
+    }
     webView.scrollView.scrollEnabled = NO;
     webView.backgroundColor = [UIColor clearColor];
     webView.opaque = NO;
@@ -107,12 +111,58 @@ typedef enum {
 
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
+    
+    [self configureWebViewConstraints];
+    
     if (self.notification.url) {
         [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
         webView.navigationDelegate = nil;
     } else{
         [webView loadHTMLString:self.notification.html baseURL:nil];
     }
+    
+    if (self.notification.darkenScreen) {
+        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
+    }
+    
+    if ([self isInAppAdvancedBuilder]) {
+        [self configureViewAutoresizing];
+    } else {
+        [self updateWebView];
+    }
+}
+
+- (void)configureWebViewConstraints {
+    if (@available(iOS 11.0, *)) {
+        UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
+        [NSLayoutConstraint activateConstraints:@[
+            // Use the safe area layout guide to position the view
+            [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
+            [webView.leadingAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
+            [webView.trailingAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
+            [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
+        ]];
+    } else {
+        // Fallback on earlier versions
+        [NSLayoutConstraint activateConstraints:@[
+            [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
+            [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+            [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+            [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
+        ]];
+    }
+}
+
+// Added to handle webview for Advanced Builder InApps
+- (void)configureViewAutoresizing {
+    webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+    
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
+    UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
+    | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+}
+
+- (void)updateWebView {
     boolean_t fixedWidth = false, fixedHeight = false;
     
     CGSize size = CGSizeZero;
@@ -194,10 +244,6 @@ typedef enum {
     frame.origin.y = frame.origin.y < 0.0f ? 0.0f : frame.origin.y;
     webView.frame = frame;
     _originalCenter = frame.origin.x + frame.size.width / 2.0f;
-    
-    if (self.notification.darkenScreen) {
-        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
-    }
     
     self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
     UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
@@ -340,6 +386,26 @@ typedef enum {
     }
 }
 
+- (void)cleanupWebViewResources {
+    if (webView) {
+        webView.navigationDelegate = nil;
+        [webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
+        
+        if (_panGesture) {
+            [webView removeGestureRecognizer:_panGesture];
+            _panGesture.delegate = nil;
+            _panGesture = nil;
+        }
+        
+        [webView removeFromSuperview];
+        webView = nil;
+    }
+    _jsInterface = nil;
+}
+
+- (void)dealloc {
+    [self cleanupWebViewResources];
+}
 
 #pragma mark - Revealing Setter
 
@@ -444,7 +510,8 @@ typedef enum {
                 self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
             }
                              completion:^(BOOL finished) {
-                [self hide:NO];
+                CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
+                [self triggerInAppAction:action callToAction: CLTAP_CTA_SWIPE_DISMISS buttonId:nil];
             }];
         }];
     }];
@@ -502,14 +569,8 @@ typedef enum {
 }
 
 - (void)hide:(BOOL)animated {
-    __weak typeof(self) weakSelf = self;
-    [self hideFromWindow:animated withCompletion:^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        [strongSelf->webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
-    }];
+    [self cleanupWebViewResources];
+    [super hideFromWindow:animated];
 }
 
 @end

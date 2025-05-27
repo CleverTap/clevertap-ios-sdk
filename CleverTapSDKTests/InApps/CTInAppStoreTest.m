@@ -14,14 +14,14 @@
 #import "CleverTapInstanceConfig.h"
 #import "CTInAppStore+Tests.h"
 #import "InAppHelper.h"
-#import "CTAES.h"
+#import "CTEncryptionManager.h"
 #import "CTMultiDelegateManager+Tests.h"
 
 @interface CTInAppStoreTest : XCTestCase
 
 @property (nonatomic, weak) CTInAppStore *store;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, strong) CTAES *ctAES;
+@property (nonatomic, strong) CTEncryptionManager *ctCryptManager;
 @property (nonatomic, strong) NSArray *inApps;
 @property (nonatomic, strong) InAppHelper *helper;
 
@@ -37,7 +37,7 @@
     self.helper = helper;
     self.config = helper.config;
     self.store = helper.inAppStore;
-    self.ctAES = [[CTAES alloc] initWithAccountID:helper.accountId];
+    self.ctCryptManager = [[CTEncryptionManager alloc] initWithAccountID:helper.accountId];
 
     self.inApps = @[
         @{
@@ -103,7 +103,7 @@
 - (NSArray *)inAppsFromStorage:(NSString *)key {
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
     if (encryptedString) {
-        NSArray *arr = [self.ctAES getDecryptedObject:encryptedString];
+        NSArray *arr = [self.ctCryptManager decryptObject:encryptedString];
         if (arr) {
             return arr;
         }
@@ -200,17 +200,37 @@
 }
 
 - (void)testStoreClientSideInAppsEncrypted {
+    // Store the in-apps
     [self.store storeClientSideInApps:self.inApps];
+    
+    // Get the stored encrypted string
     NSString *storedString = [CTPreferences getObjectForKey:[self storageKeyCS]];
-    NSString *encrypted = [self.ctAES getEncryptedBase64String:self.inApps];
-    XCTAssertEqualObjects(storedString, encrypted);
+    
+    // Verify encryption occurred
+    XCTAssertNotNil(storedString, @"Stored string should not be nil");
+    XCTAssertGreaterThan(storedString.length, 0, @"Stored string should not be empty");
+    
+    // Decrypt the stored string and verify it matches the original inApps
+    NSArray *decryptedInApps = [self.ctCryptManager decryptObject:storedString];
+    XCTAssertNotNil(decryptedInApps, @"Decrypted in-apps should not be nil");
+    XCTAssertEqualObjects(decryptedInApps, self.inApps, @"Decrypted in-apps should match original");
 }
 
 - (void)testStoreServerSideInAppsEncrypted {
+    // Store the in-apps
     [self.store storeServerSideInApps:self.inApps];
+    
+    // Get the stored encrypted string
     NSString *storedString = [CTPreferences getObjectForKey:[self storageKeySS]];
-    NSString *encrypted = [self.ctAES getEncryptedBase64String:self.inApps];
-    XCTAssertEqualObjects(storedString, encrypted);
+    
+    // Verify encryption occurred
+    XCTAssertNotNil(storedString, @"Stored string should not be nil");
+    XCTAssertGreaterThan(storedString.length, 0, @"Stored string should not be empty");
+    
+    // Decrypt the stored string and verify it matches the original inApps
+    NSArray *decryptedInApps = [self.ctCryptManager decryptObject:storedString];
+    XCTAssertNotNil(decryptedInApps, @"Decrypted in-apps should not be nil");
+    XCTAssertEqualObjects(decryptedInApps, self.inApps, @"Decrypted in-apps should match original");
 }
 
 - (void)testStoreClientSideEmptyArray {

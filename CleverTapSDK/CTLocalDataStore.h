@@ -38,7 +38,7 @@
 
 - (id)getProfileFieldForKey:(NSString *)key;
 
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)getUserAttributeChangeProperties:(NSDictionary *)event;
+- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)userAttributeChangeProperties:(NSDictionary *)event;
 
 - (void)persistLocalProfileIfRequired;
 

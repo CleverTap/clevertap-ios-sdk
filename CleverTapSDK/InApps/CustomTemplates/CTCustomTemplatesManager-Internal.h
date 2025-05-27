@@ -17,7 +17,8 @@
 
 @interface CTCustomTemplatesManager (Internal)
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig;
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)instanceConfig
+            systemAppFunctions:(NSDictionary<NSString *, CTCustomTemplate *> *)systemAppFunctions;
 
 - (NSSet<NSString *> *)fileArgsURLsForInAppData:(CTCustomTemplateInAppData *)inAppData;
 - (NSSet<NSString *> *)fileArgsURLs:(NSDictionary *)inAppJSON;

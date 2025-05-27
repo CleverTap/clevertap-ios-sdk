@@ -32,6 +32,7 @@
 #import "CTMultiDelegateManager.h"
 #import "CTSessionManager.h"
 #import "CTFileDownloader.h"
+#import "CTCryptMigrator.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppFCManager.h"
@@ -58,6 +59,7 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppTriggerManager.h"
 #import "CTCustomTemplatesManager-Internal.h"
+#import "CTSystemAppFunctions.h"
 #endif
 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
@@ -99,7 +101,7 @@ static NSArray *sslCertNames;
 
 #import "NSDictionary+Extensions.h"
 
-#import "CTAES.h"
+#import "CTEncryptionManager.h"
 
 #import <objc/runtime.h>
 
@@ -199,6 +201,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) CTDeviceInfo *deviceInfo;
 @property (nonatomic, strong) CTLocalDataStore *localDataStore;
 @property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
+@property (nonatomic, strong) CTCryptMigrator *cryptMigrator;
 
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
 @property (nonatomic, strong) NSMutableArray *profileQueue;
@@ -248,6 +251,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong, readwrite) CTImpressionManager *impressionManager;
 @property (nonatomic, strong, readwrite) CTInAppStore * _Nullable inAppStore;
 @property (nonatomic, strong, readwrite) CTCustomTemplatesManager *customTemplatesManager;
+@property (nonatomic, strong, readwrite) CTSystemTemplateActionHandler *systemTemplateActionHandler;
 #endif
 
 @property (atomic, strong) NSString *processingLoginUserIdentifier;
@@ -471,6 +475,8 @@ static BOOL sharedInstanceErrorLogged;
         self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
+        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo: _deviceInfo];
+        
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
@@ -528,7 +534,10 @@ static BOOL sharedInstanceErrorLogged;
     
     CTInAppFCManager *inAppFCManager = [[CTInAppFCManager alloc] initWithConfig:self.config delegateManager:self.delegateManager deviceId:[_deviceInfo.deviceId copy] impressionManager:impressionManager inAppTriggerManager:triggerManager];
     
-    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config];
+    self.systemTemplateActionHandler = [[CTSystemTemplateActionHandler alloc] init];
+    NSDictionary<NSString *, CTCustomTemplate *> *systemAppFunctions = [CTSystemAppFunctions systemAppFunctionsWithHandler:self.systemTemplateActionHandler];
+    CTCustomTemplatesManager *templatesManager = [[CTCustomTemplatesManager alloc] initWithConfig:self.config
+                                                                               systemAppFunctions:systemAppFunctions];
     
     CTInAppDisplayManager *displayManager = [[CTInAppDisplayManager alloc] initWithCleverTap:self
                                                                         dispatchQueueManager:self.dispatchQueueManager
@@ -551,13 +560,14 @@ static BOOL sharedInstanceErrorLogged;
     
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
+    [self.systemTemplateActionHandler setPushPrimerManager:self.pushPrimerManager];
 }
 #endif
 
 + (CleverTap *)getGlobalInstance:(NSString *)accountId {
     
     if (!_instances || [_instances count] <= 0) {
-        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTAES class], [NSArray class], [NSString class], nil];
+        NSSet *allowedClasses = [NSSet setWithObjects:[CleverTapInstanceConfig class], [CTEncryptionManager class], [NSArray class], [NSString class], nil];
         CleverTapInstanceConfig *config = [CTPreferences unarchiveFromFile:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:accountId] ofTypes:allowedClasses removeFile:NO];
         return [CleverTap instanceWithConfig:config];
     }
@@ -1132,6 +1142,13 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
     [self _appEnteredForeground];
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push permission status everytime app is resumed.
+    [self.pushPrimerManager checkAndUpdatePushPermissionStatusWithCompletion:^(CTPushPermissionStatus status) {
+        self.pushPrimerManager.pushPermissionStatus = status;
+    }];
+#endif
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
@@ -1202,6 +1219,11 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_appEnteredBackground {
     self.isAppForeground = NO;
+    
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+    // Update push status as CTPushNotKnown as it is again updated when app is resumed.
+    self.pushPrimerManager.pushPermissionStatus = CTPushNotKnown;
+#endif
     
     UIApplication *application = [CTUIUtils getSharedApplication];
     UIBackgroundTaskIdentifier __block backgroundTask;
@@ -1989,8 +2011,12 @@ static BOOL sharedInstanceErrorLogged;
         [self.dispatchQueueManager runSerialAsync:^{
             [self evaluateOnEvent:event withType: eventType];
         }];
+#else
+        // persist the profile changes
+        if (eventType == CleverTapEventTypeProfile) {
+            [self.localDataStore userAttributeChangeProperties:event];
+        }
 #endif
-        
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];
         } else {
@@ -2013,7 +2039,7 @@ static BOOL sharedInstanceErrorLogged;
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
-        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore getUserAttributeChangeProperties:event];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:event];
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
@@ -2607,6 +2633,7 @@ static BOOL sharedInstanceErrorLogged;
         
         if (cachedGUID) {
             [self.deviceInfo forceUpdateDeviceID:cachedGUID];
+            [self.cryptMigrator migrateCachedUserIfNeeded:cachedGUID];
         } else if (self.config.useCustomCleverTapId){
             [self.deviceInfo forceUpdateCustomDeviceID:cleverTapID];
         } else {
@@ -2874,7 +2901,6 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildAddMultiValue:value forKey:key
                           localDataStore:self.localDataStore
                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
@@ -2883,7 +2909,6 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildAddMultiValues:values forKey:key
                            localDataStore:self.localDataStore
                         completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
@@ -2892,7 +2917,6 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildRemoveMultiValue:value forKey:key
                              localDataStore:self.localDataStore
                           completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        
         [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
@@ -2905,26 +2929,25 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)profileIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
-    [CTProfileBuilder buildIncrementValueBy: value forKey: key
-                             localDataStore: _localDataStore
-                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+    [CTProfileBuilder buildIncrementValueBy:value forKey:key
+                             localDataStore:_localDataStore
+                          completionHandler:^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey:operatorDict errors:errors];
     }];
 }
 
 - (void)profileDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString *_Nonnull)key {
     [CTProfileBuilder buildDecrementValueBy: value forKey: key
                              localDataStore: _localDataStore
-                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSNumber * _Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey: key updatedValue: updatedValue operatorDict: operatorDict errors: errors];
+                          completionHandler: ^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
+        [self _handleIncrementDecrementProfilePushForKey:operatorDict errors:errors];
     }];
 }
 
 
 #pragma mark - Private Profile API
 
-- (void)_handleIncrementDecrementProfilePushForKey:(NSString *)key updatedValue:(NSNumber *)updatedValue operatorDict: (NSDictionary *)operatorDict errors: (NSArray<CTValidationResult*>*)errors {
-    
+- (void)_handleIncrementDecrementProfilePushForKey:(NSDictionary *)operatorDict errors:(NSArray<CTValidationResult*>*)errors {
     if (errors) {
         [self.validationResultStack pushValidationResults:errors];
         return;
@@ -2942,7 +2965,6 @@ static BOOL sharedInstanceErrorLogged;
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;
     [self queueEvent:event withType:CleverTapEventTypeProfile];
-    
 }
 
 - (void)_handleMultiValueProfilePush:(NSDictionary*)customFields updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
@@ -3785,8 +3807,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings {
     CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox Campaign Push Primer Accepted:", self);
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings
-                                       andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:fallbackToSettings withCompletionBlock:nil];
 #endif
 }
 
@@ -4336,7 +4357,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
-    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings andSkipSettingsAlert:NO];
+    [self.pushPrimerManager promptForOSPushNotificationWithFallbackToSettings:isFallbackToSettings withCompletionBlock:nil];
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {

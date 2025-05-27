@@ -20,12 +20,13 @@
 @property (nonatomic, readonly) int maxPerSession;
 @property (nonatomic, readonly) int totalLifetimeCount;
 @property (nonatomic, readonly) int totalDailyCount;
-@property (nonatomic, readonly) NSInteger timeToLive;
+@property (nonatomic, readonly) NSTimeInterval timeToLive;
 @property (nonatomic, assign, readonly) char position;
 @property (nonatomic, assign, readonly) float height;
 @property (nonatomic, assign, readonly) float heightPercent;
 @property (nonatomic, assign, readonly) float width;
 @property (nonatomic, assign, readonly) float widthPercent;
+@property (nonatomic, assign, readonly) float aspectRatio;
 
 @property (nonatomic, copy, readonly) NSString *landscapeContentType;
 @property (nonatomic, readonly) UIImage *inAppImage;
@@ -60,10 +61,10 @@
 @property (nonatomic, copy, readonly) NSDictionary *customExtras;
 @property (nonatomic, copy, readwrite) NSDictionary *actionExtras;
 
+@property (nonatomic, readonly) BOOL isRequestForPushPermission;
 @property (nonatomic, readonly) BOOL isLocalInApp;
 @property (nonatomic, readonly) BOOL isPushSettingsSoftAlert;
 @property (nonatomic, readonly) BOOL fallBackToNotificationSettings;
-@property (nonatomic, readonly) BOOL skipSettingsAlert;
 
 @property (nonatomic, readonly) CTCustomTemplateInAppData *customTemplateInAppData;
 

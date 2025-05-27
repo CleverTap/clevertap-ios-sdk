@@ -345,28 +345,26 @@
 
 #pragma mark - Increment and Decrement Operator Handling
 
-+ (void)buildIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    
++ (void)buildIncrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSArray<CTValidationResult*>* _Nullable errors))completion {
     [self _handleIncrementDecrementValue:value forKey:key
                              withCommand:kCLTAP_COMMAND_INCREMENT
                           localDataStore:dataStore completionHandler:completion];
 }
 
-+ (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSNumber* _Nullable updatedValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    
++ (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSArray<CTValidationResult*>* _Nullable errors))completion {
     [self _handleIncrementDecrementValue:value forKey:key
                              withCommand:kCLTAP_COMMAND_DECREMENT
                           localDataStore:dataStore completionHandler:completion];
 }
 
-+ (void)_handleIncrementDecrementValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command localDataStore:(CTLocalDataStore *_Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSNumber *_Nullable updatedValue, NSArray<CTValidationResult *> *_Nullable errors))completion {
++ (void)_handleIncrementDecrementValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command localDataStore:(CTLocalDataStore *_Nonnull)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors))completion {
     
     if ([key length] == 0) {
         NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
         CTValidationResult* error =  [self _generateInvalidMultiValueError: @"Profile key cannot be empty while incrementing/decrementing a property value"];
         
         [errors addObject: error];
-        completion(nil, nil, errors);
+        completion(nil, errors);
         return;
     }
     
@@ -375,22 +373,20 @@
         CTValidationResult* error =  [self _generateInvalidMultiValueError: [NSString stringWithFormat:@"Increment/Decrement value for profile key %@ cannot be zero or negative", key]];
         
         [errors addObject: error];
-        completion(nil, nil, errors);
+        completion(nil, errors);
         return;
     }
     
     NSDictionary* operatorDict = @{
         key: @{command: value}
     };
-    id cachedValue = [dataStore getProfileFieldForKey: key];
-    NSNumber *newValue;
-    newValue = [self _getUpdatedValue:value forKey:key withCommand:command cachedValue:cachedValue];
     
-    completion(operatorDict, newValue, nil);
+    completion(operatorDict, nil);
 }
 
 + (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id)cachedValue {
-    NSNumber *newValue;
+    // Set the new value to be the increment/decrement value in case there is no cached value
+    NSNumber *newValue = value;
     if ([cachedValue isKindOfClass: [NSNumber class]]) {
         NSNumber *cachedNumber = (NSNumber*)cachedValue;
         CFNumberType numberType = CFNumberGetType((CFNumberRef)cachedNumber);
