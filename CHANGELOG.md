@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.2.0) (May 26, 2025)
+### [Version 7.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.2.0) (May 27, 2025)
 
 #### Added
 - Introduces System App Functions (Open Url, App Rating, Push Permission Request - as mentioned [here](/docs/SystemInAppFunctions.md)) which can be triggered either as a button action within an in-app message or as a standalone campaign action in CleverTap, enriching client workflows.
