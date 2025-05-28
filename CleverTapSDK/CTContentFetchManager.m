@@ -63,7 +63,7 @@
 }
 
 - (void)handleContentFetch:(NSDictionary *)jsonResp {
-    NSArray *contentFetch = jsonResp[@"content_fetch"];
+    NSArray *contentFetch = jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY];
     if (!contentFetch) {
         return;
     }
@@ -71,7 +71,7 @@
     NSMutableArray *events = [[NSMutableArray alloc] init];
     for (NSDictionary *contentFetchItem in contentFetch) {
         NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
-            CLTAP_EVENT_NAME: @"content_fetch",
+            CLTAP_EVENT_NAME: CLTAP_CONTENT_FETCH_EVENT,
             CLTAP_EVENT_DATA: contentFetchItem
         }];
         
@@ -82,6 +82,7 @@
     }
     [self.queueLock lock];
     [self.contentFetchQueue addObject:events];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Added content fetch with %ld events", self, [events count]);
     NSUInteger batchIndex = self.contentFetchQueue.count - 1;
     [self.queueLock unlock];
     
@@ -90,7 +91,7 @@
 
 - (void)safeRemoveFromContentFetchQueueAt:(NSUInteger)i {
     [self.queueLock lock];
-    
+
     [self.inFlightRequestIndices removeObject:@(i)];
     
     if (i < self.contentFetchQueue.count) {
@@ -109,6 +110,7 @@
     // Check if already in-flight to prevent duplicates
     [self.queueLock lock];
     if ([self.inFlightRequestIndices containsObject:@(i)]) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Content fetch already processing index: %ld", self, i);
         [self.queueLock unlock];
         return;
     }
@@ -132,6 +134,7 @@
         dispatch_time_t semaphore_timeout = dispatch_time(DISPATCH_TIME_NOW,
                                                           self.semaphoreTimeout * NSEC_PER_SEC);
         if (dispatch_semaphore_wait(self.concurrencySemaphore, semaphore_timeout) != 0) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch timed out for index: %ld", self, i);
             [self safeRemoveFromContentFetchQueueAt:i];
             dispatch_group_leave(self.allRequestsGroup);
             return;
@@ -139,6 +142,7 @@
         
         NSDictionary *meta = [self.delegate contentFetchManagerGetBatchHeader:self];
         CTRequest *request = [self contentFetchRequest:batch withBatchHeader:meta];
+        CleverTapLogDebug(self.config.logLevel, @"%@: Will send Content fetch for index: %ld", self, i);
         [self sendContentRequest:request completed:^{
             [self safeRemoveFromContentFetchQueueAt:i];
             dispatch_semaphore_signal(self.concurrencySemaphore);
@@ -176,12 +180,15 @@
 - (void)sendContentRequest:(CTRequest *)request completed:(void(^)(void))completedBlock {
     void (^sendRequestBlock)(void) = ^{
         [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response received", self);
             [self.delegate contentFetchManager:self didReceiveResponse:data];
             completedBlock();
         }];
         [request onError:^(NSError * _Nullable error) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Error Content fetch: %@", self, error.debugDescription);
             completedBlock();
         }];
+        CleverTapLogInternal(self.config.logLevel, @"%@: Sending Content fetch request", self);
         [self.requestSender send:request];
     };
     
@@ -198,6 +205,7 @@
 
 - (void)deviceIdWillChange {
     [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapLogInternal(self.config.logLevel, @"%@: Fetching content on deviceIdWillChange", self);
         // Send all requests (those in-flight will be filtered out)
         [self fetchContent];
         
