@@ -16,8 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class CTRequestSender;
 @class CleverTapInstanceConfig;
+@class CTDispatchQueueManager;
 
-@interface CTContentFetchManager : NSObject
+@interface CTContentFetchManager : NSObject <CTSwitchUserDelegate>
 
 @property (nonatomic, weak) id<CTContentFetchManagerDelegate> delegate;
 
@@ -30,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config
                  requestSender:(CTRequestSender *)requestSender
+                 dispatchQueueManager:(CTDispatchQueueManager *)dispatchQueueManager
                domainOperations:(id<CTDomainOperations>)domainOperations
                       delegate:(id<CTContentFetchManagerDelegate>)delegate;
 

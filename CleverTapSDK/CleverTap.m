@@ -469,21 +469,23 @@ static BOOL sharedInstanceErrorLogged;
             initialProfileValues[CLTAP_SYS_TZ] = _deviceInfo.timeZone;
         }
         
-        self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
+        self.dispatchQueueManager = [[CTDispatchQueueManager alloc] initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
-        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo: _deviceInfo];
+        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo:_deviceInfo];
         
-        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
+        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo:_deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
         CleverTapEventDetail *eventDetails = [self getUserEventLog:CLTAP_APP_LAUNCHED_EVENT];
         _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
-        self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
+        self.validationResultStack = [[CTValidationResultStack alloc] initWithConfig:_config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
         // save config to defaults
-        [CTPreferences archiveObject:config forFileName:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:_config.accountId] config:_config];
+        [CTPreferences archiveObject:config
+                         forFileName:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:_config.accountId]
+                              config:_config];
         
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
@@ -493,8 +495,11 @@ static BOOL sharedInstanceErrorLogged;
         
         self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
                                                                   requestSender:self.requestSender
+                                                            dispatchQueueManager:self.dispatchQueueManager
                                                                 domainOperations:self.domainFactory
                                                                        delegate:self];
+        
+        [self.delegateManager addSwitchUserDelegate:self.contentFetchManager];
         
         self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
