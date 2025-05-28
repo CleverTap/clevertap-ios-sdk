@@ -2093,8 +2093,8 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
         
         @try {
-            // Encrypt in transit only if the config/plist flag is true and server side encryption hasn't failed yet.
-            if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed) {
+            // Encrypt in transit only if the config/plist flag is true, for event queues only and server side encryption hasn't failed yet.
+            if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed && queue != _notificationsQueue) {
                 if (@available(iOS 13.0, *)) {
                     NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
                     if (encryptedDict.count > 0) {
@@ -2187,7 +2187,6 @@ static BOOL sharedInstanceErrorLogged;
             }
             
             [queue removeObjectsInArray:batch];
-            
             
             [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
