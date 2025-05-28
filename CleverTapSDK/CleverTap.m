@@ -2488,8 +2488,7 @@ static BOOL sharedInstanceErrorLogged;
     [self _asyncSwitchUser:properties withCachedGuid:cachedGUID andCleverTapID:cleverTapID forAction:kOnUserLoginAction];
 }
 
-- (void) _asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {
-    
+- (void)_asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {
     [self.dispatchQueueManager runSerialAsync:^{
         CleverTapLogDebug(self.config.logLevel, @"%@: async switching user with properties:  %@", action, properties);
         
@@ -2501,6 +2500,8 @@ static BOOL sharedInstanceErrorLogged;
         
         // clear any events in the queue
         [self clearQueue];
+        
+        [[self delegateManager] notifyDelegatesDeviceIdWillChange];
         
         // clear ARP and other context for the old user
         [self clearUserContext];
