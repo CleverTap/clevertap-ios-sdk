@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol CTDomainOperations <NSObject>
 
+- (NSString * _Nullable)redirectDomain;
 - (BOOL)needsHandshake;
 - (void)runSerialAsyncEnsureHandshake:(void(^)(BOOL success))block;
 

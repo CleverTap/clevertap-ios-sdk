@@ -13,6 +13,7 @@
 #import "CleverTap.h"
 #import "CTConstants.h"
 #import "CTDispatchQueueManager.h"
+#import "CleverTapBuildInfo.h"
 
 @interface CTContentFetchManager()
 
@@ -140,10 +141,8 @@
             return;
         }
         
-        NSDictionary *meta = [self.delegate contentFetchManagerGetBatchHeader:self];
-        CTRequest *request = [self contentFetchRequest:batch withBatchHeader:meta];
         CleverTapLogDebug(self.config.logLevel, @"%@: Will send Content fetch for index: %ld", self, i);
-        [self sendContentRequest:request completed:^{
+        [self sendContentRequest:batch completed:^{
             [self safeRemoveFromContentFetchQueueAt:i];
             dispatch_semaphore_signal(self.concurrencySemaphore);
             dispatch_group_leave(self.allRequestsGroup);
@@ -163,22 +162,32 @@
     }
 }
 
-- (CTRequest *)contentFetchRequest:(NSArray *)events withBatchHeader:(NSDictionary *)batchHeader {
-    NSDictionary *meta = batchHeader;
-    NSMutableArray *params = [[NSMutableArray alloc] init];
-    [params addObject:meta];
-    [params addObjectsFromArray:events];
-    CTRequest *ctRequest = [CTRequestFactory contentRequestWithConfig:self.config params:params domain:[self contentDomain]];
-    return ctRequest;
+- (NSString *)contentEndpoint {
+    NSString *endpointDomain = self.domainOperations.redirectDomain;
+    // TODO: Resolve content domain for sk1
+    endpointDomain = @"sk1-content-staging.clevertap-prod.com";
+    if (!endpointDomain) return nil;
+    int currentRequestTimestamp = (int) [[[NSDate alloc] init] timeIntervalSince1970];
+    NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/content?os=iOS&t=%@&z=%@&ts=%d",
+                             endpointDomain, WR_SDK_REVISION, self.config.accountId, currentRequestTimestamp];
+    return endpointUrl;
 }
 
-// TODO: Resolve content domain (TBD)
-- (NSString *)contentDomain {
-    return @"sk1-content-staging.clevertap-prod.com";
-}
-
-- (void)sendContentRequest:(CTRequest *)request completed:(void(^)(void))completedBlock {
+- (void)sendContentRequest:(NSArray *)events completed:(void(^)(void))completedBlock {
     void (^sendRequestBlock)(void) = ^{
+        NSString *url = [self contentEndpoint];
+        if (!url) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Endpoint is not set, will not send content fetch", self);
+            completedBlock();
+            return;
+        }
+        
+        NSDictionary *meta = [self.delegate contentFetchManagerGetBatchHeader:self];
+        NSMutableArray *params = [[NSMutableArray alloc] init];
+        [params addObject:meta];
+        [params addObjectsFromArray:events];
+        CTRequest *request = [CTRequestFactory contentRequestWithConfig:self.config params:params url:[self contentEndpoint]];
+        
         [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response received", self);
             [self.delegate contentFetchManager:self didReceiveResponse:data];

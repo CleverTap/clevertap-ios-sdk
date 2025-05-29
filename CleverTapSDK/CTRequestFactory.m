@@ -27,8 +27,7 @@
     return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
 }
 
-+ (CTRequest *_Nonnull)contentRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params domain:(NSString * _Nonnull)domain {
-    NSString *url = [self urlWithDomain:domain andPath:@"content"];
++ (CTRequest *_Nonnull)contentRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url {
     return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params:params url:url];
 }
 
