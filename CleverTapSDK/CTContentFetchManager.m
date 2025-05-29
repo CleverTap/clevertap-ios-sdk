@@ -186,7 +186,7 @@
         NSMutableArray *params = [[NSMutableArray alloc] init];
         [params addObject:meta];
         [params addObjectsFromArray:events];
-        CTRequest *request = [CTRequestFactory contentRequestWithConfig:self.config params:params url:[self contentEndpoint]];
+        CTRequest *request = [CTRequestFactory contentRequestWithConfig:self.config params:params url:url];
         
         [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response received", self);
