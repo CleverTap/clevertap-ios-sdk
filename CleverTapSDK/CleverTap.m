@@ -2149,7 +2149,7 @@ static BOOL sharedInstanceErrorLogged;
                         [self.domainFactory updateMutedFromResponseHeaders:headers];
                     }
                     else {
-                        if (httpResponse.statusCode == HTTP_EXPIRED) {
+                        if (httpResponse.statusCode == HTTP_EXPIRED || httpResponse.statusCode == HTTP_PAYMENT_REQUIRED) {
                             self.sessionManager.encryptionInTransitFailed = YES;
                         }
                             
