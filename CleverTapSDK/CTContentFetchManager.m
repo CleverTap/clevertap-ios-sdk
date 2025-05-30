@@ -249,6 +249,7 @@
         [self.queueLock lock];
         [self.contentFetchQueue removeAllObjects];
         [self.inFlightRequestIndices removeAllObjects];
+        self.completedBatches = 0;
         [self.queueLock unlock];
     }];
 }
