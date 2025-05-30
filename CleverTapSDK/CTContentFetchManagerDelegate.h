@@ -28,8 +28,6 @@
 
 - (void)contentFetchManager:(CTContentFetchManager *)manager didFailWithError:(NSError *)error;
 
-- (void)contentFetchManagerDidCompleteAllRequests:(CTContentFetchManager *)manager;
-
 @end
 
 #endif /* CTContentFetchManagerDelegate_h */

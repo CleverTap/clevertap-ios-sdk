@@ -99,11 +99,6 @@
         [self.contentFetchQueue removeObjectAtIndex:i];
     }
     
-    if (self.contentFetchQueue.count == 0 &&
-        [self.delegate respondsToSelector:@selector(contentFetchManagerDidCompleteAllRequests:)]) {
-        [self.delegate contentFetchManagerDidCompleteAllRequests:self];
-    }
-    
     [self.queueLock unlock];
 }
 
