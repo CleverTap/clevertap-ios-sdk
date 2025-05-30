@@ -30,6 +30,7 @@
 
 @property (nonatomic, strong) dispatch_group_t allRequestsGroup;
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
+@property (nonatomic, assign) NSUInteger completedBatches;
 
 @end
 
@@ -90,16 +91,30 @@
     [self fetchContentAtIndex:batchIndex];
 }
 
-- (void)safeRemoveFromContentFetchQueueAt:(NSUInteger)i {
+- (void)markCompletedAtIndex:(NSUInteger)i {
     [self.queueLock lock];
-
+    
     [self.inFlightRequestIndices removeObject:@(i)];
     
-    if (i < self.contentFetchQueue.count) {
-        [self.contentFetchQueue removeObjectAtIndex:i];
+    if (i < self.contentFetchQueue.count && self.contentFetchQueue[i] != [NSNull null]) {
+        self.contentFetchQueue[i] = [NSNull null];
+        self.completedBatches++;
     }
     
+    [self cleanupIfAllCompleted];
+    
     [self.queueLock unlock];
+}
+
+- (void)cleanupIfAllCompleted {
+    if (self.completedBatches == self.contentFetchQueue.count && self.contentFetchQueue.count > 0) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: All %ld batches completed, clearing queue",
+                             self, self.contentFetchQueue.count);
+        
+        [self.contentFetchQueue removeAllObjects];
+        [self.inFlightRequestIndices removeAllObjects];
+        self.completedBatches = 0;
+    }
 }
 
 - (void)fetchContentAtIndex:(NSUInteger)i {
@@ -118,7 +133,7 @@
     dispatch_async(self.concurrentQueue, ^{
         NSArray *batch;
         [self.queueLock lock];
-        if (i >= self.contentFetchQueue.count) {
+        if (i >= self.contentFetchQueue.count || self.contentFetchQueue[i] == [NSNull null]) {
             [self.queueLock unlock];
             [self.inFlightRequestIndices removeObject:@(i)];
             dispatch_group_leave(self.allRequestsGroup);
@@ -131,7 +146,7 @@
                                                           self.semaphoreTimeout * NSEC_PER_SEC);
         if (dispatch_semaphore_wait(self.concurrencySemaphore, semaphore_timeout) != 0) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch timed out for index: %ld", self, i);
-            [self safeRemoveFromContentFetchQueueAt:i];
+            [self markCompletedAtIndex:i];
             NSError *error = [NSError errorWithDomain:NSURLErrorDomain
                                                  code:NSURLErrorTimedOut
                                              userInfo:@{
@@ -145,7 +160,7 @@
         
         CleverTapLogDebug(self.config.logLevel, @"%@: Will send Content fetch for index: %ld", self, i);
         [self sendContentRequest:batch completed:^{
-            [self safeRemoveFromContentFetchQueueAt:i];
+            [self markCompletedAtIndex:i];
             dispatch_semaphore_signal(self.concurrencySemaphore);
             dispatch_group_leave(self.allRequestsGroup);
         }];
