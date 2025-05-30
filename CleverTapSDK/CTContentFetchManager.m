@@ -65,7 +65,7 @@
 
 - (void)handleContentFetch:(NSDictionary *)jsonResp {
     NSArray *contentFetch = jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY];
-    if (!contentFetch) {
+    if (!contentFetch || ![contentFetch isKindOfClass:[NSArray class]] || contentFetch.count == 0) {
         return;
     }
     
@@ -132,6 +132,13 @@
         if (dispatch_semaphore_wait(self.concurrencySemaphore, semaphore_timeout) != 0) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch timed out for index: %ld", self, i);
             [self safeRemoveFromContentFetchQueueAt:i];
+            NSError *error = [NSError errorWithDomain:NSURLErrorDomain
+                                                 code:NSURLErrorTimedOut
+                                             userInfo:@{
+                NSLocalizedDescriptionKey: @"Content fetch request timed out",
+                NSLocalizedFailureReasonErrorKey: @"The request exceeded the maximum wait time"
+            }];
+            [self.delegate contentFetchManager:self didFailWithError:error];
             dispatch_group_leave(self.allRequestsGroup);
             return;
         }
@@ -178,6 +185,12 @@
         }
         
         NSDictionary *meta = [self.delegate contentFetchManagerGetBatchHeader:self];
+        if (!meta) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Batch header is nil, will not send content fetch", self);
+            completedBlock();
+            return;
+        }
+        
         NSMutableArray *params = [[NSMutableArray alloc] init];
         [params addObject:meta];
         [params addObjectsFromArray:events];
@@ -189,6 +202,7 @@
             completedBlock();
         }];
         [request onError:^(NSError * _Nullable error) {
+            [self.delegate contentFetchManager:self didFailWithError:error];
             CleverTapLogDebug(self.config.logLevel, @"%@: Error Content fetch: %@", self, error.debugDescription);
             completedBlock();
         }];
