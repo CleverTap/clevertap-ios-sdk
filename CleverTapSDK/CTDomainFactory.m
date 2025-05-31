@@ -320,7 +320,9 @@ NSTimeInterval const kMUTE_SECONDS = 24 * 60 * 60;
         dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
         [self performHandshakeWithCompletion:^(BOOL success) {
             if (block) {
-                block(success);
+                [self.dispatchQueueManager runSerialAsync:^{
+                    block(success);
+                }];
             }
             dispatch_semaphore_signal(semaphore);
         }];
