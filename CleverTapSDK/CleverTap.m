@@ -2112,12 +2112,11 @@ static BOOL sharedInstanceErrorLogged;
                     
                     success = (httpResponse.statusCode == 200);
                     
+                    NSDictionary *headers = httpResponse.allHeaderFields;
                     if (success) {
-                        if (queue == self->_notificationsQueue) {
-                            redirect = [self.domainFactory updateNotificationViewedDomainFromResponseHeaders:httpResponse.allHeaderFields];
-                        } else {
-                            redirect = [self.domainFactory updateDomainFromResponseHeaders:httpResponse.allHeaderFields];
-                        }
+                        [self.domainFactory updateDomainFromResponseHeaders:headers];
+                        [self.domainFactory updateNotificationViewedDomainFromResponseHeaders:headers];
+                        [self.domainFactory updateMutedFromResponseHeaders:headers];
                     } else {
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
