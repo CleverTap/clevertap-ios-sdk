@@ -2149,8 +2149,13 @@ static BOOL sharedInstanceErrorLogged;
                         [self.domainFactory updateMutedFromResponseHeaders:headers];
                     }
                     else {
-                        if (httpResponse.statusCode == HTTP_EXPIRED || httpResponse.statusCode == HTTP_PAYMENT_REQUIRED) {
+                        if (httpResponse.statusCode == HTTP_EXPIRED) {
                             self.sessionManager.encryptionInTransitFailed = YES;
+                            CleverTapLogInfo(self.config.logLevel, @"%@: Encryption in transit failed with status code: %lu", self, (long)httpResponse.statusCode);
+                        }
+                        else if (httpResponse.statusCode == HTTP_PAYMENT_REQUIRED) {
+                            self.sessionManager.encryptionInTransitFailed = YES;
+                            CleverTapLogInfo(self.config.logLevel, @"%@: Encryption in transit is not enabled for your account, please contact the CleverTap support team.", self);
                         }
                             
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
