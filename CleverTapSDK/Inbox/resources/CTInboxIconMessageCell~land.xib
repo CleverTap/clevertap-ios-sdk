@@ -126,12 +126,14 @@
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" verticalCompressionResistancePriority="751" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RTj-ot-rZd">
                                                 <rect key="frame" x="95" y="15" width="219" height="21.5"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="messageTitle"/>
                                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="26k-os-5On">
                                                 <rect key="frame" x="20" y="95" width="294" height="19.5"/>
+                                                <accessibility key="accessibilityConfiguration" identifier="messageText"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                 <color key="textColor" red="0.4941176471" green="0.4941176471" blue="0.4941176471" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -182,11 +184,13 @@
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hTb-4a-S7y">
                                         <rect key="frame" x="0.0" y="1" width="222.5" height="44"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_1"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                         <state key="normal" title="Button 1"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J1s-aB-1sD">
                                         <rect key="frame" x="222.5" y="1" width="222" height="44"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_2"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="9V7-2z-KyU"/>
                                         </constraints>
@@ -195,6 +199,7 @@
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gdB-xE-Txh">
                                         <rect key="frame" x="444.5" y="1" width="222.5" height="44"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_3"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="rba-2T-vsK"/>
                                         </constraints>
