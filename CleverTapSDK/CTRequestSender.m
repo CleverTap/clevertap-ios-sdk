@@ -16,7 +16,6 @@
 @interface CTRequestSender ()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSURLSession *urlSession;
-@property (nonatomic, strong) NSString *redirectDomain;
 @property (nonatomic, assign, readonly) BOOL sslPinningEnabled;
 
 #if CLEVERTAP_SSL_PINNING
@@ -27,26 +26,23 @@
 
 @implementation CTRequestSender
 
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config redirectDomain:(NSString* _Nonnull)redirectDomain {
-    
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nullable)redirectDomain {
     if ((self = [super init])) {
         self.config = config;
         self.redirectDomain = redirectDomain;
         [self setUpUrlSession];
-
     }
     return self;
 }
 
 #if CLEVERTAP_SSL_PINNING
-- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig *_Nonnull)config redirectDomain:(NSString* _Nonnull)redirectDomain pinnedNSURLSessionDelegate: (CTPinnedNSURLSessionDelegate* _Nonnull)pinnedNSURLSessionDelegate sslCertNames:(NSArray* _Nonnull)sslCertNames {
+- (instancetype _Nonnull)initWithConfig:(CleverTapInstanceConfig * _Nonnull)config redirectDomain:(NSString * _Nullable)redirectDomain pinnedNSURLSessionDelegate:(CTPinnedNSURLSessionDelegate * _Nonnull)pinnedNSURLSessionDelegate sslCertNames:(NSArray * _Nonnull)sslCertNames {
     if ((self = [super init])) {
         self.config = config;
         self.urlSessionDelegate = pinnedNSURLSessionDelegate;
         self.sslCertNames = sslCertNames;
         self.redirectDomain = redirectDomain;
         [self setUpUrlSession];
-
     }
     return self;
 }
@@ -84,12 +80,15 @@
     }
 }
 
-- (void)send:(CTRequest *_Nonnull)ctRequest {
+- (void)send:(CTRequest * _Nonnull)ctRequest {
     NSURLSessionDataTask *task = [_urlSession
                                   dataTaskWithRequest:ctRequest.urlRequest
                                   completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error) {
-            ctRequest.errorBlock(error);
+            if (ctRequest.errorBlock) {
+                ctRequest.errorBlock(error);
+            }
+            return;
         }
         ctRequest.responseBlock(data, response);
     }];
