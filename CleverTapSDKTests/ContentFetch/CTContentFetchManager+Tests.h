@@ -15,9 +15,12 @@
 
 @property (nonatomic, strong) NSMutableArray *contentFetchQueue;
 @property (nonatomic, strong) NSLock *queueLock;
-- (void)markCompletedAtIndex:(NSUInteger)i;
-
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
+@property NSTimeInterval semaphoreTimeout;
+@property (nonatomic, strong) dispatch_queue_t concurrentQueue;
+
+- (void)markCompletedAtIndex:(NSUInteger)i;
+- (void)fetchContentAtIndex:(NSUInteger)i;
 
 @end
 
