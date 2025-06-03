@@ -57,9 +57,12 @@ class NetworkEncryptionTests: XCTestCase {
         
         XCTAssertFalse(decrypted.isEmpty, "Decrypted data should not be empty")
         
-        let result = try! JSONSerialization.jsonObject(with: decrypted) as? [String: Any]
-        XCTAssertEqual(result?["user"] as? String, "alice")
-        XCTAssertEqual(result?["score"] as? Int, 100)
+        guard let result = try? JSONSerialization.jsonObject(with: decrypted) as? [String: Any] else {
+            XCTFail("Failed to deserialize decrypted data")
+            return
+        }
+        XCTAssertEqual(result["user"] as? String, "alice")
+        XCTAssertEqual(result["score"] as? Int, 100)
     }
     
     func testDecryptFailsWithGarbageData() {
@@ -70,7 +73,10 @@ class NetworkEncryptionTests: XCTestCase {
     
     func testDecryptFailsWithMissingFields() {
         let incomplete = [NetworkEncryptionManager.ITP: "dummy"]
-        let data = try! JSONSerialization.data(withJSONObject: incomplete, options: [])
+        guard let data = try? JSONSerialization.data(withJSONObject: incomplete, options: []) else {
+            XCTFail("Failed to serialize incomplete response")
+            return
+        }
         let decrypted = NetworkEncryptionManager.shared.decrypt(responseData: data)
         XCTAssertEqual(decrypted, Data(), "Missing nonce should cause decryption failure")
     }
@@ -80,7 +86,10 @@ class NetworkEncryptionTests: XCTestCase {
             NetworkEncryptionManager.ITP: Data("invalid".utf8).base64EncodedString(),
             NetworkEncryptionManager.ITV: Data("nonce".utf8).base64EncodedString()
         ]
-        let data = try! JSONSerialization.data(withJSONObject: corrupt, options: [])
+        guard let data = try? JSONSerialization.data(withJSONObject: corrupt, options: []) else {
+            XCTFail("Failed to serialize corrupt response")
+            return
+        }
         let decrypted = NetworkEncryptionManager.shared.decrypt(responseData: data)
         XCTAssertEqual(decrypted, Data(), "Corrupt encrypted payload should not crash and should return empty data")
     }

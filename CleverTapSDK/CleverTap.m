@@ -2101,11 +2101,11 @@ static BOOL sharedInstanceErrorLogged;
                         additionalHeaders[ENCRYPTION_HEADER] = @"true";
                         
                         NSString *encryptedPayload = encryptedDict[@"encryptedPayload"];
-                        NSData *nonceData = encryptedDict[@"nonceData"];
+                        NSString *nonceData = encryptedDict[@"nonceData"];
                         finalPayload = @{
                             NetworkEncryptionManager.ITP: encryptedPayload,
                             NetworkEncryptionManager.ITK: [[NetworkEncryptionManager shared]getSessionKeyBase64],
-                            NetworkEncryptionManager.ITV: [nonceData base64EncodedStringWithOptions:kNilOptions]
+                            NetworkEncryptionManager.ITV: nonceData
                         };
                         NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
                         CleverTapLogDebug(self.config.logLevel, @"%@: Encrypted request: %@", self, jsonBody);
