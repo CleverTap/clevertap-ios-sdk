@@ -181,8 +181,6 @@
 
 - (NSString *)contentEndpoint {
     NSString *endpointDomain = self.domainOperations.redirectDomain;
-    // TODO: Resolve content domain for sk1
-    endpointDomain = @"sk1-content-staging.clevertap-prod.com";
     if (!endpointDomain) return nil;
     int currentRequestTimestamp = (int) [[[NSDate alloc] init] timeIntervalSince1970];
     NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/content?os=iOS&t=%@&z=%@&ts=%d",
