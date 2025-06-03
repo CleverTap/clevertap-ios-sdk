@@ -49,7 +49,7 @@
         self.delegate = delegate;
         self.dispatchQueueManager = dispatchQueueManager;
         
-        self.semaphoreTimeout = CLTAP_REQUEST_TIME_OUT_INTERVAL + 5;
+        self.semaphoreTimeout = self.requestSender.requestTimeout + 5;
         
         self.queueLock = [[NSLock alloc] init];
         self.concurrentQueue = dispatch_queue_create("com.clevertap.contentfetch", DISPATCH_QUEUE_CONCURRENT);
@@ -145,13 +145,13 @@
         dispatch_time_t semaphore_timeout = dispatch_time(DISPATCH_TIME_NOW,
                                                           self.semaphoreTimeout * NSEC_PER_SEC);
         if (dispatch_semaphore_wait(self.concurrencySemaphore, semaphore_timeout) != 0) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch timed out for index: %ld", self, i);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch timed out waiting for concurrency slot at index: %ld", self, i);
             [self markCompletedAtIndex:i];
             NSError *error = [NSError errorWithDomain:NSURLErrorDomain
                                                  code:NSURLErrorTimedOut
                                              userInfo:@{
-                NSLocalizedDescriptionKey: @"Content fetch request timed out",
-                NSLocalizedFailureReasonErrorKey: @"The request exceeded the maximum wait time"
+                NSLocalizedDescriptionKey: @"Content fetch request could not acquire concurrency slot",
+                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Waited %.1f seconds for available slot", self.semaphoreTimeout]
             }];
             [self.delegate contentFetchManager:self didFailWithError:error];
             dispatch_group_leave(self.allRequestsGroup);
