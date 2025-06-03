@@ -604,6 +604,48 @@
     XCTAssertNoThrow([self.contentFetchManager handleContentFetch:malformedResp]);
 }
 
+- (void)testSendContentRequest_WithNilEndpoint_CompletesWithoutSendingRequest {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+    self.testDomainOperations.redirectDomain = nil;
+#pragma clang diagnostic pop
+    
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Request completed"];
+    self.contentFetchManager.onAllRequestsCompleted = ^{
+        [completionExpectation fulfill];
+    };
+    
+    [self.contentFetchManager handleContentFetch:@{
+        CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertEqual(self.testDelegate.receivedResponses.count, 0);
+    XCTAssertEqual(self.testDelegate.receivedErrors.count, 0);
+    XCTAssertEqual(self.contentFetchManager.contentFetchQueue.count, 0);
+}
+
+- (void)testSendContentRequest_WithNilBatchHeader_CompletesWithoutSendingRequest {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+    self.testDelegate.batchHeader = nil;
+#pragma clang diagnostic pop
+    
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Request completed"];
+    self.contentFetchManager.onAllRequestsCompleted = ^{
+        [completionExpectation fulfill];
+    };
+    
+    [self.contentFetchManager handleContentFetch:@{
+        CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertEqual(self.testDelegate.receivedResponses.count, 0);
+    XCTAssertEqual(self.testDelegate.receivedErrors.count, 0);
+    XCTAssertEqual(self.contentFetchManager.contentFetchQueue.count, 0);
+}
+
 #pragma mark - Custom Test Methods
 
 - (void)testQueueStateAccess {
