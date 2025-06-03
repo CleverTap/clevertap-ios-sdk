@@ -41,7 +41,7 @@ import Security
             }
             
             let nonce = AES.GCM.Nonce()
-            let nonceData = Data(nonce)
+            let nonceData = Data(nonce).base64EncodedString()
             let sealedBox = try AES.GCM.seal(data, using: getOrGenerateSessionKey(), nonce: nonce)
             
             // Combine Ciphertext + Tag because the server expects it this way
@@ -51,7 +51,7 @@ import Security
             return ["encryptedPayload": encryptedPayload, "nonceData": nonceData]
         }
         catch {
-            NSLog("[CleverTap]: Encryption in transit error", error.localizedDescription)
+            NSLog("[CleverTap]: Encryption in transit error: %@", error.localizedDescription)
             return [:]
         }
     }
@@ -75,7 +75,7 @@ import Security
             let decryptedData = try AES.GCM.open(sealedBox, using: getOrGenerateSessionKey())
             return decryptedData
         } catch {
-            NSLog("[CleverTap]: Decryption in transit error", error.localizedDescription)
+            NSLog("[CleverTap]: Decryption in transit error: %@", error.localizedDescription)
             return Data()
         }
     }

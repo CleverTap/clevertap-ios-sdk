@@ -9,7 +9,6 @@
 #import "CTRequest.h"
 #import "CTConstants.h"
 #import "CTUtils.h"
-#import "CleverTapInstanceConfigPrivate.h"
 
 @interface CTRequest()
 
