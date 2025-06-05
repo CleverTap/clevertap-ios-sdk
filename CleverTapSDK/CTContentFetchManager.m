@@ -15,6 +15,11 @@
 #import "CTDispatchQueueManager.h"
 #import "CleverTapBuildInfo.h"
 
+// Limit concurrent content fetch requests
+static const NSUInteger kCONCURRENCY_COUNT = 5;
+// Reasonable timeout for all requests to complete on user switch
+static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
+
 @interface CTContentFetchManager()
 
 @property (nonatomic, strong) CTRequestSender *requestSender;
@@ -27,6 +32,7 @@
 @property (nonatomic, strong) dispatch_queue_t concurrentQueue;
 @property (nonatomic, strong) dispatch_semaphore_t concurrencySemaphore;
 @property NSTimeInterval semaphoreTimeout;
+@property NSTimeInterval userSwitchTimeout;
 
 @property (nonatomic, strong) dispatch_group_t allRequestsGroup;
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
@@ -51,12 +57,12 @@
         
         // Add 5 second buffer for dispatch overhead and ensure request timeout fires first
         self.semaphoreTimeout = self.requestSender.requestTimeout + 5;
+        // Set the user switch timeout to the default one
+        self.userSwitchTimeout = kDEFAULT_USER_SWITCH_TIMEOUT;
         
         self.queueLock = [[NSLock alloc] init];
         self.concurrentQueue = dispatch_queue_create("com.clevertap.contentfetch", DISPATCH_QUEUE_CONCURRENT);
-        // Limit concurrent content fetch requests
-        int concurrencyCount = 5;
-        self.concurrencySemaphore = dispatch_semaphore_create(concurrencyCount);
+        self.concurrencySemaphore = dispatch_semaphore_create(kCONCURRENCY_COUNT);
         self.contentFetchQueue = [[NSMutableArray alloc] init];
         
         self.allRequestsGroup = dispatch_group_create();
@@ -239,11 +245,22 @@
 - (void)deviceIdWillChange {
     [self.dispatchQueueManager runSerialAsync:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: Fetching content on deviceIdWillChange", self);
+        
         // Send all requests (those in-flight will be filtered out)
         [self fetchContent];
         
-        // Wait for all to complete (both in-flight and newly started)
-        dispatch_group_wait(self.allRequestsGroup, DISPATCH_TIME_FOREVER);
+        // Ensure all content fetch requests complete before user switch (both in-flight and newly started)
+        dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.userSwitchTimeout * NSEC_PER_SEC));
+        long result = dispatch_group_wait(self.allRequestsGroup, timeout);
+        if (result != 0) {
+            CleverTapLogDebug(self.config.logLevel,
+                              @"%@: Content fetch requests timed out after %.0f seconds during user switch",
+                              self, self.userSwitchTimeout);
+        } else {
+            CleverTapLogInternal(self.config.logLevel,
+                                 @"%@: All content fetch requests completed successfully before user switch",
+                                 self);
+        }
         
         // Clean up
         [self.queueLock lock];
