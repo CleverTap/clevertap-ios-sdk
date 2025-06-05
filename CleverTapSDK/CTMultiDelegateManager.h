@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
 - (void)removeSwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate;
 - (void)notifyDelegatesDeviceIdDidChange:(NSString *)newDeviceId;
+- (void)notifyDelegatesDeviceIdWillChange;
 
 - (void)addBatchSentDelegate:(id<CTBatchSentDelegate>)delegate;
 - (void)removeBatchSentDelegate:(id<CTBatchSentDelegate>)delegate;
