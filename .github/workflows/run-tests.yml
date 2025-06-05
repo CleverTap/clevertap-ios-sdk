@@ -20,9 +20,6 @@ jobs:
 
       - name: Install CocoaPods dependencies
         run: pod install
-
-      - name: Install xcpretty
-        run: gem install xcpretty
         
       - name: Run Tests
         run: |
@@ -30,5 +27,4 @@ jobs:
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            | xcpretty --simple
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
