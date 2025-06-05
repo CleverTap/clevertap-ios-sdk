@@ -594,15 +594,11 @@
 
     self.testDelegate.onResponseReceived = ^(NSData *data) {
         successCount++;
-        NSLog(@"Success count: %ld", (long)successCount);
-        
         checkRequestsProcessed();
     };
     
     self.testDelegate.onErrorReceived = ^(NSError *error) {
         errorCount++;
-        NSLog(@"Error count: %ld, Error: %@", (long)errorCount, error.localizedDescription);
-        
         // Check if this is a semaphore timeout error
         if (error.code == NSURLErrorTimedOut &&
             [error.localizedDescription containsString:@"could not acquire concurrency slot"]) {
