@@ -562,7 +562,6 @@
 		D0A84ADD209136D500191B1F /* CTLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A84ADB209136D500191B1F /* CTLogger.m */; };
 		D0B044BC27697660000ED628 /* CleverTapSDKUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B044BB27697660000ED628 /* CleverTapSDKUITests.m */; };
 		D0B044BE27697660000ED628 /* CleverTapSDKUITestsLaunchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B044BD27697660000ED628 /* CleverTapSDKUITestsLaunchTests.m */; };
-		D0B044D02769933D000ED628 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D09A5E0221EA33C50032DDDF /* SDWebImage.framework */; };
 		D0BD759D241760C60006EE55 /* CTProductConfigController.h in Headers */ = {isa = PBXBuildFile; fileRef = D0BD759B241760C60006EE55 /* CTProductConfigController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0BD759E241760C60006EE55 /* CTProductConfigController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0BD759C241760C60006EE55 /* CTProductConfigController.m */; };
 		D0BD75A02417690E0006EE55 /* CleverTapProductConfigPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0BD759F2417690E0006EE55 /* CleverTapProductConfigPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -1163,7 +1162,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0B044D02769933D000ED628 /* SDWebImage.framework in Frameworks */,
 				D02AC2DC276044F70031C1BE /* CleverTapSDK.framework in Frameworks */,
 				677A625320C89652643838A7 /* Pods_shared_CleverTapSDKTests.framework in Frameworks */,
 				7C87D796B6B66FEA0125244A /* Pods_shared_CleverTapSDKTests.framework in Frameworks */,
