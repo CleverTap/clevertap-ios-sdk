@@ -101,9 +101,8 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
     [self.contentFetchQueue addObject:events];
     CleverTapLogDebug(self.config.logLevel, @"%@: Added content fetch with %ld events", self, [events count]);
     NSUInteger batchIndex = self.contentFetchQueue.count - 1;
-    [self.queueLock unlock];
-    
     [self fetchContentAtIndex:batchIndex];
+    [self.queueLock unlock];
 }
 
 - (void)markCompletedAtIndex:(NSUInteger)i {
