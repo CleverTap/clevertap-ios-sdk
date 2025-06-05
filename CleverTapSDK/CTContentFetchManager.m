@@ -190,8 +190,8 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 - (NSString *)contentEndpoint {
     NSString *endpointDomain = self.domainOperations.redirectDomain;
     if (!endpointDomain) return nil;
-    int currentRequestTimestamp = (int) [[[NSDate alloc] init] timeIntervalSince1970];
-    NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/content?os=iOS&t=%@&z=%@&ts=%d",
+    long long currentRequestTimestamp = (long long) [[[NSDate alloc] init] timeIntervalSince1970];
+    NSString *endpointUrl = [[NSString alloc] initWithFormat:@"https://%@/content?os=iOS&t=%@&z=%@&ts=%lld",
                              endpointDomain, WR_SDK_REVISION, self.config.accountId, currentRequestTimestamp];
     return endpointUrl;
 }
