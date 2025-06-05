@@ -1,5 +1,5 @@
 //
-//  ContentFetchManager.m
+//  CTContentFetchManager.m
 //  CleverTapSDK
 //
 //  Created by Nikola Zagorchev on 19.05.25.

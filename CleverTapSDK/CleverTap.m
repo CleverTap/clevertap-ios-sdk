@@ -33,7 +33,10 @@
 #import "CTSessionManager.h"
 #import "CTFileDownloader.h"
 #import "CTCryptMigrator.h"
+
+#if !defined(CLEVERTAP_TVOS)
 #import "CTContentFetchManager.h"
+#endif
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppFCManager.h"
@@ -182,8 +185,10 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @interface CleverTap () <CTDomainResolverDelegate> {}
 @end
 
+#if !defined(CLEVERTAP_TVOS)
 @interface CleverTap () <CTContentFetchManagerDelegate> {}
 @end
+#endif
 
 #import <UserNotifications/UserNotifications.h>
 
@@ -235,7 +240,9 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong, readwrite) CTFileDownloader *fileDownloader;
 
+#if !defined(CLEVERTAP_TVOS)
 @property (nonatomic, strong) CTContentFetchManager *contentFetchManager;
+#endif
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
@@ -493,6 +500,7 @@ static BOOL sharedInstanceErrorLogged;
         [self inflateQueuesAsync];
         [self addObservers];
         
+#if !defined(CLEVERTAP_TVOS)
         self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
                                                                   requestSender:self.requestSender
                                                             dispatchQueueManager:self.dispatchQueueManager
@@ -500,6 +508,7 @@ static BOOL sharedInstanceErrorLogged;
                                                                        delegate:self];
         
         [self.delegateManager addSwitchUserDelegate:self.contentFetchManager];
+#endif
         
         self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -2205,7 +2214,10 @@ static BOOL sharedInstanceErrorLogged;
                 [self handleInAppResponse:jsonResp];
 #endif
                 
+#if !defined(CLEVERTAP_TVOS)
                 [self.contentFetchManager handleContentFetch:jsonResp];
+#endif
+                
 #if !CLEVERTAP_NO_INBOX_SUPPORT
                 NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
                 if (inboxJSON) {
@@ -4469,6 +4481,8 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark - CTContentFetchManagerDelegate
 
+#if !defined(CLEVERTAP_TVOS)
+
 - (NSDictionary *)contentFetchManagerGetBatchHeader:(CTContentFetchManager *)manager {
     return [self batchHeaderForQueue:CTQueueTypeUndefined];
 }
@@ -4484,5 +4498,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)contentFetchManager:(CTContentFetchManager *)manager didFailWithError:(NSError *)error {
     CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch failed with error: %@", self, error);
 }
+
+#endif
 
 @end

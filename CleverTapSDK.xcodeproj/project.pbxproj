@@ -467,10 +467,7 @@
 		6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */; };
 		6BFC61AB2DDB6A5A00022EFF /* CTContentFetchManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */; };
 		6BFC61AC2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */; };
-		6BFC61AD2DDB6A5A00022EFF /* CTContentFetchManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */; };
-		6BFC61AE2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */; };
 		6BFC61B02DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */; };
-		6BFC61B12DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */; };
 		7C87D796B6B66FEA0125244A /* Pods_shared_CleverTapSDKTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E760A38DDF7A8054BC91F93 /* Pods_shared_CleverTapSDKTests.framework */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -2054,7 +2051,6 @@
 				6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */,
 				4E8B81702AD2BB8A00714BB4 /* CTDispatchQueueManager.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
-				6BFC61AD2DDB6A5A00022EFF /* CTContentFetchManager.h in Headers */,
 				D0BD75AC241769710006EE55 /* CleverTap+FeatureFlags.h in Headers */,
 				4E7929FA29799E8F00B81F3C /* CTDomainFactory.h in Headers */,
 				4E25E3CC278887A80008C888 /* CTFlexibleIdentityRepo.h in Headers */,
@@ -2065,7 +2061,6 @@
 				6BD334F42AF7FC660099E33E /* CTTriggerRadius.h in Headers */,
 				4EB3638E2C087A8200C00AE2 /* CTUserInfoMigrator.h in Headers */,
 				4E838C41299F419900ED0875 /* ContentMerger.h in Headers */,
-				6BFC61B12DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */,
 				D0BD75A82417694F0006EE55 /* CTFeatureFlagsController.h in Headers */,
 				4E25E3CD278887A80008C888 /* CTLegacyIdentityRepo.h in Headers */,
 				4E5A02DD2A4C5FD100DE242A /* LeanplumCT.h in Headers */,
@@ -2635,7 +2630,6 @@
 				4E7929FC29799E8F00B81F3C /* CTDomainFactory.m in Sources */,
 				D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */,
 				D014B90120E2FB4C001E0780 /* CTValidationResult.m in Sources */,
-				6BFC61AE2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */,
 				4E25E3CB278887A80008C888 /* CTLegacyIdentityRepo.m in Sources */,
 				4E25E3CA278887A80008C888 /* CTFlexibleIdentityRepo.m in Sources */,
 				6BEEC2C92AE9B02100BD4EC5 /* CTSystemClock.m in Sources */,
