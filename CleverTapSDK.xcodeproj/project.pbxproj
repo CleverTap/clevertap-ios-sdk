@@ -3164,7 +3164,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "CleverTapSDK/InApps/CustomTemplates/SystemAppFunction/CleverTapSDKTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TestHost_iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TestHost_iOS";
 				VALIDATE_WORKSPACE = YES;
@@ -3200,7 +3200,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "CleverTapSDK/InApps/CustomTemplates/SystemAppFunction/CleverTapSDKTests-Bridging-Header.h";
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TestHost_iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TestHost_iOS";
 				VALIDATE_WORKSPACE = YES;

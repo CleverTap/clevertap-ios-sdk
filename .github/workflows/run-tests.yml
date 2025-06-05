@@ -21,6 +21,9 @@ jobs:
       - name: Show available simulators
         run: xcrun simctl list devices
 
+      - name: Install CocoaPods dependencies
+        run: pod install  
+
       - name: Run unit tests on iPhone 15 (iOS 17.0)
         run: |
           xcodebuild test \
@@ -28,4 +31,6 @@ jobs:
             -scheme CleverTapSDKTests \
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
             -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO
