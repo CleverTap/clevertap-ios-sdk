@@ -220,8 +220,38 @@ static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
         CTRequest *request = [CTRequestFactory contentRequestWithConfig:self.config params:params url:url];
         
         [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response received", self);
-            [self.delegate contentFetchManager:self didReceiveResponse:data];
+            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+                if (httpResponse.statusCode == 200) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response received successfully", self);
+                    [self.delegate contentFetchManager:self didReceiveResponse:data];
+                } else {
+                    // Error cases - create appropriate NSError and call didFailWithError
+                    NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+                    userInfo[NSLocalizedDescriptionKey] = [NSString stringWithFormat:@"Content fetch failed with HTTP status code %ld", (long)httpResponse.statusCode];
+                    
+                    if (httpResponse.statusCode == 429) {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch request was rate limited (429). Consider reducing request frequency.", self);
+                        userInfo[NSLocalizedFailureReasonErrorKey] = @"Request was rate limited by the server";
+                    } else {
+                        userInfo[NSLocalizedFailureReasonErrorKey] = [NSString stringWithFormat:@"HTTP request failed with status code %ld", (long)httpResponse.statusCode];
+                    }
+                    
+                    NSError *httpError = [NSError errorWithDomain:NSURLErrorDomain
+                                                             code:httpResponse.statusCode
+                                                         userInfo:userInfo];
+                    [self.delegate contentFetchManager:self didFailWithError:httpError];
+                }
+            } else {
+                NSError *responseError = [NSError errorWithDomain:NSURLErrorDomain
+                                                             code:NSURLErrorBadServerResponse
+                                                         userInfo:@{
+                    NSLocalizedDescriptionKey: @"Content fetch received unexpected response type",
+                    NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Expected NSHTTPURLResponse but received %@", [response class]]
+                }];
+                [self.delegate contentFetchManager:self didFailWithError:responseError];
+            }
+            
             completedBlock();
         }];
         [request onError:^(NSError * _Nullable error) {
