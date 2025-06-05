@@ -11,10 +11,17 @@
 @implementation CTDomainOperationsMock
 
 - (instancetype)initWithRedirectDomain:(NSString *)redirectDomain {
+    return [self initWithRedirectDomain:redirectDomain needsHandshake:NO handshakeSuccess:YES];
+}
+
+- (instancetype)initWithRedirectDomain:(NSString *)redirectDomain
+                        needsHandshake:(BOOL)needsHandshake
+                      handshakeSuccess:(BOOL)handshakeSuccess {
     self = [super init];
     if (self) {
         _redirectDomain = redirectDomain;
-        _needsHandshake = NO;
+        _needsHandshake = needsHandshake;
+        _simulateHandshakeSuccess = handshakeSuccess;
     }
     return self;
 }
@@ -27,12 +34,13 @@
     return _needsHandshake;
 }
 
-- (void)runSerialAsyncEnsureHandshake:(void(^)(BOOL success))block {
+- (void)runSerialAsyncEnsureHandshake:(void(^ _Nullable)(BOOL success))block {
+    BOOL success = self.simulateHandshakeSuccess;
     if (self.executeEnsureHandshakeBlock && block) {
-        block(YES);
+        block(success);
     }
     if (self.handshakeBlock) {
-        self.handshakeBlock(YES);
+        self.handshakeBlock(success);
     }
 }
 
