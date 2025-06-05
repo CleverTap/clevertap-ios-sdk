@@ -495,6 +495,47 @@
     XCTAssertEqual(completedRequests, requestCount + additionalRequests);
 }
 
+- (void)testDeviceIdWillChange_WithSlowRequests_RespectsTimeout {
+    self.contentFetchManager.userSwitchTimeout = 2.0;
+    NSUInteger responseTime = self.contentFetchManager.userSwitchTimeout + 5.0;
+    
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:@"content"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        return [[HTTPStubsResponse responseWithJSONObject:@{@"status": @"success"} statusCode:200 headers:nil]
+                requestTime:0.1 responseTime:responseTime];
+    }];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Device ID change completed"];
+
+    __block NSDate *startTime;
+    [self.mockDispatchQueueManager runSerialAsync:^{
+        // Add items directly in the queue so they start when deviceIdWillChange is called
+        [self.contentFetchManager.contentFetchQueue addObject:@{
+            @"type": @(CleverTapEventTypeRaised),
+            CLTAP_EVENT_DATA: @{
+                @"test": @"data"
+            },
+            CLTAP_EVENT_NAME: CLTAP_CONTENT_FETCH_EVENT
+        }];
+        // Assert the item is in the queue but not in-flight
+        XCTAssertEqual(self.contentFetchManager.contentFetchQueue.count, 1);
+        XCTAssertEqual(self.contentFetchManager.inFlightRequestIndices.count, 0);
+        // Set the start of deviceIdWillChange
+        startTime = [NSDate date];
+        [self.contentFetchManager deviceIdWillChange];
+        // Ensure cleanup
+        XCTAssertEqual(self.contentFetchManager.contentFetchQueue.count, 0);
+        XCTAssertEqual(self.contentFetchManager.inFlightRequestIndices.count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:startTime];
+    // Should respect timeout and continue (not wait forever)
+    XCTAssertLessThan(elapsed, self.contentFetchManager.userSwitchTimeout + 5.0);
+}
+
 #pragma mark - Timeout Tests
 
 - (void)testContentFetchTimeout_WithSlowResponse_TimesOut {
