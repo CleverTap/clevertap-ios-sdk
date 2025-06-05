@@ -49,10 +49,12 @@
         self.delegate = delegate;
         self.dispatchQueueManager = dispatchQueueManager;
         
+        // Add 5 second buffer for dispatch overhead and ensure request timeout fires first
         self.semaphoreTimeout = self.requestSender.requestTimeout + 5;
         
         self.queueLock = [[NSLock alloc] init];
         self.concurrentQueue = dispatch_queue_create("com.clevertap.contentfetch", DISPATCH_QUEUE_CONCURRENT);
+        // Limit concurrent content fetch requests
         int concurrencyCount = 5;
         self.concurrencySemaphore = dispatch_semaphore_create(concurrencyCount);
         self.contentFetchQueue = [[NSMutableArray alloc] init];
