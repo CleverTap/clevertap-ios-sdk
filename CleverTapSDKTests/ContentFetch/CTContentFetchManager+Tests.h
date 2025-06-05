@@ -17,6 +17,7 @@
 @property (nonatomic, strong) NSLock *queueLock;
 @property (nonatomic, strong) NSMutableSet *inFlightRequestIndices;
 @property NSTimeInterval semaphoreTimeout;
+@property NSTimeInterval userSwitchTimeout;
 @property (nonatomic, strong) dispatch_queue_t concurrentQueue;
 
 - (void)markCompletedAtIndex:(NSUInteger)i;
