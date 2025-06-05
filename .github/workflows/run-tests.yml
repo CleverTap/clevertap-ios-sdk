@@ -18,26 +18,12 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_16.1.app
           swift --version
 
-      - name: Show available simulators
-        run: xcrun simctl list devices
-
       - name: Install CocoaPods dependencies
         run: pod install
 
-      - name: Build for Testing
+      - name: Run Tests
         run: |
-          xcodebuild build-for-testing \
+           xcodebuild test \
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
-
-      - name: Run Tests Without Building
-        run: |
-          xcodebuild test-without-building \
-            -workspace CleverTapSDK.xcworkspace \
-            -scheme CleverTapSDKTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
