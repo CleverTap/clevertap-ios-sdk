@@ -501,13 +501,17 @@ static BOOL sharedInstanceErrorLogged;
         [self addObservers];
         
 #if !defined(CLEVERTAP_TVOS)
-        self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
-                                                                  requestSender:self.requestSender
-                                                            dispatchQueueManager:self.dispatchQueueManager
-                                                                domainOperations:self.domainFactory
-                                                                       delegate:self];
-        
-        [self.delegateManager addSwitchUserDelegate:self.contentFetchManager];
+        if (self.requestSender && self.domainFactory && self.dispatchQueueManager) {
+            self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
+                                                                       requestSender:self.requestSender
+                                                                dispatchQueueManager:self.dispatchQueueManager
+                                                                    domainOperations:self.domainFactory
+                                                                            delegate:self];
+            
+            [self.delegateManager addSwitchUserDelegate:self.contentFetchManager];
+        } else {
+            CleverTapLogDebug(_config.logLevel, @"%@: Failed to initialize contentFetchManager due to missing dependencies", self);
+        }
 #endif
         
         self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
