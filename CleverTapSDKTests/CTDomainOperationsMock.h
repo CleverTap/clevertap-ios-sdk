@@ -17,10 +17,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL needsHandshake;
 
 @property (nonatomic, assign) BOOL executeEnsureHandshakeBlock;
+@property (nonatomic, assign) BOOL simulateHandshakeSuccess;
 @property (nonatomic, copy, nullable) void (^handshakeBlock)(BOOL success);
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithRedirectDomain:(NSString *)redirectDomain;
+- (instancetype)initWithRedirectDomain:(NSString *)redirectDomain
+                        needsHandshake:(BOOL)needsHandshake
+                      handshakeSuccess:(BOOL)handshakeSuccess;
 
 @end
 
