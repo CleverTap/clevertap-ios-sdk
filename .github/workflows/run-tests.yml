@@ -35,7 +35,7 @@ jobs:
             -resultBundlePath TestResults.xcresult \
             -quiet
 
-      - name: Debug: List files in workspace
+      - name: List files in workspace
         run: ls -la ${{ github.workspace }}
 
       - name: Parse .xcresult and show coverage
