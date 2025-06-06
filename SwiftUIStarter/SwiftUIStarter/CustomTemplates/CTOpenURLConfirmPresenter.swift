@@ -9,7 +9,7 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
     weak var viewModel: CTOpenURLConfirmViewModel?
     
     public func onPresent(context: CTTemplateContext) {
-        let stringUrl = context.string(name: "URL")
+        let stringUrl = context.string(name: OpenURLConfirmTemplate.ArgumentNames.url)
 
         if let stringUrl = stringUrl, let url = URL(string: stringUrl) {
             let cancelAction = {
@@ -35,7 +35,6 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
             vm.cancelAction = cancelAction
             
             vm.isVisible = true
-            print("Presented")
         }
     }
     

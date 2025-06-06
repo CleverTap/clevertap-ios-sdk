@@ -72,7 +72,7 @@ struct ContentView_CustomTemplateView: View {
         ZStack {
             VStack {
                 Button("Show Custom Interstitial") {
-                    customInterstitialPresenter.show(title: CustomInterstitialTemplate.Constants.title, message: CustomInterstitialTemplate.Constants.message, image: UIImage(named: CustomInterstitialTemplate.Constants.image), confirmAction: nil, cancelAction: nil)
+                    customInterstitialPresenter.show(title: CustomInterstitialTemplate.DefaultValues.title, message: CustomInterstitialTemplate.DefaultValues.message, image: UIImage(named: CustomInterstitialTemplate.DefaultValues.image), confirmAction: nil, cancelAction: nil)
                 }
             }
             CustomInterstitialView(viewModel: customInterstitialVM)

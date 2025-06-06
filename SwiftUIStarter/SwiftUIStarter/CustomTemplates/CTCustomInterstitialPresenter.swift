@@ -9,15 +9,15 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
     weak var viewModel: CTCustomInterstitialViewModel?
     
     public func onPresent(context: CTTemplateContext) {
-        let title = context.string(name: "Title") ?? CustomInterstitialTemplate.Constants.title
-        let message = context.string(name: "Message") ?? CustomInterstitialTemplate.Constants.message
-        let imageURL = context.file(name: "Image")
+        let title = context.string(name: CustomInterstitialTemplate.ArgumentNames.title) ?? CustomInterstitialTemplate.DefaultValues.title
+        let message = context.string(name: CustomInterstitialTemplate.ArgumentNames.message) ?? CustomInterstitialTemplate.DefaultValues.message
+        let imageURL = context.file(name: CustomInterstitialTemplate.ArgumentNames.image)
         
         var image: UIImage?
         if let imageURL = imageURL {
             image = UIImage(contentsOfFile: imageURL)
         } else {
-            image = UIImage(named: CustomInterstitialTemplate.Constants.image)
+            image = UIImage(named: CustomInterstitialTemplate.DefaultValues.image)
         }
         
         let cancelAction = {
@@ -27,7 +27,7 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
         
         let confirmAction = {
             print("Confirm")
-            context.triggerAction(name: "Open action")
+            context.triggerAction(name: CustomInterstitialTemplate.ArgumentNames.openAction)
             self.close(context: context)
         }
         

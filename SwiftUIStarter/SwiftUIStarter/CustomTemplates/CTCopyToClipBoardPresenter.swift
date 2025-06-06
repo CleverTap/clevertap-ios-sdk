@@ -5,7 +5,7 @@ import SwiftUI
 class CTCopyToClipBoardPresenter: CTTemplatePresenter {
     
     public func onPresent(context: CTTemplateContext) {
-        let text = context.string(name: "Text")
+        let text = context.string(name: CopyToClipboardTemplate.ArgumentNames.text)
         if let text = text {
             UIPasteboard.general.string = text
         }
