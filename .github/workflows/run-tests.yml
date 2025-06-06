@@ -32,12 +32,7 @@ jobs:
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
             -enableCodeCoverage YES \
-            -resultBundlePath TestResults.xcresult \
             -quiet
-
-      - name: List files in workspace
-        run: ls -la ${{ github.workspace }}
-        if: success() || failure()
 
       - name: Install Slather
         run: gem install slather
@@ -46,17 +41,17 @@ jobs:
       - name: Generate Coverage Report with Slather
         run: |
           slather coverage \
-            --input-format xcresult \
+            --verbose \
             --scheme CleverTapSDKTests \
             --workspace CleverTapSDK.xcworkspace \
             --binary-basename CleverTapSDK \
-            --output-directory slather-report \
-            TestResults.xcresult
+            --output-directory coverage \
+            .
         if: success() || failure()
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: slather-report/
+          name: code-coverage-report
+          path: coverage
         if: success() || failure()
