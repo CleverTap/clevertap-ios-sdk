@@ -35,9 +35,12 @@ jobs:
             -resultBundlePath TestResults.xcresult \
             -quiet
 
+      - name: Debug: List files in workspace
+        run: ls -la ${{ github.workspace }}
+
       - name: Parse .xcresult and show coverage
         uses: kishikawakatsumi/xcresulttool@v1
         with:
-          path: 'TestResults.xcresult'
+          path: '${{ github.workspace }}/TestResults.xcresult'
           show-code-coverage: true
         if: success() || failure()

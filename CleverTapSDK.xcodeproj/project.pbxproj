@@ -337,7 +337,6 @@
 		6A2E0B9329D0A5CF00FCEA5F /* CTVariablesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E0B9229D0A5CE00FCEA5F /* CTVariablesTest.m */; };
 		6A2E0B9529D49D0200FCEA5F /* CTVariables+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E0B9429D49D0200FCEA5F /* CTVariables+Tests.m */; };
 		6A2E0B9829D49D5100FCEA5F /* CTVarCacheMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E0B9729D49D5100FCEA5F /* CTVarCacheMock.m */; };
-		6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E4C17291E8A4A00385536 /* CleverTapInstanceConfigTests.m */; };
 		6A3EBD2D2AA06EB300CE97D4 /* CTInAppEvaluationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A3EBD2B2AA06EB300CE97D4 /* CTInAppEvaluationManager.h */; };
 		6A3EBD2E2AA06EB300CE97D4 /* CTInAppEvaluationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A3EBD2C2AA06EB300CE97D4 /* CTInAppEvaluationManager.m */; };
 		6A3EBD322AA0703A00CE97D4 /* CTEventAdapter.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A3EBD302AA0703A00CE97D4 /* CTEventAdapter.h */; };
@@ -2764,14 +2763,12 @@
 				D02AC2EB2767F4590031C1BE /* BaseTestCase.m in Sources */,
 				6BAFFE9C2C371B4500654CAF /* CTFileDownloaderCustomTemplatesMock.m in Sources */,
 				6BEEC2CE2AEC49F100BD4EC5 /* CTImpressionManagerTest.m in Sources */,
-				6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */,
 				4E2BFB9C2AD69BCA00DEB247 /* XCTestCase+XCTestCase_Tests.m in Sources */,
 				6B9157B92C10F40C00B1C907 /* CTInAppNotificationDisplayDelegateMock.m in Sources */,
 				6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */,
 				32790957299CC099001FE140 /* CTUtilsTest.m in Sources */,
 				48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */,
 				48C121BD2D9D8D51001A4ABA /* CTAppRatingHelper.swift in Sources */,
-				6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */,
 				6BEEC2D12AF1A3A900BD4EC5 /* CTClockMock.m in Sources */,
 				32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */,
 				48FA82C52DAD3D9100AB8651 /* CTPushPrimerManagerTests.m in Sources */,
