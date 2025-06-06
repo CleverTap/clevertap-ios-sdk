@@ -1,8 +1,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var customInterstitialVM = CTCustomInterstitialViewModel()
+    let customInterstitialPresenter = CTCustomInterstitialPresenter.shared
+    
     var body: some View {
-        HomeScreen()
+        ZStack {
+            HomeScreen()
+            CustomInterstitialView(viewModel: customInterstitialVM)
+        }.onAppear {
+            customInterstitialPresenter.interstitialViewModel = customInterstitialVM
+        }
     }
 }
 
