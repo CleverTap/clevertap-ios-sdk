@@ -43,7 +43,7 @@ jobs:
           slather coverage \
             --html \
             --scheme CleverTapSDK \
-            --workspace CleverTapSDK.xcworkspace CleverTapSDK.xcodeproj \
+            --workspace CleverTapSDK.xcworkspace \
             --output-directory coverage
         if: success() || failure()
 
