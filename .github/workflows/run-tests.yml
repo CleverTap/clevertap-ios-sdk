@@ -41,12 +41,11 @@ jobs:
       - name: Generate Coverage Report with Slather
         run: |
           slather coverage \
-            --verbose \
+            --html \
             --scheme CleverTapSDKTests \
-            --workspace CleverTapSDK.xcworkspace \
+            --workspace CleverTapSDK.xcworkspace CleverTapSDK.xcodeproj\
             --binary-basename CleverTapSDK \
-            --output-directory coverage \
-            .
+            --output-directory coverage
         if: success() || failure()
 
       - name: Upload Coverage Report
