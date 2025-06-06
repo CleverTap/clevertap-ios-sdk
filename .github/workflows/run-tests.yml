@@ -37,6 +37,7 @@ jobs:
 
       - name: List files in workspace
         run: ls -la ${{ github.workspace }}
+        if: success() || failure()
 
       - name: Parse .xcresult and show coverage
         uses: kishikawakatsumi/xcresulttool@v1
