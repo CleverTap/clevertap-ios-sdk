@@ -33,5 +33,5 @@ jobs:
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 14' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
             | xcpretty --simple
