@@ -20,18 +20,26 @@ jobs:
 
       - name: List available simulators
         run: xcrun simctl list devices
-      
+
       - name: Install CocoaPods dependencies
         run: pod install
 
       - name: Install xcpretty
         run: gem install xcpretty
-        
+
       - name: Run Tests
         run: |
-           xcodebuild test \
+          xcodebuild test \
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
-            | xcpretty --simple
+            -enableCodeCoverage YES \
+            -resultBundlePath build/MyAppTestResults.xcresult
+
+      - name: Parse .xcresult and show coverage
+        uses: kishikawakatsumi/xcresulttool@v1
+        with:
+          path: 'build/MyAppTestResults.xcresult'
+          show-code-coverage: true
+        if: success() || failure()
