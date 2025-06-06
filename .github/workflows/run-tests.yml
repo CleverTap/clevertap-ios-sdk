@@ -32,7 +32,8 @@ jobs:
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
             -enableCodeCoverage YES \
-            -resultBundlePath TestResults
+            -resultBundlePath TestResults.xcresult \
+            -quiet
 
       - name: Parse .xcresult and show coverage
         uses: kishikawakatsumi/xcresulttool@v1
