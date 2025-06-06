@@ -32,14 +32,11 @@ jobs:
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
             -enableCodeCoverage YES \
-            -resultBundlePath build/MyAppTestResults.xcresult
-
-      - name: Check if .xcresult exists
-        run: ls -lh build
+            -resultBundlePath TestResults
 
       - name: Parse .xcresult and show coverage
         uses: kishikawakatsumi/xcresulttool@v1
         with:
-          path: '${{ github.workspace }}/build/MyAppTestResults.xcresult'
+          path: 'TestResults.xcresult'
           show-code-coverage: true
         if: success() || failure()
