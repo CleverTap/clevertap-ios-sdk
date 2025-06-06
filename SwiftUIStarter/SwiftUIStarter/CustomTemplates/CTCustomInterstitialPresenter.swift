@@ -6,7 +6,7 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
     
     static let shared: CTCustomInterstitialPresenter = .init()
     
-    weak var interstitialViewModel: CTCustomInterstitialViewModel?
+    weak var viewModel: CTCustomInterstitialViewModel?
     
     public func onPresent(context: CTTemplateContext) {
         let title = context.string(name: "Title") ?? CustomInterstitialTemplate.Constants.title
@@ -31,12 +31,12 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
             self.close(context: context)
         }
         
-        showInterstitial(title: title, message: message, image: image, confirmAction: confirmAction, cancelAction: cancelAction)
+        show(title: title, message: message, image: image, confirmAction: confirmAction, cancelAction: cancelAction)
         context.presented()
     }
     
-    public func showInterstitial(title: String, message: String, image: UIImage?, confirmAction: (() -> Void)?, cancelAction: (() -> Void)?) {
-        if let vm = interstitialViewModel {
+    public func show(title: String, message: String, image: UIImage?, confirmAction: (() -> Void)?, cancelAction: (() -> Void)?) {
+        if let vm = viewModel {
             vm.title = title
             vm.message = message
             vm.image = image
@@ -54,7 +54,7 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
     
     public func close(context: CTTemplateContext) {
         context.dismissed()
-        interstitialViewModel?.isVisible = false
+        viewModel?.isVisible = false
     }
 }
 

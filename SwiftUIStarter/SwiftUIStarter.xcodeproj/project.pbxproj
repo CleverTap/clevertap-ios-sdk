@@ -25,6 +25,10 @@
 		6B68DA362DF3231900761CFE /* CTCustomTemplatesProducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA352DF3231900761CFE /* CTCustomTemplatesProducer.swift */; };
 		6B68DA382DF323B000761CFE /* CTCustomInterstitialPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA372DF323B000761CFE /* CTCustomInterstitialPresenter.swift */; };
 		6B68DA3A2DF32F4200761CFE /* CTCustomInterstitialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA392DF32F4200761CFE /* CTCustomInterstitialViewModel.swift */; };
+		6B68DA3C2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3B2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift */; };
+		6B68DA3E2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3D2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift */; };
+		6B68DA402DF3461300761CFE /* OpenURLConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3F2DF3461300761CFE /* OpenURLConfirmView.swift */; };
+		6B68DA422DF348B600761CFE /* View+Styling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA412DF348B600761CFE /* View+Styling.swift */; };
 		A983E8E0003C52EE342CBDB9 /* Pods_SwiftUIStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA9862E5A057F98569E2EEBD /* Pods_SwiftUIStarter_NotificationService.framework */; };
 /* End PBXBuildFile section */
 
@@ -78,6 +82,10 @@
 		6B68DA352DF3231900761CFE /* CTCustomTemplatesProducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomTemplatesProducer.swift; sourceTree = "<group>"; };
 		6B68DA372DF323B000761CFE /* CTCustomInterstitialPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialPresenter.swift; sourceTree = "<group>"; };
 		6B68DA392DF32F4200761CFE /* CTCustomInterstitialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialViewModel.swift; sourceTree = "<group>"; };
+		6B68DA3B2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCopyToClipBoardPresenter.swift; sourceTree = "<group>"; };
+		6B68DA3D2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmPresenter.swift; sourceTree = "<group>"; };
+		6B68DA3F2DF3461300761CFE /* OpenURLConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenURLConfirmView.swift; sourceTree = "<group>"; };
+		6B68DA412DF348B600761CFE /* View+Styling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Styling.swift"; sourceTree = "<group>"; };
 		A530F6FFBC26113F8B9C9B13 /* Pods-SwiftUIStarter-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftUIStarter-NotificationService.debug.xcconfig"; path = "Target Support Files/Pods-SwiftUIStarter-NotificationService/Pods-SwiftUIStarter-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		AA9862E5A057F98569E2EEBD /* Pods_SwiftUIStarter_NotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftUIStarter_NotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C738698B25C9108B38EA207C /* Pods-SwiftUIStarter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftUIStarter.debug.xcconfig"; path = "Target Support Files/Pods-SwiftUIStarter/Pods-SwiftUIStarter.debug.xcconfig"; sourceTree = "<group>"; };
@@ -187,10 +195,14 @@
 		6B68DA342DF322C800761CFE /* CustomTemplates */ = {
 			isa = PBXGroup;
 			children = (
+				6B68DA3F2DF3461300761CFE /* OpenURLConfirmView.swift */,
+				6B68DA3D2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift */,
+				6B68DA3B2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift */,
 				6B68DA322DF315E500761CFE /* CustomInterstitialView.swift */,
 				6B68DA352DF3231900761CFE /* CTCustomTemplatesProducer.swift */,
 				6B68DA372DF323B000761CFE /* CTCustomInterstitialPresenter.swift */,
 				6B68DA392DF32F4200761CFE /* CTCustomInterstitialViewModel.swift */,
+				6B68DA412DF348B600761CFE /* View+Styling.swift */,
 			);
 			path = CustomTemplates;
 			sourceTree = "<group>";
@@ -372,15 +384,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				489C60022A6C699300440747 /* CTViewModifier.swift in Sources */,
+				6B68DA402DF3461300761CFE /* OpenURLConfirmView.swift in Sources */,
 				48E0B3522A6708B5009C4312 /* HomeScreen.swift in Sources */,
 				48E0B3542A67166C009C4312 /* AppDelegate.swift in Sources */,
 				48E0B35A2A69C5B5009C4312 /* CTAppInboxRepresentable.swift in Sources */,
 				489C60002A6C616F00440747 /* CTCallbackCoordinator.swift in Sources */,
 				48E0B3442A66FE5F009C4312 /* ContentView.swift in Sources */,
 				48E0B3422A66FE5F009C4312 /* SwiftUIStarterApp.swift in Sources */,
+				6B68DA3C2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift in Sources */,
 				6B68DA382DF323B000761CFE /* CTCustomInterstitialPresenter.swift in Sources */,
 				489C5FFC2A6C5CCE00440747 /* CTWebViewRepresentable.swift in Sources */,
+				6B68DA3E2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift in Sources */,
 				6B68DA3A2DF32F4200761CFE /* CTCustomInterstitialViewModel.swift in Sources */,
+				6B68DA422DF348B600761CFE /* View+Styling.swift in Sources */,
 				6B68DA332DF315E500761CFE /* CustomInterstitialView.swift in Sources */,
 				6B68DA362DF3231900761CFE /* CTCustomTemplatesProducer.swift in Sources */,
 			);

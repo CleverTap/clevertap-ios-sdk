@@ -4,12 +4,17 @@ struct ContentView: View {
     @StateObject private var customInterstitialVM = CTCustomInterstitialViewModel()
     let customInterstitialPresenter = CTCustomInterstitialPresenter.shared
     
+    @StateObject private var openURLConfirmVM = CTOpenURLConfirmViewModel()
+    private let openURLConfirmPresenter = CTOpenURLConfirmPresenter.shared
+    
     var body: some View {
         ZStack {
             HomeScreen()
             CustomInterstitialView(viewModel: customInterstitialVM)
+            OpenURLConfirmView(viewModel: openURLConfirmVM)
         }.onAppear {
-            customInterstitialPresenter.interstitialViewModel = customInterstitialVM
+            customInterstitialPresenter.viewModel = customInterstitialVM
+            openURLConfirmPresenter.viewModel = openURLConfirmVM
         }
     }
 }

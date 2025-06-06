@@ -11,16 +11,32 @@ class CustomInterstitialTemplate {
 
 class CTCustomTemplatesProducer: CTTemplateProducer {
     static var templates: [String: CTCustomTemplate] {
-        let templateBuilder = CTInAppTemplateBuilder()
-        templateBuilder.setName("Custom Interstitial")
-        templateBuilder.addArgument("Title", string: CustomInterstitialTemplate.Constants.title)
-        templateBuilder.addArgument("Message", string: CustomInterstitialTemplate.Constants.message)
-        templateBuilder.addFileArgument("Image")
-        templateBuilder.addActionArgument("Open action")
-        templateBuilder.setPresenter(CTCustomInterstitialPresenter.shared)
-        let template = templateBuilder.build()
+        let customInterstitialBuilder = CTInAppTemplateBuilder()
+        customInterstitialBuilder.setName("Custom Interstitial")
+        customInterstitialBuilder.addArgument("Title", string: CustomInterstitialTemplate.Constants.title)
+        customInterstitialBuilder.addArgument("Message", string: CustomInterstitialTemplate.Constants.message)
+        customInterstitialBuilder.addFileArgument("Image")
+        customInterstitialBuilder.addActionArgument("Open action")
+        customInterstitialBuilder.setPresenter(CTCustomInterstitialPresenter.shared)
+        let customInterstitial = customInterstitialBuilder.build()
         
-        return [template.name: template]
+        let copyFunctionBuilder = CTAppFunctionBuilder(isVisual: false)
+        copyFunctionBuilder.setName("Copy to clipboard")
+        copyFunctionBuilder.addArgument("Text", string: "")
+        copyFunctionBuilder.setPresenter(CTCopyToClipBoardPresenter())
+        let copyFunction = copyFunctionBuilder.build()
+        
+        let openURLConfirmBuilder = CTAppFunctionBuilder(isVisual: true)
+        openURLConfirmBuilder.setName("Open URL with confirm")
+        openURLConfirmBuilder.addArgument("URL", string: "")
+        openURLConfirmBuilder.setPresenter(CTOpenURLConfirmPresenter.shared)
+        let openURLConfirm = openURLConfirmBuilder.build()
+        
+        return [
+            customInterstitial.name: customInterstitial,
+            copyFunction.name: copyFunction,
+            openURLConfirm.name: openURLConfirm
+        ]
     }
     
     public func defineTemplates(_ instanceConfig: CleverTapInstanceConfig) -> Set<CTCustomTemplate> {

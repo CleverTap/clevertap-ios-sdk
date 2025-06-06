@@ -1,28 +1,26 @@
 import SwiftUI
 
-struct CustomInterstitialView: View {
-    @ObservedObject var viewModel: CTCustomInterstitialViewModel
+class CTOpenURLConfirmViewModel: ObservableObject {
+    @Published var isVisible: Bool = false
+    @Published var url: String = ""
+    
+    var confirmAction: (() -> Void)?
+    var cancelAction: (() -> Void)?
+}
+
+struct OpenURLConfirmView: View {
+    @ObservedObject var viewModel: CTOpenURLConfirmViewModel
     
     var body: some View {
         if viewModel.isVisible {
             VStack(spacing: 20) {
-                Text(viewModel.title)
+                Text("Open URL")
                     .font(.headline)
-                
-                if let image = viewModel.image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: .infinity)
-                        .frame(maxHeight: 200)
-                        .clipShape(Rectangle())
-                }
                 
                 ScrollView {
                     VStack {
-                        Text(viewModel.message)
+                        Text("Do you want to navigate to \"\(viewModel.url)\"?")
                             .font(.body)
-                            .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }.frame(maxHeight: .infinity)
                 }
@@ -35,7 +33,7 @@ struct CustomInterstitialView: View {
                             viewModel.isVisible = false
                         }
                     }) {
-                        Text("Close")
+                        Text("No")
                             .buttonStyle()
                     }
                     
@@ -46,7 +44,7 @@ struct CustomInterstitialView: View {
                             viewModel.isVisible = false
                         }
                     }) {
-                        Text("Confirm")
+                        Text("Yes")
                             .buttonStyle()
                     }
                 }
@@ -56,7 +54,7 @@ struct CustomInterstitialView: View {
             .cornerRadius(12)
             .shadow(radius: 20)
             .padding(.horizontal, 40)
-            .padding(.vertical, 20)
+            .padding(.vertical, 160)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black.opacity(0.2))
         }
@@ -64,27 +62,27 @@ struct CustomInterstitialView: View {
 }
 
 #if DEBUG
-struct ContentView_CustomTemplateView: View {
-    @StateObject private var customInterstitialVM = CTCustomInterstitialViewModel()
-    private let customInterstitialPresenter = CTCustomInterstitialPresenter.shared
+struct ContentView_OpenURLConfirmView: View {
+    @StateObject private var openURLConfirmVM = CTOpenURLConfirmViewModel()
+    private let openURLConfirmPresenter = CTOpenURLConfirmPresenter.shared
     
     var body: some View {
         ZStack {
             VStack {
-                Button("Show Custom Interstitial") {
-                    customInterstitialPresenter.show(title: CustomInterstitialTemplate.Constants.title, message: CustomInterstitialTemplate.Constants.message, image: UIImage(named: CustomInterstitialTemplate.Constants.image), confirmAction: nil, cancelAction: nil)
+                Button("Show Open URL Confirm") {
+                    openURLConfirmPresenter.show(url: "https://clevertap.com/", confirmAction: nil, cancelAction: nil)
                 }
             }
-            CustomInterstitialView(viewModel: customInterstitialVM)
+            OpenURLConfirmView(viewModel: openURLConfirmVM)
         }.onAppear {
-            customInterstitialPresenter.viewModel = customInterstitialVM
+            openURLConfirmPresenter.viewModel = openURLConfirmVM
         }
     }
 }
 
-struct ContentView_CustomTemplateView_Previews: PreviewProvider {
+struct ContentView_OpenURLConfirmView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView_CustomTemplateView()
+        ContentView_OpenURLConfirmView()
     }
 }
 #endif
