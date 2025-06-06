@@ -42,9 +42,8 @@ jobs:
         run: |
           slather coverage \
             --html \
-            --scheme CleverTapSDKTests \
-            --workspace CleverTapSDK.xcworkspace CleverTapSDK.xcodeproj\
-            --binary-basename CleverTapSDK \
+            --scheme CleverTapSDK \
+            --workspace CleverTapSDK.xcworkspace CleverTapSDK.xcodeproj \
             --output-directory coverage
         if: success() || failure()
 
