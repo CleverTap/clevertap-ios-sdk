@@ -39,9 +39,24 @@ jobs:
         run: ls -la ${{ github.workspace }}
         if: success() || failure()
 
-      - name: Parse .xcresult and show coverage
-        uses: slidoapp/xcresulttool@v3.1.0
+      - name: Install Slather
+        run: gem install slather
+        if: success() || failure()
+
+      - name: Generate Coverage Report with Slather
+        run: |
+          slather coverage \
+            --input-format xcresult \
+            --scheme CleverTapSDKTests \
+            --workspace CleverTapSDK.xcworkspace \
+            --binary-basename CleverTapSDK \
+            --output-directory slather-report \
+            TestResults.xcresult
+        if: success() || failure()
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
         with:
-          path: '${{ github.workspace }}/TestResults.xcresult'
-          show-code-coverage: true
+          name: coverage-report
+          path: slather-report/
         if: success() || failure()
