@@ -24,9 +24,6 @@ jobs:
       - name: Install CocoaPods dependencies
         run: pod install
 
-      - name: Install xcpretty
-        run: gem install xcpretty
-
       - name: Run Tests
         run: |
           xcodebuild test \
@@ -37,9 +34,12 @@ jobs:
             -enableCodeCoverage YES \
             -resultBundlePath build/MyAppTestResults.xcresult
 
+      - name: Check if .xcresult exists
+        run: ls -lh build
+
       - name: Parse .xcresult and show coverage
         uses: kishikawakatsumi/xcresulttool@v1
         with:
-          path: 'build/MyAppTestResults.xcresult'
+          path: '${{ github.workspace }}/build/MyAppTestResults.xcresult'
           show-code-coverage: true
         if: success() || failure()
