@@ -28,15 +28,17 @@ struct CustomInterstitialView: View {
                 }
                 
                 HStack {
-                    Button(action: {
-                        if let cancel = viewModel.cancelAction {
-                            cancel()
-                        } else {
-                            viewModel.isVisible = false
+                    if viewModel.showCloseButton {
+                        Button(action: {
+                            if let cancel = viewModel.cancelAction {
+                                cancel()
+                            } else {
+                                viewModel.isVisible = false
+                            }
+                        }) {
+                            Text("Close")
+                                .buttonStyle()
                         }
-                    }) {
-                        Text("Close")
-                            .buttonStyle()
                     }
                     
                     Button(action: {
@@ -64,7 +66,7 @@ struct CustomInterstitialView: View {
 }
 
 #if DEBUG
-struct ContentView_CustomTemplateView: View {
+struct ContentView_CustomInterstitialView: View {
     @StateObject private var customInterstitialVM = CTCustomInterstitialViewModel()
     private let customInterstitialPresenter = CTCustomInterstitialPresenter.shared
     
@@ -82,9 +84,9 @@ struct ContentView_CustomTemplateView: View {
     }
 }
 
-struct ContentView_CustomTemplateView_Previews: PreviewProvider {
+struct ContentView_CustomInterstitialView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView_CustomTemplateView()
+        ContentView_CustomInterstitialView()
     }
 }
 #endif

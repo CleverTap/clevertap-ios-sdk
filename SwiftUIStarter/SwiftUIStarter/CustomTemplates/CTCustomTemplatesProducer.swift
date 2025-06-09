@@ -6,12 +6,15 @@ class CustomInterstitialTemplate {
         static let title = "Title text"
         static let message = "Message text"
         static let image = "logo"
+        static let showCloseButton = true
     }
     enum ArgumentNames {
         static let title = "Title"
         static let message = "Message"
         static let image = "Image"
         static let openAction = "Open action"
+        static let showCloseButton = "Show close button"
+        static let autoCloseAfter = "Auto close after"
     }
 }
 
@@ -33,6 +36,8 @@ class CTCustomTemplatesProducer: CTTemplateProducer {
         customInterstitialBuilder.setName("Custom Interstitial")
         customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.title, string: CustomInterstitialTemplate.DefaultValues.title)
         customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.message, string: CustomInterstitialTemplate.DefaultValues.message)
+        customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.showCloseButton, boolean: CustomInterstitialTemplate.DefaultValues.showCloseButton)
+        customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.autoCloseAfter, number: 0.0)
         customInterstitialBuilder.addFileArgument(CustomInterstitialTemplate.ArgumentNames.image)
         customInterstitialBuilder.addActionArgument(CustomInterstitialTemplate.ArgumentNames.openAction)
         customInterstitialBuilder.setPresenter(CTCustomInterstitialPresenter.shared)
