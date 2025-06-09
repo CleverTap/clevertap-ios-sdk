@@ -259,7 +259,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_USER_AGE @"Age"
 
 #define CLTAP_OPTOUT @"ct_optout"
-#define CLTAP_ALLOW_SYSTEM_EVENTS @"ct_allow_sys_events"
+#define CLTAP_ALLOW_SYSTEM_EVENTS @"ct_allow_sys_events_and_communication"
 
 #pragma mark Constants for profile init/sync notifications
 #define CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION @"CleverTapProfileDidInitializeNotification"
