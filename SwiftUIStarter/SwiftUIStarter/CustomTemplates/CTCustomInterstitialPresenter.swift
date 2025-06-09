@@ -2,6 +2,24 @@ import Foundation
 import CleverTapSDK
 import SwiftUI
 
+struct InterstitialConfiguration {
+    let title: String
+    let message: String
+    let image: UIImage?
+    let showCloseButton: Bool
+    let autoCloseAfter: Double
+    
+    public static var `default`: InterstitialConfiguration {
+        .init(
+            title: CustomInterstitialTemplate.DefaultValues.title,
+            message: CustomInterstitialTemplate.DefaultValues.message,
+            image: UIImage(named: CustomInterstitialTemplate.DefaultValues.image),
+            showCloseButton: CustomInterstitialTemplate.DefaultValues.showCloseButton,
+            autoCloseAfter: CustomInterstitialTemplate.DefaultValues.autoCloseAfter
+        )
+    }
+}
+
 class CTCustomInterstitialPresenter: CTTemplatePresenter {
     
     static let shared: CTCustomInterstitialPresenter = .init()
@@ -16,37 +34,68 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
         autoCloseTimer?.invalidate()
     }
     
-    public func onPresent(context: CTTemplateContext) {
-        let title = context.string(name: CustomInterstitialTemplate.ArgumentNames.title) ?? CustomInterstitialTemplate.DefaultValues.title
-        let message = context.string(name: CustomInterstitialTemplate.ArgumentNames.message) ?? CustomInterstitialTemplate.DefaultValues.message
-        let showCloseButton = context.boolean(name: CustomInterstitialTemplate.ArgumentNames.showCloseButton)
-        let imageURL = context.file(name: CustomInterstitialTemplate.ArgumentNames.image)
+    func onPresent(context: CTTemplateContext) {
+        let configuration = extractConfiguration(from: context)
         
-        var image: UIImage?
-        if let imageURL = imageURL {
-            image = UIImage(contentsOfFile: imageURL)
-        } else {
-            image = UIImage(named: CustomInterstitialTemplate.DefaultValues.image)
+        let cancelAction: (() -> Void) = { [weak self] in
+            self?.close(context: context)
         }
         
-        let cancelAction = {
-            self.close(context: context)
-        }
-        
-        let confirmAction = {
+        let confirmAction = { [weak self] in
             context.triggerAction(name: CustomInterstitialTemplate.ArgumentNames.openAction)
-            self.close(context: context)
+            self?.close(context: context)
         }
         
-        show(title: title, message: message, image: image, confirmAction: confirmAction, cancelAction: cancelAction, showCloseButton: showCloseButton)
+        show(
+            configuration: configuration,
+            confirmAction: confirmAction,
+            cancelAction: cancelAction
+        )
+        
         context.presented()
-        
-        let autoClose = context.double(name: CustomInterstitialTemplate.ArgumentNames.autoCloseAfter)
-        if (autoClose > 0) {
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + autoClose) {
-                self.close(context: context)
-            }
+        setupAutoClose(duration: configuration.autoCloseAfter, context: context)
+    }
+    
+    func show(
+        configuration: InterstitialConfiguration,
+        confirmAction: (() -> Void)?,
+        cancelAction: (() -> Void)?
+    ) {
+        guard let viewModel = viewModel else {
+            print("Warning: ViewModel not set for CustomInterstitialPresenter")
+            return
         }
+        
+        viewModel.configure(with: configuration)
+        viewModel.confirmAction = confirmAction
+        viewModel.cancelAction = cancelAction
+        viewModel.isVisible = true
+    }
+    
+    private func extractConfiguration(from context: CTTemplateContext) -> InterstitialConfiguration {
+        var config = InterstitialConfiguration.default
+        
+        // Override with context values if provided
+        let title = context.string(name: CustomInterstitialTemplate.ArgumentNames.title)
+        let message = context.string(name: CustomInterstitialTemplate.ArgumentNames.message)
+        let showCloseButton = context.boolean(name: CustomInterstitialTemplate.ArgumentNames.showCloseButton)
+        let autoCloseAfter = context.double(name: CustomInterstitialTemplate.ArgumentNames.autoCloseAfter)
+        
+        let image: UIImage? = {
+            if let imageURL = context.file(name: CustomInterstitialTemplate.ArgumentNames.image) {
+                return UIImage(contentsOfFile: imageURL)
+            } else {
+                return config.image
+            }
+        }()
+        
+        return InterstitialConfiguration(
+            title: title ?? config.title,
+            message: message ?? config.message,
+            image: image,
+            showCloseButton: showCloseButton ?? config.showCloseButton,
+            autoCloseAfter: autoCloseAfter ?? config.autoCloseAfter
+        )
     }
     
     private func setupAutoClose(duration: Double, context: CTTemplateContext) {
@@ -58,24 +107,11 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
         }
     }
     
-    public func show(title: String, message: String, image: UIImage?, confirmAction: (() -> Void)?, cancelAction: (() -> Void)?, showCloseButton: Bool = true) {
-        if let vm = viewModel {
-            vm.title = title
-            vm.message = message
-            vm.image = image
-            vm.confirmAction = confirmAction
-            vm.cancelAction = cancelAction
-            vm.showCloseButton = showCloseButton
-            
-            vm.isVisible = true
-        }
-    }
-    
-    public func onCloseClicked(context: CTTemplateContext) {
+    func onCloseClicked(context: CTTemplateContext) {
         self.close(context: context)
     }
     
-    public func close(context: CTTemplateContext) {
+    func close(context: CTTemplateContext) {
         autoCloseTimer?.invalidate()
         autoCloseTimer = nil
         

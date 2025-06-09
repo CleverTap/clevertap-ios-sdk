@@ -1,13 +1,5 @@
 import SwiftUI
 
-class CTOpenURLConfirmViewModel: ObservableObject {
-    @Published var isVisible: Bool = false
-    @Published var url: String = ""
-    
-    var confirmAction: (() -> Void)?
-    var cancelAction: (() -> Void)?
-}
-
 struct OpenURLConfirmView: View {
     @ObservedObject var viewModel: CTOpenURLConfirmViewModel
     
@@ -27,22 +19,14 @@ struct OpenURLConfirmView: View {
                 
                 HStack {
                     Button(action: {
-                        if let cancel = viewModel.cancelAction {
-                            cancel()
-                        } else {
-                            viewModel.isVisible = false
-                        }
+                        viewModel.executeCancelAction()
                     }) {
                         Text("No")
                             .buttonStyle()
                     }
                     
                     Button(action: {
-                        if let confirm = viewModel.confirmAction {
-                            confirm()
-                        } else {
-                            viewModel.isVisible = false
-                        }
+                        viewModel.executeConfirmAction()
                     }) {
                         Text("Yes")
                             .buttonStyle()

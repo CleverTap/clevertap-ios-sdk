@@ -1,13 +1,17 @@
 import Foundation
 import CleverTapSDK
 
-class CustomInterstitialTemplate {
+enum CustomInterstitialTemplate {
+    static let name = "Custom Interstitial"
+    
     enum DefaultValues {
         static let title = "Title text"
         static let message = "Message text"
         static let image = "logo"
         static let showCloseButton = true
+        static let autoCloseAfter = 0.0
     }
+    
     enum ArgumentNames {
         static let title = "Title"
         static let message = "Message"
@@ -18,51 +22,101 @@ class CustomInterstitialTemplate {
     }
 }
 
-class CopyToClipboardTemplate {
+enum CopyToClipboardTemplate {
+    static let name = "Copy to clipboard"
+    static let visible = false
+    
+    enum DefaultValues {
+        static let text = ""
+    }
+    
     enum ArgumentNames {
         static let text = "Text"
     }
 }
 
-class OpenURLConfirmTemplate {
+enum OpenURLConfirmTemplate {
+    static let name = "Open URL with confirm"
+    static let visible = true
+    
+    enum DefaultValues {
+        static let url = ""
+    }
+    
     enum ArgumentNames {
         static let url = "URL"
     }
 }
 
-class CTCustomTemplatesProducer: CTTemplateProducer {
+final class CTCustomTemplatesProducer: CTTemplateProducer {
+    
     static var templates: [String: CTCustomTemplate] {
-        let customInterstitialBuilder = CTInAppTemplateBuilder()
-        customInterstitialBuilder.setName("Custom Interstitial")
-        customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.title, string: CustomInterstitialTemplate.DefaultValues.title)
-        customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.message, string: CustomInterstitialTemplate.DefaultValues.message)
-        customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.showCloseButton, boolean: CustomInterstitialTemplate.DefaultValues.showCloseButton)
-        customInterstitialBuilder.addArgument(CustomInterstitialTemplate.ArgumentNames.autoCloseAfter, number: 0.0)
-        customInterstitialBuilder.addFileArgument(CustomInterstitialTemplate.ArgumentNames.image)
-        customInterstitialBuilder.addActionArgument(CustomInterstitialTemplate.ArgumentNames.openAction)
-        customInterstitialBuilder.setPresenter(CTCustomInterstitialPresenter.shared)
-        let customInterstitial = customInterstitialBuilder.build()
-        
-        let copyFunctionBuilder = CTAppFunctionBuilder(isVisual: false)
-        copyFunctionBuilder.setName("Copy to clipboard")
-        copyFunctionBuilder.addArgument(CopyToClipboardTemplate.ArgumentNames.text, string: "")
-        copyFunctionBuilder.setPresenter(CTCopyToClipBoardPresenter())
-        let copyFunction = copyFunctionBuilder.build()
-        
-        let openURLConfirmBuilder = CTAppFunctionBuilder(isVisual: true)
-        openURLConfirmBuilder.setName("Open URL with confirm")
-        openURLConfirmBuilder.addArgument(OpenURLConfirmTemplate.ArgumentNames.url, string: "")
-        openURLConfirmBuilder.setPresenter(CTOpenURLConfirmPresenter.shared)
-        let openURLConfirm = openURLConfirmBuilder.build()
-        
-        return [
-            customInterstitial.name: customInterstitial,
-            copyFunction.name: copyFunction,
-            openURLConfirm.name: openURLConfirm
-        ]
+            let interstitial = buildCustomInterstitialTemplate()
+            let copyFunction = buildCopyToClipboardTemplate()
+            let urlConfirm = buildOpenURLConfirmTemplate()
+            
+            return [
+                interstitial.name: interstitial,
+                copyFunction.name: copyFunction,
+                urlConfirm.name: urlConfirm
+            ]
     }
     
-    public func defineTemplates(_ instanceConfig: CleverTapInstanceConfig) -> Set<CTCustomTemplate> {
-        return Set(CTCustomTemplatesProducer.templates.values)
+    // MARK: - Template Builders
+    private static func buildCustomInterstitialTemplate() -> CTCustomTemplate {
+        let builder = CTInAppTemplateBuilder()
+        builder.setName(CustomInterstitialTemplate.name)
+        
+        builder.addArgument(
+            CustomInterstitialTemplate.ArgumentNames.title,
+            string: CustomInterstitialTemplate.DefaultValues.title
+        )
+        builder.addArgument(
+            CustomInterstitialTemplate.ArgumentNames.message,
+            string: CustomInterstitialTemplate.DefaultValues.message
+        )
+        builder.addArgument(
+            CustomInterstitialTemplate.ArgumentNames.showCloseButton,
+            boolean: CustomInterstitialTemplate.DefaultValues.showCloseButton
+        )
+        builder.addArgument(
+            CustomInterstitialTemplate.ArgumentNames.autoCloseAfter,
+            number: NSNumber(floatLiteral: CustomInterstitialTemplate.DefaultValues.autoCloseAfter)
+        )
+        
+        builder.addFileArgument(CustomInterstitialTemplate.ArgumentNames.image)
+        builder.addActionArgument(CustomInterstitialTemplate.ArgumentNames.openAction)
+        builder.setPresenter(CTCustomInterstitialPresenter.shared)
+        
+        return builder.build()
+    }
+    
+    private static func buildCopyToClipboardTemplate() -> CTCustomTemplate {
+        let builder = CTAppFunctionBuilder(isVisual: CopyToClipboardTemplate.visible)
+        builder.setName(CopyToClipboardTemplate.name)
+        builder.addArgument(
+            CopyToClipboardTemplate.ArgumentNames.text,
+            string: CopyToClipboardTemplate.DefaultValues.text
+        )
+        builder.setPresenter(CTCopyToClipBoardPresenter())
+        return builder.build()
+    }
+    
+    private static func buildOpenURLConfirmTemplate() -> CTCustomTemplate {
+        let builder = CTAppFunctionBuilder(isVisual: OpenURLConfirmTemplate.visible)
+        builder.setName(OpenURLConfirmTemplate.name)
+        builder.addArgument(
+            OpenURLConfirmTemplate.ArgumentNames.url,
+            string: OpenURLConfirmTemplate.DefaultValues.url
+        )
+        builder.setPresenter(CTOpenURLConfirmPresenter.shared)
+        return builder.build()
+    }
+    
+    // MARK: - CTTemplateProducer
+    func defineTemplates(_ instanceConfig: CleverTapInstanceConfig) -> Set<CTCustomTemplate> {
+        let templates = Self.templates.values
+        print("Defining \(templates.count) custom templates for instance: \(instanceConfig.accountId)")
+        return Set(templates)
     }
 }

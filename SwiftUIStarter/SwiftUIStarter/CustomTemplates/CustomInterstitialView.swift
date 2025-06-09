@@ -30,11 +30,7 @@ struct CustomInterstitialView: View {
                 HStack {
                     if viewModel.showCloseButton {
                         Button(action: {
-                            if let cancel = viewModel.cancelAction {
-                                cancel()
-                            } else {
-                                viewModel.isVisible = false
-                            }
+                            viewModel.executeCancelAction()
                         }) {
                             Text("Close")
                                 .buttonStyle()
@@ -42,11 +38,7 @@ struct CustomInterstitialView: View {
                     }
                     
                     Button(action: {
-                        if let confirm = viewModel.confirmAction {
-                            confirm()
-                        } else {
-                            viewModel.isVisible = false
-                        }
+                        viewModel.executeConfirmAction()
                     }) {
                         Text("Confirm")
                             .buttonStyle()
@@ -74,7 +66,7 @@ struct ContentView_CustomInterstitialView: View {
         ZStack {
             VStack {
                 Button("Show Custom Interstitial") {
-                    customInterstitialPresenter.show(title: CustomInterstitialTemplate.DefaultValues.title, message: CustomInterstitialTemplate.DefaultValues.message, image: UIImage(named: CustomInterstitialTemplate.DefaultValues.image), confirmAction: nil, cancelAction: nil)
+                    customInterstitialPresenter.show(configuration: InterstitialConfiguration.default, confirmAction: nil, cancelAction: nil)
                 }
             }
             CustomInterstitialView(viewModel: customInterstitialVM)

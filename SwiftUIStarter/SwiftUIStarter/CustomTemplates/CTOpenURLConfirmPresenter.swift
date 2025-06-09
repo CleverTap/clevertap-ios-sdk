@@ -8,41 +8,71 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
     
     weak var viewModel: CTOpenURLConfirmViewModel?
     
-    public func onPresent(context: CTTemplateContext) {
-        let stringUrl = context.string(name: OpenURLConfirmTemplate.ArgumentNames.url)
-
-        if let stringUrl = stringUrl, let url = URL(string: stringUrl) {
-            let cancelAction = {
-                self.close(context: context)
-            }
-            
-            let confirmAction = {
-                UIApplication.shared.open(url)
-                self.close(context: context)
-            }
-            
-            show(url: stringUrl, confirmAction: confirmAction, cancelAction: cancelAction)
-            context.presented()
-        } else {
+    private init() {}
+    
+    func onPresent(context: CTTemplateContext) {
+        guard let urlString = context.string(name: OpenURLConfirmTemplate.ArgumentNames.url),
+              !urlString.isEmpty else {
+            print("Error: URL is missing or empty in OpenURLConfirmPresenter")
             self.close(context: context)
+            return
         }
+        
+        guard URL(string: urlString) != nil else {
+            print("Error: Invalid URL format: \(urlString)")
+            self.close(context: context)
+            return
+        }
+        
+        let cancelAction: (() -> Void) = { [weak self] in
+            self?.close(context: context)
+        }
+        
+        let confirmAction: (() -> Void) = { [weak self] in
+            self?.openURL(urlString)
+            self?.close(context: context)
+        }
+        
+        show(url: urlString, confirmAction: confirmAction, cancelAction: cancelAction)
+        context.presented()
     }
     
-    public func show(url: String, confirmAction: (() -> Void)?, cancelAction: (() -> Void)?) {
-        if let vm = viewModel {
-            vm.url = url
-            vm.confirmAction = confirmAction
-            vm.cancelAction = cancelAction
-            
-            vm.isVisible = true
+    private func openURL(_ urlString: String) {
+        guard let url = URL(string: urlString) else {
+            print("Error: Failed to create URL from string: \(urlString)")
+            return
+        }
+        
+        // Check if the URL can be opened before attempting to open it
+        guard UIApplication.shared.canOpenURL(url) else {
+            print("Error: Cannot open URL: \(urlString)")
+            return
+        }
+        
+        UIApplication.shared.open(url) { success in
+            if !success {
+                print("Error: Failed to open URL: \(urlString)")
+            }
         }
     }
+        
+    func show(url: String, confirmAction: (() -> Void)?, cancelAction: (() -> Void)?) {
+        guard let viewModel = viewModel else {
+            print("Warning: ViewModel not set for OpenURLConfirmPresenter")
+            return
+        }
+        
+        viewModel.url = url
+        viewModel.confirmAction = confirmAction
+        viewModel.cancelAction = cancelAction
+        viewModel.isVisible = true
+    }
     
-    public func onCloseClicked(context: CTTemplateContext) {
+    func onCloseClicked(context: CTTemplateContext) {
         self.close(context: context)
     }
     
-    public func close(context: CTTemplateContext) {
+    func close(context: CTTemplateContext) {
         context.dismissed()
         viewModel?.isVisible = false
     }
