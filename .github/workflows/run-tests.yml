@@ -38,6 +38,7 @@ jobs:
 
       - name: Generate Coverage Report with Slather
         run: |
+          mkdir -p coverage
           slather coverage \
             --cobertura-xml \
             --scheme CleverTapSDK \
@@ -56,6 +57,9 @@ jobs:
   summary:
     runs-on: ubuntu-latest
     needs: test
+    if: success() || failure() 
+    permissions:
+      pull-requests: write
 
     steps:
       - name: Checkout code
