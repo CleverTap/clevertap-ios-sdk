@@ -4,21 +4,20 @@ on:
   push:
     branches:
       - run-tests
+  pull_request:
 
 jobs:
   test:
     runs-on: macos-15
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Select Xcode and show Swift version
         run: |
           sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
           swift --version
-
-      - name: List available simulators
-        run: xcrun simctl list devices
 
       - name: Install CocoaPods dependencies
         run: pod install
@@ -47,22 +46,35 @@ jobs:
             CleverTapSDK.xcodeproj
         if: success() || failure()
 
-      - name: Upload Coverage Report
+      - name: Upload Coverage XML Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report
-          path: coverage
+          name: coverage-xml
+          path: coverage/*.cobertura.xml
         if: success() || failure()
 
-      - name: Code Coverage Summary Report
+  summary:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Coverage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-xml
+
+      - name: Generate Markdown Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: 'coverage/**/*.cobertura.xml'
+          filename: '*.cobertura.xml'
           badge: true
           format: markdown
           output: both
 
-      - name: Add Coverage PR Comment
+      - name: Add PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
         if: github.event_name == 'pull_request'
         with:
