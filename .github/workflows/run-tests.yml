@@ -1,9 +1,6 @@
 name: Run Unit Tests
 
 on:
-  push:
-    branches:
-      - run-tests
   pull_request:
 
 jobs:
@@ -66,6 +63,9 @@ jobs:
     if: success() || failure() 
     permissions:
       pull-requests: write
+      checks: write
+      contents: read
+      actions: read
 
     steps:
       - name: Checkout code
