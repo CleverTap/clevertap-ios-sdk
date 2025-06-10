@@ -43,7 +43,6 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
             return
         }
         
-        // Check if the URL can be opened before attempting to open it
         guard UIApplication.shared.canOpenURL(url) else {
             print("Error: Cannot open URL: \(urlString)")
             return

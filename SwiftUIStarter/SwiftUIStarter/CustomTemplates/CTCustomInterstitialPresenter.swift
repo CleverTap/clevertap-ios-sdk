@@ -73,9 +73,8 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
     }
     
     private func extractConfiguration(from context: CTTemplateContext) -> InterstitialConfiguration {
-        var config = InterstitialConfiguration.default
+        let config = InterstitialConfiguration.default
         
-        // Override with context values if provided
         let title = context.string(name: CustomInterstitialTemplate.ArgumentNames.title)
         let message = context.string(name: CustomInterstitialTemplate.ArgumentNames.message)
         let showCloseButton = context.boolean(name: CustomInterstitialTemplate.ArgumentNames.showCloseButton)
@@ -93,8 +92,8 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
             title: title ?? config.title,
             message: message ?? config.message,
             image: image,
-            showCloseButton: showCloseButton ?? config.showCloseButton,
-            autoCloseAfter: autoCloseAfter ?? config.autoCloseAfter
+            showCloseButton: showCloseButton,
+            autoCloseAfter: autoCloseAfter
         )
     }
     

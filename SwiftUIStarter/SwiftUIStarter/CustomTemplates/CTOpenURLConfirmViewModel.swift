@@ -15,9 +15,4 @@ final class CTOpenURLConfirmViewModel: CTBaseViewModel {
         }
         return url
     }
-    
-    var isValidURL: Bool {
-        guard let url = URL(string: url) else { return false }
-        return UIApplication.shared.canOpenURL(url)
-    }
 }

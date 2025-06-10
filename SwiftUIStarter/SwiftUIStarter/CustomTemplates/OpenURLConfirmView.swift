@@ -5,42 +5,48 @@ struct OpenURLConfirmView: View {
     
     var body: some View {
         if viewModel.isVisible {
-            VStack(spacing: 20) {
-                Text("Open URL")
-                    .font(.headline)
-                
-                ScrollView {
-                    VStack {
-                        Text("Do you want to navigate to \"\(viewModel.url)\"?")
-                            .font(.body)
-                            .padding(.horizontal)
-                    }.frame(maxHeight: .infinity)
-                }
-                
-                HStack {
-                    Button(action: {
-                        viewModel.executeCancelAction()
-                    }) {
-                        Text("No")
-                            .buttonStyle()
+            GeometryReader { geometry in
+                VStack(spacing: 20) {
+                    Text("Open URL")
+                        .font(.headline)
+                    
+                    ScrollView {
+                        VStack {
+                            Text("Do you want to navigate to \"\(viewModel.displayURL)\"?")
+                                .font(.body)
+                                .padding(.horizontal)
+                        }.frame(maxHeight: .infinity)
                     }
                     
-                    Button(action: {
-                        viewModel.executeConfirmAction()
-                    }) {
-                        Text("Yes")
-                            .buttonStyle()
+                    HStack {
+                        Button(action: {
+                            viewModel.executeCancelAction()
+                        }) {
+                            Text("No")
+                                .font(.body)
+                                .fontWeight(.medium)
+                        }
+                        .buttonStyle(SecondaryButtonStyle())
+                        
+                        Button(action: {
+                            viewModel.executeConfirmAction()
+                        }) {
+                            Text("Yes")
+                                .font(.body)
+                                .fontWeight(.medium)
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
                     }
                 }
+                .padding()
+                .background(Color(UIColor.secondarySystemBackground))
+                .cornerRadius(12)
+                .shadow(radius: 20)
+                .padding(.horizontal, 40)
+                .padding(.vertical, geometry.size.height * 0.3)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.2))
             }
-            .padding()
-            .background(Color(UIColor.secondarySystemBackground))
-            .cornerRadius(12)
-            .shadow(radius: 20)
-            .padding(.horizontal, 40)
-            .padding(.vertical, 160)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black.opacity(0.2))
         }
     }
 }
@@ -53,7 +59,7 @@ struct ContentView_OpenURLConfirmView: View {
     var body: some View {
         ZStack {
             VStack {
-                Button("Show Open URL Confirm") {
+                Button("Show \(OpenURLConfirmTemplate.name)") {
                     openURLConfirmPresenter.show(url: "https://clevertap.com/", confirmAction: nil, cancelAction: nil)
                 }
             }
