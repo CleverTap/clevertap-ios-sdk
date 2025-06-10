@@ -47,11 +47,17 @@ jobs:
             CleverTapSDK.xcodeproj
         if: success() || failure()
 
+      - name: Debug - Check coverage files
+        run: |
+          echo "Contents of coverage directory:"
+          ls -la coverage/
+        if: success() || failure()
+
       - name: Upload Coverage XML Artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml
-          path: coverage/*.cobertura.xml
+          path: coverage/cobertura.xml
         if: success() || failure()
 
   summary:
