@@ -81,8 +81,20 @@ jobs:
         with:
           filename: 'cobertura.xml'
           badge: true
+          fail_below_min: false
+          hide_complexity: true
           format: markdown
           output: both
+
+      - name: PR Coverage Report (Changed Files)
+        uses: 5monkeys/cobertura-action@master
+        if: github.event_name == 'pull_request'
+        with:
+          path: cobertura.xml
+          minimum_coverage: 50
+          show_missing: true
+          only_changed_files: true
+          fail_below_threshold: false
 
       - name: Add PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
@@ -90,3 +102,4 @@ jobs:
         with:
           recreate: true
           path: code-coverage-results.md
+          header: overall-coverage
