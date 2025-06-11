@@ -83,6 +83,7 @@ jobs:
           badge: true
           fail_below_min: false
           hide_complexity: true
+          indicators: false
           format: markdown
           output: both
 
@@ -100,7 +101,6 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         if: github.event_name == 'pull_request'
         with:
-          recreate: true
+          hide_and_recreate: true
           path: code-coverage-results.md
           header: overall-coverage
-          
