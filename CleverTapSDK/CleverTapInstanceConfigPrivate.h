@@ -32,5 +32,4 @@
                 isDefaultInstance:(BOOL)isDefault;
 
 + (NSString* _Nonnull)dataArchiveFileNameWithAccountId:(NSString* _Nonnull)accountId;
-
 @end

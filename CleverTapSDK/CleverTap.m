@@ -2094,7 +2094,7 @@ static BOOL sharedInstanceErrorLogged;
         
         @try {
             // Encrypt in transit only if the config/plist flag is true, for event queues only and server side encryption hasn't failed yet.
-            if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed && queue != _notificationsQueue) {
+            if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed && queueType != CTQueueTypeNotifications) {
                 if (@available(iOS 13.0, *)) {
                     NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
                     if (encryptedDict.count > 0) {
@@ -2110,9 +2110,8 @@ static BOOL sharedInstanceErrorLogged;
                         NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
                         CleverTapLogDebug(self.config.logLevel, @"%@: Encrypted request: %@", self, jsonBody);
                     }
-                }
-                else {
-                    CleverTapLogStaticDebug(@"Encryption in transit is only available from iOS 13 and above.");
+                } else {
+                    CleverTapLogStaticDebug(@"Encryption in transit is only available from iOS 13 and later.");
                 }
             }
             
@@ -2140,7 +2139,7 @@ static BOOL sharedInstanceErrorLogged;
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                     
                     success = (httpResponse.statusCode == HTTP_OK);
-                    responseEncrypted = ([httpResponse.allHeaderFields[ENCRYPTION_HEADER]isEqual:@"true"]);
+                    responseEncrypted = ([httpResponse.allHeaderFields[ENCRYPTION_HEADER]isEqualToString:@"true"]);
                     
                     NSDictionary *headers = httpResponse.allHeaderFields;
                     if (success) {
@@ -2152,12 +2151,11 @@ static BOOL sharedInstanceErrorLogged;
                         if (httpResponse.statusCode == HTTP_EXPIRED) {
                             self.sessionManager.encryptionInTransitFailed = YES;
                             CleverTapLogInfo(self.config.logLevel, @"%@: Encryption in transit failed with status code: %lu", self, (long)httpResponse.statusCode);
-                        }
-                        else if (httpResponse.statusCode == HTTP_PAYMENT_REQUIRED) {
+                        } else if (httpResponse.statusCode == HTTP_PAYMENT_REQUIRED) {
                             self.sessionManager.encryptionInTransitFailed = YES;
                             CleverTapLogInfo(self.config.logLevel, @"%@: Encryption in transit is not enabled for your account, please contact the CleverTap support team.", self);
                         }
-                            
+                        
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
                 }
@@ -2217,6 +2215,9 @@ static BOOL sharedInstanceErrorLogged;
                     if (decryptedData.length > 0) {
                         responseData = decryptedData;
                     }
+                }
+                else {
+                    return;
                 }
             }
             
