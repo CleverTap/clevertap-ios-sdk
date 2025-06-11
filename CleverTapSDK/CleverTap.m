@@ -104,6 +104,11 @@ static NSArray *sslCertNames;
 #import "CTEncryptionManager.h"
 
 #import <objc/runtime.h>
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
@@ -2080,13 +2085,35 @@ static BOOL sharedInstanceErrorLogged;
         NSUInteger batchSize = ([queue count] > kMaxBatchSize) ? kMaxBatchSize : [queue count];
         NSArray *batch = [queue subarrayWithRange:NSMakeRange(0, batchSize)];
         NSArray *batchWithHeader = [self insertHeader:header inBatch:batch];
+        id finalPayload = [batchWithHeader copy];
+        NSMutableDictionary *additionalHeaders = [NSMutableDictionary dictionary];
         
         CleverTapLogInternal(self.config.logLevel, @"%@: Pending events batch contains: %d items", self, (int) [batch count]);
+        NSString *jsonBody = [CTUtils jsonObjectToString:batchWithHeader];
+        CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
         
         @try {
-            NSString *jsonBody = [CTUtils jsonObjectToString:batchWithHeader];
-            
-            CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, jsonBody, endpoint);
+            // Encrypt in transit only if the config/plist flag is true, for event queues only and server side encryption hasn't failed yet.
+            if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed && queueType != CTQueueTypeNotifications) {
+                if (@available(iOS 13.0, *)) {
+                    NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
+                    if (encryptedDict.count > 0) {
+                        additionalHeaders[ENCRYPTION_HEADER] = @"true";
+                        
+                        NSString *encryptedPayload = encryptedDict[@"encryptedPayload"];
+                        NSString *nonceData = encryptedDict[@"nonceData"];
+                        finalPayload = @{
+                            NetworkEncryptionManager.ITP: encryptedPayload,
+                            NetworkEncryptionManager.ITK: [[NetworkEncryptionManager shared]getSessionKeyBase64],
+                            NetworkEncryptionManager.ITV: nonceData
+                        };
+                        NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Encrypted request: %@", self, jsonBody);
+                    }
+                } else {
+                    CleverTapLogStaticDebug(@"Encryption in transit is only available from iOS 13 and later.");
+                }
+            }
             
             // update endpoint for current timestamp
             endpoint = [self endpointForQueue:queue];
@@ -2096,6 +2123,7 @@ static BOOL sharedInstanceErrorLogged;
             }
             
             __block BOOL success = NO;
+            __block BOOL responseEncrypted = NO;
             __block NSData *responseData;
             
             __block BOOL redirect = NO;
@@ -2103,21 +2131,31 @@ static BOOL sharedInstanceErrorLogged;
             // Need to simulate a synchronous request
             dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
             
-            CTRequest *ctRequest = [CTRequestFactory eventRequestWithConfig:self.config params:batchWithHeader url:endpoint];
+            CTRequest *ctRequest = [CTRequestFactory eventRequestWithConfig:self.config params:finalPayload url:endpoint additionalHeaders:additionalHeaders];
             [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
                 responseData = data;
                 
                 if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
                     
-                    success = (httpResponse.statusCode == 200);
+                    success = (httpResponse.statusCode == HTTP_OK);
+                    responseEncrypted = ([httpResponse.allHeaderFields[ENCRYPTION_HEADER]isEqualToString:@"true"]);
                     
                     NSDictionary *headers = httpResponse.allHeaderFields;
                     if (success) {
                         [self.domainFactory updateDomainFromResponseHeaders:headers];
                         [self.domainFactory updateNotificationViewedDomainFromResponseHeaders:headers];
                         [self.domainFactory updateMutedFromResponseHeaders:headers];
-                    } else {
+                    }
+                    else {
+                        if (httpResponse.statusCode == HTTP_EXPIRED) {
+                            self.sessionManager.encryptionInTransitFailed = YES;
+                            CleverTapLogInfo(self.config.logLevel, @"%@: Encryption in transit failed with status code: %lu", self, (long)httpResponse.statusCode);
+                        } else if (httpResponse.statusCode == HTTP_PAYMENT_REQUIRED) {
+                            self.sessionManager.encryptionInTransitFailed = YES;
+                            CleverTapLogInfo(self.config.logLevel, @"%@: Encryption in transit is not enabled for your account, please contact the CleverTap support team.", self);
+                        }
+                        
                         CleverTapLogDebug(self.config.logLevel, @"%@: Got %lu response when sending queue, will retry", self, (long)httpResponse.statusCode);
                     }
                 }
@@ -2153,7 +2191,7 @@ static BOOL sharedInstanceErrorLogged;
             
             [queue removeObjectsInArray:batch];
             
-            [self parseResponse:responseData];
+            [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
             [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES withQueueType:queueType];
 
@@ -2168,9 +2206,21 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark Response Handling
 
-- (void)parseResponse:(NSData *)responseData {
+- (void)parseResponse:(NSData *)responseData responseEncrypted:(BOOL)responseEncrypted {
     if (responseData) {
         @try {
+            if (responseEncrypted) {
+                if (@available(iOS 13.0, *)) {
+                    NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
+                    if (decryptedData.length > 0) {
+                        responseData = decryptedData;
+                    }
+                }
+                else {
+                    return;
+                }
+            }
+            
             id jsonResp = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
             CleverTapLogInternal(self.config.logLevel, @"%@: Response: %@", self, jsonResp);
             
@@ -4281,10 +4331,10 @@ static BOOL sharedInstanceErrorLogged;
                      logMessage:(NSString *)logMessage {
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-        if (httpResponse.statusCode == 200) {
+        if (httpResponse.statusCode == HTTP_OK) {
             CleverTapLogDebug(self->_config.logLevel, @"%@: %@ successful.", self, logMessage);
         }
-        else if (httpResponse.statusCode == 401) {
+        else if (httpResponse.statusCode == HTTP_UNAUTHORIZED) {
             CleverTapLogDebug(self->_config.logLevel, @"%@: Unauthorized access from a non-test profile. Please mark this profile as a test profile from the CleverTap dashboard.", self);
         }
     }
