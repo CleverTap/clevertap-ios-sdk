@@ -33,7 +33,7 @@ class NetworkEncryptionTests: XCTestCase {
         XCTAssertNotNil(encrypted["nonceData"], "\"nonceData\" key should be present")
         
         XCTAssertTrue(encrypted["encryptedPayload"] is String)
-        XCTAssertTrue(encrypted["nonceData"] is Data)
+        XCTAssertTrue(encrypted["nonceData"] is String)
     }
     
     func testEncryptDecryptRoundTrip() {
@@ -42,7 +42,8 @@ class NetworkEncryptionTests: XCTestCase {
         let encrypted = manager.encrypt(object: original)
         
         guard let payload = encrypted["encryptedPayload"] as? String,
-              let nonceData = encrypted["nonceData"] as? Data else {
+              let nonceBase64 = encrypted["nonceData"] as? String,
+              let nonceData = Data(base64Encoded: nonceBase64) else {
             XCTFail("Encryption failed or missing keys")
             return
         }
