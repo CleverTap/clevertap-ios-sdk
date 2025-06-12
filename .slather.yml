@@ -18,11 +18,13 @@ ignore:
   - CleverTapSDK/InApps/CTInterstitialViewController.*
   - CleverTapSDK/InApps/CTInAppHTMLViewController.*
   - CleverTapSDK/InApps/CTFooterViewController.*
+  - CleverTapSDK/InApps/CTDismissButton.*
   - CleverTapSDK/CTInAppDisplayViewControllerPrivate.*
   - CleverTapSDK/CTInAppDisplayViewController.*
   - CleverTapSDK/CleverTapTrackedViewController.*
   - CleverTapSDK/Inbox/controllers/CleverTapInboxViewController.*
   - CleverTapSDK/Inbox/cells/*
   - CleverTapSDK/Inbox/config/*
+  - CleverTapSDK/Inbox/views/*
   - CleverTapSDK/Swizzling/*
   - CleverTapSDK/CTSwizzle.*

@@ -6,7 +6,7 @@ abstract_target 'shared' do
 
   target 'CleverTapSDKTests' do
       platform :ios, '10.0'
-      pod 'OCMock', '~> 3.3.0'
+      pod 'OCMock', '~> 3.6.0'
       pod 'OHHTTPStubs'
   
   end

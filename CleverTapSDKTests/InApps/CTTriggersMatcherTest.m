@@ -2019,15 +2019,19 @@
             @"firstTimeOnly": @YES
         }
     ];
-    
+
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
-    id mockIsEventLoggedFirstTime = OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(YES);
-    
+
+    // Stub the method to return YES
+    OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(YES);
+
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{}];
-    
+
     XCTAssertTrue(match);
-    OCMVerify(mockIsEventLoggedFirstTime);
+
+    // Verify the mock method was called on the mock object
+    OCMVerify([dataStoreMock isEventLoggedFirstTime:@"event1"]);
 }
 
 - (void)testMatchChargedEventWithFirstTimeOnly {
@@ -2049,11 +2053,16 @@
                 }]
         }
     ];
-    
-    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
-    
+
+    // Create the mock first
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
-    id mockIsEventLoggedFirstTime = OCMStub([dataStoreMock isEventLoggedFirstTime:@"Charged"]).andReturn(YES);
+
+    // Pass the mock to the triggerMatcher so it actually uses your mock
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:dataStoreMock];
+
+    // Stub the method
+    OCMStub([dataStoreMock isEventLoggedFirstTime:@"Charged"]).andReturn(YES);
+
     BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
         @"prop1": @150,
     } items:@[
@@ -2066,8 +2075,11 @@
             @"price": @5.50
         }
     ]];
+
     XCTAssertTrue(match);
-    OCMVerify(mockIsEventLoggedFirstTime);
+
+    // Verify the mock method was called on the mock object
+    OCMVerify([dataStoreMock isEventLoggedFirstTime:@"Charged"]);
 }
 
 - (void)testMatchEventFirstTimeOnlyWithGeoRadius {

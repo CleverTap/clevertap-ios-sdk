@@ -140,12 +140,12 @@
     NSTimeInterval timestamp = 1234567890;
     
     // Mock the persistence call
-    OCMExpect([CTPreferences putInt:timestamp forKey:OCMOCK_ANY]);
+    OCMExpect([self.mockCTPreferences putInt:timestamp forKey:OCMOCK_ANY]);
     
     [self.productConfig setLastFetchTs:timestamp];
     
     XCTAssertEqual(self.productConfig.lastFetchTs, timestamp);
-    OCMVerify([CTPreferences putInt:timestamp forKey:OCMOCK_ANY]);
+    OCMVerify([self.mockCTPreferences putInt:timestamp forKey:OCMOCK_ANY]);
 }
 
 - (void)testSetDelegate {
@@ -159,8 +159,8 @@
 #pragma mark - Reset Tests
 
 - (void)testResetProductConfigSettings {
-    OCMExpect([CTPreferences removeObjectForKey:OCMOCK_ANY]);
-    OCMExpect([CTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]).andReturn(0);
+    OCMExpect([self.mockCTPreferences removeObjectForKey:OCMOCK_ANY]);
+    OCMExpect([self.mockCTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]).andReturn(0);
     
     [self.productConfig resetProductConfigSettings];
     
@@ -168,8 +168,8 @@
     XCTAssertEqual(self.productConfig.fetchConfigWindowLength, 60);
     XCTAssertEqual(self.productConfig.lastFetchTs, 0);
     
-    OCMVerify([CTPreferences removeObjectForKey:OCMOCK_ANY]);
-    OCMVerify([CTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]);
+    OCMVerify([self.mockCTPreferences removeObjectForKey:OCMOCK_ANY]);
+    OCMVerify([self.mockCTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]);
 }
 
 #pragma mark - Public API Tests
@@ -235,16 +235,16 @@
 
 - (void)testReset {
     // Mock the class methods that will be called during reset
-    OCMExpect([CTPreferences removeObjectForKey:OCMOCK_ANY]);
-    OCMExpect([CTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]).andReturn(0);
+    OCMExpect([self.mockCTPreferences removeObjectForKey:OCMOCK_ANY]);
+    OCMExpect([self.mockCTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]).andReturn(0);
     OCMExpect([self.mockPrivateDelegate resetProductConfig]);
     
     [self.productConfig reset];
     
     OCMVerifyAll(self.mockPrivateDelegate);
     // Verify the class mock separately
-    OCMVerify([CTPreferences removeObjectForKey:OCMOCK_ANY]);
-    OCMVerify([CTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]);
+    OCMVerify([self.mockCTPreferences removeObjectForKey:OCMOCK_ANY]);
+    OCMVerify([self.mockCTPreferences getIntForKey:OCMOCK_ANY withResetValue:0]);
 }
 
 - (void)testSetDefaults {
@@ -281,7 +281,7 @@
 
 - (void)testGetReturnsNilWhenDelegateDoesntRespond {
     id nonRespondingDelegate = OCMProtocolMock(@protocol(CleverTapPrivateProductConfigDelegate));
-    OCMStub([nonRespondingDelegate respondsToSelector:@selector(getProductConfig:)]).andReturn(NO);
+    OCMStub([nonRespondingDelegate getProductConfig:[OCMArg any]]).andReturn(nil);
     
     CleverTapProductConfig *config = [[CleverTapProductConfig alloc] initWithConfig:self.mockInstanceConfig
                                                                     privateDelegate:nonRespondingDelegate];

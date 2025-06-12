@@ -267,6 +267,7 @@
 		4E5A02DD2A4C5FD100DE242A /* LeanplumCT.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AF6C7FF2A1BDA6A001E38A8 /* LeanplumCT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4E5A02DE2A4C5FD800DE242A /* LeanplumCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */; };
 		4E5A02DF2A4C5FD800DE242A /* LeanplumCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 6AF6C8002A1BDA6A001E38A8 /* LeanplumCT.m */; };
+		4E5FE8112DFAE98D00F5731A /* CleverTapJSInterfaceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E5FE8102DFAE98D00F5731A /* CleverTapJSInterfaceTests.m */; };
 		4E6383D7296DE9A8001E83E3 /* CTRequestSender.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E6383D5296DE9A7001E83E3 /* CTRequestSender.h */; };
 		4E6383D8296DE9A8001E83E3 /* CTRequestSender.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E6383D5296DE9A7001E83E3 /* CTRequestSender.h */; };
 		4E6383D9296DE9A8001E83E3 /* CTRequestSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E6383D6296DE9A7001E83E3 /* CTRequestSender.m */; };
@@ -887,6 +888,7 @@
 		4E49AE57275D31910074A774 /* CTIdentityRepoFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTIdentityRepoFactory.h; sourceTree = "<group>"; };
 		4E49AE58275D31910074A774 /* CTIdentityRepoFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTIdentityRepoFactory.m; sourceTree = "<group>"; };
 		4E4E4D1F2DF1A00700D1E23A /* SDWebImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDWebImage.xcodeproj; path = "Vendors/SDWebImage-master/SDWebImage.xcodeproj"; sourceTree = "<group>"; };
+		4E5FE8102DFAE98D00F5731A /* CleverTapJSInterfaceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTapJSInterfaceTests.m; sourceTree = "<group>"; };
 		4E6383D5296DE9A7001E83E3 /* CTRequestSender.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTRequestSender.h; sourceTree = "<group>"; };
 		4E6383D6296DE9A7001E83E3 /* CTRequestSender.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTRequestSender.m; sourceTree = "<group>"; };
 		4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AmazonRootCA1.cer; sourceTree = "<group>"; };
@@ -1814,6 +1816,7 @@
 				4EC7A0F32DFA7D3000476BCB /* CTEventBuilder+Tests.m */,
 				4EC7A0FA2DFA8C6900476BCB /* CTProductConfigControllerTests.m */,
 				4E77CF942DFAA51C00E9BA8E /* CleverTapProductConfigTests.m */,
+				4E5FE8102DFAE98D00F5731A /* CleverTapJSInterfaceTests.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -2805,6 +2808,7 @@
 				4EC7A0F12DFA7B4F00476BCB /* CTProfileBuilder+Tests.m in Sources */,
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
 				487854072BF4BC4E00565685 /* CTFileDownloaderTests.m in Sources */,
+				4E5FE8112DFAE98D00F5731A /* CleverTapJSInterfaceTests.m in Sources */,
 				6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */,
 				6BB727362B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m in Sources */,
 				4E1F155227692A11009387AE /* CleverTap+Tests.m in Sources */,
