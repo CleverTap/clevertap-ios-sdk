@@ -10,8 +10,8 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             HomeScreen()
-            CustomInterstitialView(viewModel: customInterstitialVM)
-            OpenURLConfirmView(viewModel: openURLConfirmVM)
+            CTCustomInterstitialView(viewModel: customInterstitialVM)
+            CTOpenURLConfirmView(viewModel: openURLConfirmVM)
         }.onAppear {
             customInterstitialPresenter.viewModel = customInterstitialVM
             openURLConfirmPresenter.viewModel = openURLConfirmVM

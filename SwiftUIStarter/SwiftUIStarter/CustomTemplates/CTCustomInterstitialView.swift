@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CustomInterstitialView: View {
+struct CTCustomInterstitialView: View {
     @ObservedObject var viewModel: CTCustomInterstitialViewModel
     
     var body: some View {
@@ -71,11 +71,11 @@ struct ContentView_CustomInterstitialView: View {
     var body: some View {
         ZStack {
             VStack {
-                Button("Show \(CustomInterstitialTemplate.name)") {
-                    customInterstitialPresenter.show(configuration: InterstitialConfiguration.default, confirmAction: nil, cancelAction: nil)
+                Button("Show \(CTCustomInterstitialTemplate.name)") {
+                    customInterstitialPresenter.show(configuration: CTInterstitialConfiguration.default, confirmAction: nil, cancelAction: nil)
                 }
             }
-            CustomInterstitialView(viewModel: customInterstitialVM)
+            CTCustomInterstitialView(viewModel: customInterstitialVM)
         }.onAppear {
             customInterstitialPresenter.viewModel = customInterstitialVM
         }

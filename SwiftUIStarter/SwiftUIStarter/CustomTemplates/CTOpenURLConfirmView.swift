@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct OpenURLConfirmView: View {
+struct CTOpenURLConfirmView: View {
     @ObservedObject var viewModel: CTOpenURLConfirmViewModel
     
     var body: some View {
@@ -59,11 +59,11 @@ struct ContentView_OpenURLConfirmView: View {
     var body: some View {
         ZStack {
             VStack {
-                Button("Show \(OpenURLConfirmTemplate.name)") {
+                Button("Show \(CTOpenURLConfirmTemplate.name)") {
                     openURLConfirmPresenter.show(url: "https://clevertap.com/", confirmAction: nil, cancelAction: nil)
                 }
             }
-            OpenURLConfirmView(viewModel: openURLConfirmVM)
+            CTOpenURLConfirmView(viewModel: openURLConfirmVM)
         }.onAppear {
             openURLConfirmPresenter.viewModel = openURLConfirmVM
         }

@@ -1,7 +1,7 @@
 import Foundation
 import CleverTapSDK
 
-enum CustomInterstitialTemplate {
+enum CTCustomInterstitialTemplate {
     static let name = "Custom Interstitial"
     
     enum DefaultValues {
@@ -22,7 +22,7 @@ enum CustomInterstitialTemplate {
     }
 }
 
-enum CopyToClipboardTemplate {
+enum CTCopyToClipboardTemplate {
     static let name = "Copy to clipboard"
     static let visible = false
     
@@ -35,7 +35,7 @@ enum CopyToClipboardTemplate {
     }
 }
 
-enum OpenURLConfirmTemplate {
+enum CTOpenURLConfirmTemplate {
     static let name = "Open URL with confirm"
     static let visible = true
     
@@ -65,49 +65,49 @@ final class CTCustomTemplatesProducer: CTTemplateProducer {
     // MARK: - Template Builders
     private static func buildCustomInterstitialTemplate() -> CTCustomTemplate {
         let builder = CTInAppTemplateBuilder()
-        builder.setName(CustomInterstitialTemplate.name)
+        builder.setName(CTCustomInterstitialTemplate.name)
         
         builder.addArgument(
-            CustomInterstitialTemplate.ArgumentNames.title,
-            string: CustomInterstitialTemplate.DefaultValues.title
+            CTCustomInterstitialTemplate.ArgumentNames.title,
+            string: CTCustomInterstitialTemplate.DefaultValues.title
         )
         builder.addArgument(
-            CustomInterstitialTemplate.ArgumentNames.message,
-            string: CustomInterstitialTemplate.DefaultValues.message
+            CTCustomInterstitialTemplate.ArgumentNames.message,
+            string: CTCustomInterstitialTemplate.DefaultValues.message
         )
         builder.addArgument(
-            CustomInterstitialTemplate.ArgumentNames.showCloseButton,
-            boolean: CustomInterstitialTemplate.DefaultValues.showCloseButton
+            CTCustomInterstitialTemplate.ArgumentNames.showCloseButton,
+            boolean: CTCustomInterstitialTemplate.DefaultValues.showCloseButton
         )
         builder.addArgument(
-            CustomInterstitialTemplate.ArgumentNames.autoCloseAfter,
-            number: NSNumber(floatLiteral: CustomInterstitialTemplate.DefaultValues.autoCloseAfter)
+            CTCustomInterstitialTemplate.ArgumentNames.autoCloseAfter,
+            number: NSNumber(floatLiteral: CTCustomInterstitialTemplate.DefaultValues.autoCloseAfter)
         )
         
-        builder.addFileArgument(CustomInterstitialTemplate.ArgumentNames.image)
-        builder.addActionArgument(CustomInterstitialTemplate.ArgumentNames.openAction)
+        builder.addFileArgument(CTCustomInterstitialTemplate.ArgumentNames.image)
+        builder.addActionArgument(CTCustomInterstitialTemplate.ArgumentNames.openAction)
         builder.setPresenter(CTCustomInterstitialPresenter.shared)
         
         return builder.build()
     }
     
     private static func buildCopyToClipboardTemplate() -> CTCustomTemplate {
-        let builder = CTAppFunctionBuilder(isVisual: CopyToClipboardTemplate.visible)
-        builder.setName(CopyToClipboardTemplate.name)
+        let builder = CTAppFunctionBuilder(isVisual: CTCopyToClipboardTemplate.visible)
+        builder.setName(CTCopyToClipboardTemplate.name)
         builder.addArgument(
-            CopyToClipboardTemplate.ArgumentNames.text,
-            string: CopyToClipboardTemplate.DefaultValues.text
+            CTCopyToClipboardTemplate.ArgumentNames.text,
+            string: CTCopyToClipboardTemplate.DefaultValues.text
         )
         builder.setPresenter(CTCopyToClipBoardPresenter())
         return builder.build()
     }
     
     private static func buildOpenURLConfirmTemplate() -> CTCustomTemplate {
-        let builder = CTAppFunctionBuilder(isVisual: OpenURLConfirmTemplate.visible)
-        builder.setName(OpenURLConfirmTemplate.name)
+        let builder = CTAppFunctionBuilder(isVisual: CTOpenURLConfirmTemplate.visible)
+        builder.setName(CTOpenURLConfirmTemplate.name)
         builder.addArgument(
-            OpenURLConfirmTemplate.ArgumentNames.url,
-            string: OpenURLConfirmTemplate.DefaultValues.url
+            CTOpenURLConfirmTemplate.ArgumentNames.url,
+            string: CTOpenURLConfirmTemplate.DefaultValues.url
         )
         builder.setPresenter(CTOpenURLConfirmPresenter.shared)
         return builder.build()

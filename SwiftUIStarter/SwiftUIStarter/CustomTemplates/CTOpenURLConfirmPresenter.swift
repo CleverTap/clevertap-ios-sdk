@@ -11,7 +11,7 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
     private init() {}
     
     func onPresent(context: CTTemplateContext) {
-        guard let urlString = context.string(name: OpenURLConfirmTemplate.ArgumentNames.url),
+        guard let urlString = context.string(name: CTOpenURLConfirmTemplate.ArgumentNames.url),
               !urlString.isEmpty else {
             print("Error: URL is missing or empty in OpenURLConfirmPresenter")
             self.close(context: context)

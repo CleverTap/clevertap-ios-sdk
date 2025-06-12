@@ -2,20 +2,20 @@ import Foundation
 import CleverTapSDK
 import SwiftUI
 
-struct InterstitialConfiguration {
+struct CTInterstitialConfiguration {
     let title: String
     let message: String
     let image: UIImage?
     let showCloseButton: Bool
     let autoCloseAfter: Double
     
-    public static var `default`: InterstitialConfiguration {
+    public static var `default`: CTInterstitialConfiguration {
         .init(
-            title: CustomInterstitialTemplate.DefaultValues.title,
-            message: CustomInterstitialTemplate.DefaultValues.message,
-            image: UIImage(named: CustomInterstitialTemplate.DefaultValues.image),
-            showCloseButton: CustomInterstitialTemplate.DefaultValues.showCloseButton,
-            autoCloseAfter: CustomInterstitialTemplate.DefaultValues.autoCloseAfter
+            title: CTCustomInterstitialTemplate.DefaultValues.title,
+            message: CTCustomInterstitialTemplate.DefaultValues.message,
+            image: UIImage(named: CTCustomInterstitialTemplate.DefaultValues.image),
+            showCloseButton: CTCustomInterstitialTemplate.DefaultValues.showCloseButton,
+            autoCloseAfter: CTCustomInterstitialTemplate.DefaultValues.autoCloseAfter
         )
     }
 }
@@ -42,7 +42,7 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
         }
         
         let confirmAction = { [weak self] in
-            context.triggerAction(name: CustomInterstitialTemplate.ArgumentNames.openAction)
+            context.triggerAction(name: CTCustomInterstitialTemplate.ArgumentNames.openAction)
             self?.close(context: context)
         }
         
@@ -57,7 +57,7 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
     }
     
     func show(
-        configuration: InterstitialConfiguration,
+        configuration: CTInterstitialConfiguration,
         confirmAction: (() -> Void)?,
         cancelAction: (() -> Void)?
     ) {
@@ -72,23 +72,23 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
         viewModel.isVisible = true
     }
     
-    private func extractConfiguration(from context: CTTemplateContext) -> InterstitialConfiguration {
-        let config = InterstitialConfiguration.default
+    private func extractConfiguration(from context: CTTemplateContext) -> CTInterstitialConfiguration {
+        let config = CTInterstitialConfiguration.default
         
-        let title = context.string(name: CustomInterstitialTemplate.ArgumentNames.title)
-        let message = context.string(name: CustomInterstitialTemplate.ArgumentNames.message)
-        let showCloseButton = context.boolean(name: CustomInterstitialTemplate.ArgumentNames.showCloseButton)
-        let autoCloseAfter = context.double(name: CustomInterstitialTemplate.ArgumentNames.autoCloseAfter)
+        let title = context.string(name: CTCustomInterstitialTemplate.ArgumentNames.title)
+        let message = context.string(name: CTCustomInterstitialTemplate.ArgumentNames.message)
+        let showCloseButton = context.boolean(name: CTCustomInterstitialTemplate.ArgumentNames.showCloseButton)
+        let autoCloseAfter = context.double(name: CTCustomInterstitialTemplate.ArgumentNames.autoCloseAfter)
         
         let image: UIImage? = {
-            if let imageURL = context.file(name: CustomInterstitialTemplate.ArgumentNames.image) {
+            if let imageURL = context.file(name: CTCustomInterstitialTemplate.ArgumentNames.image) {
                 return UIImage(contentsOfFile: imageURL)
             } else {
                 return config.image
             }
         }()
         
-        return InterstitialConfiguration(
+        return CTInterstitialConfiguration(
             title: title ?? config.title,
             message: message ?? config.message,
             image: image,
