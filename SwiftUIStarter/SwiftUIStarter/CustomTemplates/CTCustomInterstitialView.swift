@@ -9,6 +9,8 @@ struct CTCustomInterstitialView: View {
                 VStack(spacing: 20) {
                     Text(viewModel.title)
                         .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityLabel("Notification title: \(viewModel.title)")
                     
                     if let image = viewModel.image {
                         Image(uiImage: image)
@@ -17,6 +19,8 @@ struct CTCustomInterstitialView: View {
                             .frame(maxWidth: geometry.size.width * 0.6)
                             .frame(maxHeight: min(200, geometry.size.height * 0.3))
                             .clipShape(Rectangle())
+                            .accessibilityLabel("Notification image")
+                            .accessibilityAddTraits(.isImage)
                     }
                     
                     ScrollView {
@@ -25,6 +29,7 @@ struct CTCustomInterstitialView: View {
                                 .font(.body)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
+                                .accessibilityLabel("Notification message: \(viewModel.message)")
                         }.frame(maxHeight: .infinity)
                     }
                     
@@ -38,6 +43,8 @@ struct CTCustomInterstitialView: View {
                                     .fontWeight(.medium)
                             }
                             .buttonStyle(SecondaryButtonStyle())
+                            .accessibilityLabel("Close notification")
+                            .accessibilityHint("Dismisses the notification without taking action")
                         }
                         
                         Button(action: {
@@ -48,7 +55,10 @@ struct CTCustomInterstitialView: View {
                                 .fontWeight(.medium)
                         }
                         .buttonStyle(PrimaryButtonStyle())
+                        .accessibilityLabel("Confirm action")
+                        .accessibilityHint("Confirms and performs the notification action")
                     }
+                    .accessibilityElement(children: .contain)
                 }
                 .padding()
                 .background(Color(UIColor.secondarySystemBackground))
@@ -58,6 +68,13 @@ struct CTCustomInterstitialView: View {
                 .padding(.vertical, geometry.size.height * 0.1)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.black.opacity(0.2))
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Custom notification dialog")
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    UIAccessibility.post(notification: .screenChanged, argument: nil)
+                }
             }
         }
     }
