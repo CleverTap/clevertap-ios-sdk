@@ -274,6 +274,7 @@
 		4E64855B287440BA00C2F409 /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */; };
 		4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */ = {isa = PBXBuildFile; fileRef = 4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */; };
 		4E7704B82679DCEF005222D0 /* CleverTapURLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4E77CF952DFAA51C00E9BA8E /* CleverTapProductConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E77CF942DFAA51C00E9BA8E /* CleverTapProductConfigTests.m */; };
 		4E7929F929799E8F00B81F3C /* CTDomainFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7929F729799E8F00B81F3C /* CTDomainFactory.h */; };
 		4E7929FA29799E8F00B81F3C /* CTDomainFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E7929F729799E8F00B81F3C /* CTDomainFactory.h */; };
 		4E7929FB29799E8F00B81F3C /* CTDomainFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E7929F829799E8F00B81F3C /* CTDomainFactory.m */; };
@@ -314,6 +315,10 @@
 		4EB3638E2C087A8200C00AE2 /* CTUserInfoMigrator.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EB3638A2C087A8200C00AE2 /* CTUserInfoMigrator.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4EB4C8BE2AAD91AC00B7F045 /* CTTriggerEvaluator.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EB4C8BC2AAD91AC00B7F045 /* CTTriggerEvaluator.h */; };
 		4EB4C8BF2AAD91AC00B7F045 /* CTTriggerEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */; };
+		4EC7A0E82DFA792000476BCB /* CTProfileBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EC7A0E72DFA792000476BCB /* CTProfileBuilderTests.m */; };
+		4EC7A0F12DFA7B4F00476BCB /* CTProfileBuilder+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EC7A0F02DFA7B4F00476BCB /* CTProfileBuilder+Tests.m */; };
+		4EC7A0F42DFA7D3000476BCB /* CTEventBuilder+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EC7A0F32DFA7D3000476BCB /* CTEventBuilder+Tests.m */; };
+		4EC7A0FB2DFA8C6900476BCB /* CTProductConfigControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EC7A0FA2DFA8C6900476BCB /* CTProductConfigControllerTests.m */; };
 		4ECD88312ADC8A05003885CE /* CTSessionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */; };
 		4ED6D50A2DC0B866009820A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ED6D5002DC0B866009820A3 /* Assets.xcassets */; };
 		4ED6D50C2DC0B866009820A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ED6D5032DC0B866009820A3 /* LaunchScreen.storyboard */; };
@@ -886,6 +891,7 @@
 		4E6383D6296DE9A7001E83E3 /* CTRequestSender.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTRequestSender.m; sourceTree = "<group>"; };
 		4E64855A287440BA00C2F409 /* AmazonRootCA1.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AmazonRootCA1.cer; sourceTree = "<group>"; };
 		4E7704B72679DCEF005222D0 /* CleverTapURLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapURLDelegate.h; sourceTree = "<group>"; };
+		4E77CF942DFAA51C00E9BA8E /* CleverTapProductConfigTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CleverTapProductConfigTests.m; sourceTree = "<group>"; };
 		4E7929F729799E8F00B81F3C /* CTDomainFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDomainFactory.h; sourceTree = "<group>"; };
 		4E7929F829799E8F00B81F3C /* CTDomainFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDomainFactory.m; sourceTree = "<group>"; };
 		4E838C3E299F419800ED0875 /* ContentMerger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContentMerger.h; sourceTree = "<group>"; };
@@ -909,6 +915,12 @@
 		4EB4C8BC2AAD91AC00B7F045 /* CTTriggerEvaluator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTTriggerEvaluator.h; sourceTree = "<group>"; };
 		4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTriggerEvaluator.m; sourceTree = "<group>"; };
 		4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityManagementTests.m; sourceTree = "<group>"; };
+		4EC7A0E72DFA792000476BCB /* CTProfileBuilderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProfileBuilderTests.m; sourceTree = "<group>"; };
+		4EC7A0EF2DFA7B4F00476BCB /* CTProfileBuilder+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTProfileBuilder+Tests.h"; sourceTree = "<group>"; };
+		4EC7A0F02DFA7B4F00476BCB /* CTProfileBuilder+Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTProfileBuilder+Tests.m"; sourceTree = "<group>"; };
+		4EC7A0F22DFA7D3000476BCB /* CTEventBuilder+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTEventBuilder+Tests.h"; sourceTree = "<group>"; };
+		4EC7A0F32DFA7D3000476BCB /* CTEventBuilder+Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CTEventBuilder+Tests.m"; sourceTree = "<group>"; };
+		4EC7A0FA2DFA8C6900476BCB /* CTProductConfigControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProductConfigControllerTests.m; sourceTree = "<group>"; };
 		4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSessionManagerTests.m; sourceTree = "<group>"; };
 		4ED6D4FF2DC0B866009820A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4ED6D5002DC0B866009820A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1795,6 +1807,13 @@
 				48FA82C62DAD638700AB8651 /* CTPushPrimerManagerMock.h */,
 				48FA82C72DAD63A900AB8651 /* CTPushPrimerManagerMock.m */,
 				0B82CD0F2DC2407200756998 /* CTAESGCMCryptTests.swift */,
+				4EC7A0E72DFA792000476BCB /* CTProfileBuilderTests.m */,
+				4EC7A0EF2DFA7B4F00476BCB /* CTProfileBuilder+Tests.h */,
+				4EC7A0F02DFA7B4F00476BCB /* CTProfileBuilder+Tests.m */,
+				4EC7A0F22DFA7D3000476BCB /* CTEventBuilder+Tests.h */,
+				4EC7A0F32DFA7D3000476BCB /* CTEventBuilder+Tests.m */,
+				4EC7A0FA2DFA8C6900476BCB /* CTProductConfigControllerTests.m */,
+				4E77CF942DFAA51C00E9BA8E /* CleverTapProductConfigTests.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -2745,8 +2764,10 @@
 				48FA82C32DAD17E300AB8651 /* CTSystemAppFunctionsTest.m in Sources */,
 				6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */,
 				6A2E0B9529D49D0200FCEA5F /* CTVariables+Tests.m in Sources */,
+				4E77CF952DFAA51C00E9BA8E /* CleverTapProductConfigTests.m in Sources */,
 				6B32A0B42B9F2E8F009ADC57 /* CTTestTemplateProducer.m in Sources */,
 				6A2E0B9829D49D5100FCEA5F /* CTVarCacheMock.m in Sources */,
+				4EC7A0E82DFA792000476BCB /* CTProfileBuilderTests.m in Sources */,
 				0B1FCD172DB8E0120039D424 /* CTCryptMigrationTests.m in Sources */,
 				4EAF05022A495DD5009D9D61 /* CleverTapInstanceTests.m in Sources */,
 				6BB778D22BF267B600A41628 /* CTTemplateContextTest.m in Sources */,
@@ -2757,6 +2778,7 @@
 				6BD334F02AF545C80099E33E /* CTInAppStoreTest.m in Sources */,
 				6B453EFE2CF74BE2003C7A89 /* CTEventAdapterTest.m in Sources */,
 				32394C1F29FA251E00956058 /* CTEventBuilderTest.m in Sources */,
+				4EC7A0F42DFA7D3000476BCB /* CTEventBuilder+Tests.m in Sources */,
 				48FA82C82DAD63A900AB8651 /* CTPushPrimerManagerMock.m in Sources */,
 				6B12F7692C9466460045D743 /* CTJsonTemplateProducerTest.m in Sources */,
 				6BB778D02BEE4C3400A41628 /* CTNotificationActionTest.m in Sources */,
@@ -2774,11 +2796,13 @@
 				48FA82C52DAD3D9100AB8651 /* CTPushPrimerManagerTests.m in Sources */,
 				4ECD88312ADC8A05003885CE /* CTSessionManagerTests.m in Sources */,
 				0B995A4A2C36AEDC00AF6006 /* CTLocalDataStoreTests.m in Sources */,
+				4EC7A0FB2DFA8C6900476BCB /* CTProductConfigControllerTests.m in Sources */,
 				6A4427C52AA6515A0098866F /* CTTriggersMatcherTest.m in Sources */,
 				6B32A0B02B9DC374009ADC57 /* CTTemplateArgumentTest.m in Sources */,
 				4E87397B2C92223C00FDFDFD /* CTDomainFactoryTests.m in Sources */,
 				0B5564562C25946C00B87284 /* CTUserInfoMigratorTest.m in Sources */,
 				4E2CF1442AC56D8F00441E8B /* CTEncryptionManagerTests.m in Sources */,
+				4EC7A0F12DFA7B4F00476BCB /* CTProfileBuilder+Tests.m in Sources */,
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
 				487854072BF4BC4E00565685 /* CTFileDownloaderTests.m in Sources */,
 				6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */,
