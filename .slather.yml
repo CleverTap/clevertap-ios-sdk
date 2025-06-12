@@ -1,0 +1,30 @@
+coverage_service: cobertura_xml
+scheme: CleverTapSDK
+workspace: CleverTapSDK.xcworkspace
+xcodeproj: CleverTapSDK.xcodeproj
+output_directory: coverage
+ignore:
+  - CleverTapSDK/InApps/CTAlertViewController.*
+  - CleverTapSDK/InApps/CTHeaderViewController.*
+  - CleverTapSDK/InApps/CTHalfInterstitialViewController.*
+  - CleverTapSDK/InApps/CTBaseHeaderFooterViewController.*
+  - CleverTapSDK/InApps/CTBaseHeaderFooterViewControllerPrivate.*
+  - CleverTapSDK/InApps/CTImageInAppViewController.*
+  - CleverTapSDK/InApps/CTInterstitialImageViewController.*
+  - CleverTapSDK/InApps/CTAVPlayerViewController.*
+  - CleverTapSDK/InApps/CTCoverViewController.*
+  - CleverTapSDK/InApps/CTCoverImageViewController.*
+  - CleverTapSDK/InApps/CTHalfInterstitialImageViewController.*
+  - CleverTapSDK/InApps/CTInterstitialViewController.*
+  - CleverTapSDK/InApps/CTInAppHTMLViewController.*
+  - CleverTapSDK/InApps/CTFooterViewController.*
+  - CleverTapSDK/InApps/CTDismissButton.*
+  - CleverTapSDK/CTInAppDisplayViewControllerPrivate.*
+  - CleverTapSDK/CTInAppDisplayViewController.*
+  - CleverTapSDK/CleverTapTrackedViewController.*
+  - CleverTapSDK/Inbox/controllers/CleverTapInboxViewController.*
+  - CleverTapSDK/Inbox/cells/*
+  - CleverTapSDK/Inbox/config/*
+  - CleverTapSDK/Inbox/views/*
+  - CleverTapSDK/Swizzling/*
+  - CleverTapSDK/CTSwizzle.*

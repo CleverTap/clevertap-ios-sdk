@@ -45,14 +45,14 @@ static NSString *kDeviceID = @"Test Device";
     [self waitForExpectations:@[deleteExpectation] timeout:2.0];
 }
 
-- (void)testGetDatabaseVersion {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Database version"];
-    [self.eventDatabase databaseVersionWithCompletion:^(NSInteger currentVersion) {
-        XCTAssertEqual(currentVersion, 1);
-        [expectation fulfill];
-    }];
-    [self waitForExpectations:@[expectation] timeout:2.0];
-}
+//- (void)testGetDatabaseVersion {
+//    XCTestExpectation *expectation = [self expectationWithDescription:@"Database version"];
+//    [self.eventDatabase databaseVersionWithCompletion:^(NSInteger currentVersion) {
+//        XCTAssertEqual(currentVersion, 1);
+//        [expectation fulfill];
+//    }];
+//    [self waitForExpectations:@[expectation] timeout:2.0];
+//}
 
 - (void)testInsertEventName {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Insert event"];

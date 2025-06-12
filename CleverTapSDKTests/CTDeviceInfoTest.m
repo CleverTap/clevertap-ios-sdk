@@ -21,14 +21,6 @@
 }
 
 - (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-}
-
-- (void)test_initialize {
-//    [CTDeviceInfo initialize];
-    
-//    XCTAssertNotNil([_classObject _idfv]);
-
 }
 
 - (void)test_initWithConfig{

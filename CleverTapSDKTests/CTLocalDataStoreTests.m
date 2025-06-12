@@ -59,30 +59,32 @@
     // Mock old values for the keys
     id mockOldValueForName = @"Jane";
     id mockOldValueForAge = @"25";
-    
-    // Stub the method to return mock old values
+
+    // Create the partial mock
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
-    id mockGetProfileFieldForKeyName = OCMStub([dataStoreMock getProfileFieldForKey:@"name"]).andReturn(mockOldValueForName);
-    id mockGetProfileFieldForKeyAge = OCMStub([dataStoreMock getProfileFieldForKey:@"age"]).andReturn(mockOldValueForAge);
-    
+
+    // Stub the methods to return mock old values
+    OCMStub([dataStoreMock getProfileFieldForKey:@"name"]).andReturn(mockOldValueForName);
+    OCMStub([dataStoreMock getProfileFieldForKey:@"age"]).andReturn(mockOldValueForAge);
+
     // Call the method and get the result
     NSDictionary *result = [dataStoreMock userAttributeChangeProperties:event];
-    
+
     // Verify the result dictionary
     XCTAssertEqual(result.count, 2);
     XCTAssertEqual(result[@"name"][CLTAP_KEY_OLD_VALUE], mockOldValueForName);
     XCTAssertEqual(result[@"name"][CLTAP_KEY_NEW_VALUE], @"John");
     XCTAssertEqual(result[@"age"][CLTAP_KEY_OLD_VALUE], mockOldValueForAge);
     XCTAssertEqual(result[@"age"][CLTAP_KEY_NEW_VALUE], @"30");
-    
+
     // Ensure skipped keys are not present in the result
     XCTAssertNil(result[@"cc"]);
     XCTAssertNil(result[@"tz"]);
     XCTAssertNil(result[@"Carrier"]);
-    
-    // Verify the mock methods were called
-    OCMVerify(mockGetProfileFieldForKeyName);
-    OCMVerify(mockGetProfileFieldForKeyAge);
+
+    // Verify the mock methods were called on the mock object
+    OCMVerify([dataStoreMock getProfileFieldForKey:@"name"]);
+    OCMVerify([dataStoreMock getProfileFieldForKey:@"age"]);
 }
 
 - (void)testGetUserAttributeChangePropertiesWithIncrementCommand {
@@ -90,25 +92,27 @@
         @"points": @{kCLTAP_COMMAND_INCREMENT: @10}
     };
     NSDictionary *event = @{CLTAP_PROFILE: profile};
-    
+
     // Mock old and new values for the key
     id mockOldValue = @20;
     id mockNewValue = @30;
-    
-    // Stub the method to return mock old values and handle increment command
+
+    // Create the partial mock
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
-    id mockGetProfileFieldForKey = OCMStub([dataStoreMock getProfileFieldForKey:@"points"]).andReturn(mockOldValue);
-    
+
+    // Stub the method to return mock old values
+    OCMStub([dataStoreMock getProfileFieldForKey:@"points"]).andReturn(mockOldValue);
+
     // Call the method and get the result
     NSDictionary *result = [dataStoreMock userAttributeChangeProperties:event];
-    
+
     // Verify the result dictionary
     XCTAssertEqual(result.count, 1);
     XCTAssertEqual(result[@"points"][CLTAP_KEY_OLD_VALUE], mockOldValue);
     XCTAssertEqual(result[@"points"][CLTAP_KEY_NEW_VALUE], mockNewValue);
-    
-    // Verify the mock methods were called
-    OCMVerify(mockGetProfileFieldForKey);
+
+    // Verify the mock method was called on the mock object
+    OCMVerify([dataStoreMock getProfileFieldForKey:@"points"]);
 }
 
 - (void)testSetAndGetProfileValueForKey {
