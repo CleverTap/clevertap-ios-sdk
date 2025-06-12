@@ -22,3 +22,7 @@ ignore:
   - CleverTapSDK/CTInAppDisplayViewController.*
   - CleverTapSDK/CleverTapTrackedViewController.*
   - CleverTapSDK/Inbox/controllers/CleverTapInboxViewController.*
+  - CleverTapSDK/Inbox/cells/*
+  - CleverTapSDK/Inbox/config/*
+  - CleverTapSDK/Swizzling/*
+  - CleverTapSDK/CTSwizzle.*
