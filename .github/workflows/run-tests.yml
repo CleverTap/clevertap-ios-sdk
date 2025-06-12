@@ -36,12 +36,7 @@ jobs:
       - name: Generate Coverage Report with Slather
         run: |
           mkdir -p coverage
-          slather coverage \
-            --cobertura-xml \
-            --scheme CleverTapSDK \
-            --workspace CleverTapSDK.xcworkspace \
-            --output-directory coverage \
-            CleverTapSDK.xcodeproj
+          slather coverage 
         if: success() || failure()
 
       - name: Debug - Check coverage files
