@@ -2,7 +2,8 @@ import Foundation
 import CleverTapSDK
 import SwiftUI
 
-class CTCopyToClipBoardPresenter: CTTemplatePresenter {
+class CTCopyToClipboardPresenter: CTTemplatePresenter {
+    
     public func onPresent(context: CTTemplateContext) {
         guard let text = context.string(name: CTCopyToClipboardTemplate.ArgumentNames.text),
                 !text.isEmpty else {
@@ -19,3 +20,4 @@ class CTCopyToClipBoardPresenter: CTTemplatePresenter {
         // NOOP: Non-visual function without actions
     }
 }
+

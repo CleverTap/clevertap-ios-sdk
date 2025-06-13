@@ -98,7 +98,7 @@ final class CTCustomTemplatesProducer: CTTemplateProducer {
             CTCopyToClipboardTemplate.ArgumentNames.text,
             string: CTCopyToClipboardTemplate.DefaultValues.text
         )
-        builder.setPresenter(CTCopyToClipBoardPresenter())
+        builder.setPresenter(CTCopyToClipboardPresenter())
         return builder.build()
     }
     
