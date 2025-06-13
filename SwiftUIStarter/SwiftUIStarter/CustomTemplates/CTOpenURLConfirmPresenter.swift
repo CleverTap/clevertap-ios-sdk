@@ -1,6 +1,7 @@
 import Foundation
 import CleverTapSDK
 import SwiftUI
+import UIKit
 
 class CTOpenURLConfirmPresenter: CTTemplatePresenter {
     
