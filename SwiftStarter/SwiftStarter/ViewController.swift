@@ -51,6 +51,7 @@ extension ViewController {
         eventList.append("Local Half Interstitial Push Primer")
         eventList.append("Local Alert Push Primer")
         eventList.append("InApp Campaign Push Primer")
+        eventList.append("Sync Custom Templates")
         self.tblEvent.reloadData()
     }
     
@@ -133,6 +134,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 14:
             createInAppCampaignPushPrimer()
             break;
+        case 15: CleverTap.sharedInstance()?.syncCustomTemplates()
         default:
             break;
         }
