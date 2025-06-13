@@ -135,6 +135,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             createInAppCampaignPushPrimer()
             break;
         case 15: CleverTap.sharedInstance()?.syncCustomTemplates()
+            break;
         default:
             break;
         }
