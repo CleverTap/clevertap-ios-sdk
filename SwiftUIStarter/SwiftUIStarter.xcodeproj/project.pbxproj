@@ -27,7 +27,7 @@
 		6B68DA362DF3231900761CFE /* CTCustomTemplatesProducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA352DF3231900761CFE /* CTCustomTemplatesProducer.swift */; };
 		6B68DA382DF323B000761CFE /* CTCustomInterstitialPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA372DF323B000761CFE /* CTCustomInterstitialPresenter.swift */; };
 		6B68DA3A2DF32F4200761CFE /* CTCustomInterstitialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA392DF32F4200761CFE /* CTCustomInterstitialViewModel.swift */; };
-		6B68DA3C2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3B2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift */; };
+		6B68DA3C2DF3452300761CFE /* CTCopyToClipboardPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3B2DF3452300761CFE /* CTCopyToClipboardPresenter.swift */; };
 		6B68DA3E2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3D2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift */; };
 		6B68DA402DF3461300761CFE /* CTOpenURLConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA3F2DF3461300761CFE /* CTOpenURLConfirmView.swift */; };
 		6B68DA422DF348B600761CFE /* CustomButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA412DF348B600761CFE /* CustomButtonStyles.swift */; };
@@ -86,7 +86,7 @@
 		6B68DA352DF3231900761CFE /* CTCustomTemplatesProducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomTemplatesProducer.swift; sourceTree = "<group>"; };
 		6B68DA372DF323B000761CFE /* CTCustomInterstitialPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialPresenter.swift; sourceTree = "<group>"; };
 		6B68DA392DF32F4200761CFE /* CTCustomInterstitialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialViewModel.swift; sourceTree = "<group>"; };
-		6B68DA3B2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCopyToClipBoardPresenter.swift; sourceTree = "<group>"; };
+		6B68DA3B2DF3452300761CFE /* CTCopyToClipboardPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCopyToClipboardPresenter.swift; sourceTree = "<group>"; };
 		6B68DA3D2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmPresenter.swift; sourceTree = "<group>"; };
 		6B68DA3F2DF3461300761CFE /* CTOpenURLConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmView.swift; sourceTree = "<group>"; };
 		6B68DA412DF348B600761CFE /* CustomButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButtonStyles.swift; sourceTree = "<group>"; };
@@ -201,7 +201,7 @@
 			children = (
 				6B68DA3F2DF3461300761CFE /* CTOpenURLConfirmView.swift */,
 				6B68DA3D2DF345BB00761CFE /* CTOpenURLConfirmPresenter.swift */,
-				6B68DA3B2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift */,
+				6B68DA3B2DF3452300761CFE /* CTCopyToClipboardPresenter.swift */,
 				6B68DA322DF315E500761CFE /* CTCustomInterstitialView.swift */,
 				6B68DA352DF3231900761CFE /* CTCustomTemplatesProducer.swift */,
 				6B68DA372DF323B000761CFE /* CTCustomInterstitialPresenter.swift */,
@@ -397,7 +397,7 @@
 				489C60002A6C616F00440747 /* CTCallbackCoordinator.swift in Sources */,
 				48E0B3442A66FE5F009C4312 /* ContentView.swift in Sources */,
 				48E0B3422A66FE5F009C4312 /* SwiftUIStarterApp.swift in Sources */,
-				6B68DA3C2DF3452300761CFE /* CTCopyToClipBoardPresenter.swift in Sources */,
+				6B68DA3C2DF3452300761CFE /* CTCopyToClipboardPresenter.swift in Sources */,
 				6B53F5922DF7201D007BBEA3 /* CTBaseViewModel.swift in Sources */,
 				6B68DA382DF323B000761CFE /* CTCustomInterstitialPresenter.swift in Sources */,
 				489C5FFC2A6C5CCE00440747 /* CTWebViewRepresentable.swift in Sources */,
