@@ -1,8 +1,41 @@
 import UIKit
 
 extension UIViewController {
+    fileprivate static func topViewControllerInHierarchy(_ controller: UIViewController) -> UIViewController {
+        if let navController = controller as? UINavigationController {
+            if let visibleController = navController.visibleViewController {
+                return topViewControllerInHierarchy(visibleController)
+            }
+            return controller
+        }
+        
+        if let tabController = controller as? UITabBarController {
+            if let selectedController = tabController.selectedViewController {
+                return topViewControllerInHierarchy(selectedController)
+            }
+            return controller
+        }
+        
+        if let splitController = controller as? UISplitViewController {
+            if let detailController = splitController.viewControllers.last {
+                return topViewControllerInHierarchy(detailController)
+            }
+            return controller
+        }
+        
+        if let pageController = controller as? UIPageViewController {
+            if let currentController = pageController.viewControllers?.first {
+                return topViewControllerInHierarchy(currentController)
+            }
+            return controller
+        }
+        
+        return controller
+    }
+    
     fileprivate static func presentedController(_ controller: UIViewController) -> UIViewController {
-        var topController = controller
+        var topController = topViewControllerInHierarchy(controller)
+        
         while let presented = topController.presentedViewController {
             topController = presented
         }
