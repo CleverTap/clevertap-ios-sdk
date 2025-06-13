@@ -71,7 +71,7 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
             message: message ?? config.message,
             image: image,
             showCloseButton: showCloseButton,
-            autoCloseAfter: autoCloseAfter
+            autoCloseAfter: autoCloseAfter > 0 ? autoCloseAfter : config.autoCloseAfter
         )
     }
     
