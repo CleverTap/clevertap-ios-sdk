@@ -1,6 +1,5 @@
 import Foundation
 import CleverTapSDK
-import SwiftUI
 
 class CTCopyToClipboardPresenter: CTTemplatePresenter {
     
@@ -16,7 +15,7 @@ class CTCopyToClipboardPresenter: CTTemplatePresenter {
         context.dismissed()
     }
     
-    func onCloseClicked(context: CTTemplateContext) {
+    public func onCloseClicked(context: CTTemplateContext) {
         // NOOP: Non-visual function without actions
     }
 }
