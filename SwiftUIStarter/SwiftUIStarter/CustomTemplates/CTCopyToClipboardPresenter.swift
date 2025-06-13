@@ -1,5 +1,6 @@
 import Foundation
 import CleverTapSDK
+import UIKit
 
 class CTCopyToClipboardPresenter: CTTemplatePresenter {
     

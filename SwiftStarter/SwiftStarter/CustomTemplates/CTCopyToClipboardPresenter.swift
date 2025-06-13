@@ -1,6 +1,6 @@
 import Foundation
+import UIKit
 import CleverTapSDK
-import SwiftUI
 
 class CTCopyToClipboardPresenter: CTTemplatePresenter {
     public func onPresent(context: CTTemplateContext) {
