@@ -81,7 +81,7 @@ final class CTCustomTemplatesProducer: CTTemplateProducer {
         )
         builder.addArgument(
             CTCustomInterstitialTemplate.ArgumentNames.autoCloseAfter,
-            number: NSNumber(floatLiteral: CTCustomInterstitialTemplate.DefaultValues.autoCloseAfter)
+            number: NSNumber(value: CTCustomInterstitialTemplate.DefaultValues.autoCloseAfter)
         )
         
         builder.addFileArgument(CTCustomInterstitialTemplate.ArgumentNames.image)
