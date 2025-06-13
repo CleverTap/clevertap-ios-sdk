@@ -44,6 +44,7 @@
 		6B53F5A02DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F59A2DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift */; };
 		6B53F5A12DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F59B2DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift */; };
 		6B53F5A32DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A22DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift */; };
+		6B53F5A52DFC3653007BBEA3 /* CTBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */; };
 		6B68DA442DF34F4A00761CFE /* CTCustomInterstitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */; };
 		CC6E947AF5932FBFF7927364 /* Pods_SwiftTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E6707AE6E92C7ECEB9BBDA7 /* Pods_SwiftTvOS.framework */; };
 		D4BC5A2400463249E0AD5442 /* Pods_SwiftStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68BBFE42CB635CB313734F6A /* Pods_SwiftStarter.framework */; };
@@ -199,6 +200,7 @@
 		6B53F59A2DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialViewModel.swift; sourceTree = "<group>"; };
 		6B53F59B2DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmViewModel.swift; sourceTree = "<group>"; };
 		6B53F5A22DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmViewController.swift; sourceTree = "<group>"; };
+		6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTBaseViewModel.swift; sourceTree = "<group>"; };
 		6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialViewController.swift; sourceTree = "<group>"; };
 		6FD51932099E6E7F3C4742C4 /* Pods-SwiftStarter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarter.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter.debug.xcconfig"; sourceTree = "<group>"; };
 		770E918DC3CFE0CB70F1B195 /* Pods-SwiftStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterTests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarterTests/Pods-SwiftStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -443,6 +445,7 @@
 				6B53F59A2DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift */,
 				6B53F59B2DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift */,
 				6B53F5A22DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift */,
+				6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */,
 			);
 			path = CustomTemplates;
 			sourceTree = "<group>";
@@ -998,6 +1001,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B53F5A52DFC3653007BBEA3 /* CTBaseViewModel.swift in Sources */,
 				0740612B20C1509E00D8F4C9 /* ViewController.swift in Sources */,
 				07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */,
 				577917AC27034C9C00C676F4 /* CustomDomainViewController.swift in Sources */,
