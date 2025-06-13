@@ -11,7 +11,9 @@ class CTOpenURLConfirmViewController: UIViewController {
     
     var viewModel: CTOpenURLConfirmViewModel? {
         didSet {
-            setupBindings()
+            if view.superview != nil {
+                setupBindings()
+            }
         }
     }
     
@@ -113,9 +115,7 @@ class CTOpenURLConfirmViewController: UIViewController {
             containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             containerView.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 40),
             containerView.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -40),
-            containerView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.4),
-            // Ensure it doesn't get too small on smaller screens
-            containerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 300),
+            containerView.heightAnchor.constraint(greaterThanOrEqualTo: view.heightAnchor, multiplier: 0.4),
             
             // Title label
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
@@ -160,9 +160,7 @@ class CTOpenURLConfirmViewController: UIViewController {
         let accessibilityElements = [titleLabel, messageLabel, noButton, yesButton]
         containerView.accessibilityElements = accessibilityElements
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            UIAccessibility.post(notification: .screenChanged, argument: self.titleLabel)
-        }
+        UIAccessibility.post(notification: .screenChanged, argument: self.titleLabel)
     }
     
     @objc private func noButtonTapped() {

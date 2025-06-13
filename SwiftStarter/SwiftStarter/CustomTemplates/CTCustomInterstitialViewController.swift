@@ -133,9 +133,7 @@ class CustomInterstitialViewController: UIViewController {
             containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
-            containerView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.7),
-            // Ensure it doesn't get too small on smaller screens
-            containerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 400),
+            containerView.heightAnchor.constraint(greaterThanOrEqualTo: view.heightAnchor, multiplier: 0.7),
             
             // Title label
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
@@ -164,8 +162,8 @@ class CustomInterstitialViewController: UIViewController {
             // Message label
             messageLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 8),
             messageLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -8),
-            messageLabel.topAnchor.constraint(greaterThanOrEqualTo: scrollView.topAnchor, constant: 8),
-            messageLabel.bottomAnchor.constraint(lessThanOrEqualTo: scrollView.bottomAnchor, constant: -8),
+            messageLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 8),
+            messageLabel.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -8),
             messageLabel.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -16)
         ])
     }
@@ -230,9 +228,7 @@ class CustomInterstitialViewController: UIViewController {
         // Set accessibility elements for the container
         containerView.accessibilityElements = accessibilityElements
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            UIAccessibility.post(notification: .screenChanged, argument: self.titleLabel)
-        }
+        UIAccessibility.post(notification: .screenChanged, argument: self.titleLabel)
     }
     
     @objc private func closeButtonTapped() {
