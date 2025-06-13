@@ -86,7 +86,7 @@ final class CTCustomTemplatesProducer: CTTemplateProducer {
         
         builder.addFileArgument(CTCustomInterstitialTemplate.ArgumentNames.image)
         builder.addActionArgument(CTCustomInterstitialTemplate.ArgumentNames.openAction)
-        builder.setPresenter(CTCustomInterstitialPresenter.shared)
+        builder.setPresenter(CTCustomInterstitialPresenter())
         
         return builder.build()
     }
@@ -109,7 +109,7 @@ final class CTCustomTemplatesProducer: CTTemplateProducer {
             CTOpenURLConfirmTemplate.ArgumentNames.url,
             string: CTOpenURLConfirmTemplate.DefaultValues.url
         )
-        builder.setPresenter(CTOpenURLConfirmPresenter.shared)
+        builder.setPresenter(CTOpenURLConfirmPresenter())
         return builder.build()
     }
     

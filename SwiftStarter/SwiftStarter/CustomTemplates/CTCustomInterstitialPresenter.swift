@@ -21,14 +21,8 @@ struct CTInterstitialConfiguration {
 }
 
 class CTCustomInterstitialPresenter: CTTemplatePresenter {
-    
-    static let shared: CTCustomInterstitialPresenter = .init()
-    
     var viewController: UIViewController?
-    
     private var autoCloseTimer: Timer?
-    
-    private init() {}
     
     deinit {
         autoCloseTimer?.invalidate()
@@ -102,6 +96,8 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
             viewController.dismiss(animated: true) {
                 context.dismissed()
             }
+        } else {
+            context.dismissed()
         }
     }
     
@@ -110,26 +106,24 @@ class CTCustomInterstitialPresenter: CTTemplatePresenter {
         confirmAction: (() -> Void)?,
         cancelAction: (() -> Void)?
     ) {
-        let interstitialVC = CustomInterstitialViewController()
-                let viewModel = CTCustomInterstitialViewModel()
-                
-                viewModel.configure(with: configuration)
-                viewModel.confirmAction = confirmAction
-                viewModel.cancelAction = cancelAction
-                
-                interstitialVC.viewModel = viewModel
-                interstitialVC.modalPresentationStyle = .overFullScreen
-                interstitialVC.modalTransitionStyle = .crossDissolve
-        viewController = interstitialVC
-        CTCustomInterstitialPresenter.topViewController?.present(interstitialVC, animated: true)
-    }
-    
-    class var topViewController: UIViewController? {
-        var topController = UIApplication.shared.keyWindow!.rootViewController
-        while (topController?.presentedViewController != nil) {
-            topController = topController?.presentedViewController;
+        guard let topViewController = UIViewController.topMostViewController else {
+            print("\(self): Cannot resolve the top UIViewController")
+            cancelAction?()
+            return
         }
-        return topController
+        
+        let viewModel = CTCustomInterstitialViewModel()
+        viewModel.configure(with: configuration)
+        viewModel.confirmAction = confirmAction
+        viewModel.cancelAction = cancelAction
+        
+        let interstitialVC = CustomInterstitialViewController()
+        interstitialVC.viewModel = viewModel
+        interstitialVC.modalPresentationStyle = .overFullScreen
+        interstitialVC.modalTransitionStyle = .crossDissolve
+        
+        viewController = interstitialVC
+        topViewController.present(interstitialVC, animated: true)
     }
 }
 

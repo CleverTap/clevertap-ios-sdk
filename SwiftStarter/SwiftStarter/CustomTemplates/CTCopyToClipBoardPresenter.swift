@@ -3,7 +3,6 @@ import CleverTapSDK
 import SwiftUI
 
 class CTCopyToClipBoardPresenter: CTTemplatePresenter {
-    
     public func onPresent(context: CTTemplateContext) {
         guard let text = context.string(name: CTCopyToClipboardTemplate.ArgumentNames.text),
                 !text.isEmpty else {

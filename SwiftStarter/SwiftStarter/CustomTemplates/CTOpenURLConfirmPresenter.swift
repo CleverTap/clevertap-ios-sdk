@@ -3,12 +3,7 @@ import CleverTapSDK
 import UIKit
 
 class CTOpenURLConfirmPresenter: CTTemplatePresenter {
-    
-    static let shared: CTOpenURLConfirmPresenter = .init()
-    
     var viewController: UIViewController?
-    
-    private init() {}
     
     func onPresent(context: CTTemplateContext) {
         guard let urlString = context.string(name: CTOpenURLConfirmTemplate.ArgumentNames.url),
@@ -56,6 +51,12 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
     }
         
     func show(url: String, confirmAction: (() -> Void)?, cancelAction: (() -> Void)?) {
+        guard let topViewController = UIViewController.topMostViewController else {
+            print("\(self): Cannot resolve the top UIViewController")
+            cancelAction?()
+            return
+        }
+        
         let viewModel = CTOpenURLConfirmViewModel()
         viewModel.url = url
         viewModel.confirmAction = confirmAction
@@ -66,7 +67,8 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
         openURLVC.modalPresentationStyle = .overFullScreen
         openURLVC.modalTransitionStyle = .crossDissolve
         viewController = openURLVC
-        CTCustomInterstitialPresenter.topViewController?.present(openURLVC, animated: true)
+        
+        topViewController.present(openURLVC, animated: true)
     }
     
     func onCloseClicked(context: CTTemplateContext) {
@@ -78,15 +80,9 @@ class CTOpenURLConfirmPresenter: CTTemplatePresenter {
             viewController.dismiss(animated: true) {
                 context.dismissed()
             }
+        } else {
+            context.dismissed()
         }
-    }
-    
-    class var topViewController: UIViewController? {
-        var topController = UIApplication.shared.keyWindow!.rootViewController
-        while (topController?.presentedViewController != nil) {
-            topController = topController?.presentedViewController;
-        }
-        return topController
     }
 }
 
