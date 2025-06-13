@@ -50,17 +50,17 @@ enum CTOpenURLConfirmTemplate {
 
 final class CTCustomTemplatesProducer: CTTemplateProducer {
     
-    static var templates: [String: CTCustomTemplate] {
-            let interstitial = buildCustomInterstitialTemplate()
-            let copyFunction = buildCopyToClipboardTemplate()
-            let urlConfirm = buildOpenURLConfirmTemplate()
-            
-            return [
-                interstitial.name: interstitial,
-                copyFunction.name: copyFunction,
-                urlConfirm.name: urlConfirm
-            ]
-    }
+    static let templates: [String: CTCustomTemplate] = {
+        let interstitial = buildCustomInterstitialTemplate()
+        let copyFunction = buildCopyToClipboardTemplate()
+        let urlConfirm = buildOpenURLConfirmTemplate()
+        
+        return [
+            interstitial.name: interstitial,
+            copyFunction.name: copyFunction,
+            urlConfirm.name: urlConfirm
+        ]
+    }()
     
     // MARK: - Template Builders
     private static func buildCustomInterstitialTemplate() -> CTCustomTemplate {
