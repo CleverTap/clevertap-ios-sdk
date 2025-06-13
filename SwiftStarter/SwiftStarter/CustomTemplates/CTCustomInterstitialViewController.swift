@@ -163,8 +163,7 @@ class CustomInterstitialViewController: UIViewController {
             messageLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 8),
             messageLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -8),
             messageLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 8),
-            messageLabel.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -8),
-            messageLabel.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -16)
+            messageLabel.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -8)
         ])
     }
     
