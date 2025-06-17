@@ -22,6 +22,11 @@ static const NSUInteger kCONCURRENCY_COUNT = 5;
 // Reasonable timeout for all requests to complete on user switch
 static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
 
+// Limit concurrent content fetch requests
+static const NSUInteger kCONCURRENCY_COUNT = 5;
+// Reasonable timeout for all requests to complete on user switch
+static const NSTimeInterval kDEFAULT_USER_SWITCH_TIMEOUT = 120.0; // 2 minutes
+
 @interface CTContentFetchManager()
 
 @property (nonatomic, strong) CTRequestSender *requestSender;
