@@ -9,11 +9,13 @@
 #import "CTContentFetchManager.h"
 #import "CTPreferences.h"
 #import "CTRequestFactory.h"
+#import "CTRequestSender.h"
 #import "CTRequest.h"
 #import "CleverTap.h"
 #import "CTConstants.h"
 #import "CTDispatchQueueManager.h"
 #import "CleverTapBuildInfo.h"
+#import "CleverTapInstanceConfig.h"
 
 // Limit concurrent content fetch requests
 static const NSUInteger kCONCURRENCY_COUNT = 5;

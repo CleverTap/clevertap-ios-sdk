@@ -1,5 +1,5 @@
 //
-//  ContentFetchManager.h
+//  CTContentFetchManager.h
 //  CleverTapSDK
 //
 //  Created by Nikola Zagorchev on 19.05.25.
@@ -7,8 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CleverTapInstanceConfig.h"
-#import "CTRequestSender.h"
 #import "CTDomainFactory.h"
 #import "CTContentFetchManagerDelegate.h"
 
