@@ -34,6 +34,10 @@
 #import "CTFileDownloader.h"
 #import "CTCryptMigrator.h"
 
+#if !defined(CLEVERTAP_TVOS)
+#import "CTContentFetchManager.h"
+#endif
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppFCManager.h"
 #import "CTInAppNotification.h"
@@ -181,6 +185,11 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @interface CleverTap () <CTDomainResolverDelegate> {}
 @end
 
+#if !defined(CLEVERTAP_TVOS)
+@interface CleverTap () <CTContentFetchManagerDelegate> {}
+@end
+#endif
+
 #import <UserNotifications/UserNotifications.h>
 
 @interface CleverTap () <UIApplicationDelegate> {
@@ -230,6 +239,10 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong, readwrite) CTMultiDelegateManager *delegateManager;
 
 @property (nonatomic, strong, readwrite) CTFileDownloader *fileDownloader;
+
+#if !defined(CLEVERTAP_TVOS)
+@property (nonatomic, strong) CTContentFetchManager *contentFetchManager;
+#endif
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (atomic, weak) id <CleverTapPushPermissionDelegate> pushPermissionDelegate;
@@ -463,27 +476,43 @@ static BOOL sharedInstanceErrorLogged;
             initialProfileValues[CLTAP_SYS_TZ] = _deviceInfo.timeZone;
         }
         
-        self.dispatchQueueManager = [[CTDispatchQueueManager alloc]initWithConfig:_config];
+        self.dispatchQueueManager = [[CTDispatchQueueManager alloc] initWithConfig:_config];
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
-        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo: _deviceInfo];
+        _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo:_deviceInfo];
         
-        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo: _deviceInfo dispatchQueueManager:_dispatchQueueManager];
+        _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo:_deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
         CleverTapEventDetail *eventDetails = [self getUserEventLog:CLTAP_APP_LAUNCHED_EVENT];
         _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
-        self.validationResultStack = [[CTValidationResultStack alloc]initWithConfig: _config];
+        self.validationResultStack = [[CTValidationResultStack alloc] initWithConfig:_config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
         
         // save config to defaults
-        [CTPreferences archiveObject:config forFileName: [CleverTapInstanceConfig dataArchiveFileNameWithAccountId:config.accountId] config:config];
+        [CTPreferences archiveObject:config
+                         forFileName:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:_config.accountId]
+                              config:_config];
         
         [self _setDeviceNetworkInfoReportingFromStorage];
         [self _setCurrentUserOptOutStateFromStorage];
         [self initNetworking];
         [self inflateQueuesAsync];
         [self addObservers];
+        
+#if !defined(CLEVERTAP_TVOS)
+        if (self.requestSender && self.domainFactory && self.dispatchQueueManager) {
+            self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
+                                                                       requestSender:self.requestSender
+                                                                dispatchQueueManager:self.dispatchQueueManager
+                                                                    domainOperations:self.domainFactory
+                                                                            delegate:self];
+            
+            [self.delegateManager addSwitchUserDelegate:self.contentFetchManager];
+        } else {
+            CleverTapLogDebug(_config.logLevel, @"%@: Failed to initialize contentFetchManager due to missing dependencies", self);
+        }
+#endif
         
         self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
@@ -1777,6 +1806,44 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
+- (void)addEventMeta:(CleverTapEventType)eventType mutableEvent:(NSMutableDictionary *)mutableEvent {
+    NSString *type;
+    if (eventType == CleverTapEventTypePage) {
+        type = @"page";
+    } else if (eventType == CleverTapEventTypePing) {
+        type = @"ping";
+    } else if (eventType == CleverTapEventTypeProfile) {
+        type = @"profile";
+    } else if (eventType == CleverTapEventTypeData) {
+        type = @"data";
+    } else if (eventType == CleverTapEventTypeNotificationViewed) {
+        type = @"event";
+    } else {
+        type = @"event";
+    }
+    
+    if ([type isEqualToString:@"event"]) {
+        NSString *bundleIdentifier = _deviceInfo.bundleId;
+        if (bundleIdentifier) {
+            mutableEvent[@"pai"] = bundleIdentifier;
+        }
+    }
+    mutableEvent[@"type"] = type;
+    mutableEvent[@"ep"] = @((int) [[NSDate date] timeIntervalSince1970]);
+    mutableEvent[@"s"] = @(self.sessionManager.sessionId);
+    int screenCount = self.sessionManager.screenCount == 0 ? 1 : self.sessionManager.screenCount;
+    mutableEvent[@"pg"] = @(screenCount);
+    mutableEvent[@"lsl"] = @(self.sessionManager.lastSessionLengthSeconds);
+    mutableEvent[@"f"] = @(self.sessionManager.firstSession);
+    mutableEvent[@"n"] = self.currentViewControllerName ? self.currentViewControllerName : @"_bg";
+    
+    if (eventType == CleverTapEventTypePing && _geofenceLocation) {
+        mutableEvent[@"gf"] = @(_geofenceLocation);
+        mutableEvent[@"gfSDKVersion"] = _gfSDKVersion;
+        _geofenceLocation = NO;
+    }
+}
+
 - (void)processEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
     @try {
         // just belt and suspenders
@@ -1801,42 +1868,7 @@ static BOOL sharedInstanceErrorLogged;
             event = [self convertDataToPrimitive:event];
         }
         
-        NSString *type;
-        if (eventType == CleverTapEventTypePage) {
-            type = @"page";
-        } else if (eventType == CleverTapEventTypePing) {
-            type = @"ping";
-        } else if (eventType == CleverTapEventTypeProfile) {
-            type = @"profile";
-        } else if (eventType == CleverTapEventTypeData) {
-            type = @"data";
-        } else if (eventType == CleverTapEventTypeNotificationViewed) {
-            type = @"event";
-            NSString *bundleIdentifier = _deviceInfo.bundleId;
-            if (bundleIdentifier) {
-                mutableEvent[@"pai"] = bundleIdentifier;
-            }
-        } else {
-            type = @"event";
-            NSString *bundleIdentifier = _deviceInfo.bundleId;
-            if (bundleIdentifier) {
-                mutableEvent[@"pai"] = bundleIdentifier;
-            }
-        }
-        mutableEvent[@"type"] = type;
-        mutableEvent[@"ep"] = @((int) [[NSDate date] timeIntervalSince1970]);
-        mutableEvent[@"s"] = @(self.sessionManager.sessionId);
-        int screenCount = self.sessionManager.screenCount == 0 ? 1 : self.sessionManager.screenCount;
-        mutableEvent[@"pg"] = @(screenCount);
-        mutableEvent[@"lsl"] = @(self.sessionManager.lastSessionLengthSeconds);
-        mutableEvent[@"f"] = @(self.sessionManager.firstSession);
-        mutableEvent[@"n"] = self.currentViewControllerName ? self.currentViewControllerName : @"_bg";
-        
-        if (eventType == CleverTapEventTypePing && _geofenceLocation) {
-            mutableEvent[@"gf"] = @(_geofenceLocation);
-            mutableEvent[@"gfSDKVersion"] = _gfSDKVersion;
-            _geofenceLocation = NO;
-        }
+        [self addEventMeta:eventType mutableEvent:mutableEvent];
         
         // Report any pending validation error
         CTValidationResult *vr = [self.validationResultStack popValidationResult];
@@ -2186,6 +2218,10 @@ static BOOL sharedInstanceErrorLogged;
                 [self handleInAppResponse:jsonResp];
 #endif
                 
+#if !defined(CLEVERTAP_TVOS)
+                [self.contentFetchManager handleContentFetch:jsonResp];
+#endif
+                
 #if !CLEVERTAP_NO_INBOX_SUPPORT
                 NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
                 if (inboxJSON) {
@@ -2473,8 +2509,7 @@ static BOOL sharedInstanceErrorLogged;
     [self _asyncSwitchUser:properties withCachedGuid:cachedGUID andCleverTapID:cleverTapID forAction:kOnUserLoginAction];
 }
 
-- (void) _asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {
-    
+- (void)_asyncSwitchUser:(NSDictionary *)properties withCachedGuid:(NSString *)cachedGUID andCleverTapID:(NSString *)cleverTapID forAction:(NSString*)action  {
     [self.dispatchQueueManager runSerialAsync:^{
         CleverTapLogDebug(self.config.logLevel, @"%@: async switching user with properties:  %@", action, properties);
         
@@ -2486,6 +2521,8 @@ static BOOL sharedInstanceErrorLogged;
         
         // clear any events in the queue
         [self clearQueue];
+        
+        [[self delegateManager] notifyDelegatesDeviceIdWillChange];
         
         // clear ARP and other context for the old user
         [self clearUserContext];
@@ -4445,5 +4482,27 @@ static BOOL sharedInstanceErrorLogged;
 - (CTVar *)defineFileVar:(NSString *)name {
     return [self.variables define:name with:nil kind:CT_KIND_FILE];
 }
+
+#pragma mark - CTContentFetchManagerDelegate
+
+#if !defined(CLEVERTAP_TVOS)
+
+- (NSDictionary *)contentFetchManagerGetBatchHeader:(CTContentFetchManager *)manager {
+    return [self batchHeaderForQueue:CTQueueTypeUndefined];
+}
+
+- (void)contentFetchManager:(CTContentFetchManager *)manager didReceiveResponse:(NSData *)data {
+    [self parseResponse:data];
+}
+
+- (void)contentFetchManager:(CTContentFetchManager *)manager addMetadataToEvent:(NSMutableDictionary *)event ofType:(CleverTapEventType)eventType {
+    [self addEventMeta:eventType mutableEvent:event];
+}
+
+- (void)contentFetchManager:(CTContentFetchManager *)manager didFailWithError:(NSError *)error {
+    CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch failed with error: %@", self, error);
+}
+
+#endif
 
 @end

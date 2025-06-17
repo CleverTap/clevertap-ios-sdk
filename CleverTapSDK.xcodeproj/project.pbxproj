@@ -465,6 +465,9 @@
 		6BF5A59E2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A59D2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m */; };
 		6BF5A5A12AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF5A5A02AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h */; };
 		6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */; };
+		6BFC61AB2DDB6A5A00022EFF /* CTContentFetchManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */; };
+		6BFC61AC2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */; };
+		6BFC61B02DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */; };
 		7C87D796B6B66FEA0125244A /* Pods_shared_CleverTapSDKTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E760A38DDF7A8054BC91F93 /* Pods_shared_CleverTapSDKTests.framework */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -1042,6 +1045,9 @@
 		6BF5A59D2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CleverTap+InAppsResponseHandler.m"; sourceTree = "<group>"; };
 		6BF5A5A02AD4313900CDED20 /* CleverTap+InAppsResponseHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppsResponseHandler.h"; sourceTree = "<group>"; };
 		6BF5A5A32AD45B4D00CDED20 /* CTInAppFCManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManagerTest.m; sourceTree = "<group>"; };
+		6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManager.h; sourceTree = "<group>"; };
+		6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTContentFetchManager.m; sourceTree = "<group>"; };
+		6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManagerDelegate.h; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
@@ -1967,6 +1973,9 @@
 				6BB778C92BED21CE00A41628 /* CTNotificationAction.h */,
 				6BB778CA2BED21CE00A41628 /* CTNotificationAction.m */,
 				6BB778D52BFD26DF00A41628 /* CTInAppNotificationDisplayDelegate.h */,
+				6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */,
+				6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */,
+				6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -2182,6 +2191,7 @@
 				6A775C3329BE78C7007790E0 /* CTVariables.h in Headers */,
 				0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */,
 				6BF5A59B2AD0318A00CDED20 /* CTSwitchUserDelegate.h in Headers */,
+				6BFC61B02DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */,
 				D0BD75A02417690E0006EE55 /* CleverTapProductConfigPrivate.h in Headers */,
 				D0D4C9EB2414D1C50029477E /* CTFeatureFlagsController.h in Headers */,
 				071EB4F8217F6427008F0FAB /* CTInterstitialImageViewController.h in Headers */,
@@ -2241,6 +2251,7 @@
 				071EB50C217F6427008F0FAB /* CTCoverImageViewController.h in Headers */,
 				4E8B81782AD2CB4E00714BB4 /* CTPushPrimerManager.h in Headers */,
 				D0213D4B207D905800FE5740 /* CleverTapInAppNotificationDelegate.h in Headers */,
+				6BFC61AB2DDB6A5A00022EFF /* CTContentFetchManager.h in Headers */,
 				6A6591662AC70D07005FDE57 /* CTAttachToBatchHeaderDelegate.h in Headers */,
 				072F9E4221B14ECC00BC6313 /* CTInboxMessageActionView.h in Headers */,
 				D0BD75AE241769E40006EE55 /* CleverTap+ProductConfig.h in Headers */,
@@ -2769,6 +2780,7 @@
 				D01A0898207ED98300423D6F /* CTPlistInfo.m in Sources */,
 				071EB4D2217F6427008F0FAB /* CTInterstitialImageViewController.m in Sources */,
 				D079742A21FE2F2300773602 /* CTVideoThumbnailGenerator.m in Sources */,
+				6BFC61AC2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */,
 				071EB4C9217F6427008F0FAB /* CTHeaderViewController.m in Sources */,
 				6A3EBD3B2AA0713100CE97D4 /* CTTriggerValue.m in Sources */,
 				6BB778CC2BED21CE00A41628 /* CTNotificationAction.m in Sources */,

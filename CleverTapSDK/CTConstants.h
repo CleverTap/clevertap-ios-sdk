@@ -63,6 +63,7 @@ extern NSString *const kSessionId;
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_CHARGED_EVENT @"Charged"
+#define CLTAP_CONTENT_FETCH_EVENT @"content_fetch"
 #define CLTAP_PROFILE @"profile"
 #define CLTAP_USER_ATTRIBUTE_CHANGE @"_change"
 #define CLTAP_KEY_NEW_VALUE @"newValue"
@@ -76,6 +77,7 @@ extern NSString *const kSessionId;
 #define CLTAP_PUSH_DELAY_SECONDS 1
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
+#define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
@@ -96,7 +98,7 @@ extern NSString *const kSessionId;
 #define CLTAP_DATE_PREFIX @"$D_"
 #define CLTAP_CachedGUIDSKey @"CachedGUIDS"
 
-// profile commands
+#pragma mark Profile Commands
 static NSString *const kCLTAP_COMMAND_SET = @"$set";
 static NSString *const kCLTAP_COMMAND_ADD = @"$add";
 static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
