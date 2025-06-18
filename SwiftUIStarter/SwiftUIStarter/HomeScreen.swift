@@ -13,7 +13,7 @@ struct HomeScreen: View {
                        "Record User Event with Properties",
                        "Record User Charged Event",
                        "Record User Event to an Additional Instance",
-                       "Show App Inbox",
+                       "Open Custom Inbox Screen",
                        "Analytics in a WebView",
                        "Increment User Profile Property",
                        "Decrement User Profile Property",
@@ -33,9 +33,9 @@ struct HomeScreen: View {
                                 buttonAction(index: index)
                             }
                             Spacer()
-                            if (eventList[index] == "Show App Inbox") {
+                            if (eventList[index] == "Open Custom Inbox Screen") {
                                 // Show App Inbox controller
-                                NavigationLink(destination: CTAppInboxRepresentable().recordScreenView(screenName: "CT App Inbox")) {
+                                NavigationLink(destination: InboxView().recordScreenView(screenName: "CT App Inbox")) {
                                 }
                             } else if (eventList[index] == "Analytics in a WebView") {
                                 // Show Web View
