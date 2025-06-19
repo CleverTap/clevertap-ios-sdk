@@ -35,7 +35,7 @@ struct HomeScreen: View {
                             Spacer()
                             if (eventList[index] == "Open Custom Inbox Screen") {
                                 // Show App Inbox controller
-                                NavigationLink(destination: InboxView().recordScreenView(screenName: "CT App Inbox")) {
+                                NavigationLink(destination: InboxView()) {
                                 }
                             } else if (eventList[index] == "Analytics in a WebView") {
                                 // Show Web View

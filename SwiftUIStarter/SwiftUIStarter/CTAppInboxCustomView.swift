@@ -11,12 +11,16 @@ struct InboxMessage: Identifiable {
 struct InboxView: View {
     @State private var messages: [InboxMessage] = []
     @StateObject private var viewModel = InboxViewModel()
+    @State private var showInboxModal = false
     
     var body: some View {
         NavigationView {
             VStack {
-                NavigationLink(destination: CTAppInboxRepresentable()) {
+                Button(action: {
+                    showInboxModal = true
+                }) {
                     Text("Show App Inbox")
+                        .foregroundColor(.blue)
                 }
                 List {
                     ForEach(viewModel.messages) { msg in
@@ -28,7 +32,7 @@ struct InboxView: View {
                             HStack(spacing: 20) {
                                 Button(action: {
                                     print("Click tapped for message: \(msg.id)")
-                                     CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: msg.id)
+                                    CleverTap.sharedInstance()?.recordInboxNotificationClickedEvent(forID: msg.id)
                                 }) {
                                     Text("Click")
                                 }
@@ -36,7 +40,7 @@ struct InboxView: View {
                                 
                                 Button(action: {
                                     print("View tapped for message: \(msg.id)")
-                                     CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: msg.id)
+                                    CleverTap.sharedInstance()?.recordInboxNotificationViewedEvent(forID: msg.id)
                                 }) {
                                     Text("View")
                                 }
@@ -66,6 +70,10 @@ struct InboxView: View {
                         .padding(.vertical, 6)
                     }
                 }
+            }
+            .sheet(isPresented: $showInboxModal) {
+                CTAppInboxRepresentable()
+                    .recordScreenView(screenName: "CT App Inbox")
             }
             .onAppear {
                 viewModel.loadInboxMessages()
