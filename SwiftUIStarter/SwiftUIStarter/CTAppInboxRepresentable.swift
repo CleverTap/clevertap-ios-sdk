@@ -6,6 +6,7 @@ struct CTAppInboxRepresentable: UIViewControllerRepresentable {
         let style = CleverTapInboxStyleConfig()
         style.title = "App Inbox"
         style.navigationTintColor = .black
+        style.navigationBarTintColor = .white
         let inboxVC: CleverTapInboxViewController = (CleverTap.sharedInstance()?.newInboxViewController(with: style, andDelegate: nil)!)!
         return inboxVC
     }

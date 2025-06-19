@@ -13,7 +13,6 @@ class CustomAppInboxScreen: UIViewController, CleverTapInboxViewControllerDelega
         registerAppInbox()
         initializeAppInbox()
         tblView.register(UINib(nibName: "AppInboxTableViewCell", bundle: nil), forCellReuseIdentifier: "AppInboxTableViewCell")
-        
         tblView.tableFooterView = UIView()
     }
     
@@ -72,22 +71,22 @@ extension CustomAppInboxScreen: UITableViewDataSource, UITableViewDelegate {
             cell.configure()
             cell.onDeleteTapped = { [weak self] inboxMessage in
                 guard let self = self else { return }
-                self.updateAppInboxMessages(deletedMessage: inboxMessage)
+                self.deleteRow(message: inboxMessage)
             }
             cell.onMarkAsRead = { [weak self] inboxMessage in
                 guard let self = self else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.updateAppInboxMessages(message: inboxMessage)
+                    self.reloadRow(message: inboxMessage)
                 }
             }
             return cell
         }
     }
     
-    func updateAppInboxMessages(deletedMessage: CleverTapInboxMessage?) {
+    func deleteRow(message: CleverTapInboxMessage?) {
         for (index, item) in eventList.enumerated() {
             switch item.type {
-            case .inbox(let msg) where msg?.messageId == deletedMessage?.messageId:
+            case .inbox(let msg) where msg?.messageId == message?.messageId:
                 eventList.remove(at: index)
                 tblView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
                 return
@@ -97,7 +96,7 @@ extension CustomAppInboxScreen: UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    func updateAppInboxMessages(message: CleverTapInboxMessage?) {
+    func reloadRow(message: CleverTapInboxMessage?) {
         for (index, item) in eventList.enumerated() {
             switch item.type {
             case .inbox(let msg) where msg?.messageId == message?.messageId:

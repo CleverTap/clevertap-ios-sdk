@@ -10,22 +10,6 @@ import Combine
 
 class InboxViewModel: ObservableObject {
     @Published var messages: [InboxMessage] = []
-    
-    func markAsRead(at index: Int) {
-        messages[index].isRead = true
-    }
-    
-    func markAsRead(_ id: String) {
-        if let index = messages.firstIndex(where: { $0.id == id }) {
-            messages[index].isRead = true
-        }
-    }
-
-    func deleteMessage(_ id: String) {
-        if let index = messages.firstIndex(where: { $0.id == id }) {
-            messages.remove(at: index)
-        }
-    }
 
     func loadInboxMessages() {
         guard let ctMessages = CleverTap.sharedInstance()?.getAllInboxMessages() else { return }
@@ -40,6 +24,18 @@ class InboxViewModel: ObservableObject {
                 message: ctMsg.content?.first?.message ?? "No Message",
                 isRead: ctMsg.isRead
             )
+        }
+    }
+    
+    func markAsRead(_ id: String) {
+        if let index = messages.firstIndex(where: { $0.id == id }) {
+            messages[index].isRead = true
+        }
+    }
+
+    func deleteMessage(_ id: String) {
+        if let index = messages.firstIndex(where: { $0.id == id }) {
+            messages.remove(at: index)
         }
     }
 }
