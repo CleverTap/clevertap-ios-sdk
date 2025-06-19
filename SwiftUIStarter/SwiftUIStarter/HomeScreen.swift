@@ -7,6 +7,8 @@ var cleverTapAdditionalInstance: CleverTap = {
     }()
 
 struct HomeScreen: View {
+    @State private var showInboxModal = false
+    
     let eventList = [  "Record User Profile",
                        "Record User Profile with Properties",
                        "Record User Event called Product Viewed",
@@ -29,22 +31,27 @@ struct HomeScreen: View {
                 List {
                     ForEach(0 ..< eventList.count, id: \.self) { index in
                         HStack {
-                            Button("\(eventList[index])") {
-                                buttonAction(index: index)
-                            }
-                            Spacer()
-                            if (eventList[index] == "Show App Inbox") {
-                                // Show App Inbox controller
-                                NavigationLink(destination: CTAppInboxRepresentable().recordScreenView(screenName: "CT App Inbox")) {
-                                }
-                            } else if (eventList[index] == "Analytics in a WebView") {
+                            if (eventList[index] == "Analytics in a WebView") {
                                 // Show Web View
                                 NavigationLink(destination: CTWebViewRepresentable().recordScreenView(screenName: "CT Web View")) {
+                                    Text(eventList[index])
+                                }
+                            } else {
+                                Button("\(eventList[index])") {
+                                    buttonAction(index: index)
+                                    if eventList[index] == "Show App Inbox" {
+                                        showInboxModal = true
+                                    }
                                 }
                             }
+                            Spacer()
                         }
                     }
                 }
+            }
+            .sheet(isPresented: $showInboxModal) {
+                CTAppInboxRepresentable()
+                    .recordScreenView(screenName: "CT App Inbox")
             }
             .recordScreenView(screenName: "Home Screen")
         }
