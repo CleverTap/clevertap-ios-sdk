@@ -9,7 +9,6 @@ struct InboxMessage: Identifiable {
 }
 
 struct InboxView: View {
-    @State private var messages: [InboxMessage] = []
     @StateObject private var viewModel = InboxViewModel()
     @State private var showInboxModal = false
     
