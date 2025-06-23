@@ -69,6 +69,11 @@
         return;
     }
     
+    if (self.isUserSwitching) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will not be handled due to user switch", self);
+        return;
+    }
+    
     // Parse SS App Launched notifications
     NSArray *inAppNotifsAppLaunched = jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
     if (inAppNotifsAppLaunched) {
