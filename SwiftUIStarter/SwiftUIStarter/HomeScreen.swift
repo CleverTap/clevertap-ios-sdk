@@ -17,7 +17,8 @@ struct HomeScreen: View {
                        "Analytics in a WebView",
                        "Increment User Profile Property",
                        "Decrement User Profile Property",
-                       "Local Half Interstitial Push Primer"
+                       "Local Half Interstitial Push Primer",
+                       "Native Display"
                     ]
     
     var body: some View {
@@ -40,6 +41,10 @@ struct HomeScreen: View {
                             } else if (eventList[index] == "Analytics in a WebView") {
                                 // Show Web View
                                 NavigationLink(destination: CTWebViewRepresentable().recordScreenView(screenName: "CT Web View")) {
+                                }
+                            } else if (eventList[index] == "Native Display") {
+                                // Show Web View
+                                NavigationLink(destination: NativeDisplayUIView().recordScreenView(screenName: "Native Display View")) {
                                 }
                             }
                         }
