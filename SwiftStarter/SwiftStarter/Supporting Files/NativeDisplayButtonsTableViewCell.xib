@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AppInboxTableViewCell" customModule="SwiftStarter" customModuleProvider="target"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="NativeDisplayButtonsTableCell" rowHeight="117" id="ffG-Dd-7OQ" customClass="NativeDisplayButtonsTableViewCell" customModule="SwiftStarter" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="403" height="117"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ffG-Dd-7OQ" id="6Tz-Nc-afZ">
+                <rect key="frame" x="0.0" y="0.0" width="403" height="117"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Nbd-eb-IiI">
+                        <rect key="frame" x="10" y="0.0" width="383" height="117"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WHe-Fr-YFA">
+                                <rect key="frame" x="0.0" y="0.0" width="383" height="34.5"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dqr-3s-03u">
+                                        <rect key="frame" x="0.0" y="0.0" width="191.5" height="34.5"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="ND_Simple"/>
+                                        <connections>
+                                            <action selector="simpleEventAction:" destination="ffG-Dd-7OQ" eventType="touchUpInside" id="Rce-W6-OVc"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ld-Id-Eic">
+                                        <rect key="frame" x="191.5" y="0.0" width="191.5" height="34.5"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="ND_Carousel"/>
+                                        <connections>
+                                            <action selector="carouselEventAction:" destination="ffG-Dd-7OQ" eventType="touchUpInside" id="4AM-0n-BuJ"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aSP-yy-yns">
+                                <rect key="frame" x="0.0" y="44.5" width="383" height="34"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Display unit ID" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i1U-GD-zqP">
+                                        <rect key="frame" x="0.0" y="0.0" width="296" height="34"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nta-It-UwY">
+                                        <rect key="frame" x="296" y="0.0" width="87" height="34"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Get Unit"/>
+                                        <connections>
+                                            <action selector="getUnitAction:" destination="ffG-Dd-7OQ" eventType="touchUpInside" id="Yok-F3-0ok"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MDW-3R-z2H">
+                                <rect key="frame" x="0.0" y="88.5" width="383" height="28.5"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Get all display units"/>
+                                <connections>
+                                    <action selector="getAllDisplayUnitsAction:" destination="ffG-Dd-7OQ" eventType="touchUpInside" id="GT3-hX-QdN"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                    </stackView>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="Nbd-eb-IiI" secondAttribute="bottom" id="HLK-4o-IrH"/>
+                    <constraint firstItem="Nbd-eb-IiI" firstAttribute="leading" secondItem="6Tz-Nc-afZ" secondAttribute="leading" constant="10" id="HNw-N8-7HX"/>
+                    <constraint firstItem="Nbd-eb-IiI" firstAttribute="top" secondItem="6Tz-Nc-afZ" secondAttribute="top" id="MtF-9S-5yF"/>
+                    <constraint firstAttribute="trailing" secondItem="Nbd-eb-IiI" secondAttribute="trailing" constant="10" id="cDJ-0a-CVg"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="displayUnitText" destination="i1U-GD-zqP" id="lrG-dR-gmk"/>
+            </connections>
+            <point key="canvasLocation" x="2.1739130434782612" y="16.40625"/>
+        </tableViewCell>
+    </objects>
+</document>
