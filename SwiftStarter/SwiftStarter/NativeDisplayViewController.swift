@@ -2,7 +2,6 @@
 //  NativeDisplayViewController.swift
 //  SwiftStarter
 //
-//  Created by Sonal Kachare on 20/06/25.
 //  Copyright © 2025 CleverTap. All rights reserved.
 //
 

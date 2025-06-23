@@ -2,7 +2,7 @@
 //  NativeDisplayUIView.swift
 //  SwiftUIStarter
 //
-//  Created by CleverTap on 23/06/25.
+//  Copyright © 2025 CleverTap. All rights reserved.
 //
 
 import SwiftUI
