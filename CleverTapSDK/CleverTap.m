@@ -2334,7 +2334,7 @@ static BOOL sharedInstanceErrorLogged;
 #if !defined(CLEVERTAP_TVOS)
                 if (!self.isUserSwitching) {
                     [self.contentFetchManager handleContentFetch:jsonResp];
-                } else {
+                } else if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response will not be handled due to user switch", self);
                 }
 #endif
