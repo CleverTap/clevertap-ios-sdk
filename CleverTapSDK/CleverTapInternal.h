@@ -39,7 +39,7 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 
 @property (nonatomic, strong, readonly) CTFileDownloader * _Nullable fileDownloader;
 
-@property (nonatomic, assign, readonly) BOOL isUserSwitching;
+@property (atomic, assign, readonly) BOOL isUserSwitching;
 
 + (NSMutableDictionary<NSString *, CleverTap *> * _Nullable)getInstances;
 
