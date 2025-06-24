@@ -123,12 +123,14 @@ static const CGFloat kSpacingConstant = 160.f;
         } else if (self.notification.imageData) {
             self.imageView.image  = [UIImage imageWithData:self.notification.imageData];
         }
+        self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
         } else if (self.notification.imageLandscapeData) {
             self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
         }
+        self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }
 }
 
