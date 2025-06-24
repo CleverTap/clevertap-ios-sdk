@@ -69,10 +69,10 @@
         return;
     }
     
-    if (self.isUserSwitching && (jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY] || jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY])) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will not be handled due to user switch", self);
-        return;
-    } else if (self.isUserSwitching) {
+    if (self.isUserSwitching) {
+        if (jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY] || jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY]) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will not be handled due to user switch", self);
+        }
         return;
     }
     
