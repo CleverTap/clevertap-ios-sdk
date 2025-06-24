@@ -162,7 +162,6 @@
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zkj-Ay-AJC">
                                         <rect key="frame" x="250" y="1" width="125" height="44"/>
-                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_3"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="apg-wv-wA7"/>
                                         </constraints>
