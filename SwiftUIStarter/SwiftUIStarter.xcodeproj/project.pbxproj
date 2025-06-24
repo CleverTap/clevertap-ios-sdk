@@ -19,8 +19,10 @@
 		48E0B3492A66FE61009C4312 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48E0B3482A66FE61009C4312 /* Preview Assets.xcassets */; };
 		48E0B3522A6708B5009C4312 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0B3512A6708B5009C4312 /* HomeScreen.swift */; };
 		48E0B3542A67166C009C4312 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0B3532A67166C009C4312 /* AppDelegate.swift */; };
-		48E0B35A2A69C5B5009C4312 /* CTAppInboxRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0B3592A69C5B5009C4312 /* CTAppInboxRepresentable.swift */; };
+		48E0B35A2A69C5B5009C4312 /* CTAppInboxCustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0B3592A69C5B5009C4312 /* CTAppInboxCustomView.swift */; };
 		48E0B35E2A69D47F009C4312 /* Pods_SwiftUIStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 334E3ED58090A5AEEF23410D /* Pods_SwiftUIStarter.framework */; };
+		574627DF2E017E460039B10A /* InboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574627DE2E017E460039B10A /* InboxViewModel.swift */; };
+		574627E12E0298A00039B10A /* CTAppInboxRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */; };
 		A983E8E0003C52EE342CBDB9 /* Pods_SwiftUIStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA9862E5A057F98569E2EEBD /* Pods_SwiftUIStarter_NotificationService.framework */; };
 /* End PBXBuildFile section */
 
@@ -67,9 +69,11 @@
 		48E0B3532A67166C009C4312 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		48E0B3552A67187F009C4312 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		48E0B3562A6718B6009C4312 /* SwiftUIStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftUIStarter.entitlements; sourceTree = "<group>"; };
-		48E0B3592A69C5B5009C4312 /* CTAppInboxRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAppInboxRepresentable.swift; sourceTree = "<group>"; };
+		48E0B3592A69C5B5009C4312 /* CTAppInboxCustomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAppInboxCustomView.swift; sourceTree = "<group>"; };
 		48E0B3612A69D697009C4312 /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		48E0B3652A69D757009C4312 /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		574627DE2E017E460039B10A /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
+		574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAppInboxRepresentable.swift; sourceTree = "<group>"; };
 		A530F6FFBC26113F8B9C9B13 /* Pods-SwiftUIStarter-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftUIStarter-NotificationService.debug.xcconfig"; path = "Target Support Files/Pods-SwiftUIStarter-NotificationService/Pods-SwiftUIStarter-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		AA9862E5A057F98569E2EEBD /* Pods_SwiftUIStarter_NotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftUIStarter_NotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C738698B25C9108B38EA207C /* Pods-SwiftUIStarter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftUIStarter.debug.xcconfig"; path = "Target Support Files/Pods-SwiftUIStarter/Pods-SwiftUIStarter.debug.xcconfig"; sourceTree = "<group>"; };
@@ -128,6 +132,8 @@
 		48E0B3402A66FE5F009C4312 /* SwiftUIStarter */ = {
 			isa = PBXGroup;
 			children = (
+				574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */,
+				574627DE2E017E460039B10A /* InboxViewModel.swift */,
 				489C5FFD2A6C5E1A00440747 /* sampleHTMLCode.html */,
 				48E0B3562A6718B6009C4312 /* SwiftUIStarter.entitlements */,
 				48E0B3552A67187F009C4312 /* Info.plist */,
@@ -137,7 +143,7 @@
 				48E0B3472A66FE61009C4312 /* Preview Content */,
 				48E0B3512A6708B5009C4312 /* HomeScreen.swift */,
 				48E0B3532A67166C009C4312 /* AppDelegate.swift */,
-				48E0B3592A69C5B5009C4312 /* CTAppInboxRepresentable.swift */,
+				48E0B3592A69C5B5009C4312 /* CTAppInboxCustomView.swift */,
 				489C5FFB2A6C5CCE00440747 /* CTWebViewRepresentable.swift */,
 				489C5FFF2A6C616F00440747 /* CTCallbackCoordinator.swift */,
 				489C60012A6C699300440747 /* CTViewModifier.swift */,
@@ -351,12 +357,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				574627E12E0298A00039B10A /* CTAppInboxRepresentable.swift in Sources */,
 				489C60022A6C699300440747 /* CTViewModifier.swift in Sources */,
 				48E0B3522A6708B5009C4312 /* HomeScreen.swift in Sources */,
 				48E0B3542A67166C009C4312 /* AppDelegate.swift in Sources */,
-				48E0B35A2A69C5B5009C4312 /* CTAppInboxRepresentable.swift in Sources */,
+				48E0B35A2A69C5B5009C4312 /* CTAppInboxCustomView.swift in Sources */,
 				489C60002A6C616F00440747 /* CTCallbackCoordinator.swift in Sources */,
 				48E0B3442A66FE5F009C4312 /* ContentView.swift in Sources */,
+				574627DF2E017E460039B10A /* InboxViewModel.swift in Sources */,
 				48E0B3422A66FE5F009C4312 /* SwiftUIStarterApp.swift in Sources */,
 				489C5FFC2A6C5CCE00440747 /* CTWebViewRepresentable.swift in Sources */,
 			);

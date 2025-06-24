@@ -7,15 +7,13 @@ var cleverTapAdditionalInstance: CleverTap = {
     }()
 
 struct HomeScreen: View {
-    @State private var showInboxModal = false
-    
     let eventList = [  "Record User Profile",
                        "Record User Profile with Properties",
                        "Record User Event called Product Viewed",
                        "Record User Event with Properties",
                        "Record User Charged Event",
                        "Record User Event to an Additional Instance",
-                       "Show App Inbox",
+                       "Open Custom Inbox Screen",
                        "Analytics in a WebView",
                        "Increment User Profile Property",
                        "Decrement User Profile Property",
@@ -31,27 +29,22 @@ struct HomeScreen: View {
                 List {
                     ForEach(0 ..< eventList.count, id: \.self) { index in
                         HStack {
-                            if (eventList[index] == "Analytics in a WebView") {
-                                // Show Web View
-                                NavigationLink(destination: CTWebViewRepresentable().recordScreenView(screenName: "CT Web View")) {
-                                    Text(eventList[index])
-                                }
-                            } else {
-                                Button("\(eventList[index])") {
-                                    buttonAction(index: index)
-                                    if eventList[index] == "Show App Inbox" {
-                                        showInboxModal = true
-                                    }
-                                }
+                            Button("\(eventList[index])") {
+                                buttonAction(index: index)
                             }
                             Spacer()
+                            if (eventList[index] == "Open Custom Inbox Screen") {
+                                // Show App Inbox controller
+                                NavigationLink(destination: InboxView()) {
+                                }
+                            } else if (eventList[index] == "Analytics in a WebView") {
+                                // Show Web View
+                                NavigationLink(destination: CTWebViewRepresentable().recordScreenView(screenName: "CT Web View")) {
+                                }
+                            }
                         }
                     }
                 }
-            }
-            .sheet(isPresented: $showInboxModal) {
-                CTAppInboxRepresentable()
-                    .recordScreenView(screenName: "CT App Inbox")
             }
             .recordScreenView(screenName: "Home Screen")
         }
