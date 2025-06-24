@@ -2202,6 +2202,7 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark Response Handling
 
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
     if (displayUnitJSON) {
@@ -2226,7 +2227,9 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 }
+#endif
 
+#if !CLEVERTAP_NO_INBOX_SUPPORT
 - (void)handleAppInboxResponse:(id)jsonResp {
     NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
     if (inboxJSON) {
@@ -2253,6 +2256,62 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 }
+#endif
+
+- (void)handleFeatureFlagsResponse:(id)jsonResp {
+    NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
+    if (featureFlagsJSON) {
+        NSMutableArray *featureFlagsNotifs;
+        @try {
+            featureFlagsNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Feature Flags JSON: %@", self, e.debugDescription);
+        }
+        if (featureFlagsNotifs && self.featureFlagsController) {
+            NSArray <NSDictionary*> *featureFlags =  [featureFlagsNotifs mutableCopy];
+            [self.featureFlagsController updateFeatureFlags:featureFlags];
+        }
+    }
+}
+
+- (void)handleProductConfigResponse:(id)jsonResp {
+    NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
+    if (productConfigJSON) {
+        NSMutableArray *productConfigNotifs;
+        @try {
+            productConfigNotifs = [[NSMutableArray alloc] initWithArray:productConfigJSON[@"kv"]];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
+        }
+        if (productConfigNotifs && self.productConfigController) {
+            NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
+            [self.productConfigController updateProductConfig:productConfig];
+            NSString *lastFetchTs = productConfigJSON[@"ts"];
+            [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
+        }
+    }
+}
+
+#if !CLEVERTAP_NO_GEOFENCE_SUPPORT
+- (void)handleGeofencesResponse:(id)jsonResp {
+    NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
+    if (geofencesJSON) {
+        NSMutableArray *geofencesList;
+        @try {
+            geofencesList = [[NSMutableArray alloc] initWithArray:geofencesJSON];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Geofences JSON: %@", self, e.debugDescription);
+        }
+        if (geofencesList) {
+            NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
+            geofencesDict[@"geofences"] = geofencesList;
+            [CTUtils runSyncMainQueue: ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
+            }];
+        }
+    }
+}
+#endif
 
 - (void)parseResponse:(NSData *)responseData {
     if (responseData) {
@@ -2288,53 +2347,11 @@ static BOOL sharedInstanceErrorLogged;
                 [self handleDisplayUnitResponse:jsonResp];
 #endif
                 
-                NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
-                if (featureFlagsJSON) {
-                    NSMutableArray *featureFlagsNotifs;
-                    @try {
-                        featureFlagsNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Feature Flags JSON: %@", self, e.debugDescription);
-                    }
-                    if (featureFlagsNotifs && self.featureFlagsController) {
-                        NSArray <NSDictionary*> *featureFlags =  [featureFlagsNotifs mutableCopy];
-                        [self.featureFlagsController updateFeatureFlags:featureFlags];
-                    }
-                }
-                
-                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
-                if (productConfigJSON) {
-                    NSMutableArray *productConfigNotifs;
-                    @try {
-                        productConfigNotifs = [[NSMutableArray alloc] initWithArray:productConfigJSON[@"kv"]];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
-                    }
-                    if (productConfigNotifs && self.productConfigController) {
-                        NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
-                        [self.productConfigController updateProductConfig:productConfig];
-                        NSString *lastFetchTs = productConfigJSON[@"ts"];
-                        [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
-                    }
-                }
+                [self handleFeatureFlagsResponse:jsonResp];
+                [self handleProductConfigResponse:jsonResp];
                 
 #if !CLEVERTAP_NO_GEOFENCE_SUPPORT
-                NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
-                if (geofencesJSON) {
-                    NSMutableArray *geofencesList;
-                    @try {
-                        geofencesList = [[NSMutableArray alloc] initWithArray:geofencesJSON];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Geofences JSON: %@", self, e.debugDescription);
-                    }
-                    if (geofencesList) {
-                        NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
-                        geofencesDict[@"geofences"] = geofencesList;
-                        [CTUtils runSyncMainQueue: ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
-                        }];
-                    }
-                }
+                [self handleGeofencesResponse:jsonResp];
 #endif
                 
                 // Handle and Cache PE Variables
