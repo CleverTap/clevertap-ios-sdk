@@ -269,7 +269,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong) NSLocale *locale;
 
-@property (nonatomic, assign) BOOL isUserSwitching;
+@property (atomic, assign) BOOL isUserSwitching;
 
 - (instancetype)init __unavailable;
 
