@@ -110,7 +110,7 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
         }
         var kvPairs = ""
         if let ce = displayUnit.customExtras{
-            kvPairs = String(describing: (ce as! [String:String]))
+            kvPairs = String(describing: (ce as? [String:String] ?? [:]))
         }
         
         let title = content.title ?? "No Title"

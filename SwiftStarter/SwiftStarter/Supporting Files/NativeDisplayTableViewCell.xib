@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AppInboxTableViewCell" customModule="SwiftStarter" customModuleProvider="target"/>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="NativeDisplayTableViewCell" customModule="SwiftStarter" customModuleProvider="target"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="NativeDisplayTableViewCell" rowHeight="189" id="Ly9-HL-Z97" customClass="NativeDisplayTableViewCell" customModule="SwiftStarter" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="479" height="189"/>
@@ -38,8 +38,7 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Click"/>
                                 <connections>
-                                    <action selector="actionClicked:" destination="-1" eventType="touchUpInside" id="qVe-c2-q2i"/>
-                                    <action selector="clickAction:" destination="Ly9-HL-Z97" eventType="touchUpInside" id="bEt-y6-n88"/>
+                                    <action selector="clickAction:" destination="Ly9-HL-Z97" eventType="touchUpInside" id="5tx-v3-9aF"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eBb-hh-sdn">
@@ -47,8 +46,7 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="View"/>
                                 <connections>
-                                    <action selector="actionViewed:" destination="-1" eventType="touchUpInside" id="eON-cC-apa"/>
-                                    <action selector="viewAction:" destination="Ly9-HL-Z97" eventType="touchUpInside" id="jyC-nm-YWx"/>
+                                    <action selector="viewAction:" destination="Ly9-HL-Z97" eventType="touchUpInside" id="msG-o2-CCe"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P2d-bV-V3q">
@@ -56,8 +54,7 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Show Details"/>
                                 <connections>
-                                    <action selector="actionShowDetails:" destination="-2" eventType="touchUpInside" id="UHd-c4-75q"/>
-                                    <action selector="showDetailsAction:" destination="Ly9-HL-Z97" eventType="touchUpInside" id="ngA-ly-0mO"/>
+                                    <action selector="showDetailsAction:" destination="Ly9-HL-Z97" eventType="touchUpInside" id="lUF-Q3-cbg"/>
                                 </connections>
                             </button>
                         </subviews>

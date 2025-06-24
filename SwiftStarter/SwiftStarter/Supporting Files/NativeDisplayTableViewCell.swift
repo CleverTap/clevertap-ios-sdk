@@ -32,7 +32,7 @@ class NativeDisplayTableViewCell: UITableViewCell {
     
     @IBAction func viewAction(_ sender: Any) {
         if let unitID = displayUnit?.unitID {
-            CleverTap.sharedInstance()?.recordDisplayUnitClickedEvent(forID: unitID)
+            CleverTap.sharedInstance()?.recordDisplayUnitViewedEvent(forID: unitID)
         }
     }
     
