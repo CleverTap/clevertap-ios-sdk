@@ -52,7 +52,7 @@
     
     self.config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccountId"
                                                         accountToken:@"testAccountToken"];
-    self.config.logLevel = CleverTapLogDebug;
+    
     // Set shorter request timeout for testing
     self.requestSender = [[CTRequestSender alloc] initWithConfig:self.config
                                                   redirectDomain:testDomain
