@@ -71,8 +71,10 @@
     
     if (self.isUserSwitching) {
         if (jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY] || jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY]) {
+            // Log only if in-apps are received in the response and will not be handled.
             CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will not be handled due to user switch", self);
         }
+        // Do not show any in-apps if the user is switching. Do not trigger the fetch in-apps callback.
         return;
     }
     

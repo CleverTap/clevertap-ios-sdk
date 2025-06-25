@@ -2354,12 +2354,14 @@ static BOOL sharedInstanceErrorLogged;
                 [self handleGeofencesResponse:jsonResp];
 #endif
                 
-                // Handle and Cache PE Variables
+                // Handle PE Variables
                 NSDictionary *varsResponse = jsonResp[CLTAP_PE_VARS_RESPONSE_KEY];
                 if (varsResponse) {
+                    // Do not handle variables if the user is switching. Do not trigger fetch variables callback.
                     if (!self.isUserSwitching) {
                         [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
                     } else {
+                        // Log only if variables are received in the response and will not be handled.
                         CleverTapLogDebug(self.config.logLevel, @"%@: PE Variables will not be handled due to user switch", self);
                     }
                 }
