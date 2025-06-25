@@ -394,6 +394,9 @@
 		6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; };
 		6B535FB82AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */; };
 		6B535FB92AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */; };
+		6B68DA252DE8B0F000761CFE /* CTContentFetchManagerMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA242DE8B0F000761CFE /* CTContentFetchManagerMock.m */; };
+		6B68DA282DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA272DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.m */; };
+		6B68DA2B2DE9A16A00761CFE /* CTDomainOperationsMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA2A2DE9A16A00761CFE /* CTDomainOperationsMock.m */; };
 		6B9157B92C10F40C00B1C907 /* CTInAppNotificationDisplayDelegateMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B9157B82C10F40C00B1C907 /* CTInAppNotificationDisplayDelegateMock.m */; };
 		6B9157BB2C11D07200B1C907 /* CTCustomTemplateInAppData-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B9157BA2C11D07200B1C907 /* CTCustomTemplateInAppData-Internal.h */; };
 		6B9DEE9F2B4D8A500097EF40 /* clevertap-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 6B9DEE9E2B4D8A500097EF40 /* clevertap-logo.png */; };
@@ -468,6 +471,7 @@
 		6BFC61AB2DDB6A5A00022EFF /* CTContentFetchManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */; };
 		6BFC61AC2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */; };
 		6BFC61B02DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */; };
+		6BFC61C92DE8534500022EFF /* CTContentFetchManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61C82DE8534500022EFF /* CTContentFetchManagerTests.m */; };
 		7C87D796B6B66FEA0125244A /* Pods_shared_CleverTapSDKTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E760A38DDF7A8054BC91F93 /* Pods_shared_CleverTapSDKTests.framework */; };
 		D0047B0A2098D45B0019C6FD /* CTLocalDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = D0047B082098D45B0019C6FD /* CTLocalDataStore.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = D0047B092098D45B0019C6FD /* CTLocalDataStore.m */; };
@@ -975,6 +979,13 @@
 		6B4A0F902B45EF6D00A42C6D /* CTInAppTriggerManagerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppTriggerManagerTest.m; sourceTree = "<group>"; };
 		6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTMultiDelegateManager.h; sourceTree = "<group>"; };
 		6B535FB52AD56C60002A2663 /* CTMultiDelegateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManager.m; sourceTree = "<group>"; };
+		6B68DA222DE8B0BE00761CFE /* CTContentFetchManager+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTContentFetchManager+Tests.h"; sourceTree = "<group>"; };
+		6B68DA232DE8B0F000761CFE /* CTContentFetchManagerMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManagerMock.h; sourceTree = "<group>"; };
+		6B68DA242DE8B0F000761CFE /* CTContentFetchManagerMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTContentFetchManagerMock.m; sourceTree = "<group>"; };
+		6B68DA262DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManagerDelegateMock.h; sourceTree = "<group>"; };
+		6B68DA272DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTContentFetchManagerDelegateMock.m; sourceTree = "<group>"; };
+		6B68DA292DE9A16A00761CFE /* CTDomainOperationsMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDomainOperationsMock.h; sourceTree = "<group>"; };
+		6B68DA2A2DE9A16A00761CFE /* CTDomainOperationsMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDomainOperationsMock.m; sourceTree = "<group>"; };
 		6B9157B72C10F40C00B1C907 /* CTInAppNotificationDisplayDelegateMock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppNotificationDisplayDelegateMock.h; sourceTree = "<group>"; };
 		6B9157B82C10F40C00B1C907 /* CTInAppNotificationDisplayDelegateMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppNotificationDisplayDelegateMock.m; sourceTree = "<group>"; };
 		6B9157BA2C11D07200B1C907 /* CTCustomTemplateInAppData-Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTCustomTemplateInAppData-Internal.h"; sourceTree = "<group>"; };
@@ -1048,6 +1059,7 @@
 		6BFC61A92DDB6A5A00022EFF /* CTContentFetchManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManager.h; sourceTree = "<group>"; };
 		6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTContentFetchManager.m; sourceTree = "<group>"; };
 		6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManagerDelegate.h; sourceTree = "<group>"; };
+		6BFC61C82DE8534500022EFF /* CTContentFetchManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTContentFetchManagerTests.m; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
@@ -1663,6 +1675,19 @@
 			path = CustomTemplates;
 			sourceTree = "<group>";
 		};
+		6B68DA2D2DEA1D3700761CFE /* ContentFetch */ = {
+			isa = PBXGroup;
+			children = (
+				6BFC61C82DE8534500022EFF /* CTContentFetchManagerTests.m */,
+				6B68DA222DE8B0BE00761CFE /* CTContentFetchManager+Tests.h */,
+				6B68DA232DE8B0F000761CFE /* CTContentFetchManagerMock.h */,
+				6B68DA242DE8B0F000761CFE /* CTContentFetchManagerMock.m */,
+				6B68DA262DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.h */,
+				6B68DA272DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.m */,
+			);
+			path = ContentFetch;
+			sourceTree = "<group>";
+		};
 		6B9E95AD2C285F2F0002D557 /* FileDownload */ = {
 			isa = PBXGroup;
 			children = (
@@ -1730,6 +1755,7 @@
 		D02AC2D9276044F70031C1BE /* CleverTapSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				6B68DA2D2DEA1D3700761CFE /* ContentFetch */,
 				0B03FA342DD4C3F900545F66 /* Encryption */,
 				4847D1702CDA1788008DC327 /* EventDatabase */,
 				6B9E95AD2C285F2F0002D557 /* FileDownload */,
@@ -1772,6 +1798,8 @@
 				48FA82C62DAD638700AB8651 /* CTPushPrimerManagerMock.h */,
 				48FA82C72DAD63A900AB8651 /* CTPushPrimerManagerMock.m */,
 				0B82CD0F2DC2407200756998 /* CTAESGCMCryptTests.swift */,
+				6B68DA292DE9A16A00761CFE /* CTDomainOperationsMock.h */,
+				6B68DA2A2DE9A16A00761CFE /* CTDomainOperationsMock.m */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -2689,6 +2717,7 @@
 				48FA82CA2DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m in Sources */,
 				6BF5A5A42AD45B4D00CDED20 /* CTInAppFCManagerTest.m in Sources */,
 				6B32A0A32B99EA9D009ADC57 /* CTCustomTemplateBuilderTest.m in Sources */,
+				6B68DA282DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.m in Sources */,
 				6B9E95B52C29C2F40002D557 /* NSFileManagerMock.m in Sources */,
 				6A7BB8DC29E47CFF00651584 /* CTVarTest.m in Sources */,
 				6B453EF92CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m in Sources */,
@@ -2697,6 +2726,7 @@
 				48FA82C32DAD17E300AB8651 /* CTSystemAppFunctionsTest.m in Sources */,
 				6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */,
 				6A2E0B9529D49D0200FCEA5F /* CTVariables+Tests.m in Sources */,
+				6B68DA2B2DE9A16A00761CFE /* CTDomainOperationsMock.m in Sources */,
 				6B32A0B42B9F2E8F009ADC57 /* CTTestTemplateProducer.m in Sources */,
 				6A2E0B9829D49D5100FCEA5F /* CTVarCacheMock.m in Sources */,
 				0B1FCD172DB8E0120039D424 /* CTCryptMigrationTests.m in Sources */,
@@ -2732,10 +2762,12 @@
 				6B32A0B02B9DC374009ADC57 /* CTTemplateArgumentTest.m in Sources */,
 				4E87397B2C92223C00FDFDFD /* CTDomainFactoryTests.m in Sources */,
 				0B5564562C25946C00B87284 /* CTUserInfoMigratorTest.m in Sources */,
+				6B68DA252DE8B0F000761CFE /* CTContentFetchManagerMock.m in Sources */,
 				4E2CF1442AC56D8F00441E8B /* CTEncryptionManagerTests.m in Sources */,
 				32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */,
 				487854072BF4BC4E00565685 /* CTFileDownloaderTests.m in Sources */,
 				6A59D20D2A334B8500531F9D /* NSDictionaryExtensionsTest.m in Sources */,
+				6BFC61C92DE8534500022EFF /* CTContentFetchManagerTests.m in Sources */,
 				6BB727362B8F8567009CE7D0 /* CTCustomTemplatesManagerTest.m in Sources */,
 				4E1F155227692A11009387AE /* CleverTap+Tests.m in Sources */,
 				6B9E95AC2C27164B0002D557 /* CTFileDownloadTestHelper.m in Sources */,
