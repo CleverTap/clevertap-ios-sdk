@@ -361,6 +361,134 @@
     [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
+#pragma mark - HTTP Status Code Tests
+
+- (void)testSendContentRequest_WithRateLimitedResponse_CallsErrorDelegate {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:@"content"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        return [HTTPStubsResponse responseWithJSONObject:@{@"error": @"Rate limited"}
+                                              statusCode:429
+                                                 headers:nil];
+    }];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Rate limit error handled"];
+    self.testDelegate.onErrorReceived = ^(NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, 429);
+        XCTAssertTrue([error.localizedDescription containsString:@"HTTP status code 429"]);
+        XCTAssertTrue([error.userInfo[NSLocalizedFailureReasonErrorKey] containsString:@"rate limited"]);
+        [expectation fulfill];
+    };
+    
+    [self.contentFetchManager handleContentFetch:@{
+        CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertEqual(self.testDelegate.receivedResponses.count, 0);
+    XCTAssertEqual(self.testDelegate.receivedErrors.count, 1);
+}
+
+- (void)testSendContentRequest_WithServerErrorResponse_CallsErrorDelegate {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:@"content"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        return [HTTPStubsResponse responseWithJSONObject:@{@"error": @"Internal server error"}
+                                              statusCode:500
+                                                 headers:nil];
+    }];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Server error handled"];
+    self.testDelegate.onErrorReceived = ^(NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, 500);
+        XCTAssertTrue([error.localizedDescription containsString:@"HTTP status code 500"]);
+        [expectation fulfill];
+    };
+    
+    [self.contentFetchManager handleContentFetch:@{
+        CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertEqual(self.testDelegate.receivedResponses.count, 0);
+    XCTAssertEqual(self.testDelegate.receivedErrors.count, 1);
+}
+
+- (void)testSendContentRequest_WithSuccessResponse_CallsResponseDelegate {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.absoluteString containsString:@"content"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        return [HTTPStubsResponse responseWithJSONObject:@{@"status": @"success"}
+                                              statusCode:200
+                                                 headers:nil];
+    }];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Success response handled"];
+    self.testDelegate.onResponseReceived = ^(NSData *data) {
+        XCTAssertNotNil(data);
+        [expectation fulfill];
+    };
+    
+    [self.contentFetchManager handleContentFetch:@{
+        CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertEqual(self.testDelegate.receivedResponses.count, 1);
+    XCTAssertEqual(self.testDelegate.receivedErrors.count, 0);
+}
+
+- (void)testSendContentRequest_WithNonHTTPResponse_CallsErrorDelegate {
+    // Setup to change to the mocked request sender
+    id mockRequestSender = OCMClassMock([CTRequestSender class]);
+    self.contentFetchManager = [[CTContentFetchManagerMock alloc]
+                                initWithConfig:self.config
+                                requestSender:mockRequestSender
+                                dispatchQueueManager:self.mockDispatchQueueManager
+                                domainOperations:self.testDomainOperations
+                                delegate:self.testDelegate];
+    
+    OCMStub([mockRequestSender send:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
+        [invocation retainArguments];
+
+        CTRequest *request;
+        [invocation getArgument:&request atIndex:2];
+        
+        // Create a non-HTTP response (NSURLResponse instead of NSHTTPURLResponse)
+        NSURL *url = [NSURL URLWithString:@"https://test.example.com/content"];
+        NSURLResponse *nonHTTPResponse = [[NSURLResponse alloc] initWithURL:url
+                                                                   MIMEType:@"application/json"
+                                                      expectedContentLength:100
+                                                           textEncodingName:@"UTF-8"];
+        
+        NSData *responseData = [@"{\"test\":\"data\"}" dataUsingEncoding:NSUTF8StringEncoding];
+        if (request.responseBlock) {
+            request.responseBlock(responseData, nonHTTPResponse);
+        }
+    });
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Non-HTTP response error handled"];
+    self.testDelegate.onErrorReceived = ^(NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, NSURLErrorBadServerResponse);
+        XCTAssertTrue([error.localizedDescription containsString:@"unexpected response type"]);
+        XCTAssertTrue([error.userInfo[NSLocalizedFailureReasonErrorKey] containsString:@"Expected NSHTTPURLResponse"]);
+        [expectation fulfill];
+    };
+    
+    [self.contentFetchManager handleContentFetch:@{
+        CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
+    }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertEqual(self.testDelegate.receivedResponses.count, 0);
+    XCTAssertEqual(self.testDelegate.receivedErrors.count, 1);
+    
+    [mockRequestSender stopMocking];
+}
+
 #pragma mark - User Switch Tests
 
 - (void)testDeviceIdWillChange_ExecutesOnSerialQueueAndWaitsForCompletion {
