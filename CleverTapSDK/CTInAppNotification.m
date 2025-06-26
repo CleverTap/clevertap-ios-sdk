@@ -164,7 +164,7 @@
     NSDictionary *_mediaLandscape = (NSDictionary*) jsonObject[CLTAP_INAPP_MEDIA_LANDSCAPE];
     if (_mediaLandscape) {
         self.landscapeContentType = _mediaLandscape[CLTAP_INAPP_MEDIA_CONTENT_TYPE];
-        self.landscapeContentDescription = _mediaLandscape[CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION] ? _media[CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION] : @"InApp Image";
+        self.landscapeContentDescription = _mediaLandscape[CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION] ? _mediaLandscape[CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION] : @"InApp Image";
         NSString *_mediaUrlLandscape = _mediaLandscape[CLTAP_INAPP_MEDIA_URL];
         if (_mediaUrlLandscape && _mediaUrlLandscape.length > 0) {
             if ([self.landscapeContentType hasPrefix:@"image"]) {
