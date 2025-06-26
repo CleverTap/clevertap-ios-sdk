@@ -85,8 +85,11 @@
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                        options:self.sdWebImageOptions context:self.sdWebImageContext];
+        self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
+        self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
+        self.avPlayerContainerView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
     }
 }
 
