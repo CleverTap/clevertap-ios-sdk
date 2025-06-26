@@ -61,7 +61,10 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch DisplaySection(rawValue: indexPath.section)! {
         case .nativeDisplay:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayButtonsTableCell", for: indexPath) as! NativeDisplayButtonsTableViewCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayButtonsTableCell", for: indexPath) as? NativeDisplayButtonsTableViewCell else {
+                fatalError("Failed to dequeue NativeDisplayButtonsTableViewCell")
+            }
+            
             cell.onShowDetails = { [weak self] in
                 self?.displayUnits = CleverTap.sharedInstance()?.getAllDisplayUnits() ?? []
                 self?.updateNativeDisplaySection()
@@ -74,7 +77,9 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
             return cell
             
         case .allDisplayUnits:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayTableViewCell", for: indexPath) as! NativeDisplayTableViewCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayTableViewCell", for: indexPath) as? NativeDisplayTableViewCell else {
+                fatalError("Failed to dequeue NativeDisplayTableViewCell")
+            }
             let displayUnit = displayUnits[indexPath.row]
             cell.configure(with: displayUnit)
             cell.onShowDetails = { [weak self] in
