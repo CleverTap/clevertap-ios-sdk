@@ -269,6 +269,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, strong) NSLocale *locale;
 
+@property (atomic, assign) BOOL isUserSwitching;
+
 - (instancetype)init __unavailable;
 
 @end
@@ -2200,6 +2202,117 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark Response Handling
 
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+- (void)handleDisplayUnitResponse:(id)jsonResp {
+    NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
+    if (displayUnitJSON) {
+        if (self.isUserSwitching) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
+            return;
+        }
+        
+        NSMutableArray *displayUnitNotifs;
+        @try {
+            displayUnitNotifs = [[NSMutableArray alloc] initWithArray:displayUnitJSON];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Display Unit JSON: %@", self, e.debugDescription);
+        }
+        if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
+            [self initializeDisplayUnitWithCallback:^(BOOL success) {
+                if (success) {
+                    NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
+                    [self.displayUnitController updateDisplayUnits:displayUnits];
+                }
+            }];
+        }
+    }
+}
+#endif
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+- (void)handleAppInboxResponse:(id)jsonResp {
+    NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
+    if (inboxJSON) {
+        if (self.isUserSwitching) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: App Inbox response will not be handled due to user switch", self);
+            return;
+        }
+        
+        NSMutableArray *inboxNotifs;
+        @try {
+            inboxNotifs = [[NSMutableArray alloc] initWithArray:inboxJSON];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Inbox Message JSON: %@", self, e.debugDescription);
+        }
+        if (inboxNotifs && [inboxNotifs count] > 0) {
+            [self initializeInboxWithCallback:^(BOOL success) {
+                if (success) {
+                    [self.dispatchQueueManager runSerialAsync:^{
+                        NSArray <NSDictionary*> *messages =  [inboxNotifs mutableCopy];;
+                        [self.inboxController updateMessages:messages];
+                    }];
+                }
+            }];
+        }
+    }
+}
+#endif
+
+- (void)handleFeatureFlagsResponse:(id)jsonResp {
+    NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
+    if (featureFlagsJSON) {
+        NSMutableArray *featureFlagsNotifs;
+        @try {
+            featureFlagsNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Feature Flags JSON: %@", self, e.debugDescription);
+        }
+        if (featureFlagsNotifs && self.featureFlagsController) {
+            NSArray <NSDictionary*> *featureFlags =  [featureFlagsNotifs mutableCopy];
+            [self.featureFlagsController updateFeatureFlags:featureFlags];
+        }
+    }
+}
+
+- (void)handleProductConfigResponse:(id)jsonResp {
+    NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
+    if (productConfigJSON) {
+        NSMutableArray *productConfigNotifs;
+        @try {
+            productConfigNotifs = [[NSMutableArray alloc] initWithArray:productConfigJSON[@"kv"]];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
+        }
+        if (productConfigNotifs && self.productConfigController) {
+            NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
+            [self.productConfigController updateProductConfig:productConfig];
+            NSString *lastFetchTs = productConfigJSON[@"ts"];
+            [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
+        }
+    }
+}
+
+#if !CLEVERTAP_NO_GEOFENCE_SUPPORT
+- (void)handleGeofencesResponse:(id)jsonResp {
+    NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
+    if (geofencesJSON) {
+        NSMutableArray *geofencesList;
+        @try {
+            geofencesList = [[NSMutableArray alloc] initWithArray:geofencesJSON];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Geofences JSON: %@", self, e.debugDescription);
+        }
+        if (geofencesList) {
+            NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
+            geofencesDict[@"geofences"] = geofencesList;
+            [CTUtils runSyncMainQueue: ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
+            }];
+        }
+    }
+}
+#endif
+
 - (void)parseResponse:(NSData *)responseData {
     if (responseData) {
         @try {
@@ -2219,103 +2332,38 @@ static BOOL sharedInstanceErrorLogged;
 #endif
                 
 #if !defined(CLEVERTAP_TVOS)
-                [self.contentFetchManager handleContentFetch:jsonResp];
+                if (!self.isUserSwitching) {
+                    [self.contentFetchManager handleContentFetch:jsonResp];
+                } else if (jsonResp[CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY]) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Content fetch response will not be handled due to user switch", self);
+                }
 #endif
                 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
-                NSArray *inboxJSON = jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY];
-                if (inboxJSON) {
-                    NSMutableArray *inboxNotifs;
-                    @try {
-                        inboxNotifs = [[NSMutableArray alloc] initWithArray:inboxJSON];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Inbox Message JSON: %@", self, e.debugDescription);
-                    }
-                    if (inboxNotifs && [inboxNotifs count] > 0) {
-                        [self initializeInboxWithCallback:^(BOOL success) {
-                            if (success) {
-                                [self.dispatchQueueManager runSerialAsync:^{
-                                    NSArray <NSDictionary*> *messages =  [inboxNotifs mutableCopy];;
-                                    [self.inboxController updateMessages:messages];
-                                }];
-                            }
-                        }];
-                    }
-                }
+                [self handleAppInboxResponse:jsonResp];
 #endif
                 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-                NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
-                if (displayUnitJSON) {
-                    NSMutableArray *displayUnitNotifs;
-                    @try {
-                        displayUnitNotifs = [[NSMutableArray alloc] initWithArray:displayUnitJSON];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Display Unit JSON: %@", self, e.debugDescription);
-                    }
-                    if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
-                        [self initializeDisplayUnitWithCallback:^(BOOL success) {
-                            if (success) {
-                                NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
-                                [self.displayUnitController updateDisplayUnits:displayUnits];
-                            }
-                        }];
-                    }
-                }
+                [self handleDisplayUnitResponse:jsonResp];
 #endif
-                NSDictionary *featureFlagsJSON = jsonResp[CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY];
-                if (featureFlagsJSON) {
-                    NSMutableArray *featureFlagsNotifs;
-                    @try {
-                        featureFlagsNotifs = [[NSMutableArray alloc] initWithArray:featureFlagsJSON[@"kv"]];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Feature Flags JSON: %@", self, e.debugDescription);
-                    }
-                    if (featureFlagsNotifs && self.featureFlagsController) {
-                        NSArray <NSDictionary*> *featureFlags =  [featureFlagsNotifs mutableCopy];
-                        [self.featureFlagsController updateFeatureFlags:featureFlags];
-                    }
-                }
                 
-                NSDictionary *productConfigJSON = jsonResp[CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY];
-                if (productConfigJSON) {
-                    NSMutableArray *productConfigNotifs;
-                    @try {
-                        productConfigNotifs = [[NSMutableArray alloc] initWithArray:productConfigJSON[@"kv"]];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Product Config JSON: %@", self, e.debugDescription);
-                    }
-                    if (productConfigNotifs && self.productConfigController) {
-                        NSArray <NSDictionary*> *productConfig =  [productConfigNotifs mutableCopy];
-                        [self.productConfigController updateProductConfig:productConfig];
-                        NSString *lastFetchTs = productConfigJSON[@"ts"];
-                        [self.productConfig updateProductConfigWithLastFetchTs:(long) [lastFetchTs longLongValue]];
-                    }
-                }
+                [self handleFeatureFlagsResponse:jsonResp];
+                [self handleProductConfigResponse:jsonResp];
                 
 #if !CLEVERTAP_NO_GEOFENCE_SUPPORT
-                NSArray *geofencesJSON = jsonResp[CLTAP_GEOFENCES_JSON_RESPONSE_KEY];
-                if (geofencesJSON) {
-                    NSMutableArray *geofencesList;
-                    @try {
-                        geofencesList = [[NSMutableArray alloc] initWithArray:geofencesJSON];
-                    } @catch (NSException *e) {
-                        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Geofences JSON: %@", self, e.debugDescription);
-                    }
-                    if (geofencesList) {
-                        NSMutableDictionary *geofencesDict = [NSMutableDictionary new];
-                        geofencesDict[@"geofences"] = geofencesList;
-                        [CTUtils runSyncMainQueue: ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:CleverTapGeofencesDidUpdateNotification object:nil userInfo:geofencesDict];
-                        }];
-                    }
-                }
+                [self handleGeofencesResponse:jsonResp];
 #endif
                 
-                // Handle and Cache PE Variables
+                // Handle PE Variables
                 NSDictionary *varsResponse = jsonResp[CLTAP_PE_VARS_RESPONSE_KEY];
                 if (varsResponse) {
-                    [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
+                    // Do not handle variables if the user is switching. Do not trigger fetch variables callback.
+                    if (!self.isUserSwitching) {
+                        [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
+                    } else {
+                        // Log only if variables are received in the response and will not be handled.
+                        CleverTapLogDebug(self.config.logLevel, @"%@: PE Variables will not be handled due to user switch", self);
+                    }
                 }
                 
                 // Handle events/profiles sync data
@@ -2513,6 +2561,8 @@ static BOOL sharedInstanceErrorLogged;
     [self.dispatchQueueManager runSerialAsync:^{
         CleverTapLogDebug(self.config.logLevel, @"%@: async switching user with properties:  %@", action, properties);
         
+        self.isUserSwitching = YES;
+        
         // set OptOut to false for the old user
         self.currentUserOptedOut = NO;
         
@@ -2542,6 +2592,9 @@ static BOOL sharedInstanceErrorLogged;
         [self.localDataStore changeUser];
         
         [self recordDeviceErrors];
+        
+        self.isUserSwitching = NO;
+        
         [[self delegateManager] notifyDelegatesDeviceIdDidChange:self.deviceInfo.deviceId];
         
         [self _setCurrentUserOptOutStateFromStorage];  // be sure to do this AFTER updating the GUID
