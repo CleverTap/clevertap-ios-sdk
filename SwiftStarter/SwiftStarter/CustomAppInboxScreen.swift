@@ -12,6 +12,7 @@ class CustomAppInboxScreen: UIViewController, CleverTapInboxViewControllerDelega
         loadData()
         registerAppInbox()
         initializeAppInbox()
+        tblView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tblView.register(UINib(nibName: "AppInboxTableViewCell", bundle: nil), forCellReuseIdentifier: "AppInboxTableViewCell")
         tblView.tableFooterView = UIView()
     }

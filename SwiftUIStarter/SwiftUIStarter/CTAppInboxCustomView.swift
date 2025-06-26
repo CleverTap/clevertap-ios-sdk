@@ -1,13 +1,6 @@
 import SwiftUI
 import CleverTapSDK
 
-struct InboxMessage: Identifiable {
-    let id: String
-    let title: String
-    let message: String
-    var isRead: Bool
-}
-
 struct InboxView: View {
     @StateObject private var viewModel = InboxViewModel()
     @State private var showInboxModal = false

@@ -8,6 +8,13 @@
 import CleverTapSDK
 import Combine
 
+struct InboxMessage: Identifiable {
+    let id: String
+    let title: String
+    let message: String
+    var isRead: Bool
+}
+
 class InboxViewModel: ObservableObject {
     @Published var messages: [InboxMessage] = []
 
