@@ -113,9 +113,17 @@ static NSDictionary *_inAppTypeMap;
 }
 
 - (void)setImageUrl:(NSString *)imageUrl {
+    [self setImageUrl:imageUrl contentDescription:nil];
+}
+
+
+- (void)setImageUrl:(NSString *)imageUrl contentDescription:(NSString * _Nullable)contentDescription {
     NSMutableDictionary *mediaObj = [NSMutableDictionary new];
     mediaObj[CLTAP_INAPP_MEDIA_CONTENT_TYPE] = @"image";
     mediaObj[CLTAP_INAPP_MEDIA_URL] = imageUrl;
+    if (contentDescription != nil) {
+        mediaObj[CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION] = contentDescription;
+    }
     self.inAppSettings[CLTAP_INAPP_MEDIA] = mediaObj;
     if (self.followDeviceOrientation) {
         self.inAppSettings[CLTAP_INAPP_MEDIA_LANDSCAPE] = mediaObj;

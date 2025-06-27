@@ -84,8 +84,12 @@
         [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                        options:self.sdWebImageOptions context:self.sdWebImageContext];
+        
+        self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
+        self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
+        self.avPlayerContainerView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
     }
     
     if (content.iconUrl) {
@@ -94,6 +98,7 @@
                          placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions context:self.sdWebImageContext];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
+        self.cellIcon.accessibilityLabel = content.iconDescription ? content.iconDescription : @"Icon Image";
     } else {
         self.cellIconHeightContraint.constant = 28;
         self.cellIconRatioContraint.priority = 750;

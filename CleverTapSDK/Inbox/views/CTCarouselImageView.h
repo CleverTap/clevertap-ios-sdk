@@ -8,6 +8,7 @@
 @property (strong, nonatomic) IBOutlet UILabel *_Nullable bodyLabel;
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint * _Nullable imageViewLandRatioConstraint;
 @property (nonatomic, strong) IBOutlet NSLayoutConstraint * _Nullable imageViewPortRatioConstraint;
+@property(nonatomic, strong, nonnull) NSString *viewDescription;
 
 + (CGFloat)captionHeight;
 
@@ -18,11 +19,13 @@
                        subcaptionColor:(NSString * _Nullable)subcaptionColor
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
-                   orientationPortrait:(BOOL)orientationPortrait;
+                   orientationPortrait:(BOOL)orientationPortrait
+                      imageDescription:(NSString * _Nonnull)imageDescription;
 
 - (instancetype _Nonnull)initWithFrame:(CGRect)frame
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
-                   orientationPortrait:(BOOL)orientationPortrait;
+                   orientationPortrait:(BOOL)orientationPortrait
+                      imageDescription:(NSString * _Nonnull)imageDescription;
 
 @end

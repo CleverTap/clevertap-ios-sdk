@@ -10,6 +10,9 @@ NSString *const ACCOUNT_TOKEN_HEADER = @"X-CleverTap-Token";
 NSString *const REDIRECT_DOMAIN_KEY = @"CLTAP_REDIRECT_DOMAIN_KEY";
 NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY = @"CLTAP_REDIRECT_NOTIF_VIEWED_DOMAIN_KEY";
 
+NSString *const LAST_TS_KEY = @"CLTAP_LAST_TS_KEY";
+NSString *const FIRST_TS_KEY = @"CLTAP_FIRST_TS_KEY";
+
 NSString *const kLastSessionPing = @"last_session_ping";
 NSString *const kLastSessionTime = @"lastSessionTime";
 NSString *const kSessionId = @"sessionId";

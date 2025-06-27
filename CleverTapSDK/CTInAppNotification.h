@@ -68,6 +68,9 @@
 
 @property (nonatomic, readonly) CTCustomTemplateInAppData *customTemplateInAppData;
 
+@property (nonatomic, copy, readonly) NSString *contentDescription;
+@property (nonatomic, copy, readonly) NSString *landscapeContentDescription;
+
 - (instancetype)init __unavailable;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (instancetype)initWithJSON:(NSDictionary*)json;

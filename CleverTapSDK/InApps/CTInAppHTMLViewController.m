@@ -99,6 +99,7 @@ typedef enum {
     webView.opaque = NO;
     webView.tag = 188293;
     webView.navigationDelegate = self;
+    webView.accessibilityViewIsModal = YES;
     [self.view addSubview:webView];
     
     [self loadWebView];
@@ -107,6 +108,15 @@ typedef enum {
         _panGesture.delegate = self;
         [webView addGestureRecognizer:_panGesture];
     }
+}
+
+- (BOOL)accessibilityPerformEscape {
+    // This is needed to dismiss the html web view with 2 finger Z gesture.
+    // If html web view doesn't have any cta buttons to close or dismiss button,
+    // using 2 finger Z gesture, this method is invoked.
+    CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
+    [self triggerInAppAction:action callToAction: CLTAP_CTA_SWIPE_DISMISS buttonId:nil];
+    return YES;
 }
 
 - (void)loadWebView {

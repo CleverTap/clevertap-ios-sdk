@@ -10,6 +10,9 @@ extern NSString *const ACCOUNT_TOKEN_HEADER;
 extern NSString *const REDIRECT_DOMAIN_KEY;
 extern NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY;
 
+extern NSString *const LAST_TS_KEY;
+extern NSString *const FIRST_TS_KEY;
+
 extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;
@@ -197,6 +200,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_MEDIA_LANDSCAPE @"mediaLandscape"
 #define CLTAP_INAPP_MEDIA_CONTENT_TYPE @"content_type"
 #define CLTAP_INAPP_MEDIA_URL @"url"
+#define CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION @"alt_text"
 
 #define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
 #define CLTAP_TRIGGER_BOOL_STRING_NO @"false"
