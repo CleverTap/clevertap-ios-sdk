@@ -11,7 +11,11 @@
 
 @protocol CTSwitchUserDelegate <NSObject>
 
+@optional
 - (void)deviceIdDidChange:(NSString *)newDeviceId;
+
+@optional
+- (void)deviceIdWillChange;
 
 @end
 

@@ -16,6 +16,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol CTDomainOperations <NSObject>
+
+@property (nonatomic, strong, nullable, readonly) NSString *redirectDomain;
+- (BOOL)needsHandshake;
+- (void)runSerialAsyncEnsureHandshake:(void(^ _Nullable)(BOOL success))block;
+
+@end
+
 @protocol CTDomainResolverDelegate <NSObject>
 
 - (void)onHandshakeSuccess;
@@ -23,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface CTDomainFactory : NSObject
+@interface CTDomainFactory : NSObject <CTDomainOperations>
 
 @property (nonatomic, strong, nullable) NSString *redirectDomain;
 @property (nonatomic, strong, nullable) NSString *explicitEndpointDomain;
@@ -45,8 +53,6 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 
 - (BOOL)isMuted;
-- (BOOL)needsHandshake;
-- (void)runSerialAsyncEnsureHandshake:(void(^ _Nullable)(BOOL success))block;
 - (BOOL)updateDomainFromResponseHeaders:(NSDictionary *)headers;
 - (BOOL)updateNotificationViewedDomainFromResponseHeaders:(NSDictionary *)headers;
 - (void)updateMutedFromResponseHeaders:(NSDictionary *)headers;
