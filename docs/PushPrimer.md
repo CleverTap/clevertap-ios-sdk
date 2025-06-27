@@ -27,7 +27,7 @@ CTLocalInApp *localInAppBuilder = [[CTLocalInApp alloc] initWithInAppType:HALF_I
 [localInAppBuilder setBtnTextColor:@"#FF0000"];
 [localInAppBuilder setBtnBorderColor:@"#FF0000"];
 [localInAppBuilder setBtnBackgroundColor:@"#FFFFFF"];	// default is White.
-[localInAppBuilder setImageUrl:@"https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png"];
+[localInAppBuilder setImageUrl:@"https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png" contentDescription:@"This is alt text"];
 
 // Prompt Push Primer with above settings.
 [[CleverTap  sharedInstance] promptPushPrimer:localInAppBuilder.getLocalInAppSettings];
@@ -53,7 +53,7 @@ localInAppBuilder.setBtnBorderRadius("4")
 localInAppBuilder.setBtnTextColor("#FF0000")
 localInAppBuilder.setBtnBorderColor("#FF0000")
 localInAppBuilder.setBtnBackgroundColor("#FFFFFF")
-localInAppBuilder.setImageUrl("https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png")
+localInAppBuilder.setImageUrl("https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png", contentDescription: "This is alt text")
 
 // Prompt Push Primer with above settings.
 CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
