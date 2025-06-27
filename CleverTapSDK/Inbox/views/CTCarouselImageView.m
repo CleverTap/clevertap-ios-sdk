@@ -27,6 +27,7 @@ static float captionHeight = 0.f;
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *captionLabel;
 @property (nonatomic, strong) UILabel *subcaptionLabel;
+@property (nonatomic, strong) NSString *imageDescription;
 
 @end
 
@@ -46,7 +47,8 @@ static float captionHeight = 0.f;
                        subcaptionColor:(NSString * _Nullable)subcaptionColor
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
-                   orientationPortrait:(BOOL)orientationPortrait{
+                   orientationPortrait:(BOOL)orientationPortrait
+                      imageDescription:(NSString * _Nonnull)imageDescription {
     
     self = [super initWithFrame:frame];
     if (self) {
@@ -57,6 +59,7 @@ static float captionHeight = 0.f;
         self.subcaptionColor = subcaptionColor;
         self.actionUrl = actionUrl;
         self.orientationPortrait = orientationPortrait;
+        self.imageDescription = imageDescription;
         [self setup];
     }
     return self;
@@ -65,13 +68,15 @@ static float captionHeight = 0.f;
 - (instancetype _Nonnull)initWithFrame:(CGRect)frame
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
-                   orientationPortrait:(BOOL)orientationPortrait{
+                   orientationPortrait:(BOOL)orientationPortrait
+                      imageDescription:(NSString * _Nonnull)imageDescription {
     
     self = [super initWithFrame:frame];
     if (self) {
         self.imageUrl = imageUrl;
         self.actionUrl = actionUrl;
         self.orientationPortrait = orientationPortrait;
+        self.imageDescription = imageDescription;
         [self setupImageOnly];
     }
     return self;
@@ -139,7 +144,13 @@ static float captionHeight = 0.f;
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
                       placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                options:(SDWebImageRetryFailed) context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)}];
-    
+    if (self.caption != nil || self.subcaption != nil) {
+        // For carousel with caption
+        self.viewDescription = [NSString stringWithFormat:@"%@ %@ %@", self.imageDescription, self.caption, self.subcaption];
+    } else {
+        // For image only carousel
+        self.viewDescription = self.imageDescription;
+    }
 }
 
 @end

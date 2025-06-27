@@ -10,9 +10,12 @@
 - (void)populateItemViews {
     self.itemViews = [NSMutableArray new];
     int index = 0;
+    int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         NSString *imageUrl = content.mediaUrl;
         NSString *actionUrl = content.actionUrl;
+        NSString *imageDescription = content.mediaDescription ? content.mediaDescription : [NSString stringWithFormat:@"Message Image %d", imageNumber];
+        imageNumber = imageNumber + 1;
         
         if (imageUrl == nil) {
             continue;
@@ -24,7 +27,8 @@
             frame.size.width = frame.size.width;
             itemView = [[CTCarouselImageView alloc] initWithFrame:frame
                                                          imageUrl:imageUrl actionUrl:actionUrl
-                                              orientationPortrait: [self orientationIsPortrait]];
+                                              orientationPortrait: [self orientationIsPortrait]
+                                                 imageDescription:imageDescription];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
