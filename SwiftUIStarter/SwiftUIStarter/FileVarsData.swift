@@ -72,6 +72,9 @@ class FileVarsData {
         }
         
         for count in 0...fileReadyListenerCount {
+            variable.onFileIsReady {
+                print("\(tag):  ready:  from listener \(count)")
+            }
             
 //            variable.addFileReadyHandler { fileVar in
 //                print("\(tag): \(fileVar?.name ?? "") ready: \(fileVar?.stringValue ?? "") from listener \(count)")
