@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.2.1) (June 27, 2025)
+
+#### Added
+* Adds Accessibility support for the `App-Inbox` and `In-app messages` channels.
+* Adds an overloaded API to support setting a contentDescription for the image in a PushPrimer to improve accessibility.
+  * `- (void)setImageUrl:(NSString *)imageUrl contentDescription:(NSString * _Nullable)contentDescription`: Sets the content description for the image to improve accessibility.
+
 ### [Version 7.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.2.0) (May 27, 2025)
 
 #### Added
