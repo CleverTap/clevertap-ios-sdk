@@ -16,25 +16,25 @@
     if (config.handshakeDomain) {
         helloUrl = [NSString stringWithFormat:@"https://%@/hello",config.handshakeDomain];
     }
-    CTRequest *request = [[CTRequest alloc] initWithHttpMethod:@"GET" config:config params:nil url:helloUrl];
+    CTRequest *request = [[CTRequest alloc] initWithHttpMethod:@"GET" config:config params:nil url:helloUrl additionalHeaders:nil];
     if (config.handshakeDomain) {
         [request.urlRequest setValue:config.handshakeDomain forHTTPHeaderField:kHANDSHAKE_DOMAIN_HEADER];
     }
     return request;
 }
 
-+ (CTRequest *_Nonnull)eventRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url {
-    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
++ (CTRequest *_Nonnull)eventRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url additionalHeaders: (NSDictionary *_Nonnull)additionalHeaders {
+    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url additionalHeaders: additionalHeaders];
 }
 
 + (CTRequest *_Nonnull)syncVarsRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params domain:(NSString *_Nonnull)domain {
     NSString *url = [self urlWithDomain:domain andPath:@"defineVars"];
-    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
+    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url additionalHeaders:nil];
 }
 
 + (CTRequest *_Nonnull)syncTemplatesRequestWithConfig:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params domain:(NSString *_Nonnull)domain {
     NSString *url = [self urlWithDomain:domain andPath:@"defineTemplates"];
-    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url];
+    return [[CTRequest alloc] initWithHttpMethod:@"POST" config:config params: params url:url additionalHeaders:nil];
 }
 
 + (NSString *)urlWithDomain:(NSString *)domain andPath:(NSString *)path {
