@@ -138,12 +138,17 @@
                 } else {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
                 }
-                completion(pushPermissionPresented);
+                
+                if (completion) {
+                    completion(pushPermissionPresented);
+                }
             }];
         }];
     } else {
         CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
-        completion(NO);
+        if (completion) {
+            completion(NO);
+        }
     }
 }
 
