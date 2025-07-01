@@ -148,3 +148,15 @@ jobs:
           git commit -m "Update Package.swift with new S3 URL and checksum" || echo "🟡 No changes to commit."
           git push origin develop
           echo "✅ Package.swift changes committed and pushed successfully"
+
+      - name: Invalidate CloudFront Cache
+        if: always()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DIST_ID }}
+        run: |
+          echo "Triggering CloudFront invalidation..."
+          aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DIST_ID" --paths '/*' || echo "⚠️ CloudFront invalidation failed"
+          echo "✅ CloudFront invalidation step completed."
