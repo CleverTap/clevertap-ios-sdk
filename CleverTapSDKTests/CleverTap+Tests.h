@@ -8,7 +8,12 @@
 @interface CleverTap (Tests)
 
 @property (nonatomic, strong) CTDeviceInfo * deviceInfo;
+@property (nonatomic, strong) CTDispatchQueueManager *dispatchQueueManager;
+@property (atomic, assign) BOOL currentUserOptedOut;
+@property (atomic, assign) BOOL currentUserOptedOutAllowSystemEvents;
 
+- (BOOL)_shouldDropEvent:(NSDictionary *)event withType:(CleverTapEventType)type;
+- (BOOL)isMuted;
 - (NSDictionary *)getCachedGUIDs;
 - (NSString *)getCachedIdentitiesForConfig:(CleverTapInstanceConfig*)config;
 + (void)notfityTestAppLaunch;
