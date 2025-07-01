@@ -2540,11 +2540,7 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     BOOL allowSystemEvents = !optedOut;
-    if (self.config.isDefaultInstance) {
-        allowSystemEvents = (BOOL) [CTPreferences getIntForKey:allowSystemEventskey withResetValue:!optedOut];
-    } else {
-        allowSystemEvents = (BOOL) [CTPreferences getIntForKey:key withResetValue:!optedOut];
-    }
+    allowSystemEvents = (BOOL) [CTPreferences getIntForKey:allowSystemEventskey withResetValue:!optedOut];
     CleverTapLogInternal(self.config.logLevel, @"Setting user optOut-allowSystemEvents state from storage to: %@ for storageKey: %@", allowSystemEvents ? @"YES" : @"NO", allowSystemEventskey);
     self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
 }
