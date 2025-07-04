@@ -55,7 +55,7 @@ class FileVarsData {
                 tag: tag
             ) {
                 list.append(variable)
-                builder += "\(variable.name) : \(variable.stringValue ?? "")\n"
+                builder += "\(String(describing: variable.name)) : \(variable.stringValue ?? "")\n"
             }
         }
         
@@ -67,7 +67,7 @@ class FileVarsData {
         fileReadyListenerCount: Int,
         tag: String
     ) -> Var? {
-        guard let variable = CleverTap.sharedInstance()?.defineVar(name: name) else {
+        guard let variable = CleverTap.sharedInstance()?.defineFileVar(name: name) else {
             return nil
         }
         
@@ -75,40 +75,33 @@ class FileVarsData {
             variable.onFileIsReady {
                 print("\(tag):  ready:  from listener \(count)")
             }
-            
-//            variable.addFileReadyHandler { fileVar in
-//                print("\(tag): \(fileVar?.name ?? "") ready: \(fileVar?.stringValue ?? "") from listener \(count)")
-//            }
         }
         
         return variable
     }
     
     static func printFileVariables(
-        tag: String = "FileVarsData"
-    ) {
-        var builder = "List of file variables:\n"
-        
-        for name in listFileVarNames {
-            if let variable = CleverTap.sharedInstance()?.getVariable(name) {
-                builder += "\(variable.name) : \(variable.stringValue ?? "")\n"
+            tag: String = "FileVarsData"
+        ) {
+            var builder = "List of file variables:\n"
+            
+            listFileVarNames.forEach { name in
+                if let variable = CleverTap.sharedInstance()?.getVariable(name) {
+                    builder += "\(variable.name()) : \n"
+                }
             }
+            print("\(tag): \(builder)")
         }
-        
-        print("\(tag): \(builder)")
-    }
     
     static func printFileVariablesValues(
         tag: String = "FileVarsData"
     ) {
         var builder = "List of file variables:\n"
-        
-        for name in listFileVarNames {
-            if let url = CleverTap.sharedInstance()?.getVariableValue(name) as? String {
+        listFileVarNames.forEach { name in
+            if let url = CleverTap.sharedInstance()?.getVariableValue(name) {
                 builder += "\(url)\n"
             }
         }
-        
         print("\(tag): \(builder)")
     }
 }

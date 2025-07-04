@@ -10,13 +10,13 @@ struct VariablesMenuView: View {
         "Define file Variables with listeners",
         "Fetch Variables",
         "Sync Variables",
-        "Parse Variables",
+//        "Parse Variables",
         "Get Variable",
         "Get Variable Value",
         "Add Variables Changed Callback",
-        "Remove Variables Changed Callback",
+//        "Remove Variables Changed Callback",
         "Add One Time Variables Changed Callback",
-        "Remove One Time Variables Changed Callback"
+//        "Remove One Time Variables Changed Callback"
     ]
     
     private let fileTypeMenuItems: [(title: String, subtitle: String)] = [
@@ -157,41 +157,45 @@ struct SimpleMenuItemView: View {
             
             print("Printing variables (basic types) :")
             for varValue in varValues {
-                print(varValue?.value)
+                print(varValue?.name() ?? "not found")
             }
-            FileVarsData.printFileVariables()
         case 5:
-            var varValues: [Var?] = []
+            var varValues: [Any?] = []
             
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_int"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_long"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_short"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_float"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_double"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_string"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_boolean"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_int"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_long"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_short"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_float"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_double"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_string"))
+            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_boolean"))
             
             print("Printing variables Values (basic types) :")
             for varValue in varValues {
-                print(varValue?.value)
+                print(varValue ?? "")
             }
             FileVarsData.printFileVariablesValues()
             
         case 6:
             
             CleverTap.sharedInstance()?.onVariablesChanged {
+                print("Variables Changed")
+            }
+            CleverTap.sharedInstance()?.onVariablesChangedAndNoDownloadsPending {
+                print("Files downloaded, onVariablesChangedAndNoDownloadsPending - should come after each fetch")
+                print("variablesChanged: reprinting files var data")
+            FileVarsData.printFileVariables()
+            }
+//        case 7:
+//            break
             
-        }
-        case 7:
+        case 7: CleverTap.sharedInstance()?.onceVariablesChanged {
+            print("One Time Variables Changed")
+               }
+            CleverTap.sharedInstance()?.onceVariablesChanged {
+                print("onceVariablesChangedAndNoDownloadsPending onceVariablesChangedAndNoDownloadsPending")
+            }
             
-            break
-            
-        case 8: CleverTap.sharedInstance()?.onceVariablesChanged {
-            
-        }
-            
-            
-            break
         default: break
         }
     }
