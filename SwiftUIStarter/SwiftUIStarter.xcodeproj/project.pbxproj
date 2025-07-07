@@ -23,7 +23,6 @@
 		48E0B35E2A69D47F009C4312 /* Pods_SwiftUIStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 334E3ED58090A5AEEF23410D /* Pods_SwiftUIStarter.framework */; };
 		574603CB2E0ABB1600AD7E22 /* VariablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574603CA2E0ABB1600AD7E22 /* VariablesView.swift */; };
 		574603CD2E0BCC0F00AD7E22 /* FileVarsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574603CC2E0BCC0F00AD7E22 /* FileVarsData.swift */; };
-		574603CF2E0D50C600AD7E22 /* VariablesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574603CE2E0D50C600AD7E22 /* VariablesModel.swift */; };
 		574627DF2E017E460039B10A /* InboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574627DE2E017E460039B10A /* InboxViewModel.swift */; };
 		574627E12E0298A00039B10A /* CTAppInboxRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */; };
 		57F4AF572E09813400F4ED37 /* NativeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF562E09813400F4ED37 /* NativeDisplayView.swift */; };
@@ -79,7 +78,6 @@
 		48E0B3652A69D757009C4312 /* CleverTapSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CleverTapSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		574603CA2E0ABB1600AD7E22 /* VariablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VariablesView.swift; sourceTree = "<group>"; };
 		574603CC2E0BCC0F00AD7E22 /* FileVarsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVarsData.swift; sourceTree = "<group>"; };
-		574603CE2E0D50C600AD7E22 /* VariablesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VariablesModel.swift; sourceTree = "<group>"; };
 		574627DE2E017E460039B10A /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
 		574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAppInboxRepresentable.swift; sourceTree = "<group>"; };
 		57F4AF562E09813400F4ED37 /* NativeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeDisplayView.swift; sourceTree = "<group>"; };
@@ -142,7 +140,6 @@
 		48E0B3402A66FE5F009C4312 /* SwiftUIStarter */ = {
 			isa = PBXGroup;
 			children = (
-				574603CE2E0D50C600AD7E22 /* VariablesModel.swift */,
 				574603CC2E0BCC0F00AD7E22 /* FileVarsData.swift */,
 				574603CA2E0ABB1600AD7E22 /* VariablesView.swift */,
 				57F4AF582E0990A800F4ED37 /* NativeDisplayUIViewModel.swift */,
@@ -384,7 +381,6 @@
 				574603CD2E0BCC0F00AD7E22 /* FileVarsData.swift in Sources */,
 				574627DF2E017E460039B10A /* InboxViewModel.swift in Sources */,
 				48E0B3422A66FE5F009C4312 /* SwiftUIStarterApp.swift in Sources */,
-				574603CF2E0D50C600AD7E22 /* VariablesModel.swift in Sources */,
 				574603CB2E0ABB1600AD7E22 /* VariablesView.swift in Sources */,
 				489C5FFC2A6C5CCE00440747 /* CTWebViewRepresentable.swift in Sources */,
 			);
