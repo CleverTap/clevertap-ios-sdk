@@ -127,13 +127,11 @@ struct SimpleMenuItemView: View {
             CleverTap.sharedInstance()?.defineVar(name: "var_double", double: Double(6.02))
             CleverTap.sharedInstance()?.defineVar(name: "var_string", string: "hello")
             CleverTap.sharedInstance()?.defineVar(name: "var_boolean", boolean: true)
-            
         case 1:
             print("Starting to define file vars:")
             FileVarsData.defineFileVars()
             print("Printing file vars values, they might be null if not yet fetched")
             FileVarsData.printFileVariables()
-            
         case 2:
             CleverTap.sharedInstance()?.fetchVariables({ isSuccess in
                 print("Variables Fetched = \(isSuccess)")
@@ -171,9 +169,7 @@ struct SimpleMenuItemView: View {
                 print(varValue ?? "")
             }
             FileVarsData.printFileVariablesValues()
-            
         case 6:
-            
             CleverTap.sharedInstance()?.onVariablesChanged {
                 print("Variables Changed")
             }
@@ -182,14 +178,13 @@ struct SimpleMenuItemView: View {
                 print("variablesChanged: reprinting files var data")
                 FileVarsData.printFileVariables()
             }
-            
-        case 7: CleverTap.sharedInstance()?.onceVariablesChanged {
-            print("One Time Variables Changed")
-        }
+        case 7:
             CleverTap.sharedInstance()?.onceVariablesChanged {
+                print("One Time Variables Changed")
+            }
+            CleverTap.sharedInstance()?.onceVariablesChangedAndNoDownloadsPending {
                 print("onceVariablesChangedAndNoDownloadsPending onceVariablesChangedAndNoDownloadsPending")
             }
-            
         default: break
         }
     }

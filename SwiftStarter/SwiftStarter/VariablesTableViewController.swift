@@ -44,9 +44,7 @@ class VariablesTableViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        title = "Variables"
-        //        navigationController?.navigationBar.prefersLargeTitles = false
-        
+        title = "Variables"        
         // Add back button
         let backButton = UIBarButtonItem(
             title: "Back",
@@ -109,9 +107,7 @@ extension VariablesTableViewController: UITableViewDelegate {
     }
     
     private func handleMenuSelection(for title: String, section: Int, row: Int) {
-        // Implement navigation or actions based on the selected menu item
         if section == 0 {
-            // First section items
             switch row {
             case 0:
                 CleverTap.sharedInstance()?.defineVar(name: "var_int", number: 3)
@@ -126,7 +122,6 @@ extension VariablesTableViewController: UITableViewDelegate {
                 FileVarsData.defineFileVars()
                 print("Printing file vars values, they might be null if not yet fetched")
                 FileVarsData.printFileVariables()
-                
             case 2:
                 CleverTap.sharedInstance()?.fetchVariables({ isSuccess in
                     print("Variables Fetched = \(isSuccess)")
@@ -164,9 +159,7 @@ extension VariablesTableViewController: UITableViewDelegate {
                     print(varValue ?? "")
                 }
                 FileVarsData.printFileVariablesValues()
-                
             case 6:
-                
                 CleverTap.sharedInstance()?.onVariablesChanged {
                     print("Variables Changed")
                 }
@@ -175,11 +168,10 @@ extension VariablesTableViewController: UITableViewDelegate {
                     print("variablesChanged: reprinting files var data")
                     FileVarsData.printFileVariables()
                 }
-                
             case 7: CleverTap.sharedInstance()?.onceVariablesChanged {
                     print("One Time Variables Changed")
                     }
-                CleverTap.sharedInstance()?.onceVariablesChanged {
+                CleverTap.sharedInstance()?.onceVariablesChangedAndNoDownloadsPending {
                     print("onceVariablesChangedAndNoDownloadsPending onceVariablesChangedAndNoDownloadsPending")
                 }
             default:
