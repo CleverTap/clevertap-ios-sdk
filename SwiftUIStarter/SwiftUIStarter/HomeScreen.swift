@@ -7,18 +7,20 @@ var cleverTapAdditionalInstance: CleverTap = {
     }()
 
 struct HomeScreen: View {
-    let eventList = [  "Record User Profile",
-                       "Record User Profile with Properties",
-                       "Record User Event called Product Viewed",
-                       "Record User Event with Properties",
-                       "Record User Charged Event",
-                       "Record User Event to an Additional Instance",
-                       "Show App Inbox",
-                       "Analytics in a WebView",
-                       "Increment User Profile Property",
-                       "Decrement User Profile Property",
-                       "Local Half Interstitial Push Primer"
-                    ]
+    let eventList = [
+        "Record User Profile",
+        "Record User Profile with Properties",
+        "Record User Event called Product Viewed",
+        "Record User Event with Properties",
+        "Record User Charged Event",
+        "Record User Event to an Additional Instance",
+        "Show App Inbox",
+        "Analytics in a WebView",
+        "Increment User Profile Property",
+        "Decrement User Profile Property",
+        "Local Half Interstitial Push Primer",
+        "Sync Custom Templates"
+    ]
     
     var body: some View {
         NavigationView {
@@ -79,6 +81,9 @@ func buttonAction(index: Int) {
             break;
         case 10:
             createLocalHalfInterstitialPushPrimer()
+            break;
+        case 11:
+            CleverTap.sharedInstance()?.syncCustomTemplates()
             break;
         default:
             break;
