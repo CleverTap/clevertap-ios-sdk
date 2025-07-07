@@ -398,9 +398,12 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (campaignId == nil) {
         campaignId = @"";
     }
+    if (buttonText == nil) {
+        buttonText = @"";
+    }
     
     if (self.notification.isLocalInApp) {
-        self.notification.actionExtras = @{CLTAP_NOTIFICATION_ID_TAG:campaignId, CLTAP_PROP_WZRK_CTA: buttonText};
+        self.notification.actionExtras = @{CLTAP_NOTIFICATION_ID_TAG: campaignId, CLTAP_PROP_WZRK_CTA: buttonText};
         if  (index == 0) {
             if (self.delegate && [self.delegate respondsToSelector:@selector(handleInAppPushPrimer:fromViewController:withFallbackToSettings:)]) {
                 [self.delegate handleInAppPushPrimer:self.notification
