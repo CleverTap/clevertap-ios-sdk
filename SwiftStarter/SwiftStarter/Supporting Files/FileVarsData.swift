@@ -26,7 +26,7 @@ class FileVarsData {
         tag: String = "FileVarsData",
         listenerCount: Int = 1
     ) {
-        for count in 0...listenerCount {
+        for count in 0..<listenerCount {
             let l1 = {
                 print("\(tag): onVariablesChangedAndNoDownloadsPending from listener-\(count) - should come after each fetch")
                 printFileVariables(tag: tag)
@@ -36,7 +36,7 @@ class FileVarsData {
                 print("\(tag): onceVariablesChangedAndNoDownloadsPending from listener-\(count) - should come only once globally")
             }
             CleverTap.sharedInstance()?.onVariablesChanged (l1)
-            CleverTap.sharedInstance()?.onVariablesChanged (l2)
+            CleverTap.sharedInstance()?.onceVariablesChanged (l2)
         }
     }
     
@@ -70,7 +70,7 @@ class FileVarsData {
             return nil
         }
         
-        for count in 0...fileReadyListenerCount {
+        for count in 0..<fileReadyListenerCount {
             variable.onFileIsReady {
                 print("\(tag):  ready:  from listener \(count)")
             }

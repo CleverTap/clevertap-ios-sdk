@@ -135,8 +135,8 @@ struct SimpleMenuItemView: View {
             FileVarsData.printFileVariables()
             
         case 2:
-            CleverTap.sharedInstance()?.fetchVariables({ isSucess in
-                print("Variables Fetched = \(isSucess)")
+            CleverTap.sharedInstance()?.fetchVariables({ isSuccess in
+                print("Variables Fetched = \(isSuccess)")
             })
         case 3:
             CleverTap.sharedInstance()?.syncVariables()
