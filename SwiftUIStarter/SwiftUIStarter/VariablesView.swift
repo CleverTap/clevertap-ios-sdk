@@ -10,13 +10,10 @@ struct VariablesMenuView: View {
         "Define file Variables with listeners",
         "Fetch Variables",
         "Sync Variables",
-//        "Parse Variables",
         "Get Variable",
         "Get Variable Value",
         "Add Variables Changed Callback",
-//        "Remove Variables Changed Callback",
         "Add One Time Variables Changed Callback",
-//        "Remove One Time Variables Changed Callback"
     ]
     
     private let fileTypeMenuItems: [(title: String, subtitle: String)] = [
@@ -25,7 +22,6 @@ struct VariablesMenuView: View {
         ("Global listeners & Define file Variables", "Adds listeners first and then registers the variables"),
         ("Multiple Global listeners & Define file Variables", "Adds listeners first and then registers the variables"),
         ("PrintFile Variables", ""),
-        ("Clear All File Resources", "")
     ]
     
     var body: some View {
@@ -92,7 +88,7 @@ struct SimpleMenuItemView: View {
     let title: String
     @State private var isPressed = false
     let index: Int
-
+    
     var body: some View {
         Button(action: {
             print("Selected: \(title)")
@@ -140,8 +136,8 @@ struct SimpleMenuItemView: View {
             
         case 2:
             CleverTap.sharedInstance()?.fetchVariables({ isSucess in
-            print("Variables Fetched = \(isSucess)")
-        })
+                print("Variables Fetched = \(isSucess)")
+            })
         case 3:
             CleverTap.sharedInstance()?.syncVariables()
         case 4:
@@ -184,14 +180,12 @@ struct SimpleMenuItemView: View {
             CleverTap.sharedInstance()?.onVariablesChangedAndNoDownloadsPending {
                 print("Files downloaded, onVariablesChangedAndNoDownloadsPending - should come after each fetch")
                 print("variablesChanged: reprinting files var data")
-            FileVarsData.printFileVariables()
+                FileVarsData.printFileVariables()
             }
-//        case 7:
-//            break
             
         case 7: CleverTap.sharedInstance()?.onceVariablesChanged {
             print("One Time Variables Changed")
-               }
+        }
             CleverTap.sharedInstance()?.onceVariablesChanged {
                 print("onceVariablesChangedAndNoDownloadsPending onceVariablesChangedAndNoDownloadsPending")
             }
