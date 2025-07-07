@@ -35,6 +35,8 @@
 		49EA454820E36104005E0E54 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EA454720E36104005E0E54 /* NotificationService.swift */; };
 		49EA454C20E36104005E0E54 /* NotificationService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 49EA454520E36103005E0E54 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		577917AC27034C9C00C676F4 /* CustomDomainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577917AB27034C9B00C676F4 /* CustomDomainViewController.swift */; };
+		5784554D2E1B996C004EB946 /* VariablesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5784554C2E1B996C004EB946 /* VariablesTableViewController.swift */; };
+		5784554F2E1BA506004EB946 /* FileVarsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5784554E2E1BA506004EB946 /* FileVarsData.swift */; };
 		57F4AF4D2E054AE400F4ED37 /* NativeDisplayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF4C2E054AE400F4ED37 /* NativeDisplayViewController.swift */; };
 		57F4AF4F2E054D7F00F4ED37 /* NativeDisplayTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57F4AF4E2E054D7F00F4ED37 /* NativeDisplayTableViewCell.xib */; };
 		57F4AF512E054DC200F4ED37 /* NativeDisplayTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF502E054DC200F4ED37 /* NativeDisplayTableViewCell.swift */; };
@@ -190,6 +192,8 @@
 		49EA454720E36104005E0E54 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		49EA454920E36104005E0E54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		577917AB27034C9B00C676F4 /* CustomDomainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDomainViewController.swift; sourceTree = "<group>"; };
+		5784554C2E1B996C004EB946 /* VariablesTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VariablesTableViewController.swift; sourceTree = "<group>"; };
+		5784554E2E1BA506004EB946 /* FileVarsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVarsData.swift; sourceTree = "<group>"; };
 		57F4AF4C2E054AE400F4ED37 /* NativeDisplayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeDisplayViewController.swift; sourceTree = "<group>"; };
 		57F4AF4E2E054D7F00F4ED37 /* NativeDisplayTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NativeDisplayTableViewCell.xib; sourceTree = "<group>"; };
 		57F4AF502E054DC200F4ED37 /* NativeDisplayTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeDisplayTableViewCell.swift; sourceTree = "<group>"; };
@@ -325,6 +329,7 @@
 		0740612720C1509E00D8F4C9 /* SwiftStarter */ = {
 			isa = PBXGroup;
 			children = (
+				5784554C2E1B996C004EB946 /* VariablesTableViewController.swift */,
 				57F4AF4C2E054AE400F4ED37 /* NativeDisplayViewController.swift */,
 				0740612820C1509E00D8F4C9 /* AppDelegate.swift */,
 				0740612A20C1509E00D8F4C9 /* ViewController.swift */,
@@ -455,6 +460,7 @@
 		F98E7CCC2487E68000610431 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				5784554E2E1BA506004EB946 /* FileVarsData.swift */,
 				57F4AF502E054DC200F4ED37 /* NativeDisplayTableViewCell.swift */,
 				57F4AF4E2E054D7F00F4ED37 /* NativeDisplayTableViewCell.xib */,
 				57F4AF522E0554AA00F4ED37 /* NativeDisplayButtonsTableViewCell.swift */,
@@ -998,6 +1004,8 @@
 				07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */,
 				57FB79FD2DF825680097FB65 /* AppInboxTableViewCell.swift in Sources */,
 				577917AC27034C9C00C676F4 /* CustomDomainViewController.swift in Sources */,
+				5784554F2E1BA506004EB946 /* FileVarsData.swift in Sources */,
+				5784554D2E1B996C004EB946 /* VariablesTableViewController.swift in Sources */,
 				57F4AF4D2E054AE400F4ED37 /* NativeDisplayViewController.swift in Sources */,
 				0740612920C1509E00D8F4C9 /* AppDelegate.swift in Sources */,
 				57F4AF512E054DC200F4ED37 /* NativeDisplayTableViewCell.swift in Sources */,
