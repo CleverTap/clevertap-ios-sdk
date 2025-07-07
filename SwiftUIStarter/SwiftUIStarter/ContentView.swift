@@ -1,8 +1,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var customInterstitialVM = CTCustomInterstitialViewModel()
+    let customInterstitialPresenter = CTCustomInterstitialPresenter.shared
+    
+    @StateObject private var openURLConfirmVM = CTOpenURLConfirmViewModel()
+    private let openURLConfirmPresenter = CTOpenURLConfirmPresenter.shared
+    
     var body: some View {
-        HomeScreen()
+        ZStack {
+            HomeScreen()
+            CTCustomInterstitialView(viewModel: customInterstitialVM)
+            CTOpenURLConfirmView(viewModel: openURLConfirmVM)
+        }.onAppear {
+            customInterstitialPresenter.viewModel = customInterstitialVM
+            openURLConfirmPresenter.viewModel = openURLConfirmVM
+        }
     }
 }
 
