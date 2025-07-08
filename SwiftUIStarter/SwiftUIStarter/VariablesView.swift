@@ -88,6 +88,7 @@ struct SimpleMenuItemView: View {
     let title: String
     @State private var isPressed = false
     let index: Int
+    private let definedVariableKeys: [String] = ["var_int", "var_long", "var_short", "var_float", "var_double", "var_string", "var_boolean"]
     
     var body: some View {
         Button(action: {
@@ -139,39 +140,25 @@ struct SimpleMenuItemView: View {
         case 3:
             CleverTap.sharedInstance()?.syncVariables()
         case 4:
-            var varValues: [Var?] = []
-            
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_int"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_long"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_short"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_float"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_double"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_string"))
-            varValues.append(CleverTap.sharedInstance()?.getVariable("var_boolean"))
-            
             print("Printing variables (basic types) :")
-            for varValue in varValues {
-                print(varValue?.name() ?? "not found")
-            }
+            
+            let varValues = definedVariableKeys.compactMap { CleverTap.sharedInstance()?.getVariable($0) }
+            varValues.forEach { print($0.name()) }
+            
         case 5:
-            var varValues: [Any?] = []
-            
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_int"))
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_long"))
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_short"))
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_float"))
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_double"))
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_string"))
-            varValues.append(CleverTap.sharedInstance()?.getVariableValue("var_boolean"))
-            
             print("Printing variables Values (basic types) :")
-            for varValue in varValues {
-                print(varValue ?? "")
-            }
+            
+            let varValues = definedVariableKeys.compactMap { CleverTap.sharedInstance()?.getVariableValue($0) }
+            varValues.forEach { print($0) }
+            
             FileVarsData.printFileVariablesValues()
         case 6:
             CleverTap.sharedInstance()?.onVariablesChanged {
                 print("Variables Changed")
+                self.definedVariableKeys.forEach { key in
+                    let val = CleverTap.sharedInstance()?.getVariableValue(key) ?? ""
+                    print("Key: \(key), Value: \(val)")
+                }
             }
             CleverTap.sharedInstance()?.onVariablesChangedAndNoDownloadsPending {
                 print("Files downloaded, onVariablesChangedAndNoDownloadsPending - should come after each fetch")
