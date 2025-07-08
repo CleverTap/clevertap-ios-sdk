@@ -1874,18 +1874,15 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out along with system events, dropping system event: %@", self, self.deviceInfo.deviceId, event);
         return YES;
     }
-    
     // Custom event
     if (self.currentUserOptedOut && !isSystemEvent) {
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
         return YES;
     }
-    
     if ([self isMuted]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: is muted, dropping event: %@", self, event);
         return YES;
     }
-    
     return NO;
 }
 
@@ -2512,7 +2509,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (NSString*)_optOutAllowSystemEventsKey {
     NSString *currentGUID = self.deviceInfo.deviceId;
-    return  currentGUID ? [NSString stringWithFormat:@"%@:OptOutAllowSystemEventsKey:%@", self.config.accountId, currentGUID] : nil;
+    return  currentGUID ? [NSString stringWithFormat:@"%@:OptOutAllowSystemEvents:%@", self.config.accountId, currentGUID] : nil;
 }
 
 - (void)_setCurrentUserOptOutStateFromStorage {
@@ -2533,16 +2530,14 @@ static BOOL sharedInstanceErrorLogged;
     self.currentUserOptedOut = optedOut;
     // Set "allow system events" to the opposite of optout for legacy cases where "allow system events" wont be cached.
     self.currentUserOptedOutAllowSystemEvents = !self.currentUserOptedOut;
-    
-    NSString *allowSystemEventskey = [self _optOutAllowSystemEventsKey];
-    if (!allowSystemEventskey) {
+    NSString *allowSystemEventsKey = [self _optOutAllowSystemEventsKey];
+    if (!allowSystemEventsKey) {
         CleverTapLogInternal(self.config.logLevel, @"Unable to set user optOut-allowSystemEvents state from storage: storage key is nil");
         return;
     }
-    BOOL allowSystemEvents = !optedOut;
-    allowSystemEvents = (BOOL) [CTPreferences getIntForKey:allowSystemEventskey withResetValue:!optedOut];
-    CleverTapLogInternal(self.config.logLevel, @"Setting user optOut-allowSystemEvents state from storage to: %@ for storageKey: %@", allowSystemEvents ? @"YES" : @"NO", allowSystemEventskey);
-    self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
+    self.currentUserOptedOutAllowSystemEvents = !optedOut;
+    self.currentUserOptedOutAllowSystemEvents = (BOOL) [CTPreferences getIntForKey:allowSystemEventsKey withResetValue:!optedOut];
+    CleverTapLogInternal(self.config.logLevel, @"Setting user optOut-allowSystemEvents state from storage to: %@ for storageKey: %@", self.currentUserOptedOutAllowSystemEvents ? @"YES" : @"NO", allowSystemEventsKey);
 }
 
 - (void)cacheGUIDSforProfile:(NSDictionary*)profileEvent {
@@ -2791,7 +2786,6 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)setOptOut:(BOOL)enabled allowSystemEvents:(BOOL)allowSystemEvents {
-    
     [self.dispatchQueueManager runSerialAsync:^{
         CleverTapLogDebug(self.config.logLevel,
                           @"%@: User: %@ OptOut set to: %@, allowSystemEvents set to: %@",
@@ -2804,6 +2798,10 @@ static BOOL sharedInstanceErrorLogged;
             CLTAP_ALLOW_SYSTEM_EVENTS: @(allowSystemEvents)
         };
         if (enabled) {
+            // We set currentUserOptedOut as NO to unblock the profile push when a change in AllowSystemEvents needs to be pushed to profile
+            if (self.currentUserOptedOutAllowSystemEvents != allowSystemEvents) {
+                self.currentUserOptedOut = NO;
+            }
             [self profilePush:profile];
             self.currentUserOptedOut = enabled;  // if opting out set this after processing the profile event that updates the server optOut state
             self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
@@ -2812,8 +2810,6 @@ static BOOL sharedInstanceErrorLogged;
             self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
             [self profilePush:profile];
         }
-        
-
         NSString *key = [self _optOutKey];
         if (!key) {
             CleverTapLogInternal(self.config.logLevel, @"unable to store user optOut, optOutKey is nil");
