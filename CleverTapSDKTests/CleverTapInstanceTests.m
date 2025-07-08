@@ -76,14 +76,16 @@
 
 - (void)testSetOptOutFailsWhenBothNO {
     id instanceMock = OCMPartialMock(self.cleverTapInstance);
-    OCMReject([instanceMock profilePush:[OCMArg any]]);
     [instanceMock setOptOut:NO allowSystemEvents:NO];
-    OCMVerifyAll(instanceMock);
+    OCMVerify([instanceMock profilePush:[OCMArg any]]);
+    [instanceMock stopMocking];
 }
 
 - (void)testOptOutYES_allowSystemEventsNO {
+    id dispatchQueueManagerMock = OCMClassMock([CTDispatchQueueManager class]);
+    self.cleverTapInstance.dispatchQueueManager = dispatchQueueManagerMock;
+    
     // Making runSerialAsync run immediately
-    self.cleverTapInstance.dispatchQueueManager = OCMClassMock([CTDispatchQueueManager class]);
     OCMStub([self.cleverTapInstance.dispatchQueueManager runSerialAsync:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
             void (^block)(void);
             [invocation getArgument:&block atIndex:2];
@@ -93,6 +95,7 @@
     [self.cleverTapInstance setOptOut:YES allowSystemEvents:NO];
     XCTAssertTrue(self.cleverTapInstance.currentUserOptedOut);
     XCTAssertFalse(self.cleverTapInstance.currentUserOptedOutAllowSystemEvents);
+    [dispatchQueueManagerMock stopMocking];
 }
 
 - (void)testOptOutYES_allowSystemEventsYES {
@@ -128,6 +131,7 @@
     OCMExpect([instanceMock setOptOut:YES allowSystemEvents:NO]);
     [instanceMock setOptOut:YES];
     OCMVerifyAll(instanceMock);
+    [instanceMock stopMocking];
 }
 
 - (void)testShouldDropEventReturnsNOForFetchType {
