@@ -212,6 +212,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 @property (nonatomic, assign) BOOL pushedAPNSId;
 @property (atomic, assign) BOOL currentUserOptedOut;
+@property (atomic, assign) BOOL currentUserOptedOutAllowSystemEvents;
 @property (atomic, assign) BOOL offline;
 @property (atomic, assign) BOOL enableNetworkInfoReporting;
 @property (atomic, assign) BOOL initialEventsPushed;
@@ -1738,16 +1739,22 @@ static BOOL sharedInstanceErrorLogged;
         return NO;
     }
     
-    if (self.currentUserOptedOut) {
+    BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
+    
+    // If the user is opted out and has disallowed system events, drop the event if its a system event
+    if (self.currentUserOptedOut && !self.currentUserOptedOutAllowSystemEvents && isSystemEvent) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out along with system events, dropping system event: %@", self, self.deviceInfo.deviceId, event);
+        return YES;
+    }
+    // Custom event
+    if (self.currentUserOptedOut && !isSystemEvent) {
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
         return YES;
     }
-    
     if ([self isMuted]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: is muted, dropping event: %@", self, event);
         return YES;
     }
-    
     return NO;
 }
 
@@ -2411,7 +2418,13 @@ static BOOL sharedInstanceErrorLogged;
     return  currentGUID ? [NSString stringWithFormat:@"OptOut:%@", currentGUID] : nil;
 }
 
+- (NSString*)_optOutAllowSystemEventsKey {
+    NSString *currentGUID = self.deviceInfo.deviceId;
+    return  currentGUID ? [NSString stringWithFormat:@"%@:OptOutAllowSystemEvents:%@", self.config.accountId, currentGUID] : nil;
+}
+
 - (void)_setCurrentUserOptOutStateFromStorage {
+
     NSString *legacyKey = [self _legacyOptOutKey];
     NSString *key = [self _optOutKey];
     if (!key) {
@@ -2426,6 +2439,16 @@ static BOOL sharedInstanceErrorLogged;
     }
     CleverTapLogInternal(self.config.logLevel, @"Setting user optOut state from storage to: %@ for storageKey: %@", optedOut ? @"YES" : @"NO", key);
     self.currentUserOptedOut = optedOut;
+    // Set "allow system events" to the opposite of optout for legacy cases where "allow system events" wont be cached.
+    self.currentUserOptedOutAllowSystemEvents = !self.currentUserOptedOut;
+    NSString *allowSystemEventsKey = [self _optOutAllowSystemEventsKey];
+    if (!allowSystemEventsKey) {
+        CleverTapLogInternal(self.config.logLevel, @"Unable to set user optOut-allowSystemEvents state from storage: storage key is nil");
+        return;
+    }
+    self.currentUserOptedOutAllowSystemEvents = !optedOut;
+    self.currentUserOptedOutAllowSystemEvents = (BOOL) [CTPreferences getIntForKey:allowSystemEventsKey withResetValue:!optedOut];
+    CleverTapLogInternal(self.config.logLevel, @"Setting user optOut-allowSystemEvents state from storage to: %@ for storageKey: %@", self.currentUserOptedOutAllowSystemEvents ? @"YES" : @"NO", allowSystemEventsKey);
 }
 
 - (void)cacheGUIDSforProfile:(NSDictionary*)profileEvent {
@@ -2530,6 +2553,7 @@ static BOOL sharedInstanceErrorLogged;
         
         // set OptOut to false for the old user
         self.currentUserOptedOut = NO;
+        self.currentUserOptedOutAllowSystemEvents = YES;
         
         // unregister the push token on the current user
         [self pushDeviceTokenWithAction:CleverTapPushTokenUnregister];
@@ -2669,14 +2693,32 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Profile API
 
 - (void)setOptOut:(BOOL)enabled {
-    [self.dispatchQueueManager runSerialAsync:^ {
-        CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ OptOut set to: %@", self, self.deviceInfo.deviceId, enabled ? @"YES" : @"NO");
-        NSDictionary *profile = @{CLTAP_OPTOUT: @(enabled)};
+    [self setOptOut:enabled allowSystemEvents:NO];
+}
+
+- (void)setOptOut:(BOOL)enabled allowSystemEvents:(BOOL)allowSystemEvents {
+    [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapLogDebug(self.config.logLevel,
+                          @"%@: User: %@ OptOut set to: %@, allowSystemEvents set to: %@",
+                          self, self.deviceInfo.deviceId,
+                          enabled ? @"YES" : @"NO",
+                          allowSystemEvents ? @"YES" : @"NO");
+
+        NSDictionary *profile = @{
+            CLTAP_OPTOUT: @(enabled),
+            CLTAP_ALLOW_SYSTEM_EVENTS: @(allowSystemEvents)
+        };
         if (enabled) {
+            // We set currentUserOptedOut as NO to unblock the profile push when a change in AllowSystemEvents needs to be pushed to profile
+            if (self.currentUserOptedOutAllowSystemEvents != allowSystemEvents) {
+                self.currentUserOptedOut = NO;
+            }
             [self profilePush:profile];
             self.currentUserOptedOut = enabled;  // if opting out set this after processing the profile event that updates the server optOut state
+            self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
         } else {
             self.currentUserOptedOut = enabled;  // if opting back in set this before processing the profile event that updates the server optOut state
+            self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
             [self profilePush:profile];
         }
         NSString *key = [self _optOutKey];
@@ -2685,8 +2727,16 @@ static BOOL sharedInstanceErrorLogged;
             return;
         }
         [CTPreferences putInt:enabled forKey:key];
+        
+        NSString *allowSystemEventsKey = [self _optOutAllowSystemEventsKey];
+        if (!allowSystemEventsKey) {
+            CleverTapLogInternal(self.config.logLevel, @"unable to store user optOut-allowSystemEventsKey, optOut-allowSystemEventsKey is nil");
+            return;
+        }
+        [CTPreferences putInt:allowSystemEvents forKey:allowSystemEventsKey];
     }];
 }
+
 - (void)setOffline:(BOOL)offline {
     _offline = offline;
     if (_offline) {

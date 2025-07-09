@@ -10,6 +10,10 @@
 #import "BaseTestCase.h"
 #import "CTPlistInfo.h"
 #import "CTPreferences.h"
+#import "CleverTap+Tests.h"
+#import <OCMock/OCMock.h>
+#import "CTConstants.h"
+#import "CTValidator.h"
 
 @interface CleverTapInstanceTests : BaseTestCase
 
@@ -68,6 +72,140 @@
     XCTAssertNotNil(instance);
     XCTAssertEqualObjects([[instance config] accountId], @"test");
     XCTAssertEqualObjects([[instance config] accountToken], @"test");
+}
+
+- (void)testSetOptOutFailsWhenBothNO {
+    id instanceMock = OCMPartialMock(self.cleverTapInstance);
+    [instanceMock setOptOut:NO allowSystemEvents:NO];
+    OCMVerify([instanceMock profilePush:[OCMArg any]]);
+    [instanceMock stopMocking];
+}
+
+- (void)testOptOutYES_allowSystemEventsNO {
+    id dispatchQueueManagerMock = OCMClassMock([CTDispatchQueueManager class]);
+    self.cleverTapInstance.dispatchQueueManager = dispatchQueueManagerMock;
+    
+    // Making runSerialAsync run immediately
+    OCMStub([self.cleverTapInstance.dispatchQueueManager runSerialAsync:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
+            void (^block)(void);
+            [invocation getArgument:&block atIndex:2];
+            block();
+        });
+    
+    [self.cleverTapInstance setOptOut:YES allowSystemEvents:NO];
+    XCTAssertTrue(self.cleverTapInstance.currentUserOptedOut);
+    XCTAssertFalse(self.cleverTapInstance.currentUserOptedOutAllowSystemEvents);
+    [dispatchQueueManagerMock stopMocking];
+}
+
+- (void)testOptOutYES_allowSystemEventsYES {
+    self.cleverTapInstance.dispatchQueueManager = OCMClassMock([CTDispatchQueueManager class]);
+    OCMStub([self.cleverTapInstance.dispatchQueueManager runSerialAsync:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
+        void (^block)(void);
+        [invocation getArgument:&block atIndex:2];
+        block();
+    });
+
+    [self.cleverTapInstance setOptOut:YES allowSystemEvents:YES];
+    
+    XCTAssertTrue(self.cleverTapInstance.currentUserOptedOut);
+    XCTAssertTrue(self.cleverTapInstance.currentUserOptedOutAllowSystemEvents);
+}
+
+- (void)testOptOutNO_allowSystemEventsYES {
+    self.cleverTapInstance.dispatchQueueManager = OCMClassMock([CTDispatchQueueManager class]);
+    OCMStub([self.cleverTapInstance.dispatchQueueManager runSerialAsync:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
+        void (^block)(void);
+        [invocation getArgument:&block atIndex:2];
+        block();
+    });
+
+    [self.cleverTapInstance setOptOut:NO allowSystemEvents:YES];
+
+    XCTAssertFalse(self.cleverTapInstance.currentUserOptedOut);
+    XCTAssertTrue(self.cleverTapInstance.currentUserOptedOutAllowSystemEvents);
+}
+
+- (void)testSetOptOutAliasCallsMainMethodWithNOSystemEvents {
+    id instanceMock = OCMPartialMock(self.cleverTapInstance);
+    OCMExpect([instanceMock setOptOut:YES allowSystemEvents:NO]);
+    [instanceMock setOptOut:YES];
+    OCMVerifyAll(instanceMock);
+    [instanceMock stopMocking];
+}
+
+- (void)testShouldDropEventReturnsNOForFetchType {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"anyEvent"};
+    BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:CleverTapEventTypeFetch];
+    XCTAssertFalse(result, @"Fetch event type should never be dropped");
+}
+
+- (void)testShouldDropEventDropsSystemEventWhenOptedOutAndDisallowSystemEvents {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"_system_event_name"};
+    self.cleverTapInstance.currentUserOptedOut = YES;
+    self.cleverTapInstance.currentUserOptedOutAllowSystemEvents = NO;
+
+    id validatorMock = OCMClassMock([CTValidator class]);
+    OCMStub([validatorMock isRestrictedEventName:@"_system_event_name"]).andReturn(YES);
+
+    BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123]; // any non-fetch type
+    XCTAssertTrue(result, @"System event should be dropped if opted out and system events disallowed");
+
+    [validatorMock stopMocking];
+}
+
+- (void)testShouldDropEventDoesNotDropSystemEventWhenAllowSystemEventsIsYES {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"_system_event_name"};
+    self.cleverTapInstance.currentUserOptedOut = YES;
+    self.cleverTapInstance.currentUserOptedOutAllowSystemEvents = YES;
+
+    id validatorMock = OCMClassMock([CTValidator class]);
+    OCMStub([validatorMock isRestrictedEventName:@"_system_event_name"]).andReturn(YES);
+
+    BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123];
+    XCTAssertFalse(result, @"System event should not be dropped if system events are allowed");
+
+    [validatorMock stopMocking];
+}
+
+- (void)testShouldDropEventDropsCustomEventWhenOptedOut {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"custom_event"};
+    self.cleverTapInstance.currentUserOptedOut = YES;
+    self.cleverTapInstance.currentUserOptedOutAllowSystemEvents = NO;
+
+    id validatorMock = OCMClassMock([CTValidator class]);
+    OCMStub([validatorMock isRestrictedEventName:@"custom_event"]).andReturn(NO);
+
+    BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123];
+    XCTAssertTrue(result, @"Custom event should be dropped if user opted out");
+
+    [validatorMock stopMocking];
+}
+
+- (void)testShouldNotDropEventIfUserNotOptedOut {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"custom_event"};
+    self.cleverTapInstance.currentUserOptedOut = NO;
+
+    id validatorMock = OCMClassMock([CTValidator class]);
+    OCMStub([validatorMock isRestrictedEventName:@"custom_event"]).andReturn(NO);
+
+    BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123];
+    XCTAssertFalse(result, @"Event should not be dropped if user not opted out");
+
+    [validatorMock stopMocking];
+}
+
+- (void)testShouldDropEventWhenMuted {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"any_event"};
+    self.cleverTapInstance.currentUserOptedOut = NO;
+
+    id instanceMock = OCMPartialMock(self.cleverTapInstance);
+    OCMStub([instanceMock isMuted]).andReturn(YES);
+
+    BOOL result = [instanceMock _shouldDropEvent:event withType:123];
+    XCTAssertTrue(result, @"Event should be dropped if instance is muted");
+
+    [instanceMock stopMocking];
 }
 
 @end
