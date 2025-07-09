@@ -97,7 +97,6 @@
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vwb-zM-spJ">
                                         <rect key="frame" x="20" y="20" width="294" height="21.5"/>
-                                        <accessibility key="accessibilityConfiguration" identifier="messageTitle"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -110,7 +109,6 @@
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Message" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="peN-Xe-IXq">
                                         <rect key="frame" x="20" y="48.5" width="294" height="19.5"/>
-                                        <accessibility key="accessibilityConfiguration" identifier="messageText"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <color key="textColor" red="0.4941176471" green="0.4941176471" blue="0.4941176471" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
@@ -165,13 +163,11 @@
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tNp-hZ-n1O">
                                         <rect key="frame" x="0.0" y="1" width="222.5" height="44"/>
-                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_1"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                         <state key="normal" title="Button 1"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6HR-4n-3kW">
                                         <rect key="frame" x="222.5" y="1" width="222" height="44"/>
-                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_2"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="dlI-8G-GZi"/>
                                         </constraints>
@@ -180,7 +176,6 @@
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gK8-Zm-MZc">
                                         <rect key="frame" x="444.5" y="1" width="222.5" height="44"/>
-                                        <accessibility key="accessibilityConfiguration" identifier="cta_button_3"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="h2I-7h-XWN"/>
                                         </constraints>
