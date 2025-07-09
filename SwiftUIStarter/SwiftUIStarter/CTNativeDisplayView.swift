@@ -1,5 +1,5 @@
 //
-//  NativeDisplayUIView.swift
+//  CTNativeDisplayViewModel.swift
 //  SwiftUIStarter
 //
 //  Copyright © 2025 CleverTap. All rights reserved.
@@ -8,8 +8,10 @@
 import SwiftUI
 import CleverTapSDK
 
-struct NativeDisplayUIView: View {
-    @StateObject private var viewModel = NativeDisplayUIViewModel()
+struct CTNativeDisplayView: View {
+    @ObservedObject private var viewModel = CTNativeDisplayViewModel()
+    private static let allDisplayUnitsTitle = "ALL DISPLAY UNITS"
+    @State private var listTitle = CTNativeDisplayView.allDisplayUnitsTitle
     @State private var displayUnitID = ""
     @State private var showingAlert = false
     @State private var alertMessage = ""
@@ -20,7 +22,7 @@ struct NativeDisplayUIView: View {
             VStack(spacing: 0) {
                 VStack(spacing: 16) {
                     HStack {
-                        Text("NATIVE DISPLAY\nNOTE: CLICKING ON BELOW BUTTON WILL RECORD EVENT WITH SAME NAME.")
+                        Text("CLICKING ON BELOW BUTTONS WILL RECORD EVENT WITH SAME NAME (WITHOUT SPACES)")
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.gray)
@@ -31,13 +33,13 @@ struct NativeDisplayUIView: View {
                     
                     // Display type buttons
                     HStack(spacing: 20) {
-                        Button("ND_Simple") {
+                        Button("Native Display Simple") {
                             viewModel.handleDisplayType(.simple)
                         }
                         .foregroundColor(.blue)
                         .font(.system(size: 16))
                         
-                        Button("ND_Carousel") {
+                        Button("Native Display Carousel") {
                             viewModel.handleDisplayType(.carousel)
                         }
                         .foregroundColor(.blue)
@@ -51,6 +53,7 @@ struct NativeDisplayUIView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         
                         Button("Get Unit") {
+                            listTitle = "DISPLAY UNIT WITH ID: \(displayUnitID)"
                             viewModel.getDisplayUnit(withID: displayUnitID)
                         }
                         .foregroundColor(.blue)
@@ -60,6 +63,7 @@ struct NativeDisplayUIView: View {
                     
                     // Get all display units button
                     Button("Get all display units") {
+                        listTitle = CTNativeDisplayView.allDisplayUnitsTitle
                         viewModel.getAllDisplayUnits()
                     }
                     .foregroundColor(.blue)
@@ -75,7 +79,7 @@ struct NativeDisplayUIView: View {
                 VStack(spacing: 0) {
                     // Section header
                     HStack {
-                        Text("ALL DISPLAY UNITS")
+                        Text(listTitle)
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.gray)
@@ -112,10 +116,12 @@ struct NativeDisplayUIView: View {
             .onAppear {
                 viewModel.setupCleverTap()
             }
-            .alert(alertTitle, isPresented: $showingAlert) {
-                Button("OK") { }
-            } message: {
-                Text(alertMessage)
+            .alert(isPresented: $showingAlert) {
+                Alert(
+                    title: Text(alertTitle),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
     }
@@ -196,6 +202,6 @@ struct DisplayUnitRowView: View {
 // MARK: - Preview
 struct NativeDisplayUIView_Previews: PreviewProvider {
     static var previews: some View {
-        NativeDisplayUIView()
+        CTNativeDisplayView()
     }
 }
