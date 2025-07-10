@@ -1735,24 +1735,37 @@ static BOOL sharedInstanceErrorLogged;
 
 - (BOOL)_shouldDropEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
     
+    // fetch events
     if (type == CleverTapEventTypeFetch) {
+        return NO;
+    }
+    // muted
+    if ([self isMuted]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: is muted, dropping event: %@", self, event);
+        return YES;
+    }
+    // opted in
+    if (!self.currentUserOptedOut) {
+        return NO;
+    }
+    // fully opted out
+    if (!self.currentUserOptedOutAllowSystemEvents) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
+        return YES;
+    }
+    // opted out and system events allowed
+    if (type != CleverTapEventTypeRaised && type != CleverTapEventTypeNotificationViewed) {
         return NO;
     }
     
     BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
-    
-    // If the user is opted out and has disallowed system events, drop the event if its a system event
-    if (self.currentUserOptedOut && !self.currentUserOptedOutAllowSystemEvents && isSystemEvent) {
+    if (isSystemEvent) {
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out along with system events, dropping system event: %@", self, self.deviceInfo.deviceId, event);
         return YES;
     }
     // Custom event
-    if (self.currentUserOptedOut && !isSystemEvent) {
+    else {
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
-        return YES;
-    }
-    if ([self isMuted]) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: is muted, dropping event: %@", self, event);
         return YES;
     }
     return NO;
