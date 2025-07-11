@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, retain, nullable) NSString *medium;
 @property (atomic, retain, nullable) NSString *campaign;
 @property (atomic, retain, nullable) NSDictionary *wzrkParams;
+@property (atomic, assign) BOOL encryptionInTransitFailed;
 
 - (instancetype)init NS_UNAVAILABLE;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
