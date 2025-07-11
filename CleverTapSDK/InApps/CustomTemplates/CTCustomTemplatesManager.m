@@ -188,6 +188,11 @@ static NSMutableArray<id<CTTemplateProducer>> *templateProducers;
     NSMutableDictionary *definitions = [NSMutableDictionary dictionary];
     NSDictionary *templates = [self templates];
     [templates enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull templateKey, CTCustomTemplate * _Nonnull template, BOOL * _Nonnull stop) {
+        if (template.isSystemDefined) {
+            // Don't add system defined templates in sync payload.
+            return;
+        }
+
         NSMutableDictionary *templateData = [NSMutableDictionary dictionary];
         templateData[@"type"] = template.templateType;
 
