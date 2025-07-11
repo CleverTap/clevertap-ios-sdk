@@ -16,7 +16,7 @@ import Security
     
     private var sessionKey: Any?
     
-    @available(iOS 13.0, *)
+    @available(iOS 13.0, tvOS 13.0, *)
     func getOrGenerateSessionKey() -> SymmetricKey {
         return keyQueue.sync {
             if let key = sessionKey as? SymmetricKey {
@@ -31,7 +31,7 @@ import Security
     }
     
     @objc public func getSessionKeyBase64() -> String? {
-        if #available(iOS 13.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, *) {
             let key = getOrGenerateSessionKey()
             let keyData = key.withUnsafeBytes { Data($0) }
             return keyData.base64EncodedString()
@@ -42,7 +42,7 @@ import Security
     }
     
     @objc public func encrypt(object: Any) -> [String: Any] {
-        if #available(iOS 13.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, *) {
             do {
                 guard JSONSerialization.isValidJSONObject(object),
                       let data = try? JSONSerialization.data(withJSONObject: object, options: []) else {
@@ -70,7 +70,7 @@ import Security
     }
     
     @objc public func decrypt(responseData: Data) -> Data {
-        if #available(iOS 13.0, *) {
+        if #available(iOS 13.0, tvOS 13.0, *) {
             guard let response = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
                   JSONSerialization.isValidJSONObject(response),
                   let nonce = response[NetworkEncryptionManager.ITV] as? String,
