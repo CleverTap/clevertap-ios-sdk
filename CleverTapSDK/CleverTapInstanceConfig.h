@@ -60,4 +60,5 @@
 - (void)setEncryptionLevel:(CleverTapEncryptionLevel)encryptionLevel;
 - (void)setEnableFileProtection:(BOOL)enableFileProtection;
 - (void)setHandshakeDomain:(NSString * _Nonnull)handshakeDomain;
+- (void)setEncryptionInTransitEnabled:(BOOL)encryptionInTransitEnabled;
 @end
