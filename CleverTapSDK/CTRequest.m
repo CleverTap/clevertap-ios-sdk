@@ -17,12 +17,11 @@
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *url;
 
-
 @end
 
 @implementation CTRequest
 
-- (CTRequest *_Nonnull)initWithHttpMethod:(NSString *_Nonnull)httpMethod config:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url additionalHeaders: (NSDictionary *_Nullable)additionalHeaders {
+- (CTRequest * _Nonnull)initWithHttpMethod:(NSString * _Nonnull)httpMethod config:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url additionalHeaders:(NSDictionary * _Nullable)additionalHeaders {
     self = [super init];
     if (self) {
         _httpMethod = httpMethod;

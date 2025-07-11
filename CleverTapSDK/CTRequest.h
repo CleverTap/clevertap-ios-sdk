@@ -14,7 +14,7 @@ typedef void (^CTNetworkResponseErrorBlock)(NSError * _Nullable error);
 
 @interface CTRequest : NSObject
 
-- (CTRequest *_Nonnull)initWithHttpMethod:(NSString *_Nonnull)httpMethod config:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url additionalHeaders: (NSDictionary *_Nullable)additionalHeaders;
+- (CTRequest * _Nonnull)initWithHttpMethod:(NSString * _Nonnull)httpMethod config:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url additionalHeaders:(NSDictionary * _Nullable)additionalHeaders;
 
 - (void)onResponse:(CTNetworkResponseBlock _Nonnull)responseBlock;
 - (void)onError:(CTNetworkResponseErrorBlock _Nonnull)errorBlock;

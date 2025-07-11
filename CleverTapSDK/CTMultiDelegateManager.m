@@ -67,6 +67,14 @@
     }
 }
 
+- (void)notifyDelegatesDeviceIdWillChange {
+    for (id<CTSwitchUserDelegate> delegate in self.switchUserDelegates) {
+        if (delegate && [delegate respondsToSelector:@selector(deviceIdWillChange)]) {
+            [delegate deviceIdWillChange];
+        }
+    }
+}
+
 #pragma mark CTBatchSentDelegate
 - (void)addBatchSentDelegate:(id<CTBatchSentDelegate>)delegate {
     [self.batchSentDelegates addObject:delegate];
