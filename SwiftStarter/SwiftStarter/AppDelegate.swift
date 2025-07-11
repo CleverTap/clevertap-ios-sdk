@@ -12,6 +12,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // Override point for customization after application launch.
         // register for push notifications
         registerForPush()
+        CleverTap.registerCustom(inAppTemplates: CTCustomTemplatesProducer())
         
         // Configure and init the default shared CleverTap instance (add CleverTap Account ID and Account Token in your .plist file)
         CleverTap.autoIntegrate()

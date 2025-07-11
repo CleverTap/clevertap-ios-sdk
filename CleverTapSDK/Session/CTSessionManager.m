@@ -102,6 +102,7 @@
 - (void)resetSession {
     if ([CTUIUtils runningInsideAppExtension]) return;
     self.appLaunchProcessed = NO;
+    self.encryptionInTransitFailed = NO;
     long lastSessionID = 0;
     long lastSessionEnd = 0;
     if (self.config.isDefaultInstance) {
