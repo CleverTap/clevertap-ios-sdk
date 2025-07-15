@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.3.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.1) (July 15, 2025)
+
+#### Fixed
+- Fixed a bug where some system events were dropped in case of partial opt-outs.
+
 ### [Version 7.3.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.0) (July 11, 2025)
 
 #### Added
