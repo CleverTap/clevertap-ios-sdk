@@ -2805,22 +2805,24 @@ static BOOL sharedInstanceErrorLogged;
                           self, self.deviceInfo.deviceId,
                           enabled ? @"YES" : @"NO",
                           allowSystemEvents ? @"YES" : @"NO");
+        
+        BOOL resolvedAllowSystemEvents = !enabled || allowSystemEvents;
 
         NSDictionary *profile = @{
             CLTAP_OPTOUT: @(enabled),
-            CLTAP_ALLOW_SYSTEM_EVENTS: @(allowSystemEvents)
+            CLTAP_ALLOW_SYSTEM_EVENTS: @(resolvedAllowSystemEvents)
         };
         if (enabled) {
             // We set currentUserOptedOut as NO to unblock the profile push when a change in AllowSystemEvents needs to be pushed to profile
-            if (self.currentUserOptedOutAllowSystemEvents != allowSystemEvents) {
+            if (self.currentUserOptedOutAllowSystemEvents != resolvedAllowSystemEvents) {
                 self.currentUserOptedOut = NO;
             }
             [self profilePush:profile];
             self.currentUserOptedOut = enabled;  // if opting out set this after processing the profile event that updates the server optOut state
-            self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
+            self.currentUserOptedOutAllowSystemEvents = resolvedAllowSystemEvents;
         } else {
             self.currentUserOptedOut = enabled;  // if opting back in set this before processing the profile event that updates the server optOut state
-            self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
+            self.currentUserOptedOutAllowSystemEvents = resolvedAllowSystemEvents;
             [self profilePush:profile];
         }
         NSString *key = [self _optOutKey];
@@ -2835,7 +2837,7 @@ static BOOL sharedInstanceErrorLogged;
             CleverTapLogInternal(self.config.logLevel, @"unable to store user optOut-allowSystemEventsKey, optOut-allowSystemEventsKey is nil");
             return;
         }
-        [CTPreferences putInt:allowSystemEvents forKey:allowSystemEventsKey];
+        [CTPreferences putInt:resolvedAllowSystemEvents forKey:allowSystemEventsKey];
     }];
 }
 
