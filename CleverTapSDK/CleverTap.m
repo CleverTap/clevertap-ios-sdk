@@ -1790,12 +1790,8 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
-    if (isSystemEvent) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out along with system events, dropping system event: %@", self, self.deviceInfo.deviceId, event);
-        return YES;
-    }
-    // Custom event
-    else {
+    if (!isSystemEvent) {
+        // Custom event
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
         return YES;
     }
@@ -2796,7 +2792,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Profile API
 
 - (void)setOptOut:(BOOL)enabled {
-    [self setOptOut:enabled allowSystemEvents:NO];
+    [self setOptOut:enabled allowSystemEvents:!enabled];
 }
 
 - (void)setOptOut:(BOOL)enabled allowSystemEvents:(BOOL)allowSystemEvents {
@@ -2806,22 +2802,25 @@ static BOOL sharedInstanceErrorLogged;
                           self, self.deviceInfo.deviceId,
                           enabled ? @"YES" : @"NO",
                           allowSystemEvents ? @"YES" : @"NO");
+        
+        // setOptOut = false, allowSystemEvents = false
+        BOOL resolvedAllowSystemEvents = !enabled || allowSystemEvents;
 
         NSDictionary *profile = @{
             CLTAP_OPTOUT: @(enabled),
-            CLTAP_ALLOW_SYSTEM_EVENTS: @(allowSystemEvents)
+            CLTAP_ALLOW_SYSTEM_EVENTS: @(resolvedAllowSystemEvents)
         };
         if (enabled) {
             // We set currentUserOptedOut as NO to unblock the profile push when a change in AllowSystemEvents needs to be pushed to profile
-            if (self.currentUserOptedOutAllowSystemEvents != allowSystemEvents) {
+            if (self.currentUserOptedOutAllowSystemEvents != resolvedAllowSystemEvents) {
                 self.currentUserOptedOut = NO;
             }
             [self profilePush:profile];
             self.currentUserOptedOut = enabled;  // if opting out set this after processing the profile event that updates the server optOut state
-            self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
+            self.currentUserOptedOutAllowSystemEvents = resolvedAllowSystemEvents;
         } else {
             self.currentUserOptedOut = enabled;  // if opting back in set this before processing the profile event that updates the server optOut state
-            self.currentUserOptedOutAllowSystemEvents = allowSystemEvents;
+            self.currentUserOptedOutAllowSystemEvents = resolvedAllowSystemEvents;
             [self profilePush:profile];
         }
         NSString *key = [self _optOutKey];
@@ -2836,7 +2835,7 @@ static BOOL sharedInstanceErrorLogged;
             CleverTapLogInternal(self.config.logLevel, @"unable to store user optOut-allowSystemEventsKey, optOut-allowSystemEventsKey is nil");
             return;
         }
-        [CTPreferences putInt:allowSystemEvents forKey:allowSystemEventsKey];
+        [CTPreferences putInt:resolvedAllowSystemEvents forKey:allowSystemEventsKey];
     }];
 }
 
