@@ -2795,7 +2795,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Profile API
 
 - (void)setOptOut:(BOOL)enabled {
-    [self setOptOut:enabled allowSystemEvents:NO];
+    [self setOptOut:enabled allowSystemEvents:!enabled];
 }
 
 - (void)setOptOut:(BOOL)enabled allowSystemEvents:(BOOL)allowSystemEvents {
