@@ -96,16 +96,6 @@ jobs:
           echo "S3_FILENAME=$S3_FILENAME" >> $GITHUB_ENV
           echo "✅ Uploaded to S3 as $S3_FILENAME"
 
-      - name: Invalidate CloudFront Cache
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DIST_ID }}
-        run: |
-          aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DIST_ID" --paths '/*'
-          echo "✅ CloudFront invalidation triggered."
-
       - name: Pull Latest Changes
         run: |
           git pull origin develop --rebase || true

@@ -1791,8 +1791,7 @@ static BOOL sharedInstanceErrorLogged;
     
     BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
     if (isSystemEvent) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out along with system events, dropping system event: %@", self, self.deviceInfo.deviceId, event);
-        return YES;
+        return NO;
     }
     // Custom event
     else {
