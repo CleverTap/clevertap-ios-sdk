@@ -1790,11 +1790,8 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
-    if (isSystemEvent) {
-        return NO;
-    }
-    // Custom event
-    else {
+    if (!isSystemEvent) {
+        // Custom event
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
         return YES;
     }
@@ -2806,6 +2803,7 @@ static BOOL sharedInstanceErrorLogged;
                           enabled ? @"YES" : @"NO",
                           allowSystemEvents ? @"YES" : @"NO");
         
+        // setOptOut = false, allowSystemEvents = false
         BOOL resolvedAllowSystemEvents = !enabled || allowSystemEvents;
 
         NSDictionary *profile = @{
