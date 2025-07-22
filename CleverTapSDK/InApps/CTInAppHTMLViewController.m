@@ -28,6 +28,9 @@ typedef enum {
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
     CleverTapJSInterface *_jsInterface;
+    BOOL _isLayoutInProgress;
+    BOOL _isWebViewInitialized;
+    dispatch_semaphore_t _layoutSemaphore;
 }
 
 @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
@@ -49,6 +52,9 @@ typedef enum {
     if (self) {
         _jsInterface = [[CleverTapJSInterface alloc] initWithConfigForInApps:config fromController:self];
         self.shouldPassThroughTouches = (self.notification.position == CLTAP_INAPP_POSITION_TOP || self.notification.position == CLTAP_INAPP_POSITION_BOTTOM);
+        _isLayoutInProgress = NO;
+        _isWebViewInitialized = NO;
+        _layoutSemaphore = dispatch_semaphore_create(1);
     }
     return self;
 }
@@ -66,47 +72,142 @@ typedef enum {
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor clearColor];
-    [self layoutNotification];
+    
+    // Defer layout to avoid rotation conflicts
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self layoutNotificationSafely];
+    });
+}
+
+- (void)layoutNotificationSafely {
+    // Thread safety check
+    if (!NSThread.isMainThread) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self layoutNotificationSafely];
+        });
+        return;
+    }
+    
+    // Prevent concurrent layout operations
+    if (dispatch_semaphore_wait(_layoutSemaphore, DISPATCH_TIME_NOW) != 0) {
+        // Another layout is in progress, skip this one
+        return;
+    }
+    
+    @try {
+        [self layoutNotification];
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception during layout: %@", [self class], exception);
+    } @finally {
+        dispatch_semaphore_signal(_layoutSemaphore);
+    }
 }
 
 - (void)layoutNotification {
+    // Skip if already in progress or if view is not ready
+    if (_isLayoutInProgress || !self.view || !self.notification) {
+        return;
+    }
+    
+    _isLayoutInProgress = YES;
     _currentStatus = kWRSlideStatusNormal;
     
-    // control the initial scale of the WKWebView
-    NSString *js = @"var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'); document.getElementsByTagName('head')[0].appendChild(meta);";
-    WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
-    WKUserContentController *wkController = [[WKUserContentController alloc] init];
-    [wkController addUserScript:wkScript];
-    [wkController addUserScript:_jsInterface.versionScript];
-    [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
-    WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
-    wkConfig.userContentController = wkController;
-    wkConfig.allowsInlineMediaPlayback = YES;
-    if (@available(iOS 10.0, *)) {
-        [wkConfig setMediaTypesRequiringUserActionForPlayback:WKAudiovisualMediaTypeNone];
-    } else {
-        // Fallback on earlier versions
+    // Clean up existing webview if any
+    if (webView) {
+        [self cleanupWebViewResources];
     }
-    webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
-    webView.scrollView.showsHorizontalScrollIndicator = NO;
-    webView.scrollView.showsVerticalScrollIndicator = NO;
-    // Set translatesAutoresizingMaskIntoConstraints to NO to use Auto Layout
-    if ([self isInAppAdvancedBuilder]) {
-        webView.translatesAutoresizingMaskIntoConstraints = NO;
-    }
-    webView.scrollView.scrollEnabled = NO;
-    webView.backgroundColor = [UIColor clearColor];
-    webView.opaque = NO;
-    webView.tag = 188293;
-    webView.navigationDelegate = self;
-    webView.accessibilityViewIsModal = YES;
-    [self.view addSubview:webView];
     
-    [self loadWebView];
-    if (!self.notification.showClose) {
-        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureHandle:)];
-        _panGesture.delegate = self;
-        [webView addGestureRecognizer:_panGesture];
+    @try {
+        // Create WebView configuration with error handling
+        WKWebViewConfiguration *wkConfig = [self createWebViewConfiguration];
+        if (!wkConfig) {
+            CleverTapLogStaticInternal(@"%@: Failed to create WebView configuration", [self class]);
+            return;
+        }
+        
+        // Create WebView on main thread with safety checks
+        webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
+        if (!webView) {
+            CleverTapLogStaticInternal(@"%@: Failed to create WebView", [self class]);
+            return;
+        }
+        
+        [self configureWebView];
+        [self.view addSubview:webView];
+        
+        [self loadWebView];
+        
+        // Setup gesture recognizer with safety checks
+        if (!self.notification.showClose && webView) {
+            _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureHandle:)];
+            _panGesture.delegate = self;
+            [webView addGestureRecognizer:_panGesture];
+        }
+        
+        _isWebViewInitialized = YES;
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception in layoutNotification: %@", [self class], exception);
+        [self cleanupWebViewResources];
+    } @finally {
+        _isLayoutInProgress = NO;
+    }
+}
+
+- (WKWebViewConfiguration *)createWebViewConfiguration {
+    @try {
+        // control the initial scale of the WKWebView
+        NSString *js = @"var meta = document.createElement('meta'); meta.setAttribute('name', 'viewport'); meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'); document.getElementsByTagName('head')[0].appendChild(meta);";
+        WKUserScript *wkScript = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+        
+        WKUserContentController *wkController = [[WKUserContentController alloc] init];
+        [wkController addUserScript:wkScript];
+        
+        if (_jsInterface && _jsInterface.versionScript) {
+            [wkController addUserScript:_jsInterface.versionScript];
+        }
+        
+        if (_jsInterface) {
+            [wkController addScriptMessageHandler:_jsInterface name:@"clevertap"];
+        }
+        
+        WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
+        wkConfig.userContentController = wkController;
+        wkConfig.allowsInlineMediaPlayback = YES;
+        
+        if (@available(iOS 10.0, *)) {
+            [wkConfig setMediaTypesRequiringUserActionForPlayback:WKAudiovisualMediaTypeNone];
+        }
+        
+        return wkConfig;
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception creating WebView configuration: %@", [self class], exception);
+        return nil;
+    }
+}
+
+- (void)configureWebView {
+    if (!webView) return;
+    
+    @try {
+        webView.scrollView.showsHorizontalScrollIndicator = NO;
+        webView.scrollView.showsVerticalScrollIndicator = NO;
+        
+        // Set translatesAutoresizingMaskIntoConstraints to NO to use Auto Layout
+        if ([self isInAppAdvancedBuilder]) {
+            webView.translatesAutoresizingMaskIntoConstraints = NO;
+        }
+        
+        webView.scrollView.scrollEnabled = NO;
+        webView.backgroundColor = [UIColor clearColor];
+        webView.opaque = NO;
+        webView.tag = 188293;
+        webView.navigationDelegate = self;
+        webView.accessibilityViewIsModal = YES;
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception configuring WebView: %@", [self class], exception);
     }
 }
 
@@ -120,157 +221,235 @@ typedef enum {
 }
 
 - (void)loadWebView {
+    if (!webView || !self.notification) {
+        return;
+    }
+    
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     
-    [self configureWebViewConstraints];
-    
-    if (self.notification.url) {
-        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.notification.url]]];
-        webView.navigationDelegate = nil;
-    } else{
-        [webView loadHTMLString:self.notification.html baseURL:nil];
-    }
-    
-    if (self.notification.darkenScreen) {
-        self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
-    }
-    
-    if ([self isInAppAdvancedBuilder]) {
-        [self configureViewAutoresizing];
-    } else {
-        [self updateWebView];
+    @try {
+        [self configureWebViewConstraints];
+        
+        if (self.notification.url) {
+            NSURL *url = [NSURL URLWithString:self.notification.url];
+            if (url) {
+                [webView loadRequest:[NSURLRequest requestWithURL:url]];
+                webView.navigationDelegate = nil;
+            }
+        } else if (self.notification.html) {
+            [webView loadHTMLString:self.notification.html baseURL:nil];
+        }
+        
+        if (self.notification.darkenScreen) {
+            self.view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
+        }
+        
+        if ([self isInAppAdvancedBuilder]) {
+            [self configureViewAutoresizing];
+        } else {
+            [self updateWebView];
+        }
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception loading WebView: %@", [self class], exception);
     }
 }
 
 - (void)configureWebViewConstraints {
-    if (@available(iOS 11.0, *)) {
-        UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
-        [NSLayoutConstraint activateConstraints:@[
-            // Use the safe area layout guide to position the view
-            [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
-            [webView.leadingAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
-            [webView.trailingAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
-            [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
-        ]];
-    } else {
-        // Fallback on earlier versions
-        [NSLayoutConstraint activateConstraints:@[
-            [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
-            [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-            [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-            [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
-        ]];
+    if (!webView || ![self isInAppAdvancedBuilder]) {
+        return;
+    }
+    
+    @try {
+        // Remove existing constraints to avoid conflicts
+        [webView removeFromSuperview];
+        [self.view addSubview:webView];
+        
+        if (@available(iOS 11.0, *)) {
+            UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
+            if (safeArea) {
+                [NSLayoutConstraint activateConstraints:@[
+                    [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
+                    [webView.leadingAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
+                    [webView.trailingAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
+                    [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
+                ]];
+            }
+        } else {
+            // Fallback on earlier versions
+            [NSLayoutConstraint activateConstraints:@[
+                [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
+                [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+                [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+                [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
+            ]];
+        }
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception configuring WebView constraints: %@", [self class], exception);
     }
 }
 
 // Added to handle webview for Advanced Builder InApps
 - (void)configureViewAutoresizing {
-    webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+    if (!webView) return;
     
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
-    UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
-    | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+    @try {
+        webView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+        
+        self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
+        UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
+        | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception configuring view autoresizing: %@", [self class], exception);
+    }
 }
 
 - (void)updateWebView {
-    boolean_t fixedWidth = false, fixedHeight = false;
-    
-    CGSize size = CGSizeZero;
-    if (self.notification.width > 0) {
-        // Ignore Constants.INAPP_X_PERCENT
-        size.width = self.notification.width;
-        fixedWidth = true;
-    } else {
-        float percent = self.notification.widthPercent;
-        size.width = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
+    if (!webView || !self.notification) {
+        return;
     }
     
-    if (self.notification.height > 0) {
-        // Ignore Constants.INAPP_X_PERCENT
-        size.height = self.notification.height;
-        fixedHeight = true;
-    } else {
-        float percent = self.notification.heightPercent;
-        size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
-    }
-    
-    // prevent webview content insets for Cover
-    if (@available(iOS 11.0, *)) {
-        if (self.notification.heightPercent == 100.0) {
-            webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    @try {
+        boolean_t fixedWidth = false, fixedHeight = false;
+        
+        CGSize size = CGSizeZero;
+        if (self.notification.width > 0) {
+            // Ignore Constants.INAPP_X_PERCENT
+            size.width = self.notification.width;
+            fixedWidth = true;
+        } else {
+            float percent = self.notification.widthPercent;
+            size.width = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.width * (percent / 100.0f));
         }
-    }
-    
-    CleverTapLogStaticInternal(@"%@: In-app notification size: %f x %f", [self class], size.width, size.height);
-    
-    CGRect frame = webView.frame;
-    frame.size = size;
-    webView.autoresizingMask = UIViewAutoresizingNone;
-    
-    CGSize screenSize = [[UIScreen mainScreen] bounds].size;
-    char pos = self.notification.position;
-    CGFloat statusBarFrameHeight = 0.0;
-    if (@available(iOS 13.0, *)) {
-        statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
-    } else {
+        
+        if (self.notification.height > 0) {
+            // Ignore Constants.INAPP_X_PERCENT
+            size.height = self.notification.height;
+            fixedHeight = true;
+        } else {
+            float percent = self.notification.heightPercent;
+            size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        }
+        
+        // prevent webview content insets for Cover
+        if (@available(iOS 11.0, *)) {
+            if (self.notification.heightPercent == 100.0) {
+                webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+            }
+        }
+        
+        CleverTapLogStaticInternal(@"%@: In-app notification size: %f x %f", [self class], size.width, size.height);
+        
+        CGRect frame = webView.frame;
+        frame.size = size;
+        webView.autoresizingMask = UIViewAutoresizingNone;
+        
+        CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+        char pos = self.notification.position;
+        CGFloat statusBarFrameHeight = 0.0;
+        if (@available(iOS 13.0, *)) {
+            UIWindow *keyWindow = [CTUIUtils getKeyWindow];
+            if (keyWindow && keyWindow.windowScene) {
+                statusBarFrameHeight = keyWindow.windowScene.statusBarManager.statusBarFrame.size.height;
+            }
+        } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        statusBarFrameHeight = [[CTUIUtils getSharedApplication] statusBarFrame].size.height;
+            statusBarFrameHeight = [[CTUIUtils getSharedApplication] statusBarFrame].size.height;
 #pragma clang diagnostic pop
+        }
+        CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? statusBarFrameHeight : 0.0;
+        
+        int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
+        switch (pos) {
+            case CLTAP_INAPP_POSITION_TOP:
+                frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+                frame.origin.y = 0.0f + extra + 20.0f;
+                webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
+                break;
+            case CLTAP_INAPP_POSITION_LEFT:
+                frame.origin.x = 0.0f;
+                frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+                webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleRightMargin;
+                break;
+            case CLTAP_INAPP_POSITION_BOTTOM:
+                frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+                frame.origin.y = screenSize.height - size.height;
+                webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleTopMargin;
+                break;
+            case CLTAP_INAPP_POSITION_RIGHT:
+                frame.origin.x = screenSize.width - size.width - extra;
+                frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+                webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
+                break;
+            case CLTAP_INAPP_POSITION_CENTER:
+                frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
+                frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
+                break;
+            default:
+                CleverTapLogStaticInternal(@"Unknown position %c", pos);
+                return;
+        }
+        frame.origin.x = frame.origin.x < 0.0f ? 0.0f : frame.origin.x;
+        frame.origin.y = frame.origin.y < 0.0f ? 0.0f : frame.origin.y;
+        webView.frame = frame;
+        _originalCenter = frame.origin.x + frame.size.width / 2.0f;
+        
+        self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
+        UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
+        | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        
+        if (self.notification.showClose) {
+            _closeButton = [CTDismissButton new];
+            [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
+            _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarHeight : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
+            _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+            [self.view addSubview:_closeButton];
+        }
+        if (!fixedWidth) {
+            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleWidth;
+        }
+        if (!fixedHeight) {
+            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleHeight;
+        }
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception updating WebView: %@", [self class], exception);
     }
-    CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? statusBarFrameHeight : 0.0;
+}
+
+// Override rotation methods to handle orientation changes safely
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     
-    int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
-    switch (pos) {
-        case CLTAP_INAPP_POSITION_TOP:
-            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-            frame.origin.y = 0.0f + extra + 20.0f;
-            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
-            break;
-        case CLTAP_INAPP_POSITION_LEFT:
-            frame.origin.x = 0.0f;
-            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
-            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleRightMargin;
-            break;
-        case CLTAP_INAPP_POSITION_BOTTOM:
-            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-            frame.origin.y = screenSize.height - size.height;
-            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleTopMargin;
-            break;
-        case CLTAP_INAPP_POSITION_RIGHT:
-            frame.origin.x = screenSize.width - size.width - extra;
-            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
-            webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
-            break;
-        case CLTAP_INAPP_POSITION_CENTER:
-            frame.origin.x = (screenSize.width - size.width) / 2.0f;//-extra;
-            frame.origin.y = (screenSize.height - size.height) / 2.0f;//+extra;
-            break;
-        default:
-            CleverTapLogStaticInternal(@"Unknown position %c", pos);
-            return;
+    // Safely handle rotation
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        // Animation block - minimal operations
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        // Re-layout after rotation completes
+        if (self->_isWebViewInitialized && !self->_isLayoutInProgress) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self updateWebViewForRotation];
+            });
+        }
+    }];
+}
+
+- (void)updateWebViewForRotation {
+    if (!webView || !self.notification) {
+        return;
     }
-    frame.origin.x = frame.origin.x < 0.0f ? 0.0f : frame.origin.x;
-    frame.origin.y = frame.origin.y < 0.0f ? 0.0f : frame.origin.y;
-    webView.frame = frame;
-    _originalCenter = frame.origin.x + frame.size.width / 2.0f;
     
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
-    UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin
-    | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-    
-    if (self.notification.showClose) {
-        _closeButton = [CTDismissButton new];
-        [_closeButton addTarget:self action:@selector(tappedDismiss) forControlEvents:UIControlEventTouchUpInside];
-        _closeButton.frame = CGRectMake(frame.origin.x + frame.size.width - extra, self.notification.heightPercent == 100.0 ? statusBarHeight : (frame.origin.y - extra), CLTAP_INAPP_CLOSE_IV_WIDTH, CLTAP_INAPP_CLOSE_IV_WIDTH);
-        _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
-        [self.view addSubview:_closeButton];
-    }
-    if (!fixedWidth) {
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleWidth;
-    }
-    if (!fixedHeight) {
-        webView.autoresizingMask = webView.autoresizingMask | UIViewAutoresizingFlexibleHeight;
+    @try {
+        if ([self isInAppAdvancedBuilder]) {
+            [self configureViewAutoresizing];
+        } else {
+            [self updateWebView];
+        }
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception during rotation update: %@", [self class], exception);
     }
 }
 
@@ -315,6 +494,8 @@ typedef enum {
 }
 
 - (void)panGestureHandle:(UIPanGestureRecognizer *)recognizer {
+    if (!webView) return;
+    
     //begin pan...
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         self.initialTouchPositionX = [recognizer locationInView:self.view].x;
@@ -397,24 +578,48 @@ typedef enum {
 }
 
 - (void)cleanupWebViewResources {
-    if (webView) {
-        webView.navigationDelegate = nil;
-        [webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
-        
-        if (_panGesture) {
-            [webView removeGestureRecognizer:_panGesture];
-            _panGesture.delegate = nil;
-            _panGesture = nil;
+    @try {
+        if (webView) {
+            webView.navigationDelegate = nil;
+            
+            // Safely remove script message handler
+            if (webView.configuration && webView.configuration.userContentController) {
+                @try {
+                    [webView.configuration.userContentController removeScriptMessageHandlerForName:@"clevertap"];
+                } @catch (NSException *exception) {
+                    // Ignore if handler doesn't exist
+                }
+            }
+            
+            if (_panGesture) {
+                [webView removeGestureRecognizer:_panGesture];
+                _panGesture.delegate = nil;
+                _panGesture = nil;
+            }
+            
+            [webView removeFromSuperview];
+            webView = nil;
         }
         
-        [webView removeFromSuperview];
-        webView = nil;
+        if (_closeButton) {
+            [_closeButton removeFromSuperview];
+            _closeButton = nil;
+        }
+        
+        _jsInterface = nil;
+        _isWebViewInitialized = NO;
+        
+    } @catch (NSException *exception) {
+        CleverTapLogStaticInternal(@"%@: Exception during cleanup: %@", [self class], exception);
     }
-    _jsInterface = nil;
 }
 
 - (void)dealloc {
     [self cleanupWebViewResources];
+    
+    if (_layoutSemaphore) {
+        _layoutSemaphore = nil;
+    }
 }
 
 #pragma mark - Revealing Setter
@@ -440,6 +645,8 @@ typedef enum {
 #pragma mark - ContentView Sliding
 
 - (void)_slideInContentViewFromDirection:(WRSlideCellDirection)direction {
+    if (!webView) return;
+    
     CGFloat bounceDistance;
     
     if (webView.center.x == _originalCenter)
@@ -460,19 +667,29 @@ typedef enum {
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction
                      animations:^{
-        self->webView.center = CGPointMake(self->_originalCenter, self->webView.center.y);
+        if (self->webView) {
+            self->webView.center = CGPointMake(self->_originalCenter, self->webView.center.y);
+        }
     }
                      completion:^(BOOL f) {
+        if (!self->webView) return;
+        
         [UIView animateWithDuration:0.1 delay:0
                             options:UIViewAnimationOptionCurveEaseOut
                          animations:^{
-            self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
+            if (self->webView) {
+                self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
+            }
         }
                          completion:^(BOOL f2) {
+            if (!self->webView) return;
+            
             [UIView animateWithDuration:0.1 delay:0
                                 options:UIViewAnimationOptionCurveEaseIn
                              animations:^{
-                self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
+                if (self->webView) {
+                    self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
+                }
             }
                              completion:^(BOOL f1) {
                 self->_currentStatus = kWRSlideStatusNormal;
@@ -482,6 +699,8 @@ typedef enum {
 }
 
 - (void)_slideOutContentViewInDirection:(WRSlideCellDirection)direction; {
+    if (!webView) return;
+    
     CGFloat newCenterX;
     CGFloat bounceDistance;
     switch (direction) {
@@ -505,19 +724,29 @@ typedef enum {
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
-        self->webView.center = CGPointMake(newCenterX, self->webView.center.y);
+        if (self->webView) {
+            self->webView.center = CGPointMake(newCenterX, self->webView.center.y);
+        }
     }
                      completion:^(BOOL f) {
+        if (!self->webView) return;
+        
         [UIView animateWithDuration:0.1 delay:0
                             options:UIViewAnimationOptionCurveEaseIn
                          animations:^{
-            self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
+            if (self->webView) {
+                self->webView.frame = CGRectOffset(self->webView.frame, -bounceDistance, 0);
+            }
         }
                          completion:^(BOOL f1) {
+            if (!self->webView) return;
+            
             [UIView animateWithDuration:0.1 delay:0
                                 options:UIViewAnimationOptionCurveEaseIn
                              animations:^{
-                self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
+                if (self->webView) {
+                    self->webView.frame = CGRectOffset(self->webView.frame, bounceDistance, 0);
+                }
             }
                              completion:^(BOOL finished) {
                 CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
