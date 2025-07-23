@@ -3,20 +3,34 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		326230AE286DADC900DFD545 /* CTWebviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 326230AD286DADC900DFD545 /* CTWebviewVC.swift */; };
 		326230B0286DB66500DFD545 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 326230AF286DB66500DFD545 /* sampleHTMLCode.html */; };
-		4930E308261EE71500A6D316 /* CleverTapSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 4930E307261EE71500A6D316 /* CleverTapSDK */; };
 		495EA5722559156D006CADFF /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495EA5712559156D006CADFF /* Utilities.swift */; };
 		49F9E6942552CF9000EF2E5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F9E6932552CF9000EF2E5C /* AppDelegate.swift */; };
 		49F9E6982552CF9000EF2E5C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F9E6972552CF9000EF2E5C /* ViewController.swift */; };
 		49F9E69B2552CF9000EF2E5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E6992552CF9000EF2E5C /* Main.storyboard */; };
 		49F9E69D2552CF9000EF2E5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E69C2552CF9000EF2E5C /* Assets.xcassets */; };
 		49F9E6A02552CF9000EF2E5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E69E2552CF9000EF2E5C /* LaunchScreen.storyboard */; };
+		5721065F2E314887006B13FA /* CleverTapSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 5721065E2E314887006B13FA /* CleverTapSDK */; };
+		5721067D2E315153006B13FA /* CleverTapWatchOS in Frameworks */ = {isa = PBXBuildFile; productRef = 5721067C2E315153006B13FA /* CleverTapWatchOS */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5721061C2E3144B9006B13FA /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		326230AD286DADC900DFD545 /* CTWebviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTWebviewVC.swift; sourceTree = "<group>"; };
@@ -30,14 +44,27 @@
 		49F9E69C2552CF9000EF2E5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		49F9E69F2552CF9000EF2E5C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		49F9E6A12552CF9000EF2E5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5721066C2E315072006B13FA /* SPMStarter Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SPMStarter Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		5721066D2E315072006B13FA /* SPMStarter Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "SPMStarter Watch App"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		49F9E68D2552CF9000EF2E5C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4930E308261EE71500A6D316 /* CleverTapSDK in Frameworks */,
+				5721065F2E314887006B13FA /* CleverTapSDK in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		572106692E315072006B13FA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5721067D2E315153006B13FA /* CleverTapWatchOS in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -48,6 +75,8 @@
 			isa = PBXGroup;
 			children = (
 				49F9E6922552CF9000EF2E5C /* SPMStarter */,
+				5721066D2E315072006B13FA /* SPMStarter Watch App */,
+				572106582E314614006B13FA /* Frameworks */,
 				49F9E6912552CF9000EF2E5C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -56,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				49F9E6902552CF9000EF2E5C /* SPMStarter.app */,
+				5721066C2E315072006B13FA /* SPMStarter Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -77,6 +107,13 @@
 			path = SPMStarter;
 			sourceTree = "<group>";
 		};
+		572106582E314614006B13FA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -87,6 +124,7 @@
 				49F9E68C2552CF9000EF2E5C /* Sources */,
 				49F9E68D2552CF9000EF2E5C /* Frameworks */,
 				49F9E68E2552CF9000EF2E5C /* Resources */,
+				5721061C2E3144B9006B13FA /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
@@ -94,10 +132,33 @@
 			);
 			name = SPMStarter;
 			packageProductDependencies = (
-				4930E307261EE71500A6D316 /* CleverTapSDK */,
+				5721065E2E314887006B13FA /* CleverTapSDK */,
 			);
 			productName = SPMStarter;
 			productReference = 49F9E6902552CF9000EF2E5C /* SPMStarter.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5721066B2E315072006B13FA /* SPMStarter Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 572106772E315073006B13FA /* Build configuration list for PBXNativeTarget "SPMStarter Watch App" */;
+			buildPhases = (
+				572106682E315072006B13FA /* Sources */,
+				572106692E315072006B13FA /* Frameworks */,
+				5721066A2E315072006B13FA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5721066D2E315072006B13FA /* SPMStarter Watch App */,
+			);
+			name = "SPMStarter Watch App";
+			packageProductDependencies = (
+				5721067C2E315153006B13FA /* CleverTapWatchOS */,
+			);
+			productName = "SPMStarter Watch App";
+			productReference = 5721066C2E315072006B13FA /* SPMStarter Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -106,12 +167,15 @@
 		49F9E6882552CF9000EF2E5C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1210;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = CleverTap;
 				TargetAttributes = {
 					49F9E68F2552CF9000EF2E5C = {
 						CreatedOnToolsVersion = 12.1;
+					};
+					5721066B2E315072006B13FA = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -125,13 +189,14 @@
 			);
 			mainGroup = 49F9E6872552CF9000EF2E5C;
 			packageReferences = (
-				4930E306261EE71500A6D316 /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */,
+				5721065D2E314887006B13FA /* XCLocalSwiftPackageReference "../../ct-ios" */,
 			);
 			productRefGroup = 49F9E6912552CF9000EF2E5C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				49F9E68F2552CF9000EF2E5C /* SPMStarter */,
+				5721066B2E315072006B13FA /* SPMStarter Watch App */,
 			);
 		};
 /* End PBXProject section */
@@ -148,6 +213,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5721066A2E315072006B13FA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -159,6 +231,13 @@
 				326230AE286DADC900DFD545 /* CTWebviewVC.swift in Sources */,
 				49F9E6982552CF9000EF2E5C /* ViewController.swift in Sources */,
 				49F9E6942552CF9000EF2E5C /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		572106682E315072006B13FA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,6 +421,77 @@
 			};
 			name = Release;
 		};
+		572106782E315073006B13FA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SPMStarter Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = A5J34NR598;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SPMStarter;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.clevertap.SPMStarter;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.SPMStarter.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Debug;
+		};
+		572106792E315073006B13FA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SPMStarter Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = A5J34NR598;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SPMStarter;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.clevertap.SPMStarter;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.SPMStarter.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -363,24 +513,33 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		572106772E315073006B13FA /* Build configuration list for PBXNativeTarget "SPMStarter Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				572106782E315073006B13FA /* Debug */,
+				572106792E315073006B13FA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		4930E306261EE71500A6D316 /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/CleverTap/clevertap-ios-sdk";
-			requirement = {
-				kind = revision;
-				revision = 899fa4501ca274b3a7f4af6c6140424ebd43d2bc;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		5721065D2E314887006B13FA /* XCLocalSwiftPackageReference "../../ct-ios" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../ct-ios";
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4930E307261EE71500A6D316 /* CleverTapSDK */ = {
+		5721065E2E314887006B13FA /* CleverTapSDK */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4930E306261EE71500A6D316 /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */;
 			productName = CleverTapSDK;
+		};
+		5721067C2E315153006B13FA /* CleverTapWatchOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5721065D2E314887006B13FA /* XCLocalSwiftPackageReference "../../ct-ios" */;
+			productName = CleverTapWatchOS;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

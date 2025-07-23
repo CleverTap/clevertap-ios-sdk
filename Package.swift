@@ -60,22 +60,6 @@ let package = Package(
             ]
         ),
         .target(
-            name: "CleverTapWatchOS1",
-            dependencies: [
-                "CleverTapSDK"
-            ],
-            path: "CleverTapWatchOS",
-            publicHeadersPath: "include",
-            cSettings: [
-                .headerSearchPath("./"),
-                .headerSearchPath("CleverTapWatchOS/")
-            ],
-            linkerSettings: [
-                .linkedFramework("WatchKit", .when(platforms: [.watchOS])),
-                .linkedFramework("Foundation", .when(platforms: [.watchOS]))
-            ]
-        ),
-        .target(
             name: "CleverTapWatchOS",
             dependencies: [],
             path: "CleverTapWatchOS",
@@ -83,11 +67,6 @@ let package = Package(
             cSettings: [
                 .headerSearchPath("./"),
                 .headerSearchPath("CleverTapWatchOS/")
-            ],
-            linkerSettings: [
-                .linkedFramework("WatchKit", .when(platforms: [.watchOS])),
-                .linkedFramework("Foundation", .when(platforms: [.watchOS])),
-                .linkedFramework("WatchConnectivity", .when(platforms: [.watchOS]))
             ]
         )
     ]
