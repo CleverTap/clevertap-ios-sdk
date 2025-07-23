@@ -16,7 +16,8 @@
 		49F9E69D2552CF9000EF2E5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E69C2552CF9000EF2E5C /* Assets.xcassets */; };
 		49F9E6A02552CF9000EF2E5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49F9E69E2552CF9000EF2E5C /* LaunchScreen.storyboard */; };
 		5721065F2E314887006B13FA /* CleverTapSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 5721065E2E314887006B13FA /* CleverTapSDK */; };
-		5721067D2E315153006B13FA /* CleverTapWatchOS in Frameworks */ = {isa = PBXBuildFile; productRef = 5721067C2E315153006B13FA /* CleverTapWatchOS */; };
+		572106802E31535E006B13FA /* CleverTapSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 5721067F2E31535E006B13FA /* CleverTapSDK */; };
+		572106822E31535E006B13FA /* CleverTapWatchOS in Frameworks */ = {isa = PBXBuildFile; productRef = 572106812E31535E006B13FA /* CleverTapWatchOS */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -56,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				572106802E31535E006B13FA /* CleverTapSDK in Frameworks */,
 				5721065F2E314887006B13FA /* CleverTapSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -64,7 +66,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5721067D2E315153006B13FA /* CleverTapWatchOS in Frameworks */,
+				572106822E31535E006B13FA /* CleverTapWatchOS in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,6 +135,7 @@
 			name = SPMStarter;
 			packageProductDependencies = (
 				5721065E2E314887006B13FA /* CleverTapSDK */,
+				5721067F2E31535E006B13FA /* CleverTapSDK */,
 			);
 			productName = SPMStarter;
 			productReference = 49F9E6902552CF9000EF2E5C /* SPMStarter.app */;
@@ -155,7 +158,7 @@
 			);
 			name = "SPMStarter Watch App";
 			packageProductDependencies = (
-				5721067C2E315153006B13FA /* CleverTapWatchOS */,
+				572106812E31535E006B13FA /* CleverTapWatchOS */,
 			);
 			productName = "SPMStarter Watch App";
 			productReference = 5721066C2E315072006B13FA /* SPMStarter Watch App.app */;
@@ -189,7 +192,7 @@
 			);
 			mainGroup = 49F9E6872552CF9000EF2E5C;
 			packageReferences = (
-				5721065D2E314887006B13FA /* XCLocalSwiftPackageReference "../../ct-ios" */,
+				5721067E2E31535E006B13FA /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */,
 			);
 			productRefGroup = 49F9E6912552CF9000EF2E5C /* Products */;
 			projectDirPath = "";
@@ -524,21 +527,30 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		5721065D2E314887006B13FA /* XCLocalSwiftPackageReference "../../ct-ios" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../../ct-ios";
+/* Begin XCRemoteSwiftPackageReference section */
+		5721067E2E31535E006B13FA /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CleverTap/clevertap-ios-sdk";
+			requirement = {
+				branch = "task/SDK-5037/watchOS_spm";
+				kind = branch;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		5721065E2E314887006B13FA /* CleverTapSDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CleverTapSDK;
 		};
-		5721067C2E315153006B13FA /* CleverTapWatchOS */ = {
+		5721067F2E31535E006B13FA /* CleverTapSDK */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5721065D2E314887006B13FA /* XCLocalSwiftPackageReference "../../ct-ios" */;
+			package = 5721067E2E31535E006B13FA /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */;
+			productName = CleverTapSDK;
+		};
+		572106812E31535E006B13FA /* CleverTapWatchOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5721067E2E31535E006B13FA /* XCRemoteSwiftPackageReference "clevertap-ios-sdk" */;
 			productName = CleverTapWatchOS;
 		};
 /* End XCSwiftPackageProductDependency section */
