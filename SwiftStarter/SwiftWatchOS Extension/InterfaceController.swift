@@ -14,7 +14,7 @@ import CleverTapWatchOS
 class InterfaceController: WKInterfaceController, WCSessionDelegate {
     
     var session: WCSession?
-
+    var cleverTap: CleverTapWatchOS?
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
@@ -24,9 +24,12 @@ class InterfaceController: WKInterfaceController, WCSessionDelegate {
         session?.activate()
         
         if (session != nil) {
-            let cleverTap = CleverTapWatchOS(session: session!)
-            cleverTap?.recordEvent("CustomWatchOSEvent", withProps: ["foo": "bar"])
+            cleverTap = CleverTapWatchOS(session: session!)
         }
+    }
+    
+    @IBAction func recordEventAction() {
+        cleverTap?.recordEvent("CustomWatchOSEvent", withProps: ["foo": "bar"])
     }
     
     override func willActivate() {

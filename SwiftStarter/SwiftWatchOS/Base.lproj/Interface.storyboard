@@ -14,7 +14,11 @@
             <objects>
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="SwiftWatchOS" customModuleProvider="target">
                     <items>
-                        <label width="140" height="64" alignment="left" text="CleverTap" textAlignment="center" id="XpU-8j-69G"/>
+                        <button width="1" alignment="left" title="Record event" id="fOy-Tw-bLv">
+                            <connections>
+                                <action selector="recordEventAction" destination="AgC-eL-Hgc" id="W5q-yx-nt2"/>
+                            </connections>
+                        </button>
                     </items>
                 </controller>
             </objects>
