@@ -3385,7 +3385,6 @@ static BOOL sharedInstanceErrorLogged;
     return [self sessionGetUTMDetails];
 }
 
-#if defined(CLEVERTAP_HOST_WATCHOS)
 - (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session  {
     NSString *type = [message objectForKey:@"clevertap_type"];
     
@@ -3396,8 +3395,6 @@ static BOOL sharedInstanceErrorLogged;
     }
     return handled;
 }
-#endif
-
 
 #pragma mark - App Inbox
 
