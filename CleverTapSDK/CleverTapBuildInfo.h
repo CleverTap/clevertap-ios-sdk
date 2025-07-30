@@ -1,1 +1,1 @@
-#define WR_SDK_REVISION @"70201"
+#define WR_SDK_REVISION @"70301"

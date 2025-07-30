@@ -473,6 +473,23 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @method
  
  @abstract
+ Enables tracking opt out for the currently active user and optionally block all communication channels.
+ 
+ @discussion
+ Use this method to opt the current user out of all event/profile tracking.
+ You must call this method separately for each active user profile (e.g. when switching user profiles using onUserLogin).
+ Once enabled, no events will be saved remotely or locally for the current user. To re-enable tracking call this method with enabled set to NO.
+ Optionally, all system events can be allowed/blocked.
+ 
+ @param enabled         BOOL Whether tracking opt out should be enabled/disabled.
+ @param allowSystemEvents         BOOL Whether all system events can be allowed/blocked.
+ */
+- (void)setOptOut:(BOOL)enabled allowSystemEvents:(BOOL)allowSystemEvents;
+
+/*!
+ @method
+ 
+ @abstract
  Disables/Enables sending events to the server.
  
  @discussion
