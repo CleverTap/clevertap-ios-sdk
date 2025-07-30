@@ -70,6 +70,12 @@ typedef enum {
 }
 
 - (void)layoutNotification {
+    if (_jsInterface == nil) {
+        // When device is rotated and inapp is closed at same time, cleanupWebViewResources can be called
+        // first which makes _jsInterface nil and then layoutNotification is again called.
+        // Added this safety check to avoid crash in this race condition as inapp is already dismissed.
+        return;
+    }
     _currentStatus = kWRSlideStatusNormal;
     
     // control the initial scale of the WKWebView
