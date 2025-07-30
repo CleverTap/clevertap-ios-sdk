@@ -66,6 +66,9 @@ extension AppDelegate: WCSessionDelegate {
     }
     
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        print(message)
+        let handled = CleverTap.sharedInstance()?.handleMessage(message, forWatch: session)
+        if (!handled!) {
+             //handle the message as its not a CleverTap Message
+        }
     }
 }

@@ -1284,7 +1284,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
-					"CLEVERTAP_HOST_WATCHOS=1",
 				);
 				INFOPLIST_FILE = "SwiftStarter/Supporting Files/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
