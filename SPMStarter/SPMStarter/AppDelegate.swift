@@ -62,12 +62,12 @@ extension AppDelegate: WCSessionDelegate {
     }
     
     func sessionDidDeactivate(_ session: WCSession) {
-        print("Session is active")
+        print("Session is deactivated")
     }
     
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         let handled = CleverTap.sharedInstance()?.handleMessage(message, forWatch: session)
-        if (!handled!) {
+        if handled != true {
              //handle the message as its not a CleverTap Message
         }
     }
