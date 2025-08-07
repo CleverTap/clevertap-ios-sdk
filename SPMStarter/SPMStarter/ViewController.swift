@@ -45,6 +45,9 @@ extension ViewController {
         eventList.append("Record User Charged Event")
         eventList.append("Show App Inbox")
         eventList.append("Analytics in a Webview")
+        eventList.append("Prompt for Push Notification")
+        eventList.append("Local Half Interstitial Push Primer")
+        eventList.append("Local Alert Push Primer")
         self.eventTableView.reloadData()
     }
     
@@ -103,6 +106,15 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
             break;
         case 6:
             navigateToWebview()
+            break;
+        case 7:
+            promptForPushNotification()
+            break;
+        case 8:
+            createLocalHalfInterstitialPushPrimer()
+            break;
+        case 9:
+            createLocalAlertPushPrimer()
             break;
         default:
             break;
@@ -223,6 +235,29 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func navigateToWebview() {
         self.performSegue(withIdentifier: "segue_webview", sender: nil)
+    }
+    
+    func promptForPushNotification() {
+        CleverTap.sharedInstance()?.prompt(forPushPermission: true)
+    }
+    
+    func createLocalHalfInterstitialPushPrimer() {
+        CleverTap.sharedInstance()?.getNotificationPermissionStatus(completionHandler: { status in
+            if status == .notDetermined || status == .denied {
+                let localInAppBuilder = CTLocalInApp(inAppType: CTLocalInAppType.HALF_INTERSTITIAL, titleText: "Get Notified", messageText: "Please enable notifications on your device to use Push Notifications.", followDeviceOrientation: true, positiveBtnText: "Allow", negativeBtnText: "Cancel")
+                localInAppBuilder.setFallbackToSettings(true)
+                localInAppBuilder.setImageUrl("https://icons.iconarchive.com/icons/treetog/junior/64/camera-icon.png")
+                CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
+            } else {
+                print("Push Persmission is already enabled.")
+            }
+        })
+    }
+    
+    func createLocalAlertPushPrimer() {
+        let localInAppBuilder = CTLocalInApp(inAppType: .ALERT, titleText: "Get Notified", messageText: "Enable Notification permission", followDeviceOrientation: true, positiveBtnText: "Allow", negativeBtnText: "Cancel")
+        localInAppBuilder.setFallbackToSettings(true)
+        CleverTap.sharedInstance()?.promptPushPrimer(localInAppBuilder.getSettings())
     }
 }
 
