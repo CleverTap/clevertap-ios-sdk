@@ -44,14 +44,13 @@ static NSLocale *_systemLocale;
 
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
 SCNetworkReachabilityRef _reachability;
-static CTTelephonyNetworkInfo *_networkInfo;
 #endif
 
 @interface CTDeviceInfo () {}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 #if !CLEVERTAP_NO_REACHABILITY_SUPPORT
-@property (nonatomic, strong) CTTelephonyNetworkInfo *_networkInfo;
+@property (nonatomic, strong) CTTelephonyNetworkInfo *networkInfo;
 #endif
 @property (strong, readwrite) NSString *deviceId;
 @property (strong, readwrite) NSString *fallbackDeviceId;
@@ -507,7 +506,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
         if (_networkInfo == nil) {
             _networkInfo = [CTTelephonyNetworkInfo new];
         }
-        NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
+        NSDictionary *radioDict = [_networkInfo.serviceCurrentRadioAccessTechnology copy];
         [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
             if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
                 radioValue = [NSString stringWithString:[value substringFromIndex:23]];
