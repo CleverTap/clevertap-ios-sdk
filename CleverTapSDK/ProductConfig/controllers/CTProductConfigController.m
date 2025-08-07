@@ -128,17 +128,17 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
 #pragma mark - Delegates
 
-+ (void)runSyncMainQueue:(void (^)(void))block {
++ (void)runAsyncMainQueue:(void (^)(void))block {
     if ([NSThread isMainThread]) {
         block();
     } else {
-        dispatch_sync(dispatch_get_main_queue(), block);
+        dispatch_async(dispatch_get_main_queue(), block);
     }
 }
 
 - (void)notifyInitUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidInitialize)]) {
-        [CTUtils runSyncMainQueue:^{
+        [CTUtils runAsyncMainQueue:^{
             [self.delegate productConfigDidInitialize];
         }];
     }
@@ -146,7 +146,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
 - (void)notifyFetchUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidFetch)]) {
-        [CTUtils runSyncMainQueue:^{
+        [CTUtils runAsyncMainQueue:^{
             [self.delegate productConfigDidFetch];
         }];
     }
@@ -154,7 +154,7 @@ typedef void (^CTProductConfigOperationBlock)(void);
 
 - (void)notifyActivateUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(productConfigDidActivate)]) {
-        [CTUtils runSyncMainQueue:^{
+        [CTUtils runAsyncMainQueue:^{
             [self.delegate productConfigDidActivate];
         }];
     }

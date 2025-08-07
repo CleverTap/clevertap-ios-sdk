@@ -16,12 +16,17 @@
         completion(nil, nil, errors);
         return;
     }
+    NSDictionary *profileCopy;
+    @synchronized (self) {
+        profileCopy = [profile copy];
+    }
+    
     @try {
         NSMutableDictionary *customFields = [NSMutableDictionary new];
         NSMutableDictionary *systemFields = [NSMutableDictionary new];
         
         CTValidationResult *vr;
-        NSArray *profileAllKeys = [profile allKeys];
+        NSArray *profileAllKeys = [profileCopy allKeys];
         for (int i = 0; i < [profileAllKeys count]; i++) {
             NSString *key = profileAllKeys[(NSUInteger) i];
             id value = profile[key];

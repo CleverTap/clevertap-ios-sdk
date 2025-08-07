@@ -99,6 +99,14 @@
     }
 }
 
++ (void)runAsyncMainQueue:(void (^)(void))block {
+    if ([NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_async(dispatch_get_main_queue(), block);
+    }
+}
+
 + (double)haversineDistance:(CLLocationCoordinate2D)coordinateA coordinateB:(CLLocationCoordinate2D)coordinateB {
     // The Earth radius ranges from a maximum of about 6378 km (equatorial)
     // to a minimum of about 6357 km (polar).

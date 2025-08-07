@@ -50,7 +50,9 @@ static CTTelephonyNetworkInfo *_networkInfo;
 @interface CTDeviceInfo () {}
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-
+#if !CLEVERTAP_NO_REACHABILITY_SUPPORT
+@property (nonatomic, strong) CTTelephonyNetworkInfo *_networkInfo;
+#endif
 @property (strong, readwrite) NSString *deviceId;
 @property (strong, readwrite) NSString *fallbackDeviceId;
 @property (strong, readwrite) NSString *vendorIdentifier;
@@ -502,6 +504,9 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (NSString *)getCurrentRadioAccessTechnology {
     __block NSString *radioValue;
     if (@available(iOS 12, *)) {
+        if (_networkInfo == nil) {
+            _networkInfo = [CTTelephonyNetworkInfo new];
+        }
         NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
         [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
             if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
