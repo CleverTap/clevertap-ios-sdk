@@ -29,7 +29,7 @@
         NSArray *profileAllKeys = [profileCopy allKeys];
         for (int i = 0; i < [profileAllKeys count]; i++) {
             NSString *key = profileAllKeys[(NSUInteger) i];
-            id value = profile[key];
+            id value = profileCopy[key];
             
             vr = [CTValidator cleanObjectKey:key];
             if ([vr object] == nil || [((NSString *) [vr object]) isEqualToString:@""]) {
