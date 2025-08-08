@@ -6,7 +6,9 @@ All notable changes to this project will be documented in this file.
 - Added Swift Package Manager (SPM) support for `CleverTapWatchOS`.
 
 #### Fixed
-- 
+- Fixes a crash in `CTInAppHTMLViewController` when HTML InApp is presented.
+- Fixes Push Primer class methods not exposed when integrated via SPM.
+- Mitigates a potential error attempted to dereference garbage pointer in `persistOrClearQueues` when app is killed.
 
 ### [Version 7.3.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.1) (July 15, 2025)
 
