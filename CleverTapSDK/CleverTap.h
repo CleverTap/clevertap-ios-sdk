@@ -1,7 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#if !TARGET_OS_TV
 #import <WatchConnectivity/WatchConnectivity.h>
+#endif
 
 #if TARGET_OS_TV
 #define CLEVERTAP_TVOS 1
@@ -1386,9 +1388,11 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
+#if !TARGET_OS_TV
 /** HostWatchOS
  */
 - (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session API_AVAILABLE(ios(9.0));
+#endif
 
 /*!
  @method
