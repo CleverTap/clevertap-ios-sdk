@@ -5,7 +5,8 @@ import PackageDescription
 let package = Package(
     name: "CleverTapSDK",
     platforms: [
-        .iOS(.v9)
+        .iOS(.v9),
+        .watchOS(.v2)
     ],
     products: [
         .library(
@@ -14,6 +15,10 @@ let package = Package(
         .library(
             name: "CleverTapLocation",
             targets: ["CleverTapLocation"]
+        ),
+        .library(
+            name: "CleverTapWatchOS",
+            targets: ["CleverTapWatchOS"]
         )
     ],
     dependencies: [],
@@ -52,6 +57,16 @@ let package = Package(
             linkerSettings: [
                 .linkedLibrary("sqlite3"),
                 .linkedFramework("SDWebImage", .when(platforms: [.iOS]))
+            ]
+        ),
+        .target(
+            name: "CleverTapWatchOS",
+            dependencies: [],
+            path: "CleverTapWatchOS",
+            publicHeadersPath: "include",
+            cSettings: [
+                .headerSearchPath("./"),
+                .headerSearchPath("CleverTapWatchOS/")
             ]
         )
     ]
