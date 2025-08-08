@@ -1072,8 +1072,30 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
-    if ([self isMuted]) return;
-    [self persistOrClearQueues];
+    UIApplication *application = [CTUIUtils getSharedApplication];
+    UIBackgroundTaskIdentifier __block backgroundTask;
+    
+    void (^finishTaskHandler)(void) = ^(){
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [application endBackgroundTask:backgroundTask];
+            backgroundTask = UIBackgroundTaskInvalid;
+        });
+    };
+    // Start background task to make sure it runs when the app is in background.
+    backgroundTask = [application beginBackgroundTaskWithExpirationHandler:finishTaskHandler];
+    
+    @try {
+        [self.dispatchQueueManager runSerialAsync:^{
+            if (![self isMuted]) {
+                [self persistOrClearQueues];
+            }
+            finishTaskHandler();
+        }];
+    }
+    @catch (NSException *exception) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Exception caught: %@", self, [exception reason]);
+        finishTaskHandler();
+    }
 }
 
 - (void)_appEnteredForegroundWithLaunchingOptions:(NSDictionary *)launchOptions {
