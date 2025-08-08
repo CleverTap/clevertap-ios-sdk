@@ -1,9 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.3.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.2) (August XX, 2025)
+### [Version 7.3.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.2) (August 08, 2025)
 #### Added
-- Added Swift Package Manager (SPM) support for watchOS.
+- Added Swift Package Manager (SPM) support for `CleverTapWatchOS`.
+
+#### Fixed
+- 
 
 ### [Version 7.3.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.1) (July 15, 2025)
 
