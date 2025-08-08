@@ -5,7 +5,8 @@ import PackageDescription
 let package = Package(
     name: "CleverTapSDK",
     platforms: [
-        .iOS(.v9)
+        .iOS(.v9),
+        .watchOS(.v2)
     ],
     products: [
         .library(
@@ -14,6 +15,10 @@ let package = Package(
         .library(
             name: "CleverTapLocation",
             targets: ["CleverTapLocation"]
+        ),
+        .library(
+            name: "CleverTapWatchOS",
+            targets: ["CleverTapWatchOS"]
         )
     ],
     dependencies: [],
@@ -25,8 +30,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.3.1.xcframework.zip",
-            checksum: "854e965fd3a77f93d6585e1e0bd8170b65f6e3b4110059916a9318137464cc54"
+            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.3.2.xcframework.zip",
+            checksum: "e605b779f9725d52c9c73c6e317e098325a613116c03bce4376ad92a87d22f9f"
         ),
         .target(
             name: "CleverTapLocation",
@@ -52,6 +57,16 @@ let package = Package(
             linkerSettings: [
                 .linkedLibrary("sqlite3"),
                 .linkedFramework("SDWebImage", .when(platforms: [.iOS]))
+            ]
+        ),
+        .target(
+            name: "CleverTapWatchOS",
+            dependencies: [],
+            path: "CleverTapWatchOS",
+            publicHeadersPath: "include",
+            cSettings: [
+                .headerSearchPath("./"),
+                .headerSearchPath("CleverTapWatchOS/")
             ]
         )
     ]
