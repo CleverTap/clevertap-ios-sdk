@@ -11,5 +11,5 @@ Pod::Spec.new do |s|
   s.source_files = 'CleverTapWatchOS/*.{h,m}'
   s.ios.public_header_files   = 'CleverTapWatchOS/CleverTapWatchOS.h'
   s.frameworks = 'WatchConnectivity', 'Foundation'
-  s.watchos.deployment_target = '3.0'
+  s.watchos.deployment_target = '2.0'
 end

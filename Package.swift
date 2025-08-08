@@ -6,7 +6,7 @@ let package = Package(
     name: "CleverTapSDK",
     platforms: [
         .iOS(.v9),
-        .watchOS(.v3)
+        .watchOS(.v2)
     ],
     products: [
         .library(
