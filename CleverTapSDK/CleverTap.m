@@ -2019,8 +2019,9 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)sendQueues {
     if ([self isMuted] || _offline) return;
-    [self sendQueue:_profileQueue ofType:CTQueueTypeProfile];
-    [self sendQueue:_eventsQueue ofType:CTQueueTypeEvents];
+    // Sending profiles and events toegether
+    NSArray *combined = [_profileQueue arrayByAddingObjectsFromArray:_eventsQueue];
+    [self sendQueue:[combined mutableCopy] ofType:CTQueueTypeEvents];
     [self sendQueue:_notificationsQueue ofType:CTQueueTypeNotifications];
 }
 
@@ -2262,6 +2263,12 @@ static BOOL sharedInstanceErrorLogged;
             }
             
             [queue removeObjectsInArray:batch];
+            if ([_profileQueue count] > 0) {
+                [_profileQueue removeObjectsInArray:batch];
+            }
+            if ([_eventsQueue count] > 0) {
+                [_eventsQueue removeObjectsInArray:batch];
+            }
             
             [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
