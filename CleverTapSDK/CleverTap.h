@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+
 #if !TARGET_OS_TV
 #import <WatchConnectivity/WatchConnectivity.h>
 #endif
@@ -63,7 +64,8 @@ typedef NS_ENUM(int, CTSignedCallEvent) {
 
 typedef NS_ENUM(int, CleverTapEncryptionLevel) {
     CleverTapEncryptionNone = 0,
-    CleverTapEncryptionMedium = 1
+    CleverTapEncryptionMedium = 1,
+    CleverTapEncryptionHigh = 2,
 };
 
 typedef void (^CleverTapFetchInAppsBlock)(BOOL success);
@@ -1388,7 +1390,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
-#if !TARGET_OS_TV
+#if defined(CLEVERTAP_HOST_WATCHOS)
 /** HostWatchOS
  */
 - (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session API_AVAILABLE(ios(9.0));

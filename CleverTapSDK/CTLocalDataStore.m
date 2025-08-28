@@ -50,6 +50,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         self.dispatchQueueManager = dispatchQueueManager;
         self.userEventLogs = [NSMutableSet set];
         self.dbHelper = [CTEventDatabase sharedInstanceWithDispatchQueueManager:dispatchQueueManager];
+        // encrypt if level has been changed to 2/high
+        
+        
         localProfileUpdateExpiryStore = [NSMutableDictionary new];
         _backgroundQueue = dispatch_queue_create([[NSString stringWithFormat:@"com.clevertap.profileBackgroundQueue:%@", _config.accountId] UTF8String], DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(_backgroundQueue, kProfileBackgroundQueueKey, (__bridge void *)self, NULL);
@@ -1019,6 +1022,41 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         
         return updatedProfile;
     }
+    else if (lastEncryptionLevel == CleverTapEncryptionHigh && self.config.cryptManager) {
+        // Always store the local profile data in decrypted values.
+        NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+        
+        for (NSString *key in profile) {
+            @try {
+                // Validate the value before attempting to decrypt
+                id value = profile[key];
+                if (!value || ![value isKindOfClass:[NSString class]]) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Invalid value for key: %@, skipping decryption", self, key);
+                    updatedProfile[key] = value ?: [NSNull null];
+                    continue;
+                }
+                
+                NSString *stringValue = [NSString stringWithFormat:@"%@", value];
+                NSString *decryptedString = [self.config.cryptManager decryptString:stringValue];
+                
+                // Validate decryption result
+                if (!decryptedString) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to decrypt data for key: %@", self, key);
+                    // Return original value if decryption fails
+                    updatedProfile[key] = stringValue;
+                } else {
+                    updatedProfile[key] = decryptedString;
+                }
+            } @catch (NSException *e) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Exception during decryption for key %@: %@", self, key, e);
+                // Add original value to avoid data loss
+                updatedProfile[key] = profile[key];
+            }
+            
+        }
+        
+        return updatedProfile;
+    }
     
     return profile;
 }
@@ -1033,6 +1071,14 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             } else {
                 updatedProfile[key] = profile[key];
             }
+        }
+        return updatedProfile;
+    }
+    else if (self.config.encryptionLevel == CleverTapEncryptionHigh && self.config.cryptManager) {
+        NSMutableDictionary *updatedProfile = [NSMutableDictionary new];
+        for (NSString *key in profile) {
+            NSString *value = [NSString stringWithFormat:@"%@",profile[key]];
+            updatedProfile[key] = [self.config.cryptManager encryptString:value];
         }
         return updatedProfile;
     }
