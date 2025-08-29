@@ -84,6 +84,8 @@ API_AVAILABLE(ios(13.0))
     _encryptionLevel = encryptionLevel;
     NSString *encryptionKey = [CTUtils getKeyWithSuffix:kENCRYPTION_KEY accountID:_accountID];
     long lastEncryptionLevel = [CTPreferences getIntForKey:encryptionKey withResetValue:0];
+    self.previousEncryptionLevel = (CleverTapEncryptionLevel)lastEncryptionLevel;
+    
     if (lastEncryptionLevel != _encryptionLevel) {
         CleverTapLogStaticInternal(@"CleverTap Encryption level changed for account: %@ to: %d", _accountID, _encryptionLevel);
         [self updateCachedGUIDS];
@@ -341,7 +343,7 @@ API_AVAILABLE(ios(13.0))
         
         NSString *key = components[0];
         NSString *identifier = components[1];
-        NSString *processedIdentifier = self->_encryptionLevel == CleverTapEncryptionMedium ?
+        NSString *processedIdentifier = (self->_encryptionLevel == CleverTapEncryptionMedium || self->_encryptionLevel == CleverTapEncryptionHigh) ?
         [self encryptString:identifier] : [self decryptString:identifier];
         
         if (processedIdentifier) {
