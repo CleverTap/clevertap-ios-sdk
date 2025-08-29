@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface CTEncryptionManager : NSObject <NSSecureCoding>
 
+@property (nonatomic, assign) CleverTapEncryptionLevel previousEncryptionLevel;
+
 /**
  * Initializes the encryption manager with an account ID.
  *
