@@ -244,12 +244,9 @@
     if (success) {
         NSDictionary *header = batchWithHeader[0];
         if (queueType == CTQueueTypeEvents) {
-            [self removeSentEvaluatedServerSideInAppIds:header];
-            [self removeSentSuppressedClientSideInApps:header];
-        }
-        else if (queueType == CTQueueTypeProfile) {
-            [self removeSentEvaluatedServerSideInAppIdsForProfile:header];
-            [self removeSentSuppressedClientSideInAppsForProfile:header];
+            // For combined queues, clean up both events and profile arrays proportionally
+            [self removeSentEvaluatedServerSideInAppIdsForCombined:header];
+            [self removeSentSuppressedClientSideInAppsForCombined:header];
         }
     }
 }
@@ -262,42 +259,59 @@
     self.hasAppLaunchedFailed = !success;
 }
 
-- (void)removeSentEvaluatedServerSideInAppIds:(NSDictionary *)header {
+- (void)removeSentEvaluatedServerSideInAppIdsForCombined:(NSDictionary *)header {
     NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_META_KEY];
     if (inapps_eval && [inapps_eval count] > 0) {
-        NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIds.count ?  self.evaluatedServerSideInAppIds.count : inapps_eval.count;
-        [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, len)];
-        [self saveEvaluatedServerSideInAppIds];
+        // Remove from events array first, then profiles
+        NSUInteger eventsCount = [self.evaluatedServerSideInAppIds count];
+        NSUInteger profilesCount = [self.evaluatedServerSideInAppIdsForProfile count];
+        NSUInteger totalToRemove = [inapps_eval count];
+        
+        // Remove from events array
+        NSUInteger removeFromEvents = MIN(eventsCount, totalToRemove);
+        if (removeFromEvents > 0) {
+            [self.evaluatedServerSideInAppIds removeObjectsInRange:NSMakeRange(0, removeFromEvents)];
+            [self saveEvaluatedServerSideInAppIds];
+            totalToRemove -= removeFromEvents;
+        }
+        
+        // Remove remaining from profiles array
+        if (totalToRemove > 0) {
+            NSUInteger removeFromProfiles = MIN(profilesCount, totalToRemove);
+            if (removeFromProfiles > 0) {
+                [self.evaluatedServerSideInAppIdsForProfile removeObjectsInRange:NSMakeRange(0, removeFromProfiles)];
+                [self saveEvaluatedServerSideInAppIdsForProfile];
+            }
+        }
     }
 }
 
-- (void)removeSentSuppressedClientSideInApps:(NSDictionary *)header {
-    NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
-    if (suppresed_inapps && [suppresed_inapps count] > 0) {
-        NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInApps.count ?  self.suppressedClientSideInApps.count : suppresed_inapps.count;
-        [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, len)];
-        [self saveSuppressedClientSideInApps];
+- (void)removeSentSuppressedClientSideInAppsForCombined:(NSDictionary *)header {
+    NSArray *suppressed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
+    if (suppressed_inapps && [suppressed_inapps count] > 0) {
+        // Remove from events array first, then profiles
+        NSUInteger eventsCount = [self.suppressedClientSideInApps count];
+        NSUInteger profilesCount = [self.suppressedClientSideInAppsForProfile count];
+        NSUInteger totalToRemove = [suppressed_inapps count];
+        
+        // Remove from events array
+        NSUInteger removeFromEvents = MIN(eventsCount, totalToRemove);
+        if (removeFromEvents > 0) {
+            [self.suppressedClientSideInApps removeObjectsInRange:NSMakeRange(0, removeFromEvents)];
+            [self saveSuppressedClientSideInApps];
+            totalToRemove -= removeFromEvents;
+        }
+        
+        // Remove remaining from profiles array
+        if (totalToRemove > 0) {
+            NSUInteger removeFromProfiles = MIN(profilesCount, totalToRemove);
+            if (removeFromProfiles > 0) {
+                [self.suppressedClientSideInAppsForProfile removeObjectsInRange:NSMakeRange(0, removeFromProfiles)];
+                [self saveSuppressedClientSideInAppsForProfile];
+            }
+        }
     }
 }
-
-- (void)removeSentEvaluatedServerSideInAppIdsForProfile:(NSDictionary *)header {
-    NSArray *inapps_eval = header[CLTAP_INAPP_SS_EVAL_META_KEY];
-    if (inapps_eval && [inapps_eval count] > 0) {
-        NSUInteger len = inapps_eval.count > self.evaluatedServerSideInAppIdsForProfile.count ?  self.evaluatedServerSideInAppIdsForProfile.count : inapps_eval.count;
-        [self.evaluatedServerSideInAppIdsForProfile removeObjectsInRange:NSMakeRange(0, len)];
-        [self saveEvaluatedServerSideInAppIdsForProfile];
-    }
-}
-
-- (void)removeSentSuppressedClientSideInAppsForProfile:(NSDictionary *)header {
-    NSArray *suppresed_inapps = header[CLTAP_INAPP_SUPPRESSED_META_KEY];
-    if (suppresed_inapps && [suppresed_inapps count] > 0) {
-        NSUInteger len = suppresed_inapps.count > self.suppressedClientSideInAppsForProfile.count ?  self.suppressedClientSideInAppsForProfile.count : suppresed_inapps.count;
-        [self.suppressedClientSideInAppsForProfile removeObjectsInRange:NSMakeRange(0, len)];
-        [self saveSuppressedClientSideInAppsForProfile];
-    }
-}
-
 
 - (BOOL)shouldSuppress:(NSDictionary *)inApp {
     return [inApp[CLTAP_INAPP_IS_SUPPRESSED] boolValue];
@@ -380,29 +394,41 @@
 }
 
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
-    // Evaluation is done for events only at the moment,
-    // send the evaluated and suppressed ids in that queue header
-    if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
-        return [NSMutableDictionary new];
-    }
-    NSMutableDictionary *header = [NSMutableDictionary new];
-    if (queueType == CTQueueTypeProfile) {
-        if ([self.evaluatedServerSideInAppIdsForProfile count] > 0) {
-            header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIdsForProfile;
-        }
-        if ([self.suppressedClientSideInAppsForProfile count] > 0) {
-            header[CLTAP_INAPP_SUPPRESSED_META_KEY] = self.suppressedClientSideInAppsForProfile;
-        }
-    }
-    else {
-        if ([self.evaluatedServerSideInAppIds count] > 0) {
-            header[CLTAP_INAPP_SS_EVAL_META_KEY] = self.evaluatedServerSideInAppIds;
-        }
-        if ([self.suppressedClientSideInApps count] > 0) {
-            header[CLTAP_INAPP_SUPPRESSED_META_KEY] = self.suppressedClientSideInApps;
-        }
-    }
-    return header;
+   // Evaluation is done for events and profiles,
+   // send the evaluated and suppressed ids in that queue header
+   if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
+       return [NSMutableDictionary new];
+   }
+   
+   NSMutableDictionary *header = [NSMutableDictionary new];
+   
+   // For combined queues, merge both events and profile arrays
+   if (queueType == CTQueueTypeEvents) {
+       // Combine evaluated IDs from both events and profiles
+       NSMutableArray *combinedEvaluatedIds = [NSMutableArray array];
+       if ([self.evaluatedServerSideInAppIds count] > 0) {
+           [combinedEvaluatedIds addObjectsFromArray:self.evaluatedServerSideInAppIds];
+       }
+       if ([self.evaluatedServerSideInAppIdsForProfile count] > 0) {
+           [combinedEvaluatedIds addObjectsFromArray:self.evaluatedServerSideInAppIdsForProfile];
+       }
+       if ([combinedEvaluatedIds count] > 0) {
+           header[CLTAP_INAPP_SS_EVAL_META_KEY] = combinedEvaluatedIds;
+       }
+       
+       // Combine suppressed IDs from both events and profiles
+       NSMutableArray *combinedSuppressedIds = [NSMutableArray array];
+       if ([self.suppressedClientSideInApps count] > 0) {
+           [combinedSuppressedIds addObjectsFromArray:self.suppressedClientSideInApps];
+       }
+       if ([self.suppressedClientSideInAppsForProfile count] > 0) {
+           [combinedSuppressedIds addObjectsFromArray:self.suppressedClientSideInAppsForProfile];
+       }
+       if ([combinedSuppressedIds count] > 0) {
+           header[CLTAP_INAPP_SUPPRESSED_META_KEY] = combinedSuppressedIds;
+       }
+   }
+   return header;
 }
 
 - (void)saveEvaluatedServerSideInAppIds {
