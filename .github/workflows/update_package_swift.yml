@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo xcode-select -s /Applications/Xcode_16.0.app
+          sudo xcode-select -s /Applications/Xcode_16.4.app
           swift --version
           echo "✅ Dependencies installed successfully"
 
