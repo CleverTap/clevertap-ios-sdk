@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.3.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.3) (September 11, 2025)
+#### Fixed
+- Fixes a bug where the updated values of variables were not fetched right after a profile push.
+- Optimises queuing behaviour of various type of clevertap events in a single batch.
+
 ### [Version 7.3.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.2) (August 08, 2025)
 #### Added
 - Added Swift Package Manager (SPM) support for `CleverTapWatchOS`.
