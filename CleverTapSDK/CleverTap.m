@@ -2019,7 +2019,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)sendQueues {
     if ([self isMuted] || _offline) return;
-    // Sending profiles and events toegether
+    // Sending profiles and events together
     NSArray *combined = [_profileQueue arrayByAddingObjectsFromArray:_eventsQueue];
     [self sendQueue:[combined mutableCopy] ofType:CTQueueTypeEvents];
     [self sendQueue:_notificationsQueue ofType:CTQueueTypeNotifications];
