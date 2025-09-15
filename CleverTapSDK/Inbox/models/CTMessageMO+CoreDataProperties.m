@@ -14,11 +14,16 @@
     self = [self initWithEntity:[NSEntityDescription entityForName:@"CTMessage" inManagedObjectContext:context] insertIntoManagedObjectContext:context];
     
     if (self != nil) {
-        
         // Check if this message was pre-encrypted
         if (json[@"_ct_is_encrypted"] && [json[@"_ct_is_encrypted"] boolValue]) {
             // Use the encrypted payload as the json property
-            self.json = json[@"_ct_encrypted_payload"];
+            if (!json[@"_ct_encrypted_payload"]) {
+                CleverTapLogStaticDebug(@"Message marked as encrypted but missing _ct_encrypted_payload");
+                self.json = [json copy];
+            }
+            else {
+                self.json = json[@"_ct_encrypted_payload"];
+            }
         } else {
             // Use the original message
             self.json = [json copy];
@@ -53,12 +58,16 @@
         NSString *encryptedString = (NSString *)jsonData;
         // Check if it's actually encrypted using AES-GCM markers
         if ([encryptedString hasPrefix:AES_GCM_PREFIX] && [encryptedString hasSuffix:AES_GCM_SUFFIX]) {
-            // Get encryption manager from context (you'll need to make this accessible)
-            CTEncryptionManager *encryptionManager =  self.user.encryptionManager; /* get from context or user */;
+            // Get encryption manager from context
+            CTEncryptionManager *encryptionManager =  self.user.encryptionManager;
             if (encryptionManager) {
                 id decryptedObj = [encryptionManager decryptObject:encryptedString];
                 if (decryptedObj && [decryptedObj isKindOfClass:[NSDictionary class]]) {
                     jsonData = decryptedObj;
+                }
+                else {
+                    CleverTapLogStaticDebug(@"Failed to decrypt message with ID: %@, returning empty dictionary", self.id);
+                    return @{@"isRead": @(self.isRead), @"date": @(self.date)};
                 }
             }
         }
