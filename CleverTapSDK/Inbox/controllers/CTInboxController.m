@@ -357,9 +357,6 @@ static NSManagedObjectContext *privateContext;
             }
         }
     }
-    
-    // Scenario 3: High → High (no change needed)
-    // Scenario 4: None/Medium → None/Medium (no change needed)
 }
 
 - (BOOL)isJSONPropertyEncrypted:(id)jsonProperty {
