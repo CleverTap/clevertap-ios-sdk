@@ -17,7 +17,7 @@
 
 @implementation CTUserMO (CoreDataProperties)
 
-+ (instancetype _Nullable)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context {
++ (instancetype _Nullable)fetchOrCreateFromJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context encryptionManager:(nonnull CTEncryptionManager *)encryptionManager {
     CTUserMO *_user;
     @try {
         NSString *identifier = json[@"identifier"];
@@ -37,9 +37,10 @@
         }
         if ([results count] > 0) {
             _user = results[0];
+            _user.encryptionManager = encryptionManager;
             CleverTapLogStaticInternal(@"Found existing %@", _user);
         } else {
-            _user = [[CTUserMO alloc] initWithJSON:json forContext:context];
+            _user = [[CTUserMO alloc] initWithJSON:json forContext:context encryptionManager:encryptionManager];
         }
         
     } @catch (NSException *e) {
@@ -49,7 +50,7 @@
     return _user;
 }
 
-- (instancetype)initWithJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context {
+- (instancetype)initWithJSON:(NSDictionary *)json forContext:(NSManagedObjectContext *)context encryptionManager:(nonnull CTEncryptionManager *)encryptionManager {
     CleverTapLogStaticInternal(@"Initializing new CTUserMO with data: %@", json);
     self = [self initWithEntity:[NSEntityDescription entityForName:@"CTUser" inManagedObjectContext:context] insertIntoManagedObjectContext:context];
     NSString *accountId = json[@"accountId"];
@@ -64,6 +65,8 @@
     if (identifier) {
         self.identifier = identifier;
     }
+    
+    self.encryptionManager = encryptionManager;
     return self;
 }
 

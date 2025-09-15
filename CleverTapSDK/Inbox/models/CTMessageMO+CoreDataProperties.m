@@ -1,5 +1,6 @@
 #import "CTMessageMO.h"
 #import "CTConstants.h"
+#import "CTUserMO.h"
 
 @implementation CTMessageMO (CoreDataProperties)
 
@@ -14,7 +15,15 @@
     
     if (self != nil) {
         
-        self.json = [json copy];
+        // Check if this message was pre-encrypted
+        if (json[@"_ct_is_encrypted"] && [json[@"_ct_is_encrypted"] boolValue]) {
+            // Use the encrypted payload as the json property
+            self.json = json[@"_ct_encrypted_payload"];
+        } else {
+            // Use the original message
+            self.json = [json copy];
+        }
+        
         self.tags = json[@"msg"][@"tags"];
         
         NSString *id = json[@"_id"];
@@ -37,7 +46,25 @@
 }
 
 - (NSDictionary *)toJSON {
-    NSMutableDictionary *json = [NSMutableDictionary dictionaryWithDictionary:self.json];
+    id jsonData = self.json;
+    
+    // If json is encrypted (stored as string), decrypt it first
+    if ([jsonData isKindOfClass:[NSString class]]) {
+        NSString *encryptedString = (NSString *)jsonData;
+        // Check if it's actually encrypted using AES-GCM markers
+        if ([encryptedString hasPrefix:AES_GCM_PREFIX] && [encryptedString hasSuffix:AES_GCM_SUFFIX]) {
+            // Get encryption manager from context (you'll need to make this accessible)
+            CTEncryptionManager *encryptionManager =  self.user.encryptionManager; /* get from context or user */;
+            if (encryptionManager) {
+                id decryptedObj = [encryptionManager decryptObject:encryptedString];
+                if (decryptedObj && [decryptedObj isKindOfClass:[NSDictionary class]]) {
+                    jsonData = decryptedObj;
+                }
+            }
+        }
+    }
+    
+    NSMutableDictionary *json = [NSMutableDictionary dictionaryWithDictionary:jsonData];
     json[@"isRead"] = @(self.isRead);
     json[@"date"] = @(self.date);
     return json;
