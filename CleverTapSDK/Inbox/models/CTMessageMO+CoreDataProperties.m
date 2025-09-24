@@ -55,20 +55,19 @@
     
     // If json is encrypted (stored as string), decrypt it first
     if ([jsonData isKindOfClass:[NSString class]]) {
+        // Get encryption manager from context
+        CTEncryptionManager *encryptionManager =  self.user.encryptionManager;
         NSString *encryptedString = (NSString *)jsonData;
+        
         // Check if it's actually encrypted using AES-GCM markers
-        if ([encryptedString hasPrefix:AES_GCM_PREFIX] && [encryptedString hasSuffix:AES_GCM_SUFFIX]) {
-            // Get encryption manager from context
-            CTEncryptionManager *encryptionManager =  self.user.encryptionManager;
-            if (encryptionManager) {
-                id decryptedObj = [encryptionManager decryptObject:encryptedString];
-                if (decryptedObj && [decryptedObj isKindOfClass:[NSDictionary class]]) {
-                    jsonData = decryptedObj;
-                }
-                else {
-                    CleverTapLogStaticDebug(@"Failed to decrypt message with ID: %@, returning empty dictionary", self.id);
-                    return @{@"isRead": @(self.isRead), @"date": @(self.date)};
-                }
+        if (encryptionManager && [encryptionManager isTextAESGCMEncrypted:encryptedString]) {
+            id decryptedObj = [encryptionManager decryptObject:encryptedString];
+            if (decryptedObj && [decryptedObj isKindOfClass:[NSDictionary class]]) {
+                jsonData = decryptedObj;
+            }
+            else {
+                CleverTapLogStaticDebug(@"Failed to decrypt message with ID: %@, returning empty dictionary", self.id);
+                return @{@"isRead": @(self.isRead), @"date": @(self.date)};
             }
         }
     }
