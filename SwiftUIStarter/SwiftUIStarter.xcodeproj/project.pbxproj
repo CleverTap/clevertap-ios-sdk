@@ -25,8 +25,8 @@
 		574603CD2E0BCC0F00AD7E22 /* FileVarsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574603CC2E0BCC0F00AD7E22 /* FileVarsData.swift */; };
 		574627DF2E017E460039B10A /* InboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574627DE2E017E460039B10A /* InboxViewModel.swift */; };
 		574627E12E0298A00039B10A /* CTAppInboxRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */; };
-		57F4AF572E09813400F4ED37 /* NativeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF562E09813400F4ED37 /* NativeDisplayView.swift */; };
-		57F4AF592E0990A800F4ED37 /* NativeDisplayUIViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF582E0990A800F4ED37 /* NativeDisplayUIViewModel.swift */; };
+		57F4AF572E09813400F4ED37 /* CTNativeDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF562E09813400F4ED37 /* CTNativeDisplayView.swift */; };
+		57F4AF592E0990A800F4ED37 /* CTNativeDisplayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F4AF582E0990A800F4ED37 /* CTNativeDisplayViewModel.swift */; };
 		A983E8E0003C52EE342CBDB9 /* Pods_SwiftUIStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA9862E5A057F98569E2EEBD /* Pods_SwiftUIStarter_NotificationService.framework */; };
 /* End PBXBuildFile section */
 
@@ -80,8 +80,8 @@
 		574603CC2E0BCC0F00AD7E22 /* FileVarsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVarsData.swift; sourceTree = "<group>"; };
 		574627DE2E017E460039B10A /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
 		574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAppInboxRepresentable.swift; sourceTree = "<group>"; };
-		57F4AF562E09813400F4ED37 /* NativeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeDisplayView.swift; sourceTree = "<group>"; };
-		57F4AF582E0990A800F4ED37 /* NativeDisplayUIViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeDisplayUIViewModel.swift; sourceTree = "<group>"; };
+		57F4AF562E09813400F4ED37 /* CTNativeDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTNativeDisplayView.swift; sourceTree = "<group>"; };
+		57F4AF582E0990A800F4ED37 /* CTNativeDisplayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTNativeDisplayViewModel.swift; sourceTree = "<group>"; };
 		A530F6FFBC26113F8B9C9B13 /* Pods-SwiftUIStarter-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftUIStarter-NotificationService.debug.xcconfig"; path = "Target Support Files/Pods-SwiftUIStarter-NotificationService/Pods-SwiftUIStarter-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
 		AA9862E5A057F98569E2EEBD /* Pods_SwiftUIStarter_NotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftUIStarter_NotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C738698B25C9108B38EA207C /* Pods-SwiftUIStarter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftUIStarter.debug.xcconfig"; path = "Target Support Files/Pods-SwiftUIStarter/Pods-SwiftUIStarter.debug.xcconfig"; sourceTree = "<group>"; };
@@ -144,6 +144,8 @@
 				574603CA2E0ABB1600AD7E22 /* VariablesView.swift */,
 				57F4AF582E0990A800F4ED37 /* NativeDisplayUIViewModel.swift */,
 				57F4AF562E09813400F4ED37 /* NativeDisplayView.swift */,
+				57F4AF582E0990A800F4ED37 /* CTNativeDisplayViewModel.swift */,
+				57F4AF562E09813400F4ED37 /* CTNativeDisplayView.swift */,
 				574627E02E0298A00039B10A /* CTAppInboxRepresentable.swift */,
 				574627DE2E017E460039B10A /* InboxViewModel.swift */,
 				489C5FFD2A6C5E1A00440747 /* sampleHTMLCode.html */,
@@ -375,10 +377,11 @@
 				48E0B3542A67166C009C4312 /* AppDelegate.swift in Sources */,
 				48E0B35A2A69C5B5009C4312 /* CTAppInboxCustomView.swift in Sources */,
 				489C60002A6C616F00440747 /* CTCallbackCoordinator.swift in Sources */,
-				57F4AF572E09813400F4ED37 /* NativeDisplayView.swift in Sources */,
+				57F4AF572E09813400F4ED37 /* CTNativeDisplayView.swift in Sources */,
 				48E0B3442A66FE5F009C4312 /* ContentView.swift in Sources */,
 				57F4AF592E0990A800F4ED37 /* NativeDisplayUIViewModel.swift in Sources */,
 				574603CD2E0BCC0F00AD7E22 /* FileVarsData.swift in Sources */,
+				57F4AF592E0990A800F4ED37 /* CTNativeDisplayViewModel.swift in Sources */,
 				574627DF2E017E460039B10A /* InboxViewModel.swift in Sources */,
 				48E0B3422A66FE5F009C4312 /* SwiftUIStarterApp.swift in Sources */,
 				574603CB2E0ABB1600AD7E22 /* VariablesView.swift in Sources */,

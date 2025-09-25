@@ -32,7 +32,7 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
         // you will get display units here
         print("displayUnitsUpdated")
         self.displayUnits = displayUnits
-        updateNativeDisplaySection()
+        updateAllDisplayUnitsSection()
     }
     
     
@@ -59,32 +59,46 @@ class NativeDisplayViewController: UITableViewController, CleverTapDisplayUnitDe
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch DisplaySection(rawValue: indexPath.section)! {
+        let displaySection = DisplaySection(rawValue: indexPath.section)
+        
+        switch displaySection {
         case .nativeDisplay:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayButtonsTableCell", for: indexPath) as! NativeDisplayButtonsTableViewCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayButtonsTableCell", for: indexPath) as? NativeDisplayButtonsTableViewCell else {
+                fatalError("Failed to dequeue NativeDisplayButtonsTableViewCell")
+            }
+            
             cell.onShowDetails = { [weak self] in
                 self?.displayUnits = CleverTap.sharedInstance()?.getAllDisplayUnits() ?? []
-                self?.updateNativeDisplaySection()
+                self?.updateAllDisplayUnitsSection()
             }
             
             cell.onShowDisplayUnit = { [weak self] displayUnit in
                 self?.displayUnits = [displayUnit]
-                self?.updateNativeDisplaySection()
+                self?.updateAllDisplayUnitsSection()
             }
             return cell
             
         case .allDisplayUnits:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayTableViewCell", for: indexPath) as! NativeDisplayTableViewCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayTableViewCell", for: indexPath) as? NativeDisplayTableViewCell else {
+                fatalError("Failed to dequeue NativeDisplayTableViewCell")
+            }
             let displayUnit = displayUnits[indexPath.row]
             cell.configure(with: displayUnit)
             cell.onShowDetails = { [weak self] in
                 self?.showNativeDisplayAlert(displayUnit)
             }
             return cell
+            
+        default:
+            //Adds to avoid force unwrapping
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "NativeDisplayButtonsTableCell", for: indexPath) as? NativeDisplayButtonsTableViewCell else {
+                fatalError("Failed to dequeue NativeDisplayButtonsTableViewCell")
+            }
+            return cell
         }
     }
     
-    func updateNativeDisplaySection() {
+    func updateAllDisplayUnitsSection() {
         DispatchQueue.main.async {
             let sectionIndex = DisplaySection.allDisplayUnits.rawValue
             let indexSet = IndexSet(integer: sectionIndex)

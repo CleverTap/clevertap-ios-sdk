@@ -45,7 +45,7 @@ struct HomeScreen: View {
                                 }
                             } else if (eventList[index] == "Native Display") {
                                 // Show Web View
-                                NavigationLink(destination: NativeDisplayUIView().recordScreenView(screenName: "Native Display View")) {
+                                NavigationLink(destination: CTNativeDisplayView().recordScreenView(screenName: "Native Display View")) {
                                 }
                             } else if (eventList[index] == "Variables") {
                                 NavigationLink(destination: VariablesMenuView().recordScreenView(screenName: "Variables View")) {
