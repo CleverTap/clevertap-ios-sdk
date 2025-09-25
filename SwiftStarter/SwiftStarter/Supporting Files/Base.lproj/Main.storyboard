@@ -185,6 +185,64 @@
             </objects>
             <point key="canvasLocation" x="930" y="-208"/>
         </scene>
+        <!--Variables Table View Controller-->
+        <scene sceneID="v8m-BQ-bgC">
+            <objects>
+                <viewController storyboardIdentifier="VariablesVC" id="c7G-2G-VC6" customClass="VariablesTableViewController" customModule="SwiftStarter" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Tin-JJ-lZK">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Tft-hY-fx9">
+                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="FhC-YR-D0r"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="FhC-YR-D0r" firstAttribute="bottom" secondItem="Tft-hY-fx9" secondAttribute="bottom" id="9BW-hF-EAU"/>
+                            <constraint firstItem="Tft-hY-fx9" firstAttribute="top" secondItem="FhC-YR-D0r" secondAttribute="top" id="HWK-ij-xBG"/>
+                            <constraint firstItem="FhC-YR-D0r" firstAttribute="trailing" secondItem="Tft-hY-fx9" secondAttribute="trailing" id="fJ9-Ux-Og9"/>
+                            <constraint firstItem="Tft-hY-fx9" firstAttribute="leading" secondItem="FhC-YR-D0r" secondAttribute="leading" id="wfu-RO-drM"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="Tft-hY-fx9" id="Tln-AI-ddc"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6s9-io-Czg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1790" y="-217"/>
+        </scene>
+        <!--Native Display View Controller-->
+        <scene sceneID="ZsD-7l-B4w">
+            <objects>
+                <tableViewController storyboardIdentifier="NativeDisplayVC" id="AB8-dO-wqz" customClass="NativeDisplayViewController" customModule="SwiftStarter" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="TSK-1R-ii6">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="hxY-IW-7Hf">
+                                <rect key="frame" x="0.0" y="50" width="375" height="43.5"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="hxY-IW-7Hf" id="v2z-m3-Yj6">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="AB8-dO-wqz" id="bPq-iM-FPL"/>
+                            <outlet property="delegate" destination="AB8-dO-wqz" id="leX-Q0-FLc"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9tK-4C-moL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1546" y="-905"/>
+        </scene>
     </scenes>
     <resources>
         <image name="logo" width="171" height="63"/>

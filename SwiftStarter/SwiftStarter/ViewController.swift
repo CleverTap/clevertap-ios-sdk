@@ -51,6 +51,8 @@ extension ViewController {
         eventList.append("Local Half Interstitial Push Primer")
         eventList.append("Local Alert Push Primer")
         eventList.append("InApp Campaign Push Primer")
+        eventList.append("Native Display")
+        eventList.append("Variables")
         self.tblEvent.reloadData()
     }
     
@@ -133,6 +135,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 14:
             createInAppCampaignPushPrimer()
             break;
+        case 15: navigateToNativeDisplay()
+            break
+        case 16: navigateToVariables()
         default:
             break;
         }
@@ -265,6 +270,18 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         let storyBoard = UIStoryboard.init(name: "Main", bundle: nil)
         let customDomainVC = storyBoard.instantiateViewController(withIdentifier: "CustomDomainVC")
         self.navigationController?.pushViewController(customDomainVC, animated: true)
+    }
+    
+    func navigateToNativeDisplay() {
+        let storyBoard = UIStoryboard.init(name: "Main", bundle: nil)
+        let customDomainVC = storyBoard.instantiateViewController(withIdentifier: "NativeDisplayVC")
+        self.navigationController?.pushViewController(customDomainVC, animated: true)
+    }
+    
+    func navigateToVariables() {
+        let storyBoard = UIStoryboard.init(name: "Main", bundle: nil)
+        let variablesVC = storyBoard.instantiateViewController(withIdentifier: "VariablesVC")
+        self.navigationController?.pushViewController(variablesVC, animated: true)
     }
     
     func promptForPushNotification() {
