@@ -35,6 +35,7 @@ static const float kPageControlViewHeight = 30.f;
 - (void)populateLandscapeViews {
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;
+    int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
@@ -49,6 +50,10 @@ static const float kPageControlViewHeight = 30.f;
             carouselItemView.titleLabel.textColor = content.titleColor ? [CTUIUtils ct_colorWithHexString:content.titleColor] : [CTUIUtils ct_colorWithHexString:@"#000000"];
             carouselItemView.bodyLabel.text = content.message;
             carouselItemView.bodyLabel.textColor = content.messageColor ? [CTUIUtils ct_colorWithHexString:content.messageColor] : [CTUIUtils ct_colorWithHexString:@"#7E7E7E"];
+            
+            NSString *imageDescription = content.mediaDescription ? content.mediaDescription : [NSString stringWithFormat:@"Message Image %d", imageNumber];
+            imageNumber = imageNumber + 1;
+            carouselItemView.viewDescription = [NSString stringWithFormat:@"%@ %@ %@", imageDescription, content.title, content.message];
         }
         
         UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -63,6 +68,7 @@ static const float kPageControlViewHeight = 30.f;
 - (void)populateItemViews {
     self.itemViews = [NSMutableArray new];
     NSUInteger index = 0;
+    int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         NSString *caption = content.title;
         NSString *subcaption = content.message;
@@ -70,6 +76,8 @@ static const float kPageControlViewHeight = 30.f;
         NSString *actionUrl = content.actionUrl;
         NSString *captionColor = content.titleColor ? content.titleColor : @"#000000";
         NSString *subcaptionColor = content.messageColor ? content.messageColor : @"#7E7E7E";
+        NSString *imageDescription = content.mediaDescription ? content.mediaDescription : [NSString stringWithFormat:@"Message Image %d", imageNumber];
+        imageNumber = imageNumber + 1;
         
         if (imageUrl == nil) {
             continue;
@@ -78,8 +86,7 @@ static const float kPageControlViewHeight = 30.f;
         if (itemView == nil){
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height;
-            itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
-                                                          caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait]];
+            itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait] imageDescription:imageDescription];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
@@ -166,6 +173,8 @@ static const float kPageControlViewHeight = 30.f;
 }
 
 - (UIView *)swipeView:(CTSwipeView *)swipeView viewForItemAtIndex:(NSInteger)index reusingView:(UIView *)view{
+    self.carouselView.isAccessibilityElement = YES;
+    self.carouselView.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", self.itemViews[index].viewDescription, self.dateLabel.text];
     return self.itemViews[index];
 }
 

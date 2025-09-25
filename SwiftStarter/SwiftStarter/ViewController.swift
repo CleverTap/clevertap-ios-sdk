@@ -53,6 +53,7 @@ extension ViewController {
         eventList.append("InApp Campaign Push Primer")
         eventList.append("Native Display")
         eventList.append("Variables")
+        eventList.append("Sync Custom Templates")
         self.tblEvent.reloadData()
     }
     
@@ -138,6 +139,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 15: navigateToNativeDisplay()
             break
         case 16: navigateToVariables()
+            break;
+        case 17: CleverTap.sharedInstance()?.syncCustomTemplates()
+            break;
         default:
             break;
         }

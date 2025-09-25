@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT' }
   s.author           = { "CleverTap" => "http://www.clevertap.com" }
   s.source           = { :git => "https://github.com/CleverTap/clevertap-ios-sdk.git", :tag => s.version.to_s }
-  s.documentation_url = 'http://support.clevertap.com/'
+  s.documentation_url = 'https://developer.clevertap.com'
   s.requires_arc = true
   s.source_files = 'CleverTapWatchOS/*.{h,m}'
   s.ios.public_header_files   = 'CleverTapWatchOS/CleverTapWatchOS.h'

@@ -80,6 +80,9 @@ typedef enum {
     [self setUpImage];
     [self setUpContent];
     [self setUpButtons];
+    
+    // This will make element inside Header/Footer not accessible.
+    self.view.accessibilityViewIsModal = YES;
 }
 
 - (void)setUpImage {
@@ -94,6 +97,7 @@ typedef enum {
         self.imageView.hidden = NO;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = self.inAppImage;
+        self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else {
         self.imageView.hidden = YES;
     }

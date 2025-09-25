@@ -1,8 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
-
-#if defined(CLEVERTAP_HOST_WATCHOS)
+#if !TARGET_OS_TV
 #import <WatchConnectivity/WatchConnectivity.h>
 #endif
 
@@ -471,6 +470,23 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @param enabled         BOOL Whether tracking opt out should be enabled/disabled.
  */
 - (void)setOptOut:(BOOL)enabled;
+
+/*!
+ @method
+ 
+ @abstract
+ Enables tracking opt out for the currently active user and optionally block all communication channels.
+ 
+ @discussion
+ Use this method to opt the current user out of all event/profile tracking.
+ You must call this method separately for each active user profile (e.g. when switching user profiles using onUserLogin).
+ Once enabled, no events will be saved remotely or locally for the current user. To re-enable tracking call this method with enabled set to NO.
+ Optionally, all system events can be allowed/blocked.
+ 
+ @param enabled         BOOL Whether tracking opt out should be enabled/disabled.
+ @param allowSystemEvents         BOOL Whether all system events can be allowed/blocked.
+ */
+- (void)setOptOut:(BOOL)enabled allowSystemEvents:(BOOL)allowSystemEvents;
 
 /*!
  @method
@@ -1372,7 +1388,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)recordGeofenceExitedEvent:(NSDictionary *_Nonnull)geofenceDetails;
 
-#if defined(CLEVERTAP_HOST_WATCHOS)
+#if !TARGET_OS_TV
 /** HostWatchOS
  */
 - (BOOL)handleMessage:(NSDictionary<NSString *, id> *_Nonnull)message forWatchSession:(WCSession *_Nonnull)session API_AVAILABLE(ios(9.0));

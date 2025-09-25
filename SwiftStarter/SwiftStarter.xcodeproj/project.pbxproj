@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -47,6 +47,16 @@
 		57FB79FD2DF825680097FB65 /* AppInboxTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FB79FA2DF825680097FB65 /* AppInboxTableViewCell.swift */; };
 		679BC290E9C031925118BB08 /* Pods_SwiftStarterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F4216C29362779E4C0FEB3D /* Pods_SwiftStarterUITests.framework */; };
 		AFB2589C851917BB401BB9B1 /* Pods_SwiftWatchOS_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFFE852570BBC5FEAF733E90 /* Pods_SwiftWatchOS_Extension.framework */; };
+		6B53F59C2DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5962DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift */; };
+		6B53F59D2DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5982DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift */; };
+		6B53F59E2DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5992DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift */; };
+		6B53F59F2DFAFCB9007BBEA3 /* CTCopyToClipboardPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5972DFAFCB9007BBEA3 /* CTCopyToClipboardPresenter.swift */; };
+		6B53F5A02DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F59A2DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift */; };
+		6B53F5A12DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F59B2DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift */; };
+		6B53F5A32DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A22DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift */; };
+		6B53F5A52DFC3653007BBEA3 /* CTBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */; };
+		6B53F5A72DFC3771007BBEA3 /* UIViewController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A62DFC3771007BBEA3 /* UIViewController+Extensions.swift */; };
+		6B68DA442DF34F4A00761CFE /* CTCustomInterstitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */; };
 		CC6E947AF5932FBFF7927364 /* Pods_SwiftTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E6707AE6E92C7ECEB9BBDA7 /* Pods_SwiftTvOS.framework */; };
 		D4BC5A2400463249E0AD5442 /* Pods_SwiftStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68BBFE42CB635CB313734F6A /* Pods_SwiftStarter.framework */; };
 		F0DB1AFCE7692FA86F4E7196 /* Pods_SwiftStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 074BE1EA48A6A4147773BB1D /* Pods_SwiftStarter_NotificationService.framework */; };
@@ -204,6 +214,16 @@
 		57FB79FB2DF825680097FB65 /* AppInboxTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppInboxTableViewCell.xib; sourceTree = "<group>"; };
 		68BBFE42CB635CB313734F6A /* Pods_SwiftStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B533584248FEB40486A8517 /* Pods-SwiftStarterUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterUITests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		6B53F5962DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmPresenter.swift; sourceTree = "<group>"; };
+		6B53F5972DFAFCB9007BBEA3 /* CTCopyToClipboardPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCopyToClipboardPresenter.swift; sourceTree = "<group>"; };
+		6B53F5982DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomTemplatesProducer.swift; sourceTree = "<group>"; };
+		6B53F5992DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialPresenter.swift; sourceTree = "<group>"; };
+		6B53F59A2DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialViewModel.swift; sourceTree = "<group>"; };
+		6B53F59B2DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmViewModel.swift; sourceTree = "<group>"; };
+		6B53F5A22DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmViewController.swift; sourceTree = "<group>"; };
+		6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTBaseViewModel.swift; sourceTree = "<group>"; };
+		6B53F5A62DFC3771007BBEA3 /* UIViewController+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extensions.swift"; sourceTree = "<group>"; };
+		6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTCustomInterstitialViewController.swift; sourceTree = "<group>"; };
 		6FD51932099E6E7F3C4742C4 /* Pods-SwiftStarter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarter.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarter/Pods-SwiftStarter.debug.xcconfig"; sourceTree = "<group>"; };
 		770E918DC3CFE0CB70F1B195 /* Pods-SwiftStarterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterTests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarterTests/Pods-SwiftStarterTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7ADEE4A53267FFA858708822 /* Pods-SwiftStarterUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterUITests.release.xcconfig"; path = "Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -331,6 +351,7 @@
 			children = (
 				5784554C2E1B996C004EB946 /* VariablesTableViewController.swift */,
 				57F4AF4C2E054AE400F4ED37 /* NativeDisplayViewController.swift */,
+				6B53F5952DFAFC93007BBEA3 /* CustomTemplates */,
 				0740612820C1509E00D8F4C9 /* AppDelegate.swift */,
 				0740612A20C1509E00D8F4C9 /* ViewController.swift */,
 				07C50073228D57AE003E1404 /* CTWebviewVC.swift */,
@@ -436,6 +457,23 @@
 				49EA454920E36104005E0E54 /* Info.plist */,
 			);
 			path = NotificationService;
+			sourceTree = "<group>";
+		};
+		6B53F5952DFAFC93007BBEA3 /* CustomTemplates */ = {
+			isa = PBXGroup;
+			children = (
+				6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */,
+				6B53F5962DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift */,
+				6B53F5972DFAFCB9007BBEA3 /* CTCopyToClipboardPresenter.swift */,
+				6B53F5982DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift */,
+				6B53F5992DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift */,
+				6B53F59A2DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift */,
+				6B53F59B2DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift */,
+				6B53F5A22DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift */,
+				6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */,
+				6B53F5A62DFC3771007BBEA3 /* UIViewController+Extensions.swift */,
+			);
+			path = CustomTemplates;
 			sourceTree = "<group>";
 		};
 		E0DB6E43831792F6F889067E /* Pods */ = {
@@ -1000,6 +1038,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				57F4AF542E0554AA00F4ED37 /* NativeDisplayButtonsTableViewCell.swift in Sources */,
+				6B53F5A52DFC3653007BBEA3 /* CTBaseViewModel.swift in Sources */,
 				0740612B20C1509E00D8F4C9 /* ViewController.swift in Sources */,
 				07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */,
 				57FB79FD2DF825680097FB65 /* AppInboxTableViewCell.swift in Sources */,
@@ -1010,6 +1049,15 @@
 				0740612920C1509E00D8F4C9 /* AppDelegate.swift in Sources */,
 				57F4AF512E054DC200F4ED37 /* NativeDisplayTableViewCell.swift in Sources */,
 				57FB79F92DF81FED0097FB65 /* CustomAppInboxScreen.swift in Sources */,
+				6B53F5A32DFB079F007BBEA3 /* CTOpenURLConfirmViewController.swift in Sources */,
+				6B68DA442DF34F4A00761CFE /* CTCustomInterstitialViewController.swift in Sources */,
+				6B53F59C2DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift in Sources */,
+				6B53F59D2DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift in Sources */,
+				6B53F59E2DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift in Sources */,
+				6B53F5A72DFC3771007BBEA3 /* UIViewController+Extensions.swift in Sources */,
+				6B53F59F2DFAFCB9007BBEA3 /* CTCopyToClipboardPresenter.swift in Sources */,
+				6B53F5A02DFAFCB9007BBEA3 /* CTCustomInterstitialViewModel.swift in Sources */,
+				6B53F5A12DFAFCB9007BBEA3 /* CTOpenURLConfirmViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1276,7 +1324,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
-					"CLEVERTAP_HOST_WATCHOS=1",
 				);
 				INFOPLIST_FILE = "SwiftStarter/Supporting Files/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;

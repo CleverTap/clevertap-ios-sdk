@@ -1,6 +1,45 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.3.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.3) (September 11, 2025)
+#### Fixed
+- Fixes a bug where the updated values of variables were not fetched right after a profile push.
+- Optimises queuing behaviour of various type of clevertap events in a single batch.
+
+### [Version 7.3.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.2) (August 08, 2025)
+#### Added
+- Added Swift Package Manager (SPM) support for `CleverTapWatchOS`.
+
+#### Fixed
+- Fixes a crash in `CTInAppHTMLViewController` when HTML InApp is presented.
+- Fixes Push Primer class methods not exposed when integrated via SPM.
+- Mitigates a potential error attempted to dereference garbage pointer in `persistOrClearQueues` when app is killed.
+
+### [Version 7.3.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.1) (July 15, 2025)
+
+#### Fixed
+- Fixed a bug where some system events were dropped in case of partial opt-outs.
+
+### [Version 7.3.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.0) (July 11, 2025)
+
+#### Added
+- Introduces support for linked content within `Native Display` units, enabling richer interactive experiences.
+- Enhances security by implementing encryption in transit for all SDK network communications.
+- Improves `GDPR` opt-out functionality by adding an option to allow critical system events while respecting user privacy choices.
+- Introduces enhanced tracking for Push Primer local In-App button interactions, providing additional parameters in callbacks:
+    * The `onDismissed` callback now includes `actionExtras` with `wzrk_c2a` (button text) and `wzrk_id` when a button is interacted with.
+
+#### Fixed
+- Fixes a `No new templates are synced` error while syncing new custom templates.
+- Fixes a Local Push Primer crash when asking for push permission using promptForPushPermission
+
+### [Version 7.2.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.2.1) (June 27, 2025)
+
+#### Added
+* Adds Accessibility support for the `App-Inbox` and `In-app messages` channels.
+* Adds an overloaded API to support setting a contentDescription for the image in a PushPrimer to improve accessibility.
+  * `- (void)setImageUrl:(NSString *)imageUrl contentDescription:(NSString * _Nullable)contentDescription`: Sets the content description for the image to improve accessibility.
+
 ### [Version 7.2.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.2.0) (May 27, 2025)
 
 #### Added

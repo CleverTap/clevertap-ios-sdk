@@ -6,6 +6,7 @@ extern NSString *const kHANDSHAKE_URL;
 extern NSString *const kHANDSHAKE_DOMAIN_HEADER;
 extern NSString *const ACCOUNT_ID_HEADER;
 extern NSString *const ACCOUNT_TOKEN_HEADER;
+extern NSString *const ENCRYPTION_HEADER;
 
 extern NSString *const REDIRECT_DOMAIN_KEY;
 extern NSString *const REDIRECT_NOTIF_VIEWED_DOMAIN_KEY;
@@ -44,6 +45,7 @@ extern NSString *const kSessionId;
 #define CLTAP_DISABLE_IDFV_LABEL @"CleverTapDisableIDFV"
 #define CLTAP_ENABLE_FILE_PROTECTION @"CleverTapEnableFileProtection"
 #define CLTAP_HANDSHAKE_DOMAIN @"CleverTapHandshakeDomain"
+#define CLTAP_ENCRYPTION_IN_TRANSIT_ENABLED @"CleverTapEncryptionInTransitEnabled"
 #define CLTAP_BETA_LABEL @"CleverTapBeta"
 #define CLTAP_SESSION_LENGTH_MINS 20
 #define CLTAP_SESSION_LAST_VC_TRAIL @"last_session_vc_trail"
@@ -63,6 +65,7 @@ extern NSString *const kSessionId;
 #define CLTAP_SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define CLTAP_APP_LAUNCHED_EVENT @"App Launched"
 #define CLTAP_CHARGED_EVENT @"Charged"
+#define CLTAP_CONTENT_FETCH_EVENT @"content_fetch"
 #define CLTAP_PROFILE @"profile"
 #define CLTAP_USER_ATTRIBUTE_CHANGE @"_change"
 #define CLTAP_KEY_NEW_VALUE @"newValue"
@@ -76,6 +79,7 @@ extern NSString *const kSessionId;
 #define CLTAP_PUSH_DELAY_SECONDS 1
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
+#define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
@@ -96,7 +100,7 @@ extern NSString *const kSessionId;
 #define CLTAP_DATE_PREFIX @"$D_"
 #define CLTAP_CachedGUIDSKey @"CachedGUIDS"
 
-// profile commands
+#pragma mark Profile Commands
 static NSString *const kCLTAP_COMMAND_SET = @"$set";
 static NSString *const kCLTAP_COMMAND_ADD = @"$add";
 static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
@@ -200,6 +204,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_MEDIA_LANDSCAPE @"mediaLandscape"
 #define CLTAP_INAPP_MEDIA_CONTENT_TYPE @"content_type"
 #define CLTAP_INAPP_MEDIA_URL @"url"
+#define CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION @"alt_text"
 
 #define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
 #define CLTAP_TRIGGER_BOOL_STRING_NO @"false"
@@ -262,6 +267,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_USER_AGE @"Age"
 
 #define CLTAP_OPTOUT @"ct_optout"
+#define CLTAP_ALLOW_SYSTEM_EVENTS @"ct_allow_sys_events_and_communication"
 
 #pragma mark Constants for profile init/sync notifications
 #define CLTAP_PROFILE_DID_INITIALIZE_NOTIFICATION @"CleverTapProfileDidInitializeNotification"
@@ -303,3 +309,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_APP_RATING_TEMPLATE_NAME @"ctsystem_apprating"
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
 #define CLTAP_OPEN_URL_ACTION_KEY @"iOS"
+
+#pragma mark HTTP Codes
+#define HTTP_OK 200
+#define HTTP_EXPIRED 419
+#define HTTP_UNAUTHORIZED 401
+#define HTTP_PAYMENT_REQUIRED 402

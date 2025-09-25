@@ -7,6 +7,7 @@ var cleverTapAdditionalInstance: CleverTap = {
     }()
 
 struct HomeScreen: View {
+
     let eventList = [  "Record User Profile",
                        "Record User Profile with Properties",
                        "Record User Event called Product Viewed",
@@ -19,8 +20,10 @@ struct HomeScreen: View {
                        "Decrement User Profile Property",
                        "Local Half Interstitial Push Primer",
                        "Native Display",
-                       "Variables"
+                       "Variables",
+                       "Sync Custom Templates"
                     ]
+
     
     var body: some View {
         NavigationView {
@@ -88,6 +91,9 @@ func buttonAction(index: Int) {
             break;
         case 10:
             createLocalHalfInterstitialPushPrimer()
+            break;
+        case 13:
+            CleverTap.sharedInstance()?.syncCustomTemplates()
             break;
         default:
             break;

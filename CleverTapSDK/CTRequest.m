@@ -17,24 +17,23 @@
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *url;
 
-
 @end
 
 @implementation CTRequest
 
-- (CTRequest *_Nonnull)initWithHttpMethod:(NSString *_Nonnull)httpMethod config:(CleverTapInstanceConfig *_Nonnull)config params:(id _Nullable)params url:(NSString *_Nonnull)url {
+- (CTRequest * _Nonnull)initWithHttpMethod:(NSString * _Nonnull)httpMethod config:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url additionalHeaders:(NSDictionary * _Nullable)additionalHeaders {
     self = [super init];
     if (self) {
         _httpMethod = httpMethod;
         _params = params;
         _config = config;
         _url = url;
-        _urlRequest = [self createURLRequest];
+        _urlRequest = [self createURLRequestWithAdditionalHeaders:additionalHeaders];
     }
     return self;
 }
 
-- (NSMutableURLRequest *)createURLRequest {
+- (NSMutableURLRequest *)createURLRequestWithAdditionalHeaders: (NSDictionary *_Nullable)additionalHeaders {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:_url]];
     NSString *accountId = self.config.accountId;
     NSString *accountToken = self.config.accountToken;
@@ -43,6 +42,11 @@
     }
     if (accountToken) {
         [request setValue:accountToken forHTTPHeaderField:ACCOUNT_TOKEN_HEADER];
+    }
+    if (additionalHeaders) {
+        [additionalHeaders enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull value, BOOL * _Nonnull stop) {
+            [request setValue:value forHTTPHeaderField:key];
+        }];
     }
     if ([_httpMethod isEqualToString:@"POST"] && _params > 0) {
         NSString *jsonBody = [CTUtils jsonObjectToString:_params];
