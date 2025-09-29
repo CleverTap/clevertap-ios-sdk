@@ -38,6 +38,7 @@
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
+#import "CTInAppDelayManager.h"
 #endif
 
 #if !(TARGET_OS_TV)
@@ -66,7 +67,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 @end
 
-@interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate> {
+@interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate, CTInAppDelayManagerDelegate> {
 }
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -84,7 +85,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 @property (nonatomic, strong) CTCustomTemplatesManager *templatesManager;
 
 @property (nonatomic, strong, readonly) NSString *imageInterstitialHtml;
-
+@property (nonatomic, strong) CTInAppDelayManager *inAppDelayManager;
 @end
 
 @implementation CTInAppDisplayManager
@@ -113,13 +114,29 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         self.inAppStore = inAppStore;
         self.templatesManager = templatesManager;
         self.fileDownloader = fileDownloader;
-        
+        self.inAppDelayManager = [[CTInAppDelayManager alloc] initWithDispatchQueue:dispatchQueueManager inAppStore:inAppStore withConfig:instance.config];
+        self.inAppDelayManager.delegate = self;
+
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(onDisplayPendingNotification:)
                                                      name:[self.class pendingNotificationKey:self.config.accountId]
                                                    object:nil];
     }
     return self;
+}
+
+- (void)delayedInAppReady:(NSDictionary *)inApp {
+    @try {
+        if (inApp) {
+            // Prepare the in-app for display
+            [self prepareNotificationForDisplay:inApp];
+            // Remove in-app after prepare
+            [self.inAppStore dequeueDelayedInApp:inApp];
+        }
+        
+    } @catch (NSException *e) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
+    }
 }
 
 - (void)dealloc {
@@ -155,10 +172,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
+        //TODO: Check if delayed inapps have any relation with RFP inapps
         NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
         if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
             filteredInAppNotifs = [self filterRFPInApps:filteredInAppNotifs];
         }
+        //Partition immediate delayed inApps here
         [self.inAppStore enqueueInApps:filteredInAppNotifs];
         
         [CTUtils runSyncMainQueue:^{
@@ -272,6 +291,25 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 }
 
+- (void)_showDelayedNotificationIfAvailable {
+    NSArray *allDelayedInApps = [self.inAppStore delayedInAppsQueue];
+    if (!allDelayedInApps.count) return;
+    
+    NSInteger maxConcurrent = 3;
+    NSInteger currentCount = self.inAppDelayManager.scheduledCampaigns.count;
+    NSInteger toSchedule = MIN(maxConcurrent - currentCount, allDelayedInApps.count);
+    
+    if (toSchedule <= 0) return;
+    
+    NSArray *inAppsToSchedule = [allDelayedInApps subarrayWithRange:NSMakeRange(0, toSchedule)];
+    [self.inAppDelayManager scheduleMultipleDelayedInApps:inAppsToSchedule];
+    
+    // Remove from store after scheduling
+    for (NSDictionary *inApp in inAppsToSchedule) {
+        [self.inAppStore dequeueDelayedInApp:inApp];
+    }
+}
+
 - (void)_showNotificationIfAvailable {
     if ([CTUIUtils runningInsideAppExtension]) return;
 
@@ -281,6 +319,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 
     @try {
+        //Immediate inapps
         NSDictionary *inApp = [self.inAppStore peekInApp];
         if (inApp) {
             // Prepare the in-app for display
@@ -288,6 +327,10 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             // Remove in-app after prepare
             [self.inAppStore dequeueInApp];
         }
+        
+        //Delayed inapps
+        [self _showDelayedNotificationIfAvailable];
+        
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
     }
@@ -307,11 +350,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             return;
         }
 
-        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
-        if (now > notification.timeToLive) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
-            return;
-        }
+//        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+//        if (now > notification.timeToLive) {
+//            CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
+//            return;
+//        }
         
         [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
