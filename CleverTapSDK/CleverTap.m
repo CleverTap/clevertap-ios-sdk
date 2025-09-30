@@ -1371,7 +1371,7 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !defined(CLEVERTAP_TVOS)
 - (BOOL)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
-    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
+    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"] || notification[@"wzrk_inapp_s3_url"]) {
         // remove unknown json attributes
         NSMutableDictionary *testPayload = [NSMutableDictionary new];
         for (NSString *key in [notification allKeys]) {
@@ -1519,6 +1519,33 @@ static BOOL sharedInstanceErrorLogged;
     return notification;
 }
 #endif
+
+- (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSString* _Nullable previewURL))completion {
+    if (!url) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Inapp preview URL is nil", self);
+        return;
+    }
+    
+    CTRequest *ctRequest = [CTRequestFactory previewRequestWithConfig:self.config url:url];
+    [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            if (httpResponse.statusCode == 200 && data) {
+                NSString *inAppJsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                completion(inAppJsonString);
+            }
+            else  {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with status code: %li", self, httpResponse.statusCode);
+            }
+        }
+    }];
+    [ctRequest onError:^(NSError * _Nullable error) {
+        if (error) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with error: %@", self, error.localizedDescription);
+        }
+    }];
+    [self.requestSender send:ctRequest];
+}
 
 #pragma mark - InApp Notifications
 

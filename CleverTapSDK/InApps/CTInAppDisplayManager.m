@@ -784,51 +784,113 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 #pragma mark - Handle InApp test from Push
 - (BOOL)didHandleInAppTestFromPushNotificaton:(NSDictionary * _Nullable)notification {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    if ([CTUIUtils runningInsideAppExtension]) {
+    if ([CTUIUtils runningInsideAppExtension] || !notification || [notification count] <= 0) {
         return NO;
     }
     
-    if (!notification || [notification count] <= 0 || !notification[@"wzrk_inapp"]) return NO;
-    
-    @try {
-        [self.instance.impressionManager resetSession];
-        CleverTapLogDebug(self.config.logLevel, @"%@: Received in-app notification from push payload: %@", self, notification);
-        
-        NSString *jsonString = notification[@"wzrk_inapp"];
-        
-        NSMutableDictionary *inapp = [[NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
-                                                                      options:0
-                                                                        error:nil] mutableCopy];
-        if (!inapp) {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse the inapp notification as JSON", self);
-            return YES;
-        }
-        
-        // Handle Image Interstitial and Advanced Builder InApp Test (Preview)
-        NSString *inAppPreviewType = notification[CLTAP_INAPP_PREVIEW_TYPE];
-        if ([inAppPreviewType isEqualToString:CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE] || [inAppPreviewType isEqualToString:CLTAP_INAPP_ADVANCED_BUILDER_TYPE]) {
-            NSMutableDictionary *htmlInapp = [self handleHTMLInAppPreview:inapp];
-            if (!htmlInapp) {
-                return YES; // Failed to handle HTML inapp
-            }
-            inapp = htmlInapp;
-        }
-        
-        float delay = self.isAppActiveForeground ? 0.5 : 2.0;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            @try {
-                [self prepareNotificationForDisplay:inapp];
-            } @catch (NSException *e) {
-                CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display the inapp notifcation from payload: %@", self, e.debugDescription);
-            }
-        });
-    } @catch (NSException *e) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display the inapp notifcation from payload: %@", self, e.debugDescription);
+    // Handle S3 URL path (newer approach)
+    NSString *s3URL = notification[@"wzrk_inapp_s3_url"];
+    if (s3URL) {
+        [self fetchAndDisplayInAppFromS3:s3URL withPreviewType:notification[CLTAP_INAPP_PREVIEW_TYPE]];
         return YES;
     }
     
+    // fallback: handle legacy JSON
+    NSString *jsonString = notification[@"wzrk_inapp"];
+    if (!jsonString) {
+        return NO;
+    }
+    
+    [self.instance.impressionManager resetSession];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Received in-app notification from push payload", self);
+    
+    NSMutableDictionary *inapp = [self parseInAppJSON:jsonString];
+    if (!inapp) {
+        return YES;
+    }
+    
+    // Transform HTML preview if needed
+    inapp = [self transformHTMLPreviewIfNeeded:inapp withType:notification[CLTAP_INAPP_PREVIEW_TYPE]] ?: inapp;
+    
+    [self scheduleInAppDisplay:inapp];
+    
 #endif
     return YES;
+}
+
+#pragma mark - Helper Methods
+
+- (void)fetchAndDisplayInAppFromS3:(NSString *)url withPreviewType:(NSString *)previewType {
+    __weak typeof(self) weakSelf = self;
+    [_instance fetchInAppPreviewContent:url onSuccess:^(NSString *inappJsonString) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        NSMutableDictionary *inapp = [strongSelf parseInAppJSON:inappJsonString];
+        if (!inapp) {
+            return;
+        }
+        
+        // Transform HTML preview if needed
+        inapp = [strongSelf transformHTMLPreviewIfNeeded:inapp withType:previewType] ?: inapp;
+        
+        [strongSelf scheduleInAppDisplay:inapp];
+        
+    }];
+}
+
+- (NSMutableDictionary *)parseInAppJSON:(NSString *)jsonString {
+    if (!jsonString) {
+        return nil;
+    }
+    
+    NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error = nil;
+    NSMutableDictionary *inapp = [NSJSONSerialization JSONObjectWithData:data
+                                                                 options:NSJSONReadingMutableContainers
+                                                                   error:&error];
+    
+    if (!inapp || error) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse inapp notification as JSON: %@", self, error.localizedDescription);
+    }
+    
+    return inapp;
+}
+
+- (NSMutableDictionary *)transformHTMLPreviewIfNeeded:(NSMutableDictionary *)inapp
+                                             withType:(NSString *)previewType {
+    if (!previewType || !inapp) {
+        return nil;
+    }
+    
+    if ([previewType isEqualToString:CLTAP_INAPP_IMAGE_INTERSTITIAL_TYPE] ||
+        [previewType isEqualToString:CLTAP_INAPP_ADVANCED_BUILDER_TYPE]) {
+        
+        NSMutableDictionary *htmlInapp = [self handleHTMLInAppPreview:inapp];
+        if (!htmlInapp) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to handle HTML inapp preview transformation", self);
+        }
+        return htmlInapp;
+    }
+    
+    return nil;
+}
+
+- (void)scheduleInAppDisplay:(NSMutableDictionary *)inapp {
+    if (!inapp) {
+        return;
+    }
+    
+    float delay = self.isAppActiveForeground ? 0.5 : 2.0;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        @try {
+            [self prepareNotificationForDisplay:inapp];
+        } @catch (NSException *e) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Failed to display inapp notification: %@",
+                            self, e.debugDescription);
+        }
+    });
 }
 
 - (NSString *)imageInterstitialHtml {
@@ -897,4 +959,3 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 @end
-

@@ -51,8 +51,8 @@
     if ([_httpMethod isEqualToString:@"POST"] && _params > 0) {
         NSString *jsonBody = [CTUtils jsonObjectToString:_params];
         request.HTTPBody = [jsonBody dataUsingEncoding:NSUTF8StringEncoding];
-        request.HTTPMethod = @"POST";
     }
+    request.HTTPMethod = _httpMethod;
     return request;
 }
 
