@@ -1520,7 +1520,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 #endif
 
-- (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSString* _Nullable previewURL))completion {
+- (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion {
     if (!url) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Inapp preview URL is nil", self);
         return;
@@ -1531,8 +1531,8 @@ static BOOL sharedInstanceErrorLogged;
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200 && data) {
-                NSString *inAppJsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                completion(inAppJsonString);
+                NSDictionary *inAppJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+                completion(inAppJson);
             }
             else  {
                 CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with status code: %li", self, httpResponse.statusCode);

@@ -822,11 +822,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (void)fetchAndDisplayInAppFromS3:(NSString *)url withPreviewType:(NSString *)previewType {
     __weak typeof(self) weakSelf = self;
-    [_instance fetchInAppPreviewContent:url onSuccess:^(NSString *inappJsonString) {
+    [_instance fetchInAppPreviewContent:url onSuccess:^(NSDictionary *inappJson) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         
-        NSMutableDictionary *inapp = [strongSelf parseInAppJSON:inappJsonString];
+        NSMutableDictionary *inapp = [inappJson mutableCopy];
         if (!inapp) {
             return;
         }
@@ -834,7 +834,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         // Transform HTML preview if needed
         inapp = [strongSelf transformHTMLPreviewIfNeeded:inapp withType:previewType] ?: inapp;
         
-        [strongSelf scheduleInAppDisplay:inapp];
+        [CTUtils runAsyncMainQueue:^{
+            [strongSelf scheduleInAppDisplay:inapp];
+        }];
         
     }];
 }
