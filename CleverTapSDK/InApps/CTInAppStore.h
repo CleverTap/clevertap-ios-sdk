@@ -42,5 +42,6 @@
 - (NSDictionary * _Nullable)peekDelayedInApp;
 - (NSDictionary * _Nullable)dequeueDelayedInApp:(NSDictionary * _Nullable)inAppNotif;
 - (NSInteger)parseDelayFromJson:(NSDictionary * _Nullable)inAppNotif;
+//- (NSDictionary<NSString *, NSArray *> *_Nullable)partitionInApps:(NSArray *_Nullable)inAppNotifs;
 
 @end

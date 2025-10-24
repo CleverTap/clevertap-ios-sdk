@@ -100,7 +100,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (instancetype _Nonnull)initWithCleverTap:(CleverTap * _Nonnull)instance
-                            dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
+                      dispatchQueueManager:(CTDispatchQueueManager * _Nonnull)dispatchQueueManager
                             inAppFCManager:(CTInAppFCManager *)inAppFCManager
                          impressionManager:(CTImpressionManager *)impressionManager
                                 inAppStore:(CTInAppStore *)inAppStore
@@ -137,6 +137,10 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
     }
+}
+
+- (void)delayedInAppCancelled:(NSString *)inAppId {
+//    CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
 }
 
 - (void)dealloc {
@@ -295,7 +299,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     NSArray *allDelayedInApps = [self.inAppStore delayedInAppsQueue];
     if (!allDelayedInApps.count) return;
     
-    NSInteger maxConcurrent = 3;
+    NSInteger maxConcurrent = 20;
     NSInteger currentCount = self.inAppDelayManager.scheduledCampaigns.count;
     NSInteger toSchedule = MIN(maxConcurrent - currentCount, allDelayedInApps.count);
     
