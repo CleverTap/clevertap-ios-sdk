@@ -10,7 +10,6 @@
 // Keep the persistent store coordinator static since the inbox file location is shared
 static NSPersistentStoreCoordinator *sharedCoordinator;
 static dispatch_once_t coordinatorOnceToken;
-static NSLock *coordinatorLock;
 
 @interface CTInboxController ()
 
@@ -32,12 +31,6 @@ static NSLock *coordinatorLock;
 @synthesize unreadMessages=_unreadMessages;
 
 #pragma mark - Initialization
-
-+ (void)initialize {
-    if (self == [CTInboxController class]) {
-        coordinatorLock = [[NSLock alloc] init];
-    }
-}
 
 // blocking, call off main thread
 - (instancetype)initWithAccountId:(NSString *)accountId guid:(NSString *)guid {
