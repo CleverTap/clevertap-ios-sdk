@@ -151,7 +151,7 @@ static dispatch_once_t coordinatorOnceToken;
         
         if (haveUpdates) {
             [strongSelf _save];
-            [strongSelf _notifyUpdateOnMainThread];
+            [strongSelf _notifyUpdate];
         }
     }];
 }
@@ -212,7 +212,7 @@ static dispatch_once_t coordinatorOnceToken;
         if (message) {
             message.isRead = YES;
             [strongSelf _save];
-            [strongSelf _notifyUpdateOnMainThread];
+            [strongSelf _notifyUpdate];
         }
     }];
 }
@@ -243,7 +243,7 @@ static dispatch_once_t coordinatorOnceToken;
         
         if (hasChanges) {
             [strongSelf _save];
-            [strongSelf _notifyUpdateOnMainThread];
+            [strongSelf _notifyUpdate];
         }
     }];
 }
@@ -326,7 +326,7 @@ static dispatch_once_t coordinatorOnceToken;
     }
     
     [self _save];
-    [self _notifyUpdateOnMainThread];
+    [self _notifyUpdate];
 }
 
 // Always call from inside context performBlock/performBlockAndWait
@@ -360,10 +360,7 @@ static dispatch_once_t coordinatorOnceToken;
     
     // Delete expired messages
     if (toDelete.count > 0) {
-        for (CTMessageMO *msg in toDelete) {
-            [self.context deleteObject:msg];
-        }
-        [self _save];
+        [self _deleteMessages:toDelete];
     }
     
     return messages;
@@ -388,12 +385,10 @@ static dispatch_once_t coordinatorOnceToken;
 
 #pragma mark - Delegate Notification
 
-- (void)_notifyUpdateOnMainThread {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.delegate && [self.delegate respondsToSelector:@selector(inboxMessagesDidUpdate)]) {
-            [self.delegate inboxMessagesDidUpdate];
-        }
-    });
+- (void)_notifyUpdate {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(inboxMessagesDidUpdate)]) {
+        [self.delegate inboxMessagesDidUpdate];
+    }
 }
 
 @end
