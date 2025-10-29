@@ -1371,7 +1371,7 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !defined(CLEVERTAP_TVOS)
 - (BOOL)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
-    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"] || notification[@"wzrk_inapp_s3_url"]) {
+    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"] || notification[@"wzrk_inapp_s3_url"] || notification[CLTAP_INAPP_PREVIEW_TYPE]) {
         // remove unknown json attributes
         NSMutableDictionary *testPayload = [NSMutableDictionary new];
         for (NSString *key in [notification allKeys]) {
