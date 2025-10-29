@@ -235,7 +235,7 @@
     _handshakeDomain = isDefault ? plist.handshakeDomain : nil;
     _encryptionInTransitEnabled = isDefault ? plist.encryptionInTransitEnabled : NO;
     
-    // Initialise cryptManager with 0 encrytpion level for custom instance also.
+    // Initialise cryptManager with 0 encryption level for custom instance also.
     _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
 }
 
