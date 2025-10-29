@@ -234,9 +234,9 @@
     _enableFileProtection = isDefault ? plist.enableFileProtection : NO;
     _handshakeDomain = isDefault ? plist.handshakeDomain : nil;
     _encryptionInTransitEnabled = isDefault ? plist.encryptionInTransitEnabled : NO;
-    if (isDefault) {
-        _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
-    }
+    
+    // Initialise cryptManager with 0 encryption level for custom instance also.
+    _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:isDefault];
 }
 
 - (void) checkIfAvailableAccountId:(NSString *)accountId
