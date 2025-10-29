@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.3.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.4) (October 29, 2025)
+#### Fixed
+- Mitigates a potential crash related to Core Data concurrency for App Inbox.
+- Fixes a bug where multiple profiles were created when `onUserLogin` was called via a custom CleverTap instance.
+- Fixes conflicts with SDWebImage when apps used other packages also using SDWebImage via Swift Package Manager.
+
 ### [Version 7.3.3](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.3) (September 11, 2025)
 #### Fixed
 - Fixes a bug where the updated values of variables were not fetched right after a profile push.
