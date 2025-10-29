@@ -24,7 +24,7 @@ let package = Package(
     dependencies: [],
     targets: [
         .binaryTarget(
-            name: "SDWebImage",
+            name: "SDWebImageCT",
             url: "https://github.com/SDWebImage/SDWebImage/releases/download/5.21.0/SDWebImage-dynamic.xcframework.zip",
             checksum: "e034ea04f5e86866bc3081d009941bd5b2a2ed705b3a06336656484514116638"
         ),
@@ -51,12 +51,11 @@ let package = Package(
             name: "CleverTapSDKWrapper",
             dependencies: [
                 "CleverTapSDK",
-                "SDWebImage"
+                "SDWebImageCT"
             ],
             path: "CleverTapSDKWrapper",
             linkerSettings: [
-                .linkedLibrary("sqlite3"),
-                .linkedFramework("SDWebImage", .when(platforms: [.iOS]))
+                .linkedLibrary("sqlite3")
             ]
         ),
         .target(
