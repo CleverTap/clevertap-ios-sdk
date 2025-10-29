@@ -6,8 +6,10 @@
 #import "CTMessageMO.h"
 #import "CTInboxUtils.h"
 
-static NSManagedObjectContext *mainContext;
-static NSManagedObjectContext *privateContext;
+
+// Keep the persistent store coordinator static since the inbox file location is shared
+static NSPersistentStoreCoordinator *sharedCoordinator;
+static dispatch_once_t coordinatorOnceToken;
 
 @interface CTInboxController ()
 
@@ -15,6 +17,9 @@ static NSManagedObjectContext *privateContext;
 @property (nonatomic, copy, readonly) NSString *guid;
 @property (nonatomic, copy, readonly) NSString *userIdentifier;
 @property (nonatomic, strong, readonly) CTUserMO *user;
+
+// Instance-specific context
+@property (nonatomic, strong) NSManagedObjectContext *context;
 
 @end
 
@@ -25,182 +30,307 @@ static NSManagedObjectContext *privateContext;
 @synthesize messages=_messages;
 @synthesize unreadMessages=_unreadMessages;
 
+#pragma mark - Initialization
 
-// blocking run off main thread
+// blocking, call off main thread
 - (instancetype)initWithAccountId:(NSString *)accountId guid:(NSString *)guid {
-    self =  [super init];
-    if (self) {
-        [self staticInit];
-        _isInitialized = (mainContext != nil && privateContext != nil);
+    
+    if (self = [super init]) {
+        // Initialize shared coordinator if needed
+        [CTInboxController initializeSharedCoordinator];
+        
+        _isInitialized = (sharedCoordinator != nil);
+        
         if (_isInitialized) {
-            _accountId = accountId;
-            _guid = guid;
+            _accountId = [accountId copy];
+            _guid = [guid copy];
+            
             NSString *userIdentifier = [NSString stringWithFormat:@"%@:%@", accountId, guid];
             _userIdentifier = userIdentifier;
-            [privateContext performBlockAndWait:^{
-                self->_user = [CTUserMO fetchOrCreateFromJSON:@{@"accountId":accountId, @"guid":guid, @"identifier": userIdentifier} forContext:privateContext];
-                [self _save];
+            
+            // Create instance-specific context with private queue
+            _context = [[NSManagedObjectContext alloc]
+                        initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+            _context.persistentStoreCoordinator = sharedCoordinator;
+            
+            // Configure merge policy for conflict resolution
+            _context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
+            
+            // Automatically merge changes from other contexts (iOS 10+)
+            if (@available(iOS 10.0, *)) {
+                _context.automaticallyMergesChangesFromParent = YES;
+            }
+            
+            // Create or fetch user on the context's queue
+            __weak typeof(self) weakSelf = self;
+            [_context performBlockAndWait:^{
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                if (!strongSelf) return;
+                
+                strongSelf->_user = [CTUserMO fetchOrCreateFromJSON:@{
+                    @"accountId": accountId,
+                    @"guid": guid,
+                    @"identifier": userIdentifier
+                } forContext:strongSelf.context];
+                
+                [strongSelf _save];
             }];
         }
     }
     return self;
 }
 
-- (void)staticInit {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
++ (void)initializeSharedCoordinator {
+    dispatch_once(&coordinatorOnceToken, ^{
         @try {
-            NSURL *modelURL = [[CTInboxUtils bundle:self.class] URLForResource:@"Inbox" withExtension:@"momd"];
-            NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
-            NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
+            // Load Core Data model
+            NSURL *modelURL = [[CTInboxUtils bundle:self.class]
+                               URLForResource:@"Inbox" withExtension:@"momd"];
+            NSManagedObjectModel *mom = [[NSManagedObjectModel alloc]
+                                         initWithContentsOfURL:modelURL];
             
-            NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-            [context setPersistentStoreCoordinator:coordinator];
-            
-            NSPersistentStoreCoordinator *psc = [context persistentStoreCoordinator];
-            NSFileManager *fileManager = [NSFileManager defaultManager];
-            NSURL *documentsURL = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
-            NSURL *storeURL = [documentsURL URLByAppendingPathComponent:@"CleverTap-Inbox.sqlite"];
-            NSError *error = nil;
-            NSPersistentStore *store = [psc addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error];
-            if (!store) {
-                CleverTapLogStaticDebug(@"Failed to initalize core data persistent store: %@\n%@", [error localizedDescription], [error userInfo]);
+            if (!mom) {
+                CleverTapLogStaticDebug(@"Failed to load Core Data model from bundle");
                 return;
             }
-            NSManagedObjectContext *private = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-            [private setParentContext:context];
-            mainContext = context;
-            privateContext = private;
+            
+            // Create persistent store coordinator
+            sharedCoordinator = [[NSPersistentStoreCoordinator alloc]
+                                 initWithManagedObjectModel:mom];
+            
+            // Get store URL
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            NSURL *documentsURL = [[fileManager URLsForDirectory:NSDocumentDirectory
+                                                        inDomains:NSUserDomainMask] lastObject];
+            NSURL *storeURL = [documentsURL URLByAppendingPathComponent:@"CleverTap-Inbox.sqlite"];
+            
+            // Configure store options with WAL mode for better concurrency. This is backward compatible
+            NSDictionary *options = @{
+                NSMigratePersistentStoresAutomaticallyOption: @YES,
+                NSInferMappingModelAutomaticallyOption: @YES,
+                NSSQLitePragmasOption: @{@"journal_mode": @"WAL"}
+            };
+            
+            NSError *error = nil;
+            NSPersistentStore *store = [sharedCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                                                       configuration:nil
+                                                                                 URL:storeURL
+                                                                             options:options
+                                                                               error:&error];
+            
+            if (!store) {
+                CleverTapLogStaticDebug(@"Failed to initialize Core Data persistent store: %@\n%@",
+                                       [error localizedDescription], [error userInfo]);
+                sharedCoordinator = nil;
+            }
         } @catch (NSException *e) {
-            CleverTapLogStaticDebug(@"Failed to initalize core data store: %@", e.debugDescription);
-            mainContext = nil;
-            privateContext = nil;
+            CleverTapLogStaticDebug(@"Failed to initialize Core Data store: %@", e.debugDescription);
+            sharedCoordinator = nil;
         }
     });
 }
 
+- (void)dealloc {
+    _context = nil;
+    _user = nil;
+}
 
-#pragma mark - Public
+#pragma mark - Public Methods
 
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages {
     if (!self.isInitialized) return;
-    [privateContext performBlock:^{
-        CleverTapLogStaticInternal(@"%@: updating messages: %@", self.user, messages);
-        BOOL haveUpdates = [self.user updateMessages:messages forContext:privateContext];
+    
+    __weak typeof(self) weakSelf = self;
+    [self.context performBlock:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        CleverTapLogStaticInternal(@"%@: updating messages: %@", strongSelf.user, messages);
+        BOOL haveUpdates = [strongSelf.user updateMessages:messages
+                                                 forContext:strongSelf.context];
+        
         if (haveUpdates) {
-            [self _save];
-            [self notifyUpdate];
+            [strongSelf _save];
+            [strongSelf _notifyUpdate];
         }
     }];
 }
 
 - (void)deleteMessageWithId:(NSString *)messageId {
-    CTMessageMO *message = [self _messageForId:messageId];
-    if (!message) return;
-    [self _deleteMessages:@[message]];
-}
-
-- (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds {
-    NSMutableArray *toDeleteInboxMessages = [NSMutableArray new];
-    for (NSString *ids in messageIds) {
-        if (ids != nil && ![ids isEqualToString:@""]){
-            CTMessageMO *msg = [self _messageForId:ids];
-            if (msg) {
-                [toDeleteInboxMessages addObject:msg];
-            }
-            else {
-                CleverTapLogStaticDebug(@"Cannot delete App Inbox Message because Message ID %@ is invalid.", ids)
-            }
-        }
-        else {
-            CleverTapLogStaticDebug(@"Cannot delete App Inbox Message because Message ID is null or not a string.");
-        }
-    }
-    if ([toDeleteInboxMessages count] > 0) {
-        [self _deleteMessages:toDeleteInboxMessages];
-    }
-}
-
-- (void)markReadMessageWithId:(NSString *)messageId {
-    [privateContext performBlock:^{
-        CTMessageMO *message = [self _messageForId:messageId];
+    if (!self.isInitialized || !messageId) return;
+    
+    __weak typeof(self) weakSelf = self;
+    [self.context performBlock:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        CTMessageMO *message = [strongSelf _messageForId:messageId];
         if (message) {
-            [message setValue:@YES forKey:@"isRead"];
-            [self _save];
-            [self notifyUpdate];
+            [strongSelf _deleteMessages:@[message]];
         }
     }];
 }
 
-- (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds {
-    [privateContext performBlock:^{
-        for (NSString *ids in messageIds) {
-            if (ids != nil && ![ids isEqualToString:@""]){
-                CTMessageMO *message = [self _messageForId:ids];
-                if (message) {
-                    [message setValue:@YES forKey:@"isRead"];
+- (void)deleteMessagesWithId:(NSArray *)messageIds {
+    if (!self.isInitialized || !messageIds || messageIds.count == 0) return;
+    
+    __weak typeof(self) weakSelf = self;
+    [self.context performBlock:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        NSMutableArray *toDelete = [NSMutableArray new];
+        
+        for (NSString *messageId in messageIds) {
+            if (messageId && ![messageId isEqualToString:@""]) {
+                CTMessageMO *msg = [strongSelf _messageForId:messageId];
+                if (msg) {
+                    [toDelete addObject:msg];
+                } else {
+                    CleverTapLogStaticDebug(@"Cannot delete App Inbox Message because Message ID %@ is invalid.", messageId);
                 }
-                else {
-                    CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID %@ is invalid.", ids);
-                }
+            } else {
+                CleverTapLogStaticDebug(@"Cannot delete App Inbox Message because Message ID is null or not a string.");
             }
-            else {
+        }
+        
+        if (toDelete.count > 0) {
+            [strongSelf _deleteMessages:toDelete];
+        }
+    }];
+}
+
+- (void)markReadMessageWithId:(NSString *)messageId {
+    if (!self.isInitialized || !messageId) return;
+    
+    __weak typeof(self) weakSelf = self;
+    [self.context performBlock:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        CTMessageMO *message = [strongSelf _messageForId:messageId];
+        if (message) {
+            message.isRead = YES;
+            [strongSelf _save];
+            [strongSelf _notifyUpdate];
+        }
+    }];
+}
+
+- (void)markReadMessagesWithId:(NSArray *)messageIds {
+    if (!self.isInitialized || !messageIds || messageIds.count == 0) return;
+    
+    __weak typeof(self) weakSelf = self;
+    [self.context performBlock:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        BOOL hasChanges = NO;
+        
+        for (NSString *messageId in messageIds) {
+            if (messageId && ![messageId isEqualToString:@""]) {
+                CTMessageMO *message = [strongSelf _messageForId:messageId];
+                if (message) {
+                    message.isRead = YES;
+                    hasChanges = YES;
+                } else {
+                    CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID %@ is invalid.", messageId);
+                }
+            } else {
                 CleverTapLogStaticDebug(@"Cannot mark App Inbox Message as read because Message ID is null or not a string.");
             }
         }
-        [self _save];
-        [self notifyUpdate];
+        
+        if (hasChanges) {
+            [strongSelf _save];
+            [strongSelf _notifyUpdate];
+        }
     }];
 }
 
 - (NSDictionary *)messageForId:(NSString *)messageId {
-    if (!self.isInitialized) return nil;
-    CTMessageMO *msg = [self _messageForId:messageId];
-    if (!msg) {
-        return nil;
-    }
-    return [msg toJSON];
+    if (!self.isInitialized || !messageId) return nil;
+    
+    __block NSDictionary *result = nil;
+    
+    [self.context performBlockAndWait:^{
+        CTMessageMO *msg = [self _messageForId:messageId];
+        if (msg) {
+            result = [msg toJSON];
+        }
+    }];
+    
+    return result;
 }
 
 - (NSInteger)count {
     if (!self.isInitialized) return -1;
-    return [self.messages count];
+    
+    NSArray *msgs = self.messages;
+    return msgs ? msgs.count : 0;
 }
 
 - (NSInteger)unreadCount {
     if (!self.isInitialized) return -1;
-    return [self.unreadMessages count];
+    
+    NSArray *msgs = self.unreadMessages;
+    return msgs ? msgs.count : 0;
 }
 
 - (NSArray<NSDictionary *> *)messages {
     if (!self.isInitialized) return nil;
-    NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
-    NSMutableArray *messages = [NSMutableArray new];
-    NSMutableArray *toDelete = [NSMutableArray new];
     
-    BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
-    if (!hasMessages) return nil;
+    __block NSArray<NSDictionary *> *result = nil;
     
-    for (CTMessageMO *msg in self.user.messages) {
-        int ttl = (int)msg.expires;
-        if (ttl > 0 && now >= ttl) {
-            CleverTapLogStaticInternal(@"%@: message expires: %@, deleting", self, msg);
-            [toDelete addObject:msg];
-        } else {
-            [messages addObject:[msg toJSON]];
-        }
-    }
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
-    [messages sortUsingDescriptors:@[sortDescriptor]];
+    [self.context performBlockAndWait:^{
+        result = [self _messagesFilteredByPredicate:nil];
+    }];
     
-    if ([toDelete count] > 0) {
-        [self _deleteMessages:toDelete];
-    }
-    return messages;
+    return result;
 }
 
 - (NSArray<NSDictionary *> *)unreadMessages {
     if (!self.isInitialized) return nil;
+    
+    __block NSArray<NSDictionary *> *result = nil;
+    
+    [self.context performBlockAndWait:^{
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"isRead == NO"];
+        result = [self _messagesFilteredByPredicate:predicate];
+    }];
+    
+    return result;
+}
+
+#pragma mark - Private Methods
+
+// Always call from inside context performBlock/performBlockAndWait
+- (CTMessageMO *)_messageForId:(NSString *)messageId {
+    if (!messageId) return nil;
+    
+    BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
+    if (!hasMessages) return nil;
+    
+    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:
+                             [NSPredicate predicateWithFormat:@"id == %@", messageId]];
+    
+    return (results && results.count > 0) ? results[0] : nil;
+}
+
+// Always call from inside context performBlock
+- (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
+    if (!messages || messages.count == 0) return;
+    
+    for (CTMessageMO *msg in messages) {
+        [self.context deleteObject:msg];
+    }
+    
+    [self _save];
+    [self _notifyUpdate];
+}
+
+// Always call from inside context performBlock/performBlockAndWait
+- (NSArray<NSDictionary *> *)_messagesFilteredByPredicate:(NSPredicate *)predicate {
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
     NSMutableArray *messages = [NSMutableArray new];
     NSMutableArray *toDelete = [NSMutableArray new];
@@ -208,7 +338,12 @@ static NSManagedObjectContext *privateContext;
     BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
     if (!hasMessages) return nil;
     
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:[NSString stringWithFormat:@"isRead == NO"]]];
+    // Get messages (filtered or all)
+    NSOrderedSet *results = predicate
+        ? [self.user.messages filteredOrderedSetUsingPredicate:predicate]
+        : self.user.messages;
+    
+    // Process messages and check for expired ones
     for (CTMessageMO *msg in results) {
         int ttl = (int)msg.expires;
         if (ttl > 0 && now >= ttl) {
@@ -218,58 +353,39 @@ static NSManagedObjectContext *privateContext;
             [messages addObject:[msg toJSON]];
         }
     }
+    
+    // Sort by date (newest first)
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
     [messages sortUsingDescriptors:@[sortDescriptor]];
     
-    if ([toDelete count] > 0) {
+    // Delete expired messages
+    if (toDelete.count > 0) {
         [self _deleteMessages:toDelete];
     }
+    
     return messages;
 }
 
-
-#pragma mark - Private
-
-- (CTMessageMO *)_messageForId:(NSString *)messageId {
-    if (!self.isInitialized) return nil;
-    
-    BOOL hasMessages = ([[self.user.entity propertiesByName] objectForKey:@"messages"] != nil);
-    if (!hasMessages) return nil;
-    
-    NSOrderedSet *results = [self.user.messages filteredOrderedSetUsingPredicate:[NSPredicate predicateWithFormat:@"id == %@", messageId]];
-    BOOL existing = results && [results count] > 0;
-    return existing ? results[0] : nil;
-}
-
-- (void)_deleteMessages:(NSArray<CTMessageMO*>*)messages {
-    [privateContext performBlockAndWait:^{
-        for (CTMessageMO *msg in messages) {
-            [privateContext deleteObject:msg];
-        }
-        [self _save];
-        [self notifyUpdate];
-    }];
-}
-
-// always call from inside privateContext performBlock
+// Always call from inside context performBlock
 - (BOOL)_save {
+    if (!self.context.hasChanges) {
+        return YES;
+    }
+    
     NSError *error = nil;
-    BOOL res = YES;
-    res = [privateContext save:&error];
-    if (!res) {
-        CleverTapLogStaticDebug(@"Error saving core data private context: %@\n%@", [error localizedDescription], [error userInfo]);
+    BOOL success = [self.context save:&error];
+    
+    if (!success) {
+        CleverTapLogStaticDebug(@"Error saving Core Data context: %@\n%@",
+                               [error localizedDescription], [error userInfo]);
     }
-    res = [mainContext save:&error];
-    if (!res) {
-        CleverTapLogStaticDebug(@"Error saving core data main context: %@\n%@", [error localizedDescription], [error userInfo]);
-    }
-    return res;
+    
+    return success;
 }
 
+#pragma mark - Delegate Notification
 
-#pragma mark - Delegate
-
-- (void)notifyUpdate {
+- (void)_notifyUpdate {
     if (self.delegate && [self.delegate respondsToSelector:@selector(inboxMessagesDidUpdate)]) {
         [self.delegate inboxMessagesDidUpdate];
     }
