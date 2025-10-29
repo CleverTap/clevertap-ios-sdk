@@ -7,20 +7,23 @@ var cleverTapAdditionalInstance: CleverTap = {
     }()
 
 struct HomeScreen: View {
-    let eventList = [
-        "Record User Profile",
-        "Record User Profile with Properties",
-        "Record User Event called Product Viewed",
-        "Record User Event with Properties",
-        "Record User Charged Event",
-        "Record User Event to an Additional Instance",
-        "Show App Inbox",
-        "Analytics in a WebView",
-        "Increment User Profile Property",
-        "Decrement User Profile Property",
-        "Local Half Interstitial Push Primer",
-        "Sync Custom Templates"
-    ]
+
+    let eventList = [  "Record User Profile",
+                       "Record User Profile with Properties",
+                       "Record User Event called Product Viewed",
+                       "Record User Event with Properties",
+                       "Record User Charged Event",
+                       "Record User Event to an Additional Instance",
+                       "Open Custom Inbox Screen",
+                       "Analytics in a WebView",
+                       "Increment User Profile Property",
+                       "Decrement User Profile Property",
+                       "Local Half Interstitial Push Primer",
+                       "Native Display",
+                       "Variables",
+                       "Sync Custom Templates"
+                    ]
+
     
     var body: some View {
         NavigationView {
@@ -35,13 +38,20 @@ struct HomeScreen: View {
                                 buttonAction(index: index)
                             }
                             Spacer()
-                            if (eventList[index] == "Show App Inbox") {
+                            if (eventList[index] == "Open Custom Inbox Screen") {
                                 // Show App Inbox controller
-                                NavigationLink(destination: CTAppInboxRepresentable().recordScreenView(screenName: "CT App Inbox")) {
+                                NavigationLink(destination: InboxView()) {
                                 }
                             } else if (eventList[index] == "Analytics in a WebView") {
                                 // Show Web View
                                 NavigationLink(destination: CTWebViewRepresentable().recordScreenView(screenName: "CT Web View")) {
+                                }
+                            } else if (eventList[index] == "Native Display") {
+                                // Show Web View
+                                NavigationLink(destination: CTNativeDisplayView().recordScreenView(screenName: "Native Display View")) {
+                                }
+                            } else if (eventList[index] == "Variables") {
+                                NavigationLink(destination: VariablesMenuView().recordScreenView(screenName: "Variables View")) {
                                 }
                             }
                         }
@@ -82,7 +92,7 @@ func buttonAction(index: Int) {
         case 10:
             createLocalHalfInterstitialPushPrimer()
             break;
-        case 11:
+        case 13:
             CleverTap.sharedInstance()?.syncCustomTemplates()
             break;
         default:

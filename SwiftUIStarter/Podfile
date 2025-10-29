@@ -5,7 +5,7 @@ target 'SwiftUIStarter' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-  pod 'CleverTap-iOS-SDK', '7.2.0'
+  pod 'CleverTap-iOS-SDK', :path =>'../'
 
   target 'NotificationService' do
     pod 'CTNotificationService'
