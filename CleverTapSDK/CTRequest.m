@@ -50,7 +50,7 @@
     }
     if ([_httpMethod isEqualToString:@"POST"] && ![CTUtils isNullOrEmpty:_params]) {
         NSString *jsonBody = [CTUtils jsonObjectToString:_params];
-        if (![CTUtils isNullOrEmpty:_params]) {
+        if (![CTUtils isNullOrEmpty:jsonBody]) {
             request.HTTPBody = [jsonBody dataUsingEncoding:NSUTF8StringEncoding];
         }
     }
