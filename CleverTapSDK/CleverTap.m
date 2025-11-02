@@ -1531,8 +1531,13 @@ static BOOL sharedInstanceErrorLogged;
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             if (httpResponse.statusCode == 200 && data) {
-                NSDictionary *inAppJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-                completion(inAppJson);
+                NSError *jsonError = nil;
+                NSDictionary *inAppJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
+                if (jsonError) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse inapp preview JSON: %@", self, jsonError.localizedDescription);
+                } else {
+                    completion(inAppJson);
+                }
             }
             else  {
                 CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with status code: %li", self, httpResponse.statusCode);

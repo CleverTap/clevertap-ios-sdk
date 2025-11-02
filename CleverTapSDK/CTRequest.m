@@ -48,9 +48,11 @@
             [request setValue:value forHTTPHeaderField:key];
         }];
     }
-    if ([_httpMethod isEqualToString:@"POST"] && _params > 0) {
+    if ([_httpMethod isEqualToString:@"POST"] && ![CTUtils isNullOrEmpty:_params]) {
         NSString *jsonBody = [CTUtils jsonObjectToString:_params];
-        request.HTTPBody = [jsonBody dataUsingEncoding:NSUTF8StringEncoding];
+        if (![CTUtils isNullOrEmpty:_params]) {
+            request.HTTPBody = [jsonBody dataUsingEncoding:NSUTF8StringEncoding];
+        }
     }
     request.HTTPMethod = _httpMethod;
     return request;
