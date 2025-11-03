@@ -28,6 +28,7 @@
                     deviceInfo:(CTDeviceInfo*)deviceInfo
                 fileDownloader:(CTFileDownloader *)fileDownloader {
     if ((self = [super init])) {
+        _config = config;
         self.varCache = [[CTVarCache alloc] initWithConfig:config deviceInfo:deviceInfo fileDownloader:fileDownloader];
         [self.varCache setDelegate:self];
     }
