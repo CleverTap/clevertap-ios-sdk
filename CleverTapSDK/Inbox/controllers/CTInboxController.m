@@ -118,6 +118,19 @@ static NSManagedObjectContext *privateContext;
         if (encryptedJSON) {
             NSMutableDictionary *processedMessage = [message mutableCopy];
             
+            // Add minimal content array to prevent crashes in older SDK
+            // This ensures message.content[0] exists and has basic properties
+            processedMessage[@"content"] = @[@{
+                @"title": @{@"text": @""},  // Empty but valid structure
+                @"message": @{@"text": @""},
+                @"media": @{
+                    @"url": @"",
+                    @"content_type": @"",
+                    @"poster": @""
+                },
+                @"action": @{@"hasLinks": @NO, @"hasUrl": @NO}
+            }];
+            
             // Wrap encrypted string in a dictionary to maintain type safety
             // This prevents crashes in older SDK versions during downgrades
             processedMessage[@"_ct_encrypted_payload"] = @{
