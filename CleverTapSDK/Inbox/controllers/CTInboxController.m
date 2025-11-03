@@ -166,39 +166,41 @@ static NSManagedObjectContext *privateContext;
             // This prevents crashes in older SDK versions during downgrades
             processedMessage[@"_ct_encrypted_payload"] = @{
                 @"_ct_encrypted_data": encryptedJSON,
-                @"content": @[
-                    @{
-                        // Required by CleverTapInboxMessageContent.initWithJSON
-                        @"title": @{
-                            @"text": @"",
-                            @"color": @"#000000"
-                        },
-                        @"message": @{
-                            @"text": @"",
-                            @"color": @"#000000"
-                        },
-                        @"icon": @{
-                            @"url": @"",
-                            @"alt_text": @""
-                        },
-                        @"media": @{
-                            @"url": @"",
-                            @"content_type": @"",
-                            @"poster": @"",
-                            @"alt_text": @""
-                        },
-                        @"action": @{
-                            @"hasUrl": @NO,
-                            @"hasLinks": @NO,
-                            @"url": @{
-                                @"ios": @{
-                                    @"text": @""
-                                }
+                @"msg": @{
+                    @"content": @[
+                        @{
+                            // Required by CleverTapInboxMessageContent.initWithJSON
+                            @"title": @{
+                                @"text": @"",
+                                @"color": @"#000000"
                             },
-                            @"links": @[]
+                            @"message": @{
+                                @"text": @"",
+                                @"color": @"#000000"
+                            },
+                            @"icon": @{
+                                @"url": @"",
+                                @"alt_text": @""
+                            },
+                            @"media": @{
+                                @"url": @"",
+                                @"content_type": @"",
+                                @"poster": @"",
+                                @"alt_text": @""
+                            },
+                            @"action": @{
+                                @"hasUrl": @NO,
+                                @"hasLinks": @NO,
+                                @"url": @{
+                                    @"ios": @{
+                                        @"text": @""
+                                    }
+                                },
+                                @"links": @[]
+                            }
                         }
-                    }
-                ]
+                    ]
+                }
             };
             processedMessage[@"_ct_is_encrypted"] = @YES;
             
