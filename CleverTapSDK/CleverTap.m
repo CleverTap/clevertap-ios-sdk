@@ -1523,6 +1523,7 @@ static BOOL sharedInstanceErrorLogged;
 - (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion {
     if (!url) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Inapp preview URL is nil", self);
+        completion(nil);
         return;
     }
     
@@ -1535,18 +1536,21 @@ static BOOL sharedInstanceErrorLogged;
                 NSDictionary *inAppJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
                 if (jsonError) {
                     CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse inapp preview JSON: %@", self, jsonError.localizedDescription);
+                    completion(nil);
                 } else {
                     completion(inAppJson);
                 }
             }
             else  {
                 CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with status code: %li", self, httpResponse.statusCode);
+                completion(nil);
             }
         }
     }];
     [ctRequest onError:^(NSError * _Nullable error) {
         if (error) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with error: %@", self, error.localizedDescription);
+            completion(nil);
         }
     }];
     [self.requestSender send:ctRequest];
