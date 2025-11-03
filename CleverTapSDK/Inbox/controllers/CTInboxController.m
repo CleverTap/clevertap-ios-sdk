@@ -113,21 +113,21 @@ static NSManagedObjectContext *privateContext;
     NSMutableArray *processedMessages = [NSMutableArray arrayWithCapacity:messages.count];
     
     for (NSDictionary *message in messages) {
-        // Encrypt the message dictionary and create a wrapper
+        // Encrypt the message dictionary
         NSString *encryptedJSON = [self.encryptionManager encryptObject:message];
         if (encryptedJSON) {
-            // Create a new message dictionary with encrypted JSON
             NSMutableDictionary *processedMessage = [message mutableCopy];
             
-            // Replace the original message data with encrypted version
-            // but keep the _id and other lookup fields unencrypted for CoreData queries
-            processedMessage[@"_ct_encrypted_payload"] = encryptedJSON;
+            // Wrap encrypted string in a dictionary to maintain type safety
+            // This prevents crashes in older SDK versions during downgrades
+            processedMessage[@"_ct_encrypted_payload"] = @{
+                @"_ct_encrypted_data": encryptedJSON
+            };
             processedMessage[@"_ct_is_encrypted"] = @YES;
             
             CleverTapLogStaticInternal(@"Pre-encrypted message for ID: %@", message[@"_id"]);
             [processedMessages addObject:processedMessage];
         } else {
-            // If encryption fails, store unencrypted
             CleverTapLogStaticDebug(@"Failed to encrypt message ID: %@, storing unencrypted", message[@"_id"]);
             [processedMessages addObject:message];
         }
@@ -339,7 +339,10 @@ static NSManagedObjectContext *privateContext;
         if (msg.json && ![self isJSONPropertyEncrypted:msg.json]) {
             NSString *encryptedJSON = [self.encryptionManager encryptObject:msg.json];
             if (encryptedJSON) {
-                msg.json = encryptedJSON;
+                // Wrap in dictionary for type safety for older version backward compatibility
+                msg.json = @{
+                    @"_ct_encrypted_data": encryptedJSON
+                };
                 CleverTapLogStaticDebug(@"Encrypted inbox message json for message ID: %@", msg.id);
             }
         }
@@ -350,23 +353,33 @@ static NSManagedObjectContext *privateContext;
              (toLevel == CleverTapEncryptionNone || toLevel == CleverTapEncryptionMedium)) {
         
         if (msg.json && [self isJSONPropertyEncrypted:msg.json]) {
-            id decryptedJSON = [self.encryptionManager decryptObject:(NSString *)msg.json];
-            if (decryptedJSON) {
-                msg.json = decryptedJSON;
-                CleverTapLogStaticDebug(@"Decrypted inbox message json for message ID: %@", msg.id);
+            NSDictionary *encryptedWrapper = (NSDictionary *)msg.json;
+            NSString *encryptedString = encryptedWrapper[@"_ct_encrypted_data"];
+            
+            if (encryptedString) {
+                id decryptedJSON = [self.encryptionManager decryptObject:encryptedString];
+                if (decryptedJSON) {
+                    msg.json = decryptedJSON;
+                    CleverTapLogStaticDebug(@"Decrypted inbox message json for message ID: %@", msg.id);
+                }
             }
         }
     }
 }
 
 - (BOOL)isJSONPropertyEncrypted:(id)jsonProperty {
-    if ([jsonProperty isKindOfClass:[NSString class]]) {
-        NSString *jsonString = (NSString *)jsonProperty;
-        return [self.encryptionManager isTextAESGCMEncrypted:jsonString];
+    if ([jsonProperty isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *jsonDict = (NSDictionary *)jsonProperty;
+        // Check for encryption marker
+        if (jsonDict[@"_ct_encrypted_data"]) {
+            NSString *encryptedString = jsonDict[@"_ct_encrypted_data"];
+            if ([encryptedString isKindOfClass:[NSString class]]) {
+                return [self.encryptionManager isTextAESGCMEncrypted:encryptedString];
+            }
+        }
     }
     return NO;
 }
-
 
 #pragma mark - Delegate
 
