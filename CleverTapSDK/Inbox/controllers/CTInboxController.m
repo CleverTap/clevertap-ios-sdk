@@ -118,6 +118,50 @@ static NSManagedObjectContext *privateContext;
         if (encryptedJSON) {
             NSMutableDictionary *processedMessage = [message mutableCopy];
             
+            // Add minimal content array to prevent crashes in older SDK
+            // This ensures message.content[0] exists and has basic properties
+            processedMessage[@"msg"] = @{
+                @"bg": @"",
+                @"orientation": @"p",
+                @"type": @"simple",
+                @"tags": @[],
+                // Minimal content array that satisfies CleverTapInboxMessageContent's initWithJSON
+                // This prevents crashes in CTInboxBaseMessageCell where it accesses message.content[0]
+                @"content": @[
+                    @{
+                        // Required by CleverTapInboxMessageContent.initWithJSON
+                        @"title": @{
+                            @"text": @"",
+                            @"color": @"#000000"
+                        },
+                        @"message": @{
+                            @"text": @"",
+                            @"color": @"#000000"
+                        },
+                        @"icon": @{
+                            @"url": @"",
+                            @"alt_text": @""
+                        },
+                        @"media": @{
+                            @"url": @"",
+                            @"content_type": @"",
+                            @"poster": @"",
+                            @"alt_text": @""
+                        },
+                        @"action": @{
+                            @"hasUrl": @NO,
+                            @"hasLinks": @NO,
+                            @"url": @{
+                                @"ios": @{
+                                    @"text": @""
+                                }
+                            },
+                            @"links": @[]
+                        }
+                    }
+                ]
+            };
+
             // Wrap encrypted string in a dictionary to maintain type safety
             // This prevents crashes in older SDK versions during downgrades
             processedMessage[@"_ct_encrypted_payload"] = @{
