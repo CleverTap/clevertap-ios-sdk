@@ -308,18 +308,27 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
-- (NSDictionary *)dequeueDelayedInApp:(NSDictionary *)inAppNotif {
+- (void)dequeueDelayedInAppWithCampaignId:(NSString *)campaignId {
+    if (!campaignId) return;
+    
     @synchronized(self) {
         NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
         
-        NSDictionary *inApp = nil;
+        NSUInteger indexToRemove = NSNotFound;
+        for (NSUInteger i = 0; i < delayedInAppsQueue.count; i++) {
+            NSDictionary *inApp = delayedInAppsQueue[i];
+            NSString *queuedCampaignId = inApp[CLTAP_INAPP_ID];
+            
+            if ([queuedCampaignId isEqualToString:campaignId]) {
+                indexToRemove = i;
+                break;
+            }
+        }
         
-        if ([delayedInAppsQueue count] > 0) {
-            inApp = delayedInAppsQueue[0];
-            [delayedInAppsQueue removeObjectAtIndex:0];
+        if (indexToRemove != NSNotFound) {
+            [delayedInAppsQueue removeObjectAtIndex:indexToRemove];
             [self storeDelayedInApps:delayedInAppsQueue];
         }
-        return inApp;
     }
 }
 
@@ -585,7 +594,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     if (!delayValue) return 0;
     
     NSInteger delay = [delayValue integerValue];
-    if (delay < 1 || delay > 1000) {
+    if (delay < CLTAP_MIN_DELAY_SECONDS || delay > CLTAP_MAX_DELAY_SECONDS) {
         return 0; // immediate
     }
     return delay;

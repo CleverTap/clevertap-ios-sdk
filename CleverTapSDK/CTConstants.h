@@ -217,6 +217,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_TRIGGERS @"whenTriggers"
 // delayAfterTrigger
 #define CLTAP_DELAY_AFTER_TRIGGER @"delayAfterTrigger"
+#define CLTAP_MAX_DELAY_SECONDS 1200
+#define CLTAP_MIN_DELAY_SECONDS 1
+#define CLTAP_MAX_DELAYED_INAPPS 20 // worst case - we assume 1 in-app per minute, session length 20 mins
 
 // whenLimits
 #define CLTAP_INAPP_FC_LIMITS @"frequencyLimits"

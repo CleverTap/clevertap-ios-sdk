@@ -128,10 +128,15 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)delayedInAppReady:(NSDictionary *)inApp {
     @try {
         if (inApp) {
+            CleverTapLogDebug(self.config.logLevel,
+                                  @"%@: Delayed in-app ready for display: %@",
+                                  self, inApp[CLTAP_INAPP_ID]);
             // Prepare the in-app for display
             [self prepareNotificationForDisplay:inApp];
             // Remove in-app after prepare
-            [self.inAppStore dequeueDelayedInApp:inApp];
+            NSString *campaignId = (NSString*) inApp[CLTAP_NOTIFICATION_ID_TAG];
+
+            [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
         }
         
     } @catch (NSException *e) {
@@ -140,7 +145,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)delayedInAppCancelled:(NSString *)inAppId {
-//    CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
+    CleverTapLogDebug(self.config.logLevel,
+                          @"%@: Delayed in-app cancelled: %@",
+                          self, inAppId);
 }
 
 - (void)dealloc {
@@ -299,19 +306,23 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     NSArray *allDelayedInApps = [self.inAppStore delayedInAppsQueue];
     if (!allDelayedInApps.count) return;
     
-    NSInteger maxConcurrent = 20;
+    NSInteger maxConcurrent = CLTAP_MAX_DELAYED_INAPPS;
     NSInteger currentCount = self.inAppDelayManager.scheduledCampaigns.count;
     NSInteger toSchedule = MIN(maxConcurrent - currentCount, allDelayedInApps.count);
     
-    if (toSchedule <= 0) return;
+    if (toSchedule <= 0) {
+        CleverTapLogDebug(self.config.logLevel,
+                          @"%@: Already at max concurrent delayed in-apps (%ld/%ld)",
+                          self, (long)currentCount, (long)maxConcurrent);
+        return;
+    }
     
     NSArray *inAppsToSchedule = [allDelayedInApps subarrayWithRange:NSMakeRange(0, toSchedule)];
-    [self.inAppDelayManager scheduleMultipleDelayedInApps:inAppsToSchedule];
-    
-    // Remove from store after scheduling
-    for (NSDictionary *inApp in inAppsToSchedule) {
-        [self.inAppStore dequeueDelayedInApp:inApp];
-    }
+    CleverTapLogDebug(self.config.logLevel,
+                          @"%@: Scheduling %ld delayed in-apps (current: %ld, max: %ld)",
+                          self, (long)toSchedule, (long)currentCount, (long)maxConcurrent);
+        
+    [self.inAppDelayManager scheduleDelayedInApps:inAppsToSchedule];
 }
 
 - (void)_showNotificationIfAvailable {

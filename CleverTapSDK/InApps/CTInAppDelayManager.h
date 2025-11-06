@@ -18,9 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithDispatchQueue:(CTDispatchQueueManager *)dispatchQueue inAppStore:(CTInAppStore *)inAppStore withConfig:(CleverTapInstanceConfig *)config;
 
 // Schedule management
-- (void)scheduleMultipleDelayedInApps:(NSArray<NSDictionary *> *)inApps;
-- (void)cancelDelayedInApp:(NSString *)campaignId;
-- (void)cancelAllDelayedInApps;
+- (void)scheduleDelayedInApps:(NSArray<NSDictionary *> *)inApps;
 
 @end
 

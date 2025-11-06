@@ -22,17 +22,14 @@
                                deviceId:(NSString * _Nonnull)deviceId;
 
 - (NSArray * _Nonnull)clientSideInApps;
-//- (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;
 - (void)partitionClientSideInApps:(NSArray * _Nullable)clientSideInApps;
 
 - (NSArray * _Nonnull)serverSideInApps;
-//- (void)storeServerSideInApps:(NSArray * _Nullable)serverSideInApps;
 - (void)partitionServerSideInApps:(NSArray * _Nullable)serverSideInApps;
 
 - (void)clearInApps;
 
 - (NSArray * _Nonnull)inAppsQueue;
-- (void)storeInApps:(NSArray * _Nullable)inApps;
 - (void)enqueueInApps:(NSArray * _Nullable)inAppNotifs;
 - (void)insertInFrontInApp:(NSDictionary * _Nullable)inAppNotif;
 - (NSDictionary * _Nullable)peekInApp;
@@ -40,8 +37,7 @@
 
 - (NSArray * _Nonnull)delayedInAppsQueue;
 - (NSDictionary * _Nullable)peekDelayedInApp;
-- (NSDictionary * _Nullable)dequeueDelayedInApp:(NSDictionary * _Nullable)inAppNotif;
+- (void)dequeueDelayedInAppWithCampaignId:(NSString *_Nullable)campaignId;
 - (NSInteger)parseDelayFromJson:(NSDictionary * _Nullable)inAppNotif;
-//- (NSDictionary<NSString *, NSArray *> *_Nullable)partitionInApps:(NSArray *_Nullable)inAppNotifs;
 
 @end
