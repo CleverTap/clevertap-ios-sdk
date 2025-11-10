@@ -61,6 +61,11 @@
     
     if (!self.timer || self.isPaused) return;
     
+    // Add nil check for startTime
+    if (!self.startTime) {
+        return; // Cannot pause if never started
+    }
+    
     _isPaused = YES;
     self.pauseTime = [NSDate date];
     NSTimeInterval elapsed = [self.pauseTime timeIntervalSinceDate:self.startTime];
@@ -103,7 +108,7 @@
     
     [self.timer invalidate];
     self.timer = nil;
-    self.completionHandler = nil;
+    _completionHandler = nil; // Access ivar directly to bypass nonnull check
     _isPaused = NO;
     _remainingTime = 0;
 }
@@ -121,7 +126,11 @@
 }
 
 - (void)dealloc {
-    [self cancel];
+    // Must invalidate timer synchronously in dealloc
+    // Cannot use dispatch_async as self will be gone
+    if (self.timer) {
+        [self.timer invalidate];
+    }
 }
 
 @end

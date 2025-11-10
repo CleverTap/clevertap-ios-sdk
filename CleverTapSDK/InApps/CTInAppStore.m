@@ -317,7 +317,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         NSUInteger indexToRemove = NSNotFound;
         for (NSUInteger i = 0; i < delayedInAppsQueue.count; i++) {
             NSDictionary *inApp = delayedInAppsQueue[i];
-            NSString *queuedCampaignId = inApp[CLTAP_INAPP_ID];
+            NSString *queuedCampaignId = inApp[CLTAP_NOTIFICATION_ID_TAG];
             
             if ([queuedCampaignId isEqualToString:campaignId]) {
                 indexToRemove = i;

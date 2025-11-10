@@ -87,20 +87,17 @@
 #pragma mark - Application Lifecycle
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
-    CleverTapLogInternal(self.config.logLevel,
-                         @"%@: App entering background, pausing all delayed in-app timers", self);
+    CleverTapLogInternal(self.config.logLevel, @"%@: App entering background, pausing all delayed in-app timers", self);
     [self onAppDidEnterBackground];
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification {
-    CleverTapLogInternal(self.config.logLevel,
-                         @"%@: App entering foreground, checking and resuming timers", self);
+    CleverTapLogInternal(self.config.logLevel, @"%@: App entering foreground, checking and resuming timers", self);
     [self onAppWillEnterForeground];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
-    CleverTapLogInternal(self.config.logLevel,
-                         @"%@: App terminating, cancelling all delayed in-apps", self);
+    CleverTapLogInternal(self.config.logLevel, @"%@: App terminating, cancelling all delayed in-apps", self);
     [self cancelAllDelayedInApps];
 }
 
@@ -117,9 +114,7 @@
             NSTimeInterval elapsedSoFar = [[NSDate date] timeIntervalSinceDate:info.startTime];
             NSTimeInterval remainingTime = info.originalDelay - elapsedSoFar;
             
-            CleverTapLogDebug(self.config.logLevel,
-                              @"%@: Paused timer %@ - elapsed: %.1fs, remaining: %.1fs",
-                              self, campaignId, elapsedSoFar, MAX(0, remainingTime));
+            CleverTapLogDebug(self.config.logLevel, @"%@: Timer cancelled %@ - elapsed: %.1fs, remaining: %.1fs", self, campaignId, elapsedSoFar, MAX(0, remainingTime));
         }
     });
 }
@@ -223,7 +218,7 @@
 - (void)scheduleDelayedInAppInternal:(NSDictionary *)inApp {
     if (!inApp) return;
     
-    NSString *campaignId = [CTInAppNotification inAppId:inApp];
+    NSString *campaignId = inApp[CLTAP_NOTIFICATION_ID_TAG];
     if (!campaignId) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Campaign id not found", self);
         return;
@@ -316,21 +311,23 @@
     }
     
     // Check if app is in foreground
-    UIApplicationState appState = [[CTUIUtils getSharedApplication] applicationState];
-    
-    if (appState == UIApplicationStateActive) {
-        // App is in foreground, add to ready queue
-        [self.readyQueue addObject:info.inAppData];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIApplicationState appState = [[CTUIUtils getSharedApplication] applicationState];
         
-        CleverTapLogDebug(self.config.logLevel, @"Timer %@ completed - queueing for display (queue size: %lu)", campaignId, (unsigned long)self.readyQueue.count);
-
-        [self processReadyQueue];
-    } else {
-        // App is in background, discard the in-app
-        CleverTapLogDebug(self.config.logLevel,@"Timer %@ fired in background (state: %ld) - discarding", campaignId, (long)appState);
-        
-        [self notifyDelegateCancelled:campaignId];
-    }
+        if (appState == UIApplicationStateActive) {
+            // App is in foreground, add to ready queue
+            [self.readyQueue addObject:info.inAppData];
+            
+            CleverTapLogDebug(self.config.logLevel, @"Timer %@ completed - queueing for display (queue size: %lu)", campaignId, (unsigned long)self.readyQueue.count);
+            
+            [self processReadyQueue];
+        } else {
+            // App is in background, discard the in-app
+            CleverTapLogDebug(self.config.logLevel,@"Timer %@ fired in background (state: %ld) - discarding", campaignId, (long)appState);
+            
+            [self notifyDelegateCancelled:campaignId];
+        }
+    });
     
     // Clean up
     [self removeTimer:campaignId notifyDelegate:NO];

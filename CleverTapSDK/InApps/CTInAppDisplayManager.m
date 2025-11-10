@@ -130,7 +130,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         if (inApp) {
             CleverTapLogDebug(self.config.logLevel,
                                   @"%@: Delayed in-app ready for display: %@",
-                                  self, inApp[CLTAP_INAPP_ID]);
+                                  self, inApp[CLTAP_NOTIFICATION_ID_TAG]);
             // Prepare the in-app for display
             [self prepareNotificationForDisplay:inApp];
             // Remove in-app after prepare
