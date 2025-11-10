@@ -360,6 +360,8 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 - (void)removeClientSideInApps {
     @synchronized (self) {
         _clientSideInApps = [NSArray new];
+        _delayedClientSideInApps = [NSArray new];
+        
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences removeObjectForKey:storageKey];
         

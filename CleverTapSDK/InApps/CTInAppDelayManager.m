@@ -105,7 +105,7 @@
 
 - (void)onAppDidEnterBackground {
     dispatch_async(self.timerQueue, ^{
-        // Just pause all active timers - no saving needed since we track start time
+        // Cancel all active timers - no saving needed since we track start time
         for (NSString *campaignId in self.activeTimers) {
             CTInAppTimer *timer = self.activeTimers[campaignId];
             [timer cancel];
@@ -371,11 +371,6 @@
                       @"%@: Processed %lu in-apps, %lu remaining in queue",
                       self, (unsigned long)inAppsToProcess.count,
                       (unsigned long)self.readyQueue.count);
-}
-
-- (NSInteger)getMaxParallelInApps {
-    // TODO: This needs to be configured based on requirements
-    return 20;
 }
 
 #pragma mark - Helper Methods

@@ -50,53 +50,6 @@
                                                  repeats:NO];
 }
 
-- (void)pause {
-    // Ensure we're on the main thread for timer operations
-    if (![NSThread isMainThread]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self pause];
-        });
-        return;
-    }
-    
-    if (!self.timer || self.isPaused) return;
-    
-    // Add nil check for startTime
-    if (!self.startTime) {
-        return; // Cannot pause if never started
-    }
-    
-    _isPaused = YES;
-    self.pauseTime = [NSDate date];
-    NSTimeInterval elapsed = [self.pauseTime timeIntervalSinceDate:self.startTime];
-    _remainingTime = MAX(0, self.delay - elapsed);
-    
-    [self.timer invalidate];
-    self.timer = nil;
-}
-
-- (void)resume {
-    // Ensure we're on the main thread for timer operations
-    if (![NSThread isMainThread]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self resume];
-        });
-        return;
-    }
-    
-    if (!self.isPaused || self.remainingTime <= 0) return;
-    
-    _isPaused = NO;
-    self.startTime = [NSDate date];
-    
-    // Create new timer with remaining time
-    self.timer = [NSTimer scheduledTimerWithTimeInterval:self.remainingTime
-                                                  target:self
-                                                selector:@selector(timerFired)
-                                                userInfo:nil
-                                                 repeats:NO];
-}
-
 - (void)cancel {
     // Ensure we're on the main thread for timer operations
     if (![NSThread isMainThread]) {

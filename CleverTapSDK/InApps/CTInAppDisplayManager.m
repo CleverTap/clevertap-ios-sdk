@@ -365,11 +365,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             return;
         }
 
-//        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
-//        if (now > notification.timeToLive) {
-//            CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
-//            return;
-//        }
+        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+        if (now > notification.timeToLive) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: InApp has elapsed its time to live, not showing the InApp: %@ wzrk_ttl: %lu", self, jsonObj, (unsigned long)notification.timeToLive);
+            return;
+        }
         
         [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
