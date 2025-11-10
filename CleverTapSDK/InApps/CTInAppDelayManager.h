@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Schedule management
 - (void)scheduleDelayedInApps:(NSArray<NSDictionary *> *)inApps;
+- (NSInteger)scheduledCampaignCount;
 
 @end
 

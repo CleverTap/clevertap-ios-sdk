@@ -303,6 +303,14 @@
     }
 }
 
+- (NSInteger)scheduledCampaignCount {
+    __block NSInteger count = 0;
+    dispatch_sync(self.timerQueue, ^{
+        count = self.scheduledCampaigns.count;
+    });
+    return count;
+}
+
 - (void)handleTimerFired:(NSString *)campaignId {
     CTTimerInfo *info = self.timerInfoMap[campaignId];
     if (!info || !info.inAppData) {

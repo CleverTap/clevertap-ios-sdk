@@ -307,7 +307,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     if (!allDelayedInApps.count) return;
     
     NSInteger maxConcurrent = CLTAP_MAX_DELAYED_INAPPS;
-    NSInteger currentCount = self.inAppDelayManager.scheduledCampaigns.count;
+    NSInteger currentCount = [self.inAppDelayManager scheduledCampaignCount];
     NSInteger toSchedule = MIN(maxConcurrent - currentCount, allDelayedInApps.count);
     
     if (toSchedule <= 0) {
