@@ -250,7 +250,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 }
 
-- (void)_discardInAppNotifications {
+- (void)_discardInAppNotifications:(BOOL)dismissInAppIfVisible {
     if ([CTUIUtils runningInsideAppExtension]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: discardInAppNotifications is a no-op in an app extension.", self);
         return;
@@ -258,6 +258,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     if (!self.config.analyticsOnly) {
         self.inAppRenderingStatus = CleverTapInAppDiscard;
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications will be discarded till resumeInAppNotifications() is not called again", self);
+        
+        if (dismissInAppIfVisible) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Hiding InApp if visible.", self);
+            [[self class] hideCurrentInAppDisplayController];
+        }
     }
 }
 
@@ -635,6 +640,16 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 + (NSString *)pendingNotificationKey:(NSString *)accountId {
     return [NSString stringWithFormat:@"%@:%@:onDisplayPendingNotification", [self class], accountId];
+}
+
++ (void)hideCurrentInAppDisplayController {
+    if (currentDisplayController == nil) {
+        CleverTapLogStaticDebug(@"No InApp is currently displayed.");
+        return;
+    }
+    
+    CleverTapLogStaticDebug(@"Hiding current displaying inApp: %@", currentlyDisplayingNotification.campaignId);
+    [currentDisplayController hide:YES];
 }
 
 #pragma mark - CTInAppNotificationDisplayDelegate
