@@ -38,15 +38,13 @@
     // Parse SS notifications
     NSArray *ssInAppNotifs = jsonResp[CLTAP_INAPP_SS_JSON_RESPONSE_KEY];
     if (ssInAppNotifs) {
-//        [self.inAppStore storeServerSideInApps:ssInAppNotifs];
-        [self.inAppStore partitionServerSideInApps:ssInAppNotifs];
+        [self.inAppStore storeServerSideInApps:ssInAppNotifs];
     }
     
     // Parse CS notifications
     NSArray *csInAppNotifs = jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY];
     if (csInAppNotifs) {
-//        [self.inAppStore storeClientSideInApps:csInAppNotifs];
-        [self.inAppStore partitionClientSideInApps:csInAppNotifs];
+        [self.inAppStore storeClientSideInApps:csInAppNotifs];
         
         // Preload CS in-app images to disk cache
         [self downloadMediaURLs:csInAppNotifs];

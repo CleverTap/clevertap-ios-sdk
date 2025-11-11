@@ -28,8 +28,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) NSArray *clientSideInApps;
 @property (nonatomic, strong) NSArray *serverSideInApps;
 @property (nonatomic, strong) NSArray *delayedInAppsQueue;
-@property (nonatomic, strong) NSArray *delayedClientSideInApps;
-@property (nonatomic, strong) NSArray *delayedServerSideInApps;
 
 @end
 
@@ -360,21 +358,9 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 - (void)removeClientSideInApps {
     @synchronized (self) {
         _clientSideInApps = [NSArray new];
-        _delayedClientSideInApps = [NSArray new];
-        
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
         [CTPreferences removeObjectForKey:storageKey];
-        
-        NSString *delayedStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_DELAYED_KEY_CS];
-        [CTPreferences removeObjectForKey:delayedStorageKey];
     }
-}
-
-- (void)partitionClientSideInApps:(NSArray *)clientSideInApps {
-    NSDictionary<NSString *, NSArray *> *partitionedNotifs = [self partitionInApps:clientSideInApps];
-    
-    [self storeClientSideInApps:partitionedNotifs[@"immediate"]];
-    [self storeDelayedClientSideInApps:partitionedNotifs[@"delayed"]];
 }
 
 - (void)storeClientSideInApps:(NSArray *)clientSideInApps {
@@ -419,66 +405,13 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
-- (void)storeDelayedClientSideInApps:(NSArray *)clientSideInApps {
-    if (!clientSideInApps) return;
-    
-    @synchronized (self) {
-        _delayedClientSideInApps = clientSideInApps;
-        
-        NSString *encryptedString = nil;
-        @try {
-            encryptedString = [self.cryptManager encryptObject:clientSideInApps];
-            if (!encryptedString) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed for delayed client side InApps", self);
-                return;
-            }
-        } @catch (NSException *exception) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for delayed client side InApps: %@", self, exception);
-            return;
-        }
-        
-        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_DELAYED_KEY_CS];
-        [CTPreferences putString:encryptedString forKey:storageKey];
-    }
-}
-
-- (NSArray *)delayedClientSideInApps {
-    @synchronized(self) {
-        if (_delayedClientSideInApps) return _delayedClientSideInApps;
-        
-        @try {
-            _delayedClientSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_DELAYED_KEY_CS];
-            if (!_delayedClientSideInApps) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to retrieve delayed client side InApps", self);
-                _delayedClientSideInApps = [NSArray new];
-            }
-        } @catch (NSException *exception) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving delayed client side InApps: %@", self, exception);
-            _delayedClientSideInApps = [NSArray new];
-        }
-        return _delayedClientSideInApps;
-    }
-}
-
 #pragma mark Server-Side In-Apps
-
-- (void)partitionServerSideInApps:(NSArray *)serverSideInApps {
-    NSDictionary<NSString *, NSArray *> *partitionedNotifs = [self partitionInApps:serverSideInApps];
-    
-    [self storeServerSideInApps:partitionedNotifs[@"immediate"]];
-    [self storeDelayedServerSideInApps:partitionedNotifs[@"delayed"]];
-}
 
 - (void)removeServerSideInApps {
     @synchronized (self) {
         _serverSideInApps = [NSArray new];
-        _delayedServerSideInApps = [NSArray new];
-        
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
         [CTPreferences removeObjectForKey:storageKey];
-        
-        NSString *delayedStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_DELAYED_KEY_SS];
-        [CTPreferences removeObjectForKey:delayedStorageKey];
     }
 }
 
@@ -521,48 +454,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         }
         
         return _serverSideInApps;
-    }
-}
-
-- (void)storeDelayedServerSideInApps:(NSArray *)serverSideInApps {
-    if (!serverSideInApps) return;
-    
-    @synchronized (self) {
-        _delayedServerSideInApps = serverSideInApps;
-        
-        NSString *encryptedString = nil;
-        @try {
-            encryptedString = [self.cryptManager encryptObject:serverSideInApps];
-            if (!encryptedString) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed for delayed server side InApps", self);
-                return;
-            }
-        } @catch (NSException *exception) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for delayed server side InApps: %@", self, exception);
-            return;
-        }
-        
-        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_DELAYED_KEY_SS];
-        [CTPreferences putString:encryptedString forKey:storageKey];
-    }
-}
-
-- (NSArray *)delayedServerSideInApps {
-    @synchronized(self) {
-        if (_delayedServerSideInApps) return _delayedServerSideInApps;
-        
-        @try {
-            _delayedServerSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_DELAYED_KEY_SS];
-            if (!_delayedServerSideInApps) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to retrieve delayed server side InApps", self);
-                _delayedServerSideInApps = [NSArray new];
-            }
-        } @catch (NSException *exception) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving delayed server side InApps: %@", self, exception);
-            _delayedServerSideInApps = [NSArray new];
-        }
-        
-        return _delayedServerSideInApps;
     }
 }
 
@@ -636,10 +527,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     self.inAppsQueue = nil;
     self.clientSideInApps = nil;
     self.serverSideInApps = nil;
-    
     self.delayedInAppsQueue = nil;
-    self.delayedClientSideInApps = nil;
-    self.delayedServerSideInApps = nil;
 }
 
 @end

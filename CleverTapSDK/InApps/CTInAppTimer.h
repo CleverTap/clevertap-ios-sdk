@@ -18,8 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithDelay:(NSTimeInterval)delay completion:(void (^)(void))completion;
 - (void)start;
-- (void)pause;
-- (void)resume;
 - (void)cancel;
 
 @end

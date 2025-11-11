@@ -22,10 +22,10 @@
                                deviceId:(NSString * _Nonnull)deviceId;
 
 - (NSArray * _Nonnull)clientSideInApps;
-- (void)partitionClientSideInApps:(NSArray * _Nullable)clientSideInApps;
+- (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;
 
 - (NSArray * _Nonnull)serverSideInApps;
-- (void)partitionServerSideInApps:(NSArray * _Nullable)serverSideInApps;
+- (void)storeServerSideInApps:(NSArray * _Nullable)serverSideInApps;
 
 - (void)clearInApps;
 
