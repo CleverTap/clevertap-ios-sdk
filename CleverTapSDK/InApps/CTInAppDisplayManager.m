@@ -128,9 +128,15 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)delayedInAppReady:(NSDictionary *)inApp {
     @try {
         if (inApp) {
-            CleverTapLogDebug(self.config.logLevel,
-                                  @"%@: Delayed in-app ready for display: %@",
-                                  self, inApp[CLTAP_NOTIFICATION_ID_TAG]);
+            // if we are currently displaying a notification, cache this notification for later display
+            if (currentlyDisplayingNotification) {
+                __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:inApp];
+                if (self.config.accountId && notification) {
+                    [pendingNotifications addObject:@[self.config.accountId, notification]];
+                    CleverTapLogDebug(self.config.logLevel, @"%@: InApp already displaying, queueing to pending InApps", self);
+                }
+                return;
+            }
             // Prepare the in-app for display
             [self prepareNotificationForDisplay:inApp];
             // Remove in-app after prepare
