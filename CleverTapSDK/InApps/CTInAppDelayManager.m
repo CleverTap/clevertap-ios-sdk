@@ -16,7 +16,6 @@
 
 @interface CTInAppDelayManager ()
 
-@property (nonatomic, strong) CTDispatchQueueManager *dispatchQueue;
 @property (nonatomic, strong) CTInAppStore *inAppStore;
 @property (atomic, strong) CleverTapInstanceConfig *config;
 
@@ -33,12 +32,10 @@
 @implementation CTInAppDelayManager
 
 #pragma mark - Initialization
-- (instancetype)initWithDispatchQueue:(CTDispatchQueueManager *)dispatchQueue
-                           inAppStore:(CTInAppStore *)inAppStore
+- (instancetype)initWithInAppStore:(CTInAppStore *)inAppStore
                            withConfig:(CleverTapInstanceConfig *)config {
     
     if (self = [super init]) {
-        _dispatchQueue = dispatchQueue;
         _inAppStore = inAppStore;
         _config = config;
         _activeTimers = [NSMutableDictionary dictionary];
@@ -196,12 +193,7 @@
 }
 
 - (void)notifyDelegateCancelled:(NSString *)campaignId {
-    if (!self.delegate) return;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if ([self.delegate respondsToSelector:@selector(delayedInAppCancelled:)]) {
-                    [self.delegate delayedInAppCancelled:campaignId];
-        }
-    });
+    CleverTapLogDebug(self.config.logLevel, @"%@: Delayed in-app cancelled: %@", self, campaignId);
 }
 
 - (void)notifyDelegateReady:(NSDictionary *)inApp {
@@ -236,6 +228,9 @@
             CleverTapLogDebug(self.config.logLevel,
                               @"%@: Campaign %@ already scheduled with %.1fs remaining, skipping",
                               self, campaignId, remaining);
+            //Remove inapp from queue
+            [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
+
             return;
         }
     }
@@ -271,10 +266,6 @@
 
 - (void)scheduleDelayedInApps:(NSArray<NSDictionary *> *)inApps {
     if (!inApps || inApps.count == 0) return;
-    
-    CleverTapLogDebug(self.config.logLevel,
-                      @"%@: Scheduling %lu delayed in-apps",
-                      self, (unsigned long)inApps.count);
     
     // Sort by priority and delay
     NSArray *sortedInApps = [self sortInAppsForScheduling:inApps];
@@ -326,7 +317,7 @@
             // App is in foreground, add to ready queue
             [self.readyQueue addObject:info.inAppData];
             
-            CleverTapLogDebug(self.config.logLevel, @"Timer %@ completed - queueing for display (queue size: %lu)", campaignId, (unsigned long)self.readyQueue.count);
+            CleverTapLogDebug(self.config.logLevel, @"Timer %@ completed - queueing (queue size: %lu)", campaignId, (unsigned long)self.readyQueue.count);
             
             [self processReadyQueue];
         } else {
@@ -368,7 +359,7 @@
     }
     
     CleverTapLogDebug(self.config.logLevel,
-                      @"%@: Processed %lu in-apps, %lu remaining in queue",
+                      @"%@: Processing %lu in-apps, %lu remaining in queue",
                       self, (unsigned long)inAppsToProcess.count,
                       (unsigned long)self.readyQueue.count);
 }
@@ -417,18 +408,6 @@
 
 #pragma mark - Cancellation
 
-- (void)cancelDelayedInApp:(NSString *)campaignId {
-    if (!campaignId) return;
-    
-    dispatch_async(self.timerQueue, ^{
-        [self removeTimer:campaignId notifyDelegate:YES];
-        
-        CleverTapLogDebug(self.config.logLevel,
-                          @"%@: Cancelled delayed in-app: %@",
-                          self, campaignId);
-    });
-}
-
 - (void)cancelAllDelayedInApps {
     dispatch_async(self.timerQueue, ^{
         [self cancelAllDelayedInAppsInternal];
@@ -440,6 +419,7 @@
     
     for (NSString *campaignId in campaignIds) {
         [self removeTimer:campaignId notifyDelegate:YES];
+        [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
     }
     
     [self.readyQueue removeAllObjects];

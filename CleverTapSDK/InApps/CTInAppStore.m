@@ -257,52 +257,36 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
         id data = [CTPreferences getObjectForKey:storageKey];
-        
+        _delayedInAppsQueue = [NSArray new];
+        if (!data) {
+            return _delayedInAppsQueue;
+        }
+        if (!self.cryptManager) {
+            CleverTapLogDebug(self.config.logLevel,
+                              @"%@: Cannot decrypt inApps queue - cryptManager is nil",
+                              self);
+            return _delayedInAppsQueue;
+        }
         if ([data isKindOfClass:[NSString class]]) {
             @try {
-                if (!self.cryptManager) {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Cannot decrypt inApps queue - cryptManager is nil", self);
-                    _delayedInAppsQueue = [NSArray new];
-                    return _delayedInAppsQueue;
-                }
-                
-                NSArray *arr = [self.cryptManager decryptObject:data];
-                if (arr) {
-                    if ([arr isKindOfClass:[NSArray class]]) {
-                        _delayedInAppsQueue = arr;
-                    } else {
-                        CleverTapLogDebug(self.config.logLevel, @"%@: Decrypted inApps queue is not an NSArray type: %@", self, [arr class]);
-                        _delayedInAppsQueue = [NSArray new];
-                    }
+                id decrypted = [self.cryptManager decryptObject:data];
+                if ([decrypted isKindOfClass:[NSArray class]]) {
+                    _delayedInAppsQueue = decrypted;
                 } else {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to decrypt inApps queue", self);
-                    _delayedInAppsQueue = [NSArray new];
+                    CleverTapLogDebug(self.config.logLevel,
+                                      @"%@: Decrypted inApps queue is not an NSArray type: %@",
+                                      self, [decrypted class]);
                 }
             } @catch (NSException *exception) {
-                CleverTapLogDebug(self.config.logLevel, @"%@: Exception during inApps queue decryption: %@", self, exception);
-                _delayedInAppsQueue = [NSArray new];
+                CleverTapLogDebug(self.config.logLevel,
+                                  @"%@: Exception during inApps queue decryption: %@",
+                                  self, exception);
             }
         } else if (data) {
             // Log if data exists but is not a string (unexpected type)
             CleverTapLogDebug(self.config.logLevel, @"%@: Found inApps queue data of unexpected type: %@", self, [data class]);
-            _delayedInAppsQueue = [NSArray new];
         }
-        
-        if (!_delayedInAppsQueue) {
-            _delayedInAppsQueue = [NSArray new];
-        }
-        
-        return _delayedInAppsQueue;
-    }
-}
-
-- (NSDictionary *)peekDelayedInApp {
-    @synchronized(self) {
-        NSArray *inApps = [self delayedInAppsQueue];
-        if ([inApps count] > 0) {
-            return inApps[0];
-        }
-        return nil;
+        return _delayedInAppsQueue ?: [NSArray new];
     }
 }
 
@@ -352,7 +336,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         }
     }
 }
-
 
 #pragma mark Client-Side In-Apps
 - (void)removeClientSideInApps {

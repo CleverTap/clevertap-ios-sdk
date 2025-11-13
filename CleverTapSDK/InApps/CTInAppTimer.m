@@ -9,11 +9,8 @@
 
 @interface CTInAppTimer ()
 @property (nonatomic, strong) NSTimer *timer;
-@property (nonatomic, assign) NSTimeInterval elapsedTime;
 @property (nonatomic, strong) NSDate *startTime;
-@property (nonatomic, strong) NSDate *pauseTime;
 @property (nonatomic, assign) NSTimeInterval remainingTime;
-@property (nonatomic, assign) BOOL isPaused;
 @end
 
 @implementation CTInAppTimer
@@ -23,7 +20,6 @@
         _delay = delay;
         _completionHandler = completion;
         _remainingTime = delay;
-        _isPaused = NO;
     }
     return self;
 }
@@ -40,7 +36,6 @@
     if (self.timer) return;
     
     self.startTime = [NSDate date];
-    self.isPaused = NO;
     
     // Create timer on main thread where run loop is guaranteed to be active
     self.timer = [NSTimer scheduledTimerWithTimeInterval:self.remainingTime

@@ -114,7 +114,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         self.inAppStore = inAppStore;
         self.templatesManager = templatesManager;
         self.fileDownloader = fileDownloader;
-        self.inAppDelayManager = [[CTInAppDelayManager alloc] initWithDispatchQueue:dispatchQueueManager inAppStore:inAppStore withConfig:instance.config];
+        self.inAppDelayManager = [[CTInAppDelayManager alloc] initWithInAppStore:inAppStore withConfig:instance.config];
         self.inAppDelayManager.delegate = self;
 
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -135,19 +135,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             [self prepareNotificationForDisplay:inApp];
             // Remove in-app after prepare
             NSString *campaignId = (NSString*) inApp[CLTAP_NOTIFICATION_ID_TAG];
-
             [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
         }
         
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
     }
-}
-
-- (void)delayedInAppCancelled:(NSString *)inAppId {
-    CleverTapLogDebug(self.config.logLevel,
-                          @"%@: Delayed in-app cancelled: %@",
-                          self, inAppId);
 }
 
 - (void)dealloc {

@@ -7,7 +7,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol CTInAppDelayManagerDelegate <NSObject>
 - (void)delayedInAppReady:(NSDictionary *)inApp;
-- (void)delayedInAppCancelled:(NSString *)inAppId;
 @end
 
 @interface CTInAppDelayManager : NSObject
@@ -15,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<CTInAppDelayManagerDelegate> delegate;
 @property (nonatomic, strong) NSMutableSet<NSString *> *scheduledCampaigns;
 
-- (instancetype)initWithDispatchQueue:(CTDispatchQueueManager *)dispatchQueue inAppStore:(CTInAppStore *)inAppStore withConfig:(CleverTapInstanceConfig *)config;
+- (instancetype)initWithInAppStore:(CTInAppStore *)inAppStore withConfig:(CleverTapInstanceConfig *)config;
 
 // Schedule management
 - (void)scheduleDelayedInApps:(NSArray<NSDictionary *> *)inApps;
