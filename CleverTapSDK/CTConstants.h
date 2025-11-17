@@ -76,7 +76,7 @@ extern NSString *const kSessionId;
 #define CLTAP_CHARGED_EVENT_ITEMS @"Items"
 #define CLTAP_ERROR_KEY @"wzrk_error"
 #define CLTAP_WZRK_FETCH_EVENT @"wzrk_fetch"
-#define CLTAP_PUSH_DELAY_SECONDS 1
+#define CLTAP_PUSH_DELAY_SECONDS 0.2
 #define CLTAP_PING_TICK_INTERVAL 1
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
