@@ -649,7 +649,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
     
     CleverTapLogStaticDebug(@"Hiding current displaying inApp: %@", currentlyDisplayingNotification.campaignId);
-    [currentDisplayController hide:YES];
+    [CTUtils runSyncMainQueue:^{
+        [currentDisplayController hide:YES];
+    }];
 }
 
 #pragma mark - CTInAppNotificationDisplayDelegate
