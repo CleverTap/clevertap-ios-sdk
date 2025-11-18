@@ -509,6 +509,19 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         [self _showInAppNotificationIfAny];  // auto try the next one
         return;
     }
+    
+    if (self.inAppRenderingStatus == CleverTapInAppDiscard) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be discarded, not saving and showing the InApp Notification", self);
+        return;
+    }
+    
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
+        if (self.config.accountId && notification) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, queueing to pending InApps", self);
+            [pendingNotifications addObject:@[self.config.accountId, notification]];
+        }
+        return;
+    }
 
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
