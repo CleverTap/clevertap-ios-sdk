@@ -1533,7 +1533,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)discardInAppNotifications {
-    [self.inAppDisplayManager _discardInAppNotifications];
+    [self.inAppDisplayManager _discardInAppNotifications:NO];
 }
 
 - (void)resumeInAppNotifications {
@@ -1543,6 +1543,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)clearInAppResources:(BOOL)expiredOnly {
     [self.fileDownloader clearFileAssets:expiredOnly];
+}
+
+- (void)discardInAppNotifications:(BOOL)dismissInAppIfVisible {
+    [self.inAppDisplayManager _discardInAppNotifications:dismissInAppIfVisible];
 }
 
 + (void)registerCustomInAppTemplates:(id<CTTemplateProducer> _Nonnull)producer {

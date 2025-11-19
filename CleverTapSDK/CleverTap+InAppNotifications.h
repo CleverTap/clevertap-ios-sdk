@@ -42,6 +42,19 @@
  */
 - (void)clearInAppResources:(BOOL)expiredOnly;
 
+/*!
+ @method
+ 
+ @abstract
+ Discards inApp notifications until 'resumeInAppNotifications' is called for current session.
+ 
+ Automatically resumes InApp notifications display on CleverTap shared instance creation. Pending inApp notifications are not displayed.
+ 
+ @param dismissInAppIfVisible  when true, dismisses the currently visible InApp (if any) immediately.
+                              when false, allows the currently visible InApp to remain displayed.
+ */
+- (void)discardInAppNotifications:(BOOL)dismissInAppIfVisible;
+
 #endif
 
 @end
