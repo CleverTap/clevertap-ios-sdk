@@ -2077,21 +2077,60 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)inflateEventsQueue {
-    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
-    if (!self.eventsQueue || [self isMuted]) {
+    // If the previous encryption level was 2/high, decrypt the object
+    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+
+    if (wasEncrypted) {
+        // File was encrypted, so decrypt when reading
+        self.eventsQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
+            [CTPreferences unarchiveFromFile:[self eventsFileName]
+                                       ofType:[NSMutableArray class]
+                                    removeFile:YES]];
+    } else {
+        // File was stored raw
+        self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:
+            [self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    }
+
+    // fallback incase decryption fails
+    if (!self.eventsQueue || ![self.eventsQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
         self.eventsQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateProfileQueue {
-    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    // If the previous encryption level was 2/high, decrypt the object
+    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+
+    if (wasEncrypted) {
+        // File was encrypted, so decrypt when reading
+        self.profileQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
+            [CTPreferences unarchiveFromFile:[self profileEventsFileName]
+                                       ofType:[NSMutableArray class]
+                                    removeFile:YES]];
+    } else {
+        // File was stored raw
+        self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    }
     if (!self.profileQueue || [self isMuted]) {
         self.profileQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateNotificationsQueue {
-    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    // If the previous encryption level was 2/high, decrypt the object
+    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+
+    if (wasEncrypted) {
+        // File was encrypted, so decrypt when reading
+        self.notificationsQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
+            [CTPreferences unarchiveFromFile:[self notificationsFileName]
+                                       ofType:[NSMutableArray class]
+                                    removeFile:YES]];
+    } else {
+        // File was stored raw
+        self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    }
     if (!self.notificationsQueue || [self isMuted]) {
         self.notificationsQueue = [NSMutableArray array];
     }
@@ -2122,6 +2161,7 @@ static BOOL sharedInstanceErrorLogged;
     if ([self isMuted]) {
         [self clearQueues];
     } else {
+        // encrypt if level has been changed to 2/high
         [self persistProfileQueue];
         [self persistEventsQueue];
         [self persistNotificationsQueue];
@@ -2130,27 +2170,36 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)persistEventsQueue {
     NSString *fileName = [self eventsFileName];
-    NSMutableArray *eventsCopy;
+    id eventsCopy;
     @synchronized (self) {
         eventsCopy = [NSMutableArray arrayWithArray:[self.eventsQueue copy]];
+        if (self.config.encryptionLevel == CleverTapEncryptionHigh) {
+            eventsCopy = [self.config.cryptManager encryptObject:eventsCopy];
+        }
     }
     [CTPreferences archiveObject:eventsCopy forFileName:fileName config:_config];
 }
 
 - (void)persistProfileQueue {
     NSString *fileName = [self profileEventsFileName];
-    NSMutableArray *profileEventsCopy;
+    id profileEventsCopy;
     @synchronized (self) {
         profileEventsCopy = [NSMutableArray arrayWithArray:[self.profileQueue copy]];
+        if (self.config.encryptionLevel == CleverTapEncryptionHigh) {
+            profileEventsCopy = [self.config.cryptManager encryptObject:profileEventsCopy];
+        }
     }
     [CTPreferences archiveObject:profileEventsCopy forFileName:fileName config:_config];
 }
 
 - (void)persistNotificationsQueue {
     NSString *fileName = [self notificationsFileName];
-    NSMutableArray *notificationsCopy;
+    id notificationsCopy;
     @synchronized (self) {
         notificationsCopy = [NSMutableArray arrayWithArray:[self.notificationsQueue copy]];
+        if (self.config.encryptionLevel == CleverTapEncryptionHigh) {
+            notificationsCopy = [self.config.cryptManager encryptObject:notificationsCopy];
+        }
     }
     [CTPreferences archiveObject:notificationsCopy forFileName:fileName config:_config];
 }
@@ -3702,7 +3751,7 @@ static BOOL sharedInstanceErrorLogged;
             return;
         }
         if (self.deviceInfo.deviceId) {
-            self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+            self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
             self.inboxController.delegate = self;
             [CTUtils runSyncMainQueue: ^{
                 callback(self.inboxController.isInitialized);
@@ -3857,7 +3906,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_resetInbox {
     if (self.inboxController && self.inboxController.isInitialized && self.deviceInfo.deviceId) {
-        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
         self.inboxController.delegate = self;
     }
 }
