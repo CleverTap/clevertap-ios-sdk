@@ -46,6 +46,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 - (void)recordInAppNotificationStateEvent:(BOOL)clicked
                           forNotification:(CTInAppNotification * _Nonnull)notification andQueryParameters:(NSDictionary * _Nullable)params;
 
+- (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion;
+
 - (id <CleverTapURLDelegate> _Nullable)urlDelegate;
 
 @end

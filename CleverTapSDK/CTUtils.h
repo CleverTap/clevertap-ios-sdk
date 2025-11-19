@@ -11,6 +11,7 @@
 + (NSString *)jsonObjectToString:(id)object;
 + (NSString *)getKeyWithSuffix:(NSString *)suffix accountID:(NSString *)accountID;
 + (void)runSyncMainQueue:(void (^)(void))block;
++ (void)runAsyncMainQueue:(void (^)(void))block;
 + (double)haversineDistance:(CLLocationCoordinate2D)coordinateA coordinateB:(CLLocationCoordinate2D)coordinateB;
 + (NSNumber * _Nullable)numberFromString:(NSString * _Nullable)string;
 + (NSNumber * _Nullable)numberFromString:(NSString * _Nullable)string withLocale:(NSLocale * _Nullable)locale;
