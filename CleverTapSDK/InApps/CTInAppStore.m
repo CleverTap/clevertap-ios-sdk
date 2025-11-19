@@ -27,6 +27,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) NSArray *inAppsQueue;
 @property (nonatomic, strong) NSArray *clientSideInApps;
 @property (nonatomic, strong) NSArray *serverSideInApps;
+@property (nonatomic, strong) NSArray *delayedInAppsQueue;
 
 @end
 
@@ -46,6 +47,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         
         [delegateManager addSwitchUserDelegate:self];
         [self migrateInAppQueueKeys];
+        [self migrateDelayedInAppQueueKeys];
     }
     return self;
 }
@@ -83,8 +85,13 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending InApp notifications", self);
         _inAppsQueue = [NSArray new];
+        _delayedInAppsQueue = [NSArray new];
+        //immediate inapps
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences removeObjectForKey:storageKey];
+        //delayed inapps
+        NSString *delayedStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
+        [CTPreferences removeObjectForKey:delayedStorageKey];
     }
 }
 
@@ -150,16 +157,15 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     
     @synchronized(self) {
         NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
-        for (int i = 0; i < [inAppNotifs count]; i++) {
-            @try {
-                NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
-                [inAppsQueue addObject:inAppNotif];
-            } @catch (NSException *e) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
-            }
-        }
+        NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
+        
+        NSDictionary<NSString *, NSArray *> *partitionedNotifs = [self partitionInApps:inAppNotifs];
+        [inAppsQueue addObjectsFromArray:partitionedNotifs[@"immediate"]];
+        [delayedInAppsQueue addObjectsFromArray:partitionedNotifs[@"delayed"]];
+        
         // Commit all the changes
         [self storeInApps:inAppsQueue];
+        [self storeDelayedInApps:delayedInAppsQueue];
     }
 }
 
@@ -168,8 +174,15 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     
     @synchronized(self) {
         NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
-        [inAppsQueue insertObject:inAppNotif atIndex:0];
+        NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
+        
+        if ([self parseDelayFromJson: inAppNotif] == 0) {
+            [inAppsQueue insertObject:inAppNotif atIndex:0];
+        } else {
+            [delayedInAppsQueue insertObject:inAppNotif atIndex:0];
+        }
         [self storeInApps:inAppsQueue];
+        [self storeDelayedInApps:delayedInAppsQueue];
     }
 }
 
@@ -193,6 +206,111 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
             [self storeInApps:inAppsQueue];
         }
         return inApp;
+    }
+}
+
+#pragma mark Delayed InApps
+
+- (void)migrateDelayedInAppQueueKeys {
+    @synchronized(self) {
+        NSString *storageKey = [CTPreferences storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY config: self.config];
+        id data = [CTPreferences getObjectForKey:storageKey];
+        if (data) {
+            if ([data isKindOfClass:[NSArray class]]) {
+                _delayedInAppsQueue = data;
+                
+                NSString *encryptedString = nil;
+                @try {
+                    encryptedString = [self.cryptManager encryptObject:data];
+                    if (!encryptedString) {
+                        CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed", self);
+                        return;
+                    }
+                } @catch (NSException *exception) {
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error: %@", self, exception);
+                    return;
+                }
+                
+                NSString *newStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
+                [CTPreferences putString:encryptedString forKey:newStorageKey];
+            }
+            [CTPreferences removeObjectForKey:storageKey];
+        }
+    }
+}
+
+- (void)storeDelayedInApps:(NSArray *)inApps {
+    if (!inApps) return;
+    
+    @synchronized (self) {
+        _delayedInAppsQueue = inApps;
+        
+        NSString *encryptedString = [self.cryptManager encryptObject:inApps];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
+        [CTPreferences putString:encryptedString forKey:storageKey];
+    }
+}
+
+- (NSArray *)delayedInAppsQueue {
+    @synchronized(self) {
+        if (_delayedInAppsQueue) return _delayedInAppsQueue;
+        
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
+        id data = [CTPreferences getObjectForKey:storageKey];
+        _delayedInAppsQueue = [NSArray new];
+        if (!data) {
+            return _delayedInAppsQueue;
+        }
+        if (!self.cryptManager) {
+            CleverTapLogDebug(self.config.logLevel,
+                              @"%@: Cannot decrypt inApps queue - cryptManager is nil",
+                              self);
+            return _delayedInAppsQueue;
+        }
+        if ([data isKindOfClass:[NSString class]]) {
+            @try {
+                id decrypted = [self.cryptManager decryptObject:data];
+                if ([decrypted isKindOfClass:[NSArray class]]) {
+                    _delayedInAppsQueue = decrypted;
+                } else {
+                    CleverTapLogDebug(self.config.logLevel,
+                                      @"%@: Decrypted inApps queue is not an NSArray type: %@",
+                                      self, [decrypted class]);
+                }
+            } @catch (NSException *exception) {
+                CleverTapLogDebug(self.config.logLevel,
+                                  @"%@: Exception during inApps queue decryption: %@",
+                                  self, exception);
+            }
+        } else if (data) {
+            // Log if data exists but is not a string (unexpected type)
+            CleverTapLogDebug(self.config.logLevel, @"%@: Found inApps queue data of unexpected type: %@", self, [data class]);
+        }
+        return _delayedInAppsQueue ?: [NSArray new];
+    }
+}
+
+- (void)dequeueDelayedInAppWithCampaignId:(NSString *)campaignId {
+    if (!campaignId) return;
+    
+    @synchronized(self) {
+        NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
+        
+        NSUInteger indexToRemove = NSNotFound;
+        for (NSUInteger i = 0; i < delayedInAppsQueue.count; i++) {
+            NSDictionary *inApp = delayedInAppsQueue[i];
+            NSString *queuedCampaignId = inApp[CLTAP_NOTIFICATION_ID_TAG];
+            
+            if ([queuedCampaignId isEqualToString:campaignId]) {
+                indexToRemove = i;
+                break;
+            }
+        }
+        
+        if (indexToRemove != NSNotFound) {
+            [delayedInAppsQueue removeObjectAtIndex:indexToRemove];
+            [self storeDelayedInApps:delayedInAppsQueue];
+        }
     }
 }
 
@@ -271,6 +389,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 }
 
 #pragma mark Server-Side In-Apps
+
 - (void)removeServerSideInApps {
     @synchronized (self) {
         _serverSideInApps = [NSArray new];
@@ -322,6 +441,41 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 }
 
 #pragma mark Utils
+
+- (NSDictionary<NSString *, NSArray *> *)partitionInApps:(NSArray *)inAppNotifs {
+    NSMutableArray *immediate = [NSMutableArray array];
+    NSMutableArray *delayed = [NSMutableArray array];
+    
+    for (int i = 0; i < [inAppNotifs count]; i++) {
+        @try {
+            NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
+            if ([self parseDelayFromJson: inAppNotif] == 0) {
+                [immediate addObject:inAppNotif];
+            } else {
+                [delayed addObject:inAppNotif];
+            }
+            
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+        }
+    }
+    return @{
+        @"immediate": [immediate copy],
+        @"delayed": [delayed copy]
+    };
+}
+
+- (NSInteger)parseDelayFromJson:(NSDictionary *)inAppNotif {
+    NSNumber *delayValue = inAppNotif[CLTAP_DELAY_AFTER_TRIGGER];
+    if (!delayValue) return 0;
+    
+    NSInteger delay = [delayValue integerValue];
+    if (delay < CLTAP_MIN_DELAY_SECONDS || delay > CLTAP_MAX_DELAY_SECONDS) {
+        return 0; // immediate
+    }
+    return delay;
+}
+
 - (NSArray *)decryptInAppsWithKeySuffix:(NSString *)keySuffix {
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
@@ -349,6 +503,19 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
 }
 
+- (void)updateTTL:(NSMutableDictionary *)inApp {
+    NSNumber *offset = inApp[CLTAP_INAPP_CS_TTL_OFFSET];
+    if (offset != nil) {
+        NSInteger now = [[NSDate date] timeIntervalSince1970];
+        NSInteger ttl = now + [offset longValue];
+        [inApp setObject:[NSNumber numberWithLong:ttl] forKey:CLTAP_INAPP_TTL];
+    } else {
+        // Remove TTL, since it cannot be calculated based on the TTL offset
+        // The default TTL will be set in CTInAppNotification
+        [inApp removeObjectForKey:CLTAP_INAPP_TTL];
+    }
+}
+
 #pragma mark CTSwitchUserDelegate
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     self.deviceId = newDeviceId;
@@ -356,6 +523,7 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     self.inAppsQueue = nil;
     self.clientSideInApps = nil;
     self.serverSideInApps = nil;
+    self.delayedInAppsQueue = nil;
 }
 
 @end

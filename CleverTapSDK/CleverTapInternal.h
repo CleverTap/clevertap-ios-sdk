@@ -4,6 +4,7 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppStore.h"
+#import "CTInAppDelayManager.h"
 #endif
 #import "CTSessionManager.h"
 #import "CTCryptMigrator.h"
@@ -26,6 +27,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (nonatomic, strong, readonly) CTInAppDisplayManager * _Nullable inAppDisplayManager;
+@property (nonatomic, strong, readonly) CTInAppDelayManager * _Nullable inAppDelayManager;
+
 @property (nonatomic, strong, readonly) CTInAppEvaluationManager * _Nullable inAppEvaluationManager;
 @property (nonatomic, strong, readonly) CTInAppFCManager * _Nullable inAppFCManager;
 @property (nonatomic, strong, readonly) CTInAppStore * _Nullable inAppStore;
