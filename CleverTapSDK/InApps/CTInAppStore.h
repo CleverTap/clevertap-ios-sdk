@@ -35,8 +35,9 @@
 - (NSDictionary * _Nullable)peekInApp;
 - (NSDictionary * _Nullable)dequeueInApp;
 
-- (NSArray * _Nonnull)delayedInAppsQueue;
+- (NSArray * _Nullable)delayedInAppsQueue;
 - (void)dequeueDelayedInAppWithCampaignId:(NSString *_Nullable)campaignId;
 - (NSInteger)parseDelayFromJson:(NSDictionary * _Nullable)inAppNotif;
-
+- (NSDictionary<NSString *, NSArray *> * _Nullable)partitionInApps:(NSArray * _Nullable)inAppNotifs;
+- (void)updateTTL:(NSMutableDictionary * _Nullable)inApp;
 @end

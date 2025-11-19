@@ -126,11 +126,19 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)delayedInAppReady:(NSDictionary *)inApp {
+    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
+        [self.inAppDelayManager.readyQueue addObject:inApp];
+        return;
+    }
     @try {
         if (inApp) {
+            //Update TTL for delayed inApp after timer is up
+            NSMutableDictionary *mutable = [inApp mutableCopy];
+            [self.inAppStore updateTTL:mutable];
             // if we are currently displaying a notification, cache this notification for later display
             if (currentlyDisplayingNotification) {
-                __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:inApp];
+                __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:mutable];
                 if (self.config.accountId && notification) {
                     [pendingNotifications addObject:@[self.config.accountId, notification]];
                     CleverTapLogDebug(self.config.logLevel, @"%@: InApp already displaying, queueing to pending InApps", self);
@@ -138,10 +146,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
                 return;
             }
             // Prepare the in-app for display
-            [self prepareNotificationForDisplay:inApp];
-            // Remove in-app after prepare
-            NSString *campaignId = (NSString*) inApp[CLTAP_NOTIFICATION_ID_TAG];
-            [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
+            [self prepareNotificationForDisplay:mutable];
         }
         
     } @catch (NSException *e) {
@@ -182,7 +187,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (void)_addInAppNotificationsToQueue:(NSArray *)inappNotifs {
     @try {
-        //TODO: Check if delayed inapps have any relation with RFP inapps
         NSArray *filteredInAppNotifs = [self filterNonRegisteredTemplates:inappNotifs];
         if (pushPrimerManager.pushPermissionStatus == CTPushEnabled) {
             filteredInAppNotifs = [self filterRFPInApps:filteredInAppNotifs];
@@ -302,6 +306,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)_showDelayedNotificationIfAvailable {
+    //Resume suspended inapps first
+    [self.inAppDelayManager processReadyQueue];
+
     NSArray *allDelayedInApps = [self.inAppStore delayedInAppsQueue];
     if (!allDelayedInApps.count) return;
     
@@ -326,7 +333,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (void)_showNotificationIfAvailable {
     if ([CTUIUtils runningInsideAppExtension]) return;
-
+    //Bypassing suspend logic for delayed inapps - will be scheduled and kept ready to display when resumed
+    [self _showDelayedNotificationIfAvailable];
+    
     if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
         return;
@@ -341,10 +350,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             // Remove in-app after prepare
             [self.inAppStore dequeueInApp];
         }
-        
-        //Delayed inapps
-        [self _showDelayedNotificationIfAvailable];
-        
     } @catch (NSException *e) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
     }

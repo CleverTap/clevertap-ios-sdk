@@ -21,7 +21,6 @@
 
 @property (nonatomic, strong) NSMutableDictionary<NSString *, CTInAppTimer *> *activeTimers;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, CTTimerInfo *> *timerInfoMap;
-@property (nonatomic, strong) NSMutableArray<NSDictionary *> *readyQueue;
 @property (nonatomic, strong) dispatch_queue_t timerQueue;
 
 // State flags
@@ -155,11 +154,11 @@
                                   self, campaignId, remainingTime, totalElapsed, info.originalDelay);
             }
         }
-        
         // Remove expired timers
         for (NSString *campaignId in expiredCampaigns) {
-            [self removeTimer:campaignId notifyDelegate:YES];
+            [self removeTimer:campaignId];
             [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
+            CleverTapLogDebug(self.config.logLevel, @"%@: Delayed in-app cancelled: %@", self, campaignId);
         }
         
         // Recreate active timers with correct remaining time
@@ -192,15 +191,11 @@
     });
 }
 
-- (void)notifyDelegateCancelled:(NSString *)campaignId {
-    CleverTapLogDebug(self.config.logLevel, @"%@: Delayed in-app cancelled: %@", self, campaignId);
-}
-
 - (void)notifyDelegateReady:(NSDictionary *)inApp {
     if (!self.delegate) return;
     dispatch_async(dispatch_get_main_queue(), ^{
         if ([self.delegate respondsToSelector:@selector(delayedInAppReady:)]) {
-                    [self.delegate delayedInAppReady:inApp];
+            [self.delegate delayedInAppReady:inApp];
         }
     });
 }
@@ -230,7 +225,6 @@
                               self, campaignId, remaining);
             //Remove inapp from queue
             [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
-
             return;
         }
     }
@@ -244,7 +238,8 @@
     // Store timer info
     self.timerInfoMap[campaignId] = info;
     [self.scheduledCampaigns addObject:campaignId];
-    
+    //Remove inapp from queue
+    [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
     // Create and start timer
     __weak typeof(self) weakSelf = self;
     CTInAppTimer *timer = [[CTInAppTimer alloc] initWithDelay:delaySeconds completion:^{
@@ -289,7 +284,7 @@
         CleverTapLogDebug(self.config.logLevel,
                           @"%@: Timer %@ has no in-app data",
                           self, campaignId);
-        [self removeTimer:campaignId notifyDelegate:YES];
+        [self removeTimer:campaignId];
         [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
     }
 }
@@ -308,7 +303,6 @@
         [self handleInvalidTimer:campaignId info:info];
         return;
     }
-    
     // Check if app is in foreground
     dispatch_async(dispatch_get_main_queue(), ^{
         UIApplicationState appState = [[CTUIUtils getSharedApplication] applicationState];
@@ -323,13 +317,10 @@
         } else {
             // App is in background, discard the in-app
             CleverTapLogDebug(self.config.logLevel,@"Timer %@ fired in background (state: %ld) - discarding", campaignId, (long)appState);
-            
-            [self notifyDelegateCancelled:campaignId];
         }
     });
-    
     // Clean up
-    [self removeTimer:campaignId notifyDelegate:NO];
+    [self removeTimer:campaignId];
 }
 
 #pragma mark - Queue Processing
@@ -366,7 +357,7 @@
 
 #pragma mark - Helper Methods
 
-- (void)removeTimer:(NSString *)campaignId notifyDelegate:(BOOL)notify {
+- (void)removeTimer:(NSString *)campaignId {
     CTInAppTimer *timer = self.activeTimers[campaignId];
     if (timer) {
         [timer cancel];
@@ -375,10 +366,6 @@
     [self.activeTimers removeObjectForKey:campaignId];
     [self.timerInfoMap removeObjectForKey:campaignId];
     [self.scheduledCampaigns removeObject:campaignId];
-    
-    if (notify) {
-        [self notifyDelegateCancelled:campaignId];
-    }
 }
 
 - (NSArray *)sortInAppsForScheduling:(NSArray *)inApps {
@@ -416,16 +403,12 @@
 
 - (void)cancelAllDelayedInAppsInternal {
     NSArray *campaignIds = [self.timerInfoMap allKeys];
-    
     for (NSString *campaignId in campaignIds) {
-        [self removeTimer:campaignId notifyDelegate:YES];
+        [self removeTimer:campaignId];
         [self.inAppStore dequeueDelayedInAppWithCampaignId:campaignId];
+        CleverTapLogDebug(self.config.logLevel, @"%@: Delayed in-app cancelled: %@", self, campaignId);
     }
-    
     [self.readyQueue removeAllObjects];
-    
-    CleverTapLogDebug(self.config.logLevel,
-                      @"%@: Cancelled all %lu delayed in-apps",
-                      self, (unsigned long)campaignIds.count);
+    CleverTapLogDebug(self.config.logLevel, @"%@: Cancelled all %lu delayed in-apps", self, (unsigned long)campaignIds.count);
 }
 @end

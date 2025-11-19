@@ -19,7 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 // Schedule management
 - (void)scheduleDelayedInApps:(NSArray<NSDictionary *> *)inApps;
 - (NSInteger)scheduledCampaignCount;
-
+- (void)processReadyQueue;
+@property (nonatomic, strong) NSMutableArray<NSDictionary *> *readyQueue;
 @end
 
 NS_ASSUME_NONNULL_END

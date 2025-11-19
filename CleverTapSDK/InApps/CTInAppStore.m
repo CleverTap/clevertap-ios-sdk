@@ -503,6 +503,19 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, self.deviceId, suffix];
 }
 
+- (void)updateTTL:(NSMutableDictionary *)inApp {
+    NSNumber *offset = inApp[CLTAP_INAPP_CS_TTL_OFFSET];
+    if (offset != nil) {
+        NSInteger now = [[NSDate date] timeIntervalSince1970];
+        NSInteger ttl = now + [offset longValue];
+        [inApp setObject:[NSNumber numberWithLong:ttl] forKey:CLTAP_INAPP_TTL];
+    } else {
+        // Remove TTL, since it cannot be calculated based on the TTL offset
+        // The default TTL will be set in CTInAppNotification
+        [inApp removeObjectForKey:CLTAP_INAPP_TTL];
+    }
+}
+
 #pragma mark CTSwitchUserDelegate
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     self.deviceId = newDeviceId;
