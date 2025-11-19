@@ -1546,6 +1546,9 @@ static BOOL sharedInstanceErrorLogged;
                 completion(nil);
             }
         }
+        else {
+            completion(nil);
+        }
     }];
     [ctRequest onError:^(NSError * _Nullable error) {
         if (error) {
