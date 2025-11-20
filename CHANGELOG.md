@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.4.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.0) (November 20, 2025)
+#### Added
+- Adds support for previewing all types of InApps from the dashboard.
+- Extends the `discardInAppNotifications()` method to support an optional `dismissInAppIfVisible` parameter to control whether an active InApp notification should be immediately dismissed.
+- Adds support for delayed InApp notifications.
+- Adds support for complete encryption of all data stored in the SDK. Please refer to [Encryption.md](/docs/Encryption.md) file to read more on how to enable/disable encryption.
+
+> ⚠️ **NOTE**
+After upgrading the SDK to v7.4.0+, do not downgrade in subsequent app releases if you have enabled additional encryption. If you encounter any issues, please contact the CleverTap support team for assistance.
+
 ### [Version 7.3.4](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.3.4) (October 29, 2025)
 #### Fixed
 - Mitigates a potential crash related to Core Data concurrency for App Inbox.
