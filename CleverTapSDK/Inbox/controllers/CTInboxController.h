@@ -1,4 +1,6 @@
 #import <Foundation/Foundation.h>
+#import "CleverTap.h"
+#import "CTEncryptionManager.h"
 
 @protocol CTInboxDelegate <NSObject>
 @required
@@ -22,7 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 // blocking, call off main thread
 - (instancetype _Nullable)initWithAccountId:(NSString *)accountId
-                                       guid:(NSString *)guid;
+                                       guid:(NSString *)guid
+                            encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel
+                    previousEncryptionLevel:(CleverTapEncryptionLevel)previousEncryptionLevel
+                          encryptionManager:(CTEncryptionManager*)encryptionManager;
 
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages;
 - (NSDictionary * _Nullable )messageForId:(NSString *)messageId;

@@ -179,6 +179,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
 #define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
 
+#define CLTAP_PREFS_DELAYED_INAPP_KEY @"delayed_inapp_notifs"
+
 #define CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS @"cs_inapp_active_assets"
 #define CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS @"cs_inapp_inactive_assets"
 #define CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS @"cs_inapp_assets_last_deleted_timestamp"
@@ -211,6 +213,11 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 
 // whenTriggers
 #define CLTAP_INAPP_TRIGGERS @"whenTriggers"
+// delayAfterTrigger
+#define CLTAP_DELAY_AFTER_TRIGGER @"delayAfterTrigger"
+#define CLTAP_MAX_DELAY_SECONDS 1200
+#define CLTAP_MIN_DELAY_SECONDS 1
+#define CLTAP_MAX_DELAYED_INAPPS 20 // worst case - we assume 1 in-app per minute, session length 20 mins
 
 // whenLimits
 #define CLTAP_INAPP_FC_LIMITS @"frequencyLimits"

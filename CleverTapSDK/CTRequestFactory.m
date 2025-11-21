@@ -41,8 +41,16 @@
     return [self _createPostRequestWithConfig:config params:params url:url];
 }
 
++ (CTRequest * _Nonnull)previewRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config url:(NSString * _Nonnull)url {
+    return [self _createGetRequestWithConfig:config url:url];
+}
+
 + (CTRequest * _Nonnull)_createPostRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url {
     return [self _createPostRequestWithConfig:config params:params url:url additionalHeaders:nil];
+}
+
++ (CTRequest * _Nonnull)_createGetRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config url:(NSString * _Nonnull)url {
+    return [[CTRequest alloc] initWithHttpMethod:@"GET" config:config params:nil url:url additionalHeaders:nil];
 }
 
 + (CTRequest * _Nonnull)_createPostRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url additionalHeaders:(NSDictionary * _Nullable)additionalHeaders {

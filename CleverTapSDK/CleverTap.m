@@ -1371,7 +1371,7 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !defined(CLEVERTAP_TVOS)
 - (BOOL)_checkAndHandleTestPushPayload:(NSDictionary *)notification {
-    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"]) {
+    if (notification[@"wzrk_inapp"] || notification[@"wzrk_inbox"] || notification[@"wzrk_adunit"] || notification[@"wzrk_inapp_s3_url"] || notification[CLTAP_INAPP_PREVIEW_TYPE]) {
         // remove unknown json attributes
         NSMutableDictionary *testPayload = [NSMutableDictionary new];
         for (NSString *key in [notification allKeys]) {
@@ -1520,6 +1520,45 @@ static BOOL sharedInstanceErrorLogged;
 }
 #endif
 
+- (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion {
+    if (!url) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Inapp preview URL is nil", self);
+        completion(nil);
+        return;
+    }
+    
+    CTRequest *ctRequest = [CTRequestFactory previewRequestWithConfig:self.config url:url];
+    [ctRequest onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            if (httpResponse.statusCode == 200 && data) {
+                NSError *jsonError = nil;
+                NSDictionary *inAppJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
+                if (jsonError) {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Failed to parse inapp preview JSON: %@", self, jsonError.localizedDescription);
+                    completion(nil);
+                } else {
+                    completion(inAppJson);
+                }
+            }
+            else  {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with status code: %li", self, httpResponse.statusCode);
+                completion(nil);
+            }
+        }
+        else {
+            completion(nil);
+        }
+    }];
+    [ctRequest onError:^(NSError * _Nullable error) {
+        if (error) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Could not fetch inapp preview content with error: %@", self, error.localizedDescription);
+            completion(nil);
+        }
+    }];
+    [self.requestSender send:ctRequest];
+}
+
 #pragma mark - InApp Notifications
 
 #pragma mark Public Method
@@ -1533,7 +1572,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)discardInAppNotifications {
-    [self.inAppDisplayManager _discardInAppNotifications];
+    [self.inAppDisplayManager _discardInAppNotifications:NO];
 }
 
 - (void)resumeInAppNotifications {
@@ -1543,6 +1582,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)clearInAppResources:(BOOL)expiredOnly {
     [self.fileDownloader clearFileAssets:expiredOnly];
+}
+
+- (void)discardInAppNotifications:(BOOL)dismissInAppIfVisible {
+    [self.inAppDisplayManager _discardInAppNotifications:dismissInAppIfVisible];
 }
 
 + (void)registerCustomInAppTemplates:(id<CTTemplateProducer> _Nonnull)producer {
@@ -2034,21 +2077,60 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)inflateEventsQueue {
-    self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
-    if (!self.eventsQueue || [self isMuted]) {
+    // If the previous encryption level was 2/high, decrypt the object
+    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+
+    if (wasEncrypted) {
+        // File was encrypted, so decrypt when reading
+        self.eventsQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
+            [CTPreferences unarchiveFromFile:[self eventsFileName]
+                                       ofType:[NSMutableArray class]
+                                    removeFile:YES]];
+    } else {
+        // File was stored raw
+        self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:
+            [self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    }
+
+    // fallback incase decryption fails
+    if (!self.eventsQueue || ![self.eventsQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
         self.eventsQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateProfileQueue {
-    self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    // If the previous encryption level was 2/high, decrypt the object
+    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+
+    if (wasEncrypted) {
+        // File was encrypted, so decrypt when reading
+        self.profileQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
+            [CTPreferences unarchiveFromFile:[self profileEventsFileName]
+                                       ofType:[NSMutableArray class]
+                                    removeFile:YES]];
+    } else {
+        // File was stored raw
+        self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    }
     if (!self.profileQueue || [self isMuted]) {
         self.profileQueue = [NSMutableArray array];
     }
 }
 
 - (void)inflateNotificationsQueue {
-    self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    // If the previous encryption level was 2/high, decrypt the object
+    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+
+    if (wasEncrypted) {
+        // File was encrypted, so decrypt when reading
+        self.notificationsQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
+            [CTPreferences unarchiveFromFile:[self notificationsFileName]
+                                       ofType:[NSMutableArray class]
+                                    removeFile:YES]];
+    } else {
+        // File was stored raw
+        self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
+    }
     if (!self.notificationsQueue || [self isMuted]) {
         self.notificationsQueue = [NSMutableArray array];
     }
@@ -2079,6 +2161,7 @@ static BOOL sharedInstanceErrorLogged;
     if ([self isMuted]) {
         [self clearQueues];
     } else {
+        // encrypt if level has been changed to 2/high
         [self persistProfileQueue];
         [self persistEventsQueue];
         [self persistNotificationsQueue];
@@ -2087,27 +2170,36 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)persistEventsQueue {
     NSString *fileName = [self eventsFileName];
-    NSMutableArray *eventsCopy;
+    id eventsCopy;
     @synchronized (self) {
         eventsCopy = [NSMutableArray arrayWithArray:[self.eventsQueue copy]];
+        if (self.config.encryptionLevel == CleverTapEncryptionHigh) {
+            eventsCopy = [self.config.cryptManager encryptObject:eventsCopy];
+        }
     }
     [CTPreferences archiveObject:eventsCopy forFileName:fileName config:_config];
 }
 
 - (void)persistProfileQueue {
     NSString *fileName = [self profileEventsFileName];
-    NSMutableArray *profileEventsCopy;
+    id profileEventsCopy;
     @synchronized (self) {
         profileEventsCopy = [NSMutableArray arrayWithArray:[self.profileQueue copy]];
+        if (self.config.encryptionLevel == CleverTapEncryptionHigh) {
+            profileEventsCopy = [self.config.cryptManager encryptObject:profileEventsCopy];
+        }
     }
     [CTPreferences archiveObject:profileEventsCopy forFileName:fileName config:_config];
 }
 
 - (void)persistNotificationsQueue {
     NSString *fileName = [self notificationsFileName];
-    NSMutableArray *notificationsCopy;
+    id notificationsCopy;
     @synchronized (self) {
         notificationsCopy = [NSMutableArray arrayWithArray:[self.notificationsQueue copy]];
+        if (self.config.encryptionLevel == CleverTapEncryptionHigh) {
+            notificationsCopy = [self.config.cryptManager encryptObject:notificationsCopy];
+        }
     }
     [CTPreferences archiveObject:notificationsCopy forFileName:fileName config:_config];
 }
@@ -3659,7 +3751,7 @@ static BOOL sharedInstanceErrorLogged;
             return;
         }
         if (self.deviceInfo.deviceId) {
-            self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+            self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
             self.inboxController.delegate = self;
             [CTUtils runSyncMainQueue: ^{
                 callback(self.inboxController.isInitialized);
@@ -3814,7 +3906,7 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_resetInbox {
     if (self.inboxController && self.inboxController.isInitialized && self.deviceInfo.deviceId) {
-        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+        self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
         self.inboxController.delegate = self;
     }
 }

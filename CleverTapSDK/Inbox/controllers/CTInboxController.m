@@ -16,6 +16,9 @@ static dispatch_once_t coordinatorOnceToken;
 @property (nonatomic, copy, readonly) NSString *accountId;
 @property (nonatomic, copy, readonly) NSString *guid;
 @property (nonatomic, copy, readonly) NSString *userIdentifier;
+@property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
+@property (nonatomic, assign) CleverTapEncryptionLevel previousEncryptionLevel;
+@property (nonatomic, strong) CTEncryptionManager *encryptionManager;
 @property (nonatomic, strong, readonly) CTUserMO *user;
 
 // Instance-specific context
@@ -33,7 +36,11 @@ static dispatch_once_t coordinatorOnceToken;
 #pragma mark - Initialization
 
 // blocking, call off main thread
-- (instancetype)initWithAccountId:(NSString *)accountId guid:(NSString *)guid {
+- (instancetype)initWithAccountId:(NSString *)accountId
+                             guid:(NSString *)guid
+                  encryptionLevel:(CleverTapEncryptionLevel)encryptionLevel
+           previousEncryptionLevel:(CleverTapEncryptionLevel)previousEncryptionLevel
+                encryptionManager:(nonnull CTEncryptionManager *)encryptionManager {
     
     if (self = [super init]) {
         // Initialize shared coordinator if needed
@@ -44,6 +51,9 @@ static dispatch_once_t coordinatorOnceToken;
         if (_isInitialized) {
             _accountId = [accountId copy];
             _guid = [guid copy];
+            _encryptionLevel = encryptionLevel;
+            _previousEncryptionLevel = previousEncryptionLevel;
+            _encryptionManager = encryptionManager;
             
             NSString *userIdentifier = [NSString stringWithFormat:@"%@:%@", accountId, guid];
             _userIdentifier = userIdentifier;
@@ -71,7 +81,7 @@ static dispatch_once_t coordinatorOnceToken;
                     @"accountId": accountId,
                     @"guid": guid,
                     @"identifier": userIdentifier
-                } forContext:strongSelf.context];
+                } forContext:strongSelf.context encryptionManager:encryptionManager];
                 
                 [strongSelf _save];
             }];
@@ -146,7 +156,11 @@ static dispatch_once_t coordinatorOnceToken;
         if (!strongSelf) return;
         
         CleverTapLogStaticInternal(@"%@: updating messages: %@", strongSelf.user, messages);
-        BOOL haveUpdates = [strongSelf.user updateMessages:messages
+        
+        // Pre-process messages for encryption if needed
+        NSArray<NSDictionary*> *processedMessages = [strongSelf processMessagesForEncryption:messages];
+        
+        BOOL haveUpdates = [strongSelf.user updateMessages:processedMessages
                                                  forContext:strongSelf.context];
         
         if (haveUpdates) {
@@ -154,6 +168,38 @@ static dispatch_once_t coordinatorOnceToken;
             [strongSelf _notifyUpdate];
         }
     }];
+}
+
+- (NSArray<NSDictionary*> *)processMessagesForEncryption:(NSArray<NSDictionary*> *)messages {
+    // If not CleverTapEncryptionHigh, return messages unchanged
+    if (self.encryptionLevel != CleverTapEncryptionHigh || !self.encryptionManager) {
+        return messages;
+    }
+    
+    NSMutableArray *processedMessages = [NSMutableArray arrayWithCapacity:messages.count];
+    
+    for (NSDictionary *message in messages) {
+        // Encrypt the message dictionary and create a wrapper
+        NSString *encryptedJSON = [self.encryptionManager encryptObject:message];
+        if (encryptedJSON) {
+            // Create a new message dictionary with encrypted JSON
+            NSMutableDictionary *processedMessage = [message mutableCopy];
+            
+            // Replace the original message data with encrypted version
+            // but keep the _id and other lookup fields unencrypted for CoreData queries
+            processedMessage[@"_ct_encrypted_payload"] = encryptedJSON;
+            processedMessage[@"_ct_is_encrypted"] = @YES;
+            
+            CleverTapLogStaticInternal(@"Pre-encrypted message for ID: %@", message[@"_id"]);
+            [processedMessages addObject:processedMessage];
+        } else {
+            // If encryption fails, store unencrypted
+            CleverTapLogStaticDebug(@"Failed to encrypt message ID: %@, storing unencrypted", message[@"_id"]);
+            [processedMessages addObject:message];
+        }
+    }
+    
+    return [processedMessages copy];
 }
 
 - (void)deleteMessageWithId:(NSString *)messageId {
@@ -368,6 +414,15 @@ static dispatch_once_t coordinatorOnceToken;
 
 // Always call from inside context performBlock
 - (BOOL)_save {
+    // Handle encryption level transitions for existing messages
+    if (self.encryptionLevel != self.previousEncryptionLevel && [self.user.messages count] > 0) {
+        [self migrateMessagesEncryption];
+        
+        // Update previousEncryptionLevel to prevent repeated migrations
+        self.previousEncryptionLevel = self.encryptionLevel;
+        CleverTapLogStaticDebug(@"Migration completed, updated previousEncryptionLevel to %d", (int)self.encryptionLevel);
+    }
+    
     if (!self.context.hasChanges) {
         return YES;
     }
@@ -381,6 +436,56 @@ static dispatch_once_t coordinatorOnceToken;
     }
     
     return success;
+}
+
+- (void)migrateMessagesEncryption {
+    CleverTapLogStaticDebug(@"Migrating inbox messages encryption from level %d to %d",
+                              (int)self.previousEncryptionLevel, (int)self.encryptionLevel);
+    
+    for (CTMessageMO *msg in self.user.messages) {
+        [self migrateMessageEncryption:msg
+                           fromLevel:self.previousEncryptionLevel
+                             toLevel:self.encryptionLevel];
+    }
+}
+
+- (void)migrateMessageEncryption:(CTMessageMO *)msg
+                       fromLevel:(CleverTapEncryptionLevel)fromLevel
+                         toLevel:(CleverTapEncryptionLevel)toLevel {
+    
+    // Scenario 1: None/Medium → High (need to encrypt json)
+    if ((fromLevel == CleverTapEncryptionNone || fromLevel == CleverTapEncryptionMedium) &&
+        toLevel == CleverTapEncryptionHigh) {
+        
+        if (msg.json && ![self isJSONPropertyEncrypted:msg.json]) {
+            NSString *encryptedJSON = [self.encryptionManager encryptObject:msg.json];
+            if (encryptedJSON) {
+                msg.json = encryptedJSON;
+                CleverTapLogStaticDebug(@"Encrypted inbox message json for message ID: %@", msg.id);
+            }
+        }
+    }
+    
+    // Scenario 2: High → None/Medium (need to decrypt json)
+    else if (fromLevel == CleverTapEncryptionHigh &&
+             (toLevel == CleverTapEncryptionNone || toLevel == CleverTapEncryptionMedium)) {
+        
+        if (msg.json && [self isJSONPropertyEncrypted:msg.json]) {
+            id decryptedJSON = [self.encryptionManager decryptObject:(NSString *)msg.json];
+            if (decryptedJSON) {
+                msg.json = decryptedJSON;
+                CleverTapLogStaticDebug(@"Decrypted inbox message json for message ID: %@", msg.id);
+            }
+        }
+    }
+}
+
+- (BOOL)isJSONPropertyEncrypted:(id)jsonProperty {
+    if ([jsonProperty isKindOfClass:[NSString class]]) {
+        NSString *jsonString = (NSString *)jsonProperty;
+        return [self.encryptionManager isTextAESGCMEncrypted:jsonString];
+    }
+    return NO;
 }
 
 #pragma mark - Delegate Notification

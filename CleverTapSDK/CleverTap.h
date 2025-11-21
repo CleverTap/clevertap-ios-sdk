@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+
 #if !TARGET_OS_TV
 #import <WatchConnectivity/WatchConnectivity.h>
 #endif
@@ -61,10 +62,26 @@ typedef NS_ENUM(int, CTSignedCallEvent) {
     SIGNED_CALL_END_EVENT
 };
 
+/**
+ The encryption level used by CleverTap to secure stored data.
+
+ Each level defines the extent of encryption applied to user and event data.
+
+ - `CleverTapEncryptionNone` (0): No encryption. Data is stored as plain text.
+ - `CleverTapEncryptionMedium` (1): Encrypts Personally Identifiable Information (PII) only (e.g., Email, Name, Identitiy).
+ - `CleverTapEncryptionHigh` (2): Encrypts both PII and non-PII data.
+ */
 typedef NS_ENUM(int, CleverTapEncryptionLevel) {
+    /// No encryption. Data is stored in plain text.
     CleverTapEncryptionNone = 0,
-    CleverTapEncryptionMedium = 1
+
+    /// Encrypts only PII (Personally Identifiable Information) data.
+    CleverTapEncryptionMedium = 1,
+
+    /// Encrypts all data, including non-PII data.
+    CleverTapEncryptionHigh = 2,
 };
+
 
 typedef void (^CleverTapFetchInAppsBlock)(BOOL success);
 
