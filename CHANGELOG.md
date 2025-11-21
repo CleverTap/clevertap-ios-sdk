@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.4.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.0) (November 20, 2025)
+### [Version 7.4.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.0) (November 21, 2025)
 #### Added
 - Adds support for previewing all types of InApps from the dashboard.
 - Extends the `discardInAppNotifications()` method to support an optional `dismissInAppIfVisible` parameter to control whether an active InApp notification should be immediately dismissed.
