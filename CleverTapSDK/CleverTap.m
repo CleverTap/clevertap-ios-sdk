@@ -2560,6 +2560,9 @@ static BOOL sharedInstanceErrorLogged;
                     if (!self.isUserSwitching) {
                         [[self variables] handleVariantsResponse:variantsResponse];
                     }
+                    else {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Variants will not be handled due to user switch", self);
+                    }
                 }
                 
                 // Handle events/profiles sync data
