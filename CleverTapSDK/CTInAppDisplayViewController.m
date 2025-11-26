@@ -273,36 +273,16 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     
-    [self initializeWindowOfClass:UIWindow.class animated:animated];
+    [self initializeWindowOfClass:UIWindow.class animated:NO];
     if (!self.window) {
         return;
     }
-    self.window.alpha = 0;
     self.window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     self.window.windowLevel = UIWindowLevelNormal;
     self.window.rootViewController = self;
     [self.window setHidden:NO];
-    
-    void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
-    };
-    
-    if (animated) {
-        CGRect windowFrame = self.window.frame;
-        CGRect transformWindowFrame = CGRectMake(0, -(windowFrame.size.height + windowFrame.origin.y),  [UIScreen mainScreen].bounds.size.width, windowFrame.size.height);
-        self.window.frame = transformWindowFrame;
-        
-        [UIView animateWithDuration:0.33 delay:0 usingSpringWithDamping:1.0 initialSpringVelocity:10 options:UIViewAnimationOptionTransitionFlipFromTop animations:^{
-            self.window.alpha = 1.0;
-            self.window.frame = windowFrame;
-        } completion:^(BOOL finished) {
-            completionBlock();
-        }];
-    } else {
-        self.window.alpha = 1.0;
-        completionBlock();
+    if (self.delegate) {
+        [self.delegate notificationDidShow:self.notification];
     }
 }
 

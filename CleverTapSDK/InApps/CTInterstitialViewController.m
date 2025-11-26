@@ -2,7 +2,6 @@
 #import "CTInterstitialViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CTUIUtils.h"
-#import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTAVPlayerViewController.h"
 #import <SDWebImage/UIImageView+WebCache.h>
@@ -22,7 +21,7 @@
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
 @property (nonatomic, strong) IBOutlet UIButton *firstButton;
 @property (nonatomic, strong) IBOutlet UIButton *secondButton;
-@property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
+@property (nonatomic, strong) IBOutlet UIButton *closeButton;
 @property (nonatomic, strong) CTAVPlayerViewController *playerController;
 
 @end
@@ -234,7 +233,7 @@
 #pragma mark - Public
 
 - (void)show:(BOOL)animated {
-    [self showFromWindow:animated];
+    [self showFromWindow:NO];
 }
 
 - (void)hide:(BOOL)animated {

@@ -131,7 +131,7 @@
 #pragma mark - Public
 
 - (void)show:(BOOL)animated {
-    [self showFromWindow:animated];
+    [self showFromWindow:NO];
 }
 
 - (void)hide:(BOOL)animated {

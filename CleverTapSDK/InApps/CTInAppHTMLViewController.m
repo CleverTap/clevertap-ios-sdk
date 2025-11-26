@@ -581,7 +581,7 @@ typedef enum {
 
 - (void)show:(BOOL)animated {
     if (!self.notification.html) return;
-    [self showFromWindow:animated];
+    [self showFromWindow:NO];
 }
 
 - (void)hide:(BOOL)animated {
