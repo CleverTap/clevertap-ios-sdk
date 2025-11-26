@@ -2548,10 +2548,17 @@ static BOOL sharedInstanceErrorLogged;
                     // Do not handle variables if the user is switching. Do not trigger fetch variables callback.
                     if (!self.isUserSwitching) {
                         [[self variables] handleVariablesResponse: jsonResp[CLTAP_PE_VARS_RESPONSE_KEY]];
-                        [[self variables] handleVariantsResponse:jsonResp[CLTAP_PE_VARIANTS_RESPONSE_KEY]];
                     } else {
                         // Log only if variables are received in the response and will not be handled.
                         CleverTapLogDebug(self.config.logLevel, @"%@: PE Variables will not be handled due to user switch", self);
+                    }
+                }
+                
+                // Handle Variants
+                NSArray *variantsResponse = jsonResp[CLTAP_PE_VARIANTS_RESPONSE_KEY];
+                if (variantsResponse) {
+                    if (!self.isUserSwitching) {
+                        [[self variables] handleVariantsResponse:variantsResponse];
                     }
                 }
                 
@@ -4652,7 +4659,7 @@ static BOOL sharedInstanceErrorLogged;
     CT_TRY
     NSArray *variants = [self.variables.varCache variants];
     if (variants) {
-        return variants;
+        return [variants copy];
     }
     CT_END_TRY
     return [NSArray array];
