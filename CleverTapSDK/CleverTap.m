@@ -1128,16 +1128,24 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_appEnteredForeground {
     if ([CTUIUtils runningInsideAppExtension]) return;
+    
+    // Check application state
+    UIApplication *application = [CTUIUtils getSharedApplication];
+    BOOL isActuallyInForeground = (application.applicationState == UIApplicationStateActive);
     [self.sessionManager updateSessionStateOnLaunch];
-    if (!self.isAppForeground) {
+    
+    // Only record app launched if app is transitioning to foreground and app is active
+    if (!self.isAppForeground && isActuallyInForeground) {
         [self recordAppLaunched:@"appEnteredForeground"];
         [self scheduleQueueFlush];
         CleverTapLogInternal(self.config.logLevel, @"%@: app is in foreground", self);
     }
-    self.isAppForeground = YES;
+    
+    // Set flag based on actual state
+    self.isAppForeground = isActuallyInForeground;
     
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
+    if (isActuallyInForeground && !_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
     }
 #endif
