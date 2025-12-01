@@ -74,7 +74,7 @@
 }
 
 - (void)handleVariantsResponse:(NSArray<NSDictionary<NSString *, id> *> *)variantsResponse {
-    if (variantsResponse && variantsResponse.count > 0) {
+    if (variantsResponse && variantsResponse.count >= 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Handle Variants Response with: %@", self, variantsResponse);
         [[self varCache] handleVariantsData:variantsResponse];
     }
