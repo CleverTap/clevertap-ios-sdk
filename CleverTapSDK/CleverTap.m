@@ -1197,6 +1197,7 @@ static BOOL sharedInstanceErrorLogged;
     
     // Load Vars from cache before App Launched
     [self.variables.varCache loadDiffs];
+    [self.variables.varCache loadVariants];
     
     self.sessionManager.appLaunchProcessed = YES;
     
@@ -2558,6 +2559,17 @@ static BOOL sharedInstanceErrorLogged;
                     } else {
                         // Log only if variables are received in the response and will not be handled.
                         CleverTapLogDebug(self.config.logLevel, @"%@: PE Variables will not be handled due to user switch", self);
+                    }
+                }
+                
+                // Handle Variants
+                NSArray *variantsResponse = jsonResp[CLTAP_PE_VARIANTS_RESPONSE_KEY];
+                if (variantsResponse) {
+                    if (!self.isUserSwitching) {
+                        [[self variables] handleVariantsResponse:variantsResponse];
+                    }
+                    else {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Variants will not be handled due to user switch", self);
                     }
                 }
                 
@@ -4651,6 +4663,17 @@ static BOOL sharedInstanceErrorLogged;
 
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name {
     return [[self.variables varCache] getMergedValue:name];
+}
+
+- (NSArray<NSDictionary<NSString *, id> *> *)variants
+{
+    CT_TRY
+    NSArray *variants = [self.variables.varCache variants];
+    if (variants) {
+        return [variants copy];
+    }
+    CT_END_TRY
+    return [NSArray array];
 }
 
 - (void)onVariablesChangedAndNoDownloadsPending:(CleverTapVariablesChangedBlock _Nonnull )block {
