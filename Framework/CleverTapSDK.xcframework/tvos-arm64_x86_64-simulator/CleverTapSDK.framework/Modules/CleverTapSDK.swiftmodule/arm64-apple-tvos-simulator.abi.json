@@ -1,0 +1,906 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "CleverTapSDK",
+    "printedName": "CleverTapSDK",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "CleverTapSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "CryptoKit",
+        "printedName": "CryptoKit",
+        "declKind": "Import",
+        "moduleName": "CleverTapSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Security",
+        "printedName": "Security",
+        "declKind": "Import",
+        "moduleName": "CleverTapSDK"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "AESGCMCrypt",
+        "printedName": "AESGCMCrypt",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(keychainTag:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AESGCMCrypt",
+                "printedName": "CleverTapSDK.AESGCMCrypt",
+                "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt(im)initWithKeychainTag:",
+            "mangledName": "$s12CleverTapSDK11AESGCMCryptC11keychainTagACSS_tcfc",
+            "moduleName": "CleverTapSDK",
+            "objc_name": "initWithKeychainTag:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "encryptString",
+            "printedName": "encryptString(_:error:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AutoreleasingUnsafeMutablePointer",
+                    "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ],
+                    "usr": "s:SA"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt(im)encryptString:error:",
+            "mangledName": "$s12CleverTapSDK11AESGCMCryptC13encryptString_5errorSSSgSS_SAySo7NSErrorCSgGSgtF",
+            "moduleName": "CleverTapSDK",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "encryptData",
+            "printedName": "encryptData(_:error:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AutoreleasingUnsafeMutablePointer",
+                    "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ],
+                    "usr": "s:SA"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt(im)encryptData:error:",
+            "mangledName": "$s12CleverTapSDK11AESGCMCryptC11encryptData_5errorSSSg10Foundation0F0V_SAySo7NSErrorCSgGSgtF",
+            "moduleName": "CleverTapSDK",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "decryptString",
+            "printedName": "decryptString(_:error:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AutoreleasingUnsafeMutablePointer",
+                    "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ],
+                    "usr": "s:SA"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt(im)decryptString:error:",
+            "mangledName": "$s12CleverTapSDK11AESGCMCryptC13decryptString_5errorSSSgSS_SAySo7NSErrorCSgGSgtF",
+            "moduleName": "CleverTapSDK",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "decryptData",
+            "printedName": "decryptData(_:error:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Foundation.Data?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Data",
+                    "printedName": "Foundation.Data",
+                    "usr": "s:10Foundation4DataV"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AutoreleasingUnsafeMutablePointer",
+                    "printedName": "Swift.AutoreleasingUnsafeMutablePointer<Foundation.NSError?>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ],
+                    "usr": "s:SA"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt(im)decryptData:error:",
+            "mangledName": "$s12CleverTapSDK11AESGCMCryptC11decryptData_5error10Foundation0F0VSgSS_SAySo7NSErrorCSgGSgtF",
+            "moduleName": "CleverTapSDK",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AESGCMCrypt",
+                "printedName": "CleverTapSDK.AESGCMCrypt",
+                "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt(im)init",
+            "mangledName": "$s12CleverTapSDK11AESGCMCryptCACycfc",
+            "moduleName": "CleverTapSDK",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@CleverTapSDK@objc(cs)CTAESGCMCrypt",
+        "mangledName": "$s12CleverTapSDK11AESGCMCryptC",
+        "moduleName": "CleverTapSDK",
+        "intro_iOS": "13.0",
+        "intro_tvOS": "13.0",
+        "objc_name": "CTAESGCMCrypt",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC",
+          "Available",
+          "Available"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "CleverTapSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "CryptoKit",
+        "printedName": "CryptoKit",
+        "declKind": "Import",
+        "moduleName": "CleverTapSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Security",
+        "printedName": "Security",
+        "declKind": "Import",
+        "moduleName": "CleverTapSDK"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "NetworkEncryptionManager",
+        "printedName": "NetworkEncryptionManager",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "shared",
+            "printedName": "shared",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NetworkEncryptionManager",
+                "printedName": "CleverTapSDK.NetworkEncryptionManager",
+                "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cpy)shared",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC6sharedACvpZ",
+            "moduleName": "CleverTapSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "NetworkEncryptionManager",
+                    "printedName": "CleverTapSDK.NetworkEncryptionManager",
+                    "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cm)shared",
+                "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC6sharedACvgZ",
+                "moduleName": "CleverTapSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "ITP",
+            "printedName": "ITP",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cpy)ITP",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC3ITPSSvpZ",
+            "moduleName": "CleverTapSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cm)ITP",
+                "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC3ITPSSvgZ",
+                "moduleName": "CleverTapSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "ITK",
+            "printedName": "ITK",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cpy)ITK",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC3ITKSSvpZ",
+            "moduleName": "CleverTapSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cm)ITK",
+                "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC3ITKSSvgZ",
+                "moduleName": "CleverTapSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "ITV",
+            "printedName": "ITV",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cpy)ITV",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC3ITVSSvpZ",
+            "moduleName": "CleverTapSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(cm)ITV",
+                "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC3ITVSSvgZ",
+                "moduleName": "CleverTapSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "getSessionKeyBase64",
+            "printedName": "getSessionKeyBase64()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(im)getSessionKeyBase64",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC19getSessionKeyBase64SSSgyF",
+            "moduleName": "CleverTapSDK",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "encrypt",
+            "printedName": "encrypt(object:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "ProtocolComposition",
+                "printedName": "Any"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(im)encryptWithObject:",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC7encrypt6objectSDySSypGyp_tF",
+            "moduleName": "CleverTapSDK",
+            "objc_name": "encryptWithObject:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "decrypt",
+            "printedName": "decrypt(responseData:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager(im)decryptWithResponseData:",
+            "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC7decrypt12responseData10Foundation0I0VAH_tF",
+            "moduleName": "CleverTapSDK",
+            "objc_name": "decryptWithResponseData:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@CleverTapSDK@objc(cs)NetworkEncryptionManager",
+        "mangledName": "$s12CleverTapSDK24NetworkEncryptionManagerC",
+        "moduleName": "CleverTapSDK",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "hasMissingDesignatedInitializers": true,
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/akash.malhotra\/clevertap-ios-sdk\/CleverTapSDK\/Encryption\/CTAESGCMCrypt.swift",
+      "kind": "StringLiteral",
+      "offset": 240,
+      "length": 6,
+      "value": "\"<ct<\""
+    },
+    {
+      "filePath": "\/Users\/akash.malhotra\/clevertap-ios-sdk\/CleverTapSDK\/Encryption\/CTAESGCMCrypt.swift",
+      "kind": "StringLiteral",
+      "offset": 280,
+      "length": 6,
+      "value": "\">ct>\""
+    },
+    {
+      "filePath": "\/Users\/akash.malhotra\/clevertap-ios-sdk\/CleverTapSDK\/Encryption\/NetworkEncryptionManager.swift",
+      "kind": "StringLiteral",
+      "offset": 243,
+      "length": 5,
+      "value": "\"itp\""
+    },
+    {
+      "filePath": "\/Users\/akash.malhotra\/clevertap-ios-sdk\/CleverTapSDK\/Encryption\/NetworkEncryptionManager.swift",
+      "kind": "StringLiteral",
+      "offset": 283,
+      "length": 5,
+      "value": "\"itk\""
+    },
+    {
+      "filePath": "\/Users\/akash.malhotra\/clevertap-ios-sdk\/CleverTapSDK\/Encryption\/NetworkEncryptionManager.swift",
+      "kind": "StringLiteral",
+      "offset": 323,
+      "length": 5,
+      "value": "\"itv\""
+    },
+    {
+      "filePath": "\/Users\/akash.malhotra\/clevertap-ios-sdk\/CleverTapSDK\/Encryption\/NetworkEncryptionManager.swift",
+      "kind": "StringLiteral",
+      "offset": 413,
+      "length": 49,
+      "value": "\"com.clevertap.NetworkEncryptionManager.keyqueue\""
+    }
+  ]
+}

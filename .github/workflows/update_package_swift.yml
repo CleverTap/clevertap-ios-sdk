@@ -64,15 +64,37 @@ jobs:
             FRAMEWORK_SEARCH_PATHS="./Vendors/simulator"
           echo "🖥️ iOS Simulator framework built successfully"
 
+      - name: Build tvOS Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK_TVOS \
+            -sdk appletvos \
+            -archivePath ./build/CleverTapSDK-tvOS.xcarchive \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          echo "📺 tvOS framework built successfully"
+
+      - name: Build tvOS Simulator Framework
+        run: |
+          xcodebuild archive \
+            -scheme CleverTapSDK_TVOS \
+            -sdk appletvsimulator \
+            -archivePath ./build/CleverTapSDK-tvOSSimulator.xcarchive \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          echo "📺 tvOS Simulator framework built successfully"
+
       - name: Create XCFramework
         run: |
           xcodebuild -create-xcframework \
             -framework ./build/CleverTapSDK-iOS.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
             -framework ./build/CleverTapSDK-iOSSimulator.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -framework ./build/CleverTapSDK-tvOS.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
+            -framework ./build/CleverTapSDK-tvOSSimulator.xcarchive/Products/Library/Frameworks/CleverTapSDK.framework \
             -output CleverTapSDK.xcframework
 
           zip -r CleverTapSDK.xcframework.zip CleverTapSDK.xcframework
-          echo "📦 XCFramework created and zipped successfully"
+          echo "📦 XCFramework created and zipped successfully (iOS + tvOS)"
 
       - name: Compute Checksum
         id: checksum
