@@ -242,8 +242,61 @@
     }
 }
 
+- (void)loadVariants {
+    @try {
+        NSString *fileName = [self dataArchiveVariantsFileName];
+        NSString *filePath = [CTPreferences filePathfromFileName:fileName];
+        NSData *variantsData = [NSData dataWithContentsOfFile:filePath];
+        
+        if (!variantsData) {
+            @synchronized (self) {
+                self.variants = @[];
+            }
+            CleverTapLogDebug(self.config.logLevel, @"%@: No cached variants found", self);
+            return;
+        }
+        
+        NSKeyedUnarchiver *unarchiver;
+        if (@available(iOS 12.0, tvOS 11.0, *)) {
+            NSError *error = nil;
+            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:variantsData error:&error];
+            if (error != nil) {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Error loading variants: %@", self, error.localizedDescription);
+                @synchronized (self) {
+                    self.variants = @[];
+                }
+                return;
+            }
+            unarchiver.requiresSecureCoding = NO;
+        } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:variantsData];
+#pragma clang diagnostic pop
+        }
+        
+        NSArray *loadedVariants = (NSArray *)[unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIANTS_KEY];
+        
+        @synchronized (self) {
+            self.variants = loadedVariants ?: @[];
+        }
+        
+        CleverTapLogDebug(self.config.logLevel, @"%@: Loaded %lu variants from cache", self, (unsigned long)[self.variants count]);
+        
+    } @catch (NSException *exception) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Exception loading variants: %@", self, exception.debugDescription);
+        @synchronized (self) {
+            self.variants = @[];
+        }
+    }
+}
+
 - (NSString*)dataArchiveFileName {
     return [NSString stringWithFormat:@"clevertap-%@-%@-pe-vars.plist", _config.accountId, _deviceInfo.deviceId];
+}
+
+- (NSString*)dataArchiveVariantsFileName {
+    return [NSString stringWithFormat:@"clevertap-%@-%@-pe-variants.plist", _config.accountId, _deviceInfo.deviceId];
 }
 
 - (void)applyVariableDiffs:(NSDictionary *)diffs_ {
@@ -291,9 +344,39 @@
     }
 }
 
+- (void)handleVariantsData:(NSArray<NSDictionary<NSString *, id> *> *)variantsData {
+    @synchronized (self) {
+        self.variants = variantsData;
+    }
+    
+    NSMutableData *diffsData = [[NSMutableData alloc] init];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:diffsData];
+#pragma clang diagnostic pop
+    [archiver encodeObject:variantsData forKey:CLEVERTAP_DEFAULTS_VARIANTS_KEY];
+    [archiver finishEncoding];
+    
+    NSError *writeError = nil;
+    NSString *variantsFileName = [self dataArchiveVariantsFileName];
+    NSString *filePath = [CTPreferences filePathfromFileName:variantsFileName];
+    NSDataWritingOptions fileProtectionOption = _config.enableFileProtection ?
+    NSDataWritingFileProtectionComplete : NSDataWritingAtomic;
+    [diffsData writeToFile:filePath options:fileProtectionOption error:&writeError];
+    if (writeError) {
+        CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
+    }
+}
+
 - (void)clearUserContent {
     // Disable callbacks and wait until fetch is finished
     [self setHasVarsRequestCompleted:NO];
+    
+    // Clear variants for the old user
+    @synchronized (self) {
+        self.variants = @[];
+    }
+    
     // Clear Var state to allow callback invocation when server values are downloaded
     [self.vars enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         CTVar *var = (CTVar *)obj;

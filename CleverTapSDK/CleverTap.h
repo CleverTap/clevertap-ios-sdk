@@ -1531,6 +1531,19 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
 
+/**
+ * Returns experiment variant information for the current user.
+ *
+ * Each dictionary contains details about an assigned A/B test variant.
+ * Common keys include:
+ *   - "name": Variant name
+ *   - "abTestId": Experiment identifier
+ *   - "abTestName": Experiment name
+ *
+ * @return Array of variant dictionaries with string keys. Returns empty array if no variants assigned.
+ */
+- (NSArray<NSDictionary<NSString *, id> *> * _Nonnull)variants;
+
 /*!
  @method
  
