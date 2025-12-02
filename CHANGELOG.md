@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.4.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.1) (December 02, 2025)
+#### Added
+- Adds a public method called `variants` to fetch A/B experiment variants for the user.
+
+#### Fixed
+- Fixes a bug where `App Launched` events were being recorded when the app was woken up by silent push notifications.
+- Fixes a bug where HTML inapp previews weren't rendering gradient colors.
+
 ### [Version 7.4.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.0) (November 21, 2025)
 #### Added
 - Adds support for previewing all types of InApps from the dashboard.
