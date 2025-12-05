@@ -20,14 +20,15 @@ typedef NS_ENUM(int, CTValidatorContext) {
 
 + (CTValidationResult *)cleanMultiValuePropertyArray:(NSArray *)multi forKey:(NSString*)key;
 
-+ (CTValidationResult *)cleanObjectValue:(NSObject *)o context:(CTValidatorContext)context;
++ (CTValidationResult *)cleanObjectValue:(NSObject *)o context:(CTValidatorContext)context depth:(int)depth;
 
 + (BOOL)isRestrictedEventName:(NSString *)name;
 
-+ (BOOL)isDiscaredEventName:(NSString *)name;
++ (BOOL)isDiscardedEventName:(NSString *)name;
 
 + (void)setDiscardedEvents:(NSArray *)events;
 
 + (BOOL)isValidCleverTapId:(NSString *)cleverTapID;
 
++ (CTValidationResult *)validateArrayAndObjectLimitsInDictionary:(NSDictionary *)dict;
 @end
