@@ -1,19 +1,59 @@
 #import <Foundation/Foundation.h>
 
+#import <Foundation/Foundation.h>
+
+typedef NS_ENUM(NSInteger, CTValidationOutcome) {
+    CTValidationOutcomeSuccess = 0,
+    CTValidationOutcomeWarning = 1,
+    CTValidationOutcomeDrop = 2
+};
+
+typedef NS_ENUM(NSInteger, CTDropReason) {
+    CTDropReasonNullEventName,
+    CTDropReasonRestrictedEventName,
+    CTDropReasonDiscardedEventName,
+    CTDropReasonEmptyKey,
+    CTDropReasonRestrictedMultiValueKey
+};
+
 @interface CTValidationResult : NSObject
 
-- (NSString *)errorDesc;
+@property (nonatomic, assign) int errorCode;
+@property (nonatomic, strong) NSString *errorDesc;
+@property (nonatomic, strong) NSObject *object;
 
-- (NSObject *)object;
-
-- (int)errorCode;
+@property (nonatomic, assign) CTValidationOutcome outcome;
+@property (nonatomic, assign) CTDropReason dropReason;
+@property (nonatomic, strong, nullable) id cleanedData;
+@property (nonatomic, strong, nullable) NSArray<CTValidationResult *> *subResults;
 
 - (void)setErrorDesc:(NSString *)errorDsc;
-
 - (void)setObject:(NSObject *)obj;
-
 - (void)setErrorCode:(int)errorCod;
 
-+ (CTValidationResult *) resultWithErrorCode:(int) code andMessage:(NSString*) message;
+// Legacy compatibility
++ (CTValidationResult *)resultWithErrorCode:(int)code andMessage:(NSString *)message;
+
+// Basic creation methods
++ (CTValidationResult *)success;
++ (CTValidationResult *)successWithData:(id)data;
++ (CTValidationResult *)warningWithCode:(int)code
+                                message:(NSString *)message
+                                   data:(nullable id)data;
++ (CTValidationResult *)dropWithCode:(int)code
+                             message:(NSString *)message
+                              reason:(CTDropReason)reason;
+
+// Sub-results methods for nested validation
++ (CTValidationResult *)successWithData:(id)data
+                             subResults:(nullable NSArray<CTValidationResult *> *)subResults;
+
++ (CTValidationResult *)warningWithSubResults:(NSArray<CTValidationResult *> *)subResults
+                                         data:(nullable id)data;
+
++ (CTValidationResult *)dropWithSubResults:(NSArray<CTValidationResult *> *)subResults
+                                    reason:(CTDropReason)reason;
+
+- (BOOL)shouldDrop;
 
 @end

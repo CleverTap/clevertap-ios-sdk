@@ -6,68 +6,118 @@
 #import "CTKnownProfileFields.h"
 #import "CTLocalDataStore.h"
 #import "CTUtils.h"
+#import "CTMultiValuePropertyKeyValidator.h"
+#import "CTEventDataValidator.h"
 
 @implementation CTProfileBuilder
+static CTPropertyKeyValidator *_profileKeyValidator;
+static CTEventDataValidator *_profileDataValidator;
+static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
 
-+ (void)build:(NSDictionary *)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
++ (void)initialize {
+    if (self == [CTProfileBuilder class]) {
+        // Initialize validators with default config
+        CTValidationConfig *config = [CTValidationConfig defaultConfig];
+        _profileKeyValidator = [[CTPropertyKeyValidator alloc] initWithConfig:config];
+        _profileDataValidator = [[CTEventDataValidator alloc] initWithConfig:config];
+        _multiValueKeyValidator = [[CTMultiValuePropertyKeyValidator alloc] initWithConfig:config];
+    }
+}
+
++ (void)build1:(NSDictionary *)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
     NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-    
+    CTValidationConfig *validationConfig = [CTValidationConfig defaultConfig];
+    CTEventDataValidator *eventDataValidator = [[CTEventDataValidator alloc] initWithConfig: validationConfig];
+
     if (profile == nil || profile.count == 0) {
         completion(nil, nil, errors);
         return;
     }
+    
     @try {
+        
+        CTValidationResult *dataResult = [eventDataValidator validateEventData:profile];
+        
+        // Get cleaned properties
+        NSDictionary *cleanedProperties = dataResult.cleanedData;
+        
+        // Log all warnings
+        if (dataResult.outcome == CTValidationOutcomeWarning && dataResult.subResults.count > 0) {
+            for (CTValidationResult *warning in dataResult.subResults) {
+                CleverTapLogStaticDebug(@"%@: Property validation - %@", self, warning.errorDesc);
+            }
+            [errors addObjectsFromArray:dataResult.subResults];
+        }
+        
+        if (dataResult.shouldDrop) {
+            // Log error and push to stack
+            CleverTapLogStaticDebug(@"%@: Push profile dropped - %@", self, dataResult.errorDesc);
+            [errors addObject:dataResult];
+            completion(nil, nil, errors);
+            return;
+        }
+        
         NSMutableDictionary *customFields = [NSMutableDictionary new];
         NSMutableDictionary *systemFields = [NSMutableDictionary new];
-        
-        CTValidationResult *vr;
-        NSArray *profileAllKeys = [profile allKeys];
-        for (int i = 0; i < [profileAllKeys count]; i++) {
-            NSString *key = profileAllKeys[(NSUInteger) i];
-            id value = profile[key];
-            
-            vr = [CTValidator cleanObjectKey:key];
-            if ([vr object] == nil || [((NSString *) [vr object]) isEqualToString:@""]) {
-                [errors addObject:[CTValidationResult resultWithErrorCode:512 andMessage:[NSString stringWithFormat:@"Invalid user profile key: %@", key]]];
-                CleverTapLogStaticDebug(@"Invalid user profile key: %@", key);
-                continue;
-            }
-            key = (NSString *) [vr object];
-            if ([vr errorCode] != 0) {
-                [errors addObject:vr];
-                if ([vr errorDesc] != nil) {
-                    CleverTapLogStaticDebug(@"%@", [vr errorDesc]);
-                }
-            }
-            BOOL accepted = false;
-            @try {
-                vr = [CTValidator cleanObjectValue:value context:CTValidatorContextProfile];
-                accepted = [vr object] != nil;
-            } @catch (NSException *e) {
-                accepted = false;
-                vr = nil;
-            }
-            if (!accepted) {
-                if (vr != nil && [vr errorDesc] != nil) {
-                    CleverTapLogStaticDebug(@"%@", [vr errorDesc]);
-                }
-                NSString *errString = [NSString stringWithFormat:@"Invalid value: %@ for user profile field: %@", value, key];
-                CTValidationResult *error = [[CTValidationResult alloc] init];
-                [error setErrorCode:512];
-                [error setErrorDesc:errString];
-                [errors addObject:error];
-                CleverTapLogStaticDebug(@"%@", errString);
-                continue;
-            }
-            value = [vr object];
-            // Check for an error
-            if ([vr errorCode] != 0) {
-                [errors addObject:vr];
-                if ([vr errorDesc] != nil) {
-                    CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
-                }
-            }
             // if a reserved key add to systemFields else add to customFields
+        NSArray *profileAllKeys = [cleanedProperties allKeys];
+        for (int i = 0; i < [cleanedProperties count]; i++) {
+            NSString *key = profileAllKeys[(NSUInteger) i];
+            id value = cleanedProperties[key];
+            
+            KnownField kf = [CTKnownProfileFields getKnownFieldIfPossibleForKey:key];
+            if (kf != UNKNOWN) {
+                systemFields[key] = value;
+            } else {
+                customFields[key] = value;
+            }
+        }
+        completion(customFields, systemFields, errors);
+    } @catch (NSException *e) {
+        CleverTapLogStaticInternal(@"%@: error building profile: %@", self, e.debugDescription);
+        completion(nil, nil, errors);
+    }
+}
+
++ (void)build:(NSDictionary *)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
+    NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
+    CTValidationConfig *validationConfig = [CTValidationConfig defaultConfig];
+    CTEventDataValidator *eventDataValidator = [[CTEventDataValidator alloc] initWithConfig: validationConfig];
+
+    if (profile == nil || profile.count == 0) {
+        completion(nil, nil, errors);
+        return;
+    }
+    
+    @try {
+        CTValidationResult *dataResult = [eventDataValidator validateEventData:profile];
+        // Get cleaned properties
+        NSDictionary *cleanedProperties = dataResult.cleanedData;
+        
+        // Log all warnings
+        if (dataResult.outcome == CTValidationOutcomeWarning && dataResult.subResults.count > 0) {
+            for (CTValidationResult *warning in dataResult.subResults) {
+                CleverTapLogStaticDebug(@"%@: Property validation - %@", self, warning.errorDesc);
+            }
+            [errors addObjectsFromArray:dataResult.subResults];
+        }
+        
+        if (dataResult.shouldDrop) {
+            // Log error and push to stack
+            CleverTapLogStaticDebug(@"%@: Push profile dropped - %@", self, dataResult.errorDesc);
+            [errors addObject:dataResult];
+            completion(nil, nil, errors);
+            return;
+        }
+        
+        NSMutableDictionary *customFields = [NSMutableDictionary new];
+        NSMutableDictionary *systemFields = [NSMutableDictionary new];
+            // if a reserved key add to systemFields else add to customFields
+        NSArray *profileAllKeys = [cleanedProperties allKeys];
+        for (int i = 0; i < [cleanedProperties count]; i++) {
+            NSString *key = profileAllKeys[(NSUInteger) i];
+            id value = cleanedProperties[key];
+            
             KnownField kf = [CTKnownProfileFields getKnownFieldIfPossibleForKey:key];
             if (kf != UNKNOWN) {
                 systemFields[key] = value;
@@ -84,22 +134,53 @@
 
 + (void)buildRemoveValueForKey:(NSString *)key completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {
     NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
-    CTValidationResult *vr;
-    vr = [CTValidator cleanObjectKey:key];
-    if ([vr object] == nil || [((NSString *) [vr object]) isEqualToString:@""]) {
-        [errors addObject:[CTValidationResult resultWithErrorCode:512 andMessage:[NSString stringWithFormat:@"Invalid profile value for %@", key]]];
-        CleverTapLogStaticDebug(@"Invalid user profile key: %@", key);
+    
+    CTPropertyKeyValidator *keyValidator = [[CTPropertyKeyValidator alloc] initWithConfig:[CTValidationConfig defaultConfig]];
+    
+    CTValidationResult *keyValidationResult = [keyValidator validateKey:key];
+    
+    if (keyValidationResult.shouldDrop) {
+        // Key is restricted or invalid - add all errors and abort
+        if (keyValidationResult.subResults) {
+            [errors addObjectsFromArray:keyValidationResult.subResults];
+        } else {
+            [errors addObject:keyValidationResult];
+        }
+        
+        // Log the drop reason
+        if (keyValidationResult.dropReason == CTDropReasonRestrictedMultiValueKey) {
+            CleverTapLogStaticDebug(@"%@: Property key '%@' is restricted. %@",
+                                    self, key, keyValidationResult.errorDesc);
+        } else {
+            CleverTapLogStaticDebug(@"%@: Property key validation failed: %@",
+                                    self, keyValidationResult.errorDesc);
+        }
+        
         completion(nil, nil, errors);
         return;
     }
-    key = (NSString *) [vr object];
-    if ([vr errorCode] != 0) {
-        [errors addObject:vr];
-        if ([vr errorDesc] != nil) {
-            CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
+    
+    if (keyValidationResult.outcome == CTValidationOutcomeWarning) {
+        if (keyValidationResult.subResults) {
+            [errors addObjectsFromArray:keyValidationResult.subResults];
+        } else if (keyValidationResult.errorCode != 0) {
+            [errors addObject:keyValidationResult];
+        }
+        
+        // Log warnings
+        for (CTValidationResult *warning in keyValidationResult.subResults) {
+            CleverTapLogStaticDebug(@"%@: Property key warning [%d]: %@. Cleaned",
+                                    self, warning.errorCode, warning.errorDesc);
         }
     }
-    completion(@{key : @{kCLTAP_COMMAND_DELETE : @(YES)}}, nil, errors);
+    
+    NSString *cleanedKey = (NSString *)keyValidationResult.cleanedData;
+    if (!cleanedKey || [cleanedKey isEqualToString:@""]) {
+        [errors addObject:[self _generateEmptyMultiValueErrorForKey:key]];
+        completion(nil, nil, errors);
+        return;
+    }
+    completion(@{cleanedKey : @{kCLTAP_COMMAND_DELETE : @(YES)}}, nil, errors);
 }
 
 
@@ -175,30 +256,68 @@
     }
     values = _allStrings;
     @try {
-        CTValidationResult *vr;
-        // validate key
-        vr = [CTValidator cleanMultiValuePropertyKey:key];
-        // Check for an error
-        if ([vr errorCode] != 0) {
-            [errors addObject:vr];
-            if ([vr errorDesc] != nil) {
-                CleverTapLogStaticDebug(@"%@: %@", self, [vr errorDesc]);
+        CTMultiValuePropertyKeyValidator *multiValueKeyValidator = [[CTMultiValuePropertyKeyValidator alloc] initWithConfig:[CTValidationConfig defaultConfig]];
+        
+        CTValidationResult *keyValidationResult = [multiValueKeyValidator validateKey:key];
+        
+        if (keyValidationResult.shouldDrop) {
+            // Key is restricted or invalid - add all errors and abort
+            if (keyValidationResult.subResults) {
+                [errors addObjectsFromArray:keyValidationResult.subResults];
+            } else {
+                [errors addObject:keyValidationResult];
+            }
+            
+            // Log the drop reason
+            if (keyValidationResult.dropReason == CTDropReasonRestrictedMultiValueKey) {
+                CleverTapLogStaticDebug(@"%@: Multi-value key '%@' is restricted. %@",
+                                        self, key, keyValidationResult.errorDesc);
+            } else {
+                CleverTapLogStaticDebug(@"%@: Multi-value key validation failed: %@",
+                                        self, keyValidationResult.errorDesc);
+            }
+            
+            completion(nil, nil, errors);
+            return;
+        }
+        
+        if (keyValidationResult.outcome == CTValidationOutcomeWarning) {
+            if (keyValidationResult.subResults) {
+                [errors addObjectsFromArray:keyValidationResult.subResults];
+            } else if (keyValidationResult.errorCode != 0) {
+                [errors addObject:keyValidationResult];
+            }
+            
+            // Log warnings
+            for (CTValidationResult *warning in keyValidationResult.subResults) {
+                CleverTapLogStaticDebug(@"%@: Multi-value key warning [%d]: %@. Cleaned",
+                                        self, warning.errorCode, warning.errorDesc);
             }
         }
-        // if key is empty generate an error and return
-        if ([vr object] == nil || [(NSString *) [vr object] isEqualToString:@""]) {
+        
+        NSString *cleanedKey = (NSString *)keyValidationResult.cleanedData;
+        if (!cleanedKey || [cleanedKey isEqualToString:@""]) {
             [errors addObject:[self _generateEmptyMultiValueErrorForKey:key]];
             completion(nil, nil, errors);
             return;
         }
-        key = (NSString *) [vr object];
-        NSArray *multiValue = [self _constructLocalMultiValueWithOriginalValues:values forKey:key usingCommand:command localDataStore:dataStore];
+        
+        NSArray *multiValue = [self _constructLocalMultiValueWithOriginalValues:values
+                                                                         forKey:cleanedKey
+                                                                   usingCommand:command
+                                                                 localDataStore:dataStore];
+        
         if (!multiValue) {
-            [errors addObject:[self _generateEmptyMultiValueErrorForKey:key]];
+            [errors addObject:[self _generateEmptyMultiValueErrorForKey:cleanedKey]];
             completion(nil, nil, errors);
             return;
         }
-        [self _validateAndPushMultiValue:multiValue forKey:key withOriginalValues:values usingCommand:command completionHandler:completion];
+        
+        [self _validateAndPushMultiValue:multiValue
+                                  forKey:cleanedKey
+                      withOriginalValues:values
+                            usingCommand:command
+                       completionHandler:completion];
     } @catch (NSException *e) {
         CleverTapLogStaticInternal(@"%@: error in _handleMultiValues forKey: %@ Reason: %@", self, key, e.debugDescription);
         completion(nil, nil, errors);

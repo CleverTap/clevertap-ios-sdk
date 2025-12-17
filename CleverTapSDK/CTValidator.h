@@ -10,8 +10,6 @@ typedef NS_ENUM(int, CTValidatorContext) {
 
 @interface CTValidator : NSObject
 
-+ (CTValidationResult *)cleanEventName:(NSString *)name;
-
 + (CTValidationResult *)cleanObjectKey:(NSString *)name;
 
 + (CTValidationResult *)cleanMultiValuePropertyKey:(NSString *)name;
@@ -20,7 +18,7 @@ typedef NS_ENUM(int, CTValidatorContext) {
 
 + (CTValidationResult *)cleanMultiValuePropertyArray:(NSArray *)multi forKey:(NSString*)key;
 
-+ (CTValidationResult *)cleanObjectValue:(NSObject *)o context:(CTValidatorContext)context depth:(int)depth;
++ (CTValidationResult *)cleanObjectValue:(NSObject *)o context:(CTValidatorContext)context;
 
 + (BOOL)isRestrictedEventName:(NSString *)name;
 
@@ -30,5 +28,4 @@ typedef NS_ENUM(int, CTValidatorContext) {
 
 + (BOOL)isValidCleverTapId:(NSString *)cleverTapID;
 
-+ (CTValidationResult *)validateArrayAndObjectLimitsInDictionary:(NSDictionary *)dict;
 @end

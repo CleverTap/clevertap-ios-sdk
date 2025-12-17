@@ -8,10 +8,6 @@ static const int kMaxKeyChars = 120;
 static const int kMaxValueChars = 1024;
 static const int kMaxMultiValuePropertyArrayCount = 100;
 static const int kMaxMultiValuePropertyValueChars = 1024;
-static const int kMaxNestingDepth = 3;
-static const int kMaxArrayPropertiesPerLevel = 5;
-static const int kMaxObjectPropertiesPerLevel = 5;
-static const int kMaxPropertiesPerObject = 100;
 
 static NSArray *discardedEvents;
 
@@ -160,304 +156,68 @@ static NSArray *discardedEvents;
     return vr;
 }
 
-#pragma mark - Main Cleaning Method
-
-+ (CTValidationResult *)cleanObjectValue:(NSObject *)o
-                                 context:(CTValidatorContext)context
-                                   depth:(int)depth {
-    if (o == nil || [self isEmptyValue:o forKey:nil]) {
++ (CTValidationResult *)cleanObjectValue:(NSObject *)o context:(CTValidatorContext)context {
+    if (o == nil) {
         return nil;
     }
     CTValidationResult *vr = [[CTValidationResult alloc] init];
-    CTValidationResult *depthValidation = [self validateNestingDepth:depth];
-    if (depthValidation) {
-        return depthValidation;
-    }
+    // If it's any type of number, send it back
     if ([o isKindOfClass:[NSNumber class]]) {
         [vr setObject:o];
         return vr;
-    }
-    if ([o isKindOfClass:[NSDate class]]) {
+    } else if ([o isKindOfClass:[NSString class]]) {
+        NSString *value = (NSString *) o;
+        value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
+        NSArray *objectValueCharsNotAllowed = @[@"'", @"\"", @"\\"];
+        for (NSString *x in objectValueCharsNotAllowed)
+            value = [value stringByReplacingOccurrencesOfString:x withString:@""];
+        
+        value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (value.length > kMaxValueChars) {
+            value = [value substringToIndex:kMaxValueChars-1];
+            NSString *errStr = [NSString stringWithFormat:@"%@%@", value, [NSString stringWithFormat:@"... exceeds the limit of %d characters. Trimmed", kMaxValueChars]];
+            [vr setErrorDesc:errStr];
+            [vr setErrorCode:521];
+        }
+        
+        if (value) {
+            [vr setObject:value];
+        }
+        return vr;
+    } else if ([o isKindOfClass:[NSDate class]]) {
         NSString *date = [NSString stringWithFormat:@"%@%d",CLTAP_DATE_PREFIX, (int) ((NSDate *) o).timeIntervalSince1970];
         [vr setObject:date];
         return vr;
-    }
-    if ([o isKindOfClass:[NSString class]]) {
-        return [self cleanString:(NSString *)o];
-    }
-    if ([o isKindOfClass:[NSArray class]]) {
-        return [self cleanArray:(NSArray *)o context:context depth:depth];
-    }
-    if ([o isKindOfClass:[NSDictionary class]]) {
-        return [self cleanDictionary:(NSDictionary *)o context:context depth:depth];
-    }
-    return nil;
-}
-
-#pragma mark - Validation Helpers
-
-+ (BOOL)isEmptyValue:(id)value forKey:(NSString* _Nullable)key {
-    BOOL isEmpty = false;
-    if ([value isKindOfClass:[NSNull class]]) {
-        isEmpty = true;
-    }
-    if ([value isKindOfClass:[NSDictionary class]]) {
-        isEmpty = [(NSDictionary *)value count] == 0;
-    }
-    if ([value isKindOfClass:[NSArray class]]) {
-        isEmpty = [(NSArray *)value count] == 0;
-    }
-    if ([value isKindOfClass:[NSString class]]) {
-        NSString *trimmed = [(NSString *)value stringByTrimmingCharactersInSet:
-                             [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        isEmpty = trimmed.length == 0;
-    }
-    if (isEmpty && key) {
-        CleverTapLogStaticDebug(@"Event validation - Empty value found for key: %@", key);
-    }
-    return isEmpty;
-}
-
-+ (CTValidationResult *)validateNestingDepth:(int)depth {
-    if (depth > kMaxNestingDepth) {
-        CTValidationResult *vr = [[CTValidationResult alloc] init];
-        NSString *errStr = [NSString stringWithFormat:
-                            @"Maximum nesting depth exceeded %d levels",
-                            kMaxNestingDepth];
-        [vr setErrorDesc:errStr];
-        [vr setErrorCode:542];
-        return vr;
-    }
-    return nil;
-}
-
-+ (CTValidationResult *)validateArrayElementCount:(NSInteger)count {
-    if (count > kMaxMultiValuePropertyArrayCount) {
-        CTValidationResult *vr = [[CTValidationResult alloc] init];
-        NSString *errStr = [NSString stringWithFormat:
-                            @"Array exceeded maximum element count. Allowed maximum is %d elements",
-                            kMaxMultiValuePropertyArrayCount];
-        [vr setErrorDesc:errStr];
-        [vr setErrorCode:544];
-        return vr;
-    }
-    return nil;
-}
-
-+ (CTValidationResult *)validateObjectPropertyCount:(NSInteger)count {
-    if (count > kMaxPropertiesPerObject) {
-        CTValidationResult *vr = [[CTValidationResult alloc] init];
-        NSString *errStr = [NSString stringWithFormat:
-                            @"Object exceeded maximum property count. Allowed maximum is %d key-value pairs",
-                            kMaxPropertiesPerObject];
-        [vr setErrorDesc:errStr];
-        [vr setErrorCode:544];
-        return vr;
-    }
-    return nil;
-}
-
-+ (CTValidationResult *)validateArrayAndObjectLimitsInDictionary:(NSDictionary *)dict {
-    int arrayPropertiesCount = 0;
-    int objectPropertiesCount = 0;
-    
-    //TODO: Count non-empty array and object properties
-    for (id key in dict) {
-        id value = dict[key];
         
-        if ([self isEmptyValue:value forKey:key]) {
-            continue;
-        }
-        if ([value isKindOfClass:[NSArray class]]) {
-            arrayPropertiesCount++;
-        } else if ([value isKindOfClass:[NSDictionary class]]) {
-            objectPropertiesCount++;
-        }
-    }
-    if (arrayPropertiesCount > kMaxArrayPropertiesPerLevel) {
-        CTValidationResult *vr = [[CTValidationResult alloc] init];
-        NSString *errStr = [NSString stringWithFormat:
-                            @"Maximum array-type properties exceeded. Found %d array properties, allowed maximum is %d per level",
-                            arrayPropertiesCount, kMaxArrayPropertiesPerLevel];
-        [vr setErrorDesc:errStr];
-        [vr setErrorCode:543];
-        return vr;
-    }
-    if (objectPropertiesCount > kMaxObjectPropertiesPerLevel) {
-        CTValidationResult *vr = [[CTValidationResult alloc] init];
-        NSString *errStr = [NSString stringWithFormat:
-                            @"Maximum object-type properties exceeded. Found %d object properties, allowed maximum is %d per level",
-                            objectPropertiesCount, kMaxObjectPropertiesPerLevel];
-        [vr setErrorDesc:errStr];
-        [vr setErrorCode:543];
-        return vr;
-    }
-    return nil;
-}
-
-#pragma mark - String Cleaning
-
-+ (CTValidationResult *)cleanString:(NSString *)string {
-    CTValidationResult *vr = [[CTValidationResult alloc] init];
-    
-    NSString *value = [string stringByTrimmingCharactersInSet:
-                       [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    NSArray *restrictedChars = @[@"'", @"\"", @"\\"];
-    for (NSString *c in restrictedChars) {
-        value = [value stringByReplacingOccurrencesOfString:c withString:@""];
-    }
-    value = [value stringByTrimmingCharactersInSet:
-             [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (value.length == 0) {
-        return nil;
-    }
-    if (value.length > kMaxValueChars) {
-        value = [value substringToIndex:kMaxValueChars - 1];
-        NSString *errStr = [NSString stringWithFormat:
-                            @"%@... exceeds the limit of %d characters. Trimmed",
-                            value, kMaxValueChars];
-        [vr setErrorDesc:errStr];
-        [vr setErrorCode:521];
-    }
-    [vr setObject:value];
-    return vr;
-}
-
-#pragma mark - Array Cleaning
-
-+ (CTValidationResult *)cleanArray:(NSArray *)array
-                           context:(CTValidatorContext)context
-                             depth:(int)depth {
-    // Validate array size
-    CTValidationResult *sizeValidation = [self validateArrayElementCount:array.count];
-    if (sizeValidation) {
-        return sizeValidation;
-    }
-    if ([self arrayHasNestedStructures:array]) {
-        return [self cleanNestedArray:array context:context depth:depth];
-    } else {
-        return [self cleanPrimitiveArray:array context:context];
-    }
-}
-
-+ (BOOL)arrayHasNestedStructures:(NSArray *)array {
-    for (id item in array) {
-        if ([item isKindOfClass:[NSDictionary class]] ||
-            [item isKindOfClass:[NSArray class]]) {
-            return YES;
-        }
-    }
-    return NO;
-}
-
-+ (CTValidationResult *)cleanNestedArray:(NSArray *)array
-                                 context:(CTValidatorContext)context
-                                   depth:(int)depth {
-    NSMutableArray *cleanedArray = [NSMutableArray new];
-    
-    for (id item in array) {
-        if ([self isEmptyValue:item forKey:nil]) {
-            continue;
-        }
-        
-        // Recursively clean nested items
-        CTValidationResult *itemResult = [self cleanObjectValue:item
-                                                        context:context
-                                                          depth:depth + 1];
-        
-        if (itemResult && itemResult.errorCode != 0) {
-            return itemResult;
-        }
-        
-        if (itemResult && itemResult.object) {
-            [cleanedArray addObject:itemResult.object];
-        }
-    }
-    if (cleanedArray.count == 0) {
-        return nil;
-    }
-    CTValidationResult *vr = [[CTValidationResult alloc] init];
-    [vr setObject:cleanedArray];
-    return vr;
-}
-
-+ (CTValidationResult *)cleanPrimitiveArray:(NSArray *)array
-                                    context:(CTValidatorContext)context {
-    NSMutableArray *cleanedArray = [NSMutableArray new];
-    
-    for (id value in array) {
-        if ([value isKindOfClass:[NSNull class]]) {
-            continue;
-        }
-        //TODO: //check if existing logic is required
+    } else if ([o isKindOfClass:[NSArray class]]) {
+        // allow string arrays for profiles
         if (context == CTValidatorContextProfile) {
-            // Convert to strings for profile context
-            @try {
-                NSString *stringValue = [NSString stringWithFormat:@"%@", value];
-                if (stringValue && stringValue.length > 0) {
-                    [cleanedArray addObject:stringValue];
+            NSArray *values = (NSArray *) o;
+            // make sure the values really are all strings
+            NSMutableArray *_allStrings = [NSMutableArray new];
+            for (id value in values) {
+                @try {
+                    [_allStrings addObject:[NSString stringWithFormat:@"%@", value]];
+                }
+                @catch (NSException *e) {
+                    // no-op
                 }
             }
-            @catch (NSException *e) {
-                // Skip values that can't be converted
+            values = _allStrings;
+            if (values.count > 0 && values.count <= kMaxMultiValuePropertyArrayCount) {
+                [vr setObject:values];
+            } else {
+                NSString *errStr = [NSString stringWithFormat:@"Invalid user profile property array count: %lu; max is: %d", (unsigned long)values.count, kMaxMultiValuePropertyArrayCount];
+                [vr setErrorDesc:errStr];
+                [vr setErrorCode:521];
             }
-        } else {
-            // Keep original type for non-profile context
-            if (value) {
-                [cleanedArray addObject:value];
-            }
+            return vr;
         }
+        
+    } else {
+        vr = nil;
     }
-    if (cleanedArray.count == 0) {
-        return nil;
-    }
-    // Validate cleaned array size
-    CTValidationResult *sizeValidation = [self validateArrayElementCount:cleanedArray.count];
-    if (sizeValidation) {
-        return sizeValidation;
-    }
-    CTValidationResult *vr = [[CTValidationResult alloc] init];
-    [vr setObject:cleanedArray];
-    return vr;
-}
-
-#pragma mark - Dictionary Cleaning
-
-+ (CTValidationResult *)cleanDictionary:(NSDictionary *)dict
-                                context:(CTValidatorContext)context
-                                  depth:(int)depth {
-    CTValidationResult *countValidation = [self validateObjectPropertyCount:dict.count];
-    if (countValidation) {
-        return countValidation;
-    }
-    CTValidationResult *typeValidation = [self validateArrayAndObjectLimitsInDictionary:dict];
-    if (typeValidation) {
-        return typeValidation;
-    }
-    NSMutableDictionary *cleanedDict = [NSMutableDictionary new];
-    
-    for (id key in dict) {
-        id value = dict[key];
-        if ([self isEmptyValue:value forKey:nil]) {
-            continue;
-        }
-        // Recursively clean the value
-        CTValidationResult *cleanedValue = [self cleanObjectValue:value
-                                                          context:context
-                                                            depth:depth + 1];
-        if (cleanedValue && cleanedValue.errorCode != 0) {
-            CleverTapLogStaticDebug(@"Event validation - %@ for key: %@", cleanedValue.errorDesc, key);
-            continue;
-        }
-        if (cleanedValue && cleanedValue.object) {
-            cleanedDict[key] = cleanedValue.object;
-        }
-    }
-    if (cleanedDict.count == 0) {
-        return nil;
-    }
-    CTValidationResult *vr = [[CTValidationResult alloc] init];
-    [vr setObject:cleanedDict];
     return vr;
 }
 

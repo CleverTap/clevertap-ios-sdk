@@ -5,6 +5,18 @@
 @class CleverTapInstanceConfig;
 @class CleverTapEventDetail;
 
+typedef NS_ENUM(NSInteger, CTProfileOperation) {
+    CTProfileOperationGet = 0,
+    CTProfileOperationSet = 1,
+    CTProfileOperationRemove = 2,
+    CTProfileOperationAdd = 3,
+    CTProfileOperationIncrement = 4,
+    CTProfileOperationDecrement = 5,
+    CTProfileOperationDelete = 6,
+    CTProfileOperationArrayRemove = 7,
+    CTProfileOperationUpdate = 8
+};
+
 @interface CTLocalDataStore : NSObject
 
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config 
@@ -54,4 +66,7 @@
 
 - (NSDictionary *)readUserEventLogs;
 
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey value:(id)value command:(CTProfileOperation)operation;
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson
+                                                               operation:(CTProfileOperation)operation;
 @end
