@@ -7,9 +7,6 @@
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
-typedef NSString * _Nullable (^CTDeviceCountryCodeProvider)(void);
-
 /**
  * Configuration for validation rules.
  * Create an instance and set properties directly, or use defaultConfig for common CleverTap limits.
@@ -49,7 +46,7 @@ typedef NSString * _Nullable (^CTDeviceCountryCodeProvider)(void);
  * Provider block for device country code.
  * This block will be called whenever the country code is needed.
  */
-@property (nonatomic, copy, nullable) CTDeviceCountryCodeProvider deviceCountryCodeProvider;
+@property (nonatomic, copy, nullable) NSString* deviceCountryCode;
 
 /**
  * Default restricted event names set.
@@ -69,11 +66,13 @@ typedef NSString * _Nullable (^CTDeviceCountryCodeProvider)(void);
 
 /**
  * Creates a default validation configuration with common CleverTap limits.
- * @param countryCodeProvider Optional provider for device country code
+ * @param countryCode Optional provider for device country code
  * @return Default ValidationConfig instance
  */
-+ (instancetype)defaultConfigWithCountryCodeProvider:(nullable CTDeviceCountryCodeProvider)countryCodeProvider;
++ (instancetype)defaultConfigWithCountryCode:(nullable NSString*)countryCode;
 
++ (BOOL)isRestrictedEventName:(NSString *)name;
++ (BOOL)isDiscardedEventName:(NSString *)name;
 @end
 
 NS_ASSUME_NONNULL_END

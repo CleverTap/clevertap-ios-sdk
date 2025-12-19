@@ -20,6 +20,18 @@
     return self;
 }
 
+/**
+ * Cleans the event name to the following guidelines:
+ *
+ * The following characters are removed:
+ * dot, colon, dollar sign, single quote, double quote, and backslash.
+ * Additionally, the event name is limited to kMaxKeyChars characters.
+ *
+ *
+ * @param eventName The event name to be cleaned
+ * @return The ValidationResult object CTValidationOutcomeSuccess, CTValidationOutcomeWarning and CTValidationOutcomeDrop
+ *
+ */
 - (CTValidationResult *)validateEventName:(NSString *)eventName {
     // Step 1: Check for null/empty
     if (!eventName || eventName.length == 0) {

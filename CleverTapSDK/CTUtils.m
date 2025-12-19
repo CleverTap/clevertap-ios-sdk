@@ -1,5 +1,6 @@
 #include <math.h>
 #import "CTUtils.h"
+#import "CTConstants.h"
 
 @implementation CTUtils
 
@@ -174,6 +175,25 @@
     NSString *normalizedSecondName = [CTUtils getNormalizedName:secondName];
     
     return [normalizedFirstName isEqualToString:normalizedSecondName];
+}
+
++ (BOOL)isValidCleverTapId:(NSString *)cleverTapID {
+    NSString *allowedCharacters = @"[=|<>;+.A-Za-z0-9()!:$@_-]*";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", allowedCharacters];
+    if (!cleverTapID) {
+        CleverTapLogStaticInternal(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is NULL.");
+        return NO;
+    } else if(cleverTapID.length <= 0){
+        CleverTapLogStaticInfo(@"CleverTapUseCustomId has been specified true in Info.plist but custom CleverTap ID passed is empty.");
+        return NO;
+    } else if (cleverTapID.length > 64) {
+        CleverTapLogStaticInfo(@"Custom CleverTap ID passed is greater than 64 characters.")
+        return NO;
+    } else if (![predicate evaluateWithObject:cleverTapID]) {
+        CleverTapLogStaticInfo(@"Custom CleverTap ID cannot contain special characters apart from (, ), !, :, @, $, _, and -");
+        return NO;
+    }
+    return YES;
 }
 
 @end

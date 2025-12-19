@@ -21,7 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
  * Note: Event data validation never drops events, only warns.
  */
 - (CTValidationResult *)validateEventData:(nullable NSDictionary *)eventData;
-
+- (CTValidationResult *)cleanArray:(NSArray *)array forKey:(NSString *)key;
+- (CTValidationResult *)validate:(NSString *)value forKey:(nullable NSString *)key;
 @end
 
 NS_ASSUME_NONNULL_END

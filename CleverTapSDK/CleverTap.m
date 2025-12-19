@@ -8,7 +8,6 @@
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
-#import "CTValidator.h"
 #import "CTUriHelper.h"
 #import "CTInAppUtils.h"
 #import "CTDeviceInfo.h"
@@ -115,7 +114,7 @@ static NSArray *sslCertNames;
 #import "CleverTapSDK-Swift.h"
 #endif
 
-#import "CTFlattenedEventData.h"
+#import "CTValidationConfig.h"
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static NSMutableDictionary *auxiliarySdkVersions;
@@ -278,6 +277,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) NSLocale *locale;
 
 @property (atomic, assign) BOOL isUserSwitching;
+@property (nonatomic, strong) CTValidationConfig *validationConfig;
 
 - (instancetype)init __unavailable;
 
@@ -460,7 +460,7 @@ static BOOL sharedInstanceErrorLogged;
 #endif
         }
     } else {
-        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
+        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTUtils isValidCleverTapId:cleverTapID]) {
             [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
         }
     }
@@ -498,7 +498,9 @@ static BOOL sharedInstanceErrorLogged;
         _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
         self.validationResultStack = [[CTValidationResultStack alloc] initWithConfig:_config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
-        
+        self.validationConfig = [CTValidationConfig defaultConfigWithCountryCode:_deviceInfo.countryCode];
+        [CTProfileBuilder initializeWithValidationConfig:self.validationConfig];
+        [CTEventBuilder initializeWithValidationConfig:self.validationConfig];
         // save config to defaults
         [CTPreferences archiveObject:config
                          forFileName:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:_config.accountId]
@@ -1723,10 +1725,10 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     
-    NSArray *discardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
+    NSSet *discardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
     if (discardedEvents && discardedEvents.count > 0) {
         @try {
-            [CTValidator setDiscardedEvents:discardedEvents];
+            [self.validationConfig setDiscardedEventNames:discardedEvents];
         } @catch (NSException *e) {
             CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
         }
@@ -1865,7 +1867,7 @@ static BOOL sharedInstanceErrorLogged;
         return NO;
     }
     
-    BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
+    BOOL isSystemEvent = [CTValidationConfig isRestrictedEventName:event[CLTAP_EVENT_NAME]];
     if (!isSystemEvent) {
         // Custom event
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
@@ -2030,8 +2032,22 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
+- (void)getFlattenedData:(CTFlattenedEventData *)flattenedEventData {
+    switch (flattenedEventData.type) {
+        case CTFlattenedEventDataTypeNoData:
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: No Data", self);
+            break;
+        case CTFlattenedEventDataTypeProfileChanges:
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.profileChanges);
+            break;
+        case CTFlattenedEventDataTypeEventProperties:
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.profileChanges)
+            break;
+    }
+}
+
 - (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
-    CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@, %@", self, flattenedEventData.eventProperties, flattenedEventData.profileChanges);
+    [self getFlattenedData:flattenedEventData];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     NSString *eventName = event[CLTAP_EVENT_NAME];
     // Add the system properties for evaluation
@@ -4600,7 +4616,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Utility
 
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
-    return [CTValidator isValidCleverTapId:cleverTapID];
+    return [CTUtils isValidCleverTapId:cleverTapID];
 }
 
 #pragma mark - Sync PE and Custom Templates

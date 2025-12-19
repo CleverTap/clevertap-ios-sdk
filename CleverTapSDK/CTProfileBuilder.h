@@ -2,8 +2,11 @@
 
 @class CTValidationResult;
 @class CTLocalDataStore;
+@class CTValidationConfig;
 
 @interface CTProfileBuilder : NSObject
+
++ (void)initializeWithValidationConfig:(CTValidationConfig*_Nullable)validationConfig;
 
 + (void)build:(NSDictionary *_Nonnull)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion;
 

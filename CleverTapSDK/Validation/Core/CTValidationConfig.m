@@ -6,6 +6,8 @@
 //
 #import "CTValidationConfig.h"
 #import "CTConstants.h"
+#import "CTUtils.h"
+#import "CTValidationResult.h"
 
 static const int kMaxKeyChars = 120;
 static const int kMaxValueChars = 1024;
@@ -50,10 +52,10 @@ static const int kMaxPropertiesPerObject = 100;
 }
 
 + (instancetype)defaultConfig {
-    return [self defaultConfigWithCountryCodeProvider:nil];
+    return [self defaultConfigWithCountryCode:nil];
 }
 
-+ (instancetype)defaultConfigWithCountryCodeProvider:(nullable CTDeviceCountryCodeProvider)countryCodeProvider {
++ (instancetype)defaultConfigWithCountryCode:(nullable NSString*)countryCode {
     CTValidationConfig *config = [[CTValidationConfig alloc] init];
     
     // Size validations
@@ -85,9 +87,41 @@ static const int kMaxPropertiesPerObject = 100;
     config.restrictedMultiValueFields = [CTValidationConfig defaultRestrictedMultiValueFields];
     
     // Country code provider
-    config.deviceCountryCodeProvider = countryCodeProvider;
+    config.deviceCountryCode = countryCode;
     
     return config;
 }
 
+/**
+ * Checks whether the specified event name is restricted. If it is,
+ * then create a pending error, and abort.
+ *
+ * @param name The event name
+ * @return Boolean indication whether the event name is restricted
+ */
++ (BOOL)isRestrictedEventName:(NSString *)name {
+    if (name == nil) {
+        return NO;
+    }
+    NSSet<NSString *> *restrictedNames = [CTValidationConfig defaultRestrictedEventNames];
+    for (NSString *restrictedName in restrictedNames) {
+        if ([CTUtils areEqualNormalizedName:name andName:restrictedName]) {
+            CleverTapLogStaticDebug(@"Restricted event name: %@", restrictedName);
+            return YES;
+        }
+    }
+    return NO;
+}
+
++ (BOOL)isDiscardedEventName:(NSString *)name {
+    NSSet<NSString *> *discardedNames = [CTValidationConfig defaultRestrictedEventNames];
+
+    for (NSString *discardedName in discardedNames)
+        if ([CTUtils areEqualNormalizedName:name andName:discardedName]) {
+            // The event name is discarded
+            CleverTapLogStaticDebug(@"Discarded event name: %@", discardedName);
+            return true;
+        }
+    return false;
+}
 @end

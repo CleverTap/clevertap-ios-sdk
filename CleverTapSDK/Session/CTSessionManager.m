@@ -9,13 +9,14 @@
 #import "CTSessionManager.h"
 #import "CTUIUtils.h"
 #import "CTPreferences.h"
-#import "CTValidator.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTConstants.h"
 #import "CleverTapInternal.h"
+#import "CTValidationConfig.h"
 
 @interface CTSessionManager()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
+@property (nonatomic, strong) CTValidationConfig *validationConfig;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppStore *inAppStore;
@@ -37,6 +38,7 @@
         self.config = config;
         self.impressionManager = impressionManager;
         self.inAppStore = inAppStore;
+        self.validationConfig = [CTValidationConfig defaultConfig];
     }
     return self;
 }
@@ -96,7 +98,7 @@
 
 - (void)createFirstRequestInSession {
     self.firstRequestInSession = YES;
-    [CTValidator setDiscardedEvents:nil];
+    [self.validationConfig setDiscardedEventNames:nil];
 }
 
 - (void)resetSession {
