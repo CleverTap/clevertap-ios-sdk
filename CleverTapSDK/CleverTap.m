@@ -511,8 +511,9 @@ static BOOL sharedInstanceErrorLogged;
         self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
         // Initialise Variables
         self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
-        // Load Vars from cache before App Launched
+        // Load Vars and Variants from cache
         [self.variables.varCache loadDiffs];
+        [self.variables.varCache loadVariants];
         
 #if !defined(CLEVERTAP_TVOS)
         if (self.requestSender && self.domainFactory && self.dispatchQueueManager) {
@@ -1194,7 +1195,6 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogInternal(self.config.logLevel, @"%@: App Launched already processed", self);
         return;
     }
-    [self.variables.varCache loadVariants];
     
     self.sessionManager.appLaunchProcessed = YES;
     
