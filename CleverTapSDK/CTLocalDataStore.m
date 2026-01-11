@@ -84,18 +84,14 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!dotNotationPath || [dotNotationPath length] == 0) {
         return @{};
     }
-    
     NSArray<NSString *> *pathComponents = [dotNotationPath componentsSeparatedByString:@"."];
-    
     if ([pathComponents count] == 0) {
         return @{};
     }
-    
     // If there's only one component, return a simple dictionary
     if ([pathComponents count] == 1) {
         return @{pathComponents[0]: value ?: [NSNull null]};
     }
-    
     // Build nested structure from the end to the beginning
     NSMutableDictionary *result = [NSMutableDictionary dictionary];
     NSMutableDictionary *current = result;
@@ -106,50 +102,35 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         current[key] = nested;
         current = nested;
     }
-    
     // Set the final value
     NSString *lastKey = pathComponents[[pathComponents count] - 1];
     current[lastKey] = value ?: [NSNull null];
-    
     return [result copy];
 }
 
 - (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey
-                                                               value:(id)value
+                                                           value:(id)value
                                                          command:(CTProfileOperation)operation {
     @try {
         NSDictionary *nestedProfile = [self buildFromPath:dotNotationKey value:value];
         return [self processProfileTreeWithJson:nestedProfile operation:operation];
     } @catch (NSException *e) {
-        NSError *error = [NSError errorWithDomain:@"CTLocalDataStore"
-                                         code:-1
-                                     userInfo:@{NSLocalizedDescriptionKey: e.reason ?: @"Unknown error"}];
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process profile tree: %@",
-                           self, e.debugDescription);
+                             self, e.debugDescription);
         return @{};
     }
 }
 
-- (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson
-                                                                   operation:(CTProfileOperation)operation {
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson operation:(CTProfileOperation)operation {
     @synchronized (localProfileForSession) {
         @try {
-            NSDictionary<NSString *, NSDictionary *> *result = [self traverse:localProfileForSession
-                                                                             newJson:newJson
-                                                                           operation:operation];
-            
+            NSDictionary<NSString *, NSDictionary *> *result = [self traverse:localProfileForSession newJson:newJson operation:operation];
             if (operation != CTProfileOperationGet) {
                 [self persistLocalProfileIfRequired];
             }
-            
             return result;
         } @catch (NSException *e) {
-            NSError *error = [NSError errorWithDomain:@"CTLocalDataStore"
-                                             code:-1
-                                         userInfo:@{NSLocalizedDescriptionKey: e.reason ?: @"Unknown error"}];
-            
-            CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process profile tree with data: %@",
-                               self, e.debugDescription);
+            CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process profile tree with data: %@", self, e.debugDescription);
             return @{};
         }
     }
@@ -173,21 +154,14 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         ^(NSMutableDictionary *t, NSDictionary *s, NSString *p, NSMutableDictionary *c) {
             [weakSelf traverseRecursive:t source:s path:p changes:c operation:operation];
         };
-        
         switch (operation) {
-            case CTProfileOperationRemove:
+            case CTProfileOperationDelete:
                 [self.deleteHandler handleDelete:target key:key newValue:newValue currentPath:currentPath changes:changes recursiveMerge:recursiveTraverse];
                 break;
-                
-            case CTProfileOperationSet:
-            case CTProfileOperationAdd:
-            case CTProfileOperationIncrement:
-            case CTProfileOperationDecrement:
-            case CTProfileOperationGet:
-            case CTProfileOperationArrayRemove:
-            case CTProfileOperationUpdate:
+            default:
                 [self.updateHandler handleOperation:target key:key newValue:newValue currentPath:currentPath changes:changes operation:operation recursiveApply:recursiveTraverse];
-            break;
+                break;
+
         }
     }
 }
@@ -200,11 +174,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 }
 
 - (NSDictionary<NSString *, NSDictionary *> *)traverse:(NSMutableDictionary *)currentState
-                               newJson:(NSDictionary *)newJson
-                             operation:(CTProfileOperation)operation {
-    
+                                               newJson:(NSDictionary *)newJson
+                                             operation:(CTProfileOperation)operation {
     NSMutableDictionary<NSString *, NSDictionary *> *changes = [NSMutableDictionary dictionary];
-    
     [self traverseRecursive:currentState source:newJson path:@"" changes:changes operation:operation];
     return changes;
 }
@@ -216,19 +188,15 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if ([value1 isKindOfClass:[NSString class]] && [value2 isKindOfClass:[NSString class]]) {
         return [(NSString *)value1 isEqualToString:(NSString *)value2];
     }
-    
     if ([value1 isKindOfClass:[NSNumber class]] && [value2 isKindOfClass:[NSNumber class]]) {
         return [(NSNumber *)value1 isEqualToNumber:(NSNumber *)value2];
     }
-    
     if ([value1 isKindOfClass:[NSArray class]] && [value2 isKindOfClass:[NSArray class]]) {
         return [(NSArray *)value1 isEqualToArray:(NSArray *)value2];
     }
-    
     if ([value1 isKindOfClass:[NSDictionary class]] && [value2 isKindOfClass:[NSDictionary class]]) {
         return [(NSDictionary *)value1 isEqualToDictionary:(NSDictionary *)value2];
     }
-    
     return [value1 isEqual:value2];
 }
 
@@ -354,7 +322,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
  */
 - (void)persistEvent:(NSDictionary *)event  {
     if (!event || !event[CLTAP_EVENT_NAME]) return;
-
+    
     NSString *eventName = event[CLTAP_EVENT_NAME];
     NSString *normalizedEventName = [CTUtils getNormalizedName:eventName];
     [self.dbHelper upsertEvent:eventName normalizedEventName:normalizedEventName deviceID:self.deviceInfo.deviceId];
@@ -1240,8 +1208,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }
         return updatedProfile;
     }
-
+    
     return profile;
 }
-
 @end

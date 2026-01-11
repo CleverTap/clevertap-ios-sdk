@@ -12,12 +12,9 @@ typedef NS_ENUM(NSInteger, CTFlattenedEventDataType) {
 
 @property (nonatomic, assign, readonly) CTFlattenedEventDataType type;
 
-// Factory methods
 + (instancetype)profileChanges:(NSDictionary<NSString *, id> *)changes;
 + (instancetype)eventProperties:(NSDictionary<NSString *, id> *)properties;
 + (instancetype)noData;
-
-// Accessors (return nil if wrong type)
 - (nullable NSDictionary<NSString *, id> *)profileChanges;
 - (nullable NSDictionary<NSString *, id> *)eventProperties;
 - (BOOL)isNoData;

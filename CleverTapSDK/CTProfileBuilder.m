@@ -5,20 +5,19 @@
 #import "CTKnownProfileFields.h"
 #import "CTLocalDataStore.h"
 #import "CTUtils.h"
-#import "CTMultiValuePropertyKeyValidator.h"
+#import "CTPropertyKeyValidator.h"
 #import "CTEventDataValidator.h"
+#import "CTFlattenedEventData.h"
 
 @implementation CTProfileBuilder
 static CTPropertyKeyValidator *_profileKeyValidator;
 static CTEventDataValidator *_profileDataValidator;
-static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
 
 + (void)initializeWithValidationConfig:(CTValidationConfig*)validationConfig {
     if (self == [CTProfileBuilder class]) {
         // Initialize validators with default config
         _profileKeyValidator = [[CTPropertyKeyValidator alloc] initWithConfig:validationConfig];
         _profileDataValidator = [[CTEventDataValidator alloc] initWithConfig:validationConfig];
-        _multiValueKeyValidator = [[CTMultiValuePropertyKeyValidator alloc] initWithConfig:validationConfig];
     }
 }
 
@@ -29,7 +28,6 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
         completion(nil, nil, errors);
         return;
     }
-    
     @try {
         CTValidationResult *dataResult = [_profileDataValidator validateEventData:profile];
         NSDictionary *cleanedProperties = dataResult.cleanedData;
@@ -125,7 +123,7 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
 # pragma mark Start Multi-Value Handling
 
 + (void)buildSetMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_SET localDataStore:dataStore completionHandler:completion];
+    [self _handleMultiValues:values forKey:key withCommand:CTProfileOperationSet localDataStore:dataStore completionHandler:completion];
 }
 
 + (void)buildAddMultiValue:(NSString *)value forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
@@ -139,7 +137,7 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
 }
 
 + (void)buildAddMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_ADD localDataStore:dataStore completionHandler:completion];
+    [self _handleMultiValues:values forKey:key withCommand:CTProfileOperationAdd localDataStore:dataStore completionHandler:completion];
 }
 
 + (void)buildRemoveMultiValue:(NSString *)value forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
@@ -153,7 +151,7 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
 }
 
 + (void)buildRemoveMultiValues:(NSArray *)values forKey:(NSString *)key localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
-    [self _handleMultiValues:values forKey:key withCommand:kCLTAP_COMMAND_REMOVE localDataStore:dataStore completionHandler:completion];
+    [self _handleMultiValues:values forKey:key withCommand:CTProfileOperationArrayRemove localDataStore:dataStore completionHandler:completion];
 }
 
 + (CTValidationResult*)_generateEmptyMultiValueErrorForKey:(NSString *)key {
@@ -169,7 +167,7 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
     return [CTValidationResult resultWithErrorCode:512 andMessage:message];
 }
 
-+ (void)_handleMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key withCommand:(NSString *)command localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion  {
++ (void)_handleMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key withCommand:(CTProfileOperation)command localDataStore:(CTLocalDataStore*)dataStore completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion  {
     NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
     if (key == nil) {
         completion(nil, nil, errors);
@@ -192,80 +190,33 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
     }
     values = _allStrings;
     @try {
-        CTValidationResult *keyValidationResult = [_multiValueKeyValidator validateKey:key];
-        
-        if (keyValidationResult.shouldDrop) {
-            // Key is restricted or invalid - add all errors and abort
-            if (keyValidationResult.subResults) {
-                [errors addObjectsFromArray:keyValidationResult.subResults];
-            } else {
-                [errors addObject:keyValidationResult];
-            }
-            
-            // Log the drop reason
-            if (keyValidationResult.dropReason == CTDropReasonRestrictedMultiValueKey) {
-                CleverTapLogStaticDebug(@"%@: Multi-value key '%@' is restricted. %@",
-                                        self, key, keyValidationResult.errorDesc);
-            } else {
-                CleverTapLogStaticDebug(@"%@: Multi-value key validation failed: %@",
-                                        self, keyValidationResult.errorDesc);
-            }
-            
-            completion(nil, nil, errors);
+        // validate the multi-value array
+        CTValidationResult *dataResult = [_profileDataValidator cleanArray:values forKey:key];
+        if (dataResult.shouldDrop) {
             return;
         }
-        
-        if (keyValidationResult.outcome == CTValidationOutcomeWarning) {
-            if (keyValidationResult.subResults) {
-                [errors addObjectsFromArray:keyValidationResult.subResults];
-            } else if (keyValidationResult.errorCode != 0) {
-                [errors addObject:keyValidationResult];
-            }
-            
-            // Log warnings
-            for (CTValidationResult *warning in keyValidationResult.subResults) {
-                CleverTapLogStaticDebug(@"%@: Multi-value key warning [%d]: %@. Cleaned",
-                                        self, warning.errorCode, warning.errorDesc);
-            }
-        }
-        
-        NSString *cleanedKey = (NSString *)keyValidationResult.cleanedData;
-        if (!cleanedKey || [cleanedKey isEqualToString:@""]) {
+        NSArray *multiValue = [self _constructLocalMultiValueWithOriginalValues:dataResult.cleanedData forKey:key usingCommand:command localDataStore:dataStore];
+        if (!multiValue) {
             [errors addObject:[self _generateEmptyMultiValueErrorForKey:key]];
             completion(nil, nil, errors);
             return;
         }
-        
-        NSArray *multiValue = [self _constructLocalMultiValueWithOriginalValues:values
-                                                                         forKey:cleanedKey
-                                                                   usingCommand:command
-                                                                 localDataStore:dataStore];
-        
-        if (!multiValue) {
-            [errors addObject:[self _generateEmptyMultiValueErrorForKey:cleanedKey]];
-            completion(nil, nil, errors);
-            return;
-        }
-        
-        [self _validateAndPushMultiValue:multiValue
-                                  forKey:cleanedKey
-                      withOriginalValues:values
-                            usingCommand:command
-                       completionHandler:completion];
+        [self _validateAndPushMultiValue:dataResult.cleanedData forKey:key withOriginalValues:values usingCommand:command completionHandler:completion];
     } @catch (NSException *e) {
         CleverTapLogStaticInternal(@"%@: error in _handleMultiValues forKey: %@ Reason: %@", self, key, e.debugDescription);
         completion(nil, nil, errors);
     }
 }
 
-+ (NSArray<NSString *> *) _constructLocalMultiValueWithOriginalValues:(NSArray *)values forKey:(NSString *)key usingCommand:(NSString *)command localDataStore:(CTLocalDataStore*)dataStore {
-    if (!command || ![CLTAP_MULTIVAL_COMMANDS containsObject:command]) {
-        CleverTapLogStaticInternal(@"%@: Unknown multi-value command %@, aborting", self, command);
+
+
++ (NSArray<NSString *> *) _constructLocalMultiValueWithOriginalValues:(NSArray *)values forKey:(NSString *)key usingCommand:(CTProfileOperation)command localDataStore:(CTLocalDataStore*)dataStore {
+    if (!command) {
+        CleverTapLogStaticInternal(@"%@: Unknown multi-value command %ld, aborting", self, (long)command);
         return nil;
     }
-    CTValidationResult *vr;
-    BOOL remove = [command isEqualToString:kCLTAP_COMMAND_REMOVE];
-    BOOL add = [command isEqualToString:kCLTAP_COMMAND_ADD];
+    BOOL remove = command == CTProfileOperationRemove;
+    BOOL add = command == CTProfileOperationAdd;
     NSArray *_existingMultiValue = [self _constructExistingMultiValueForKey:key usingCommand:command localDataStore:dataStore];
     // if its a remove operation and there is no existing multi-value abort
     if (remove && _existingMultiValue == nil) {
@@ -309,9 +260,9 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
     return multiValue;
 }
 
-+ (NSArray<NSString *> *) _constructExistingMultiValueForKey:(NSString *)key usingCommand:(NSString *)command localDataStore:(CTLocalDataStore*)dataStore {
-    BOOL remove = [command isEqualToString:kCLTAP_COMMAND_REMOVE];
-    BOOL add = [command isEqualToString:kCLTAP_COMMAND_ADD];
++ (NSArray<NSString *> *) _constructExistingMultiValueForKey:(NSString *)key usingCommand:(CTProfileOperation)command localDataStore:(CTLocalDataStore*)dataStore {
+    BOOL remove = command == CTProfileOperationRemove;
+    BOOL add = command == CTProfileOperationAdd;
     // only relevant for add's and remove's; a set overrides the existing value
     if (!remove && !add) return nil;
     id existing = [dataStore getProfileFieldForKey:key];
@@ -367,25 +318,16 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
     return ret;
 }
 
-+ (void)_validateAndPushMultiValue:(NSArray<NSString *> *)multiValue forKey:(NSString *)key withOriginalValues:(NSArray<NSString *> *)values usingCommand:(NSString *)command completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
++ (void)_validateAndPushMultiValue:(NSArray<NSString *> *)multiValue forKey:(NSString *)key withOriginalValues:(NSArray<NSString *> *)values usingCommand:(CTProfileOperation)operation completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields,  NSArray* _Nullable updatedMultiValue, NSArray<CTValidationResult*>* _Nullable errors))completion {
     NSMutableArray<CTValidationResult*> *errors = [NSMutableArray new];
     // if the local copy is nil here it means there has been some kind of problem, so just abort the whole operation
     if (!multiValue) {
         completion(nil, nil, errors);
         return;
     }
-    // validate the multi-value array
-    CTValidationResult *dataResult = [_profileDataValidator cleanArray:multiValue forKey:key];
-    NSArray *cleanedProperties = dataResult.cleanedData;
-    if (dataResult.outcome == CTValidationOutcomeWarning && dataResult.subResults.count > 0) {
-        for (CTValidationResult *warning in dataResult.subResults) {
-            CleverTapLogStaticDebug(@"%@: Property validation - %@", self, warning.errorDesc);
-        }
-        [errors addObjectsFromArray:dataResult.subResults];
-    }
-    
+    NSString *command = [self getStringForOperation:operation];
     NSDictionary *fields = @{key : @{command : values} };
-    completion(fields, cleanedProperties, errors);
+    completion(fields, multiValue, errors);
 }
 
 # pragma mark End Multi-Value Handling
@@ -504,4 +446,20 @@ static CTMultiValuePropertyKeyValidator *_multiValueKeyValidator;
     return newValue;
 }
 
++ (NSString *)getStringForOperation:(CTProfileOperation)operation {
+    switch (operation) {
+        case CTProfileOperationAdd:
+            return kCLTAP_COMMAND_ADD;
+        case CTProfileOperationRemove:
+        case CTProfileOperationArrayRemove:
+            return kCLTAP_COMMAND_REMOVE;
+        case CTProfileOperationSet:
+            return kCLTAP_COMMAND_SET;
+        case CTProfileOperationIncrement:
+            return kCLTAP_COMMAND_INCREMENT;
+        case CTProfileOperationDecrement:
+            return kCLTAP_COMMAND_DECREMENT;
+        default: return @"";
+    }
+}
 @end

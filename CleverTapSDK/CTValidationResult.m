@@ -50,25 +50,21 @@
 + (CTValidationResult *)successWithData:(id)data {
     CTValidationResult *result = [self success];
     result.cleanedData = data;
-    [result setObject:data]; // For backward compatibility
+    [result setObject:data];
     return result;
 }
 
-+ (CTValidationResult *)warningWithCode:(int)code
-                                message:(NSString *)message
-                                   data:(nullable id)data {
++ (CTValidationResult *)warningWithCode:(int)code message:(NSString *)message data:(nullable id)data {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     result.outcome = CTValidationOutcomeWarning;
     result.errorCode = code;
     result.errorDesc = message;
     result.cleanedData = data;
-    [result setObject:data]; // For backward compatibility
+    [result setObject:data];
     return result;
 }
 
-+ (CTValidationResult *)dropWithCode:(int)code
-                             message:(NSString *)message
-                              reason:(CTDropReason)reason {
++ (CTValidationResult *)dropWithCode:(int)code message:(NSString *)message reason:(CTDropReason)reason {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     result.outcome = CTValidationOutcomeDrop;
     result.errorCode = code;
@@ -80,45 +76,38 @@
 
 #pragma mark - Sub-Results Methods
 
-+ (CTValidationResult *)successWithData:(id)data
-                             subResults:(nullable NSArray<CTValidationResult *> *)subResults {
++ (CTValidationResult *)successWithData:(id)data subResults:(nullable NSArray<CTValidationResult *> *)subResults {
     CTValidationResult *result = [self successWithData:data];
     result.subResults = subResults;
     return result;
 }
 
-+ (CTValidationResult *)warningWithSubResults:(NSArray<CTValidationResult *> *)subResults
-                                         data:(nullable id)data {
++ (CTValidationResult *)warningWithSubResults:(NSArray<CTValidationResult *> *)subResults data:(nullable id)data {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     result.outcome = CTValidationOutcomeWarning;
     result.subResults = subResults;
     result.cleanedData = data;
     [result setObject:data]; // For backward compatibility
-    
     // Aggregate error information from sub-results
     if (subResults.count > 0) {
         result.errorCode = subResults.firstObject.errorCode;
         result.errorDesc = [NSString stringWithFormat:@"%lu validation warnings",
                            (unsigned long)subResults.count];
     }
-    
     return result;
 }
 
-+ (CTValidationResult *)dropWithSubResults:(NSArray<CTValidationResult *> *)subResults
-                                    reason:(CTDropReason)reason {
++ (CTValidationResult *)dropWithSubResults:(NSArray<CTValidationResult *> *)subResults reason:(CTDropReason)reason {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     result.outcome = CTValidationOutcomeDrop;
     result.subResults = subResults;
     result.dropReason = reason;
-    
     // Aggregate error information from sub-results
     if (subResults.count > 0) {
         result.errorCode = subResults.firstObject.errorCode;
         result.errorDesc = [NSString stringWithFormat:@"%lu validation errors",
                            (unsigned long)subResults.count];
     }
-    
     return result;
 }
 
@@ -127,5 +116,4 @@
 - (BOOL)shouldDrop {
     return self.outcome == CTValidationOutcomeDrop;
 }
-
 @end

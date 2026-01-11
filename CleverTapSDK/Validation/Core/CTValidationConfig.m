@@ -57,48 +57,33 @@ static const int kMaxPropertiesPerObject = 100;
 
 + (instancetype)defaultConfigWithCountryCode:(nullable NSString*)countryCode {
     CTValidationConfig *config = [[CTValidationConfig alloc] init];
-    
     // Size validations
     config.maxKeyLength = @(kMaxKeyChars);
     config.maxValueLength = @(kMaxValueChars);
     config.maxDepth = @(kMaxNestingDepth);
-    
     // Count validations
     config.maxArrayKeyPerLevelCount = @(kMaxPropertiesPerLevel);
     config.maxObjectKeyPerLevelCount = @(kMaxPropertiesPerLevel);
     config.maxArrayLength = @(kMaxPropertiesPerObject);
     config.maxKVPairCount = @(kMaxPropertiesPerObject);
-    
     // Character validations for keys - create NSCharacterSet from string
     NSString *keyCharsNotAllowedString = @":$'\"\\";
     config.keyCharsNotAllowed = [NSCharacterSet characterSetWithCharactersInString:keyCharsNotAllowedString];
-    
     // Character validations for values - create NSCharacterSet from string
     NSString *valueCharsNotAllowedString = @"'\"\\";
     config.valueCharsNotAllowed = [NSCharacterSet characterSetWithCharactersInString:valueCharsNotAllowedString];
-    
-    // Event name validations
+        // Event name validations
     config.maxEventNameLength = @(kMaxValueChars);
     NSString *eventNameCharsNotAllowedString = @".:$'\"\\";
     config.eventNameCharsNotAllowed = [NSCharacterSet characterSetWithCharactersInString:eventNameCharsNotAllowedString];
-    
     // Restricted names
     config.restrictedEventNames = [CTValidationConfig defaultRestrictedEventNames];
     config.restrictedMultiValueFields = [CTValidationConfig defaultRestrictedMultiValueFields];
-    
     // Country code provider
     config.deviceCountryCode = countryCode;
-    
     return config;
 }
 
-/**
- * Checks whether the specified event name is restricted. If it is,
- * then create a pending error, and abort.
- *
- * @param name The event name
- * @return Boolean indication whether the event name is restricted
- */
 + (BOOL)isRestrictedEventName:(NSString *)name {
     if (name == nil) {
         return NO;
@@ -111,17 +96,5 @@ static const int kMaxPropertiesPerObject = 100;
         }
     }
     return NO;
-}
-
-+ (BOOL)isDiscardedEventName:(NSString *)name {
-    NSSet<NSString *> *discardedNames = [CTValidationConfig defaultRestrictedEventNames];
-
-    for (NSString *discardedName in discardedNames)
-        if ([CTUtils areEqualNormalizedName:name andName:discardedName]) {
-            // The event name is discarded
-            CleverTapLogStaticDebug(@"Discarded event name: %@", discardedName);
-            return true;
-        }
-    return false;
 }
 @end

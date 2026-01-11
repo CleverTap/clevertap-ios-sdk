@@ -37,7 +37,6 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 CTDeleteOperationHandler : NSObject
 
 - (instancetype)initWithChangeTracker:(CTProfileChangeTracker *)changeTracker;
-
 - (void)handleDelete:(NSMutableDictionary *)target
                  key:(NSString *)key
             newValue:(id)newValue
@@ -82,33 +81,25 @@ CTDeleteOperationHandler : NSObject
 #pragma mark - Utility Classes
 
 @interface CTProfileOperationUtils : NSObject
-
 + (BOOL)isDeleteMarker:(id)value;
 + (id)processDatePrefix:(NSString *)value;
-
 @end
 
 @interface CTArrayMergeUtils : NSObject
-
 + (NSArray *)copyArray:(NSArray *)array;
 + (BOOL)hasDeleteMarkerElements:(NSArray *)array;
 + (BOOL)hasJsonObjectElements:(NSArray *)array;
 + (BOOL)shouldMergeArrayElements:(NSArray *)array;
 + (BOOL)arrayContainsString:(NSArray *)array string:(NSString *)string;
-
 @end
 
 @interface CTNumberOperationUtils : NSObject
-
 + (NSNumber *)addNumbers:(NSNumber *)num1 number:(NSNumber *)num2;
 + (NSNumber *)subtractNumbers:(NSNumber *)num1 number:(NSNumber *)num2;
-
 @end
 
 @interface CTJsonComparisonUtils : NSObject
-
 + (BOOL)areEqual:(id)value1 value:(id)value2;
-
 @end
 
 NS_ASSUME_NONNULL_END

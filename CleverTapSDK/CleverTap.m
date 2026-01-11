@@ -2058,10 +2058,9 @@ static BOOL sharedInstanceErrorLogged;
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
-        //TODO: send flattened data instead of eventdata
-//        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:event];
-        NSDictionary<NSString *, NSDictionary<NSString *, id> *>  *flattenedProfileChanges = flattenedEventData.profileChanges;
-        [self.inAppEvaluationManager evaluateOnUserAttributeChange:flattenedProfileChanges];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedProfileChanges = flattenedEventData.profileChanges;
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:flattenedProfileChanges];
+        [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
     //TODO: send flattened data instaed of eventdata
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
@@ -3090,7 +3089,7 @@ static BOOL sharedInstanceErrorLogged;
                 NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
                 event[@"profile"] = profile;
                 
-                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:@"__DELETE__" withKey:_key command:CTProfileOperationRemove];
+                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:CTProfileOperationDelete];
                 [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             }
             if (errors) {
@@ -3195,7 +3194,7 @@ static BOOL sharedInstanceErrorLogged;
         event[@"profile"] = profile;
         CTFlattenedEventData *flattenedData;
         if (operation == CTProfileOperationDelete) {
-            flattenedData = [self getFlattenedProfileChange:@"__DELETE__" withKey:_key command:operation];
+            flattenedData = [self getFlattenedProfileChange:kCLTAP_DELETE_MARKER withKey:_key command:operation];
         } else {
             flattenedData = [self getFlattenedProfileListChanges:updatedMultiValue withKey:_key command:operation];
         }

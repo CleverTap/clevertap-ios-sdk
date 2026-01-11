@@ -72,7 +72,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)defaultConfigWithCountryCode:(nullable NSString*)countryCode;
 
 + (BOOL)isRestrictedEventName:(NSString *)name;
-+ (BOOL)isDiscardedEventName:(NSString *)name;
 @end
 
 NS_ASSUME_NONNULL_END

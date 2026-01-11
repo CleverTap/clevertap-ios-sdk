@@ -67,6 +67,5 @@ typedef NS_ENUM(NSInteger, CTProfileOperation) {
 - (NSDictionary *)readUserEventLogs;
 
 - (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey value:(id)value command:(CTProfileOperation)operation;
-- (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson
-                                                               operation:(CTProfileOperation)operation;
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson operation:(CTProfileOperation)operation;
 @end

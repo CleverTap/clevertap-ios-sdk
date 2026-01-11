@@ -58,13 +58,10 @@ static CTEventDataValidator *_eventDataValidator;
         // Log error and push to stack
         CleverTapLogStaticDebug(@"%@: Event dropped - %@", self, nameResult.errorDesc);
         [errors addObject:nameResult];
+        completion(nil, errors);
         return;
     }
-    
-    // Get cleaned event name
     NSString *cleanedEventName = nameResult.cleanedData;
-    
-    // Log warning if name was modified
     if (nameResult.outcome == CTValidationOutcomeWarning) {
         CleverTapLogStaticDebug(@"%@: Event name modified - %@", self, nameResult.errorDesc);
         [errors addObject:nameResult];
@@ -72,13 +69,14 @@ static CTEventDataValidator *_eventDataValidator;
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     @try {
-        // Step 2: Validate event properties
+        //Validate event properties
         CTValidationResult *dataResult = [_eventDataValidator validateEventData:eventActions];
         NSDictionary *cleanedProperties = dataResult.cleanedData;
         
         if (dataResult.shouldDrop) {
             CleverTapLogStaticDebug(@"%@: Property dropped - %@", self, dataResult.errorDesc);
             [errors addObject:dataResult];
+            completion(nil, errors);
             return;
         }
         if (dataResult.outcome == CTValidationOutcomeWarning && dataResult.subResults.count > 0) {
@@ -87,7 +85,6 @@ static CTEventDataValidator *_eventDataValidator;
             }
             [errors addObjectsFromArray:dataResult.subResults];
         }
-        
         event[CLTAP_EVENT_NAME] = cleanedEventName;
         event[CLTAP_EVENT_DATA] = cleanedProperties;
         completion(event, errors);
@@ -108,7 +105,6 @@ static CTEventDataValidator *_eventDataValidator;
         completion(nil, errors);
         return;
     }
-    
     if (((int) [items count]) > 50) {
         CTValidationResult *error = [[CTValidationResult alloc] init];
         [error setErrorCode:522];
@@ -116,17 +112,16 @@ static CTEventDataValidator *_eventDataValidator;
         CleverTapLogStaticDebug(@"Charged event contained more than 50 items.");
         [errors addObject:error];
     }
-    
     NSMutableDictionary *evtData = [[NSMutableDictionary alloc] init];
     NSMutableDictionary *chargedEvent = [[NSMutableDictionary alloc] init];
     @try {
-        // Step 2: Validate event properties
         CTValidationResult *dataResult = [_eventDataValidator validateEventData:chargeDetails];
         evtData = dataResult.cleanedData;
         
         if (dataResult.shouldDrop) {
             CleverTapLogStaticDebug(@"%@: Charged Event Property dropped - %@", self, dataResult.errorDesc);
             [errors addObject:dataResult];
+            completion(nil, errors);
             return;
         }
         if (dataResult.outcome == CTValidationOutcomeWarning && dataResult.subResults.count > 0) {
@@ -135,8 +130,6 @@ static CTEventDataValidator *_eventDataValidator;
             }
             [errors addObjectsFromArray:dataResult.subResults];
         }
-        
-        // Validate each item
         NSMutableArray *jsonItemsArray = [NSMutableArray array];
         for (id map in items) {
             CTValidationResult *itemResult = [_eventDataValidator validateEventData:map];
@@ -147,7 +140,6 @@ static CTEventDataValidator *_eventDataValidator;
             }
         }
         evtData[CLTAP_CHARGED_EVENT_ITEMS] = jsonItemsArray;
-        
         chargedEvent[CLTAP_EVENT_NAME] = CLTAP_CHARGED_EVENT;
         chargedEvent[CLTAP_EVENT_DATA] = evtData;
         completion(chargedEvent, errors);
