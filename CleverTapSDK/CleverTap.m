@@ -3184,12 +3184,6 @@ static BOOL sharedInstanceErrorLogged;
         NSString* _key = [customFields allKeys][0];
         CleverTapLogInternal(self.config.logLevel, @"Created multi-value profile push: %@", customFields);
         [profile addEntriesFromDictionary:customFields];
-        
-        if (updatedMultiValue && [updatedMultiValue count] > 0) {
-            [self.localDataStore setProfileFieldWithKey:_key andValue:updatedMultiValue];
-        } else {
-            [self.localDataStore removeProfileFieldForKey:_key];
-        }
         NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
         event[@"profile"] = profile;
         CTFlattenedEventData *flattenedData;
@@ -3198,7 +3192,6 @@ static BOOL sharedInstanceErrorLogged;
         } else {
             flattenedData = [self getFlattenedProfileListChanges:updatedMultiValue withKey:_key command:operation];
         }
-
         [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
     }
     if (errors) {

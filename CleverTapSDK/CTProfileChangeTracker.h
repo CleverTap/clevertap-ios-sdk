@@ -37,11 +37,11 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 CTDeleteOperationHandler : NSObject
 
 - (instancetype)initWithChangeTracker:(CTProfileChangeTracker *)changeTracker;
-- (void)handleDelete:(NSMutableDictionary *)target
+- (BOOL)handleDelete:(NSMutableDictionary *)target
                  key:(NSString *)key
             newValue:(id)newValue
          currentPath:(NSString *)currentPath
-             changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes
+             changes:(nullable NSMutableDictionary<NSString *, NSDictionary *> *)changes
      recursiveMerge:(CTProfileRecursiveBlock)recursiveMerge;
 
 @end

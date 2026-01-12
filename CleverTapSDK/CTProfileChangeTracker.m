@@ -45,7 +45,6 @@ static NSString *const kDatePrefix = @"$D_";
         }
     }
 }
-
 @end
 
 #pragma mark - Delete Operation Handler Implementation
@@ -63,32 +62,42 @@ static NSString *const kDatePrefix = @"$D_";
     return self;
 }
 
-- (void)handleDelete:(NSMutableDictionary *)target key:(NSString *)key newValue:(id)newValue currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes recursiveMerge:(CTProfileRecursiveBlock)recursiveMerge {
-    
-    if (!target[key]) return;
+- (BOOL)handleDelete:(NSMutableDictionary *)target key:(NSString *)key newValue:(id)newValue currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes recursiveMerge:(CTProfileRecursiveBlock)recursiveMerge {
     id oldValue = target[key];
+    if (!oldValue) {
+        return NO;
+    }
+    BOOL didModify = NO;
     if ([CTProfileOperationUtils isDeleteMarker:newValue]) {
         // Delete this key entirely
         [self deleteValue:target key:key value:oldValue path:currentPath changes:changes];
+        didModify = YES;
     }
-    else if ([oldValue isKindOfClass:[NSDictionary class]] &&
-             [newValue isKindOfClass:[NSDictionary class]]) {
+    else if ([oldValue isKindOfClass:[NSDictionary class]] && [newValue isKindOfClass:[NSDictionary class]]) {
+        NSUInteger beforeCount = [(NSDictionary *)oldValue count];
         // Recurse into nested objects for deletion
         recursiveMerge((NSMutableDictionary *)oldValue, (NSDictionary *)newValue, currentPath, changes);
         // Remove the object if it's now empty
-        if ([((NSDictionary *)oldValue) count] == 0) {
+        if ([(NSDictionary *)oldValue count] == 0) {
             [target removeObjectForKey:key];
+            didModify = YES;
+        }
+        else if ([(NSDictionary *)oldValue count] != beforeCount) {
+            didModify = YES;
         }
     }
-    else if ([oldValue isKindOfClass:[NSArray class]] &&
-             [newValue isKindOfClass:[NSArray class]]) {
+    else if ([oldValue isKindOfClass:[NSArray class]] && [newValue isKindOfClass:[NSArray class]]) {
+        NSUInteger beforeCount = [(NSArray *)oldValue count];
         // Handle array element deletions
         [self handleArrayDeletion:target key:key oldArray:(NSMutableArray *)oldValue newArray:(NSArray *)newValue currentPath:currentPath changes:changes];
+        if ([(NSArray *)oldValue count] != beforeCount) {
+            didModify = YES;
+        }
     }
+    return didModify;
 }
 
 - (void)handleArrayDeletion:(NSMutableDictionary *)parentJson key:(NSString *)key oldArray:(NSMutableArray *)oldArray newArray:(NSArray *)newArray currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    
     if ([newArray count] == 0) return;
     BOOL hasDeleteMarkers = [CTArrayMergeUtils hasDeleteMarkerElements:newArray];
     BOOL hasObjectsToDelete = [CTArrayMergeUtils hasJsonObjectElements:newArray];
@@ -104,36 +113,49 @@ static NSString *const kDatePrefix = @"$D_";
 }
 
 - (void)deleteFromArrayElements:(NSMutableArray *)oldArray newArray:(NSArray *)newArray basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    
     NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
     BOOL arrayModified = NO;
-    NSInteger minLength = MIN([newArray count], [oldArray count]);
-    for (NSInteger i = 0; i < minLength; i++) {
+    NSInteger minLength = MIN(oldArray.count, newArray.count);
+    for (NSInteger i = minLength - 1; i >= 0; i--) {
         id oldElement = oldArray[i];
         id newElement = newArray[i];
+        if (![oldElement isKindOfClass:[NSDictionary class]] || ![newElement isKindOfClass:[NSDictionary class]]) {
+            continue;
+        }
+        // Work on a mutable dictionary
+        NSMutableDictionary *oldDict =
+        [oldElement isKindOfClass:[NSMutableDictionary class]] ? (NSMutableDictionary *)oldElement : [oldElement mutableCopy];
         
-        if ([oldElement isKindOfClass:[NSDictionary class]] && [newElement isKindOfClass:[NSDictionary class]]) {
-            NSMutableDictionary *oldDict = (NSMutableDictionary *)[oldElement mutableCopy];
-            NSDictionary *newDict = (NSDictionary *)newElement;
-            // Recursively delete fields from this array element
-            CTDeleteOperationHandler *elementHandler =
-            [[CTDeleteOperationHandler alloc] initWithChangeTracker:self.changeTracker];
-            for (NSString *key in newDict) {
-                id value = newDict[key];
-                [elementHandler handleDelete:oldDict key:key newValue:value currentPath:@"" changes:[NSMutableDictionary new] recursiveMerge:^(NSMutableDictionary *target, NSDictionary *source, NSString *path, NSMutableDictionary *localChanges) {
-                    if (source) {
-                        [elementHandler handleDeleteRecursive:target source:source changes:[NSMutableDictionary new]];
-                    }
-                }];
-            }
-            arrayModified = YES;
-            // Remove empty objects
-            if ([oldDict count] == 0) {
-                [oldArray removeObjectAtIndex:i];
+        NSDictionary *newDict = (NSDictionary *)newElement;
+        CTDeleteOperationHandler *elementHandler =
+        [[CTDeleteOperationHandler alloc] initWithChangeTracker:self.changeTracker];
+        
+        BOOL elementModified = NO;
+        for (NSString *key in newDict) {
+            id value = newDict[key];
+            // Ideally handleDelete should return whether it mutated `oldDict`
+            BOOL didDelete =
+            [elementHandler handleDelete:oldDict key:key newValue:value currentPath:@"" changes:nil recursiveMerge:^(NSMutableDictionary *target, NSDictionary *source, NSString *path, NSMutableDictionary *localChanges) {
+                if (source) {
+                    [elementHandler handleDeleteRecursive:target source:source changes:nil];
+                }
+            }];
+            if (didDelete) {
+                elementModified = YES;
             }
         }
+        if (!elementModified) {
+            continue;
+        }
+        arrayModified = YES;
+        // Remove empty dictionaries
+        if (oldDict.count == 0) {
+            [oldArray removeObjectAtIndex:i];
+        } else {
+            // Write back the modified dictionary if needed
+            oldArray[i] = oldDict;
+        }
     }
-    
     if (arrayModified) {
         NSDictionary *change = @{
             @"oldValue": oldArrayCopy,
@@ -143,9 +165,7 @@ static NSString *const kDatePrefix = @"$D_";
     }
 }
 
-- (void)handleDeleteRecursive:(NSMutableDictionary *)target
-                       source:(NSDictionary *)source
-                      changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+- (void)handleDeleteRecursive:(NSMutableDictionary *)target source:(NSDictionary *)source changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
     for (NSString *key in source) {
         id newValue = source[key];
         [self handleDelete:target key:key newValue:newValue currentPath:@"" changes:changes recursiveMerge:^(NSMutableDictionary *t, NSDictionary *s, NSString *p, NSMutableDictionary *c) {
@@ -190,9 +210,7 @@ static NSString *const kDatePrefix = @"$D_";
     [self.changeTracker recordDeletion:value path:path changes:changes];
     [parent removeObjectForKey:key];
 }
-
 @end
-
 
 #pragma mark - Update Operation Handler Implementation
 
@@ -214,12 +232,7 @@ static NSString *const kDatePrefix = @"$D_";
 - (void)handleOperation:(NSMutableDictionary *)target key:(NSString *)key newValue:(id)newValue currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes operation:(CTProfileOperation)operation recursiveApply:(CTProfileRecursiveBlock)recursiveApply {
     
     if (!target[key]) {
-        [self handleMissingKey:target
-                           key:key
-                      newValue:newValue
-                   currentPath:currentPath
-                       changes:changes
-                     operation:operation];
+        [self handleMissingKey:target key:key newValue:newValue currentPath:currentPath changes:changes operation:operation];
         return;
     }
     id oldValue = target[key];
@@ -363,7 +376,6 @@ static NSString *const kDatePrefix = @"$D_";
     
     NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
     BOOL modified = NO;
-    
     for (id item in newArray) {
         if ([item isKindOfClass:[NSString class]]) {
             id processedItem = [CTProfileOperationUtils processDatePrefix:(NSString *)item];
@@ -371,7 +383,6 @@ static NSString *const kDatePrefix = @"$D_";
             modified = YES;
         }
     }
-    
     if (modified) {
         NSDictionary *change = @{
             @"oldValue": oldArrayCopy,
@@ -382,7 +393,6 @@ static NSString *const kDatePrefix = @"$D_";
 }
 
 - (void)handleArrayRemove:(NSMutableDictionary *)parentJson key:(NSString *)key oldArray:(NSMutableArray *)oldArray newArray:(NSArray *)newArray path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    
     NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
     NSMutableArray *resultArray = [NSMutableArray array];
     BOOL modified = NO;
@@ -467,7 +477,6 @@ static NSString *const kDatePrefix = @"$D_";
 }
 
 - (BOOL)handleOutOfBoundsIndex:(NSMutableArray *)oldArray newArray:(NSArray *)newArray index:(NSInteger)index operation:(CTProfileOperation)operation {
-    
     if (operation != CTProfileOperationSet) return NO;
     id newElement = newArray[index];
     while ([oldArray count] <= index) {
@@ -478,21 +487,17 @@ static NSString *const kDatePrefix = @"$D_";
 }
 
 - (NSNumber *)applyNumberOperation:(NSNumber *)oldValue newValue:(NSNumber *)newValue operation:(CTProfileOperation)operation {
-    
     switch (operation) {
         case CTProfileOperationIncrement:
             return [CTNumberOperationUtils addNumbers:oldValue number:newValue];
-            
         case CTProfileOperationDecrement:
             return [CTNumberOperationUtils subtractNumbers:oldValue number:newValue];
-            
         default:
             return oldValue;
     }
 }
 
 - (void)getArrayElements:(NSMutableArray *)oldArray newArray:(NSArray *)newArray basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes recursiveTraversal:(CTProfileRecursiveBlock)recursiveTraversal {
-    
     for (NSInteger i = 0; i < [newArray count]; i++) {
         if (i >= [oldArray count]) {
             continue;
@@ -616,23 +621,18 @@ static NSString *const kDatePrefix = @"$D_";
 + (BOOL)areEqual:(id)value1 value:(id)value2 {
     if (value1 == value2) return YES;
     if (!value1 || !value2) return NO;
-    
     if ([value1 isKindOfClass:[NSString class]] && [value2 isKindOfClass:[NSString class]]) {
         return [(NSString *)value1 isEqualToString:(NSString *)value2];
     }
-    
     if ([value1 isKindOfClass:[NSNumber class]] && [value2 isKindOfClass:[NSNumber class]]) {
         return [(NSNumber *)value1 isEqualToNumber:(NSNumber *)value2];
     }
-    
     if ([value1 isKindOfClass:[NSArray class]] && [value2 isKindOfClass:[NSArray class]]) {
         return [(NSArray *)value1 isEqualToArray:(NSArray *)value2];
     }
-    
     if ([value1 isKindOfClass:[NSDictionary class]] && [value2 isKindOfClass:[NSDictionary class]]) {
         return [(NSDictionary *)value1 isEqualToDictionary:(NSDictionary *)value2];
     }
-    
     return [value1 isEqual:value2];
 }
 
