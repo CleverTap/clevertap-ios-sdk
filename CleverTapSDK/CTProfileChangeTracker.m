@@ -216,11 +216,6 @@ static NSString *const kDatePrefix = @"$D_";
 }
 
 - (void)deleteValue:(NSMutableDictionary *)parent key:(NSString *)key value:(id)value path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    if ([value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSDictionary class]]) {
-        CleverTapLogStaticDebug(@"%@: Profile remove operation failed as value is not leaf node: %@",
-                                self, value);
-        return;
-    }
     [self.changeTracker recordDeletion:value path:path changes:changes];
     [parent removeObjectForKey:key];
 }
