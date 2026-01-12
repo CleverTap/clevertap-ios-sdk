@@ -14,17 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTPropertyKeyValidator : NSObject
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config;
-
-/**
- * Validates a property key.
- * Returns CTValidationResult with cleaned key and outcome.
- */
 - (CTValidationResult *)validateKey:(nullable NSString *)key;
-
-/**
- * Validates a multi-value property key (additional restrictions).
- * Returns CTValidationResult with cleaned key and outcome.
- */
 - (CTValidationResult *)validateMultiValueKey:(nullable NSString *)key;
 
 @end

@@ -3089,7 +3089,7 @@ static BOOL sharedInstanceErrorLogged;
                 NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
                 event[@"profile"] = profile;
                 
-                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:CTProfileOperationDelete];
+                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChange:kCLTAP_DELETE_MARKER withKey:_key command:CTProfileOperationDelete]?: CTFlattenedEventData.noData;
                 [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             }
             if (errors) {

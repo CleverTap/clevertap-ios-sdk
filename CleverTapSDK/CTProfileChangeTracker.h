@@ -32,9 +32,7 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 
 #pragma mark - Delete Operation Handler
 
-@interface
-
-CTDeleteOperationHandler : NSObject
+@interface CTDeleteOperationHandler : NSObject
 
 - (instancetype)initWithChangeTracker:(CTProfileChangeTracker *)changeTracker;
 - (BOOL)handleDelete:(NSMutableDictionary *)target
@@ -94,8 +92,8 @@ CTDeleteOperationHandler : NSObject
 @end
 
 @interface CTNumberOperationUtils : NSObject
-+ (NSNumber *)addNumbers:(NSNumber *)num1 number:(NSNumber *)num2;
-+ (NSNumber *)subtractNumbers:(NSNumber *)num1 number:(NSNumber *)num2;
++ (NSNumber *)addNumbers:(NSNumber *)a number:(NSNumber *)b;
++ (NSNumber *)subtractNumbers:(NSNumber *)a number:(NSNumber *)b;
 @end
 
 @interface CTJsonComparisonUtils : NSObject

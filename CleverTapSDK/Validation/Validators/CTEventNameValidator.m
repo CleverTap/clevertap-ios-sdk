@@ -20,18 +20,6 @@
     return self;
 }
 
-/**
- * Cleans the event name to the following guidelines:
- *
- * The following characters are removed:
- * dot, colon, dollar sign, single quote, double quote, and backslash.
- * Additionally, the event name is limited to kMaxKeyChars characters.
- *
- *
- * @param eventName The event name to be cleaned
- * @return The ValidationResult object CTValidationOutcomeSuccess, CTValidationOutcomeWarning and CTValidationOutcomeDrop
- *
- */
 - (CTValidationResult *)validateEventName:(NSString *)eventName {
     // Step 1: Check for null/empty
     if (!eventName || eventName.length == 0) {
@@ -43,14 +31,12 @@
     // Step 2: Normalize the event name
     NSString *originalName = eventName;
     NSString *cleaned = [self normalizeEventName:eventName];
-    
     // Step 3: Check if became empty after normalization
     if (!cleaned || cleaned.length == 0) {
         return [CTValidationResult dropWithCode:510
                                         message:@"Event name became empty after normalization"
                                          reason:CTDropReasonNullEventName];
     }
-    
     // Step 4: Check restricted event names
     if ([self isNameRestricted:cleaned]) {
         NSString *message = [NSString stringWithFormat:@"'%@' is a restricted event name", cleaned];
@@ -58,7 +44,6 @@
                                         message:message
                                          reason:CTDropReasonRestrictedEventName];
     }
-    
     // Step 5: Check discarded event names
     if ([self isNameDiscarded:cleaned]) {
         NSString *message = [NSString stringWithFormat:@"'%@' is a discarded event name", cleaned];
@@ -66,7 +51,6 @@
                                         message:message
                                          reason:CTDropReasonDiscardedEventName];
     }
-    
     // Step 6: Check if modifications were made during normalization
     if (![cleaned isEqualToString:originalName]) {
         NSString *message = [NSString stringWithFormat:
@@ -75,7 +59,6 @@
                                            message:message
                                               data:cleaned];
     }
-    
     // Step 7: Success - no issues found
     return [CTValidationResult successWithData:cleaned];
 }
@@ -93,14 +76,12 @@
     // Step 1: Trim leading/trailing whitespace
     NSString *cleaned = [eventName stringByTrimmingCharactersInSet:
                         [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
     // Step 2: Remove invalid characters using NSCharacterSet
     if (self.config.eventNameCharsNotAllowed) {
         NSString *filtered = [[cleaned componentsSeparatedByCharactersInSet:self.config.eventNameCharsNotAllowed]
                              componentsJoinedByString:@""];
         cleaned = filtered;
     }
-    
     // Step 3: Truncate if exceeds max length
     if (self.config.maxEventNameLength) {
         NSInteger maxLength = [self.config.maxEventNameLength integerValue];
@@ -108,7 +89,6 @@
             cleaned = [cleaned substringToIndex:maxLength];
         }
     }
-    
     // Step 4: Final trim to remove any trailing whitespace
     return [cleaned stringByTrimmingCharactersInSet:
            [NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -122,16 +102,13 @@
     if (!self.config.restrictedEventNames) {
         return NO;
     }
-    
     NSString *normalizedName = [name lowercaseString];
-    
     for (NSString *restricted in self.config.restrictedEventNames) {
         NSString *normalizedRestricted = [restricted lowercaseString];
         if ([normalizedName isEqualToString:normalizedRestricted]) {
             return YES;
         }
     }
-    
     return NO;
 }
 
@@ -143,9 +120,7 @@
     if (!self.config.discardedEventNames) {
         return NO;
     }
-    
     NSString *normalizedName = [name lowercaseString];
-    
     for (NSString *discarded in self.config.discardedEventNames) {
         NSString *normalizedDiscarded = [discarded lowercaseString];
         if ([normalizedName isEqualToString:normalizedDiscarded]) {
@@ -154,5 +129,4 @@
     }
     return NO;
 }
-
 @end

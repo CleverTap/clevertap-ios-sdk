@@ -102,7 +102,7 @@ static NSString *const kDatePrefix = @"$D_";
     BOOL hasDeleteMarkers = [CTArrayMergeUtils hasDeleteMarkerElements:newArray];
     BOOL hasObjectsToDelete = [CTArrayMergeUtils hasJsonObjectElements:newArray];
     if (hasDeleteMarkers) {
-        [self deleteArrayElements:oldArray newArray:newArray basePath:currentPath changes:changes];
+        [self deleteArrayElements:parentJson key:key oldArray:oldArray newArray:newArray basePath:currentPath changes:changes];
     }
     else if (hasObjectsToDelete) {
         [self deleteFromArrayElements:oldArray newArray:newArray basePath:currentPath changes:changes];
@@ -176,7 +176,7 @@ static NSString *const kDatePrefix = @"$D_";
     }
 }
 
-- (void)deleteArrayElements:(NSMutableArray *)oldArray newArray:(NSArray *)newArray basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+- (void)deleteArrayElements:(NSMutableDictionary *)parentJson key:(NSString *)key oldArray:(NSMutableArray *)oldArray newArray:(NSArray *)newArray basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
     
     NSMutableArray *indicesToDelete = [NSMutableArray array];
     // Collect indices to delete
@@ -205,17 +205,21 @@ static NSString *const kDatePrefix = @"$D_";
     }
     // Only report changes if we actually removed something
     if (removedAny) {
-//        [parentJson setObject:mutableOldArray forKey:key];
+        [parentJson setObject:mutableOldArray forKey:key];
         NSDictionary *change = @{
             @"oldValue": oldArrayCopy,
             @"newValue": oldArray
         };
         [changes setObject:change forKey:basePath];
     }
-    
 }
 
 - (void)deleteValue:(NSMutableDictionary *)parent key:(NSString *)key value:(id)value path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+    if ([value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSDictionary class]]) {
+        CleverTapLogStaticDebug(@"%@: Profile remove operation failed as value is not leaf node: %@",
+                                self, value);
+        return;
+    }
     [self.changeTracker recordDeletion:value path:path changes:changes];
     [parent removeObjectForKey:key];
 }
@@ -474,7 +478,6 @@ static NSString *const kDatePrefix = @"$D_";
             arrayModified = YES;
         }
     }
-    
     if (arrayModified) {
         NSDictionary *change = @{
             @"oldValue": oldArrayCopy,
@@ -532,7 +535,6 @@ static NSString *const kDatePrefix = @"$D_";
         }
     }
 }
-
 @end
 
 #pragma mark - Utility Classes Implementation
@@ -553,7 +555,6 @@ static NSString *const kDatePrefix = @"$D_";
     }
     return value;
 }
-
 @end
 
 @implementation CTArrayMergeUtils
@@ -594,34 +595,55 @@ static NSString *const kDatePrefix = @"$D_";
 + (BOOL)arrayContainsString:(NSArray *)array string:(NSString *)string {
     return [array containsObject:string];
 }
-
 @end
 
 @implementation CTNumberOperationUtils
 
-+ (NSNumber *)addNumbers:(NSNumber *)num1 number:(NSNumber *)num2 {
-    // Handle integer and floating point
-    if (strcmp([num1 objCType], @encode(double)) == 0 ||
-        strcmp([num2 objCType], @encode(double)) == 0 ||
-        strcmp([num1 objCType], @encode(float)) == 0 ||
-        strcmp([num2 objCType], @encode(float)) == 0) {
-        return @([num1 doubleValue] + [num2 doubleValue]);
-    } else {
-        return @([num1 longLongValue] + [num2 longLongValue]);
++ (NSNumber *)addNumbersWithA:(NSNumber *)a b:(NSNumber *)b {
+    const char *aType = [a objCType];
+    const char *bType = [b objCType];
+    
+    // Check if both are integers
+    if (strcmp(aType, @encode(int)) == 0 && strcmp(bType, @encode(int)) == 0) {
+        return @([a intValue] + [b intValue]);
+    }
+    // Check if either is long
+    else if (strcmp(aType, @encode(long)) == 0 || strcmp(bType, @encode(long)) == 0 ||
+             strcmp(aType, @encode(long long)) == 0 || strcmp(bType, @encode(long long)) == 0) {
+        return @([a longLongValue] + [b longLongValue]);
+    }
+    // Check if either is float
+    else if (strcmp(aType, @encode(float)) == 0 || strcmp(bType, @encode(float)) == 0) {
+        return @([a floatValue] + [b floatValue]);
+    }
+    // Default to double
+    else {
+        return @([a doubleValue] + [b doubleValue]);
     }
 }
 
-+ (NSNumber *)subtractNumbers:(NSNumber *)num1 number:(NSNumber *)num2 {
-    if (strcmp([num1 objCType], @encode(double)) == 0 ||
-        strcmp([num2 objCType], @encode(double)) == 0 ||
-        strcmp([num1 objCType], @encode(float)) == 0 ||
-        strcmp([num2 objCType], @encode(float)) == 0) {
-        return @([num1 doubleValue] - [num2 doubleValue]);
-    } else {
-        return @([num1 longLongValue] - [num2 longLongValue]);
++ (NSNumber *)subtractNumbersWithA:(NSNumber *)a b:(NSNumber *)b {
+    const char *aType = [a objCType];
+    const char *bType = [b objCType];
+    
+    // Check if both are integers
+    if (strcmp(aType, @encode(int)) == 0 && strcmp(bType, @encode(int)) == 0) {
+        return @([a intValue] - [b intValue]);
+    }
+    // Check if either is long
+    else if (strcmp(aType, @encode(long)) == 0 || strcmp(bType, @encode(long)) == 0 ||
+             strcmp(aType, @encode(long long)) == 0 || strcmp(bType, @encode(long long)) == 0) {
+        return @([a longLongValue] - [b longLongValue]);
+    }
+    // Check if either is float
+    else if (strcmp(aType, @encode(float)) == 0 || strcmp(bType, @encode(float)) == 0) {
+        return @([a floatValue] - [b floatValue]);
+    }
+    // Default to double
+    else {
+        return @([a doubleValue] - [b doubleValue]);
     }
 }
-
 @end
 
 @implementation CTJsonComparisonUtils
