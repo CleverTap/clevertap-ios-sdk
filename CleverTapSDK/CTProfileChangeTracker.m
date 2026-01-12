@@ -178,7 +178,6 @@ static NSString *const kDatePrefix = @"$D_";
 
 - (void)deleteArrayElements:(NSMutableArray *)oldArray newArray:(NSArray *)newArray basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
     
-    NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
     NSMutableArray *indicesToDelete = [NSMutableArray array];
     // Collect indices to delete
     for (NSInteger i = 0; i < [newArray count]; i++) {
@@ -187,18 +186,33 @@ static NSString *const kDatePrefix = @"$D_";
         }
     }
     if ([indicesToDelete count] == 0) return;
-    // Delete in reverse order to maintain correct indices
-    NSArray *sortedIndices = [indicesToDelete sortedArrayUsingComparator:^NSComparisonResult(NSNumber *a, NSNumber *b) {
-        return [b compare:a]; // Descending order
+    NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
+    NSMutableArray *mutableOldArray = [oldArray mutableCopy];
+    BOOL removedAny = NO;
+    // Sort indices in descending order to maintain correct indices during deletion
+    NSArray *sortedIndices = [indicesToDelete sortedArrayUsingComparator:^NSComparisonResult(NSNumber *obj1, NSNumber *obj2) {
+        return [obj2 compare:obj1]; // Descending order
     }];
+    // Delete in reverse order to maintain correct indices
     for (NSNumber *indexNum in sortedIndices) {
-        [oldArray removeObjectAtIndex:[indexNum integerValue]];
+        NSInteger index = [indexNum integerValue];
+        id oldElement = [oldArray objectAtIndex:index];
+        // Check is needed since BE can only delete leaf nodes
+        if (![oldElement isKindOfClass:[NSDictionary class]] && ![oldElement isKindOfClass:[NSArray class]]) {
+            [mutableOldArray removeObjectAtIndex:index];
+            removedAny = YES;
+        }
     }
-    NSDictionary *change = @{
-        @"oldValue": oldArrayCopy,
-        @"newValue": oldArray
-    };
-    changes[basePath] = change;
+    // Only report changes if we actually removed something
+    if (removedAny) {
+//        [parentJson setObject:mutableOldArray forKey:key];
+        NSDictionary *change = @{
+            @"oldValue": oldArrayCopy,
+            @"newValue": oldArray
+        };
+        [changes setObject:change forKey:basePath];
+    }
+    
 }
 
 - (void)deleteValue:(NSMutableDictionary *)parent key:(NSString *)key value:(id)value path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
@@ -267,9 +281,8 @@ static NSString *const kDatePrefix = @"$D_";
 }
 
 - (void)handleMissingKey:(NSMutableDictionary *)target key:(NSString *)key newValue:(id)newValue currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes operation:(CTProfileOperation)operation {
-    
-    // Skip adding keys for arithmetic operations and GET operations
-    if (operation == CTProfileOperationIncrement || operation == CTProfileOperationDecrement || operation == CTProfileOperationGet) {
+    // Skip GET operations on missing keys
+    if (operation == CTProfileOperationGet) {
         return;
     }
     target[key] = newValue;
