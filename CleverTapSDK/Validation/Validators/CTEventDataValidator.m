@@ -146,9 +146,7 @@
                                                                     data:nil]];
             continue;
         }
-        
         id value = dict[key];
-        
         // Handle null - log warning and continue
         if (!value || [value isKindOfClass:[NSNull class]]) {
             [self.warnings addObject:[CTValidationResult warningWithCode:545

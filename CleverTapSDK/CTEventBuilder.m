@@ -19,13 +19,16 @@
 static CTEventNameValidator *_eventKeyValidator;
 static CTEventDataValidator *_eventDataValidator;
 
-+ (void)initializeWithValidationConfig:(CTValidationConfig*)validationConfig {
-    if (self == [CTEventBuilder class]) {
-        // Initialize validators with default config
-        _eventKeyValidator = [[CTEventNameValidator alloc] initWithConfig:validationConfig];
-        _eventDataValidator = [[CTEventDataValidator alloc] initWithConfig:validationConfig];
-    }
++ (void)initializeWithValidationConfig:(CTValidationConfig *)validationConfig {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        if (self == [CTEventBuilder class]) {
+            _eventKeyValidator = [[CTEventNameValidator alloc] initWithConfig:validationConfig];
+            _eventDataValidator = [[CTEventDataValidator alloc] initWithConfig:validationConfig];
+        }
+    });
 }
+
 + (NSMutableDictionary *)getErrorObject:(CTValidationResult *)vr {
     NSMutableDictionary *error = [[NSMutableDictionary alloc] init];
     @try {

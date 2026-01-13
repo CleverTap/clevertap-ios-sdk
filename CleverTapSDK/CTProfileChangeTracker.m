@@ -11,7 +11,6 @@
 #import "CTConstants.h"
 
 static NSString *const kGetMarker = @"__GET_MARKER__";
-static NSString *const kDatePrefix = @"$D_";
 
 #pragma mark - Change Tracker Implementation
 
@@ -74,23 +73,37 @@ static NSString *const kDatePrefix = @"$D_";
         didModify = YES;
     }
     else if ([oldValue isKindOfClass:[NSDictionary class]] && [newValue isKindOfClass:[NSDictionary class]]) {
-        NSUInteger beforeCount = [(NSDictionary *)oldValue count];
+        NSMutableDictionary *mutableOldValue;
+        if ([oldValue isKindOfClass:[NSMutableDictionary class]]) {
+            mutableOldValue = (NSMutableDictionary *)oldValue;
+        } else {
+            mutableOldValue = [oldValue mutableCopy];
+            target[key] = mutableOldValue;  // Replace immutable with mutable
+        }
+        NSUInteger beforeCount = mutableOldValue.count;
         // Recurse into nested objects for deletion
-        recursiveMerge((NSMutableDictionary *)oldValue, (NSDictionary *)newValue, currentPath, changes);
+        recursiveMerge(mutableOldValue, (NSDictionary *)newValue, currentPath, changes);
         // Remove the object if it's now empty
-        if ([(NSDictionary *)oldValue count] == 0) {
+        if (mutableOldValue.count == 0) {
             [target removeObjectForKey:key];
             didModify = YES;
         }
-        else if ([(NSDictionary *)oldValue count] != beforeCount) {
+        else if (mutableOldValue.count != beforeCount) {
             didModify = YES;
         }
     }
     else if ([oldValue isKindOfClass:[NSArray class]] && [newValue isKindOfClass:[NSArray class]]) {
-        NSUInteger beforeCount = [(NSArray *)oldValue count];
+        NSMutableArray *mutableOldValue;
+        if ([oldValue isKindOfClass:[NSMutableArray class]]) {
+            mutableOldValue = (NSMutableArray *)oldValue;
+        } else {
+            mutableOldValue = [oldValue mutableCopy];
+            target[key] = mutableOldValue;  // Replace immutable with mutable
+        }
+        NSUInteger beforeCount = mutableOldValue.count;
         // Handle array element deletions
-        [self handleArrayDeletion:target key:key oldArray:(NSMutableArray *)oldValue newArray:(NSArray *)newValue currentPath:currentPath changes:changes];
-        if ([(NSArray *)oldValue count] != beforeCount) {
+        [self handleArrayDeletion:target key:key oldArray:mutableOldValue newArray:(NSArray *)newValue currentPath:currentPath changes:changes];
+        if (mutableOldValue.count != beforeCount) {
             didModify = YES;
         }
     }
@@ -576,8 +589,8 @@ static NSString *const kDatePrefix = @"$D_";
 + (id)processDatePrefix:(NSString *)value {
     if (![value isKindOfClass:[NSString class]]) return value;
     
-    if ([value hasPrefix:kDatePrefix]) {
-        NSString *numberString = [value substringFromIndex:[kDatePrefix length]];
+    if ([value hasPrefix:CLTAP_DATE_PREFIX]) {
+        NSString *numberString = [value substringFromIndex:[CLTAP_DATE_PREFIX length]];
         return @([numberString longLongValue]);
     }
     return value;

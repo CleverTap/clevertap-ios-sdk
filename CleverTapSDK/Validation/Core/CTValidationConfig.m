@@ -11,7 +11,6 @@
 
 static const int kMaxKeyChars = 120;
 static const int kMaxValueChars = 1024;
-static const int kMaxMultiValuePropertyValueChars = 1024;
 static const int kMaxNestingDepth = 3;
 static const int kMaxPropertiesPerLevel = 5;
 static const int kMaxPropertiesPerObject = 100;
