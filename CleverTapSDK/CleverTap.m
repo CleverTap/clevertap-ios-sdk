@@ -2062,7 +2062,6 @@ static BOOL sharedInstanceErrorLogged;
         NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:flattenedProfileChanges];
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
     } else if (eventName) {
-    //TODO: send flattened data instaed of eventdata
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
 #endif
