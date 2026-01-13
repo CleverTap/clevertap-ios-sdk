@@ -3089,7 +3089,7 @@ static BOOL sharedInstanceErrorLogged;
                 NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
                 event[@"profile"] = profile;
                 
-                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChange:kCLTAP_DELETE_MARKER withKey:_key command:CTProfileOperationDelete]?: CTFlattenedEventData.noData;
+                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:CTProfileOperationDelete]?: CTFlattenedEventData.noData;
                 [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             }
             if (errors) {
@@ -3142,7 +3142,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildIncrementValueBy:value forKey:key
                              localDataStore:_localDataStore
                           completionHandler:^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey:operatorDict operation:CTProfileOperationIncrement errors:errors];
+        [self _handleIncrementDecrementProfilePushForKey:key value:value operatorDict:operatorDict operation:CTProfileOperationIncrement errors:errors];
     }];
 }
 
@@ -3150,14 +3150,14 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildDecrementValueBy: value forKey: key
                              localDataStore: _localDataStore
                           completionHandler: ^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey:operatorDict operation:CTProfileOperationDecrement errors:errors];
+        [self _handleIncrementDecrementProfilePushForKey:key value:value operatorDict:operatorDict operation:CTProfileOperationDecrement errors:errors];
     }];
 }
 
 
 #pragma mark - Private Profile API
 
-- (void)_handleIncrementDecrementProfilePushForKey:(NSDictionary *)operatorDict operation:(CTProfileOperation)operation errors:(NSArray<CTValidationResult*>*)errors {
+- (void)_handleIncrementDecrementProfilePushForKey:(NSString*)key value:(NSNumber *_Nonnull)value operatorDict:(NSDictionary *)operatorDict operation:(CTProfileOperation)operation errors:(NSArray<CTValidationResult*>*)errors {
     if (errors) {
         [self.validationResultStack pushValidationResults:errors];
         return;
@@ -3174,11 +3174,11 @@ static BOOL sharedInstanceErrorLogged;
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;
-    CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:profile command: operation];
+    CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:value withKey:key command:operation];
     [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
 }
 
-- (void)_handleMultiValueProfilePush:(NSDictionary*)customFields operation:(CTProfileOperation)operation  updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
+- (void)_handleMultiValueProfilePush:(NSDictionary*)customFields operation:(CTProfileOperation)operation updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
     if (customFields && [[customFields allKeys] count] > 0) {
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
         NSString* _key = [customFields allKeys][0];
@@ -3188,9 +3188,9 @@ static BOOL sharedInstanceErrorLogged;
         event[@"profile"] = profile;
         CTFlattenedEventData *flattenedData;
         if (operation == CTProfileOperationDelete) {
-            flattenedData = [self getFlattenedProfileChange:kCLTAP_DELETE_MARKER withKey:_key command:operation];
+            flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:operation];
         } else {
-            flattenedData = [self getFlattenedProfileListChanges:updatedMultiValue withKey:_key command:operation];
+            flattenedData = [self getFlattenedProfileChanges:updatedMultiValue withKey:_key command:operation];
         }
         [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
     }
@@ -3203,27 +3203,7 @@ static BOOL sharedInstanceErrorLogged;
     return [CTFlattenedEventData eventProperties:properties];
 }
 
-- (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(NSDictionary *)originalValues
-                                                      withKey:(NSString *)key
-                                                      command:(CTProfileOperation)operation {
-    NSDictionary<NSString *, id> *profileChanges = [self.localDataStore processProfileTree:key value:originalValues command: operation];
-    if (!profileChanges) {
-        return nil;
-    }
-    return [CTFlattenedEventData profileChanges:profileChanges];
-}
-
-- (nullable CTFlattenedEventData *)getFlattenedProfileListChanges:(NSArray *)originalValues
-                                                      withKey:(NSString *)key
-                                                      command:(CTProfileOperation)operation {
-    NSDictionary<NSString *, id> *profileChanges = [self.localDataStore processProfileTree:key value:originalValues command: operation];
-    if (!profileChanges) {
-        return nil;
-    }
-    return [CTFlattenedEventData profileChanges:profileChanges];
-}
-
-- (nullable CTFlattenedEventData *)getFlattenedProfileChange:(NSString *)originalValues
+- (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(id)originalValues
                                                       withKey:(NSString *)key
                                                       command:(CTProfileOperation)operation {
    
@@ -3236,7 +3216,6 @@ static BOOL sharedInstanceErrorLogged;
 
 - (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(NSDictionary *)originalValues
                                                       command:(CTProfileOperation)operation {
-   
     NSDictionary<NSString *, id> *profileChanges = [self.localDataStore processProfileTreeWithJson:originalValues operation:operation];
     if (!profileChanges) {
         return nil;

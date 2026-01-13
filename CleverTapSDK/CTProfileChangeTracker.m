@@ -284,13 +284,40 @@ static NSString *const kDatePrefix = @"$D_";
     if (operation == CTProfileOperationGet) {
         return;
     }
-    target[key] = newValue;
-    if ([newValue isKindOfClass:[NSDictionary class]]) {
+    id updatedValue;
+       
+       switch (operation) {
+           case CTProfileOperationDecrement: {
+               // For missing keys, DECREMENT means 0 - value = -value
+               if (![newValue isKindOfClass:[NSNumber class]]) {
+                   return;
+               }
+               updatedValue = [CTNumberOperationUtils negateNumber:newValue];
+               break;
+           }
+               
+           case CTProfileOperationIncrement: {
+               // For missing keys, INCREMENT means 0 + value = value
+               if (![newValue isKindOfClass:[NSNumber class]]) {
+                   return;
+               }
+               updatedValue = newValue;
+               break;
+           }
+               
+           default: {
+               // For SET and other operations, use the value as-is
+               updatedValue = [CTProfileOperationUtils processDatePrefix:newValue];
+               break;
+           }
+       }
+    target[key] = updatedValue;
+    if ([updatedValue isKindOfClass:[NSDictionary class]]) {
         [self.changeTracker recordAllLeafValues:(NSDictionary *)newValue path:currentPath changes:changes];
     } else {
         NSDictionary *change = @{
             @"oldValue": [NSNull null],
-            @"newValue": newValue ?: [NSNull null]
+            @"newValue": updatedValue ?: [NSNull null]
         };
         changes[currentPath] = change;
     }
@@ -599,7 +626,7 @@ static NSString *const kDatePrefix = @"$D_";
 
 @implementation CTNumberOperationUtils
 
-+ (NSNumber *)addNumbersWithA:(NSNumber *)a b:(NSNumber *)b {
++ (nonnull NSNumber *)addNumbers:(nonnull NSNumber *)a number:(nonnull NSNumber *)b {
     const char *aType = [a objCType];
     const char *bType = [b objCType];
     
@@ -622,7 +649,7 @@ static NSString *const kDatePrefix = @"$D_";
     }
 }
 
-+ (NSNumber *)subtractNumbersWithA:(NSNumber *)a b:(NSNumber *)b {
++ (nonnull NSNumber *)subtractNumbers:(nonnull NSNumber *)a number:(nonnull NSNumber *)b {
     const char *aType = [a objCType];
     const char *bType = [b objCType];
     
@@ -642,6 +669,32 @@ static NSString *const kDatePrefix = @"$D_";
     // Default to double
     else {
         return @([a doubleValue] - [b doubleValue]);
+    }
+}
+
++ (NSNumber *)negateNumber:(NSNumber *)n {
+    // Get the underlying type using objCType
+    const char *type = [n objCType];
+    
+    if (strcmp(type, @encode(int)) == 0 ||
+        strcmp(type, @encode(NSInteger)) == 0 ||
+        strcmp(type, @encode(short)) == 0 ||
+        strcmp(type, @encode(char)) == 0) {
+        return @(-[n integerValue]);
+    }
+    else if (strcmp(type, @encode(long)) == 0 ||
+             strcmp(type, @encode(long long)) == 0) {
+        return @(-[n longLongValue]);
+    }
+    else if (strcmp(type, @encode(float)) == 0) {
+        return @(-[n floatValue]);
+    }
+    else if (strcmp(type, @encode(double)) == 0) {
+        return @(-[n doubleValue]);
+    }
+    else {
+        // Default case: treat as double
+        return @(-[n doubleValue]);
     }
 }
 @end

@@ -94,6 +94,7 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 @interface CTNumberOperationUtils : NSObject
 + (NSNumber *)addNumbers:(NSNumber *)a number:(NSNumber *)b;
 + (NSNumber *)subtractNumbers:(NSNumber *)a number:(NSNumber *)b;
++ (NSNumber *)negateNumber:(NSNumber *)n;
 @end
 
 @interface CTJsonComparisonUtils : NSObject
