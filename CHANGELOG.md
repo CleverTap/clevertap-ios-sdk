@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.4.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.2) (January 14, 2026)
+#### Fixed
+- Fixes a bug where DOB value is passed incorrectly when performing profile events.
+
 ### [Version 7.4.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.1) (December 02, 2025)
 #### Added
 - Adds a public method called `variants` to fetch A/B experiment variants for the user.
