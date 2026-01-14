@@ -508,6 +508,13 @@ static BOOL sharedInstanceErrorLogged;
         [self inflateQueuesAsync];
         [self addObservers];
         
+        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
+        // Initialise Variables
+        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
+        // Load Vars and Variants from cache
+        [self.variables.varCache loadDiffs];
+        [self.variables.varCache loadVariants];
+        
 #if !defined(CLEVERTAP_TVOS)
         if (self.requestSender && self.domainFactory && self.dispatchQueueManager) {
             self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
@@ -522,7 +529,6 @@ static BOOL sharedInstanceErrorLogged;
         }
 #endif
         
-        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
             [self initializeInAppSupport];
@@ -538,12 +544,7 @@ static BOOL sharedInstanceErrorLogged;
         }
         
         [self _initFeatureFlags];
-        
         [self _initProductConfig];
-        
-        // Initialise Variables
-        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
-        
         [self notifyUserProfileInitialized];
     }
     
@@ -1194,10 +1195,6 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogInternal(self.config.logLevel, @"%@: App Launched already processed", self);
         return;
     }
-    
-    // Load Vars from cache before App Launched
-    [self.variables.varCache loadDiffs];
-    [self.variables.varCache loadVariants];
     
     self.sessionManager.appLaunchProcessed = YES;
     
