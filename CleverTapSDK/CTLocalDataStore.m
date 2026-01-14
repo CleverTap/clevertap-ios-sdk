@@ -530,6 +530,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         id oldValue = [self getProfileFieldForKey:key];
         id newValue = profile[key];
         NSMutableDictionary *properties = [NSMutableDictionary dictionary];
+        NSString *newDOBValueStr;
         if ([newValue isKindOfClass:[NSDictionary class]]) {
             NSDictionary *obj = (NSDictionary *)newValue;
             NSString *commandIdentifier = [[obj allKeys] firstObject];
@@ -552,6 +553,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             NSString *newValueStr = (NSString *)newValue;
             if ([newValueStr hasPrefix:CLTAP_DATE_PREFIX]) {
                 newValue = @([[newValueStr substringFromIndex:[CLTAP_DATE_PREFIX length]] longLongValue]);
+                newDOBValueStr = newValueStr;
             }
         }
         if (oldValue != nil && ![oldValue isKindOfClass:[NSArray class]]) {
@@ -564,6 +566,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         // Skip evaluation if both newValue or oldValue are null
         if ([properties count] > 0) {
             [userAttributesChangeProperties setObject:properties forKey:key];
+        }
+        // Use DOB with $D_ prefix for persisting locally so that correct DOB is
+        // added to profile for further events.
+        if (newDOBValueStr) {
+            newValue = newDOBValueStr;
         }
         // Need to persist only if the new profile value is not a null value
         if (newValue != nil && newValue != oldValue) {
