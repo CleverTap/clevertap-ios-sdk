@@ -2032,7 +2032,7 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)getFlattenedData:(CTFlattenedEventData *)flattenedEventData {
+- (void)logFlattenedData:(CTFlattenedEventData *)flattenedEventData {
     switch (flattenedEventData.type) {
         case CTFlattenedEventDataTypeNoData:
             CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: No Data", self);
@@ -2047,7 +2047,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
-    [self getFlattenedData:flattenedEventData];
+    [self logFlattenedData:flattenedEventData];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     NSString *eventName = event[CLTAP_EVENT_NAME];
     // Add the system properties for evaluation

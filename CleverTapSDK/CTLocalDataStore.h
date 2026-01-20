@@ -1,21 +1,10 @@
 #import <Foundation/Foundation.h>
 #import "CTDeviceInfo.h"
 #import "CTDispatchQueueManager.h"
+#import "CTProfileOperationType.h"
 
 @class CleverTapInstanceConfig;
 @class CleverTapEventDetail;
-
-typedef NS_ENUM(NSInteger, CTProfileOperation) {
-    CTProfileOperationGet = 0,
-    CTProfileOperationSet = 1,
-    CTProfileOperationRemove = 2,
-    CTProfileOperationAdd = 3,
-    CTProfileOperationIncrement = 4,
-    CTProfileOperationDecrement = 5,
-    CTProfileOperationDelete = 6,
-    CTProfileOperationArrayRemove = 7,
-    CTProfileOperationUpdate = 8
-};
 
 @interface CTLocalDataStore : NSObject
 

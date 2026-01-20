@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CTLocalDataStore.h"
+#import "CTProfileOperationType.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

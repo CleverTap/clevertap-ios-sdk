@@ -44,12 +44,8 @@ typedef NS_ENUM(NSInteger, CTDropReason) {
                               reason:(CTDropReason)reason;
 
 // Sub-results methods for nested validation
-+ (CTValidationResult *)successWithData:(id)data
-                             subResults:(nullable NSArray<CTValidationResult *> *)subResults;
-
 + (CTValidationResult *)warningWithSubResults:(NSArray<CTValidationResult *> *)subResults
                                          data:(nullable id)data;
-
 + (CTValidationResult *)dropWithSubResults:(NSArray<CTValidationResult *> *)subResults
                                     reason:(CTDropReason)reason;
 

@@ -76,12 +76,6 @@
 
 #pragma mark - Sub-Results Methods
 
-+ (CTValidationResult *)successWithData:(id)data subResults:(nullable NSArray<CTValidationResult *> *)subResults {
-    CTValidationResult *result = [self successWithData:data];
-    result.subResults = subResults;
-    return result;
-}
-
 + (CTValidationResult *)warningWithSubResults:(NSArray<CTValidationResult *> *)subResults data:(nullable id)data {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     result.outcome = CTValidationOutcomeWarning;
