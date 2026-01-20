@@ -9,7 +9,7 @@
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 #import "CTInAppNotification.h"
 #endif
-#import "CTEventDataValidator.h"
+#import "CTDataValidator.h"
 #import "CTValidationConfig.h"
 #import "CTEventNameValidator.h"
 #import "CTPropertyKeyValidator.h"
@@ -17,14 +17,14 @@
 
 @implementation CTEventBuilder
 static CTEventNameValidator *_eventKeyValidator;
-static CTEventDataValidator *_eventDataValidator;
+static CTDataValidator *_eventDataValidator;
 
 + (void)initializeWithValidationConfig:(CTValidationConfig *)validationConfig {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         if (self == [CTEventBuilder class]) {
             _eventKeyValidator = [[CTEventNameValidator alloc] initWithConfig:validationConfig];
-            _eventDataValidator = [[CTEventDataValidator alloc] initWithConfig:validationConfig];
+            _eventDataValidator = [[CTDataValidator alloc] initWithConfig:validationConfig];
         }
     });
 }

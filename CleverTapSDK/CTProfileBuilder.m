@@ -6,19 +6,22 @@
 #import "CTLocalDataStore.h"
 #import "CTUtils.h"
 #import "CTPropertyKeyValidator.h"
-#import "CTEventDataValidator.h"
+#import "CTDataValidator.h"
 #import "CTFlattenedEventData.h"
 
 @implementation CTProfileBuilder
 static CTPropertyKeyValidator *_profileKeyValidator;
-static CTEventDataValidator *_profileDataValidator;
+static CTDataValidator *_profileDataValidator;
 
-+ (void)initializeWithValidationConfig:(CTValidationConfig*)validationConfig {
-    if (self == [CTProfileBuilder class]) {
-        // Initialize validators with default config
-        _profileKeyValidator = [[CTPropertyKeyValidator alloc] initWithConfig:validationConfig];
-        _profileDataValidator = [[CTEventDataValidator alloc] initWithConfig:validationConfig];
-    }
++ (void)initializeWithValidationConfig:(CTValidationConfig *)validationConfig {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        if (self == [CTProfileBuilder class]) {
+            // Initialize validators with default config
+            _profileKeyValidator = [[CTPropertyKeyValidator alloc] initWithConfig:validationConfig];
+            _profileDataValidator = [[CTDataValidator alloc] initWithConfig:validationConfig];
+        }
+    });
 }
 
 + (void)build:(NSDictionary *)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion {

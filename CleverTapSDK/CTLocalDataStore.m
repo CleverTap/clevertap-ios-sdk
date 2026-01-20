@@ -161,7 +161,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
             default:
                 [self.updateHandler handleOperation:target key:key newValue:newValue currentPath:currentPath changes:changes operation:operation recursiveApply:recursiveTraverse];
                 break;
-
         }
     }
 }
@@ -173,11 +172,11 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return [NSString stringWithFormat:@"%@.%@", path, key];
 }
 
-- (NSDictionary<NSString *, NSDictionary *> *)traverse:(NSMutableDictionary *)currentState
+- (NSDictionary<NSString *, NSDictionary *> *)traverse:(NSMutableDictionary *)target
                                                newJson:(NSDictionary *)newJson
                                              operation:(CTProfileOperation)operation {
     NSMutableDictionary<NSString *, NSDictionary *> *changes = [NSMutableDictionary dictionary];
-    [self traverseRecursive:currentState source:newJson path:@"" changes:changes operation:operation];
+    [self traverseRecursive:target source:newJson path:@"" changes:changes operation:operation];
     return changes;
 }
 

@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
-
-#import <Foundation/Foundation.h>
+#import "CTValidationConfig.h"
 
 typedef NS_ENUM(NSInteger, CTValidationOutcome) {
     CTValidationOutcomeSuccess = 0,
@@ -37,7 +36,7 @@ typedef NS_ENUM(NSInteger, CTDropReason) {
 // Basic creation methods
 + (CTValidationResult *)success;
 + (CTValidationResult *)successWithData:(id)data;
-+ (CTValidationResult *)warningWithCode:(int)code
++ (CTValidationResult *)warningWithCode:(CTValidationErrorCode)code
                                 message:(NSString *)message
                                    data:(nullable id)data;
 + (CTValidationResult *)dropWithCode:(int)code

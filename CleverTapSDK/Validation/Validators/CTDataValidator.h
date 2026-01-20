@@ -1,5 +1,5 @@
 //
-//  CTEventDataValidator.h
+//  CTDataValidator.h
 //  CleverTapSDK
 //
 //  Created by Sonal Kachare on 12/12/25.
@@ -8,10 +8,11 @@
 #import <Foundation/Foundation.h>
 #import "CTValidationConfig.h"
 #import "CTValidationResult.h"
+#import "CTValidatorBase.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTEventDataValidator : NSObject
+@interface CTDataValidator : CTValidatorBase
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config;
 

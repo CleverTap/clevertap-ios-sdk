@@ -9,15 +9,12 @@
 #import "CTValidationResult.h"
 
 @interface CTPropertyKeyValidator ()
-@property (nonatomic, strong) CTValidationConfig *config;
 @end
 
 @implementation CTPropertyKeyValidator
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config {
-    if (self = [super init]) {
-        _config = config;
-    }
+    self = [super initWithConfig:config];
     return self;
 }
 
@@ -32,18 +29,14 @@
     NSMutableArray<CTValidationResult *> *warnings = [NSMutableArray array];
     // Check for null/empty
     if (!key || key.length == 0) {
-        CTValidationResult *warning = [CTValidationResult warningWithCode:512
-                                                                  message:@"Key is null or empty"
-                                                                     data:nil];
+        CTValidationResult *warning = [CTValidationResult warningWithCode:CTValidationErrorEmptyKey message:@"Key is null or empty" data:nil];
         return warning;
     }
     // Normalize key
     NSString *cleaned = [self normalizeKey:key warnings:warnings];
     // Check if became empty after normalization
     if (!cleaned || cleaned.length == 0) {
-        return [CTValidationResult dropWithCode:512
-                                        message:@"Key became empty after normalization"
-                                         reason:CTDropReasonEmptyKey];
+        return [CTValidationResult dropWithCode:CTValidationErrorEmptyKey message:@"Key became empty after normalization" reason:CTDropReasonEmptyKey];
     }
     // Return result based on warnings
     if (warnings.count > 0) {
@@ -62,7 +55,7 @@
     // Check multi-value restrictions
     if ([self isKeyRestrictedForMultiValue:cleanedKey]) {
         NSString *message = [NSString stringWithFormat:@"'%@' is restricted for multi-value operations", cleanedKey];
-        return [CTValidationResult dropWithCode:523
+        return [CTValidationResult dropWithCode:CTValidationErrorRestrictedKey
                                         message:message
                                          reason:CTDropReasonRestrictedMultiValueKey];
     }
@@ -100,7 +93,7 @@
         if (![filtered isEqualToString:cleaned]) {
             cleaned = filtered;
             NSString *message = [NSString stringWithFormat:@"Key '%@' contains invalid characters", key];
-            [warnings addObject:[CTValidationResult warningWithCode:520
+            [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorInvalidKey
                                                             message:message
                                                                data:nil]];
         }
@@ -111,7 +104,7 @@
         if (cleaned.length > maxLength) {
             cleaned = [cleaned substringToIndex:maxLength];
             NSString *message = [NSString stringWithFormat:@"Key '%@' exceeds %ld characters", key, (long)maxLength];
-            [warnings addObject:[CTValidationResult warningWithCode:520
+            [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorKeyTooLong
                                                             message:message
                                                                data:nil]];
         }

@@ -1,27 +1,24 @@
 //
-//  CTEventDataValidator.m
+//  CTDataValidator.m
 //  CleverTapSDK
 //
 //  Created by Sonal Kachare on 12/12/25.
 //
 
-#import "CTEventDataValidator.h"
+#import "CTDataValidator.h"
 #import "CTValidationResult.h"
 #import "CTConstants.h"
 
-@interface CTEventDataValidator ()
-@property (nonatomic, strong) CTValidationConfig *config;
+@interface CTDataValidator ()
 @property (nonatomic, assign) NSInteger currentDepth;
 @property (nonatomic, assign) NSInteger maxDepthReached;
 @property (nonatomic, strong) NSMutableArray<CTValidationResult *> *warnings;
 @end
 
-@implementation CTEventDataValidator
+@implementation CTDataValidator
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config {
-    if (self = [super init]) {
-        _config = config;
-    }
+    self = [super initWithConfig:config];
     return self;
 }
 
@@ -29,21 +26,16 @@
     NSString *cleaned = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     NSMutableArray *warnings = [NSMutableArray array];
     if (cleaned.length == 0) {
-        [warnings addObject:[CTValidationResult warningWithCode:545
-                                                             message:[NSString stringWithFormat:@"Empty value for key '%@' was removed", key]
-                                                                data:nil]];
+        [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorEmptyValueRemoved message:[NSString stringWithFormat:@"Empty value for key '%@' was removed", key] data:nil]];
         return nil;
     }
     // Remove invalid characters using NSCharacterSet
     if (self.config.valueCharsNotAllowed) {
-        NSString *filtered = [[cleaned componentsSeparatedByCharactersInSet:self.config.valueCharsNotAllowed]
-                             componentsJoinedByString:@""];
+        NSString *filtered = [[cleaned componentsSeparatedByCharactersInSet:self.config.valueCharsNotAllowed] componentsJoinedByString:@""];
         
         if (![filtered isEqualToString:cleaned]) {
             cleaned = filtered;
-            [warnings addObject:[CTValidationResult warningWithCode:521
-                                                                 message:[NSString stringWithFormat:@"Value for key '%@' contains invalid characters", key]
-                                                                    data:nil]];
+            [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorInvalidKey message:[NSString stringWithFormat:@"Value '%@' for key '%@' contains invalid characters. Cleaned to '%@'", value, key, cleaned] data:nil]];
         }
     }
     // Truncate if needed
@@ -51,9 +43,7 @@
     
     if (cleaned.length > limit) {
         cleaned = [cleaned substringToIndex:limit];
-        [warnings addObject:[CTValidationResult warningWithCode:521
-                                                             message:[NSString stringWithFormat:@"Value for key '%@' exceeds %ld characters", key, (long)limit]
-                                                                data:nil]];
+        [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorValueTooLong message:[NSString stringWithFormat:@"Value '%@' for key '%@' exceeds the limit of %li characters. Trimmed to '%@'", value, key, limit, cleaned] data:nil]];
     }
     
     cleaned = [cleaned stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -69,10 +59,7 @@
     NSInteger maxLength = self.config.maxArrayLength ? [self.config.maxArrayLength integerValue] : 100;
     
     if (maxLength > 0 && array.count > maxLength) {
-        [warnings addObject:[CTValidationResult warningWithCode:544
-                                                             message:[NSString stringWithFormat:@"Array length %lu exceeds limit %ld for key '%@'",
-                                                                     (unsigned long)array.count, (long)maxLength, key]
-                                                                data:nil]];
+        [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorArrayLengthExceeded message:[NSString stringWithFormat:@"Event data exceeded maximum array length. Length: %li, Limit: %li, Key: %@", array.count, maxLength, key] data:nil]];
         // Continue processing but truncate
     }
     NSMutableArray *cleaned = [NSMutableArray array];
@@ -82,14 +69,10 @@
         if (maxLength > 0 && processedCount >= maxLength) {
             break; // Stop processing after limit
         }
-        
         if (!item || [item isKindOfClass:[NSNull class]]) {
-            [warnings addObject:[CTValidationResult warningWithCode:545
-                                                                 message:[NSString stringWithFormat:@"Null value in array for key '%@'", key]
-                                                                    data:nil]];
+            [warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorNullValueRemoved message:[NSString stringWithFormat:@"Null value for key '%@' was removed", key] data:nil]];
             continue; // Skip null but continue
         }
-        
         id cleanedItem = [self cleanStringValue:item forKey:key];
         if (cleanedItem) {
             [cleaned addObject:cleanedItem];
@@ -122,10 +105,7 @@
     // Track depth
     self.maxDepthReached = MAX(self.maxDepthReached, depth);
     if (self.config.maxDepth && depth > [self.config.maxDepth integerValue]) {
-        CTValidationResult *warning = [CTValidationResult warningWithCode:541
-                                                                  message:[NSString stringWithFormat:@"Max nesting depth limit: %ld exceeded at depth: %ld",
-                                                                           (long)[self.config.maxDepth integerValue], (long)depth]
-                                                                     data:nil];
+        CTValidationResult *warning = [CTValidationResult warningWithCode: CTValidationErrorObjectKeyLimitExceeded message:[NSString stringWithFormat:@"Event data exceeded maximum object count. Count: %ld, Limit: %li", (long)[self.config.maxDepth integerValue], (long)depth] data:nil];
         [self.warnings addObject:warning];
     }
     NSMutableDictionary *cleaned = [NSMutableDictionary dictionary];
@@ -141,17 +121,24 @@
         // Clean key
         NSString *cleanedKey = [self cleanKey:key];
         if (!cleanedKey || cleanedKey.length == 0) {
-            [self.warnings addObject:[CTValidationResult warningWithCode:512
-                                                                 message:[NSString stringWithFormat:@"Found empty key in dictionary"]
-                                                                    data:nil]];
+            [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorEmptyValueRemoved message:[NSString stringWithFormat:@"Empty value for key '%@' was removed, depth: %li", key, depth] data:nil]];
             continue;
         }
         id value = dict[key];
+
+        // Drop restricted multi-value fields at 0th level if value is object or array
+        if (depth == 0 && self.config.restrictedMultiValueFields != nil &&
+            [self.config.restrictedMultiValueFields containsObject:[cleanedKey lowercaseString]]) {
+            BOOL isObjectOrArray = [value isKindOfClass:[NSDictionary class]] ||
+                                  [value isKindOfClass:[NSArray class]];
+            if (isObjectOrArray) {
+                [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorRestrictedKey message:[NSString stringWithFormat:@"'%@'is a restricted key for multi-value properties. Dropped, Depth: %li", key, depth] data:nil]];
+                continue;
+            }
+        }
         // Handle null - log warning and continue
         if (!value || [value isKindOfClass:[NSNull class]]) {
-            [self.warnings addObject:[CTValidationResult warningWithCode:545
-                                                                 message:[NSString stringWithFormat:@"Null value for key '%@'", cleanedKey]
-                                                                    data:nil]];
+            [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorNullValueRemoved message:[NSString stringWithFormat:@"Null value for key '%@' was removed, depth: %li", key, depth] data:nil]];
             continue;
         }
         // Count arrays and dictionaries FIRST (including empty ones)
@@ -163,31 +150,23 @@
         // THEN check for empty collections - log and skip
         if ([value isKindOfClass:[NSArray class]]) {
             if ([(NSArray *)value count] == 0) {
-                [self.warnings addObject:[CTValidationResult warningWithCode:546
-                                                                     message:[NSString stringWithFormat:@"Empty array for key '%@' was removed", cleanedKey]
-                                                                        data:nil]];
+                [self.warnings addObject:[CTValidationResult warningWithCode: CTValidationErrorEmptyValueRemoved message:[NSString stringWithFormat:@"Empty array for key '%@' was removed, depth: %li", cleanedKey, depth] data:nil]];
                 continue;
             }
         } else if ([value isKindOfClass:[NSDictionary class]]) {
             if ([(NSDictionary *)value count] == 0) {
-                [self.warnings addObject:[CTValidationResult warningWithCode:547
-                                                                     message:[NSString stringWithFormat:@"Empty dictionary for key '%@' was removed", cleanedKey]
-                                                                        data:nil]];
+                [self.warnings addObject:[CTValidationResult warningWithCode: CTValidationErrorEmptyValueRemoved message:[NSString stringWithFormat:@"Empty dictionary for key '%@' was removed, depth: %li", cleanedKey, depth] data:nil]];
                 continue;
             }
         }
         // Drop restricted multi-value fields at 0th level if value is object or array
-        if (depth == 0 &&
-            self.config.restrictedMultiValueFields &&
-            [self.config.restrictedMultiValueFields containsObject:cleanedKey]) {
+        if (depth == 0 && self.config.restrictedMultiValueFields && [self.config.restrictedMultiValueFields containsObject:cleanedKey]) {
             
             BOOL isObjectOrArray = [value isKindOfClass:[NSDictionary class]] ||
             [value isKindOfClass:[NSArray class]];
             
             if (isObjectOrArray) {
-                [self.warnings addObject:[CTValidationResult warningWithCode:523
-                                                                     message:[NSString stringWithFormat:@"%@ is a restricted key. It can't have an object/array as the value", value]
-                                                                        data:nil]];
+                [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorRestrictedKey message:[NSString stringWithFormat:@"%@ is a restricted key for multi-value properties. Dropped, depth: %li", value, depth] data:nil]];
                 continue;
             }
         }
@@ -206,16 +185,10 @@
     }
     // Check limits ONCE after counting all items (including empties)
     if (objectKeyCount > objectKeyLimit) {
-        [self.warnings addObject:[CTValidationResult warningWithCode:543
-                                                             message:[NSString stringWithFormat:@"Object key count %ld exceeds limit %ld at depth %ld",
-                                                                      (long)objectKeyCount, (long)objectKeyLimit, (long)depth]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorKVPairCountExceeded message:[NSString stringWithFormat:@"Event data exceeded maximum key-value pair count. Count: %li, Limit: %li, Depth: %li", objectKeyCount, objectKeyLimit, depth] data:nil]];
     }
     if (arrayKeyCount > arrayKeyLimit) {
-        [self.warnings addObject:[CTValidationResult warningWithCode:542
-                                                             message:[NSString stringWithFormat:@"Array key count %ld exceeds limit %ld at depth %ld",
-                                                                      (long)arrayKeyCount, (long)arrayKeyLimit, (long)depth]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorArrayLengthExceeded message:[NSString stringWithFormat:@"Event data exceeded maximum array length. Length: %li, Limit: %li Depth: %li", arrayKeyCount, arrayKeyLimit, depth] data:nil]];
     }
     return cleaned;
 }
@@ -225,10 +198,7 @@
 - (NSArray *)cleanArray:(NSArray *)array forKey:(NSString *)key depth:(NSInteger)depth {
     NSInteger maxLength = self.config.maxArrayLength ? [self.config.maxArrayLength integerValue] : 100;
     if (maxLength > 0 && array.count > maxLength) {
-        [self.warnings addObject:[CTValidationResult warningWithCode:544
-                                                             message:[NSString stringWithFormat:@"Array length %lu exceeds limit %ld for key '%@'",
-                                                                     (unsigned long)array.count, (long)maxLength, key]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorArrayLengthExceeded message:[NSString stringWithFormat:@"Event data exceeded maximum array length. Length: %li, Limit: %li, Key: %@, Depth: %li", array.count, maxLength, key, depth] data:nil]];
         // Continue processing but truncate
     }
     NSMutableArray *cleaned = [NSMutableArray array];
@@ -239,9 +209,7 @@
             break; // Stop processing after limit
         }
         if (!item || [item isKindOfClass:[NSNull class]]) {
-            [self.warnings addObject:[CTValidationResult warningWithCode:545
-                                                                 message:[NSString stringWithFormat:@"Null value in array for key '%@'", key]
-                                                                    data:nil]];
+            [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorNullValueRemoved message:[NSString stringWithFormat:@"Null value for key '%@' was removed, Depth: %li", key, depth] data:nil]];
             continue; // Skip null but continue
         }
         id cleanedItem = [self cleanValue:item forKey:key depth:depth];
@@ -271,9 +239,7 @@
         NSTimeInterval timestamp = [(NSDate *)value timeIntervalSince1970];
         return [NSString stringWithFormat:@"$D_%ld", (long)timestamp];
     } else {
-        [self.warnings addObject:[CTValidationResult warningWithCode:512
-                                                             message:[NSString stringWithFormat:@"Non-primitive value for key '%@'", key]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorNonPrimitiveValue message:[NSString stringWithFormat:@"Property value for key '%@' wasn't a primitive '%@', Depth: %li", key, value, depth] data:nil]];
         return nil;
     }
 }
@@ -282,7 +248,6 @@
 
 - (NSString *)cleanKey:(NSString *)key {
     NSString *cleaned = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
     // Remove invalid characters using NSCharacterSet
     if (self.config.keyCharsNotAllowed) {
         NSString *filtered = [[cleaned componentsSeparatedByCharactersInSet:self.config.keyCharsNotAllowed]
@@ -290,19 +255,14 @@
         
         if (![filtered isEqualToString:cleaned]) {
             cleaned = filtered;
-            [self.warnings addObject:[CTValidationResult warningWithCode:520
-                                                                 message:[NSString stringWithFormat:@"Key '%@' contains invalid characters", key]
-                                                                    data:nil]];
+            [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorInvalidKey  message:[NSString stringWithFormat:@"Key '%@' contains invalid characters", key] data:nil]];
         }
     }
     // Truncate if needed
     NSInteger limit = self.config.maxKeyLength ? [self.config.maxKeyLength integerValue] : 120;
     if (cleaned.length > limit) {
         cleaned = [cleaned substringToIndex:limit];
-        [self.warnings addObject:[CTValidationResult warningWithCode:520
-                                                             message:[NSString stringWithFormat:@"Key '%@...' exceeds %ld characters",
-                                                                     [cleaned substringToIndex:MIN(20, cleaned.length)], (long)limit]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorKeyTooLong message:[NSString stringWithFormat:@"Key '%@' exceeds %li characters. Trimmed to '%@", key, limit, cleaned] data:nil]];
     }
     return [cleaned stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
@@ -311,9 +271,7 @@
     NSString *cleaned = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     if (cleaned.length == 0) {
-        [self.warnings addObject:[CTValidationResult warningWithCode:545
-                                                             message:[NSString stringWithFormat:@"Empty value for key '%@' was removed", key]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorEmptyValueRemoved message:[NSString stringWithFormat:@"Empty value for key '%@' was removed", key] data:nil]];
         return nil;
     }
     // Remove invalid characters using NSCharacterSet
@@ -323,18 +281,14 @@
         
         if (![filtered isEqualToString:cleaned]) {
             cleaned = filtered;
-            [self.warnings addObject:[CTValidationResult warningWithCode:521
-                                                                 message:[NSString stringWithFormat:@"Value for key '%@' contains invalid characters", key]
-                                                                    data:nil]];
+            [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorInvalidValue message:[NSString stringWithFormat:@"Value for key '%@' contains invalid characters", key] data:nil]];
         }
     }
     // Truncate if needed
     NSInteger limit = self.config.maxValueLength ? [self.config.maxValueLength integerValue] : 1024;
     if (cleaned.length > limit) {
         cleaned = [cleaned substringToIndex:limit];
-        [self.warnings addObject:[CTValidationResult warningWithCode:521
-                                                             message:[NSString stringWithFormat:@"Value for key '%@' exceeds %ld characters", key, (long)limit]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorValueTooLong message:[NSString stringWithFormat:@"Value for key '%@' exceeds %ld characters", key, (long)limit] data:nil]];
     }
     cleaned = [cleaned stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     return cleaned.length > 0 ? cleaned : nil;
@@ -342,26 +296,10 @@
 
 #pragma mark - Phone Validation
 
-- (BOOL)isValidPhone:(id)value {
-    if (![value isKindOfClass:[NSString class]]) {
-        return NO;
-    }
-    NSString *phone = [(NSString *)value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    // If no country code provider, phone must start with +
-    NSString *countryCode = self.config.deviceCountryCode ? self.config.deviceCountryCode : nil;
-    
-    if (!countryCode || countryCode.length == 0) {
-        return [phone hasPrefix:@"+"];
-    }
-    return YES;
-}
-
 - (void)validatePhoneNumber:(NSString *)key value:(id)value {
     // Check if value is a string
     if (![value isKindOfClass:[NSString class]]) {
-        [self.warnings addObject:[CTValidationResult warningWithCode:512
-                                                             message:[NSString stringWithFormat:@"Invalid phone number for key '%@'", key]
-                                                                data:nil]];
+        [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorInvalidPhone message:[NSString stringWithFormat:@"Invalid phone number for key '%@'", key] data:nil]];
         return;
     }
     NSString *phoneValue = [(NSString *)value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -370,9 +308,7 @@
     
     if (!countryCode || countryCode.length == 0) {
         if (![phoneValue hasPrefix:@"+"]) {
-            [self.warnings addObject:[CTValidationResult warningWithCode:512
-                                                                 message:[NSString stringWithFormat:@"Device country code not available and profile phone: %@ does not appear to start with country code", value]
-                                                                    data:nil]];
+            [self.warnings addObject:[CTValidationResult warningWithCode:CTValidationErrorInvalidCountryCode message:[NSString stringWithFormat:@"Device country code not available and profile phone: %@ does not appear to start with country code", value] data:nil]];
         }
     }
     CleverTapLogStaticInternal(@"Profile phone number is: %@, device country code is: %@", value, countryCode);

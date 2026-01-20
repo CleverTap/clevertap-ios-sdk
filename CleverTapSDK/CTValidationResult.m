@@ -54,7 +54,7 @@
     return result;
 }
 
-+ (CTValidationResult *)warningWithCode:(int)code message:(NSString *)message data:(nullable id)data {
++ (CTValidationResult *)warningWithCode:(CTValidationErrorCode)code message:(NSString *)message data:(nullable id)data {
     CTValidationResult *result = [[CTValidationResult alloc] init];
     result.outcome = CTValidationOutcomeWarning;
     result.errorCode = code;
@@ -105,8 +105,7 @@
     // Aggregate error information from sub-results
     if (subResults.count > 0) {
         result.errorCode = subResults.firstObject.errorCode;
-        result.errorDesc = [NSString stringWithFormat:@"%lu validation errors",
-                           (unsigned long)subResults.count];
+        result.errorDesc = [NSString stringWithFormat:@"%li validation errors", subResults.count];
     }
     return result;
 }

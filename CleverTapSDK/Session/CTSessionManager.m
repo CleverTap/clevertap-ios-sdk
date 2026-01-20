@@ -12,7 +12,6 @@
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTConstants.h"
 #import "CleverTapInternal.h"
-#import "CTValidationConfig.h"
 
 @interface CTSessionManager()
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -32,22 +31,23 @@
 @synthesize firstRequestInSession=_firstRequestInSession;
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppStore:(CTInAppStore *)inAppStore {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppStore:(CTInAppStore *)inAppStore validationConfig:(CTValidationConfig*)validationConfig {
     if ((self = [super init])) {
         self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
         self.config = config;
         self.impressionManager = impressionManager;
         self.inAppStore = inAppStore;
-        self.validationConfig = [CTValidationConfig defaultConfig];
+        self.validationConfig = validationConfig;
     }
     return self;
 }
 #endif
 
-- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config {
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config validationConfig:(CTValidationConfig*)validationConfig {
     if ((self = [super init])) {
         self.minSessionSeconds =  CLTAP_SESSION_LENGTH_MINS * 60;
         self.config = config;
+        self.validationConfig = validationConfig;
     }
     return self;
 }

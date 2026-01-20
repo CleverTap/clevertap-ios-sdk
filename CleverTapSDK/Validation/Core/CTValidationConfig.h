@@ -7,6 +7,51 @@
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
+#pragma mark - Error Codes
+typedef NS_ENUM(int, CTValidationErrorCode) {
+    // Event Errors (510)
+    CTValidationErrorEventNameNull = 510,
+    CTValidationErrorEventNameTooLong = 510,
+    CTValidationErrorInvalidCharacters = 510,
+
+    // Profile Key Errors (512)
+    CTValidationErrorInvalidCountryCode = 512,
+    CTValidationErrorInvalidPhone = 512,
+    CTValidationErrorEmptyKey = 512,
+    CTValidationErrorEmptyKeyAbort = 512, //not used
+    CTValidationErrorNonPrimitiveValue = 512,
+    
+    // Event Restriction Errors (513)
+    CTValidationErrorDropEvent = 513,
+    CTValidationErrorRestrictedEventName = 513,
+    CTValidationErrorDiscardedEventName = 513,
+    
+    // Custom CleverTap ID Error (514)
+    CTValidationErrorCustomID = 514,
+    
+    // Key Errors (520)
+    CTValidationErrorInvalidKey = 520,
+    CTValidationErrorKeyTooLong = 520,
+    
+    // Value Errors (521)
+    CTValidationErrorValueTooLong = 521,
+    CTValidationErrorInvalidValue = 521,
+    
+    // Multi-value key Errors (521)
+    CTValidationErrorRestrictedKey = 523,
+    
+    // Depth & Structure Errors (540-544)
+    CTValidationErrorDepthLimitExceeded = 540,
+    CTValidationErrorArrayKeyCountLimitExceeded = 541,
+    CTValidationErrorObjectKeyLimitExceeded = 542,
+    CTValidationErrorArrayLengthExceeded = 543,
+    CTValidationErrorKVPairCountExceeded = 544,
+
+    // Empty/Null Value Errors (545)
+    CTValidationErrorNullValueRemoved = 545,
+    CTValidationErrorEmptyValueRemoved = 545,
+};
+
 /**
  * Configuration for validation rules.
  * Create an instance and set properties directly, or use defaultConfig for common CleverTap limits.
@@ -57,12 +102,6 @@ NS_ASSUME_NONNULL_BEGIN
  * Default restricted multi-value fields set.
  */
 + (NSSet<NSString *> *)defaultRestrictedMultiValueFields;
-
-/**
- * Creates a default validation configuration with common CleverTap limits.
- * @return Default ValidationConfig instance
- */
-+ (instancetype)defaultConfig;
 
 /**
  * Creates a default validation configuration with common CleverTap limits.

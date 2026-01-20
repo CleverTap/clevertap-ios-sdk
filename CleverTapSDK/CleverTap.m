@@ -587,8 +587,8 @@ static BOOL sharedInstanceErrorLogged;
     self.inAppEvaluationManager = evaluationManager;
     self.inAppEvaluationManager.location = self.userSetLocation;
     self.inAppDisplayManager = displayManager;
-
-    self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore];
+    
+    self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore validationConfig:self.validationConfig];
     
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
@@ -2041,7 +2041,7 @@ static BOOL sharedInstanceErrorLogged;
             CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.profileChanges);
             break;
         case CTFlattenedEventDataTypeEventProperties:
-            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.profileChanges)
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.eventProperties)
             break;
     }
 }
@@ -2059,10 +2059,10 @@ static BOOL sharedInstanceErrorLogged;
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
         NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedProfileChanges = flattenedEventData.profileChanges;
-        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:flattenedProfileChanges];
-        [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
+        [self.inAppEvaluationManager evaluateOnUserAttributeChange:flattenedProfileChanges];
     } else if (eventName) {
-        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedEventChanges = flattenedEventData.eventProperties;
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:flattenedEventChanges];
     }
 #endif
 }
@@ -2762,8 +2762,15 @@ static BOOL sharedInstanceErrorLogged;
     for (NSString *key in properties) {
         @try {
             if ([identityRepo isIdentity:key]) {
+                id value = properties[key];
                 NSString *identifier = [NSString stringWithFormat:@"%@", properties[key]];
-                
+                if ([value isKindOfClass:[NSNumber class]] ||
+                    [value isKindOfClass:[NSString class]]) { // NSNumber also covers Boolean
+                    identifier = [NSString stringWithFormat:@"%@", value];
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: Aborting the operation. Non-primitive value for the identifier key = %@", self, key);
+                    return;
+                }
                 if (identifier && [identifier length] > 0) {
                     haveIdentifier = YES;
                     cachedGUID = [loginInfoProvider getGUIDforKey:key andIdentifier:identifier];
@@ -3029,9 +3036,11 @@ static BOOL sharedInstanceErrorLogged;
         [CTProfileBuilder build:properties completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
             if (systemFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed system profile: %@", self, systemFields);
                 [profile addEntriesFromDictionary:systemFields];
             }
             if (customFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
                 [profile addEntriesFromDictionary:customFields];
             }
             [self cacheGUIDSforProfile:profile];
@@ -3126,7 +3135,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildRemoveMultiValue:value forKey:key
                              localDataStore:self.localDataStore
                           completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationRemove updatedMultiValue:updatedMultiValue errors:errors];
+        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationArrayRemove updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 

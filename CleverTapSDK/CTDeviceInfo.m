@@ -332,7 +332,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (void)recordDeviceError: (NSString *)errorString {
     CTValidationResult *error = [[CTValidationResult alloc] init];
-    [error setErrorCode:514];
+    [error setErrorCode:CTValidationErrorCustomID];
     [error setErrorDesc:[NSString stringWithFormat:@"%@", errorString]];
     @synchronized (_validationErrors) {
         [_validationErrors addObject:error];

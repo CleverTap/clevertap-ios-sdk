@@ -28,11 +28,12 @@ static const int kMaxPropertiesPerObject = 100;
             @"UTM Visited",
             @"Notification Sent",
             @"App Launched",
-            @"wzrk_d",
             @"App Uninstalled",
-            @"Notification Bounced",
             CLTAP_GEOFENCE_ENTERED_EVENT_NAME,
-            CLTAP_GEOFENCE_EXITED_EVENT_NAME
+            CLTAP_GEOFENCE_EXITED_EVENT_NAME,
+            @"wzrk_fetch",
+            @"wzrk_d",
+            @"SCCampaignOptOut"
         ]];
     });
     return defaultNames;
@@ -48,10 +49,6 @@ static const int kMaxPropertiesPerObject = 100;
         ]];
     });
     return defaultFields;
-}
-
-+ (instancetype)defaultConfig {
-    return [self defaultConfigWithCountryCode:nil];
 }
 
 + (instancetype)defaultConfigWithCountryCode:(nullable NSString*)countryCode {

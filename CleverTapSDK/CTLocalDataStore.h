@@ -50,8 +50,6 @@ typedef NS_ENUM(NSInteger, CTProfileOperation) {
 
 - (id)getProfileFieldForKey:(NSString *)key;
 
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)userAttributeChangeProperties:(NSDictionary *)event;
-
 - (void)persistLocalProfileIfRequired;
 
 - (NSDictionary*)generateBaseProfile;

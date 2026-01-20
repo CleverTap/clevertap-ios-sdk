@@ -16,14 +16,26 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
 
 @implementation CTProfileChangeTracker
 
-- (void)recordDeletion:(id)value
-                  path:(NSString *)path
-               changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+- (void)recordChange:(nonnull NSString *)path oldValue:(nonnull id)oldValue newValue:(nonnull id)newValue changes:(nonnull NSMutableDictionary<NSString *,NSDictionary *> *)changes {
     NSDictionary *change = @{
-        @"oldValue": value ?: [NSNull null],
-        @"newValue": [NSNull null]
+        @"oldValue": [self processValue:oldValue],
+        @"newValue": [self processValue:newValue]
     };
     changes[path] = change;
+}
+
+- (void)recordAddition:(id)newValue path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+    id processedValue = [self processValue:newValue];
+
+    if ([processedValue isKindOfClass:[NSDictionary class]]) {
+        [self recordAllLeafAdditions:processedValue basePath:path changes:changes];
+    } else {
+        NSDictionary *change = @{
+            @"oldValue": [NSNull null],
+            @"newValue": processedValue ?: [NSNull null]
+        };
+        changes[path] = change;
+    }
 }
 
 - (void)recordAllLeafValues:(NSDictionary *)jsonObject
@@ -38,12 +50,65 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
         } else {
             NSDictionary *change = @{
                 @"oldValue": [NSNull null],
-                @"newValue": value ?: [NSNull null]
+                @"newValue": [self processValue:value] ?: [NSNull null]
             };
             changes[newPath] = change;
         }
     }
 }
+
+- (void)recordAllLeafDeletions:(NSDictionary *)dict basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+    for (NSString *key in dict) {
+        id value = dict[key];
+        NSString *currentPath = [self buildPathWithBasePath:basePath key:key];
+
+        if ([value isKindOfClass:[NSDictionary class]]) {
+            // Recurse into nested object
+            [self recordAllLeafDeletions:value basePath:currentPath changes:changes];
+        } else {
+            // Leaf node → record deletion
+            NSDictionary *change = @{
+                @"oldValue": [self processValue:value] ?: [NSNull null],
+                @"newValue": [NSNull null]
+            };
+            changes[currentPath] = change;
+        }
+    }
+}
+
+- (void)recordAllLeafAdditions:(NSDictionary *)dict basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+    for (NSString *key in dict) {
+        id value = dict[key];
+        NSString *currentPath = [self buildPathWithBasePath:basePath key:key];
+        if ([value isKindOfClass:[NSDictionary class]]) {
+            // Recurse into nested object
+            [self recordAllLeafAdditions:value basePath:currentPath changes:changes];
+        } else {
+            // Leaf node → record addition
+            NSDictionary *change = @{
+                @"oldValue": [NSNull null],
+                @"newValue": [self processValue:value] ?: [NSNull null],
+            };
+            changes[currentPath] = change;
+        }
+    }
+}
+
+- (id)processValue:(id)value {
+    if (value == nil) {
+        return nil;
+    }
+    return [CTProfileOperationUtils processDatePrefixes:value];
+}
+
+- (NSString *)buildPathWithBasePath:(NSString *)basePath key:(NSString *)key {
+    if (basePath.length == 0) {
+        return key;
+    } else {
+        return [NSString stringWithFormat:@"%@.%@", basePath, key];
+    }
+}
+
 @end
 
 #pragma mark - Delete Operation Handler Implementation
@@ -119,8 +184,7 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     }
     else if (hasObjectsToDelete) {
         [self deleteFromArrayElements:oldArray newArray:newArray basePath:currentPath changes:changes];
-    }
-    else {
+    } else {
         [self deleteValue:parentJson key:key value:oldArray path:currentPath changes:changes];
     }
 }
@@ -129,68 +193,55 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
     BOOL arrayModified = NO;
     NSInteger minLength = MIN(oldArray.count, newArray.count);
-    for (NSInteger i = minLength - 1; i >= 0; i--) {
+    NSMutableArray<NSNumber *> *indicesToRemove = [NSMutableArray array];
+    
+    for (NSUInteger i = 0; i < minLength; i++) {
         id oldElement = oldArray[i];
         id newElement = newArray[i];
-        if (![oldElement isKindOfClass:[NSDictionary class]] || ![newElement isKindOfClass:[NSDictionary class]]) {
+        if (![oldElement isKindOfClass:[NSDictionary class]] || ![oldElement isKindOfClass:[NSDictionary class]] || ![newElement isKindOfClass:[NSDictionary class]]) {
             continue;
         }
-        // Work on a mutable dictionary
         NSMutableDictionary *oldDict =
         [oldElement isKindOfClass:[NSMutableDictionary class]] ? (NSMutableDictionary *)oldElement : [oldElement mutableCopy];
-        
         NSDictionary *newDict = (NSDictionary *)newElement;
-        CTDeleteOperationHandler *elementHandler =
-        [[CTDeleteOperationHandler alloc] initWithChangeTracker:self.changeTracker];
-        
-        BOOL elementModified = NO;
         for (NSString *key in newDict) {
             id value = newDict[key];
-            // Ideally handleDelete should return whether it mutated `oldDict`
-            BOOL didDelete =
-            [elementHandler handleDelete:oldDict key:key newValue:value currentPath:@"" changes:nil recursiveMerge:^(NSMutableDictionary *target, NSDictionary *source, NSString *path, NSMutableDictionary *localChanges) {
-                if (source) {
-                    [elementHandler handleDeleteRecursive:target source:source changes:nil];
+            [self handleDelete:oldDict key:key newValue:value currentPath:@"" changes:[NSMutableDictionary dictionary] recursiveMerge:^(NSMutableDictionary * _Nonnull target, NSDictionary * _Nullable source, NSString * _Nonnull path, NSMutableDictionary<NSString *,NSDictionary *> * _Nonnull changes) {
+                if (source != nil) {
+                    [self handleDeleteRecursive:target source:source];
                 }
             }];
-            if (didDelete) {
-                elementModified = YES;
-            }
-        }
-        if (!elementModified) {
-            continue;
         }
         arrayModified = YES;
         // Remove empty dictionaries
         if (oldDict.count == 0) {
-            [oldArray removeObjectAtIndex:i];
-        } else {
-            // Write back the modified dictionary if needed
-            oldArray[i] = oldDict;
+            [indicesToRemove addObject:@(i)];
         }
     }
+    // Remove in reverse order
+    NSArray<NSNumber *> *sortedIndices =
+    [indicesToRemove sortedArrayUsingDescriptors:@[
+        [NSSortDescriptor sortDescriptorWithKey:@"self" ascending:NO]
+    ]];
+    
+    for (NSNumber *index in sortedIndices) {
+        [oldArray removeObjectAtIndex:index.unsignedIntegerValue];
+    }
     if (arrayModified) {
-        NSDictionary *change = @{
-            @"oldValue": oldArrayCopy,
-            @"newValue": oldArray
-        };
-        changes[basePath] = change;
+        [self.changeTracker recordChange:basePath oldValue:oldArrayCopy newValue:oldArray changes:changes];
     }
 }
 
-- (void)handleDeleteRecursive:(NSMutableDictionary *)target source:(NSDictionary *)source changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
+- (void)handleDeleteRecursive:(NSMutableDictionary *)target source:(NSDictionary *)source {
     for (NSString *key in source) {
         id newValue = source[key];
-        [self handleDelete:target key:key newValue:newValue currentPath:@"" changes:changes recursiveMerge:^(NSMutableDictionary *t, NSDictionary *s, NSString *p, NSMutableDictionary *c) {
-            if (s) {
-                [self handleDeleteRecursive:t source:s changes:[NSMutableDictionary new]];
-            }
+        [self handleDelete:target key:key newValue:newValue currentPath:@"" changes:[NSMutableDictionary dictionary] recursiveMerge:^(NSMutableDictionary * _Nonnull target, NSDictionary * _Nullable source, NSString * _Nonnull path, NSMutableDictionary<NSString *,NSDictionary *> * _Nonnull changes) {
+            [self handleDeleteRecursive:target source:source];
         }];
     }
 }
 
 - (void)deleteArrayElements:(NSMutableDictionary *)parentJson key:(NSString *)key oldArray:(NSMutableArray *)oldArray newArray:(NSArray *)newArray basePath:(NSString *)basePath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    
     NSMutableArray *indicesToDelete = [NSMutableArray array];
     // Collect indices to delete
     for (NSInteger i = 0; i < [newArray count]; i++) {
@@ -224,6 +275,7 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
             @"newValue": oldArray
         };
         [changes setObject:change forKey:basePath];
+        [self.changeTracker recordChange:basePath oldValue:oldArrayCopy newValue:oldArray changes:changes];
     }
 }
 
@@ -233,8 +285,8 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
                                 self, value);
         return;
     }
-    [self.changeTracker recordDeletion:value path:path changes:changes];
     [parent removeObjectForKey:key];
+    [self.changeTracker recordChange:path oldValue:value newValue:[NSNull null] changes:changes];
 }
 @end
 
@@ -294,46 +346,33 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
 
 - (void)handleMissingKey:(NSMutableDictionary *)target key:(NSString *)key newValue:(id)newValue currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes operation:(CTProfileOperation)operation {
     // Skip GET operations on missing keys
-    if (operation == CTProfileOperationGet) {
+    if (operation == CTProfileOperationGet || operation == CTProfileOperationArrayRemove) {
         return;
     }
     id updatedValue;
-       
-       switch (operation) {
-           case CTProfileOperationDecrement: {
-               // For missing keys, DECREMENT means 0 - value = -value
-               if (![newValue isKindOfClass:[NSNumber class]]) {
-                   return;
-               }
-               updatedValue = [CTNumberOperationUtils negateNumber:newValue];
-               break;
-           }
-               
-           case CTProfileOperationIncrement: {
-               // For missing keys, INCREMENT means 0 + value = value
-               if (![newValue isKindOfClass:[NSNumber class]]) {
-                   return;
-               }
-               updatedValue = newValue;
-               break;
-           }
-               
-           default: {
-               // For SET and other operations, use the value as-is
-               updatedValue = [CTProfileOperationUtils processDatePrefix:newValue];
-               break;
-           }
-       }
-    target[key] = updatedValue;
-    if ([updatedValue isKindOfClass:[NSDictionary class]]) {
-        [self.changeTracker recordAllLeafValues:(NSDictionary *)newValue path:currentPath changes:changes];
-    } else {
-        NSDictionary *change = @{
-            @"oldValue": [NSNull null],
-            @"newValue": updatedValue ?: [NSNull null]
-        };
-        changes[currentPath] = change;
+    
+    switch (operation) {
+        case CTProfileOperationDecrement: {
+            // For missing keys, DECREMENT means 0 - value = -value
+            if (![newValue isKindOfClass:[NSNumber class]]) {
+                return;
+            }
+            updatedValue = [CTNumberOperationUtils negateNumber:newValue];
+            break;
+        }
+        case CTProfileOperationIncrement: {
+            // For missing keys, INCREMENT means 0 + value = value
+            if (![newValue isKindOfClass:[NSNumber class]]) {
+                return;
+            }
+            updatedValue = newValue;
+            break;
+        }
+        default: updatedValue = newValue;
+        break;
     }
+    target[key] = updatedValue;
+    [self.changeTracker recordAddition:newValue path:currentPath changes:changes];
 }
 
 - (void)handleNumberOperation:(NSMutableDictionary *)parent key:(NSString *)key oldValue:(NSNumber *)oldValue newValue:(NSNumber *)newValue path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes operation:(CTProfileOperation)operation {
@@ -348,41 +387,20 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     }
     if (![CTJsonComparisonUtils areEqual:oldValue value:result]) {
         parent[key] = result;
-        NSDictionary *change = @{
-            @"oldValue": oldValue,
-            @"newValue": result
-        };
-        changes[path] = change;
+        [self.changeTracker recordChange:path oldValue:oldValue newValue:newValue changes:changes];
     }
 }
 
 - (void)handleValueUpdate:(NSMutableDictionary *)parent key:(NSString *)key oldValue:(id)oldValue newValue:(id)newValue path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    
-    id processedOldValue = [oldValue isKindOfClass:[NSString class]]
-    ? [CTProfileOperationUtils processDatePrefix:(NSString *)oldValue]
-    : oldValue;
-    
-    id processedNewValue = [newValue isKindOfClass:[NSString class]]
-    ? [CTProfileOperationUtils processDatePrefix:(NSString *)newValue]
-    : newValue;
-    
-    if (![CTJsonComparisonUtils areEqual:processedOldValue value:processedNewValue]) {
-        parent[key] = processedNewValue;
-        NSDictionary *change = @{
-            @"oldValue": processedOldValue ?: [NSNull null],
-            @"newValue": processedNewValue ?: [NSNull null]
-        };
-        changes[path] = change;
+    if (![CTJsonComparisonUtils areEqual:oldValue value:newValue]) {
+        parent[key] = newValue;
+        [self.changeTracker recordChange:path oldValue:oldValue newValue:newValue changes:changes];
     }
 }
 
 - (void)handleGetOperation:(id)oldValue path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
-    
-    id processedOldValue = [oldValue isKindOfClass:[NSString class]]
-    ? [CTProfileOperationUtils processDatePrefix:(NSString *)oldValue]
-    : oldValue;
     NSDictionary *change = @{
-        @"oldValue": processedOldValue ?: [NSNull null],
+        @"oldValue": oldValue ?: [NSNull null],
         @"newValue": kGetMarker
     };
     changes[path] = change;
@@ -391,8 +409,18 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
 @end
 
 #pragma mark - Array Operation Handler Implementation
+@interface CTArrayOperationHandler ()
+@property (nonatomic, strong) CTProfileChangeTracker *changeTracker;
+@end
 
 @implementation CTArrayOperationHandler
+
+- (instancetype)initWithChangeTracker:(CTProfileChangeTracker *)changeTracker {
+    if (self = [super init]) {
+        _changeTracker = changeTracker;
+    }
+    return self;
+}
 
 - (void)handleArrayOperation:(NSMutableDictionary *)parentJson key:(NSString *)key oldArray:(NSMutableArray *)oldArray newArray:(NSArray *)newArray currentPath:(NSString *)currentPath changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes operation:(CTProfileOperation)operation recursiveTraversal:(CTProfileRecursiveBlock)recursiveTraversal {
     if ([newArray count] == 0) return;
@@ -430,17 +458,16 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     BOOL modified = NO;
     for (id item in newArray) {
         if ([item isKindOfClass:[NSString class]]) {
-            id processedItem = [CTProfileOperationUtils processDatePrefix:(NSString *)item];
-            [oldArray addObject:processedItem];
+            [oldArray addObject:item];
             modified = YES;
         }
     }
     if (modified) {
-        NSDictionary *change = @{
-            @"oldValue": oldArrayCopy,
-            @"newValue": oldArray
-        };
-        changes[path] = change;
+        [self.changeTracker recordChange:path
+                                oldValue:oldArrayCopy
+                                newValue:oldArray
+                                 changes:changes];
+        
     }
 }
 
@@ -459,11 +486,7 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     }
     if (modified) {
         parentJson[key] = resultArray;
-        NSDictionary *change = @{
-            @"oldValue": oldArrayCopy,
-            @"newValue": resultArray
-        };
-        changes[path] = change;
+        [self.changeTracker recordChange:path oldValue:oldArrayCopy newValue:resultArray changes:changes];
     }
 }
 
@@ -471,11 +494,7 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     
     if (![CTJsonComparisonUtils areEqual:oldArray value:newArray]) {
         parentJson[key] = newArray;
-        NSDictionary *change = @{
-            @"oldValue": oldArray,
-            @"newValue": newArray
-        };
-        changes[path] = change;
+        [self.changeTracker recordChange:path oldValue:oldArray newValue:newArray changes:changes];
     }
 }
 
@@ -483,25 +502,28 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     
     NSArray *oldArrayCopy = [CTArrayMergeUtils copyArray:oldArray];
     BOOL arrayModified = NO;
+    NSUInteger arrayLength = MIN(oldArray.count, newArray.count);
     
-    for (NSInteger i = 0; i < [newArray count]; i++) {
-        if (i >= [oldArray count]) {
-            arrayModified = [self handleOutOfBoundsIndex:oldArray newArray:newArray index:i operation:operation] || arrayModified;
-            continue;
-        }
+    for (NSUInteger i = 0; i < arrayLength; i++) {
         id oldElement = oldArray[i];
         id newElement = newArray[i];
-        if ([oldElement isKindOfClass:[NSDictionary class]] &&
+        
+        if ([oldElement isKindOfClass:[NSMutableDictionary class]] &&
             [newElement isKindOfClass:[NSDictionary class]]) {
             
-            NSMutableDictionary *elementChanges = [NSMutableDictionary dictionary];
-            recursiveTraversal((NSMutableDictionary *)oldElement, (NSDictionary *)newElement, @"", elementChanges);
-            if ([elementChanges count] > 0) {
+            NSMutableDictionary *oldDict = (NSMutableDictionary *)oldElement;
+            NSMutableDictionary *newDict = [(NSDictionary *)newElement mutableCopy];
+            
+            NSMutableDictionary<NSString *, NSDictionary *> *elementChanges =
+            [NSMutableDictionary dictionary];
+            
+            recursiveTraversal(oldDict, newDict, @"", elementChanges);
+            
+            if (elementChanges.count > 0) {
                 arrayModified = YES;
             }
-        }
-        else if ([oldElement isKindOfClass:[NSNumber class]] &&
-                 [newElement isKindOfClass:[NSNumber class]]) {
+        } else if ([oldElement isKindOfClass:[NSNumber class]] &&
+                   [newElement isKindOfClass:[NSNumber class]]) {
             
             NSNumber *result = [self applyNumberOperation:(NSNumber *)oldElement
                                                  newValue:(NSNumber *)newElement
@@ -512,18 +534,9 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
                 arrayModified = YES;
             }
         }
-        else if (operation == CTProfileOperationSet &&
-                 ![CTJsonComparisonUtils areEqual:oldElement value:newElement]) {
-            oldArray[i] = newElement;
-            arrayModified = YES;
-        }
     }
     if (arrayModified) {
-        NSDictionary *change = @{
-            @"oldValue": oldArrayCopy,
-            @"newValue": oldArray
-        };
-        changes[basePath] = change;
+        [self.changeTracker recordChange:basePath oldValue:oldArrayCopy newValue:oldArray changes:changes];
     }
 }
 
@@ -561,12 +574,10 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
             [newElement isKindOfClass:[NSDictionary class]]) {
             
             recursiveTraversal((NSMutableDictionary *)oldElement, (NSDictionary *)newElement, elementPath, changes);
-        }
-        else {
+        } else {
             id processedOldValue = [oldElement isKindOfClass:[NSString class]]
-            ? [CTProfileOperationUtils processDatePrefix:(NSString *)oldElement]
+            ? [CTProfileOperationUtils processDatePrefixes:(NSString *)oldElement]
             : oldElement;
-            
             NSDictionary *change = @{
                 @"oldValue": processedOldValue ?: [NSNull null],
                 @"newValue": kGetMarker
@@ -594,6 +605,38 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
         return @([numberString longLongValue]);
     }
     return value;
+}
+
++ (NSArray *)processArrayDatePrefixes:(NSArray *)array {
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:array.count];
+    for (id item in array) {
+        [result addObject:[self processDatePrefixes:item]];
+    }
+    return [result copy];
+}
+
++ (NSDictionary *)processObjectDatePrefixes:(NSDictionary *)obj {
+    NSMutableDictionary *result = [NSMutableDictionary dictionaryWithCapacity:obj.count];
+    for (NSString *key in obj) {
+        id value = obj[key];
+        result[key] = [self processDatePrefixes:value];
+    }
+    return [result copy];
+}
+
++ (id)processDatePrefixes:(id)value {
+    if ([value isKindOfClass:[NSString class]]) {
+        return [self processDatePrefix:(NSString *)value];
+    }
+    else if ([value isKindOfClass:[NSArray class]]) {
+        return [self processArrayDatePrefixes:(NSArray *)value];
+    }
+    else if ([value isKindOfClass:[NSDictionary class]]) {
+        return [self processObjectDatePrefixes:(NSDictionary *)value];
+    }
+    else {
+        return value;
+    }
 }
 @end
 
@@ -731,5 +774,4 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
     }
     return [value1 isEqual:value2];
 }
-
 @end

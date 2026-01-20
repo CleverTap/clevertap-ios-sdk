@@ -20,13 +20,11 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 
 @interface CTProfileChangeTracker : NSObject
 
-- (void)recordDeletion:(id)value
-                  path:(NSString *)path
-               changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes;
-
 - (void)recordAllLeafValues:(NSDictionary *)jsonObject
                         path:(NSString *)path
                      changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes;
+
+- (void)recordChange:(NSString *)path oldValue:(id)oldValue newValue:(id)newValue changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes;
 
 @end
 
@@ -80,7 +78,7 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 
 @interface CTProfileOperationUtils : NSObject
 + (BOOL)isDeleteMarker:(id)value;
-+ (id)processDatePrefix:(NSString *)value;
++ (id)processDatePrefixes:(id)value;
 @end
 
 @interface CTArrayMergeUtils : NSObject
