@@ -9,8 +9,8 @@
 import Foundation
 import os.log
 
-@objc(CTLogger)  // Explicitly name it for ObjC
-@objcMembers     // Expose all members to ObjC
+@objc(CTLogger)
+@objcMembers
 public class CTLogger: NSObject {
     
     private static var debugLevel: Int32 = 0
@@ -27,7 +27,6 @@ public class CTLogger: NSObject {
     }
     
     public static func logWithLevel(_ level: Int32, type: Int32, message: String) {
-        // Same implementation as before...
         switch type {
         case 0: guard level >= 0 else { return }
         case 1: guard level > 0 else { return }

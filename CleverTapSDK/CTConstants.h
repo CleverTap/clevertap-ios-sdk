@@ -1,4 +1,3 @@
-//#import "CTLogger.h"
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
 
 extern NSString *const kCTApiDomain;
