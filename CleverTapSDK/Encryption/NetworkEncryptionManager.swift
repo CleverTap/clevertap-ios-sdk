@@ -24,7 +24,7 @@ import Security
             }
             
             let newKey = SymmetricKey(size: .bits256)
-            CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Generated new session key.")
+            CTLogger.logWithLevel(0, type: 0, message: "Generated new session key.")
             sessionKey = newKey
             return newKey
         }
@@ -36,7 +36,7 @@ import Security
             let keyData = key.withUnsafeBytes { Data($0) }
             return keyData.base64EncodedString()
         } else {
-            CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Encryption in transit is only available from iOS 13 and later.")
+            CTLogger.logWithLevel(0, type: 0, message: "Encryption in transit is only available from iOS 13 and later.")
             return nil
         }
     }
@@ -60,11 +60,11 @@ import Security
                 return ["encryptedPayload": encryptedPayload, "nonceData": nonceData]
             }
             catch {
-                CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Encryption in transit error: \( error.localizedDescription)")
+                CTLogger.logWithLevel(0, type: 0, message: "Encryption in transit error: \( error.localizedDescription)")
                 return [:]
             }
         } else {
-            CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Encryption in transit is only available from iOS 13 and later.")
+            CTLogger.logWithLevel(0, type: 0, message: "Encryption in transit is only available from iOS 13 and later.")
             return [:]
         }
     }
@@ -81,7 +81,7 @@ import Security
                 return Data()
             }
             do {
-                CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Encrypted Response: \(response)")
+                CTLogger.logWithLevel(0, type: 0, message: "Encrypted Response: \(response)")
                 let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonceData),
                                                       ciphertext: encryptedData.dropLast(16), // Excluding the tag
                                                       tag: encryptedData.suffix(16)) // Last 16 bytes are the authentication tag
@@ -89,11 +89,11 @@ import Security
                 let decryptedData = try AES.GCM.open(sealedBox, using: getOrGenerateSessionKey())
                 return decryptedData
             } catch {
-                CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Decryption in transit error: \(error.localizedDescription)")
+                CTLogger.logWithLevel(0, type: 0, message: "Decryption in transit error: \(error.localizedDescription)")
                 return Data()
             }
         } else {
-            CTLogger.logWithLevel(0, type: 0, message: "[CleverTap]: Encryption in transit is only available from iOS 13 and later.")
+            CTLogger.logWithLevel(0, type: 0, message: "Encryption in transit is only available from iOS 13 and later.")
             return Data()
         }
     }
