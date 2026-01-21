@@ -18,11 +18,13 @@ extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;
 
+static const int CTLogTypeInfo = 0;
+static const int CTLogTypeDebug = 1;
 #define CleverTapLogInfo(level, fmt, ...) \
     do { \
         if (level >= 0) { \
             NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-            [CTLogger logWithLevel:level type:0 message:_logMsg]; \
+            [CTLogger logWithLevel:level type:CTLogTypeInfo message:_logMsg]; \
         } \
     } while(0)
 
@@ -30,7 +32,7 @@ extern NSString *const kSessionId;
     do { \
         if (level > 0) { \
             NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-            [CTLogger logWithLevel:level type:1 message:_logMsg]; \
+            [CTLogger logWithLevel:level type:CTLogTypeDebug message:_logMsg]; \
         } \
     } while(0)
 
@@ -38,7 +40,7 @@ extern NSString *const kSessionId;
     do { \
         if (level >= 1) { \
             NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-            [CTLogger logWithLevel:level type:1 message:_logMsg]; \
+            [CTLogger logWithLevel:level type:CTLogTypeDebug message:_logMsg]; \
         } \
     } while(0)
 
@@ -47,7 +49,7 @@ extern NSString *const kSessionId;
         int _lvl = [CTLogger getDebugLevel]; \
         if (_lvl >= 0) { \
             NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-            [CTLogger logWithLevel:_lvl type:0 message:_logMsg]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeInfo message:_logMsg]; \
         } \
     } while(0)
 
@@ -56,7 +58,7 @@ extern NSString *const kSessionId;
         int _lvl = [CTLogger getDebugLevel]; \
         if (_lvl > 0) { \
             NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-            [CTLogger logWithLevel:_lvl type:1 message:_logMsg]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeDebug message:_logMsg]; \
         } \
     } while(0)
 
@@ -65,7 +67,7 @@ extern NSString *const kSessionId;
         int _lvl = [CTLogger getDebugLevel]; \
         if (_lvl >= 1) { \
             NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
-            [CTLogger logWithLevel:_lvl type:1 message:_logMsg]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeDebug message:_logMsg]; \
         } \
     } while(0)
 
