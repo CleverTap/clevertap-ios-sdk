@@ -330,6 +330,7 @@ static CTDataValidator *_profileDataValidator;
     }
     NSString *command = [self getStringForOperation:operation];
     NSDictionary *fields = @{key : @{command : values} };
+    
     completion(fields, multiValue, errors);
 }
 

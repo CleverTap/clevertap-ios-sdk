@@ -17,6 +17,7 @@
 #import "CTProfileBuilder.h"
 #import "CTEventDatabase.h"
 #import "CTProfileChangeTracker.h"
+#import "CTNestedJsonBuilder.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;
@@ -43,6 +44,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 @property (nonatomic, strong) CTProfileChangeTracker *changeTracker;
 @property (nonatomic, strong) CTUpdateOperationHandler *updateHandler;
 @property (nonatomic, strong) CTDeleteOperationHandler *deleteHandler;
+@property (nonatomic, strong) CTNestedJsonBuilder *nestedBuilder;
+
 
 @end
 
@@ -75,44 +78,15 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         self.changeTracker = [[CTProfileChangeTracker alloc]init];
         self.updateHandler = [[CTUpdateOperationHandler alloc]initWithChangeTracker:_changeTracker arrayHandler:_arrayHandler];
         self.deleteHandler = [[CTDeleteOperationHandler alloc]initWithChangeTracker:_changeTracker];
+        self.nestedBuilder = [[CTNestedJsonBuilder alloc] init];
         [self addObservers];
     }
     return self;
 }
 
-- (NSDictionary *)buildFromPath:(NSString *)dotNotationPath value:(id)value {
-    if (!dotNotationPath || [dotNotationPath length] == 0) {
-        return @{};
-    }
-    NSArray<NSString *> *pathComponents = [dotNotationPath componentsSeparatedByString:@"."];
-    if ([pathComponents count] == 0) {
-        return @{};
-    }
-    // If there's only one component, return a simple dictionary
-    if ([pathComponents count] == 1) {
-        return @{pathComponents[0]: value ?: [NSNull null]};
-    }
-    // Build nested structure from the end to the beginning
-    NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    NSMutableDictionary *current = result;
-    
-    for (NSInteger i = 0; i < [pathComponents count] - 1; i++) {
-        NSString *key = pathComponents[i];
-        NSMutableDictionary *nested = [NSMutableDictionary dictionary];
-        current[key] = nested;
-        current = nested;
-    }
-    // Set the final value
-    NSString *lastKey = pathComponents[[pathComponents count] - 1];
-    current[lastKey] = value ?: [NSNull null];
-    return [result copy];
-}
-
-- (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey
-                                                           value:(id)value
-                                                         command:(CTProfileOperation)operation {
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey value:(id)value command:(CTProfileOperation)operation {
     @try {
-        NSDictionary *nestedProfile = [self buildFromPath:dotNotationKey value:value];
+        NSMutableDictionary *nestedProfile = [self.nestedBuilder buildFromPath:dotNotationKey value:value];
         return [self processProfileTreeWithJson:nestedProfile operation:operation];
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process profile tree: %@",
@@ -717,7 +691,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }];
     }];
 }
-
 - (void)setProfileFields:(NSDictionary *)fields {
     [self setProfileFields:fields fromUpstream:NO];
 }
