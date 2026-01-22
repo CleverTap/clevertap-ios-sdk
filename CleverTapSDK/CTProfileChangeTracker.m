@@ -353,6 +353,8 @@
         case CTProfileOperationDecrement: {
             // For missing keys, DECREMENT means 0 - value = -value
             if (![newValue isKindOfClass:[NSNumber class]]) {
+                target[key] = newValue;
+                [self.changeTracker recordAddition:newValue path:currentPath changes:changes];
                 return;
             }
             updatedValue = [CTNumberOperationUtils negateNumber:newValue];
@@ -361,6 +363,8 @@
         case CTProfileOperationIncrement: {
             // For missing keys, INCREMENT means 0 + value = value
             if (![newValue isKindOfClass:[NSNumber class]]) {
+                target[key] = newValue;
+                [self.changeTracker recordAddition:newValue path:currentPath changes:changes];
                 return;
             }
             updatedValue = newValue;
