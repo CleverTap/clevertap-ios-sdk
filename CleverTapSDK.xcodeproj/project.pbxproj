@@ -331,6 +331,10 @@
 		4EFC9E4F2DF9690D00104D52 /* CTEncryptionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EFC9E412DF9690D00104D52 /* CTEncryptionManager.h */; };
 		4EFC9E502DF9690D00104D52 /* CTCryptMigrator.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EFC9E3F2DF9690D00104D52 /* CTCryptMigrator.h */; };
 		5709005327FD8E1F0011B89F /* CleverTap+SCDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 5709005227FD8E1E0011B89F /* CleverTap+SCDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		57B7E74C2F214EC900CF22E1 /* CTDataFlattener.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E74A2F214EC900CF22E1 /* CTDataFlattener.h */; };
+		57B7E74D2F214EC900CF22E1 /* CTDataFlattener.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E74B2F214EC900CF22E1 /* CTDataFlattener.m */; };
+		57B7E74E2F214EC900CF22E1 /* CTDataFlattener.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E74B2F214EC900CF22E1 /* CTDataFlattener.m */; };
+		57B7E74F2F214EC900CF22E1 /* CTDataFlattener.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E74A2F214EC900CF22E1 /* CTDataFlattener.h */; };
 		57CDEE042F13D0DE001161F5 /* CTProfileChangeTracker.h in Headers */ = {isa = PBXBuildFile; fileRef = 57CDEE022F13D0DE001161F5 /* CTProfileChangeTracker.h */; };
 		57CDEE052F13D0DE001161F5 /* CTFlattenedEventData.h in Headers */ = {isa = PBXBuildFile; fileRef = 57CDEE002F13D0DE001161F5 /* CTFlattenedEventData.h */; };
 		57CDEE062F13D0DE001161F5 /* CTProfileChangeTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE032F13D0DE001161F5 /* CTProfileChangeTracker.m */; };
@@ -942,6 +946,8 @@
 		4EFC9E422DF9690D00104D52 /* CTEncryptionManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEncryptionManager.m; sourceTree = "<group>"; };
 		4EFC9E432DF9690D00104D52 /* NetworkEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkEncryptionManager.swift; sourceTree = "<group>"; };
 		5709005227FD8E1E0011B89F /* CleverTap+SCDomain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+SCDomain.h"; sourceTree = "<group>"; };
+		57B7E74A2F214EC900CF22E1 /* CTDataFlattener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDataFlattener.h; sourceTree = "<group>"; };
+		57B7E74B2F214EC900CF22E1 /* CTDataFlattener.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDataFlattener.m; sourceTree = "<group>"; };
 		57CDEE002F13D0DE001161F5 /* CTFlattenedEventData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTFlattenedEventData.h; sourceTree = "<group>"; };
 		57CDEE012F13D0DE001161F5 /* CTFlattenedEventData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFlattenedEventData.m; sourceTree = "<group>"; };
 		57CDEE022F13D0DE001161F5 /* CTProfileChangeTracker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileChangeTracker.h; sourceTree = "<group>"; };
@@ -1636,6 +1642,8 @@
 			children = (
 				57CDEE152F13D1B5001161F5 /* Core */,
 				57CDEE1E2F13D1B5001161F5 /* Validators */,
+				57B7E74A2F214EC900CF22E1 /* CTDataFlattener.h */,
+				57B7E74B2F214EC900CF22E1 /* CTDataFlattener.m */,
 			);
 			path = Validation;
 			sourceTree = "<group>";
@@ -2189,6 +2197,7 @@
 				48DC69B82D3FDF4D000E7BE4 /* CTCustomTemplateInAppData.h in Headers */,
 				D014B8E620E2FA64001E0780 /* CleverTapInstanceConfig.h in Headers */,
 				6BEEC2C72AE9B02100BD4EC5 /* CTSystemClock.h in Headers */,
+				57B7E74F2F214EC900CF22E1 /* CTDataFlattener.h in Headers */,
 				4E41FD99294F46510001FBED /* CTVarCache.h in Headers */,
 				D014B8F220E2FABC001E0780 /* CTDeviceInfo.h in Headers */,
 				D014B90A20E2FB74001E0780 /* CTProfileBuilder.h in Headers */,
@@ -2284,6 +2293,7 @@
 				4E7929F929799E8F00B81F3C /* CTDomainFactory.h in Headers */,
 				6A775C3329BE78C7007790E0 /* CTVariables.h in Headers */,
 				0797132F21A2F09A0011C9A3 /* CTSwipeView.h in Headers */,
+				57B7E74C2F214EC900CF22E1 /* CTDataFlattener.h in Headers */,
 				6BF5A59B2AD0318A00CDED20 /* CTSwitchUserDelegate.h in Headers */,
 				6BFC61B02DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */,
 				D0BD75A02417690E0006EE55 /* CleverTapProductConfigPrivate.h in Headers */,
@@ -2740,6 +2750,7 @@
 				57CDEE2D2F13D1B5001161F5 /* CTEventDataValidator.m in Sources */,
 				57CDEE2E2F13D1B5001161F5 /* CTMultiValueDataValidationPipeline.m in Sources */,
 				4E41FD9D294F46510001FBED /* CTVarCache.m in Sources */,
+				57B7E74E2F214EC900CF22E1 /* CTDataFlattener.m in Sources */,
 				4EB3638C2C087A8200C00AE2 /* CTUserInfoMigrator.m in Sources */,
 				D014B91D20E2FBD6001E0780 /* CTCertificatePinning.m in Sources */,
 				D014B90920E2FB71001E0780 /* CTLocalDataStore.m in Sources */,
@@ -2930,6 +2941,7 @@
 				57CDEE072F13D0DE001161F5 /* CTFlattenedEventData.m in Sources */,
 				48C121BC2D9D8D51001A4ABA /* CTAppRatingHelper.swift in Sources */,
 				D0047B0B2098D45B0019C6FD /* CTLocalDataStore.m in Sources */,
+				57B7E74D2F214EC900CF22E1 /* CTDataFlattener.m in Sources */,
 				487C71A72D9567F00052986F /* CTOpenUrlSystemAppFunction.m in Sources */,
 				071EB4CC217F6427008F0FAB /* CTHalfInterstitialViewController.m in Sources */,
 				07B94549219EA34300D4C542 /* CTMessageMO+CoreDataProperties.m in Sources */,

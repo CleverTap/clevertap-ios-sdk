@@ -10,8 +10,6 @@
 #import "CTLocalDataStore.h"
 #import "CTConstants.h"
 
-static NSString *const kGetMarker = @"__GET_MARKER__";
-
 #pragma mark - Change Tracker Implementation
 
 @implementation CTProfileChangeTracker
@@ -401,7 +399,7 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
 - (void)handleGetOperation:(id)oldValue path:(NSString *)path changes:(NSMutableDictionary<NSString *, NSDictionary *> *)changes {
     NSDictionary *change = @{
         @"oldValue": oldValue ?: [NSNull null],
-        @"newValue": kGetMarker
+        @"newValue": kCLTAP_GET_MARKER
     };
     changes[path] = change;
 }
@@ -580,7 +578,7 @@ static NSString *const kGetMarker = @"__GET_MARKER__";
             : oldElement;
             NSDictionary *change = @{
                 @"oldValue": processedOldValue ?: [NSNull null],
-                @"newValue": kGetMarker
+                @"newValue": kCLTAP_GET_MARKER
             };
             changes[elementPath] = change;
         }

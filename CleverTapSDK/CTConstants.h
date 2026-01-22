@@ -109,6 +109,8 @@ static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
 static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
 static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
 static NSString *const kCLTAP_DELETE_MARKER = @"__DELETE__";
+static NSString *const kCLTAP_GET_MARKER = @"__GET_MARKER__";
+
 
 #define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
 

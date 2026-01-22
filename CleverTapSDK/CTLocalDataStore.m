@@ -46,7 +46,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 @property (nonatomic, strong) CTDeleteOperationHandler *deleteHandler;
 @property (nonatomic, strong) CTNestedJsonBuilder *nestedBuilder;
 
-
 @end
 
 @implementation CTLocalDataStore
@@ -618,65 +617,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
 }
 
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)userAttributeChangeProperties:(NSDictionary *)event {
-    NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id> *> *userAttributesChangeProperties = [NSMutableDictionary dictionary];
-    NSMutableDictionary<NSString *, id> *fieldsToPersistLocally = [NSMutableDictionary dictionary];
-    NSDictionary *profile = event[CLTAP_PROFILE];
-    if (!profile) {
-        return @{};
-    }
-    for (NSString *key in profile) {
-        if ([CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION containsObject: key]) {
-            continue;
-        }
-        id oldValue = [self getProfileFieldForKey:key];
-        id newValue = profile[key];
-        NSMutableDictionary *properties = [NSMutableDictionary dictionary];
-        if ([newValue isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *obj = (NSDictionary *)newValue;
-            NSString *commandIdentifier = [[obj allKeys] firstObject];
-            id value = [obj objectForKey:commandIdentifier];
-            if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_INCREMENT] ||
-                [commandIdentifier isEqualToString:kCLTAP_COMMAND_DECREMENT]) {
-                newValue = [CTProfileBuilder _getUpdatedValue:value forKey:key withCommand:commandIdentifier cachedValue:oldValue];
-            } else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_DELETE]) {
-                newValue = nil;
-                [self removeProfileFieldForKey:key];
-            }
-            else if ([commandIdentifier isEqualToString:kCLTAP_COMMAND_SET] ||
-                     [commandIdentifier isEqualToString:kCLTAP_COMMAND_ADD] ||
-                     [commandIdentifier isEqualToString:kCLTAP_COMMAND_REMOVE]) {
-                // Multi values are not supported as user property triggers
-                // The multi values changes are already persisted locally when building the event
-            }
-        } else if ([newValue isKindOfClass:[NSString class]]) {
-            // Remove the date prefix before evaluation and persisting
-            NSString *newValueStr = (NSString *)newValue;
-            if ([newValueStr hasPrefix:CLTAP_DATE_PREFIX]) {
-                newValue = @([[newValueStr substringFromIndex:[CLTAP_DATE_PREFIX length]] longLongValue]);
-            }
-        }
-        if (oldValue != nil && ![oldValue isKindOfClass:[NSArray class]]) {
-            [properties setObject:oldValue forKey:CLTAP_KEY_OLD_VALUE];
-        }
-        if (newValue != nil && ![newValue isKindOfClass:[NSArray class]]) {
-            [properties setObject:newValue forKey:CLTAP_KEY_NEW_VALUE];
-        }
-        
-        // Skip evaluation if both newValue or oldValue are null
-        if ([properties count] > 0) {
-            [userAttributesChangeProperties setObject:properties forKey:key];
-        }
-        // Need to persist only if the new profile value is not a null value
-        if (newValue != nil && newValue != oldValue) {
-            [fieldsToPersistLocally setObject:newValue forKey:key];
-        }
-    }
-    // Persist the changes
-    [self updateProfileFieldsLocally:fieldsToPersistLocally];
-    return userAttributesChangeProperties;
-}
-
 -(void) updateProfileFieldsLocally: (NSMutableDictionary<NSString *, id> *) fieldsToPersistLocally{
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
@@ -837,15 +777,15 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
 - (id)_getProfileFieldFromSessionCacheWithKey:(NSString *)key {
     if (!key || !localProfileForSession) return nil;
     
-    id val = nil;
+    NSDictionary *profileChange = nil;
     
     @synchronized (localProfileForSession) {
         // CACHED VALUES HAVE a "user" PREFIX, SO PREPEND IT BEFORE SEARCHING CACHE
         NSString *keyToSearch = [localProfileForSession.allKeys containsObject:key] ? key : [NSString stringWithFormat:@"user%@",key];
-        val = localProfileForSession[keyToSearch];
+        NSDictionary<NSString *, id> *profileChanges = [self processProfileTree:keyToSearch value:kCLTAP_GET_MARKER command:CTProfileOperationGet];
+        profileChange = profileChanges[key];
     }
-    
-    return val;
+    return profileChange == nil ? nil : profileChange[@"oldValue"];
 }
 
 - (NSString *)profileFileName {

@@ -115,6 +115,7 @@ static NSArray *sslCertNames;
 #endif
 
 #import "CTValidationConfig.h"
+#import "CTDataFlattener.h"
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static NSMutableDictionary *auxiliarySdkVersions;
@@ -3048,7 +3049,7 @@ static BOOL sharedInstanceErrorLogged;
             NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
             event[@"profile"] = profile;
             
-            CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:profile command: CTProfileOperationUpdate];
+            CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:customFields command: CTProfileOperationUpdate];
             [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             
             if (errors) {
@@ -3192,14 +3193,14 @@ static BOOL sharedInstanceErrorLogged;
         NSString* _key = [customFields allKeys][0];
         CleverTapLogInternal(self.config.logLevel, @"Created multi-value profile push: %@", customFields);
         [profile addEntriesFromDictionary:customFields];
-        NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
-        event[@"profile"] = profile;
         CTFlattenedEventData *flattenedData;
         if (operation == CTProfileOperationDelete) {
             flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:operation];
         } else {
             flattenedData = [self getFlattenedProfileChanges:updatedMultiValue withKey:_key command:operation];
         }
+        NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+        event[@"profile"] = profile;
         [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
     }
     if (errors) {
@@ -3208,7 +3209,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (nullable CTFlattenedEventData *)getFlattenedEventProperties:(NSDictionary *)properties {
-    return [CTFlattenedEventData eventProperties:properties];
+    return [CTFlattenedEventData eventProperties:[CTDataFlattener flatten:properties]];
 }
 
 - (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(id)originalValues
@@ -3249,7 +3250,8 @@ static BOOL sharedInstanceErrorLogged;
 - (void)recordEvent:(NSString *)event withProps:(NSDictionary *)properties {
     [self.dispatchQueueManager runSerialAsync:^{
         [CTEventBuilder build:event withEventActions:properties completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
-            CTFlattenedEventData *flattenedData = [self getFlattenedEventProperties:properties];
+            NSDictionary *evtData = event[CLTAP_EVENT_DATA];
+            CTFlattenedEventData *flattenedData = [self getFlattenedEventProperties:evtData];
             if (event) {
                 [self queueEvent:event withType:CleverTapEventTypeRaised flattenedEventData:flattenedData];
             }

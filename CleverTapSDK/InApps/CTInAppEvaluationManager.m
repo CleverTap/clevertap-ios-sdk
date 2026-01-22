@@ -112,6 +112,9 @@
     NSDictionary<NSString *, NSDictionary<NSString *, id> *> *nestedMap = [self toNestedMap:profile];
     NSMutableArray<CTEventAdapter *> *eventAdapterList = [NSMutableArray array];
     [nestedMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
+        if ([CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION containsObject: key]) {
+            return;
+        }
         NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
         NSMutableDictionary *eventProperties = [NSMutableDictionary dictionaryWithDictionary:value];
         [eventProperties addEntriesFromDictionary:appFields];
