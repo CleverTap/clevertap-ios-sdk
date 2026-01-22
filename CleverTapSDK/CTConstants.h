@@ -1,4 +1,8 @@
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
@@ -18,8 +22,6 @@ extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;
 
-static const int CTLogTypeInfo = 0;
-static const int CTLogTypeDebug = 1;
 #define CleverTapLogInfo(level, fmt, ...) \
     do { \
         if (level >= 0) { \

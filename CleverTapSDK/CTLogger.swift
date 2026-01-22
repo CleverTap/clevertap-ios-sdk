@@ -13,6 +13,11 @@ import os.log
 @objcMembers
 public class CTLogger: NSObject {
     
+    @objc public enum CTLogType: Int32 {
+        case info = 0
+        case debug = 1
+    }
+    
     private static var debugLevel: Int32 = 0
     
     @available(iOS 10.0, tvOS 10.0, *)
@@ -27,21 +32,21 @@ public class CTLogger: NSObject {
     }
     
     public static func logWithLevel(_ level: Int32, type: Int32, message: String) {
-        switch type {
-        case 0: guard level >= 0 else { return }
-        case 1: guard level > 0 else { return }
-        case 2: break
-        default: break
+        guard let logType = CTLogType(rawValue: type) else { return }
+        
+        switch logType {
+        case .info: guard level >= 0 else { return }
+        case .debug: guard level > 0 else { return }
         }
         
         let fullMessage = "[CleverTap]: \(message)"
         
-        if #available(iOS 12.0, tvOS 12.0, *) {
-            switch type {
-            case 0: os_log(.info, log: osLog, "%{public}@", fullMessage)
-            case 1: os_log(.debug, log: osLog, "%{public}@", fullMessage)
-            case 2: os_log(.error, log: osLog, "%{public}@", fullMessage)
-            default: os_log(.default, log: osLog, "%{public}@", fullMessage)
+        if #available(iOS 10.0, tvOS 10.0, *) {
+            switch logType {
+            case .info:
+                os_log("%{public}@", log: osLog, type: .info, fullMessage)
+            case .debug:
+                os_log("%{public}@", log: osLog, type: .debug, fullMessage)
             }
         } else {
             NSLog("%@", fullMessage)
@@ -50,6 +55,6 @@ public class CTLogger: NSObject {
     
     public static func logInternalError(_ exception: NSException) {
         let message = "\(self): Caught exception: \(exception)\n\(exception.callStackSymbols)"
-        logWithLevel(debugLevel, type: 2, message: message)
+        logWithLevel(debugLevel, type: CTLogType.debug.rawValue, message: message)
     }
 }
