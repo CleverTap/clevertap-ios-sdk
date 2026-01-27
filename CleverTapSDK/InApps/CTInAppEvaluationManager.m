@@ -18,6 +18,11 @@
 #import "CTInAppNotification.h"
 #import "CTUtils.h"
 #import "CTPreferences.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @interface CTInAppEvaluationManager()
 
@@ -140,7 +145,61 @@
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     // Server-side evaluations do **NOT** update TTL
-    [self _processEligibleInApps:eligibleInApps shouldUpdateTTL:NO];
+    NSMutableArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:ImmediateInAppSelectionStrategy.shared withTTL: true];
+    [self.inAppDisplayManager _addInAppNotificationsToQueue:@[ssInApps]];
+}
+
+- (NSArray<NSDictionary *> *)selectAndProcessEligibleInApps:(NSMutableArray *)eligibleInApps withStrategy:(id<InAppSelectionStrategy>)strategy withTTL:(BOOL)shouldUpdateTTLForThisContext {
+    
+    [self sortByPriority:eligibleInApps];
+    //Track suppression updates
+    __block BOOL updated = NO;
+    
+    NSArray<NSDictionary *> *selectedInApps = [strategy selectInApps:eligibleInApps suppressionHandler:^BOOL(NSDictionary *inApp) {
+        BOOL isSuppressed = [self shouldSuppress:inApp];
+        if (isSuppressed) {
+            updated = YES;
+            [self suppress:inApp];
+            NSLog(@"Suppressed in-app: %@", inApp);
+        }
+        return isSuppressed;
+    }];
+    //Strategy-specific TTL update (only if context allows)
+    if(shouldUpdateTTLForThisContext && [strategy shouldUpdateTTL]) {
+        for (NSDictionary *inApp in selectedInApps) {
+            NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
+            [self.inAppStore updateTTL:mutableInApp];
+            NSLog(@"Updated TTL for in-app: %@", inApp);
+        }
+    }
+    
+    //Persist suppression state if changed
+    if (updated) {
+        //            [self.suppressedClientSideInApps addObject:suppressedInAppMeta];
+        [self saveSuppressedClientSideInApps];
+    }
+    return selectedInApps;
+}
+
+- (void)evaluateOnAppLaunchedDelayedServerSide:(NSArray<NSDictionary *> *)appLaunchedNotifs {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
+    NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
+    NSArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:DelayedInAppSelectionStrategy.shared withTTL: true];
+    // Create mutable array with mutable dictionaries (deep copy)
+    NSMutableArray<NSMutableDictionary *> *ssInAppsCopy = [NSMutableArray array];
+    for (NSDictionary *inApp in ssInApps) {
+        [ssInAppsCopy addObject:[inApp mutableCopy]];
+    }
+    [self.inAppDisplayManager scheduleDelayedInAppsForAllModes:ssInAppsCopy];
+}
+
+- (void)evaluateOnAppLaunchedInActionServerSide:(NSArray *)appLaunchedNotifs {
+    CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
+    NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
+    // Server-side evaluations do **NOT** update TTL
+    NSMutableArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:ImmediateInAppSelectionStrategy.shared withTTL: true];
+    NSMutableArray<NSMutableDictionary *> *ssInAppsCopy = [ssInApps mutableCopy];
+    [self.inAppDisplayManager scheduleInActionInApps: ssInAppsCopy];
 }
 
 - (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events {
@@ -154,7 +213,16 @@
         [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
     }
     // Client-side evaluations **DO** update TTL
-    [self _processEligibleInApps:eligibleInApps shouldUpdateTTL:YES];
+    [self sortByPriority:eligibleInApps];
+       for (NSDictionary *inApp in eligibleInApps) {
+           if (![self shouldSuppress:inApp]) {
+               NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
+               [self.inAppStore updateTTL:mutableInApp];
+               [self.inAppDisplayManager _addInAppNotificationsToQueue:@[mutableInApp]];
+               break;
+           }
+           [self suppress:inApp];
+       }
 }
 
 - (void)evaluateServerSide:(NSArray<CTEventAdapter *> *)events withQueueType:(CTQueueType)queueType{
@@ -184,6 +252,51 @@
         }
         else if (queueType == CTQueueTypeProfile){
             [self saveEvaluatedServerSideInAppIdsForProfile];
+        }
+    }
+}
+
+- (void)evaluateServerSideInAction:(NSArray<CTEventAdapter *> *)events withQueueType:(CTQueueType)queueType {
+    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];
+    for (CTEventAdapter *event in events) {
+        [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.serverSideInActionInAppsMetaData]];
+    }
+    BOOL updated = NO;
+    for (NSDictionary *inApp in eligibleInApps) {
+        NSString *campaignId = [CTInAppNotification inAppId:inApp];
+        if (campaignId) {
+            NSNumber *cid = [CTUtils numberFromString:campaignId];
+            if (cid) {
+                updated = YES;
+                if (queueType == CTQueueTypeEvents){
+                    [self.evaluatedServerSideInAppIds addObject:cid];
+                }
+                else if (queueType == CTQueueTypeProfile){
+                    [self.evaluatedServerSideInAppIdsForProfile addObject:cid];
+                }
+            }
+        }
+    }
+    if (updated) {
+        if (queueType == CTQueueTypeEvents){
+            [self saveEvaluatedServerSideInAppIds];
+        }
+        else if (queueType == CTQueueTypeProfile){
+            [self saveEvaluatedServerSideInAppIdsForProfile];
+        }
+    }
+}
+
+- (void)_processEligibleInApps:(NSArray<NSDictionary *> *)eligibleInApps
+               shouldUpdateTTL:(BOOL)shouldUpdateTTL {
+    if (eligibleInApps.count == 0) return;
+    // Sort by priority
+    NSMutableArray *sorted = [eligibleInApps mutableCopy];
+    [self sortByPriority:sorted];
+    // Handle the first immediate in-app
+    for (NSDictionary *inApp in sorted) {
+        if ([self processInApp:inApp allowOnlyFirst:YES shouldUpdate:shouldUpdateTTL]) {
+            break;
         }
     }
 }
@@ -294,51 +407,6 @@
             }
         }
     }
-}
-
-- (void)_processEligibleInApps:(NSArray<NSDictionary *> *)eligibleInApps
-               shouldUpdateTTL:(BOOL)shouldUpdateTTL {
-    if (eligibleInApps.count == 0) return;
-    
-    // Sort by priority
-    NSMutableArray *sorted = [eligibleInApps mutableCopy];
-    [self sortByPriority:sorted];
-    
-    // Partition into delayed + immediate
-    NSDictionary<NSString *, NSArray *> *partitioned =
-    [self.inAppStore partitionInApps:sorted];
-    
-    NSArray *delayedQueue   = partitioned[@"delayed"] ?: @[];
-    NSArray *immediateQueue = partitioned[@"immediate"] ?: @[];
-    
-    // Handle all delayed in-apps
-    for (NSDictionary *inApp in delayedQueue) {
-        [self processInApp:inApp allowOnlyFirst:NO shouldUpdate:shouldUpdateTTL];
-    }
-    
-    // Handle the first immediate in-app
-    for (NSDictionary *inApp in immediateQueue) {
-        if ([self processInApp:inApp allowOnlyFirst:YES shouldUpdate:shouldUpdateTTL]) {
-            break;
-        }
-    }
-}
-
-- (BOOL)processInApp:(NSDictionary *)inApp allowOnlyFirst:(BOOL)onlyOne shouldUpdate:(BOOL)updateTTL{
-    BOOL suppressed = [self shouldSuppress:inApp];
-    
-    if (suppressed) {
-        [self suppress:inApp];
-        return NO;
-    }
-    
-    NSMutableDictionary *mutable = [inApp mutableCopy];
-    if (updateTTL) {
-        [self.inAppStore updateTTL:mutable];
-    }
-    [self.inAppDisplayManager _addInAppNotificationsToQueue:@[mutable]];
-    
-    return onlyOne;
 }
 
 - (BOOL)shouldSuppress:(NSDictionary *)inApp {

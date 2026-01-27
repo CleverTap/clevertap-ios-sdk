@@ -160,6 +160,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_SS_JSON_RESPONSE_KEY @"inapp_notifs_ss"
 #define CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY @"inapp_notifs_applaunched"
 #define CLTAP_INAPP_MODE_JSON_RESPONSE_KEY @"inapp_delivery_mode"
+#define CLTAP_INAPP_META_KEY @"inapp_notifs_meta"
+#define CLTAP_INAPP_SS_APP_LAUNCHED_META_KEY @"inapp_notifs_applaunched_meta"
 
 #define CLTAP_INAPP_SHOWN_TODAY_META_KEY @"imp"
 #define CLTAP_INAPP_COUNTS_META_KEY @"tlc"
@@ -180,6 +182,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
 #define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
+#define CLTAP_PREFS_INACTION_INAPP_KEY_SS @"inaction_inapp_notifs_ss"
 
 #define CLTAP_PREFS_DELAYED_INAPP_KEY @"delayed_inapp_notifs"
 

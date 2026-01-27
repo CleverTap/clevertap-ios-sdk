@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)properties;
 - (void)evaluateOnAppLaunchedClientSide;
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs;
+- (void)evaluateOnAppLaunchedDelayedServerSide:(NSArray *)appLaunchedNotifs;
 
 @end
 

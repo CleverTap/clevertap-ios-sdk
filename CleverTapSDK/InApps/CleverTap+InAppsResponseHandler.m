@@ -15,6 +15,11 @@
 #import "CleverTapInternal.h"
 #import "CTUtils.h"
 #import "CTCustomTemplatesManager-Internal.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CleverTap(InAppsResponseHandler)
 
@@ -35,21 +40,74 @@
     }
     [self.inAppFCManager updateGlobalLimitsPerDay:perDay.intValue andPerSession:perSession.intValue];
     
-    // Parse SS notifications
-    NSArray *ssInAppNotifs = jsonResp[CLTAP_INAPP_SS_JSON_RESPONSE_KEY];
-    if (ssInAppNotifs) {
-        [self.inAppStore storeServerSideInApps:ssInAppNotifs];
+//     Legacy SS in-apps (inapp_notifs -> NORMAL/DELAYED in-app campaigns WITHOUT advance display rules)
+    ImmediateAndDelayed *partitionedLegacyInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY]];
+    if ([partitionedLegacyInApps hasImmediateInApps]) {
+        [self.inAppDisplayManager _addInAppNotificationsToQueue:partitionedLegacyInApps.immediateInApps];
+    }
+    if ([partitionedLegacyInApps hasDelayedInApps]) {
+        [self.inAppDisplayManager scheduleDelayedInAppsForAllModes:partitionedLegacyInApps.delayedInApps];
+    }
+
+    // Legacy SS in-apps meta (inapp_notifs_meta -> IN-ACTION in-app campaigns WITHOUT advance display rules)
+    InActionOnly *partitionedLegacyMetaInApps = [InAppDurationPartitioner partitionLegacyMetaInApps:jsonResp[CLTAP_INAPP_META_KEY]];
+    if ([partitionedLegacyMetaInApps hasInActionInApps]) {
+        // Schedule in-action timers
+        [self.inAppDisplayManager scheduleInActionInApps:partitionedLegacyMetaInApps.inActionInApps];
+    }
+
+    // App launch SS in-apps (inapp_notifs_applaunched -> NORMAL/DELAYED in-app campaigns WITH/WITHOUT advance display rules on app launched event)
+    ImmediateAndDelayed *partitionedAppLaunchServerSideInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY]];
+    if ([partitionedAppLaunchServerSideInApps hasImmediateInApps]) {
+        @try {
+            [self.inAppEvaluationManager evaluateOnAppLaunchedServerSide:partitionedAppLaunchServerSideInApps.immediateInApps];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error evaluating App Launched notifications JSON: %@", self, e.debugDescription);
+        }
+    }
+    if ([partitionedAppLaunchServerSideInApps hasDelayedInApps]) {
+        @try {
+            [self.inAppEvaluationManager evaluateOnAppLaunchedDelayedServerSide:partitionedAppLaunchServerSideInApps.delayedInApps];
+        } @catch (NSException *e) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error evaluating App Launched notifications JSON: %@", self, e.debugDescription);
+        }
+    }
+
+    // App launch SS in-apps meta (inapp_notifs_applaunched_meta -> IN-ACTION in-app campaigns WITH/WITHOUT advance display rules on app launched event)
+    InActionOnly *partitionedAppLaunchServerSideMetaInApps = [InAppDurationPartitioner partitionAppLaunchServerSideMetaInApps:jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_META_KEY]];
+    if ([partitionedAppLaunchServerSideMetaInApps hasInActionInApps]) {
+        // Schedule in-action from App Launch SS meta
+        [self.inAppDisplayManager scheduleInActionInApps:partitionedAppLaunchServerSideMetaInApps.inActionInApps];
     }
     
-    // Parse CS notifications
-    NSArray *csInAppNotifs = jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY];
-    if (csInAppNotifs) {
-        [self.inAppStore storeClientSideInApps:csInAppNotifs];
-        
+    // SS in-apps (inapp_notifs_ss -> IN-ACTION + NORMAL in-app campaigns WITH advance display rules)
+    UnknownAndInAction *partitionedServerSideInAppsMeta = [InAppDurationPartitioner partitionServerSideMetaInApps:jsonResp[CLTAP_INAPP_SS_JSON_RESPONSE_KEY]];
+        // delayAfterTrigger only comes within inapp_notifs(Legacy SS, with in-app content)
+    if ([partitionedServerSideInAppsMeta hasUnknownDurationInApps]) {
+        [self.inAppStore storeServerSideInApps:partitionedServerSideInAppsMeta.unknownDurationInApps];
+    }
+    if ([partitionedServerSideInAppsMeta hasInActionInApps]) {
+        [self.inAppStore storeServerSideInactionInApps:partitionedServerSideInAppsMeta.inActionInApps];
+    }
+
+    // CS in-apps (inapp_notifs_cs)
+    ImmediateAndDelayed *partitionedClientSideInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]];
+
+    if ([partitionedClientSideInApps hasImmediateInApps]) {
+        NSArray *immediateInApps = partitionedClientSideInApps.immediateInApps;
+        [self.inAppStore storeClientSideInApps:immediateInApps];
         // Preload CS in-app images to disk cache
-        [self downloadMediaURLs:csInAppNotifs];
+        [self downloadMediaURLs:immediateInApps];
         // Preload CS custom template in-app files to disk cache
-        [self downloadCustomTemplatesFileURLs:csInAppNotifs];
+        [self downloadCustomTemplatesFileURLs:immediateInApps];
+    }
+    if ([partitionedClientSideInApps hasDelayedInApps]) {
+        NSArray *delayedInApps = partitionedClientSideInApps.delayedInApps;
+        [self.inAppStore storeClientSideInApps:delayedInApps];
+        // Preload CS in-app images to disk cache
+        [self downloadMediaURLs:delayedInApps];
+        // Preload CS custom template in-app files to disk cache
+        [self downloadCustomTemplatesFileURLs:delayedInApps];
     }
     
     // Parse in-app Mode
@@ -77,34 +135,6 @@
         // Do not show any in-apps if the user is switching. Do not trigger the fetch in-apps callback.
         return;
     }
-    
-    // Parse SS App Launched notifications
-    NSArray *inAppNotifsAppLaunched = jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY];
-    if (inAppNotifsAppLaunched) {
-        @try {
-            [self.inAppEvaluationManager evaluateOnAppLaunchedServerSide:inAppNotifsAppLaunched];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error evaluating App Launched notifications JSON: %@", self, e.debugDescription);
-        }
-    }
-    
-    // Parse in-app notifications to be displayed
-    NSArray *inappsJSON = jsonResp[CLTAP_INAPP_JSON_RESPONSE_KEY];
-    if (inappsJSON) {
-        NSMutableArray *inappNotifs;
-        @try {
-            inappNotifs = [[NSMutableArray alloc] initWithArray:inappsJSON];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing InApps JSON: %@", self, e.debugDescription);
-        }
-        
-        // Add all the new notifications to the queue
-        if (inappNotifs && [inappNotifs count] > 0) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Processing new InApps: %@", self, inappNotifs);
-            [self.inAppDisplayManager _addInAppNotificationsToQueue:inappNotifs];
-        }
-    }
-    
     [self triggerFetchInApps:YES];
 }
 

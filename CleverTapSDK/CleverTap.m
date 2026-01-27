@@ -3682,6 +3682,15 @@ static BOOL sharedInstanceErrorLogged;
     self.fetchInAppsBlock = block;
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @5}} withType:CleverTapEventTypeFetch];
 }
+
+- (void)fetchInactionInApps:(NSString *)inAppId {
+    NSNumber *campaignId = @([inAppId integerValue]);
+    NSDictionary *eventData = @{
+        @"t": @(6),
+        @"tgtId": campaignId  // Use inAppId directly if it's already NSNumber or typecast to NSString
+    };
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: eventData} withType:CleverTapEventTypeFetch];
+}
 #endif
 
 #pragma mark - Event API
