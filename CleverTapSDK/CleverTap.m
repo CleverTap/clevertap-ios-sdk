@@ -142,6 +142,7 @@ NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
 static BOOL isAutoIntegrated;
+static BOOL freshAppLaunchSent = 0;
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenRegister,
@@ -835,6 +836,8 @@ static BOOL sharedInstanceErrorLogged;
     } @catch (NSException *ex) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach wzrk_ref to batch header", self);
     }
+        
+    header[@"fl"] = @([self isFreshAppLaunch]);
     
     @try {
         NSDictionary *additionalHeaders = [[self delegateManager] notifyAttachToHeaderDelegatesAndCollectKeyPathValues:queueType];
@@ -848,6 +851,11 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     return header;
+}
+
+- (BOOL)isFreshAppLaunch {
+    BOOL result = (initialAppEnteredForegroundTime > 0) && !freshAppLaunchSent;
+    return result;
 }
 
 - (NSArray *)insertHeader:(NSDictionary *)header inBatch:(NSArray *)batch {
