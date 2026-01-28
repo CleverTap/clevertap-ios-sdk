@@ -854,7 +854,9 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (BOOL)isFreshAppLaunch {
-    BOOL result = (initialAppEnteredForegroundTime > 0) && !freshAppLaunchSent;
+    BOOL isInitialTimeRecorded = (initialAppEnteredForegroundTime > 0);
+    BOOL result = isInitialTimeRecorded && !freshAppLaunchSent;
+    freshAppLaunchSent = isInitialTimeRecorded;
     return result;
 }
 
