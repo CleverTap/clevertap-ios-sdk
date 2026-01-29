@@ -287,20 +287,6 @@
     }
 }
 
-- (void)_processEligibleInApps:(NSArray<NSDictionary *> *)eligibleInApps
-               shouldUpdateTTL:(BOOL)shouldUpdateTTL {
-    if (eligibleInApps.count == 0) return;
-    // Sort by priority
-    NSMutableArray *sorted = [eligibleInApps mutableCopy];
-    [self sortByPriority:sorted];
-    // Handle the first immediate in-app
-    for (NSDictionary *inApp in sorted) {
-        if ([self processInApp:inApp allowOnlyFirst:YES shouldUpdate:shouldUpdateTTL]) {
-            break;
-        }
-    }
-}
-
 - (NSMutableArray *)evaluate:(CTEventAdapter *)event withInApps:(NSArray *)inApps {
     NSMutableArray *eligibleInApps = [NSMutableArray new];
     for (NSDictionary *inApp in inApps) {
