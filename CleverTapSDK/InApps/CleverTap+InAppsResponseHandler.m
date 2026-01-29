@@ -87,7 +87,7 @@
         [self.inAppStore storeServerSideInApps:partitionedServerSideInAppsMeta.unknownDurationInApps];
     }
     if ([partitionedServerSideInAppsMeta hasInActionInApps]) {
-        [self.inAppStore storeServerSideInactionInApps:partitionedServerSideInAppsMeta.inActionInApps];
+        [self.inAppStore storeServerSideInActionMetaData:partitionedServerSideInAppsMeta.inActionInApps];
     }
 
     // CS in-apps (inapp_notifs_cs)

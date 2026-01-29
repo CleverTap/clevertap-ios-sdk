@@ -27,8 +27,8 @@
 - (NSArray * _Nonnull)serverSideInApps;
 - (void)storeServerSideInApps:(NSArray * _Nullable)serverSideInApps;
 
-- (NSArray * _Nonnull)serverSideInActionInAppsMetaData;
-- (void)storeServerSideInactionInApps:(NSArray * _Nullable)serverSideInApps;
+- (NSArray * _Nonnull)serverSideInActionMetaData;
+- (void)storeServerSideInActionMetaData:(NSArray * _Nullable)serverSideInApps;
 - (void)clearInApps;
 
 - (NSArray * _Nonnull)inAppsQueue;
@@ -41,6 +41,6 @@
 - (void)updateTTL:(NSMutableDictionary * _Nullable)inApp;
 - (BOOL)storeDelayedInApps:(NSArray * _Nullable)inApps;
 - (void)clearDelayedInApps;
-- (NSDictionary *)dequeueDelayedInAppWithCampaignId:(NSString * _Nullable)campaignId;
+- (NSDictionary *_Nullable)dequeueDelayedInAppWithCampaignId:(NSString * _Nullable)campaignId;
 
 @end
