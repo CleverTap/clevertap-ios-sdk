@@ -236,7 +236,7 @@
         return;
     }
     // Client-side evaluations **DO** update TTL
-    NSArray<NSDictionary *> * *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[DelayedInAppSelectionStrategy shared] withTTL: true];
+    NSArray<NSDictionary *> *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[DelayedInAppSelectionStrategy shared] withTTL: true];
     [_inAppDisplayManager scheduleDelayedInAppsForAllModes:ssInApps];
 }
 
