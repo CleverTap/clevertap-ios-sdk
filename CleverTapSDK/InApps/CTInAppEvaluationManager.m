@@ -125,9 +125,9 @@
         [eventAdapterList addObject:event];
     }];
     [self evaluateServerSide:eventAdapterList withQueueType:CTQueueTypeProfile];
-    [self evaluateServerSideInAction:eventList withQueueType:CTQueueTypeProfile];
-    [self evaluateClientSide:eventList];
-    [self evaluateDelayedClientSide:eventList];
+    [self evaluateServerSideInAction:eventAdapterList withQueueType:CTQueueTypeProfile];
+    [self evaluateClientSide:eventAdapterList];
+    [self evaluateDelayedClientSide:eventAdapterList];
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
@@ -323,7 +323,7 @@
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId
                                            withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
         if (matchesLimits) {
-            Cleve(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
+            NSLog(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
             [eligibleInApps addObject:inApp];
         }
     }
