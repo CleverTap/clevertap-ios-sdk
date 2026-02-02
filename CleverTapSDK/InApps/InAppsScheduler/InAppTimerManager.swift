@@ -30,7 +30,7 @@ private struct TimerData {
     private let lock = NSRecursiveLock()
     
     private var tag: String {
-        return "[InAppTimerManager:\(tagSuffix)]:"
+        return "[CleverTap]: [InAppTimerManager:\(tagSuffix)]:"
     }
     
     // MARK: - Initialization
@@ -70,26 +70,17 @@ private struct TimerData {
     @objc private func handleBackground() {
         onAppBackground()
     }
-    
-    // MARK: - Public Methods
-    
+
     /// Schedule a timer with callback after specified delay
-    /// - Parameters:
-    ///   - id: Unique identifier for the timer
-    ///   - delay: Delay in seconds (NSTimeInterval)
-    ///   - callback: Lambda invoked after delay completes
-    /// - Returns: DispatchWorkItem handle
     @discardableResult
     public func scheduleTimer( id: String, delay: TimeInterval, callback: @escaping (CTTimerResult) -> Void) -> DispatchWorkItem {
         lock.lock()
         defer { lock.unlock() }
-        
         // Keep existing active job if present
         if let existingTimer = activeJobs[id], !existingTimer.workItem.isCancelled {
                 print("\(tag) Timer with id '\(id)' already scheduled, keeping existing")
                 return existingTimer.workItem
             }
-        
         let scheduledAt = Date().timeIntervalSince1970
         var workItemRef: DispatchWorkItem?
         
@@ -99,26 +90,17 @@ private struct TimerData {
             defer {
                 self.removeActiveJob(id: id)
             }
-            
-            // Check cancellation (like catching CancellationException)
+            // Check cancellation
             guard let item = workItemRef, !item.isCancelled else {
-                print("\(self.tag) Cancelled timer with id: \(id)")
                 self.storeCancelledJob(
                     id: id,
                     delay: delay,
                     scheduledAt: scheduledAt,
                     callback: callback
                 )
-                return  // Similar to ensureActive() - stop execution
+                print("\(self.tag) Cancelled timer with id: \(id)")
+                return  // stop execution
             }
-            // Check if cancelled
-            //            if Thread.current.isCancelled {
-            //                print("\(self.tag) Cancelled timer with id: \(id)")
-            //                self.storeCancelledJob(id: id, delay: delay, scheduledAt: scheduledAt, callback: callback)
-            //                self.removeActiveJob(id: id)
-            //                return
-            //            }
-            
             // Timer completed successfully
             callback(CTTimerResult.completed(withId: id, scheduledAt: scheduledAt))
             self.removeCancelledJob(id: id)
@@ -132,10 +114,8 @@ private struct TimerData {
                 callback: callback
             )
         activeJobs[id] = timerData
-        print("\(tag) Scheduled timer with id '\(id)' for \(delay)s delay")
-        
         workQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
-        
+        print("\(tag) Scheduled timer with id '\(id)' for \(delay)s delay")
         return workItem
     }
     
@@ -159,11 +139,9 @@ private struct TimerData {
         let cancelledCount = activeJobs.count
         let jobsToCancel = activeJobs.values.map { $0.workItem }
         lock.unlock()
-        
         for workItem in jobsToCancel {
             workItem.cancel()
         }
-        
         print("\(tag) Cancelled \(cancelledCount) timers")
     }
 
@@ -177,47 +155,15 @@ private struct TimerData {
         }
         return !timerData.workItem.isCancelled
     }
-    
-    /// Cancel a specific timer by ID
-//    @objc public func cancelTimer(id: String) -> Bool {
-//        lock.lock()
-//        defer { lock.unlock() }
-//        
-//        guard let job = activeJobs[id] else {
-//            return false
-//        }
-//        
-//        job.cancel()
-//        activeJobs.removeValue(forKey: id)
-//        print("\(tag) Cancelled timer with id: \(id)")
-//        return true
-//    }
-    
-    /// Cancel all active timers
-//    @objc public func cancelAllTimers() {
-//        lock.lock()
-//        let cancelledCount = activeJobs.count
-//        let jobsToCancel = Array(activeJobs.values)
-//        lock.unlock()
-//        
-//        for job in jobsToCancel {
-//            job.cancel()
-//        }
-//        
-//        print("\(tag) Cancelled \(cancelledCount) timers")
-//    }
-    
+
     /// Cleanup all timer state
     func cleanup() {
         print("\(tag) cleaning up timer state")
-        
         cancelAllTimers()
-        
         lock.lock()
         activeJobs.removeAll()
         cancelledJobs.removeAll()
         lock.unlock()
-        
         print("\(tag) cleanup complete")
     }
     
@@ -227,60 +173,38 @@ private struct TimerData {
         defer { lock.unlock() }
         return activeJobs.count
     }
-    
-    /// Check if a timer is scheduled and active
-//    func isTimerScheduled(id: String) -> Bool {
-//        lock.lock()
-//        defer { lock.unlock() }
-//        
-//        guard let job = activeJobs[id] else {
-//            return false
-//        }
-//        return !job.isCancelled
-//    }
-    
+
     // MARK: - Lifecycle Handlers
     
     /// App went to background - cancel all timers
-//    func onAppBackground() {
-//        cancelAllTimers()
-//    }
     func onAppBackground() {
         lock.lock()
-        
         // Store all active timers as cancelled BEFORE cancelling them
         let currentTime = Date().timeIntervalSince1970
-        
         for (id, timerData) in activeJobs {
             if !timerData.workItem.isCancelled {
                 // Calculate elapsed time
                 let elapsedTime = currentTime - timerData.scheduledAt
-                
                 // Store cancelled job data
                 cancelledJobs[id] = CancelledJobData(
                     originalDelay: timerData.delay,
                     scheduledAt: timerData.scheduledAt,
                     callback: timerData.callback
                 )
-                
                 print("\(tag) Stored cancelled timer: \(id), elapsed: \(elapsedTime)s")
             }
         }
-        
         // Now cancel all work items
         let jobsToCancel = activeJobs.values.map { $0.workItem }
         lock.unlock()
-        
         for workItem in jobsToCancel {
             workItem.cancel()
         }
-        
         print("\(tag) Cancelled all timers on background")
     }
     
     /// App came to foreground - reschedule cancelled timers with remaining time
     func onAppForeground() {
-//        print("\(tag) Handling foreground - rescheduling cancelled timers")
         lock.lock()
         let currentTime = Date().timeIntervalSince1970
         var toReschedule: [RescheduleData] = []
@@ -293,9 +217,7 @@ private struct TimerData {
             let elapsedTime = currentTime - scheduledAt
             let remainingTime = originalDelay - elapsedTime
             
-            print("\(tag) Id \(id) - Original delay: \(originalDelay)s, " +
-                  "Elapsed: \(elapsedTime)s, Remaining: \(remainingTime)s")
-            
+            print("\(tag) Id \(id) - Original delay: \(originalDelay)s, " + "Elapsed: \(elapsedTime)s, Remaining: \(remainingTime)s")
             if remainingTime > 0 {
                 toReschedule.append(
                     RescheduleData(
@@ -317,7 +239,6 @@ private struct TimerData {
             rescheduledCount += 1
             print("\(tag) Rescheduled \(data.id) with \(data.remainingTime)s remaining")
         }
-        
         // Discard expired timers
         var discardedCount = 0
         for id in toDiscard {
@@ -328,32 +249,20 @@ private struct TimerData {
             if let cancelledData = cancelledData {
                 discardedCount += 1
                 cancelledData.callback(CTTimerResult.discarded(withId: id))
-//                print("\(tag) Discarded expired timer: \(id)")
             }
         }
-        
-//        print("\(tag) Foreground handling complete - Rescheduled: \(rescheduledCount), Discarded: \(discardedCount)")
     }
     
     // MARK: - Private Helpers
-    
-    private func storeCancelledJob(
-        id: String,
-        delay: TimeInterval,
-        scheduledAt: TimeInterval,
-        callback: @escaping (CTTimerResult) -> Void
-    ) {
+    private func storeCancelledJob(id: String, delay: TimeInterval, scheduledAt: TimeInterval, callback: @escaping (CTTimerResult) -> Void) {
         lock.lock()
         defer { lock.unlock() }
-        
         cancelledJobs[id] = CancelledJobData(
             originalDelay: delay,
             scheduledAt: scheduledAt,
             callback: callback
         )
     }
-    
-    
     
     private func removeCancelledJob(id: String) {
         lock.lock()
@@ -368,7 +277,6 @@ private struct TimerData {
     }
     
     // MARK: - Data Types
-    
     private struct RescheduleData {
         let id: String
         let remainingTime: TimeInterval

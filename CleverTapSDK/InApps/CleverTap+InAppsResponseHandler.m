@@ -77,13 +77,13 @@
     InActionOnly *partitionedAppLaunchServerSideMetaInApps = [InAppDurationPartitioner partitionAppLaunchServerSideMetaInApps:jsonResp[CLTAP_INAPP_SS_APP_LAUNCHED_META_KEY]];
     if ([partitionedAppLaunchServerSideMetaInApps hasInActionInApps]) {
         // Schedule in-action from App Launch SS meta
-        [self.inAppDisplayManager scheduleInActionInApps:partitionedAppLaunchServerSideMetaInApps.inActionInApps];
+        [self.inAppEvaluationManager evaluateOnAppLaunchedInActionServerSide:partitionedAppLaunchServerSideMetaInApps.inActionInApps];
     }
     
     // SS in-apps (inapp_notifs_ss -> IN-ACTION + NORMAL in-app campaigns WITH advance display rules)
     UnknownAndInAction *partitionedServerSideInAppsMeta = [InAppDurationPartitioner partitionServerSideMetaInApps:jsonResp[CLTAP_INAPP_SS_JSON_RESPONSE_KEY]];
         // delayAfterTrigger only comes within inapp_notifs(Legacy SS, with in-app content)
-    if ([partitionedServerSideInAppsMeta hasUnknownDurationInApps]) {
+    if ([partitionedServerSideInAppsMeta hasUnknownDurationInApps]) {//storeServerSideInAppsMetaData
         [self.inAppStore storeServerSideInApps:partitionedServerSideInAppsMeta.unknownDurationInApps];
     }
     if ([partitionedServerSideInAppsMeta hasInActionInApps]) {
@@ -103,7 +103,7 @@
     }
     if ([partitionedClientSideInApps hasDelayedInApps]) {
         NSArray *delayedInApps = partitionedClientSideInApps.delayedInApps;
-        [self.inAppStore storeClientSideInApps:delayedInApps];
+        [self.inAppStore storeDelayedClientSideInApps:delayedInApps];
         // Preload CS in-app images to disk cache
         [self downloadMediaURLs:delayedInApps];
         // Preload CS custom template in-app files to disk cache

@@ -13,32 +13,24 @@ import Foundation
 public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
     private var inActionCache: [String: [String: Any]] = [:]
     private let cacheQueue = DispatchQueue(label: "InActionCache", attributes: .concurrent)
+    private static let TAG = "[CleverTap]: [InactionInAppStorageStrategy]: "
     
     @objc public func prepareForScheduling(inApps: [[String : Any]]) -> Bool {
-        print("Preparing \(inApps.count) in-actions for scheduling")
-        
+        print("\(InactionInAppStorageStrategy.TAG) Preparing \(inApps.count) in-actions for scheduling")
         var swiftInApps: [[String: Any]] = []
         for i in 0..<inApps.count {
-            if let dict = inApps[i] as? [String: Any] {
-                swiftInApps.append(dict)
-            }
+            swiftInApps.append(inApps[i])
         }
         var cachedCount = 0
-//        cacheQueue.async(flags: .barrier) { [weak self] in
-//            guard let self = self else { return }
-//            
-//
-//        }
-        
         for inApp in swiftInApps {
             let inAppId = "\(inApp["ti"] ?? "")"
             if !inAppId.isEmpty {
                 self.inActionCache[inAppId] = inApp
                 cachedCount += 1
-                print("Cached in-action: \(inAppId)")
+                print("\(InactionInAppStorageStrategy.TAG) Cached in-action: \(inAppId)")
             }
         }
-        print("Cached \(cachedCount) in-actions in memory")
+        print("\(InactionInAppStorageStrategy.TAG) Cached \(cachedCount) in-actions in memory")
         return true
     }
     
@@ -48,19 +40,18 @@ public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
             result = inActionCache[id]
         }
         if result != nil {
-            print("Retrieved in-action from cache: \(id)")
+            print("\(InactionInAppStorageStrategy.TAG) Retrieved in-action from cache: \(id)")
         } else {
-            print("In-action not found in cache: \(id)")
+            print("\(InactionInAppStorageStrategy.TAG) In-action not found in cache: \(id)")
         }
-        
-        return result as? [String : Any]
+        return result
     }
     
     @objc public func clear(id: String) {
         cacheQueue.async(flags: .barrier) { [weak self] in
             guard let self = self else { return }
             self.inActionCache.removeValue(forKey: id)
-            print("Cleared in-action from cache: \(id)")
+            print("\(InactionInAppStorageStrategy.TAG) Cleared in-action from cache: \(id)")
         }
     }
     
@@ -69,7 +60,7 @@ public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
             guard let self = self else { return }
             let count = self.inActionCache.count
             self.inActionCache.removeAll()
-            print("Cleared all \(count) in-actions from cache")
+            print("\(InactionInAppStorageStrategy.TAG) Cleared all \(count) in-actions from cache")
         }
     }
     

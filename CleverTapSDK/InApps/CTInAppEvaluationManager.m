@@ -52,8 +52,8 @@
 @implementation CTInAppEvaluationManager
 
 - (instancetype)initWithAccountId:(NSString *)accountId
-                       deviceId:(NSString *)deviceId
-                   delegateManager:(CTMultiDelegateManager *)delegateManager
+                         deviceId:(NSString *)deviceId
+                  delegateManager:(CTMultiDelegateManager *)delegateManager
                 impressionManager:(CTImpressionManager *)impressionManager
               inAppDisplayManager:(CTInAppDisplayManager *)inAppDisplayManager
                        inAppStore:(CTInAppStore *)inAppStore
@@ -88,12 +88,12 @@
         if (savedSuppressedClientSideInAppsForProfile) {
             self.suppressedClientSideInAppsForProfile = [savedSuppressedClientSideInAppsForProfile mutableCopy];
         }
-
+        
         self.inAppStore = inAppStore;
         self.triggersMatcher = [[CTTriggersMatcher alloc] initWithDataStore:dataStore];
         self.limitsMatcher = [CTLimitsMatcher new];
         self.triggerManager = inAppTriggerManager;
-
+        
         [delegateManager addBatchSentDelegate:self];
         [delegateManager addAttachToHeaderDelegate:self];
     }
@@ -125,8 +125,9 @@
         [eventAdapterList addObject:event];
     }];
     [self evaluateServerSide:eventAdapterList withQueueType:CTQueueTypeProfile];
-    [self evaluateClientSide:eventAdapterList];
-    
+    [self evaluateServerSideInAction:eventList withQueueType:CTQueueTypeProfile];
+    [self evaluateClientSide:eventList];
+    [self evaluateDelayedClientSide:eventList];
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
@@ -134,59 +135,30 @@
     NSArray *eventList = @[event];
     CTQueueType queueType = CTQueueTypeEvents;
     [self evaluateServerSide:eventList withQueueType:queueType];
+    [self evaluateServerSideInAction:eventList withQueueType:queueType];
     [self evaluateClientSide:eventList];
+    [self evaluateDelayedClientSide:eventList];
 }
 
 - (void)evaluateOnAppLaunchedClientSide {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSArray *eventList = @[event];
     [self evaluateClientSide:eventList];
+    [self evaluateDelayedClientSide:eventList];
 }
 
 - (void)evaluateOnAppLaunchedServerSide:(NSArray *)appLaunchedNotifs {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     // Server-side evaluations do **NOT** update TTL
-    NSMutableArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:ImmediateInAppSelectionStrategy.shared withTTL: false];
-    [self.inAppDisplayManager _addInAppNotificationsToQueue:@[ssInApps]];
-}
-
-- (NSArray<NSDictionary *> *)selectAndProcessEligibleInApps:(NSMutableArray *)eligibleInApps withStrategy:(id<InAppSelectionStrategy>)strategy withTTL:(BOOL)shouldUpdateTTLForThisContext {
-    
-    [self sortByPriority:eligibleInApps];
-    //Track suppression updates
-    __block BOOL updated = NO;
-    
-    NSArray<NSDictionary *> *selectedInApps = [strategy selectInApps:eligibleInApps suppressionHandler:^BOOL(NSDictionary *inApp) {
-        BOOL isSuppressed = [self shouldSuppress:inApp];
-        if (isSuppressed) {
-            updated = YES;
-            [self suppress:inApp];
-            NSLog(@"Suppressed in-app: %@", inApp);
-        }
-        return isSuppressed;
-    }];
-    //Strategy-specific TTL update (only if context allows)
-    if(shouldUpdateTTLForThisContext && [strategy shouldUpdateTTL]) {
-        for (NSDictionary *inApp in selectedInApps) {
-            NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
-            [self.inAppStore updateTTL:mutableInApp];
-            NSLog(@"Updated TTL for in-app: %@", inApp);
-        }
-    }
-    
-    //Persist suppression state if changed
-    if (updated) {
-        //            [self.suppressedClientSideInApps addObject:suppressedInAppMeta];
-        [self saveSuppressedClientSideInApps];
-    }
-    return selectedInApps;
+    NSArray<NSDictionary *> *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[ImmediateInAppSelectionStrategy shared] withTTL: false];
+    [self.inAppDisplayManager _addInAppNotificationsToQueue:ssInApps];
 }
 
 - (void)evaluateOnAppLaunchedDelayedServerSide:(NSArray<NSDictionary *> *)appLaunchedNotifs {
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
-    NSArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:DelayedInAppSelectionStrategy.shared withTTL: true];
+    NSArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[DelayedInAppSelectionStrategy shared] withTTL: true];
     // Create mutable array with mutable dictionaries (deep copy)
     NSMutableArray<NSMutableDictionary *> *ssInAppsCopy = [NSMutableArray array];
     for (NSDictionary *inApp in ssInApps) {
@@ -199,13 +171,13 @@
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:CLTAP_APP_LAUNCHED_EVENT eventProperties:self.appLaunchedProperties andLocation:self.location];
     NSMutableArray *eligibleInApps = [self evaluate:event withInApps:appLaunchedNotifs];
     // Server-side evaluations do **NOT** update TTL
-    NSMutableArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:ImmediateInAppSelectionStrategy.shared withTTL: false];
+    NSArray<NSDictionary *> *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:ImmediateInAppSelectionStrategy.shared withTTL: false];
     NSMutableArray<NSMutableDictionary *> *ssInAppsCopy = [ssInApps mutableCopy];
     [self.inAppDisplayManager scheduleInActionInApps: ssInAppsCopy];
 }
 
 - (void)evaluateClientSide:(NSArray<CTEventAdapter *> *)events {
-    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];    
+    NSMutableArray<NSDictionary *> *eligibleInApps = [NSMutableArray array];
     for (CTEventAdapter *event in events) {
         id oldValue = [event.eventProperties objectForKey:CLTAP_KEY_OLD_VALUE];
         id newValue = [event.eventProperties objectForKey:CLTAP_KEY_NEW_VALUE];
@@ -214,12 +186,31 @@
         }
         [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
     }
-    if (eligibleInApps.count <= 0) {
-        return;
-    }
     // Client-side evaluations **DO** update TTL
-    NSMutableArray *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[ImmediateInAppSelectionStrategy shared] withTTL: true];
-    [self.inAppDisplayManager _addInAppNotificationsToQueue:@[ssInApps]];
+    NSArray<NSDictionary *> *ssInApps = [self selectAndProcessEligibleInApps: eligibleInApps withStrategy:[ImmediateInAppSelectionStrategy shared] withTTL: true];
+    [self.inAppDisplayManager _addInAppNotificationsToQueue:ssInApps];
+}
+
+- (NSArray<NSDictionary *> *)selectAndProcessEligibleInApps:(NSMutableArray *)eligibleInApps withStrategy:(id<InAppSelectionStrategy>)strategy withTTL:(BOOL)shouldUpdateTTLForThisContext {
+    [self sortByPriority:eligibleInApps];
+    //Track suppression updates
+    __block BOOL updated = NO;
+    NSArray<NSDictionary *> *selectedInApps = [strategy selectInApps:eligibleInApps suppressionHandler:^BOOL(NSDictionary *inApp) {
+        BOOL isSuppressed = [self shouldSuppress:inApp];
+        if (isSuppressed) {
+            updated = YES;
+            [self suppress:inApp];
+        }
+        return isSuppressed;
+    }];
+    //Strategy-specific TTL update (only if context allows)
+    if(shouldUpdateTTLForThisContext && [strategy shouldUpdateTTL]) {
+        for (NSDictionary *inApp in selectedInApps) {
+            NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
+            [self.inAppStore updateTTL:mutableInApp];
+        }
+    }
+    return selectedInApps;
 }
 
 - (void)evaluateDelayedClientSide:(NSArray<CTEventAdapter *> *)events {
@@ -230,7 +221,7 @@
         if (event.profileAttrName != nil && newValue == oldValue) {
             continue;
         }
-        [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.clientSideInApps]];
+        [eligibleInApps addObjectsFromArray:[self evaluate:event withInApps:self.inAppStore.delayedClientSideInApps]];
     }
     if (eligibleInApps.count <= 0) {
         return;
@@ -318,8 +309,8 @@
         NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
         if (!matchesTrigger) continue;
-        
         NSLog(@"Triggers matched for event %@ against inApp %@",[event eventName], campaignId);
+        
         // In-app matches the trigger, increment trigger count
         [self.triggerManager incrementTrigger:campaignId];
         
@@ -332,7 +323,7 @@
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId
                                            withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
         if (matchesLimits) {
-            NSLog(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
+            Cleve(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
             [eligibleInApps addObject:inApp];
         }
     }
@@ -437,9 +428,9 @@
 - (void)sortByPriority:(NSMutableArray *)inApps {
     NSNumber *(^delay)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
         NSNumber *d = inApp[CLTAP_DELAY_AFTER_TRIGGER];
-           if (d != nil) return d;
-           return @(0); // default to 0 if missing
-       };
+        if (d != nil) return d;
+        return @(0); // default to 0 if missing
+    };
     
     NSNumber *(^priority)(NSDictionary *) = ^NSNumber *(NSDictionary *inApp) {
         NSNumber *priority = inApp[CLTAP_INAPP_PRIORITY];
@@ -479,7 +470,7 @@
         // If priority is the same, display the earliest created
         return [ti(inAppA) compare:ti(inAppB)];
     }];
-
+    
     // Sort by delay theny by priority if delay is same
     //then by timestamp if priority is same
     [inApps sortUsingDescriptors:@[sortByDelayDescriptor, sortByPriorityDescriptor, sortByTimestampDescriptor]];
@@ -494,41 +485,41 @@
 }
 
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
-   // Evaluation is done for events and profiles,
-   // send the evaluated and suppressed ids in that queue header
-   if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
-       return [NSMutableDictionary new];
-   }
-   
-   NSMutableDictionary *header = [NSMutableDictionary new];
-   
-   // For combined queues, merge both events and profile arrays
-   if (queueType == CTQueueTypeEvents) {
-       // Combine evaluated IDs from both events and profiles
-       NSMutableArray *combinedEvaluatedIds = [NSMutableArray array];
-       if ([self.evaluatedServerSideInAppIds count] > 0) {
-           [combinedEvaluatedIds addObjectsFromArray:self.evaluatedServerSideInAppIds];
-       }
-       if ([self.evaluatedServerSideInAppIdsForProfile count] > 0) {
-           [combinedEvaluatedIds addObjectsFromArray:self.evaluatedServerSideInAppIdsForProfile];
-       }
-       if ([combinedEvaluatedIds count] > 0) {
-           header[CLTAP_INAPP_SS_EVAL_META_KEY] = combinedEvaluatedIds;
-       }
-       
-       // Combine suppressed IDs from both events and profiles
-       NSMutableArray *combinedSuppressedIds = [NSMutableArray array];
-       if ([self.suppressedClientSideInApps count] > 0) {
-           [combinedSuppressedIds addObjectsFromArray:self.suppressedClientSideInApps];
-       }
-       if ([self.suppressedClientSideInAppsForProfile count] > 0) {
-           [combinedSuppressedIds addObjectsFromArray:self.suppressedClientSideInAppsForProfile];
-       }
-       if ([combinedSuppressedIds count] > 0) {
-           header[CLTAP_INAPP_SUPPRESSED_META_KEY] = combinedSuppressedIds;
-       }
-   }
-   return header;
+    // Evaluation is done for events and profiles,
+    // send the evaluated and suppressed ids in that queue header
+    if (queueType != CTQueueTypeEvents && queueType != CTQueueTypeProfile) {
+        return [NSMutableDictionary new];
+    }
+    
+    NSMutableDictionary *header = [NSMutableDictionary new];
+    
+    // For combined queues, merge both events and profile arrays
+    if (queueType == CTQueueTypeEvents) {
+        // Combine evaluated IDs from both events and profiles
+        NSMutableArray *combinedEvaluatedIds = [NSMutableArray array];
+        if ([self.evaluatedServerSideInAppIds count] > 0) {
+            [combinedEvaluatedIds addObjectsFromArray:self.evaluatedServerSideInAppIds];
+        }
+        if ([self.evaluatedServerSideInAppIdsForProfile count] > 0) {
+            [combinedEvaluatedIds addObjectsFromArray:self.evaluatedServerSideInAppIdsForProfile];
+        }
+        if ([combinedEvaluatedIds count] > 0) {
+            header[CLTAP_INAPP_SS_EVAL_META_KEY] = combinedEvaluatedIds;
+        }
+        
+        // Combine suppressed IDs from both events and profiles
+        NSMutableArray *combinedSuppressedIds = [NSMutableArray array];
+        if ([self.suppressedClientSideInApps count] > 0) {
+            [combinedSuppressedIds addObjectsFromArray:self.suppressedClientSideInApps];
+        }
+        if ([self.suppressedClientSideInAppsForProfile count] > 0) {
+            [combinedSuppressedIds addObjectsFromArray:self.suppressedClientSideInAppsForProfile];
+        }
+        if ([combinedSuppressedIds count] > 0) {
+            header[CLTAP_INAPP_SUPPRESSED_META_KEY] = combinedSuppressedIds;
+        }
+    }
+    return header;
 }
 
 - (void)saveEvaluatedServerSideInAppIds {

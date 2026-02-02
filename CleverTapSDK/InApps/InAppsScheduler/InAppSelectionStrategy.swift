@@ -43,8 +43,6 @@ public protocol InAppSelectionStrategy {
 @objc
 @objcMembers
 public class ImmediateInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
-    
-    // Singleton instance
     @objc public static let shared = ImmediateInAppSelectionStrategy()
     
     private override init() {
@@ -67,20 +65,12 @@ public class ImmediateInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
 
 // MARK: - Delayed Strategy
 
-/**
- * Strategy for delayed in-app evaluation and scheduling.
- * - Defers TTL update to display time
- * - Groups in-apps by delay value
- * - Returns one in-app per delay group for concurrent scheduling
- * - Used for both client-side and app launch server-side delayed in-apps
- */
+/// Strategy for delayed in-app evaluation and scheduling.
 @objc
 @objcMembers
 public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
     
-    private static let TAG = "DelayedInAppSelectionStrategy"
-    
-    // Singleton instance
+    private static let TAG = "[CleverTap]: [DelayedInAppSelectionStrategy]: "
     @objc public static let shared = DelayedInAppSelectionStrategy()
     
     private override init() {
@@ -91,49 +81,38 @@ public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
         return false
     }
     
-    public func selectInApps(
-        _ sortedInApps: [NSDictionary],
-        suppressionHandler: @escaping SuppressionHandler
-    ) -> [NSDictionary] {
-        
-        // Group by delay value
-        var delayedInAppsByDelay: [Int: [NSDictionary]] = [:]
-        
+    public func selectInApps(_ sortedInApps: [NSDictionary], suppressionHandler: @escaping SuppressionHandler) -> [NSDictionary] {
+        var delayedInApps: [NSNumber: [NSDictionary]] = [:]
         for inApp in sortedInApps {
-            let delay = (inApp[INAPP_DELAY_AFTER_TRIGGER] as? NSNumber)?.intValue ?? 0
-            
-            if delayedInAppsByDelay[delay] == nil {
-                delayedInAppsByDelay[delay] = []
+            guard let inAppId = inApp[INAPP_ID_IN_PAYLOAD] as? NSNumber else {
+                continue
             }
-            delayedInAppsByDelay[delay]?.append(inApp)
+            if delayedInApps[inAppId] == nil {
+                delayedInApps[inAppId] = []
+            }
+            delayedInApps[inAppId]?.append(inApp)
         }
-        
         var selectedInApps: [NSDictionary] = []
-        
-        // For each delay group, select first non-suppressed in-app
-        for (delay, inAppsWithSameDelay) in delayedInAppsByDelay {
-            print( "\(DelayedInAppSelectionStrategy.TAG), message: Processing \(inAppsWithSameDelay.count) in-apps with delay: \(delay)s")
+        print( "\(DelayedInAppSelectionStrategy.TAG): Processing \(delayedInApps.count) in-apps")
 
-            
+        // For each delay group, select first non-suppressed in-app
+        for (inAppId, inAppsWithSameDelay) in delayedInApps {
             // Find first non-suppressed in-app
             let selectedInApp = inAppsWithSameDelay.first { inApp in
-                !suppressionHandler(inApp)
+                print("\(DelayedInAppSelectionStrategy.TAG): InApp suppressed: \(suppressionHandler(inApp))")
+                return !suppressionHandler(inApp)
             }
-            
             if let inApp = selectedInApp {
                 selectedInApps.append(inApp)
-                
-                let inAppId = inApp[INAPP_ID_IN_PAYLOAD] as? String ?? "unknown"
-                print( "\(DelayedInAppSelectionStrategy.TAG), message: Selected in-app for delay \(delay)s: \(inAppId)")
+                let inAppDelay = inApp[INAPP_DELAY_AFTER_TRIGGER] ?? 0
+                print("\(DelayedInAppSelectionStrategy.TAG): Selected in-app for delay \(inAppDelay)s: \(inAppId)")
             }
         }
-        
         return selectedInApps
     }
 }
 
 // MARK: - Constants (if not already defined)
-
-let INAPP_DELAY_AFTER_TRIGGER = "delay"
+let INAPP_DELAY_AFTER_TRIGGER = "delayAfterTrigger"
 let INAPP_ID_IN_PAYLOAD = "ti"
 

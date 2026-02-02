@@ -204,6 +204,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)scheduleDelayedInAppsForAllModes:(NSArray<NSDictionary *> *)inappNotifs {
+    if (inappNotifs.count <= 0) return;
     __weak typeof(self) weakSelf = self;
     NSLog(@"Scheduling  %lu delayed inApps", (unsigned long)inappNotifs.count);
     [_inAppDelayManager scheduleInApps:inappNotifs onComplete:^(CTDelayedInAppResult *result) {
@@ -223,6 +224,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)scheduleInActionInApps:(NSArray *)inappNotifs {
+    if (inappNotifs.count <= 0) return;
     __weak typeof(self) weakSelf = self;
     NSLog(@"Scheduling  %lu inaction inApps", (unsigned long)inappNotifs.count);
     [_inAppInActionManager scheduleInApps:inappNotifs onComplete:^(CTInActionResult *result) {

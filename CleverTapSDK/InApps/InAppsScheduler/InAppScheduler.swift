@@ -18,19 +18,14 @@ import Foundation
     private let timerManager: InAppTimerManager
     private let storageStrategy: InAppSchedulingStrategy?
     private let dataExtractor: InAppDataExtractor?
-    private let queue = DispatchQueue(label: "com.clevertap.InAppScheduler", attributes: .concurrent)
+    private let queue = DispatchQueue(label: "com.clevertap.CTInAppScheduler", attributes: .concurrent)
     
     private var tag: String {
-        return "[InAppScheduler]:"
+        return "[CleverTap]: [CTInAppScheduler]:"
     }
     
     // MARK: - Initialization
-    
-    @objc public init(
-        timerManager: InAppTimerManager,
-        storageStrategy: InAppSchedulingStrategy?,
-        dataExtractor: InAppDataExtractor?
-    ) {
+    @objc public init(timerManager: InAppTimerManager, storageStrategy: InAppSchedulingStrategy?, dataExtractor: InAppDataExtractor?) {
         self.timerManager = timerManager
         self.storageStrategy = storageStrategy
         self.dataExtractor = dataExtractor
@@ -39,15 +34,10 @@ import Foundation
     // MARK: - Public Methods
     
     /// Schedule multiple in-apps with appropriate storage strategy
-    /// - Parameters:
-    ///   - inApps: Array of in-app dictionaries to schedule
-    ///   - onComplete: Callback when timer completes with result
     @objc public func schedule(inApps: [[String: Any]], onComplete: @escaping (Any?) -> Void) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            
             print("\(self.tag) Scheduling \(inApps.count) in-apps")
-            
             // Step 1: Filter already scheduled in-apps
             var newInApps: [[String: Any]] = []
             for inApp in inApps {
@@ -59,7 +49,6 @@ import Foundation
                     newInApps.append(inApp)
                 }
             }
-            
             // Step 2: Prepare/store data using strategy
             let prepared = self.storageStrategy?.prepareForScheduling(inApps: newInApps)
             if !(prepared ?? false) {
@@ -71,7 +60,6 @@ import Foundation
                 }
                 return
             }
-            
             // Step 3: Schedule timers for each in-app
             for inApp in newInApps {
                 let inAppId = "\(inApp["ti"] ?? "")"
@@ -112,7 +100,6 @@ import Foundation
     }
     
     // MARK: - Private Methods
-    
     /// Schedule a single in-app with timer
     private func scheduleWithTimer(id: String, delay: TimeInterval, onComplete: @escaping (Any) -> Void ) {
         timerManager.scheduleTimer(id: id, delay: delay) { [weak self] timerResult in
@@ -128,13 +115,12 @@ import Foundation
                 }
                 let data = self.storageStrategy?.retrieveAfterTimer(id: resultId)
                 
-                if let data = data as? [String: Any] {
+                if let data = data {
                     result = self.dataExtractor?.createSuccessResult(id: resultId, data: data)
                 } else {
                     result = self.dataExtractor?.createErrorResult(id: resultId, message: "Data not found")
                 }
                 onComplete(result)
-//                self.storageStrategy?.clear(id: resultId)
                 
             case .error:
                 let resultId = timerResult.resultId
@@ -150,7 +136,6 @@ import Foundation
                 let resultId = timerResult.resultId
                 let result = self.dataExtractor?.createDiscardedResult(id: id)
                 onComplete(result)
-//                self.storageStrategy?.clear(id: id)
                 self.storageStrategy?.retrieveAfterTimer(id: resultId ?? "")
                 print("\(self.tag) Timer discarded, cleaned up: \(id)")
                 

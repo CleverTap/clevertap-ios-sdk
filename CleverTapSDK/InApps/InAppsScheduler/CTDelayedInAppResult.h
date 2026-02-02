@@ -22,7 +22,7 @@ typedef NS_ENUM(NSInteger, CTErrorReason) {
 @interface CTDelayedInAppResult : NSObject
 
 @property (nonatomic, readonly) CTDelayedInAppResultType type;
-@property (nonatomic, readonly, copy) NSString *resultId;
+@property (nonatomic, readonly, copy) NSString * _Nullable resultId;
 
 // Properties for success case
 @property (nonatomic, readonly, nullable) NSDictionary<NSString *, id> *data;
@@ -34,8 +34,8 @@ typedef NS_ENUM(NSInteger, CTErrorReason) {
 // Property for discarded case
 @property (nonatomic, readonly, nullable) NSString *message;
 
-+ (instancetype)successWithId:(NSString *)resultId data:(NSDictionary<NSString *, id> *)data;
-+ (instancetype)errorWithId:(NSString *)resultId reason:(CTErrorReason)reason exception:(nullable NSError *)exception;
-+ (instancetype)discardedWithId:(NSString *)resultId message:(NSString *)message;
++ (instancetype _Nullable)successWithId:(NSString *_Nonnull)resultId data:(NSDictionary<NSString *, id> * _Nullable)data;
++ (instancetype _Nullable)errorWithId:(NSString * _Nonnull)resultId reason:(CTErrorReason)reason exception:(nullable NSError *)exception;
++ (instancetype _Nullable)discardedWithId:(NSString * _Nonnull)resultId message:(NSString * _Nullable)message;
 
 @end

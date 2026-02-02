@@ -11,26 +11,27 @@ import Foundation
 @objc
 @objcMembers
 public class DelayedInAppStorageStrategy: NSObject, InAppSchedulingStrategy {
+    private static let TAG = "[CleverTap]: [InactionInAppStorageStrategy]:"
     public var delayedLegacyInAppStore: CTInAppStore?
-
+    
     @objc public init(delayedLegacyInAppStore: CTInAppStore? = nil) {
-            self.delayedLegacyInAppStore = delayedLegacyInAppStore
-            super.init()
-        }
+        self.delayedLegacyInAppStore = delayedLegacyInAppStore
+        super.init()
+    }
     
     public func prepareForScheduling(inApps: [[String : Any]]) -> Bool {
         guard let store = delayedLegacyInAppStore else {
-                   print("DelayedLegacyInAppStore is null, cannot prepare")
-                   return false
-               }
+            print("\(DelayedInAppStorageStrategy.TAG) DelayedLegacyInAppStore is null, cannot prepare")
+            return false
+        }
         return store.storeDelayed(inApps: inApps)
     }
     
     public func retrieveAfterTimer(id: String) -> [String : Any]? {
         guard let store = delayedLegacyInAppStore else {
-            print("DelayedLegacyInAppStore is null, cannot retrieve")
-                    return nil
-                }
+            print("\(DelayedInAppStorageStrategy.TAG) DelayedLegacyInAppStore is null, cannot retrieve")
+            return nil
+        }
         let inApp = store.dequeueDelayedInApp(withCampaignId: id)
         return (inApp as? [String : Any]?) ?? nil
     }

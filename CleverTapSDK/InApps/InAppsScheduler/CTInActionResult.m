@@ -41,21 +41,4 @@
     return result;
 }
 
-- (NSString *)description {
-    switch (self.type) {
-        case CTInActionResultTypeReadyToFetch:
-            return [NSString stringWithFormat:@"ReadyToFetch(id: %@, data: %@)",
-                    self.inActionId, self.data];
-        case CTInActionResultTypeError:
-            return [NSString stringWithFormat:@"Error(id: %@, message: %@)",
-                    self.inActionId, self.message];
-        case CTInActionResultTypeCancelled:
-            return [NSString stringWithFormat:@"Cancelled(id: %@, message: %@)",
-                    self.inActionId, self.message];
-        case CTInActionResultTypeDiscarded:
-            return [NSString stringWithFormat:@"Discarded(id: %@, message: %@)",
-                    self.inActionId, self.message];
-    }
-}
-
 @end
