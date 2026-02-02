@@ -192,13 +192,55 @@ static CTDataValidator *_profileDataValidator;
         }
     }
     values = _allStrings;
+    CTValidationResult *keyValidationResult = [_profileKeyValidator validateKey:key];
+    if (keyValidationResult.shouldDrop) {
+        // Key is restricted or invalid - add all errors and abort
+        if (keyValidationResult.subResults) {
+            [errors addObjectsFromArray:keyValidationResult.subResults];
+        } else {
+            [errors addObject:keyValidationResult];
+        }
+        
+        // Log the drop reason
+        if (keyValidationResult.dropReason == CTDropReasonRestrictedMultiValueKey) {
+            CleverTapLogStaticDebug(@"%@: Property key '%@' is restricted. %@",
+                                    self, key, keyValidationResult.errorDesc);
+        } else {
+            CleverTapLogStaticDebug(@"%@: Property key validation failed: %@",
+                                    self, keyValidationResult.errorDesc);
+        }
+        
+        completion(nil, nil, errors);
+        return;
+    }
+    if (keyValidationResult.outcome == CTValidationOutcomeWarning) {
+        if (keyValidationResult.subResults) {
+            [errors addObjectsFromArray:keyValidationResult.subResults];
+        } else if (keyValidationResult.errorCode != 0) {
+            [errors addObject:keyValidationResult];
+        }
+        
+        // Log warnings
+        for (CTValidationResult *warning in keyValidationResult.subResults) {
+            CleverTapLogStaticDebug(@"%@: Property key warning [%d]: %@. Cleaned",
+                                    self, warning.errorCode, warning.errorDesc);
+        }
+    }
+    
+    NSString *cleanedKey = (NSString *)keyValidationResult.cleanedData;
+    if (!cleanedKey || [cleanedKey isEqualToString:@""]) {
+        [errors addObject:[self _generateEmptyMultiValueErrorForKey:key]];
+        completion(nil, nil, errors);
+        return;
+    }
+    
     @try {
         // validate the multi-value array
-        CTValidationResult *dataResult = [_profileDataValidator cleanArray:values forKey:key];
+        CTValidationResult *dataResult = [_profileDataValidator cleanArray:values forKey:cleanedKey];
         if (dataResult.shouldDrop) {
             return;
         }
-        [self _validateAndPushMultiValue:dataResult.cleanedData forKey:key withOriginalValues:values usingCommand:command completionHandler:completion];
+        [self _validateAndPushMultiValue:dataResult.cleanedData forKey:cleanedKey withOriginalValues:values usingCommand:command completionHandler:completion];
     } @catch (NSException *e) {
         CleverTapLogStaticInternal(@"%@: error in _handleMultiValues forKey: %@ Reason: %@", self, key, e.debugDescription);
         completion(nil, nil, errors);

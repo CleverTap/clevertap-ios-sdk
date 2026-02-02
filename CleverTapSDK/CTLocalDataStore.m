@@ -73,8 +73,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
                 }
             }
         }];
-        self.arrayHandler = [[CTArrayOperationHandler alloc]init];
         self.changeTracker = [[CTProfileChangeTracker alloc]init];
+        self.arrayHandler = [[CTArrayOperationHandler alloc] initWithChangeTracker:_changeTracker];
         self.updateHandler = [[CTUpdateOperationHandler alloc]initWithChangeTracker:_changeTracker arrayHandler:_arrayHandler];
         self.deleteHandler = [[CTDeleteOperationHandler alloc]initWithChangeTracker:_changeTracker];
         self.nestedBuilder = [[CTNestedJsonBuilder alloc] init];

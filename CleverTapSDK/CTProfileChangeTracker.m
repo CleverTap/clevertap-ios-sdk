@@ -270,10 +270,10 @@
         [parentJson setObject:mutableOldArray forKey:key];
         NSDictionary *change = @{
             @"oldValue": oldArrayCopy,
-            @"newValue": oldArray
+            @"newValue": mutableOldArray
         };
         [changes setObject:change forKey:basePath];
-        [self.changeTracker recordChange:basePath oldValue:oldArrayCopy newValue:oldArray changes:changes];
+        [self.changeTracker recordChange:basePath oldValue:oldArrayCopy newValue:mutableOldArray changes:changes];
     }
 }
 

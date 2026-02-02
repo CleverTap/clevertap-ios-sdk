@@ -46,6 +46,7 @@ typedef void (^CTProfileRecursiveBlock)(NSMutableDictionary *target,
 #pragma mark - Array Operation Handler
 
 @interface CTArrayOperationHandler : NSObject
+- (instancetype)initWithChangeTracker:(CTProfileChangeTracker *)changeTracker;
 
 - (void)handleArrayOperation:(NSMutableDictionary *)parentJson
                          key:(NSString *)key

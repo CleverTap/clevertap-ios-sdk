@@ -2036,10 +2036,10 @@ static BOOL sharedInstanceErrorLogged;
 - (void)logFlattenedData:(CTFlattenedEventData *)flattenedEventData {
     switch (flattenedEventData.type) {
         case CTFlattenedEventDataTypeNoData:
-            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: No Data", self);
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedData: No Data", self);
             break;
         case CTFlattenedEventDataTypeProfileChanges:
-            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.profileChanges);
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedProfileData: %@", self, flattenedEventData.profileChanges);
             break;
         case CTFlattenedEventDataTypeEventProperties:
             CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.eventProperties)
@@ -3037,11 +3037,9 @@ static BOOL sharedInstanceErrorLogged;
         [CTProfileBuilder build:properties completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
             if (systemFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed system profile: %@", self, systemFields);
                 [profile addEntriesFromDictionary:systemFields];
             }
             if (customFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
                 [profile addEntriesFromDictionary:customFields];
             }
             [self cacheGUIDSforProfile:profile];
