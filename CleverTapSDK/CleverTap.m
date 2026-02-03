@@ -3037,9 +3037,11 @@ static BOOL sharedInstanceErrorLogged;
         [CTProfileBuilder build:properties completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
             if (systemFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed system profile: %@", self, systemFields);
                 [profile addEntriesFromDictionary:systemFields];
             }
             if (customFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
                 [profile addEntriesFromDictionary:customFields];
             }
             [self cacheGUIDSforProfile:profile];
