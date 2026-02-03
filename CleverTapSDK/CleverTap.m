@@ -3049,7 +3049,7 @@ static BOOL sharedInstanceErrorLogged;
             NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
             event[@"profile"] = profile;
             
-            CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:customFields command: CTProfileOperationUpdate];
+            CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:profile command: CTProfileOperationUpdate];
             [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             
             if (errors) {
@@ -3220,17 +3220,13 @@ static BOOL sharedInstanceErrorLogged;
     if (!profileChanges) {
         return nil;
     }
-    [self.localDataStore updateProfileFieldsLocally:profileChanges[key]];
     return [CTFlattenedEventData profileChanges:profileChanges];
 }
-
-- (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(NSDictionary *)originalValues
-                                                      command:(CTProfileOperation)operation {
+- (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(NSDictionary *)originalValues command:(CTProfileOperation)operation {
     NSDictionary<NSString *, id> *profileChanges = [self.localDataStore processProfileTreeWithJson:originalValues operation:operation];
     if (!profileChanges) {
         return nil;
     }
-    [self.localDataStore updateProfileFieldsLocally:profileChanges];
     return [CTFlattenedEventData profileChanges:profileChanges];
 }
 

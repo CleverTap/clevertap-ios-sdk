@@ -88,8 +88,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         NSMutableDictionary *nestedProfile = [self.nestedBuilder buildFromPath:dotNotationKey value:value];
         return [self processProfileTreeWithJson:nestedProfile operation:operation];
     } @catch (NSException *e) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process profile tree: %@",
-                             self, e.debugDescription);
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to process profile tree: %@", self, e.debugDescription);
         return @{};
     }
 }
@@ -99,7 +98,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         @try {
             NSDictionary<NSString *, NSDictionary *> *result = [self traverse:localProfileForSession newJson:newJson operation:operation];
             if (operation != CTProfileOperationGet) {
-                [self persistLocalProfileIfRequired];
+                [self updateLocalProfileWithChanges:result];
             }
             return result;
         } @catch (NSException *e) {
@@ -118,6 +117,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!source) return;
     
     for (NSString *key in [source allKeys]) {
+        if ([CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION containsObject: key]) {
+            continue;
+        }
         id newValue = source[key];
         NSString *currentPath = [self buildPath:path withKey:key];
         
@@ -617,9 +619,42 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
 }
 
+- (void)updateLocalProfileWithChanges:(NSDictionary<NSString *, NSDictionary *> *)changes {
+    if (!changes || changes.count == 0) return;
+    
+    NSMutableDictionary *fieldsToUpdate = [NSMutableDictionary dictionary];
+    
+    for (NSString *path in changes) {
+        NSDictionary *changeInfo = changes[path];
+        id newValue = changeInfo[CLTAP_KEY_NEW_VALUE];
+        // For nested paths, only update the root level key in localProfileForSession
+        // The full nested structure is already in the traverse target
+        NSString *rootKey = [self extractRootKeyFromPath:path];
+        if (newValue != nil) {
+            // Get the full nested value for this root key from localProfileForSession
+            // (which was already modified by traverse operation)
+            id rootValue = localProfileForSession[rootKey];
+            if (rootValue) {
+                fieldsToUpdate[rootKey] = rootValue;
+            }
+        } else if ([changeInfo objectForKey:CLTAP_KEY_OLD_VALUE] != nil && newValue == nil) {
+            // Handle deletion
+            [self removeProfileFieldForKey:rootKey];
+        }
+    }
+    // Update the session cache without calling CTProfileBuilder again
+    // since validation/building already happened in traverse
+    if (fieldsToUpdate.count > 0) {
+        [self setProfileFields:fieldsToUpdate fromUpstream:NO];
+    }
+}
+
+- (NSString *)extractRootKeyFromPath:(NSString *)path {
+    NSArray *components = [path componentsSeparatedByString:@"."];
+    return components.firstObject ?: path;
+}
+
 -(void)updateProfileFieldsLocally: (NSDictionary<NSString *, id> *) fieldsToPersistLocally{
-    BOOL shouldUpdateProfile = (fieldsToPersistLocally[@"newValue"] != nil && fieldsToPersistLocally[@"newValue"] != fieldsToPersistLocally[@"oldValue"]);
-    if (!shouldUpdateProfile) return;
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             if (systemFields) {
@@ -704,10 +739,8 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     for (NSString *key in fields) {
         id value = fields[key];
         if (!value) continue;
-        
-        [self _setProfileValue:fields[key] forKey:key fromUpstream:fromUpstream];
+        [self _setProfileValue:value forKey:key fromUpstream:fromUpstream];
     }
-    
     [self persistLocalProfileIfRequired];
 }
 
