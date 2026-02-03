@@ -621,7 +621,9 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     }
 }
 
--(void) updateProfileFieldsLocally: (NSMutableDictionary<NSString *, id> *) fieldsToPersistLocally{
+-(void)updateProfileFieldsLocally: (NSDictionary<NSString *, id> *) fieldsToPersistLocally{
+    BOOL shouldUpdateProfile = (fieldsToPersistLocally[@"newValue"] != nil && fieldsToPersistLocally[@"newValue"] != fieldsToPersistLocally[@"oldValue"]);
+    if (!shouldUpdateProfile) return;
     [self.dispatchQueueManager runSerialAsync:^{
         [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             if (systemFields) {

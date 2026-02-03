@@ -3220,6 +3220,7 @@ static BOOL sharedInstanceErrorLogged;
     if (!profileChanges) {
         return nil;
     }
+    [self.localDataStore updateProfileFieldsLocally:profileChanges[key]];
     return [CTFlattenedEventData profileChanges:profileChanges];
 }
 
@@ -3229,6 +3230,7 @@ static BOOL sharedInstanceErrorLogged;
     if (!profileChanges) {
         return nil;
     }
+    [self.localDataStore updateProfileFieldsLocally:profileChanges];
     return [CTFlattenedEventData profileChanges:profileChanges];
 }
 

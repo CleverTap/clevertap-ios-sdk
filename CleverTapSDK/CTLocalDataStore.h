@@ -55,4 +55,5 @@
 
 - (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey value:(id)value command:(CTProfileOperation)operation;
 - (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson operation:(CTProfileOperation)operation;
+- (void) updateProfileFieldsLocally: (NSDictionary<NSString *, id> *) fieldsToPersistLocally;
 @end
