@@ -8,11 +8,11 @@
 #import <Foundation/Foundation.h>
 #import "CTValidationConfig.h"
 #import "CTValidationResult.h"
-#import "CTValidatorBase.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CTDataValidator : CTValidatorBase
+@interface CTDataValidator : NSObject
+@property (nonatomic, strong, readonly) CTValidationConfig *config;
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config;
 

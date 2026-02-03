@@ -1726,7 +1726,7 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     
-    NSSet *discardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
+    NSSet *discardedEvents = [NSSet setWithArray:arp[CLTAP_DISCARDED_EVENT_JSON_KEY]];
     if (discardedEvents && discardedEvents.count > 0) {
         @try {
             [self.validationConfig setDiscardedEventNames:discardedEvents];

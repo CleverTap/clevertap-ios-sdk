@@ -94,16 +94,6 @@ typedef NS_ENUM(int, CTValidationErrorCode) {
 @property (nonatomic, copy, nullable) NSString* deviceCountryCode;
 
 /**
- * Default restricted event names set.
- */
-+ (NSSet<NSString *> *)defaultRestrictedEventNames;
-
-/**
- * Default restricted multi-value fields set.
- */
-+ (NSSet<NSString *> *)defaultRestrictedMultiValueFields;
-
-/**
  * Creates a default validation configuration with common CleverTap limits.
  * @param countryCode Optional provider for device country code
  * @return Default ValidationConfig instance

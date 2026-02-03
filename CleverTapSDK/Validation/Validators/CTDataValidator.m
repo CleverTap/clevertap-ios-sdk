@@ -18,7 +18,9 @@
 @implementation CTDataValidator
 
 - (instancetype)initWithConfig:(CTValidationConfig *)config {
-    self = [super initWithConfig:config];
+    if (self = [super init]) {
+        _config = config;
+    }
     return self;
 }
 

@@ -8,6 +8,7 @@
 
 #import "CTDataFlattener.h"
 #import "CTProfileChangeTracker.h"
+#import "CTProfileOperationUtils.h"
 
 @implementation CTDataFlattener
 

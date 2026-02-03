@@ -26,28 +26,21 @@ typedef NS_ENUM(NSInteger, CTDropReason) {
 @property (nonatomic, strong, nullable) id cleanedData;
 @property (nonatomic, strong, nullable) NSArray<CTValidationResult *> *subResults;
 
-- (void)setErrorDesc:(NSString *)errorDsc;
-- (void)setObject:(NSObject *)obj;
+- (void)setErrorDesc:(NSString *_Nullable)errorDsc;
+- (void)setObject:(NSObject *_Nullable)obj;
 - (void)setErrorCode:(int)errorCod;
 
 // Legacy compatibility
-+ (CTValidationResult *)resultWithErrorCode:(int)code andMessage:(NSString *)message;
++ (CTValidationResult *_Nullable)resultWithErrorCode:(int)code andMessage:(NSString *_Nonnull)message;
 
 // Basic creation methods
-+ (CTValidationResult *)success;
-+ (CTValidationResult *)successWithData:(id)data;
-+ (CTValidationResult *)warningWithCode:(CTValidationErrorCode)code
-                                message:(NSString *)message
-                                   data:(nullable id)data;
-+ (CTValidationResult *)dropWithCode:(int)code
-                             message:(NSString *)message
-                              reason:(CTDropReason)reason;
++ (CTValidationResult *_Nullable)successWithData:(id _Nullable )data;
++ (CTValidationResult *_Nullable)warningWithCode:(CTValidationErrorCode)code message:(NSString *_Nullable)message data:(nullable id)data;
++ (CTValidationResult *_Nullable)dropWithCode:(int)code message:(NSString *_Nullable)message reason:(CTDropReason)reason;
 
 // Sub-results methods for nested validation
-+ (CTValidationResult *)warningWithSubResults:(NSArray<CTValidationResult *> *)subResults
-                                         data:(nullable id)data;
-+ (CTValidationResult *)dropWithSubResults:(NSArray<CTValidationResult *> *)subResults
-                                    reason:(CTDropReason)reason;
++ (CTValidationResult *_Nullable)warningWithSubResults:(NSArray<CTValidationResult *> *_Nullable)subResults data:(nullable id)data;
++ (CTValidationResult *_Nullable)dropWithSubResults:(NSArray<CTValidationResult *> *_Nullable)subResults reason:(CTDropReason)reason;
 
 - (BOOL)shouldDrop;
 

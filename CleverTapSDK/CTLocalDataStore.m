@@ -18,6 +18,10 @@
 #import "CTEventDatabase.h"
 #import "CTProfileChangeTracker.h"
 #import "CTNestedJsonBuilder.h"
+#import "CTArrayOperationHandler.h"
+#import "CTUpdateOperationHandler.h"
+#import "CTDeleteOperationHandler.h"
+#import "CTNestedJsonBuilder.h"
 
 static const void *const kProfileBackgroundQueueKey = &kProfileBackgroundQueueKey;
 static const double kProfilePersistenceIntervalSeconds = 30.f;

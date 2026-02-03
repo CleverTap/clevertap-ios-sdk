@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config impressionManager:(CTImpressionManager *)impressionManager inAppStore:(CTInAppStore *)inAppStore validationConfig:(CTValidationConfig*)validationConfig;
 #endif
+- (instancetype)initWithConfig:(CleverTapInstanceConfig *)config;
 - (instancetype)initWithConfig:(CleverTapInstanceConfig *)config validationConfig:(CTValidationConfig*)validationConfig;
 - (void)updateSessionStateOnLaunch;
 - (void)updateSessionTime:(long)ts;
