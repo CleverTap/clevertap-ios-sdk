@@ -1,0 +1,48 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
+// swift-module-flags: -target x86_64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name CleverTapSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
+@_exported import CleverTapSDK
+import CryptoKit
+import Foundation
+import Security
+import StoreKit
+import Swift
+import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@available(iOS 13.0, tvOS 13.0, *)
+@objc(CTAESGCMCrypt) public class AESGCMCrypt : ObjectiveC.NSObject {
+  @objc public init(keychainTag: Swift.String)
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func encryptString(_ message: Swift.String, error errorPointer: Foundation.NSErrorPointer) -> Swift.String?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func encryptData(_ data: Foundation.Data, error errorPointer: Foundation.NSErrorPointer) -> Swift.String?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func decryptString(_ encryptedString: Swift.String, error errorPointer: Foundation.NSErrorPointer) -> Swift.String?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func decryptData(_ encryptedString: Swift.String, error errorPointer: Foundation.NSErrorPointer) -> Foundation.Data?
+  #endif
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class NetworkEncryptionManager : ObjectiveC.NSObject {
+  @objc public static let shared: CleverTapSDK.NetworkEncryptionManager
+  @objc public static let ITP: Swift.String
+  @objc public static let ITK: Swift.String
+  @objc public static let ITV: Swift.String
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func getSessionKeyBase64() -> Swift.String?
+  #endif
+  @objc public func encrypt(object: Any) -> [Swift.String : Any]
+  @objc public func decrypt(responseData: Foundation.Data) -> Foundation.Data
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc(CTAppRatingHelper) public class CTAppRatingHelper : ObjectiveC.NSObject {
+  @_Concurrency.MainActor @objc public class func requestRating(completion: @escaping (Swift.Bool) -> Swift.Void)
+  @objc override dynamic public init()
+  @objc deinit
+}
