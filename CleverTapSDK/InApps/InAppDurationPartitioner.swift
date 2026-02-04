@@ -14,6 +14,7 @@ import Foundation
  */
 @objc public class InAppDelayConstants: NSObject {
     @objc public static let INAPP_DELAY_AFTER_TRIGGER = "delayAfterTrigger"
+    @objc public static let INAPP_ID_IN_PAYLOAD = "ti"
     @objc public static let INAPP_MIN_DELAY_SECONDS = 1
     @objc public static let INAPP_MAX_DELAY_SECONDS = 1200
     @objc public static let INAPP_DEFAULT_DELAY_SECONDS = 0

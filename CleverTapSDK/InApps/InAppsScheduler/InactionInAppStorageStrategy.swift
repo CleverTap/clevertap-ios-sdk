@@ -23,7 +23,7 @@ public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
         }
         var cachedCount = 0
         for inApp in swiftInApps {
-            let inAppId = "\(inApp["ti"] ?? "")"
+            let inAppId = "\(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")"
             if !inAppId.isEmpty {
                 self.inActionCache[inAppId] = inApp
                 cachedCount += 1

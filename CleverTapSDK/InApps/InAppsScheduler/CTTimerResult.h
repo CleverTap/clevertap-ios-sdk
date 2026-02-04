@@ -5,7 +5,8 @@
 //  Created by Sonal Kachare on 23/01/26.
 //
 
-// CTTimerResult.h
+#import <Foundation/Foundation.h>
+
 typedef NS_ENUM(NSInteger, CTTimerResultType) {
     CTTimerResultTypeCompleted,
     CTTimerResultTypeError,

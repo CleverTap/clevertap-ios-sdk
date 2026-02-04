@@ -40,7 +40,7 @@ import Foundation
             // Step 1: Filter already scheduled in-apps
             var newInApps: [[String: Any]] = []
             for inApp in inApps {
-                let inAppId = "\(inApp["ti"] ?? "")"
+                let inAppId = "\(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")"
                 guard !inAppId.isEmpty else { continue }
                 
                 let isScheduled = self.timerManager.isTimerScheduled(id: inAppId)
@@ -53,7 +53,7 @@ import Foundation
             if !(prepared ?? false) {
                 print("\(self.tag) Failed to prepare in-apps for scheduling")
                 for inApp in newInApps {
-                    guard let id = inApp["id"] as? String else { continue }
+                    guard let id = inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] as? String else { continue }
                     let result = self.dataExtractor?.createErrorResult(id: id, message: "Preparation failed")
                     onComplete(result)
                 }
@@ -61,8 +61,7 @@ import Foundation
             }
             // Step 3: Schedule timers for each in-app
             for inApp in newInApps {
-                let inAppId = "\(inApp["ti"] ?? "")"
-                
+                let inAppId = "\(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")"
                 guard !inAppId.isEmpty else { continue }
                 let delay = self.dataExtractor?.extractDelay(inApp: inApp) ?? 0
                 

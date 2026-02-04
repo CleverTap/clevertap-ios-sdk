@@ -258,11 +258,12 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
         
         NSUInteger indexToRemove = NSNotFound;
+        NSDictionary *foundInApp = nil;
         for (NSUInteger i = 0; i < delayedInAppsQueue.count; i++) {
             NSDictionary *inApp = delayedInAppsQueue[i];
             id queuedCampaignIdObj = inApp[CLTAP_INAPP_ID];
             NSString *queuedCampaignId;
-
+            
             if ([queuedCampaignIdObj isKindOfClass:[NSNumber class]]) {
                 queuedCampaignId = [(NSNumber *)queuedCampaignIdObj stringValue];
             } else if ([queuedCampaignIdObj isKindOfClass:[NSString class]]) {
@@ -270,16 +271,17 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
             } else {
                 queuedCampaignId = [queuedCampaignIdObj description];
             }
-        if ([queuedCampaignId isEqualToString:campaignId]) {
+            if ([queuedCampaignId isEqualToString:campaignId]) {
                 indexToRemove = i;
-                return inApp;
+                foundInApp = inApp;
+                break;
             }
         }
         if (indexToRemove != NSNotFound) {
             [delayedInAppsQueue removeObjectAtIndex:indexToRemove];
             [self storeDelayedInApps:delayedInAppsQueue];
         }
-        return nil;
+        return foundInApp;
     }
 }
 

@@ -25,11 +25,10 @@ import Foundation
     
     @objc public func extractDelay(inApp: [String: Any]) -> TimeInterval {
         // Extract delay from in-app dictionary
-        // Assuming delay is stored in milliseconds, convert to seconds
-        if let delayMs = inApp["delayAfterTrigger"] as? Int {
+        if let delayMs = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] as? Int {
             return TimeInterval(delayMs)
         }
-        if let delayMs = inApp["delayAfterTrigger"] as? Double {
+        if let delayMs = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] as? Int {
             return TimeInterval(delayMs)
         }
         return 0

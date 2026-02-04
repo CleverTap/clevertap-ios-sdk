@@ -84,7 +84,7 @@ public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
     public func selectInApps(_ sortedInApps: [NSDictionary], suppressionHandler: @escaping SuppressionHandler) -> [NSDictionary] {
         var delayedInApps: [NSNumber: [NSDictionary]] = [:]
         for inApp in sortedInApps {
-            guard let inAppId = inApp[INAPP_ID_IN_PAYLOAD] as? NSNumber else {
+            guard let inAppId = inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] as? NSNumber else {
                 continue
             }
             if delayedInApps[inAppId] == nil {
@@ -104,15 +104,11 @@ public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
             }
             if let inApp = selectedInApp {
                 selectedInApps.append(inApp)
-                let inAppDelay = inApp[INAPP_DELAY_AFTER_TRIGGER] ?? 0
+                let inAppDelay = inApp[InAppDelayConstants.INAPP_DELAY_AFTER_TRIGGER] ?? 0
                 print("\(DelayedInAppSelectionStrategy.TAG) Selected in-app for delay \(inAppDelay)s: \(inAppId)")
             }
         }
         return selectedInApps
     }
 }
-
-// MARK: - Constants (if not already defined)
-let INAPP_DELAY_AFTER_TRIGGER = "delayAfterTrigger"
-let INAPP_ID_IN_PAYLOAD = "ti"
 
