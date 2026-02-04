@@ -534,7 +534,7 @@ static BOOL sharedInstanceErrorLogged;
         }
 #endif
 #if defined(CLEVERTAP_TVOS)
-        self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config];
+        self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config validationConfig:self.validationConfig];
 #endif
         
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -2016,11 +2016,8 @@ static BOOL sharedInstanceErrorLogged;
         [self.dispatchQueueManager runSerialAsync:^{
             [self evaluateOnEvent:event withType: eventType flattenedEventData: flattenedEventData];
         }];
-#else
-        // persist the profile changes
-        if (eventType == CleverTapEventTypeProfile) {
-            [self.localDataStore userAttributeChangeProperties:event];
-        }
+        // For tvOS, removed the else block that called `userAttributeChangeProperties`
+        // Persist profile is already handled in `updateLocalProfileWithChanges`
 #endif
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];

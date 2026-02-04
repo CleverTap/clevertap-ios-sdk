@@ -343,28 +343,12 @@
 		57B7E7C62F31B21200CF22E1 /* CTNestedJsonBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7C32F31B21200CF22E1 /* CTNestedJsonBuilder.h */; };
 		57B7E7C72F31B21200CF22E1 /* CTNestedJsonBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7C42F31B21200CF22E1 /* CTNestedJsonBuilder.m */; };
 		57B7E7C82F31B21200CF22E1 /* CTNestedJsonBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7C32F31B21200CF22E1 /* CTNestedJsonBuilder.h */; };
-		57B7E7D42F31D67900CF22E1 /* CTArrayOperationHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7CA2F31D67900CF22E1 /* CTArrayOperationHandler.m */; };
-		57B7E7D52F31D67900CF22E1 /* CTProfileOperationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7D12F31D67900CF22E1 /* CTProfileOperationUtils.m */; };
-		57B7E7D62F31D67900CF22E1 /* CTDeleteOperationHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7CC2F31D67900CF22E1 /* CTDeleteOperationHandler.m */; };
 		57B7E7D72F31D67900CF22E1 /* CTProfileChangeTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7CE2F31D67900CF22E1 /* CTProfileChangeTracker.m */; };
-		57B7E7D82F31D67900CF22E1 /* CTUpdateOperationHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7D32F31D67900CF22E1 /* CTUpdateOperationHandler.m */; };
 		57B7E7D92F31D67900CF22E1 /* CTProfileChangeTracker.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7CD2F31D67900CF22E1 /* CTProfileChangeTracker.h */; };
-		57B7E7DA2F31D67900CF22E1 /* CTProfileOperationUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7D02F31D67900CF22E1 /* CTProfileOperationUtils.h */; };
-		57B7E7DB2F31D67900CF22E1 /* CTArrayOperationHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7C92F31D67900CF22E1 /* CTArrayOperationHandler.h */; };
-		57B7E7DC2F31D67900CF22E1 /* CTDeleteOperationHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7CB2F31D67900CF22E1 /* CTDeleteOperationHandler.h */; };
 		57B7E7DD2F31D67900CF22E1 /* CTProfileOperationType.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7CF2F31D67900CF22E1 /* CTProfileOperationType.h */; };
-		57B7E7DE2F31D67900CF22E1 /* CTUpdateOperationHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7D22F31D67900CF22E1 /* CTUpdateOperationHandler.h */; };
 		57B7E7DF2F31D67900CF22E1 /* CTProfileChangeTracker.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7CD2F31D67900CF22E1 /* CTProfileChangeTracker.h */; };
-		57B7E7E02F31D67900CF22E1 /* CTProfileOperationUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7D02F31D67900CF22E1 /* CTProfileOperationUtils.h */; };
-		57B7E7E12F31D67900CF22E1 /* CTArrayOperationHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7C92F31D67900CF22E1 /* CTArrayOperationHandler.h */; };
-		57B7E7E22F31D67900CF22E1 /* CTDeleteOperationHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7CB2F31D67900CF22E1 /* CTDeleteOperationHandler.h */; };
 		57B7E7E32F31D67900CF22E1 /* CTProfileOperationType.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7CF2F31D67900CF22E1 /* CTProfileOperationType.h */; };
-		57B7E7E42F31D67900CF22E1 /* CTUpdateOperationHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7D22F31D67900CF22E1 /* CTUpdateOperationHandler.h */; };
-		57B7E7E52F31D67900CF22E1 /* CTArrayOperationHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7CA2F31D67900CF22E1 /* CTArrayOperationHandler.m */; };
-		57B7E7E62F31D67900CF22E1 /* CTProfileOperationUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7D12F31D67900CF22E1 /* CTProfileOperationUtils.m */; };
-		57B7E7E72F31D67900CF22E1 /* CTDeleteOperationHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7CC2F31D67900CF22E1 /* CTDeleteOperationHandler.m */; };
 		57B7E7E82F31D67900CF22E1 /* CTProfileChangeTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7CE2F31D67900CF22E1 /* CTProfileChangeTracker.m */; };
-		57B7E7E92F31D67900CF22E1 /* CTUpdateOperationHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7D32F31D67900CF22E1 /* CTUpdateOperationHandler.m */; };
 		57CDEE052F13D0DE001161F5 /* CTFlattenedEventData.h in Headers */ = {isa = PBXBuildFile; fileRef = 57CDEE002F13D0DE001161F5 /* CTFlattenedEventData.h */; };
 		57CDEE072F13D0DE001161F5 /* CTFlattenedEventData.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE012F13D0DE001161F5 /* CTFlattenedEventData.m */; };
 		57CDEE092F13D0DE001161F5 /* CTFlattenedEventData.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE012F13D0DE001161F5 /* CTFlattenedEventData.m */; };
@@ -970,17 +954,9 @@
 		57B7E7BE2F31B20200CF22E1 /* CTDataValidator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDataValidator.m; sourceTree = "<group>"; };
 		57B7E7C32F31B21200CF22E1 /* CTNestedJsonBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTNestedJsonBuilder.h; sourceTree = "<group>"; };
 		57B7E7C42F31B21200CF22E1 /* CTNestedJsonBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTNestedJsonBuilder.m; sourceTree = "<group>"; };
-		57B7E7C92F31D67900CF22E1 /* CTArrayOperationHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTArrayOperationHandler.h; sourceTree = "<group>"; };
-		57B7E7CA2F31D67900CF22E1 /* CTArrayOperationHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTArrayOperationHandler.m; sourceTree = "<group>"; };
-		57B7E7CB2F31D67900CF22E1 /* CTDeleteOperationHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDeleteOperationHandler.h; sourceTree = "<group>"; };
-		57B7E7CC2F31D67900CF22E1 /* CTDeleteOperationHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDeleteOperationHandler.m; sourceTree = "<group>"; };
 		57B7E7CD2F31D67900CF22E1 /* CTProfileChangeTracker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileChangeTracker.h; sourceTree = "<group>"; };
 		57B7E7CE2F31D67900CF22E1 /* CTProfileChangeTracker.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProfileChangeTracker.m; sourceTree = "<group>"; };
 		57B7E7CF2F31D67900CF22E1 /* CTProfileOperationType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileOperationType.h; sourceTree = "<group>"; };
-		57B7E7D02F31D67900CF22E1 /* CTProfileOperationUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileOperationUtils.h; sourceTree = "<group>"; };
-		57B7E7D12F31D67900CF22E1 /* CTProfileOperationUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTProfileOperationUtils.m; sourceTree = "<group>"; };
-		57B7E7D22F31D67900CF22E1 /* CTUpdateOperationHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTUpdateOperationHandler.h; sourceTree = "<group>"; };
-		57B7E7D32F31D67900CF22E1 /* CTUpdateOperationHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUpdateOperationHandler.m; sourceTree = "<group>"; };
 		57CDEE002F13D0DE001161F5 /* CTFlattenedEventData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTFlattenedEventData.h; sourceTree = "<group>"; };
 		57CDEE012F13D0DE001161F5 /* CTFlattenedEventData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFlattenedEventData.m; sourceTree = "<group>"; };
 		57CDEE132F13D1B5001161F5 /* CTValidationConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTValidationConfig.h; sourceTree = "<group>"; };
@@ -1643,17 +1619,9 @@
 		57B7E7A22F31413C00CF22E1 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				57B7E7C92F31D67900CF22E1 /* CTArrayOperationHandler.h */,
-				57B7E7CA2F31D67900CF22E1 /* CTArrayOperationHandler.m */,
-				57B7E7CB2F31D67900CF22E1 /* CTDeleteOperationHandler.h */,
-				57B7E7CC2F31D67900CF22E1 /* CTDeleteOperationHandler.m */,
 				57B7E7CD2F31D67900CF22E1 /* CTProfileChangeTracker.h */,
 				57B7E7CE2F31D67900CF22E1 /* CTProfileChangeTracker.m */,
 				57B7E7CF2F31D67900CF22E1 /* CTProfileOperationType.h */,
-				57B7E7D02F31D67900CF22E1 /* CTProfileOperationUtils.h */,
-				57B7E7D12F31D67900CF22E1 /* CTProfileOperationUtils.m */,
-				57B7E7D22F31D67900CF22E1 /* CTUpdateOperationHandler.h */,
-				57B7E7D32F31D67900CF22E1 /* CTUpdateOperationHandler.m */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -2194,11 +2162,7 @@
 				D014B8F020E2FAB1001E0780 /* CTPlistInfo.h in Headers */,
 				48DC69B42D3FDF1F000E7BE4 /* CTEventDatabase.h in Headers */,
 				57B7E7DF2F31D67900CF22E1 /* CTProfileChangeTracker.h in Headers */,
-				57B7E7E02F31D67900CF22E1 /* CTProfileOperationUtils.h in Headers */,
-				57B7E7E12F31D67900CF22E1 /* CTArrayOperationHandler.h in Headers */,
-				57B7E7E22F31D67900CF22E1 /* CTDeleteOperationHandler.h in Headers */,
 				57B7E7E32F31D67900CF22E1 /* CTProfileOperationType.h in Headers */,
-				57B7E7E42F31D67900CF22E1 /* CTUpdateOperationHandler.h in Headers */,
 				6B535FB72AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */,
 				4E8B81702AD2BB8A00714BB4 /* CTDispatchQueueManager.h in Headers */,
 				D014B8EC20E2FA9D001E0780 /* CleverTapTrackedViewController.h in Headers */,
@@ -2302,11 +2266,7 @@
 				07B94546219EA34300D4C542 /* CTMessageMO+CoreDataProperties.h in Headers */,
 				6BB727332B8F787D009CE7D0 /* CTCustomTemplatesManager.h in Headers */,
 				57B7E7D92F31D67900CF22E1 /* CTProfileChangeTracker.h in Headers */,
-				57B7E7DA2F31D67900CF22E1 /* CTProfileOperationUtils.h in Headers */,
-				57B7E7DB2F31D67900CF22E1 /* CTArrayOperationHandler.h in Headers */,
-				57B7E7DC2F31D67900CF22E1 /* CTDeleteOperationHandler.h in Headers */,
 				57B7E7DD2F31D67900CF22E1 /* CTProfileOperationType.h in Headers */,
-				57B7E7DE2F31D67900CF22E1 /* CTUpdateOperationHandler.h in Headers */,
 				487C719F2D9485290052986F /* CTSystemTemplateActionHandler.h in Headers */,
 				6BA3B2DB2B03E926004E834B /* CTQueueType.h in Headers */,
 				6A4427D02AB9D8C30098866F /* CTInAppFCManager+Legacy.h in Headers */,
@@ -2786,11 +2746,7 @@
 				D014B91F20E2FBDF001E0780 /* CTPinnedNSURLSessionDelegate.m in Sources */,
 				4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
 				4E25E3CE278887A80008C888 /* CTIdentityRepoFactory.m in Sources */,
-				57B7E7E52F31D67900CF22E1 /* CTArrayOperationHandler.m in Sources */,
-				57B7E7E62F31D67900CF22E1 /* CTProfileOperationUtils.m in Sources */,
-				57B7E7E72F31D67900CF22E1 /* CTDeleteOperationHandler.m in Sources */,
 				57B7E7E82F31D67900CF22E1 /* CTProfileChangeTracker.m in Sources */,
-				57B7E7E92F31D67900CF22E1 /* CTUpdateOperationHandler.m in Sources */,
 				49C189A0243B08860003E4D4 /* CTProductConfigController.m in Sources */,
 				4EFC9E472DF9690D00104D52 /* CTEncryptionManager.m in Sources */,
 				4EFC9E482DF9690D00104D52 /* CTAESGCMCrypt.swift in Sources */,
@@ -3004,11 +2960,7 @@
 				07B94549219EA34300D4C542 /* CTMessageMO+CoreDataProperties.m in Sources */,
 				6A4427BE2AA394ED0098866F /* CTTriggersMatcher.m in Sources */,
 				4E8B81792AD2CB4E00714BB4 /* CTPushPrimerManager.m in Sources */,
-				57B7E7D42F31D67900CF22E1 /* CTArrayOperationHandler.m in Sources */,
-				57B7E7D52F31D67900CF22E1 /* CTProfileOperationUtils.m in Sources */,
-				57B7E7D62F31D67900CF22E1 /* CTDeleteOperationHandler.m in Sources */,
 				57B7E7D72F31D67900CF22E1 /* CTProfileChangeTracker.m in Sources */,
-				57B7E7D82F31D67900CF22E1 /* CTUpdateOperationHandler.m in Sources */,
 				6A4427B62AA38E500098866F /* CTTriggerAdapter.m in Sources */,
 				4EA64A2E296C1190001D9B22 /* CTRequest.m in Sources */,
 				487C71892D8AD18B0052986F /* CTSystemAppFunctions.m in Sources */,
