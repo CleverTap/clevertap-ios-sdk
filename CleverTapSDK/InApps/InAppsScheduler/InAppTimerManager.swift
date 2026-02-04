@@ -138,6 +138,7 @@ private struct TimerData {
         lock.lock()
         let cancelledCount = activeJobs.count
         let jobsToCancel = activeJobs.values.map { $0.workItem }
+        activeJobs.removeAll() 
         lock.unlock()
         for workItem in jobsToCancel {
             workItem.cancel()

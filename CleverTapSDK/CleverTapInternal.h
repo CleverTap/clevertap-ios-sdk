@@ -57,7 +57,6 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  Fetch in-action in-app content from backend after inactionDuration expires
  
  @discussion
- Fetch in-action in-app content from backend after inactionDuration expires
  Sends wzrk_fetch event with t=6 and target ID
  
  @param inAppId the campaign ID (ti) to fetch content for
