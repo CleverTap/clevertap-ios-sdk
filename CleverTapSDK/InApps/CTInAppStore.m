@@ -25,9 +25,12 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 @property (nonatomic, strong) CTEncryptionManager *cryptManager;
 
 @property (nonatomic, strong) NSArray *inAppsQueue;
-@property (nonatomic, strong) NSArray *clientSideInApps;
-@property (nonatomic, strong) NSArray *serverSideInApps;
 @property (nonatomic, strong) NSArray *delayedInAppsQueue;
+@property (nonatomic, strong) NSArray *clientSideInApps;
+@property (nonatomic, strong) NSArray *delayedClientSideInApps;
+@property (nonatomic, strong) NSArray *serverSideInApps;
+@property (nonatomic, strong) NSArray *delayedServerSideInApps;
+@property (nonatomic, strong) NSArray *serverSideInActionMetaData;
 
 @end
 
@@ -85,11 +88,15 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending InApp notifications", self);
         _inAppsQueue = [NSArray new];
-        _delayedInAppsQueue = [NSArray new];
-        //immediate inapps
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences removeObjectForKey:storageKey];
-        //delayed inapps
+    }
+}
+
+- (void)clearDelayedInApps {
+    @synchronized (self) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Clearing all pending delayed InApp notifications", self);
+        _delayedInAppsQueue = [NSArray new];
         NSString *delayedStorageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
         [CTPreferences removeObjectForKey:delayedStorageKey];
     }
@@ -100,7 +107,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     
     @synchronized (self) {
         _inAppsQueue = inApps;
-        
         NSString *encryptedString = [self.cryptManager encryptObject:inApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY];
         [CTPreferences putString:encryptedString forKey:storageKey];
@@ -157,15 +163,16 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     
     @synchronized(self) {
         NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
-        NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
-        
-        NSDictionary<NSString *, NSArray *> *partitionedNotifs = [self partitionInApps:inAppNotifs];
-        [inAppsQueue addObjectsFromArray:partitionedNotifs[@"immediate"]];
-        [delayedInAppsQueue addObjectsFromArray:partitionedNotifs[@"delayed"]];
-        
+        for (int i = 0; i < [inAppNotifs count]; i++) {
+            @try {
+                NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
+                [inAppsQueue addObject:inAppNotif];
+            } @catch (NSException *e) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+            }
+        }
         // Commit all the changes
         [self storeInApps:inAppsQueue];
-        [self storeDelayedInApps:delayedInAppsQueue];
     }
 }
 
@@ -174,15 +181,8 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     
     @synchronized(self) {
         NSMutableArray *inAppsQueue = [[NSMutableArray alloc] initWithArray:[self inAppsQueue]];
-        NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
-        
-        if ([self parseDelayFromJson: inAppNotif] == 0) {
-            [inAppsQueue insertObject:inAppNotif atIndex:0];
-        } else {
-            [delayedInAppsQueue insertObject:inAppNotif atIndex:0];
-        }
+        [inAppsQueue insertObject:inAppNotif atIndex:0];
         [self storeInApps:inAppsQueue];
-        [self storeDelayedInApps:delayedInAppsQueue];
     }
 }
 
@@ -239,78 +239,49 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
-- (void)storeDelayedInApps:(NSArray *)inApps {
-    if (!inApps) return;
+- (BOOL)storeDelayedInApps:(NSArray *)inApps {
+    if (!inApps) return false;
     
     @synchronized (self) {
         _delayedInAppsQueue = inApps;
-        
         NSString *encryptedString = [self.cryptManager encryptObject:inApps];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
         [CTPreferences putString:encryptedString forKey:storageKey];
+        return true;
     }
 }
 
-- (NSArray *)delayedInAppsQueue {
-    @synchronized(self) {
-        if (_delayedInAppsQueue) return _delayedInAppsQueue;
-        
-        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY];
-        id data = [CTPreferences getObjectForKey:storageKey];
-        _delayedInAppsQueue = [NSArray new];
-        if (!data) {
-            return _delayedInAppsQueue;
-        }
-        if (!self.cryptManager) {
-            CleverTapLogDebug(self.config.logLevel,
-                              @"%@: Cannot decrypt inApps queue - cryptManager is nil",
-                              self);
-            return _delayedInAppsQueue;
-        }
-        if ([data isKindOfClass:[NSString class]]) {
-            @try {
-                id decrypted = [self.cryptManager decryptObject:data];
-                if ([decrypted isKindOfClass:[NSArray class]]) {
-                    _delayedInAppsQueue = decrypted;
-                } else {
-                    CleverTapLogDebug(self.config.logLevel,
-                                      @"%@: Decrypted inApps queue is not an NSArray type: %@",
-                                      self, [decrypted class]);
-                }
-            } @catch (NSException *exception) {
-                CleverTapLogDebug(self.config.logLevel,
-                                  @"%@: Exception during inApps queue decryption: %@",
-                                  self, exception);
-            }
-        } else if (data) {
-            // Log if data exists but is not a string (unexpected type)
-            CleverTapLogDebug(self.config.logLevel, @"%@: Found inApps queue data of unexpected type: %@", self, [data class]);
-        }
-        return _delayedInAppsQueue ?: [NSArray new];
-    }
-}
-
-- (void)dequeueDelayedInAppWithCampaignId:(NSString *)campaignId {
-    if (!campaignId) return;
+- (NSDictionary *)dequeueDelayedInAppWithCampaignId:(NSString *)campaignId {
+    if (!campaignId) return nil;
     
     @synchronized(self) {
         NSMutableArray *delayedInAppsQueue = [[NSMutableArray alloc] initWithArray:[self delayedInAppsQueue]];
         
         NSUInteger indexToRemove = NSNotFound;
+        NSDictionary *foundInApp = nil;
         for (NSUInteger i = 0; i < delayedInAppsQueue.count; i++) {
             NSDictionary *inApp = delayedInAppsQueue[i];
-            NSString *queuedCampaignId = inApp[CLTAP_NOTIFICATION_ID_TAG];
+            id queuedCampaignIdObj = inApp[CLTAP_INAPP_ID];
+            NSString *queuedCampaignId;
             
+            if ([queuedCampaignIdObj isKindOfClass:[NSNumber class]]) {
+                queuedCampaignId = [(NSNumber *)queuedCampaignIdObj stringValue];
+            } else if ([queuedCampaignIdObj isKindOfClass:[NSString class]]) {
+                queuedCampaignId = (NSString *)queuedCampaignIdObj;
+            } else {
+                queuedCampaignId = [queuedCampaignIdObj description];
+            }
             if ([queuedCampaignId isEqualToString:campaignId]) {
                 indexToRemove = i;
+                foundInApp = inApp;
                 break;
             }
         }
-        
         if (indexToRemove != NSNotFound) {
             [delayedInAppsQueue removeObjectAtIndex:indexToRemove];
             [self storeDelayedInApps:delayedInAppsQueue];
         }
+        return foundInApp;
     }
 }
 
@@ -328,9 +299,11 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
         
         if ([mode isEqualToString:kCLIENT_SIDE_MODE]) {
             [self removeServerSideInApps];
+            [self removeserverSideInActionMetaData];
         } else if ([mode isEqualToString:kSERVER_SIDE_MODE]) {
             [self removeClientSideInApps];
         } else {
+            [self removeserverSideInActionMetaData];
             [self removeServerSideInApps];
             [self removeClientSideInApps];
         }
@@ -342,6 +315,14 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     @synchronized (self) {
         _clientSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_CS];
+        [CTPreferences removeObjectForKey:storageKey];
+    }
+}
+
+- (void)removeDelayedClientSideInApps {
+    @synchronized (self) {
+        _clientSideInApps = [NSArray new];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY_CS];
         [CTPreferences removeObjectForKey:storageKey];
     }
 }
@@ -369,6 +350,26 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+- (void)storeDelayedClientSideInApps:(NSArray *)delayedClientSideInApps {
+    if (!delayedClientSideInApps) return;
+    @synchronized (self) {
+        _delayedClientSideInApps = delayedClientSideInApps;
+        NSString *encryptedString = nil;
+        @try {
+            encryptedString = [self.cryptManager encryptObject:delayedClientSideInApps];
+            if (!encryptedString) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed for client side InApps", self);
+                return;
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for client side InApps: %@", self, exception);
+            return;
+        }
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY_CS];
+        [CTPreferences putString:encryptedString forKey:storageKey];
+    }
+}
+
 - (NSArray *)clientSideInApps {
     @synchronized(self) {
         if (_clientSideInApps) return _clientSideInApps;
@@ -388,12 +389,37 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     }
 }
 
+- (NSArray *)delayedClientSideInApps {
+    @synchronized(self) {
+        if (_delayedClientSideInApps) return _delayedClientSideInApps;
+        @try {
+            _delayedClientSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_DELAYED_INAPP_KEY_CS];
+            if (!_delayedClientSideInApps) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to retrieve client side InApps", self);
+                _delayedClientSideInApps = [NSArray new];
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving client side InApps: %@", self, exception);
+            _delayedClientSideInApps = [NSArray new];
+        }
+        return _delayedClientSideInApps;
+    }
+}
+
 #pragma mark Server-Side In-Apps
 
 - (void)removeServerSideInApps {
     @synchronized (self) {
         _serverSideInApps = [NSArray new];
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
+        [CTPreferences removeObjectForKey:storageKey];
+    }
+}
+
+- (void)removeserverSideInActionMetaData {
+    @synchronized (self) {
+        _serverSideInActionMetaData = [NSArray new];
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INACTION_INAPP_KEY_SS];
         [CTPreferences removeObjectForKey:storageKey];
     }
 }
@@ -415,7 +441,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
             CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for server side InApps: %@", self, exception);
             return;
         }
-        
         NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INAPP_KEY_SS];
         [CTPreferences putString:encryptedString forKey:storageKey];
     }
@@ -424,7 +449,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
 - (NSArray *)serverSideInApps {
     @synchronized(self) {
         if (_serverSideInApps) return _serverSideInApps;
-        
         @try {
             _serverSideInApps = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INAPP_KEY_SS];
             if (!_serverSideInApps) {
@@ -435,47 +459,51 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
             CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving server side InApps: %@", self, exception);
             _serverSideInApps = [NSArray new];
         }
-        
         return _serverSideInApps;
     }
 }
 
-#pragma mark Utils
-
-- (NSDictionary<NSString *, NSArray *> *)partitionInApps:(NSArray *)inAppNotifs {
-    NSMutableArray *immediate = [NSMutableArray array];
-    NSMutableArray *delayed = [NSMutableArray array];
+- (void)storeServerSideInActionMetaData:(NSArray *)serverSideInActionMetaData {
+    if (!serverSideInActionMetaData) return;
     
-    for (int i = 0; i < [inAppNotifs count]; i++) {
+    @synchronized (self) {
+        _serverSideInActionMetaData = serverSideInActionMetaData;
+        
+        NSString *encryptedString = nil;
         @try {
-            NSMutableDictionary *inAppNotif = [[NSMutableDictionary alloc] initWithDictionary:inAppNotifs[i]];
-            if ([self parseDelayFromJson: inAppNotif] == 0) {
-                [immediate addObject:inAppNotif];
-            } else {
-                [delayed addObject:inAppNotif];
+            encryptedString = [self.cryptManager encryptObject:serverSideInActionMetaData];
+            if (!encryptedString) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Encryption failed for server side InApps", self);
+                return;
             }
-            
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Malformed InApp notification", self);
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Encryption error for server side InApps: %@", self, exception);
+            return;
         }
+        
+        NSString *storageKey = [self storageKeyWithSuffix:CLTAP_PREFS_INACTION_INAPP_KEY_SS];
+        [CTPreferences putString:encryptedString forKey:storageKey];
     }
-    return @{
-        @"immediate": [immediate copy],
-        @"delayed": [delayed copy]
-    };
 }
 
-- (NSInteger)parseDelayFromJson:(NSDictionary *)inAppNotif {
-    NSNumber *delayValue = inAppNotif[CLTAP_DELAY_AFTER_TRIGGER];
-    if (!delayValue) return 0;
-    
-    NSInteger delay = [delayValue integerValue];
-    if (delay < CLTAP_MIN_DELAY_SECONDS || delay > CLTAP_MAX_DELAY_SECONDS) {
-        return 0; // immediate
+- (NSArray *)serverSideInActionMetaData {
+    @synchronized(self) {
+        if (_serverSideInActionMetaData) return _serverSideInActionMetaData;
+        @try {
+            _serverSideInActionMetaData = [self decryptInAppsWithKeySuffix:CLTAP_PREFS_INACTION_INAPP_KEY_SS];
+            if (!_serverSideInActionMetaData) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Failed to retrieve server side InApps", self);
+                _serverSideInActionMetaData = [NSArray new];
+            }
+        } @catch (NSException *exception) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: Error retrieving server side InApps: %@", self, exception);
+            _serverSideInActionMetaData = [NSArray new];
+        }
+        return _serverSideInActionMetaData;
     }
-    return delay;
 }
 
+#pragma mark Utils
 - (NSArray *)decryptInAppsWithKeySuffix:(NSString *)keySuffix {
     NSString *key = [self storageKeyWithSuffix:keySuffix];
     NSString *encryptedString = [CTPreferences getObjectForKey:key];
@@ -492,7 +520,6 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
             CleverTapLogInternal(self.config.logLevel, @"%@: Decryption error: %@", self, exception);
             return [NSArray new];
         }
-        
         return arr;
     }
     
@@ -522,8 +549,10 @@ NSString* const kSERVER_SIDE_MODE = @"SS";
     // Set to nil to reload from cache
     self.inAppsQueue = nil;
     self.clientSideInApps = nil;
+    self.delayedClientSideInApps = nil;
     self.serverSideInApps = nil;
-    self.delayedInAppsQueue = nil;
+    self.delayedServerSideInApps = nil;
+    self.serverSideInActionMetaData = nil;
 }
 
 @end

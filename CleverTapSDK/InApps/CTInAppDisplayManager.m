@@ -38,13 +38,20 @@
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
-#import "CTInAppDelayManager.h"
 #endif
 
 #if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView.h>
 #endif
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
+#import "CTTimerResult.h"
+#import "CTDelayedInAppResult.h"
+#import "CTInActionResult.h"
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static const NSString *kInAppNotificationKey = @"inAppNotification";
@@ -67,7 +74,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 @end
 
-@interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate, CTInAppDelayManagerDelegate> {
+@interface CTInAppDisplayManager() <CTInAppNotificationDisplayDelegate> {
 }
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -85,7 +92,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 @property (nonatomic, strong) CTCustomTemplatesManager *templatesManager;
 
 @property (nonatomic, strong, readonly) NSString *imageInterstitialHtml;
-@property (nonatomic, strong) CTInAppDelayManager *inAppDelayManager;
+@property (nonatomic, strong) CTInAppScheduler *inAppDelayManager;
+@property (nonatomic, strong) CTInAppScheduler *inAppInActionManager;
+
 @end
 
 @implementation CTInAppDisplayManager
@@ -114,9 +123,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         self.inAppStore = inAppStore;
         self.templatesManager = templatesManager;
         self.fileDownloader = fileDownloader;
-        self.inAppDelayManager = [[CTInAppDelayManager alloc] initWithInAppStore:inAppStore withConfig:instance.config];
-        self.inAppDelayManager.delegate = self;
-
+        [self createDelayedInAppScheduler];
+        [self createInActionInAppScheduler];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(onDisplayPendingNotification:)
                                                      name:[self.class pendingNotificationKey:self.config.accountId]
@@ -125,33 +133,18 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     return self;
 }
 
-- (void)delayedInAppReady:(NSDictionary *)inApp {
-    if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
-        [self.inAppDelayManager.readyQueue addObject:inApp];
-        return;
-    }
-    @try {
-        if (inApp) {
-            //Update TTL for delayed inApp after timer is up
-            NSMutableDictionary *mutable = [inApp mutableCopy];
-            [self.inAppStore updateTTL:mutable];
-            // if we are currently displaying a notification, cache this notification for later display
-            if (currentlyDisplayingNotification) {
-                __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:mutable];
-                if (self.config.accountId && notification) {
-                    [pendingNotifications addObject:@[self.config.accountId, notification]];
-                    CleverTapLogDebug(self.config.logLevel, @"%@: InApp already displaying, queueing to pending InApps", self);
-                }
-                return;
-            }
-            // Prepare the in-app for display
-            [self prepareNotificationForDisplay:mutable];
-        }
-        
-    } @catch (NSException *e) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Problem showing InApp: %@", self, e.debugDescription);
-    }
+- (void)createDelayedInAppScheduler {
+    InAppTimerManager *timerManager = [[InAppTimerManager alloc]initWithTagSuffix:@"Delayed"];
+    DelayedInAppStorageStrategy *strategy = [[DelayedInAppStorageStrategy alloc] initWithDelayedLegacyInAppStore: self.inAppStore];
+    DelayedInAppDataExtractor *extractor = [[DelayedInAppDataExtractor alloc] init];
+    self.inAppDelayManager = [[CTInAppScheduler alloc] initWithTimerManager:timerManager storageStrategy:strategy dataExtractor:extractor];
+}
+
+- (void)createInActionInAppScheduler {
+    InAppTimerManager *timerManager = [[InAppTimerManager alloc]initWithTagSuffix:@"InAction"];
+    InActionDataExtractor *extractor = [[InActionDataExtractor alloc] init];
+    InactionInAppStorageStrategy *strategy = [[InactionInAppStorageStrategy alloc]init];
+    self.inAppInActionManager = [[CTInAppScheduler alloc] initWithTimerManager:timerManager storageStrategy:strategy dataExtractor:extractor];
 }
 
 - (void)dealloc {
@@ -208,6 +201,50 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: InApp notification handling error: %@", self, e.debugDescription);
     }
+}
+
+- (void)scheduleDelayedInAppsForAllModes:(NSArray<NSDictionary *> *)inappNotifs {
+    if (inappNotifs.count <= 0) return;
+    __weak typeof(self) weakSelf = self;
+    CleverTapLogDebug(self.config.logLevel, @"Scheduling %lu delayed inApps", (unsigned long)inappNotifs.count);
+    [_inAppDelayManager scheduleInApps:inappNotifs onComplete:^(CTDelayedInAppResult *result) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        switch (result.type) {
+            case CTDelayedInAppResultTypeSuccess:
+                [result.data mutableCopy];
+                [strongSelf.inAppStore updateTTL:[result.data mutableCopy]];
+                [strongSelf _addInAppNotificationsToQueue:@[[result.data mutableCopy]]];
+                break;
+            case CTDelayedInAppResultTypeError: break;
+            case CTDelayedInAppResultTypeDiscarded: break;
+        }
+    }];
+}
+
+- (void)scheduleInActionInApps:(NSArray *)inappNotifs {
+    if (inappNotifs.count <= 0) return;
+    __weak typeof(self) weakSelf = self;
+    CleverTapLogDebug(self.config.logLevel, @"Scheduling %lu inaction inApps", (unsigned long)inappNotifs.count);
+    [_inAppInActionManager scheduleInApps:inappNotifs onComplete:^(CTInActionResult *result) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        switch (result.type) {
+            case CTInActionResultTypeReadyToFetch:
+                [self.instance fetchInactionInApps:result.inActionId];
+                break;
+            case CTInActionResultTypeError:
+                CleverTapLogDebug(self.config.logLevel, @"Error scheduling in-action in-app: %@ for inAppID: %@", result.message, result.inActionId);
+                break;
+            case CTInActionResultTypeDiscarded:
+                CleverTapLogDebug(self.config.logLevel, @"In-action: in-app discarded : %@ for inAppID: %@", result.message, result.inActionId);
+                break;
+            case CTInActionResultTypeCancelled:
+                CleverTapLogDebug(self.config.logLevel, @"Cancelled timer with id: %@", result.inActionId);
+                break;
+        }
+    }];
 }
 
 - (void)_addInAppNotificationInFrontOfQueue:(CTInAppNotification *)inappNotif {
@@ -310,37 +347,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 }
 
-- (void)_showDelayedNotificationIfAvailable {
-    //Resume suspended inapps first
-    [self.inAppDelayManager processReadyQueue];
-
-    NSArray *allDelayedInApps = [self.inAppStore delayedInAppsQueue];
-    if (!allDelayedInApps.count) return;
-    
-    NSInteger maxConcurrent = CLTAP_MAX_DELAYED_INAPPS;
-    NSInteger currentCount = [self.inAppDelayManager scheduledCampaignCount];
-    NSInteger toSchedule = MIN(maxConcurrent - currentCount, allDelayedInApps.count);
-    
-    if (toSchedule <= 0) {
-        CleverTapLogDebug(self.config.logLevel,
-                          @"%@: Already at max concurrent delayed in-apps (%ld/%ld)",
-                          self, (long)currentCount, (long)maxConcurrent);
-        return;
-    }
-    
-    NSArray *inAppsToSchedule = [allDelayedInApps subarrayWithRange:NSMakeRange(0, toSchedule)];
-    CleverTapLogDebug(self.config.logLevel,
-                          @"%@: Scheduling %ld delayed in-apps (current: %ld, max: %ld)",
-                          self, (long)toSchedule, (long)currentCount, (long)maxConcurrent);
-        
-    [self.inAppDelayManager scheduleDelayedInApps:inAppsToSchedule];
-}
-
 - (void)_showNotificationIfAvailable {
     if ([CTUIUtils runningInsideAppExtension]) return;
-    //Bypassing suspend logic for delayed inapps - will be scheduled and kept ready to display when resumed
-    [self _showDelayedNotificationIfAvailable];
-    
     if (self.inAppRenderingStatus == CleverTapInAppSuspend) {
         CleverTapLogDebug(self.config.logLevel, @"%@: InApp Notifications are set to be suspended, not showing the InApp Notification", self);
         return;
