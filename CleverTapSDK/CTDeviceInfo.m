@@ -7,7 +7,6 @@
 #import "CTPreferences.h"
 #import "CTUtils.h"
 #import "CTDeviceInfo.h"
-#import "CTValidator.h"
 #import "CTValidationResult.h"
 #import "CleverTapBuildInfo.h"
 #import "CleverTapInstanceConfig.h"
@@ -311,7 +310,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 }
 
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID {
-    if ([CTValidator isValidCleverTapId:cleverTapID]) {
+    if ([CTUtils isValidCleverTapId:cleverTapID]) {
         [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
         CleverTapLogInfo(self.config.logLevel, @"%@: Updating CleverTap ID to custom CleverTap ID: %@", self, cleverTapID);
     } else {
@@ -333,7 +332,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 
 - (void)recordDeviceError: (NSString *)errorString {
     CTValidationResult *error = [[CTValidationResult alloc] init];
-    [error setErrorCode:514];
+    [error setErrorCode:CTValidationErrorCustomID];
     [error setErrorDesc:[NSString stringWithFormat:@"%@", errorString]];
     @synchronized (_validationErrors) {
         [_validationErrors addObject:error];

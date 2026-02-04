@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "CTDeviceInfo.h"
 #import "CTDispatchQueueManager.h"
+#import "CTProfileOperationType.h"
 
 @class CleverTapInstanceConfig;
 @class CleverTapEventDetail;
@@ -38,8 +39,6 @@
 
 - (id)getProfileFieldForKey:(NSString *)key;
 
-- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)userAttributeChangeProperties:(NSDictionary *)event;
-
 - (void)persistLocalProfileIfRequired;
 
 - (NSDictionary*)generateBaseProfile;
@@ -54,4 +53,7 @@
 
 - (NSDictionary *)readUserEventLogs;
 
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTree:(NSString *)dotNotationKey value:(id)value command:(CTProfileOperation)operation;
+- (NSDictionary<NSString *, NSDictionary *> *)processProfileTreeWithJson:(NSDictionary *)newJson operation:(CTProfileOperation)operation;
+- (void) updateProfileFieldsLocally: (NSDictionary<NSString *, id> *) fieldsToPersistLocally;
 @end

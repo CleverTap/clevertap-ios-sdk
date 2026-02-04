@@ -7,7 +7,6 @@
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
-#import "CTValidator.h"
 #import "CTUriHelper.h"
 #import "CTInAppUtils.h"
 #import "CTDeviceInfo.h"
@@ -105,6 +104,7 @@ static NSArray *sslCertNames;
 #import "NSDictionary+Extensions.h"
 
 #import "CTEncryptionManager.h"
+#import "CTFlattenedEventData.h"
 
 #import <objc/runtime.h>
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
@@ -113,6 +113,8 @@ static NSArray *sslCertNames;
 #import "CleverTapSDK-Swift.h"
 #endif
 
+#import "CTValidationConfig.h"
+#import "CTDataFlattener.h"
 static const void *const kQueueKey = &kQueueKey;
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static NSMutableDictionary *auxiliarySdkVersions;
@@ -276,6 +278,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) NSLocale *locale;
 
 @property (atomic, assign) BOOL isUserSwitching;
+@property (nonatomic, strong) CTValidationConfig *validationConfig;
 
 - (instancetype)init __unavailable;
 
@@ -458,7 +461,7 @@ static BOOL sharedInstanceErrorLogged;
 #endif
         }
     } else {
-        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTValidator isValidCleverTapId:cleverTapID]) {
+        if ([instance.deviceInfo isErrorDeviceID] && instance.config.useCustomCleverTapId && cleverTapID != nil && [CTUtils isValidCleverTapId:cleverTapID]) {
             [instance _asyncSwitchUser:nil withCachedGuid:nil andCleverTapID:cleverTapID forAction:kInstanceWithCleverTapIDAction];
         }
     }
@@ -496,7 +499,9 @@ static BOOL sharedInstanceErrorLogged;
         _userLastVisitTs = eventDetails ? eventDetails.lastTime : -1;
         self.validationResultStack = [[CTValidationResultStack alloc] initWithConfig:_config];
         self.userSetLocation = kCLLocationCoordinate2DInvalid;
-        
+        self.validationConfig = [CTValidationConfig defaultConfigWithCountryCode:_deviceInfo.countryCode];
+        [CTProfileBuilder initializeWithValidationConfig:self.validationConfig];
+        [CTEventBuilder initializeWithValidationConfig:self.validationConfig];
         // save config to defaults
         [CTPreferences archiveObject:config
                          forFileName:[CleverTapInstanceConfig dataArchiveFileNameWithAccountId:_config.accountId]
@@ -535,7 +540,7 @@ static BOOL sharedInstanceErrorLogged;
         }
 #endif
 #if defined(CLEVERTAP_TVOS)
-        self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config];
+        self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config validationConfig:self.validationConfig];
 #endif
         
         int now = [[[NSDate alloc] init] timeIntervalSince1970];
@@ -584,8 +589,8 @@ static BOOL sharedInstanceErrorLogged;
     self.inAppEvaluationManager = evaluationManager;
     self.inAppEvaluationManager.location = self.userSetLocation;
     self.inAppDisplayManager = displayManager;
-
-    self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore];
+    
+    self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config impressionManager:self.impressionManager inAppStore:inAppStore validationConfig:self.validationConfig];
     
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
@@ -1727,10 +1732,10 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     
-    NSArray *discardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
+    NSSet *discardedEvents = [NSSet setWithArray:arp[CLTAP_DISCARDED_EVENT_JSON_KEY]];
     if (discardedEvents && discardedEvents.count > 0) {
         @try {
-            [CTValidator setDiscardedEvents:discardedEvents];
+            [self.validationConfig setDiscardedEventNames:discardedEvents];
         } @catch (NSException *e) {
             CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
         }
@@ -1869,7 +1874,7 @@ static BOOL sharedInstanceErrorLogged;
         return NO;
     }
     
-    BOOL isSystemEvent = [CTValidator isRestrictedEventName:event[CLTAP_EVENT_NAME]];
+    BOOL isSystemEvent = [CTValidationConfig isRestrictedEventName:event[CLTAP_EVENT_NAME]];
     if (!isSystemEvent) {
         // Custom event
         CleverTapLogDebug(self.config.logLevel, @"%@: User: %@ has opted out of sending events, dropping event: %@", self, self.deviceInfo.deviceId, event);
@@ -1879,6 +1884,10 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type {
+    [self queueEvent:event withType:type flattenedEventData:CTFlattenedEventData.noData];
+}
+
+- (void)queueEvent:(NSDictionary *)event withType:(CleverTapEventType)type flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
     if ([self _shouldDropEvent:event withType:type]) {
         return;
     }
@@ -1889,7 +1898,7 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: App Launched not yet processed re-queueing: %@, %lu", self, event, (long)type);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, .3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [self.dispatchQueueManager runSerialAsync:^{
-                [self queueEvent:event withType:type];
+                [self queueEvent:event withType:type flattenedEventData:flattenedEventData];
             }];
         });
         return;
@@ -1897,14 +1906,14 @@ static BOOL sharedInstanceErrorLogged;
     
     if (type == CleverTapEventTypeFetch) {
         [self.dispatchQueueManager runSerialAsync:^{
-            [self processEvent:event withType:type];
+            [self processEvent:event withType:type flattenedEventData:flattenedEventData];
         }];
     } else {
         [self.sessionManager createSessionIfNeeded];
         [self pushInitialEventsIfNeeded];
         [self.dispatchQueueManager runSerialAsync:^{
             [self.sessionManager updateSessionTime:(long) [[NSDate date] timeIntervalSince1970]];
-            [self processEvent:event withType:type];
+            [self processEvent:event withType:type flattenedEventData:flattenedEventData];
         }];
     }
 }
@@ -1947,7 +1956,7 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)processEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
+- (void)processEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
     @try {
         // just belt and suspenders
         if ([self isMuted]) {
@@ -2011,13 +2020,10 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         // Evaluate the event only if it will be processed
         [self.dispatchQueueManager runSerialAsync:^{
-            [self evaluateOnEvent:event withType: eventType];
+            [self evaluateOnEvent:event withType: eventType flattenedEventData: flattenedEventData];
         }];
-#else
-        // persist the profile changes
-        if (eventType == CleverTapEventTypeProfile) {
-            [self.localDataStore userAttributeChangeProperties:event];
-        }
+        // For tvOS, removed the else block that called `userAttributeChangeProperties`
+        // Persist profile is already handled in `updateLocalProfileWithChanges`
 #endif
         if (eventType == CleverTapEventTypeFetch) {
             [self flushQueue];
@@ -2030,7 +2036,22 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
-- (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType {
+- (void)logFlattenedData:(CTFlattenedEventData *)flattenedEventData {
+    switch (flattenedEventData.type) {
+        case CTFlattenedEventDataTypeNoData:
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedData: No Data", self);
+            break;
+        case CTFlattenedEventDataTypeProfileChanges:
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedProfileData: %@", self, flattenedEventData.profileChanges);
+            break;
+        case CTFlattenedEventDataTypeEventProperties:
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.eventProperties);
+            break;
+    }
+}
+
+- (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
+    [self logFlattenedData:flattenedEventData];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     NSString *eventName = event[CLTAP_EVENT_NAME];
     // Add the system properties for evaluation
@@ -2041,10 +2062,11 @@ static BOOL sharedInstanceErrorLogged;
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
-        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *result = [self.localDataStore userAttributeChangeProperties:event];
-        [self.inAppEvaluationManager evaluateOnUserAttributeChange:result];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedProfileChanges = flattenedEventData.profileChanges;
+        [self.inAppEvaluationManager evaluateOnUserAttributeChange:flattenedProfileChanges];
     } else if (eventName) {
-        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
+        NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedEventChanges = flattenedEventData.eventProperties;
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:flattenedEventChanges];
     }
 #endif
 }
@@ -2744,8 +2766,15 @@ static BOOL sharedInstanceErrorLogged;
     for (NSString *key in properties) {
         @try {
             if ([identityRepo isIdentity:key]) {
+                id value = properties[key];
                 NSString *identifier = [NSString stringWithFormat:@"%@", properties[key]];
-                
+                if ([value isKindOfClass:[NSNumber class]] ||
+                    [value isKindOfClass:[NSString class]]) { // NSNumber also covers Boolean
+                    identifier = [NSString stringWithFormat:@"%@", value];
+                } else {
+                    CleverTapLogDebug(self.config.logLevel, @"%@: onUserLogin: Aborting the operation. Non-primitive value for the identifier key = %@", self, key);
+                    return;
+                }
                 if (identifier && [identifier length] > 0) {
                     haveIdentifier = YES;
                     cachedGUID = [loginInfoProvider getGUIDforKey:key andIdentifier:identifier];
@@ -3011,39 +3040,20 @@ static BOOL sharedInstanceErrorLogged;
         [CTProfileBuilder build:properties completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
             NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
             if (systemFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed system profile: %@", self, systemFields);
                 [profile addEntriesFromDictionary:systemFields];
             }
             if (customFields) {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
                 [profile addEntriesFromDictionary:customFields];
             }
             [self cacheGUIDSforProfile:profile];
-#if !defined(CLEVERTAP_TVOS)
-            // make sure Phone is a string and debug check for country code and phone format, but always send
-            NSArray *profileAllKeys = [profile allKeys];
-            for (int i = 0; i < [profileAllKeys count]; i++) {
-                NSString *key = profileAllKeys[(NSUInteger) i];
-                id value = profile[key];
-                if ([key isEqualToString:@"Phone"]) {
-                    value = [NSString stringWithFormat:@"%@", value];
-                    if (!self.deviceInfo.countryCode || [self.deviceInfo.countryCode isEqualToString:@""]) {
-                        NSString *_value = (NSString *)value;
-                        if (![_value hasPrefix:@"+"]) {
-                            // if no country code and phone doesn't start with + log error but still send
-                            NSString *errString = [NSString stringWithFormat:@"Device country code not available and profile phone: %@ does not appear to start with country code", _value];
-                            CTValidationResult *error = [[CTValidationResult alloc] init];
-                            [error setErrorCode:512];
-                            [error setErrorDesc:errString];
-                            [self.validationResultStack pushValidationResult:error];
-                            CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errString);
-                        }
-                    }
-                    CleverTapLogInternal(self.config.logLevel, @"Profile phone number is: %@, device country code is: %@", value, self.deviceInfo.countryCode);
-                }
-            }
-#endif
+
             NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
             event[@"profile"] = profile;
-            [self queueEvent:event withType:CleverTapEventTypeProfile];
+            
+            CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:profile command: CTProfileOperationUpdate];
+            [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             
             if (errors) {
                 [self.validationResultStack pushValidationResults:errors];
@@ -3090,7 +3100,9 @@ static BOOL sharedInstanceErrorLogged;
                 
                 NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
                 event[@"profile"] = profile;
-                [self queueEvent:event withType:CleverTapEventTypeProfile];
+                
+                CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:CTProfileOperationDelete]?: CTFlattenedEventData.noData;
+                [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
             }
             if (errors) {
                 [self.validationResultStack pushValidationResults:errors];
@@ -3103,7 +3115,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildSetMultiValues:values forKey:key
                            localDataStore:self.localDataStore
                         completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
+        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationSet updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
@@ -3111,7 +3123,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildAddMultiValue:value forKey:key
                           localDataStore:self.localDataStore
                        completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
+        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationAdd updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
@@ -3119,7 +3131,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildAddMultiValues:values forKey:key
                            localDataStore:self.localDataStore
                         completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
+        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationAdd updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
@@ -3127,14 +3139,14 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildRemoveMultiValue:value forKey:key
                              localDataStore:self.localDataStore
                           completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
+        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationArrayRemove updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
 - (void)profileRemoveMultiValues:(NSArray<NSString *> *)values forKey:(NSString *)key {
     [CTProfileBuilder buildRemoveMultiValues:values forKey:key
                               localDataStore:self.localDataStore completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray<CTValidationResult*>*errors) {
-        [self _handleMultiValueProfilePush:customFields updatedMultiValue:updatedMultiValue errors:errors];
+        [self _handleMultiValueProfilePush:customFields operation:CTProfileOperationArrayRemove updatedMultiValue:updatedMultiValue errors:errors];
     }];
 }
 
@@ -3142,7 +3154,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildIncrementValueBy:value forKey:key
                              localDataStore:_localDataStore
                           completionHandler:^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey:operatorDict errors:errors];
+        [self _handleIncrementDecrementProfilePushForKey:key value:value operatorDict:operatorDict operation:CTProfileOperationIncrement errors:errors];
     }];
 }
 
@@ -3150,14 +3162,14 @@ static BOOL sharedInstanceErrorLogged;
     [CTProfileBuilder buildDecrementValueBy: value forKey: key
                              localDataStore: _localDataStore
                           completionHandler: ^(NSDictionary *_Nullable operatorDict, NSArray<CTValidationResult *> *_Nullable errors) {
-        [self _handleIncrementDecrementProfilePushForKey:operatorDict errors:errors];
+        [self _handleIncrementDecrementProfilePushForKey:key value:value operatorDict:operatorDict operation:CTProfileOperationDecrement errors:errors];
     }];
 }
 
 
 #pragma mark - Private Profile API
 
-- (void)_handleIncrementDecrementProfilePushForKey:(NSDictionary *)operatorDict errors:(NSArray<CTValidationResult*>*)errors {
+- (void)_handleIncrementDecrementProfilePushForKey:(NSString*)key value:(NSNumber *_Nonnull)value operatorDict:(NSDictionary *)operatorDict operation:(CTProfileOperation)operation errors:(NSArray<CTValidationResult*>*)errors {
     if (errors) {
         [self.validationResultStack pushValidationResults:errors];
         return;
@@ -3174,28 +3186,51 @@ static BOOL sharedInstanceErrorLogged;
     
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
     event[@"profile"] = profile;
-    [self queueEvent:event withType:CleverTapEventTypeProfile];
+    CTFlattenedEventData *flattenedData = [self getFlattenedProfileChanges:value withKey:key command:operation];
+    [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
 }
 
-- (void)_handleMultiValueProfilePush:(NSDictionary*)customFields updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
+- (void)_handleMultiValueProfilePush:(NSDictionary*)customFields operation:(CTProfileOperation)operation updatedMultiValue:(NSArray*)updatedMultiValue errors:(NSArray<CTValidationResult*>*)errors {
     if (customFields && [[customFields allKeys] count] > 0) {
         NSMutableDictionary *profile = [[self.localDataStore generateBaseProfile] mutableCopy];
         NSString* _key = [customFields allKeys][0];
         CleverTapLogInternal(self.config.logLevel, @"Created multi-value profile push: %@", customFields);
         [profile addEntriesFromDictionary:customFields];
-        
-        if (updatedMultiValue && [updatedMultiValue count] > 0) {
-            [self.localDataStore setProfileFieldWithKey:_key andValue:updatedMultiValue];
+        CTFlattenedEventData *flattenedData;
+        if (operation == CTProfileOperationDelete) {
+            flattenedData = [self getFlattenedProfileChanges:kCLTAP_DELETE_MARKER withKey:_key command:operation];
         } else {
-            [self.localDataStore removeProfileFieldForKey:_key];
+            flattenedData = [self getFlattenedProfileChanges:updatedMultiValue withKey:_key command:operation];
         }
         NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
         event[@"profile"] = profile;
-        [self queueEvent:event withType:CleverTapEventTypeProfile];
+        [self queueEvent:event withType:CleverTapEventTypeProfile flattenedEventData:flattenedData];
     }
     if (errors) {
         [self.validationResultStack pushValidationResults:errors];
     }
+}
+
+- (nullable CTFlattenedEventData *)getFlattenedEventProperties:(NSDictionary *)properties {
+    return [CTFlattenedEventData eventProperties:[CTDataFlattener flatten:properties]];
+}
+
+- (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(id)originalValues
+                                                      withKey:(NSString *)key
+                                                      command:(CTProfileOperation)operation {
+   
+    NSDictionary<NSString *, id> *profileChanges = [self.localDataStore processProfileTree:key value:originalValues command: operation];
+    if (!profileChanges) {
+        return nil;
+    }
+    return [CTFlattenedEventData profileChanges:profileChanges];
+}
+- (nullable CTFlattenedEventData *)getFlattenedProfileChanges:(NSDictionary *)originalValues command:(CTProfileOperation)operation {
+    NSDictionary<NSString *, id> *profileChanges = [self.localDataStore processProfileTreeWithJson:originalValues operation:operation];
+    if (!profileChanges) {
+        return nil;
+    }
+    return [CTFlattenedEventData profileChanges:profileChanges];
 }
 
 #pragma mark - User Action Events API
@@ -3216,8 +3251,10 @@ static BOOL sharedInstanceErrorLogged;
 - (void)recordEvent:(NSString *)event withProps:(NSDictionary *)properties {
     [self.dispatchQueueManager runSerialAsync:^{
         [CTEventBuilder build:event withEventActions:properties completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+            NSDictionary *evtData = event[CLTAP_EVENT_DATA];
+            CTFlattenedEventData *flattenedData = [self getFlattenedEventProperties:evtData];
             if (event) {
-                [self queueEvent:event withType:CleverTapEventTypeRaised];
+                [self queueEvent:event withType:CleverTapEventTypeRaised flattenedEventData:flattenedData];
             }
             if (errors) {
                 [self.validationResultStack pushValidationResults:errors];
@@ -4571,7 +4608,7 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark - Utility
 
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
-    return [CTValidator isValidCleverTapId:cleverTapID];
+    return [CTUtils isValidCleverTapId:cleverTapID];
 }
 
 #pragma mark - Sync PE and Custom Templates

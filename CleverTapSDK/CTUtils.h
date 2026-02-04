@@ -26,4 +26,6 @@
  */
 + (BOOL)areEqualNormalizedName:(NSString * _Nullable)firstName andName:(NSString * _Nullable)secondName;
 
++ (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID;
+
 @end

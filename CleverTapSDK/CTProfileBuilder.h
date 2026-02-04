@@ -1,9 +1,13 @@
 #import <Foundation/Foundation.h>
+#import "CTLocalDataStore.h"
 
 @class CTValidationResult;
 @class CTLocalDataStore;
+@class CTValidationConfig;
 
 @interface CTProfileBuilder : NSObject
+
++ (void)initializeWithValidationConfig:(CTValidationConfig*_Nullable)validationConfig;
 
 + (void)build:(NSDictionary *_Nonnull)profile completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable customFields, NSDictionary* _Nullable systemFields, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
@@ -24,7 +28,5 @@
 + (void)buildDecrementValueBy:(NSNumber* _Nonnull)value forKey:(NSString* _Nonnull)key localDataStore:(CTLocalDataStore* _Nonnull)dataStore completionHandler: (void(^ _Nonnull )(NSDictionary* _Nullable operatorDict, NSArray<CTValidationResult*>* _Nullable errors))completion;
 
 + (NSNumber *_Nullable)_getUpdatedValue:(NSNumber *_Nonnull)value forKey:(NSString *_Nonnull)key withCommand:(NSString *_Nonnull)command cachedValue:(id _Nullable)cachedValue;
-
-+ (NSArray<NSString *> *_Nullable) _constructLocalMultiValueWithOriginalValues:(NSArray * _Nonnull)values forKey:(NSString * _Nonnull)key usingCommand:(NSString * _Nonnull)command localDataStore:(CTLocalDataStore* _Nonnull)dataStore;
 
 @end

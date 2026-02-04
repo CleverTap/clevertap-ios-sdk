@@ -5,8 +5,11 @@
 @class CTInAppNotification;
 @class CleverTapInboxMessage;
 @class CleverTapDisplayUnit;
+@class CTValidationConfig;
 
 @interface CTEventBuilder : NSObject
+
++ (void)initializeWithValidationConfig:(CTValidationConfig* _Nonnull)validationConfig;
 
 + (void)build:(NSString * _Nonnull)eventName completionHandler:(void(^ _Nonnull )(NSDictionary* _Nullable event, NSArray<CTValidationResult*>* _Nullable errors))completion;
 

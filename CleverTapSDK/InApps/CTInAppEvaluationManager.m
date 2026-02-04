@@ -116,8 +116,12 @@
 
 -(void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)profile {
     NSDictionary *appFields = self.appLaunchedProperties;
+    NSDictionary<NSString *, NSDictionary<NSString *, id> *> *nestedMap = [self toNestedMap:profile];
     NSMutableArray<CTEventAdapter *> *eventAdapterList = [NSMutableArray array];
-    [profile enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
+    [nestedMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, id value, BOOL *stop) {
+        if ([CLTAP_SKIP_KEYS_USER_ATTRIBUTE_EVALUATION containsObject: key]) {
+            return;
+        }
         NSString *eventName = [key stringByAppendingString:CLTAP_USER_ATTRIBUTE_CHANGE];
         NSMutableDictionary *eventProperties = [NSMutableDictionary dictionaryWithDictionary:value];
         [eventProperties addEntriesFromDictionary:appFields];
@@ -128,6 +132,19 @@
     [self evaluateServerSideInAction:eventAdapterList withQueueType:CTQueueTypeProfile];
     [self evaluateClientSide:eventAdapterList];
     [self evaluateDelayedClientSide:eventAdapterList];
+}
+
+- (NSDictionary<NSString *, NSDictionary<NSString *, id> *> *)toNestedMap:(NSDictionary<NSString *, NSDictionary *> *)profileChanges {
+    NSMutableDictionary<NSString *, NSDictionary<NSString *, id> *> *result =
+        [NSMutableDictionary dictionaryWithCapacity:profileChanges.count];
+    
+    [profileChanges enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSDictionary *change, BOOL *stop) {
+        result[key] = @{
+            @"oldValue": change[@"oldValue"] ?: [NSNull null],
+            @"newValue": change[@"newValue"] ?: [NSNull null]
+        };
+    }];
+    return [result copy];
 }
 
 - (void)evaluateOnChargedEvent:(NSDictionary *)chargeDetails andItems:(NSArray *)items {
