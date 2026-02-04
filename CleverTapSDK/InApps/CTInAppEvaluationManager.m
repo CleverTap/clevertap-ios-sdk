@@ -309,7 +309,7 @@
         NSArray *whenTriggers = inApp[CLTAP_INAPP_TRIGGERS];
         BOOL matchesTrigger = [self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event];
         if (!matchesTrigger) continue;
-        NSLog(@"Triggers matched for event %@ against inApp %@",[event eventName], campaignId);
+        CleverTapLogStaticDebug(@"Triggers matched for event %@ against inApp %@",[event eventName], campaignId);
         
         // In-app matches the trigger, increment trigger count
         [self.triggerManager incrementTrigger:campaignId];
@@ -323,7 +323,7 @@
         BOOL matchesLimits = [self.limitsMatcher matchWhenLimits:whenLimits forCampaignId:campaignId
                                            withImpressionManager:self.impressionManager andTriggerManager:self.triggerManager];
         if (matchesLimits) {
-            NSLog(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
+            CleverTapLogStaticDebug(@"Limits matched for event %@ against inApp %@",[event eventName], campaignId);
             [eligibleInApps addObject:inApp];
         }
     }

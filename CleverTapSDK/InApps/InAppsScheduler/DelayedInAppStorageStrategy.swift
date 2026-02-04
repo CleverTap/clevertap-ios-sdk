@@ -11,7 +11,7 @@ import Foundation
 @objc
 @objcMembers
 public class DelayedInAppStorageStrategy: NSObject, InAppSchedulingStrategy {
-    private static let TAG = "[CleverTap]: [InactionInAppStorageStrategy]:"
+    private static let TAG = "[CleverTap]:"
     public var delayedLegacyInAppStore: CTInAppStore?
     
     @objc public init(delayedLegacyInAppStore: CTInAppStore? = nil) {

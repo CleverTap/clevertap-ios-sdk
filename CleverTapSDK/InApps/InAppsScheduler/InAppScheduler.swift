@@ -37,7 +37,6 @@ import Foundation
     @objc public func schedule(inApps: [[String: Any]], onComplete: @escaping (Any?) -> Void) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            print("\(self.tag) Scheduling \(inApps.count) in-apps")
             // Step 1: Filter already scheduled in-apps
             var newInApps: [[String: Any]] = []
             for inApp in inApps {

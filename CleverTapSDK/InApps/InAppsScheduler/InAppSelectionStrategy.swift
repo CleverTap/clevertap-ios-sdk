@@ -70,7 +70,7 @@ public class ImmediateInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
 @objcMembers
 public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
     
-    private static let TAG = "[CleverTap]: [DelayedInAppSelectionStrategy]: "
+    private static let TAG = "[CleverTap]:"
     @objc public static let shared = DelayedInAppSelectionStrategy()
     
     private override init() {
@@ -93,19 +93,19 @@ public class DelayedInAppSelectionStrategy: NSObject, InAppSelectionStrategy {
             delayedInApps[inAppId]?.append(inApp)
         }
         var selectedInApps: [NSDictionary] = []
-        print( "\(DelayedInAppSelectionStrategy.TAG): Processing \(delayedInApps.count) in-apps")
+        print("\(DelayedInAppSelectionStrategy.TAG) Processing \(delayedInApps.count) delayed in-apps")
 
         // For each delay group, select first non-suppressed in-app
         for (inAppId, inAppsWithSameDelay) in delayedInApps {
             // Find first non-suppressed in-app
             let selectedInApp = inAppsWithSameDelay.first { inApp in
-                print("\(DelayedInAppSelectionStrategy.TAG): InApp suppressed: \(suppressionHandler(inApp))")
+                print("\(DelayedInAppSelectionStrategy.TAG) Delayed inApp suppressed: \(suppressionHandler(inApp))")
                 return !suppressionHandler(inApp)
             }
             if let inApp = selectedInApp {
                 selectedInApps.append(inApp)
                 let inAppDelay = inApp[INAPP_DELAY_AFTER_TRIGGER] ?? 0
-                print("\(DelayedInAppSelectionStrategy.TAG): Selected in-app for delay \(inAppDelay)s: \(inAppId)")
+                print("\(DelayedInAppSelectionStrategy.TAG) Selected in-app for delay \(inAppDelay)s: \(inAppId)")
             }
         }
         return selectedInApps

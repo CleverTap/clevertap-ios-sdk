@@ -1125,20 +1125,6 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  */
 - (void)fetchInApps:(CleverTapFetchInAppsBlock _Nullable)block;
 
-/*!
- @method
- 
- @abstract
- Fetch in-action in-app content from backend after inactionDuration expires
- 
- @discussion
- Fetch in-action in-app content from backend after inactionDuration expires
- Sends wzrk_fetch event with t=6 and target ID
- 
- @param inAppId the campaign ID (ti) to fetch content for
- */
-- (void)fetchInactionInApps:(NSString * _Nonnull)inAppId;
-
 #endif
 
 /*!

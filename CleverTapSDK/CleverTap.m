@@ -142,7 +142,7 @@ NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
 static BOOL isAutoIntegrated;
-static BOOL freshAppLaunchSent = 0;
+static BOOL freshAppLaunchSent = NO;
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenRegister,
@@ -3695,9 +3695,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)fetchInactionInApps:(NSString *)inAppId {
     NSNumber *campaignId = @([inAppId integerValue]);
+    CleverTapLogDebug(self.config.logLevel, @"Fetching in-action in-app content for targetId: %@", inAppId);
     NSDictionary *eventData = @{
         @"t": @(6),
-        @"tgtId": campaignId  // Use inAppId directly if it's already NSNumber or typecast to NSString
+        @"tgtId": campaignId
     };
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: eventData} withType:CleverTapEventTypeFetch];
 }

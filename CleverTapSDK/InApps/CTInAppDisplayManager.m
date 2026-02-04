@@ -206,14 +206,13 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)scheduleDelayedInAppsForAllModes:(NSArray<NSDictionary *> *)inappNotifs {
     if (inappNotifs.count <= 0) return;
     __weak typeof(self) weakSelf = self;
-    NSLog(@"Scheduling  %lu delayed inApps", (unsigned long)inappNotifs.count);
+    CleverTapLogDebug(self.config.logLevel, @"Scheduling %lu delayed inApps", (unsigned long)inappNotifs.count);
     [_inAppDelayManager scheduleInApps:inappNotifs onComplete:^(CTDelayedInAppResult *result) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         switch (result.type) {
             case CTDelayedInAppResultTypeSuccess:
                 [result.data mutableCopy];
-                NSLog(@"Updating TTL");
                 [strongSelf.inAppStore updateTTL:[result.data mutableCopy]];
                 [strongSelf _addInAppNotificationsToQueue:@[[result.data mutableCopy]]];
                 break;
@@ -226,43 +225,26 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)scheduleInActionInApps:(NSArray *)inappNotifs {
     if (inappNotifs.count <= 0) return;
     __weak typeof(self) weakSelf = self;
-    NSLog(@"Scheduling  %lu inaction inApps", (unsigned long)inappNotifs.count);
+    CleverTapLogDebug(self.config.logLevel, @"Scheduling %lu inaction inApps", (unsigned long)inappNotifs.count);
     [_inAppInActionManager scheduleInApps:inappNotifs onComplete:^(CTInActionResult *result) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         
         switch (result.type) {
             case CTInActionResultTypeReadyToFetch:
-                [strongSelf fetchInActionInApp:result.inActionId];
+                [self.instance fetchInactionInApps:result.inActionId];
                 break;
             case CTInActionResultTypeError:
-                NSLog(@"Error scheduling in-action in-app: %@ for inAppID: %@", result.message, result.inActionId);
+                CleverTapLogDebug(self.config.logLevel, @"Error scheduling in-action in-app: %@ for inAppID: %@", result.message, result.inActionId);
                 break;
             case CTInActionResultTypeDiscarded:
-                NSLog(@"In-action: in-app discarded : %@ for inAppID: %@", result.message, result.inActionId);
+                CleverTapLogDebug(self.config.logLevel, @"In-action: in-app discarded : %@ for inAppID: %@", result.message, result.inActionId);
                 break;
             case CTInActionResultTypeCancelled:
-                NSLog(@"Cancelled timer with id: %@", result.inActionId);
+                CleverTapLogDebug(self.config.logLevel, @"Cancelled timer with id: %@", result.inActionId);
                 break;
         }
     }];
-}
-- (void)fetchInActionInApp:(NSString *)inAppId {
-    NSLog(@"Fetching in-action in-app content for targetId");
-    [self.instance fetchInactionInApps:inAppId];
-}
-
-- (NSMutableDictionary *)createInActionFetchRequestWithTargetId:(NSNumber *)targetId {
-    // Create inner event data dictionary
-    NSMutableDictionary *eventData = [[NSMutableDictionary alloc] init];
-    [eventData setObject:@(6) forKey:@"t"]; // t=6
-    [eventData setObject:targetId forKey:@"tgtId"];
-    
-    // Create outer request dictionary
-    NSMutableDictionary *request = [[NSMutableDictionary alloc] init];
-    [request setObject:CLTAP_WZRK_FETCH_EVENT forKey:CLTAP_EVENT_NAME];
-    [request setObject:eventData forKey:CLTAP_EVENT_DATA];
-    return request;
 }
 
 - (void)_addInAppNotificationInFrontOfQueue:(CTInAppNotification *)inappNotif {
