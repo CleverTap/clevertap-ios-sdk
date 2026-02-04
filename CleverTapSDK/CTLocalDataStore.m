@@ -623,7 +623,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     if (!changes || changes.count == 0) return;
     
     NSMutableDictionary *fieldsToUpdate = [NSMutableDictionary dictionary];
-    
     for (NSString *path in changes) {
         NSDictionary *changeInfo = changes[path];
         id newValue = changeInfo[CLTAP_KEY_NEW_VALUE];
@@ -668,6 +667,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         }];
     }];
 }
+
 - (void)setProfileFields:(NSDictionary *)fields {
     [self setProfileFields:fields fromUpstream:NO];
 }

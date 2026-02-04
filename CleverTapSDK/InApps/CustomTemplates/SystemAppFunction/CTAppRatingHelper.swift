@@ -21,7 +21,7 @@ public class CTAppRatingHelper : NSObject {
                 guard let sharedApplication = CTAppRatingHelper.getSharedApplication(),
                       let activeScene: UIScene = sharedApplication.connectedScenes.first(where: { $0.activationState == .foregroundActive }),
                       let windowScene = activeScene as? UIWindowScene else {
-                    NSLog("[CleverTap]: Cannot request for App rating prompt as there is no active scene present.")
+                    CTLogger.logWithLevel(0, type: 0, message: "Cannot request for App rating prompt as there is no active scene present.")
                     completion(presented)
                     return
                 }
@@ -32,13 +32,13 @@ public class CTAppRatingHelper : NSObject {
                 } else {
                     SKStoreReviewController.requestReview(in: windowScene)
                 }
-                NSLog("[CleverTap]: App rating request successful.")
+                CTLogger.logWithLevel(0, type: 0, message: "App rating request successful.")
             } else if #available(iOS 10.3, *) {
                 presented = true
                 SKStoreReviewController.requestReview()
-                NSLog("[CleverTap]: App rating request successful.")
+                CTLogger.logWithLevel(0, type: 0, message: "App rating request successful.")
             } else {
-                NSLog("[CleverTap]: Cannot request for App rating prompt for iOS version 10.2 and below.")
+                CTLogger.logWithLevel(0, type: 0, message: "Cannot request for App rating prompt for iOS version 10.2 and below.")
             }
             completion(presented)
         }
@@ -49,7 +49,7 @@ public class CTAppRatingHelper : NSObject {
         guard UIApplication.responds(to: sharedSelector),
                 let shared = UIApplication.perform(sharedSelector),
                 let application = shared.takeUnretainedValue() as? UIApplication else {
-            NSLog("[CleverTap]: Failed to get shared application.")
+            CTLogger.logWithLevel(0, type: 0, message: "Failed to get shared application.")
             return nil
         }
 

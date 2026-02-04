@@ -4,7 +4,6 @@
 #import "CTUtils.h"
 #import "CTUIUtils.h"
 #import "CTSwizzle.h"
-#import "CTLogger.h"
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
@@ -144,6 +143,7 @@ NSString *const kInstanceWithCleverTapIDAction = @"instanceWithCleverTapID";
 static int currentRequestTimestamp = 0;
 static int initialAppEnteredForegroundTime = 0;
 static BOOL isAutoIntegrated;
+static BOOL freshAppLaunchSent = NO;
 
 typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
     CleverTapPushTokenRegister,
@@ -358,7 +358,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 + (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
-    CleverTapLogStaticInfo("%@: Auto Integration enabled", self);
+    CleverTapLogStaticInfo(@"%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [CTSwizzleManager swizzleAppDelegate];
     CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
@@ -513,6 +513,13 @@ static BOOL sharedInstanceErrorLogged;
         [self inflateQueuesAsync];
         [self addObservers];
         
+        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
+        // Initialise Variables
+        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
+        // Load Vars and Variants from cache
+        [self.variables.varCache loadDiffs];
+        [self.variables.varCache loadVariants];
+        
 #if !defined(CLEVERTAP_TVOS)
         if (self.requestSender && self.domainFactory && self.dispatchQueueManager) {
             self.contentFetchManager = [[CTContentFetchManager alloc] initWithConfig:_config
@@ -527,7 +534,6 @@ static BOOL sharedInstanceErrorLogged;
         }
 #endif
         
-        self.fileDownloader = [[CTFileDownloader alloc] initWithConfig:self.config];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
             [self initializeInAppSupport];
@@ -543,12 +549,7 @@ static BOOL sharedInstanceErrorLogged;
         }
         
         [self _initFeatureFlags];
-        
         [self _initProductConfig];
-        
-        // Initialise Variables
-        self.variables = [[CTVariables alloc] initWithConfig:self.config deviceInfo:self.deviceInfo fileDownloader:self.fileDownloader];
-        
         [self notifyUserProfileInitialized];
     }
     
@@ -840,6 +841,8 @@ static BOOL sharedInstanceErrorLogged;
     } @catch (NSException *ex) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to attach wzrk_ref to batch header", self);
     }
+        
+    header[@"fl"] = @([self isFreshAppLaunch]);
     
     @try {
         NSDictionary *additionalHeaders = [[self delegateManager] notifyAttachToHeaderDelegatesAndCollectKeyPathValues:queueType];
@@ -853,6 +856,13 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     return header;
+}
+
+- (BOOL)isFreshAppLaunch {
+    BOOL isInitialTimeRecorded = (initialAppEnteredForegroundTime > 0);
+    BOOL result = isInitialTimeRecorded && !freshAppLaunchSent;
+    freshAppLaunchSent = isInitialTimeRecorded;
+    return result;
 }
 
 - (NSArray *)insertHeader:(NSDictionary *)header inBatch:(NSArray *)batch {
@@ -1199,10 +1209,6 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogInternal(self.config.logLevel, @"%@: App Launched already processed", self);
         return;
     }
-    
-    // Load Vars from cache before App Launched
-    [self.variables.varCache loadDiffs];
-    [self.variables.varCache loadVariants];
     
     self.sessionManager.appLaunchProcessed = YES;
     
@@ -2039,7 +2045,7 @@ static BOOL sharedInstanceErrorLogged;
             CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedProfileData: %@", self, flattenedEventData.profileChanges);
             break;
         case CTFlattenedEventDataTypeEventProperties:
-            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.eventProperties)
+            CleverTapLogDebug(self.config.logLevel, @"%@ FlattenedEventData: %@", self, flattenedEventData.eventProperties);
             break;
     }
 }
@@ -2627,7 +2633,7 @@ static BOOL sharedInstanceErrorLogged;
                 @try {
                     [self processAdditionalRequestParameters:jsonResp];
                 } @catch (NSException *ex) {
-                    CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle ARP update: %@", self, ex.debugDescription)
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle ARP update: %@", self, ex.debugDescription);
                 }
                 
                 // Handle dbg_lvl
@@ -3718,6 +3724,16 @@ static BOOL sharedInstanceErrorLogged;
 - (void)fetchInApps:(CleverTapFetchInAppsBlock _Nullable)block {
     self.fetchInAppsBlock = block;
     [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: @{@"t": @5}} withType:CleverTapEventTypeFetch];
+}
+
+- (void)fetchInactionInApps:(NSString *)inAppId {
+    NSNumber *campaignId = @([inAppId integerValue]);
+    CleverTapLogDebug(self.config.logLevel, @"Fetching in-action in-app content for targetId: %@", inAppId);
+    NSDictionary *eventData = @{
+        @"t": @(6),
+        @"tgtId": campaignId
+    };
+    [self queueEvent:@{CLTAP_EVENT_NAME: CLTAP_WZRK_FETCH_EVENT, CLTAP_EVENT_DATA: eventData} withType:CleverTapEventTypeFetch];
 }
 #endif
 
