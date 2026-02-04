@@ -653,21 +653,6 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
     return components.firstObject ?: path;
 }
 
--(void)updateProfileFieldsLocally: (NSDictionary<NSString *, id> *) fieldsToPersistLocally{
-    [self.dispatchQueueManager runSerialAsync:^{
-        [CTProfileBuilder build:fieldsToPersistLocally completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray<CTValidationResult*>*errors) {
-            if (systemFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed system profile: %@", self, systemFields);
-                [self setProfileFields:systemFields];
-            }
-            if (customFields) {
-                CleverTapLogInternal(self.config.logLevel, @"%@: Constructed custom profile: %@", self, customFields);
-                [self setProfileFields:customFields];
-            }
-        }];
-    }];
-}
-
 - (void)setProfileFields:(NSDictionary *)fields {
     [self setProfileFields:fields fromUpstream:NO];
 }
