@@ -4,7 +4,6 @@
 #import "CTUtils.h"
 #import "CTUIUtils.h"
 #import "CTSwizzle.h"
-//#import "CTLogger.h"
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
