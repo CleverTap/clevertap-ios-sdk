@@ -1,4 +1,8 @@
-#import "CTLogger.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
@@ -18,12 +22,56 @@ extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;
 
-#define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogInternal(level, fmt, ...) if (level >= 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticInfo(fmt, ...)  if([CTLogger getDebugLevel] >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticDebug(fmt, ...) if([CTLogger getDebugLevel] > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticInternal(fmt, ...) if([CTLogger getDebugLevel] >= 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
+#define CleverTapLogInfo(level, fmt, ...) \
+    do { \
+        if (level >= 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:level type:CTLogTypeInfo message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogDebug(level, fmt, ...) \
+    do { \
+        if (level > 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:level type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogInternal(level, fmt, ...) \
+    do { \
+        if (level >= 1) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:level type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogStaticInfo(fmt, ...) \
+    do { \
+        int _lvl = [CTLogger getDebugLevel]; \
+        if (_lvl >= 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeInfo message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogStaticDebug(fmt, ...) \
+    do { \
+        int _lvl = [CTLogger getDebugLevel]; \
+        if (_lvl > 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogStaticInternal(fmt, ...) \
+    do { \
+        int _lvl = [CTLogger getDebugLevel]; \
+        if (_lvl >= 1) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
 
 #define CT_TRY @try {
 #define CT_END_TRY }\
@@ -86,6 +134,7 @@ extern NSString *const kSessionId;
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
 #define CLTAP_GEOFENCES_JSON_RESPONSE_KEY @"geofences"
 #define CLTAP_PE_VARS_RESPONSE_KEY @"vars"
+#define CLTAP_PE_VARIANTS_RESPONSE_KEY @"abVariantInfo"
 #define CLTAP_DISCARDED_EVENT_JSON_KEY @"d_e"
 #define CLTAP_INAPP_CLOSE_IV_WIDTH 40
 #define CLTAP_NOTIFICATION_ID_TAG @"wzrk_id"
@@ -107,6 +156,9 @@ static NSString *const kCLTAP_COMMAND_REMOVE = @"$remove";
 static NSString *const kCLTAP_COMMAND_INCREMENT = @"$incr";
 static NSString *const kCLTAP_COMMAND_DECREMENT = @"$decr";
 static NSString *const kCLTAP_COMMAND_DELETE = @"$delete";
+static NSString *const kCLTAP_DELETE_MARKER = @"__DELETE__";
+static NSString *const kCLTAP_GET_MARKER = @"__GET_MARKER__";
+
 
 #define CLTAP_MULTIVAL_COMMANDS @[kCLTAP_COMMAND_SET, kCLTAP_COMMAND_ADD, kCLTAP_COMMAND_REMOVE]
 
@@ -138,6 +190,7 @@ extern NSString *CT_KIND_BOOLEAN;
 extern NSString *CT_KIND_DICTIONARY;
 extern NSString *CT_KIND_FILE;
 extern NSString *CLEVERTAP_DEFAULTS_VARIABLES_KEY;
+extern NSString *CLEVERTAP_DEFAULTS_VARIANTS_KEY;
 extern NSString *CLEVERTAP_DEFAULTS_VARS_JSON_KEY;
 
 extern NSString *CT_PE_VARS_PAYLOAD_TYPE;
@@ -158,6 +211,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_SS_JSON_RESPONSE_KEY @"inapp_notifs_ss"
 #define CLTAP_INAPP_SS_APP_LAUNCHED_JSON_RESPONSE_KEY @"inapp_notifs_applaunched"
 #define CLTAP_INAPP_MODE_JSON_RESPONSE_KEY @"inapp_delivery_mode"
+#define CLTAP_INAPP_META_KEY @"inapp_notifs_meta"
+#define CLTAP_INAPP_SS_APP_LAUNCHED_META_KEY @"inapp_notifs_applaunched_meta"
 
 #define CLTAP_INAPP_SHOWN_TODAY_META_KEY @"imp"
 #define CLTAP_INAPP_COUNTS_META_KEY @"tlc"
@@ -178,8 +233,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
 #define CLTAP_PREFS_INAPP_KEY_SS @"inapp_notifs_ss"
-
 #define CLTAP_PREFS_DELAYED_INAPP_KEY @"delayed_inapp_notifs"
+#define CLTAP_PREFS_DELAYED_INAPP_KEY_CS @"delayed_inapp_notifs_cs"
+#define CLTAP_PREFS_INACTION_INAPP_KEY_SS @"inaction_inapp_notifs_ss"
 
 #define CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS @"cs_inapp_active_assets"
 #define CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS @"cs_inapp_inactive_assets"

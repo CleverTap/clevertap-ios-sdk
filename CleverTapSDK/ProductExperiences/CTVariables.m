@@ -73,6 +73,13 @@
     }
 }
 
+- (void)handleVariantsResponse:(NSArray<NSDictionary<NSString *, id> *> *)variantsResponse {
+    if (variantsResponse && variantsResponse.count >= 0) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Handle Variants Response with: %@", self, variantsResponse);
+        [[self varCache] handleVariantsData:variantsResponse];
+    }
+}
+
 - (void)handleVariablesError {
     CleverTapLogDebug(self.config.logLevel, @"%@: Handle Variables Error", self);
     if (![[self varCache] hasVarsRequestCompleted]) {

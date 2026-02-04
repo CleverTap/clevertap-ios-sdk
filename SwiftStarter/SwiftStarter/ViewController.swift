@@ -38,14 +38,21 @@ extension ViewController {
     func loadData(){
         eventList.append("Record User Profile")
         eventList.append("Record User Profile with Properties")
+      
+        eventList.append("Replace Multi Value Properties")
+        eventList.append("Add Multi Value Properties")
+        eventList.append("Remove Multi Value Properties")
+        eventList.append("Get User Profile Property")
+        
+        eventList.append("Increment User Profile Property")
+        eventList.append("Decrement User Profile Property")
+        
         eventList.append("Record User Event called Product Viewed")
         eventList.append("Record User Event with Properties")
         eventList.append("Record User Charged Event")
         eventList.append("Record User event to an Additional instance")
         eventList.append("Open Custom Inbox Screen")
         eventList.append("Analytics in a Webview")
-        eventList.append("Increment User Profile Property")
-        eventList.append("Decrement User Profile Property")
         eventList.append("Activate Custom domain proxy")
         eventList.append("Prompt for Push Notification")
         eventList.append("Local Half Interstitial Push Primer")
@@ -97,50 +104,58 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 1:
             recordUserProfileWithProperties()
             break;
-        case 2:
-            recordUserEventWithoutProperties()
+        case 2: profileSetMultiValueProperties()
             break;
-        case 3:
-            recordUserEventWithProperties()
+        case 3: profileAddMultiValueProperties()
             break;
-        case 4:
-            recordUserChargedEvent()
+        case 4: profileRemoveMultiValueProperties()
             break;
-        case 5:
-            recordUserEventforAdditionalInstance()
+        case 5: profileGetValueProperties()
             break;
         case 6:
-            showAppInbox()
-            break;
-        case 7:
-            navigateToWebview()
-            break;
-        case 8:
             incrementUserProfileProperty()
             break;
-        case 9:
+        case 7:
             decrementUserProfileProperty()
             break;
+        case 8:
+            recordUserEventWithoutProperties()
+            break;
+        case 9:
+            recordUserEventWithProperties()
+            break;
         case 10:
-            activateCustomDomain()
+            recordUserChargedEvent()
             break;
         case 11:
-            promptForPushNotification()
+            recordUserEventforAdditionalInstance()
             break;
         case 12:
-            createLocalHalfInterstitialPushPrimer()
+            showAppInbox()
             break;
         case 13:
-            createLocalAlertPushPrimer()
+            navigateToWebview()
             break;
         case 14:
+            activateCustomDomain()
+            break;
+        case 15:
+            promptForPushNotification()
+            break;
+        case 16:
+            createLocalHalfInterstitialPushPrimer()
+            break;
+        case 17:
+            createLocalAlertPushPrimer()
+            break;
+        case 18:
             createInAppCampaignPushPrimer()
             break;
-        case 15: navigateToNativeDisplay()
+        case 19: navigateToNativeDisplay()
             break
-        case 16: navigateToVariables()
+        case 20: navigateToVariables()
             break;
-        case 17: CleverTap.sharedInstance()?.syncCustomTemplates()
+        case 21: CleverTap.sharedInstance()?.syncCustomTemplates()
             break;
         default:
             break;
@@ -200,6 +215,24 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         
         //To remove the value of a property (scalar or multi-value)
         CleverTap.sharedInstance()?.profileRemoveValue(forKey: "myStuff")
+    }
+    
+    func profileSetMultiValueProperties() {
+        CleverTap.sharedInstance()?.profileSetMultiValues(["a", "b", "cp1", "r"], forKey: "details.traits.favourites")
+    }
+    
+    func profileAddMultiValueProperties() {
+        CleverTap.sharedInstance()?.profileAddMultiValue("coat", forKey: "details.level")
+//        CleverTap.sharedInstance()?.profileAddMultiValues(["coat"], forKey: "details.level")
+    }
+    
+    func profileRemoveMultiValueProperties() {
+        CleverTap.sharedInstance()?.profileRemoveValue(forKey: "details.traits.favItem")
+        CleverTap.sharedInstance()?.profileRemoveMultiValues(["sa", "as"], forKey: "details.traits.level3.arr2")
+    }
+    
+    func profileGetValueProperties() {
+        CleverTap.sharedInstance()?.profileGet("")
     }
     
     func recordUserEventWithoutProperties() {

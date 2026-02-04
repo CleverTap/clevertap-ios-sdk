@@ -731,7 +731,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  @abstract
  Record an event.
  
- Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "UTM Visited", "Notification Sent", "App Launched", "wzrk_d", are prohibited.
+ Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "UTM Visited", "Notification Sent", "App Launched", "App Uninstalled",  "SCCampaignOptOut", "Geocluster Entered", "Geocluster Exited", "wzrk_fetch", "wzrk_d", are prohibited.
  
  Be sure to call enablePersonalization (typically once at app launch) prior to using this method.
  
@@ -747,7 +747,7 @@ extern NSString * _Nonnull const CleverTapGeofencesDidUpdateNotification;
  
  @discussion
  Property keys must be NSString and values must be one of NSString, NSNumber, BOOL or NSDate.
- Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "UTM Visited", "Notification Sent", "App Launched", "wzrk_d", are prohibited.
+ Reserved event names: "Stayed", "Notification Clicked", "Notification Viewed", "UTM Visited", "Notification Sent", "App Launched", "App Uninstalled",  "SCCampaignOptOut", "Geocluster Entered", "Geocluster Exited", "wzrk_fetch", "wzrk_d", are prohibited.
  Keys are limited to 32 characters.
  Values are limited to 40 bytes.
  Longer will be truncated.
@@ -1530,6 +1530,19 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @param name The name of the variable or the group.
  */
 - (id _Nullable)getVariableValue:(NSString * _Nonnull)name;
+
+/**
+ * Returns experiment variant information for the current user.
+ *
+ * Each dictionary contains details about an assigned A/B test variant.
+ * Common keys include:
+ *   - "name": Variant name
+ *   - "abTestId": Experiment identifier
+ *   - "abTestName": Experiment name
+ *
+ * @return Array of variant dictionaries with string keys. Returns empty array if no variants assigned.
+ */
+- (NSArray<NSDictionary<NSString *, id> *> * _Nonnull)variants;
 
 /*!
  @method

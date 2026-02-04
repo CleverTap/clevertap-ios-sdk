@@ -27,10 +27,13 @@ NS_SWIFT_NAME(VarCache)
 @property (assign, nonatomic) BOOL hasVarsRequestCompleted;
 @property (assign, nonatomic) BOOL hasPendingDownloads;
 @property (nonatomic, weak) id<CTFileVarDelegate> delegate;
+@property (nonatomic, strong) NSArray<NSDictionary<NSString *, id> *> *variants;
 
 - (nullable NSDictionary<NSString *, id> *)diffs;
 - (void)loadDiffs;
+- (void)loadVariants;
 - (void)applyVariableDiffs:(nullable NSDictionary<NSString *, id> *)diffs_;
+- (void)handleVariantsData:(NSArray<NSDictionary<NSString *, id> *> *)variantsData;
 
 - (void)registerVariable:(CTVar *)var;
 - (nullable CTVar *)getVariable:(NSString *)name;

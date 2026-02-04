@@ -24,9 +24,14 @@
 - (NSArray * _Nonnull)clientSideInApps;
 - (void)storeClientSideInApps:(NSArray * _Nullable)clientSideInApps;
 
+- (NSArray * _Nonnull)delayedClientSideInApps;
+- (void)storeDelayedClientSideInApps:(NSArray *_Nullable)clientSideInApps;
+
 - (NSArray * _Nonnull)serverSideInApps;
 - (void)storeServerSideInApps:(NSArray * _Nullable)serverSideInApps;
 
+- (NSArray * _Nonnull)serverSideInActionMetaData;
+- (void)storeServerSideInActionMetaData:(NSArray * _Nullable)serverSideInApps;
 - (void)clearInApps;
 
 - (NSArray * _Nonnull)inAppsQueue;
@@ -35,9 +40,8 @@
 - (NSDictionary * _Nullable)peekInApp;
 - (NSDictionary * _Nullable)dequeueInApp;
 
-- (NSArray * _Nullable)delayedInAppsQueue;
-- (void)dequeueDelayedInAppWithCampaignId:(NSString *_Nullable)campaignId;
-- (NSInteger)parseDelayFromJson:(NSDictionary * _Nullable)inAppNotif;
-- (NSDictionary<NSString *, NSArray *> * _Nullable)partitionInApps:(NSArray * _Nullable)inAppNotifs;
 - (void)updateTTL:(NSMutableDictionary * _Nullable)inApp;
+- (BOOL)storeDelayedInApps:(NSArray * _Nullable)inApps;
+- (void)clearDelayedInApps;
+- (NSDictionary *_Nullable)dequeueDelayedInAppWithCampaignId:(NSString * _Nullable)campaignId;
 @end
