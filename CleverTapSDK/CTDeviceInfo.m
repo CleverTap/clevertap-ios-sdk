@@ -313,7 +313,7 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 - (void)forceUpdateCustomDeviceID:(NSString *)cleverTapID {
     if ([CTValidator isValidCleverTapId:cleverTapID]) {
         [self forceUpdateDeviceID:[NSString stringWithFormat:@"-h%@", cleverTapID]];
-        CleverTapLogInfo(self.config.logLevel, "%@: Updating CleverTap ID to custom CleverTap ID: %@", self, cleverTapID);
+        CleverTapLogInfo(self.config.logLevel, @"%@: Updating CleverTap ID to custom CleverTap ID: %@", self, cleverTapID);
     } else {
         // clear the guid for current user
         [self forceRemoveDeviceID];

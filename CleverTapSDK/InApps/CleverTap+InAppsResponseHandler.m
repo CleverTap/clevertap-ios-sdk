@@ -119,7 +119,7 @@
         NSArray *stale = jsonResp[CLTAP_INAPP_STALE_JSON_RESPONSE_KEY];
         [self.inAppFCManager removeStaleInAppCounts:stale];
     } @catch (NSException *ex) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription)
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle inapp_stale update: %@", self, ex.debugDescription);
     }
     
     if (self.inAppDisplayManager.inAppRenderingStatus == CleverTapInAppDiscard) {

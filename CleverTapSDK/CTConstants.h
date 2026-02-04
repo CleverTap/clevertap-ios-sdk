@@ -1,4 +1,8 @@
-#import "CTLogger.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 extern NSString *const kCTApiDomain;
 extern NSString *const kCTNotifViewedApiDomain;
@@ -18,12 +22,56 @@ extern NSString *const kLastSessionPing;
 extern NSString *const kLastSessionTime;
 extern NSString *const kSessionId;
 
-#define CleverTapLogInfo(level, fmt, ...)  if(level >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogDebug(level, fmt, ...) if(level > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogInternal(level, fmt, ...) if (level >= 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticInfo(fmt, ...)  if([CTLogger getDebugLevel] >= 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticDebug(fmt, ...) if([CTLogger getDebugLevel] > 0) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
-#define CleverTapLogStaticInternal(fmt, ...) if([CTLogger getDebugLevel] >= 1) { NSLog((@"%@" fmt), @"[CleverTap]: ", ##__VA_ARGS__); }
+#define CleverTapLogInfo(level, fmt, ...) \
+    do { \
+        if (level >= 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:level type:CTLogTypeInfo message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogDebug(level, fmt, ...) \
+    do { \
+        if (level > 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:level type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogInternal(level, fmt, ...) \
+    do { \
+        if (level >= 1) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:level type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogStaticInfo(fmt, ...) \
+    do { \
+        int _lvl = [CTLogger getDebugLevel]; \
+        if (_lvl >= 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeInfo message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogStaticDebug(fmt, ...) \
+    do { \
+        int _lvl = [CTLogger getDebugLevel]; \
+        if (_lvl > 0) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
+
+#define CleverTapLogStaticInternal(fmt, ...) \
+    do { \
+        int _lvl = [CTLogger getDebugLevel]; \
+        if (_lvl >= 1) { \
+            NSString *_logMsg = [NSString stringWithFormat:fmt, ##__VA_ARGS__]; \
+            [CTLogger logWithLevel:_lvl type:CTLogTypeDebug message:_logMsg]; \
+        } \
+    } while(0)
 
 #define CT_TRY @try {
 #define CT_END_TRY }\

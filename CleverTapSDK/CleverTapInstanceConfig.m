@@ -242,11 +242,11 @@
 - (void) checkIfAvailableAccountId:(NSString *)accountId
                        accountToken:(NSString *)accountToken {
     if (accountId.length <= 0) {
-        CleverTapLogStaticInfo("CleverTap accountId is empty");
+        CleverTapLogStaticInfo(@"CleverTap accountId is empty");
     }
     
     if (accountToken.length <= 0) {
-        CleverTapLogStaticInfo("CleverTap accountToken is empty");
+        CleverTapLogStaticInfo(@"CleverTap accountToken is empty");
     }
 }
 
@@ -255,7 +255,7 @@
         _encryptionLevel = encryptionLevel;
         _cryptManager = [[CTEncryptionManager alloc] initWithAccountID:_accountId encryptionLevel:_encryptionLevel isDefaultInstance:_isDefaultInstance];
     } else {
-        CleverTapLogStaticInfo("CleverTap Encryption level for default instance can't be updated from setEncryptionLevel method");
+        CleverTapLogStaticInfo(@"CleverTap Encryption level for default instance can't be updated from setEncryptionLevel method");
     }
 }
 
@@ -263,7 +263,7 @@
     if (!_isDefaultInstance) {
         _enableFileProtection = enableFileProtection;
     } else {
-        CleverTapLogStaticInfo("CleverTap enable file protection for default instance can't be updated from setEnableFileProtection method");
+        CleverTapLogStaticInfo(@"CleverTap enable file protection for default instance can't be updated from setEnableFileProtection method");
     }
 }
 
@@ -271,7 +271,7 @@
     if (!_isDefaultInstance) {
         _handshakeDomain = handshakeDomain;
     } else {
-        CleverTapLogStaticInfo("CleverTap handshake domain for default instance can't be updated from setHandshakeDomain method");
+        CleverTapLogStaticInfo(@"CleverTap handshake domain for default instance can't be updated from setHandshakeDomain method");
     }
 }
 
@@ -279,7 +279,7 @@
     if (!_isDefaultInstance) {
         _encryptionInTransitEnabled = encryptionInTransitEnabled;
     } else {
-        CleverTapLogStaticInfo("CleverTap encryptionInTransitEnabled for default instance can't be enabled from setEncryptionInTransitEnabled method");
+        CleverTapLogStaticInfo(@"CleverTap encryptionInTransitEnabled for default instance can't be enabled from setEncryptionInTransitEnabled method");
     }
 }
 

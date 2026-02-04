@@ -4,7 +4,6 @@
 #import "CTUtils.h"
 #import "CTUIUtils.h"
 #import "CTSwizzle.h"
-#import "CTLogger.h"
 #import "CTSwizzleManager.h"
 #import "CTConstants.h"
 #import "CTPlistInfo.h"
@@ -356,7 +355,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 + (nullable instancetype)_autoIntegrateWithCleverTapID:(NSString *)cleverTapID {
-    CleverTapLogStaticInfo("%@: Auto Integration enabled", self);
+    CleverTapLogStaticInfo(@"%@: Auto Integration enabled", self);
     isAutoIntegrated = YES;
     [CTSwizzleManager swizzleAppDelegate];
     CleverTap *instance = cleverTapID ? [CleverTap sharedInstanceWithCleverTapID:cleverTapID] : [CleverTap sharedInstance];
@@ -2612,7 +2611,7 @@ static BOOL sharedInstanceErrorLogged;
                 @try {
                     [self processAdditionalRequestParameters:jsonResp];
                 } @catch (NSException *ex) {
-                    CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle ARP update: %@", self, ex.debugDescription)
+                    CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle ARP update: %@", self, ex.debugDescription);
                 }
                 
                 // Handle dbg_lvl
