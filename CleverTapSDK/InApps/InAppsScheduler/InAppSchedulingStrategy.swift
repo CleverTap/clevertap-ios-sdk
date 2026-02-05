@@ -11,9 +11,9 @@ import Foundation
 /// Strategy protocol for handling storage operations before/after scheduling
 @objc public protocol InAppSchedulingStrategy {
     
-//    / Prepare data before scheduling (e.g., save to DB)
-//    / - Parameter inApps: Array of in-app dictionaries
-//    / - Returns: true if preparation successful, false otherwise
+    /// Prepare data before scheduling (e.g., save to DB)
+    /// - Parameter inApps: Array of in-app dictionaries
+    /// - Returns: true if preparation successful, false otherwise
     @objc func prepareForScheduling(inApps: [[String: Any]]) -> Bool
     
     /// Retrieve data after timer completes

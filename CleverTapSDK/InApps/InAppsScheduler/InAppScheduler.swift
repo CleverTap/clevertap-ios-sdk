@@ -21,7 +21,7 @@ import Foundation
     private let queue = DispatchQueue(label: "com.clevertap.CTInAppScheduler", attributes: .concurrent)
     
     private var tag: String {
-        return "[CleverTap]: [CTInAppScheduler]:"
+        return "[CTInAppScheduler]:"
     }
     
     // MARK: - Initialization
