@@ -382,14 +382,16 @@
     NSNumber *result;
     if (operation == CTProfileOperationIncrement) {
         result = [CTNumberOperationUtils addNumbers:oldValue number:newValue];
+        [self.changeTracker recordChange:path oldValue:oldValue newValue:result changes:changes];
     } else if (operation == CTProfileOperationDecrement) {
         result = [CTNumberOperationUtils subtractNumbers:oldValue number:newValue];
+        [self.changeTracker recordChange:path oldValue:oldValue newValue:result changes:changes];
     } else {
         result = oldValue;
+        [self.changeTracker recordChange:path oldValue:oldValue newValue:newValue changes:changes];
     }
     if (![CTJsonComparisonUtils areEqual:oldValue value:result]) {
         parent[key] = result;
-        [self.changeTracker recordChange:path oldValue:oldValue newValue:newValue changes:changes];
     }
 }
 
