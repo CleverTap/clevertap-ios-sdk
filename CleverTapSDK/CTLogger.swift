@@ -9,14 +9,14 @@
 import Foundation
 import os.log
 
+@objc public enum CTLogType: Int32 {
+    case info = 0
+    case debug = 1
+}
+
 @objc(CTLogger)
 @objcMembers
 public class CTLogger: NSObject {
-    
-    @objc public enum CTLogType: Int32 {
-        case info = 0
-        case debug = 1
-    }
     
     private static var debugLevel: Int32 = 0
     
