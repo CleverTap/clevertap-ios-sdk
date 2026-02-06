@@ -21,10 +21,6 @@ import Foundation
     /// - Returns: Dictionary if found, nil otherwise
     @objc func retrieveAfterTimer(id: String) -> [String: Any]?
     
-    /// Cleanup after timer completes or cancelled
-    /// - Parameter id: Timer identifier
-    @objc func clear(id: String)
-    
     /// Clear all stored data
     @objc func clearAll()
 }

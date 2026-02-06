@@ -51,7 +51,7 @@ import Foundation
             // Step 2: Prepare/store data using strategy
             let prepared = self.storageStrategy?.prepareForScheduling(inApps: newInApps)
             if !(prepared ?? false) {
-                print("\(self.tag) Failed to prepare in-apps for scheduling")
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Failed to prepare in-apps for scheduling")
                 for inApp in newInApps {
                     guard let id = inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] as? String else { continue }
                     let result = self.dataExtractor?.createErrorResult(id: id, message: "Preparation failed")
@@ -135,10 +135,9 @@ import Foundation
                 let result = self.dataExtractor?.createDiscardedResult(id: id)
                 onComplete(result)
                 self.storageStrategy?.retrieveAfterTimer(id: resultId ?? "")
-                print("\(self.tag) Timer discarded, cleaned up: \(id)")
-                
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Timer discarded, cleaned up: \(id)")
             @unknown default:
-                print("\(self.tag) Unknown timer result type for id: \(id)")
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Unknown timer result type for id: \(id)")
                 break
             }
         }
