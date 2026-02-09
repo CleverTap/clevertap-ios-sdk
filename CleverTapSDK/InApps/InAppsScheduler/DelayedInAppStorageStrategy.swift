@@ -11,7 +11,6 @@ import Foundation
 @objc
 @objcMembers
 public class DelayedInAppStorageStrategy: NSObject, InAppSchedulingStrategy {
-    private static let TAG = "[CleverTap]:"
     public var delayedLegacyInAppStore: CTInAppStore?
     
     @objc public init(delayedLegacyInAppStore: CTInAppStore? = nil) {
@@ -21,7 +20,7 @@ public class DelayedInAppStorageStrategy: NSObject, InAppSchedulingStrategy {
     
     public func prepareForScheduling(inApps: [[String : Any]]) -> Bool {
         guard let store = delayedLegacyInAppStore else {
-            print("\(DelayedInAppStorageStrategy.TAG) DelayedLegacyInAppStore is null, cannot prepare")
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "DelayedLegacyInAppStore is null, cannot prepare")
             return false
         }
         return store.storeDelayed(inApps: inApps)
@@ -29,17 +28,13 @@ public class DelayedInAppStorageStrategy: NSObject, InAppSchedulingStrategy {
     
     public func retrieveAfterTimer(id: String) -> [String : Any]? {
         guard let store = delayedLegacyInAppStore else {
-            print("\(DelayedInAppStorageStrategy.TAG) DelayedLegacyInAppStore is null, cannot retrieve")
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "DelayedLegacyInAppStore is null, cannot retrieve")
             return nil
         }
         let inApp = store.dequeueDelayedInApp(withCampaignId: id)
         return (inApp as? [String : Any]?) ?? nil
     }
-    
-    public func clear(id: String) {
-        
-    }
-    
+
     public func clearAll() {
         delayedLegacyInAppStore?.clearDelayedInApps()
     }

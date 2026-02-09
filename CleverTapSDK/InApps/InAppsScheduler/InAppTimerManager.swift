@@ -30,7 +30,7 @@ private struct TimerData {
     private let lock = NSRecursiveLock()
     
     private var tag: String {
-        return "[CleverTap]: [InAppTimerManager:\(tagSuffix)]:"
+        return "[InAppTimerManager:\(tagSuffix)]:"
     }
     
     // MARK: - Initialization
@@ -78,7 +78,7 @@ private struct TimerData {
         defer { lock.unlock() }
         // Keep existing active job if present
         if let existingTimer = activeJobs[id], !existingTimer.workItem.isCancelled {
-                print("\(tag) Timer with id '\(id)' already scheduled, keeping existing")
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Timer with id '\(id)' already scheduled, keeping existing")
                 return existingTimer.workItem
             }
         let scheduledAt = Date().timeIntervalSince1970
@@ -98,7 +98,7 @@ private struct TimerData {
                     scheduledAt: scheduledAt,
                     callback: callback
                 )
-                print("\(self.tag) Cancelled timer with id: \(id)")
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Cancelled timer with id: \(id)")
                 return  // stop execution
             }
             // Timer completed successfully
@@ -115,7 +115,7 @@ private struct TimerData {
             )
         activeJobs[id] = timerData
         workQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
-        print("\(tag) Scheduled timer with id '\(id)' for \(delay)s delay")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Scheduled timer with id '\(id)' for \(delay)s delay")
         return workItem
     }
     
@@ -129,7 +129,7 @@ private struct TimerData {
         
         timerData.workItem.cancel()
         activeJobs.removeValue(forKey: id)
-        print("\(tag) Cancelled timer with id: \(id)")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Cancelled timer with id: \(id)")
         return true
     }
 
@@ -143,7 +143,7 @@ private struct TimerData {
         for workItem in jobsToCancel {
             workItem.cancel()
         }
-        print("\(tag) Cancelled \(cancelledCount) timers")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Cancelled \(cancelledCount) timers")
     }
 
     /// Check if a timer is scheduled and active
@@ -159,13 +159,13 @@ private struct TimerData {
 
     /// Cleanup all timer state
     func cleanup() {
-        print("\(tag) cleaning up timer state")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) cleaning up timer state")
         cancelAllTimers()
         lock.lock()
         activeJobs.removeAll()
         cancelledJobs.removeAll()
         lock.unlock()
-        print("\(tag) cleanup complete")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) cleanup complete")
     }
     
     /// Get count of active timers
@@ -192,7 +192,7 @@ private struct TimerData {
                     scheduledAt: timerData.scheduledAt,
                     callback: timerData.callback
                 )
-                print("\(tag) Stored cancelled timer: \(id), elapsed: \(elapsedTime)s")
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Stored cancelled timer: \(id), elapsed: \(elapsedTime)s")
             }
         }
         // Now cancel all work items
@@ -201,7 +201,7 @@ private struct TimerData {
         for workItem in jobsToCancel {
             workItem.cancel()
         }
-        print("\(tag) Cancelled all timers on background")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Cancelled all timers on background")
     }
     
     /// App came to foreground - reschedule cancelled timers with remaining time
@@ -217,8 +217,7 @@ private struct TimerData {
             
             let elapsedTime = currentTime - scheduledAt
             let remainingTime = originalDelay - elapsedTime
-            
-            print("\(tag) Id \(id) - Original delay: \(originalDelay)s, " + "Elapsed: \(elapsedTime)s, Remaining: \(remainingTime)s")
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Id \(id) - Original delay: \(originalDelay)s, " + "Elapsed: \(elapsedTime)s, Remaining: \(remainingTime)s")
             if remainingTime > 0 {
                 toReschedule.append(
                     RescheduleData(
@@ -238,7 +237,7 @@ private struct TimerData {
         for data in toReschedule {
             scheduleTimer(id: data.id, delay: data.remainingTime, callback: data.callback)
             rescheduledCount += 1
-            print("\(tag) Rescheduled \(data.id) with \(data.remainingTime)s remaining")
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Rescheduled \(data.id) with \(data.remainingTime)s remaining")
         }
         // Discard expired timers
         var discardedCount = 0
