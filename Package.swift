@@ -6,6 +6,7 @@ let package = Package(
     name: "CleverTapSDK",
     platforms: [
         .iOS(.v9),
+        .tvOS(.v9),
         .watchOS(.v2)
     ],
     products: [
@@ -51,7 +52,7 @@ let package = Package(
             name: "CleverTapSDKWrapper",
             dependencies: [
                 "CleverTapSDK",
-                "SDWebImageCT"
+                .target(name: "SDWebImageCT", condition: .when(platforms: [.iOS]))
             ],
             path: "CleverTapSDKWrapper",
             linkerSettings: [

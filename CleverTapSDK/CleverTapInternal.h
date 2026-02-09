@@ -4,7 +4,6 @@
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppStore.h"
-#import "CTInAppDelayManager.h"
 #endif
 #import "CTSessionManager.h"
 #import "CTCryptMigrator.h"
@@ -27,8 +26,6 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 @property (strong, nonatomic, nullable) CleverTapFetchInAppsBlock fetchInAppsBlock;
 @property (nonatomic, strong, readonly) CTInAppDisplayManager * _Nullable inAppDisplayManager;
-@property (nonatomic, strong, readonly) CTInAppDelayManager * _Nullable inAppDelayManager;
-
 @property (nonatomic, strong, readonly) CTInAppEvaluationManager * _Nullable inAppEvaluationManager;
 @property (nonatomic, strong, readonly) CTInAppFCManager * _Nullable inAppFCManager;
 @property (nonatomic, strong, readonly) CTInAppStore * _Nullable inAppStore;
@@ -52,5 +49,18 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 - (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion;
 
 - (id <CleverTapURLDelegate> _Nullable)urlDelegate;
+
+/*!
+ @method
+ 
+ @abstract
+ Fetch in-action in-app content from backend after inactionDuration expires
+ 
+ @discussion
+ Sends wzrk_fetch event with t=6 and target ID
+ 
+ @param inAppId the campaign ID (ti) to fetch content for
+ */
+- (void)fetchInactionInApps:(NSString *_Nonnull)inAppId;
 
 @end
