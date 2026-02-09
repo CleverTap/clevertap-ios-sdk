@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 #### Added
 - Nested Objects Ingestion: Adds support for ingestion of nested objects in both event and profile properties, enabling richer engagement through more structured analytics. Please contact the `CleverTap` team to enable it for your account.
 - Inaction In-App Notifications: Adds support for triggering In-App messages based on user inaction. You can now configure an inaction duration (1-1200 seconds) to display In-App notifications when a user does NOT perform an expected action within the specified time window. This feature enables powerful re-engagement scenarios—for example, showing a cart abandonment reminder if a user adds items to cart but doesn't proceed to checkout within 60 seconds, or displaying a content recommendation if a user launches the app but doesn't start watching within 30 seconds.
-- Added SPM support for tvOS.
+- Adds SPM support for tvOS.
+
+#### Fixed
+- Refactors console logs to use OSLog instead of NSLog.
 
 ### [Version 7.4.2](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.4.2) (January 14, 2026)
 #### Fixed
