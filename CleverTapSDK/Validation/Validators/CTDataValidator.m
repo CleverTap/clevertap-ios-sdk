@@ -20,6 +20,7 @@
 - (instancetype)initWithConfig:(CTValidationConfig *)config {
     if (self = [super init]) {
         _config = config;
+        _warnings = [NSMutableArray array]; 
     }
     return self;
 }
