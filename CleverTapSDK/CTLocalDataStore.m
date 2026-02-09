@@ -803,7 +803,7 @@ NSString *const CT_ENCRYPTION_KEY = @"CLTAP_ENCRYPTION_KEY";
         // CACHED VALUES HAVE a "user" PREFIX, SO PREPEND IT BEFORE SEARCHING CACHE
         NSString *keyToSearch = [localProfileForSession.allKeys containsObject:key] ? key : [NSString stringWithFormat:@"user%@",key];
         NSDictionary<NSString *, id> *profileChanges = [self processProfileTree:keyToSearch value:kCLTAP_GET_MARKER command:CTProfileOperationGet];
-        profileChange = profileChanges[key];
+        profileChange = profileChanges[keyToSearch];
     }
     return profileChange == nil ? nil : profileChange[@"oldValue"];
 }

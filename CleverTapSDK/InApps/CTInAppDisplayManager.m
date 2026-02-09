@@ -211,11 +211,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         switch (result.type) {
-            case CTDelayedInAppResultTypeSuccess:
-                [result.data mutableCopy];
-                [strongSelf.inAppStore updateTTL:[result.data mutableCopy]];
-                [strongSelf _addInAppNotificationsToQueue:@[[result.data mutableCopy]]];
+            case CTDelayedInAppResultTypeSuccess: {
+                NSMutableDictionary *mutableData = [result.data mutableCopy];
+                [strongSelf.inAppStore updateTTL:mutableData];
+                [strongSelf _addInAppNotificationsToQueue:@[mutableData]];
                 break;
+            }
             case CTDelayedInAppResultTypeError: break;
             case CTDelayedInAppResultTypeDiscarded: break;
         }

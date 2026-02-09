@@ -238,6 +238,8 @@ static CTDataValidator *_profileDataValidator;
         // validate the multi-value array
         CTValidationResult *dataResult = [_profileDataValidator cleanArray:values forKey:cleanedKey];
         if (dataResult.shouldDrop) {
+            [errors addObject:[self _generateInvalidMultiValueKeyErrorForKey:key]];
+            completion(nil, nil, errors);
             return;
         }
         [self _validateAndPushMultiValue:dataResult.cleanedData forKey:cleanedKey withOriginalValues:values usingCommand:command completionHandler:completion];
