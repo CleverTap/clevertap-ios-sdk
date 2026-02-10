@@ -122,7 +122,8 @@ static const CGFloat kSpacingConstant = 160.f;
         [self addChildViewController:self.playerController];
         self.playerController.view.frame = self.containerView.bounds;
         self.playerController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self.containerView addSubview:self.playerController.view];
+        // Insert video player below close button instead of adding on top
+        [self.containerView insertSubview:self.playerController.view belowSubview:self.closeButton];
         [self.playerController didMoveToParentViewController:self];
         return;
     }
