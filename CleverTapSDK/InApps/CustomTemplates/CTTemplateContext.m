@@ -156,7 +156,7 @@
     if (self.notificationDelegate) {
         [self.notificationDelegate notificationDidShow:self.notification];
     } else {
-        CleverTapLogStaticDebug(@"%@: Cannot set template as presented.", [self class])
+        CleverTapLogStaticDebug(@"%@: Cannot set template as presented.", [self class]);
     }
 }
 
@@ -199,7 +199,7 @@
         [self.notificationDelegate notificationDidDismiss:self.notification fromViewController:nil];
         self.notificationDelegate = nil;
     } else {
-        CleverTapLogStaticDebug(@"%@: Cannot set template as dismissed.", [self class])
+        CleverTapLogStaticDebug(@"%@: Cannot set template as dismissed.", [self class]);
     }
 }
 

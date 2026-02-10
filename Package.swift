@@ -6,6 +6,7 @@ let package = Package(
     name: "CleverTapSDK",
     platforms: [
         .iOS(.v9),
+        .tvOS(.v9),
         .watchOS(.v2)
     ],
     products: [
@@ -30,8 +31,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.4.2.xcframework.zip",
-            checksum: "aed7a5ecf6f202039497f4c1c026997ed4bcec7422c44c69e00f7ffc24a72c69"
+            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.5.0.xcframework.zip",
+            checksum: "6ac3486c4846e6f4493415293118e275b1dde9fdf8f4bdeb8b609162a557bad5"
         ),
         .target(
             name: "CleverTapLocation",
@@ -51,7 +52,7 @@ let package = Package(
             name: "CleverTapSDKWrapper",
             dependencies: [
                 "CleverTapSDK",
-                "SDWebImageCT"
+                .target(name: "SDWebImageCT", condition: .when(platforms: [.iOS]))
             ],
             path: "CleverTapSDKWrapper",
             linkerSettings: [
