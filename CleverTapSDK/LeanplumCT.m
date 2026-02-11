@@ -9,7 +9,6 @@
 #import "LeanplumCT.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
-#import "NSDictionary+Extensions.h"
 
 NSString *const LP_PURCHASE_EVENT = @"Purchase";
 NSString *const LP_STATE_PREFIX = @"state_";
@@ -60,7 +59,7 @@ static CleverTap * _instance;
 }
 
 + (void)setUserAttributes:(NSDictionary *)attributes {
-    NSDictionary *profileAttributes = [[self transformArrayValuesInDictionary:attributes] dictionaryRemovingNullValues];
+    NSDictionary *profileAttributes = [[self transformArrayValuesInDictionary:attributes] ct_dictionaryRemovingNullValues];
     CleverTapLogDebug(self.instance.config.logLevel,
                       @"%@: LeanplumCT.setUserAttributes will call profilePush with %@.", self, profileAttributes);
     [[self instance] profilePush:profileAttributes];
@@ -186,7 +185,7 @@ andParameters:(nullable NSDictionary<NSString *, id> *)params {
  * @param dictionary The dictionary which values to transform.
  */
 + (NSDictionary<NSString *, id> *)transformArrayValuesInDictionary:(NSDictionary<NSString *, id> *)dictionary {
-    return [dictionary dictionaryWithTransformUsingBlock:^id _Nonnull(id _Nonnull value) {
+    return [dictionary ct_dictionaryWithTransformUsingBlock:^id _Nonnull(id _Nonnull value) {
         if ([value isKindOfClass:[NSArray class]]) {
             NSArray *array = (NSArray *)value;
             NSArray *filteredArray =

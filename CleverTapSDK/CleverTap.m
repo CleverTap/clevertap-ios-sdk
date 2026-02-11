@@ -99,8 +99,6 @@ static NSArray *sslCertNames;
 #import "CTDomainFactory.h"
 #import "CleverTap+SCDomain.h"
 
-#import "NSDictionary+Extensions.h"
-
 #import "CTEncryptionManager.h"
 
 #import <objc/runtime.h>
@@ -2798,8 +2796,8 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     // stringify the profile dict to use as a concurrent dupe key
-    NSString *profileToString = [properties toJsonString];
-    
+    NSString *profileToString = [properties ct_toJsonString];
+
     // as processing happens async block concurrent onUserLogin requests with the same profile, as our cache is set async
     if ([self isProcessingLoginUserWithIdentifier:profileToString]) {
         CleverTapLogInternal(self.config.logLevel, @"Already processing onUserLogin, will not process for profile: %@", properties);

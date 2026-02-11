@@ -2,7 +2,6 @@
 #import "CTValidationResult.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
-#import "CTKnownProfileFields.h"
 #import "CTLocalDataStore.h"
 #import "CTUtils.h"
 #import "CTPropertyKeyValidator.h"
@@ -55,9 +54,9 @@ static CTDataValidator *_profileDataValidator;
         for (int i = 0; i < [cleanedProperties count]; i++) {
             NSString *key = profileAllKeys[(NSUInteger) i];
             id value = cleanedProperties[key];
-            
+
             KnownField kf = [CTKnownProfileFields getKnownFieldIfPossibleForKey:key];
-            if (kf != UNKNOWN) {
+            if (kf != KnownFieldUnknown) {
                 systemFields[key] = value;
             } else {
                 customFields[key] = value;

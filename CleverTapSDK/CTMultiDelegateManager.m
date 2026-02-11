@@ -8,7 +8,6 @@
 
 #import "CTMultiDelegateManager.h"
 #import "CTConstants.h"
-#import "CTBatchSentDelegateHelper.h"
 
 @interface CTMultiDelegateManager ()
 
