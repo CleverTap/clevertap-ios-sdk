@@ -8,8 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
-#import "CleverTapEventDetail.h"
 #import "CTClock.h"
+
+@class CleverTapEventDetail;
 #import "CTDispatchQueueManager.h"
 
 @interface CTEventDatabase : NSObject

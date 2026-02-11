@@ -3,7 +3,6 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CleverTapSyncDelegate.h"
-#import "CleverTapEventDetail.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapInstanceConfigPrivate.h"
 #import "CTLoginInfoProvider.h"

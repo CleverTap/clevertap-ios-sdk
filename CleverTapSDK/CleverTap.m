@@ -14,8 +14,6 @@
 #import "CTEventBuilder.h"
 #import "CTProfileBuilder.h"
 #import "CTLocalDataStore.h"
-#import "CleverTapUTMDetail.h"
-#import "CleverTapEventDetail.h"
 #import "CleverTapSyncDelegate.h"
 #import "CleverTapURLDelegate.h"
 #import "CleverTapInstanceConfig.h"
