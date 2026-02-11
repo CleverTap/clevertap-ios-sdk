@@ -49,6 +49,46 @@
         [self.inAppDisplayManager scheduleDelayedInAppsForAllModes:partitionedLegacyInApps.delayedInApps];
     }
 
+//    NSMutableDictionary *testGifInApp = [@{
+//           @"ti": @"test_gif_campaign_id_123",
+//           @"wzrk_id": @"test_gif_inapp_123",
+//           @"type": @"cover",  // Or use: "interstitialImage", "halfInterstitialImage"
+//           @"bg": @"#FFFFFF",
+//           @"close": @YES,
+//           @"tablet": @NO,
+//           @"hasPortrait": @YES,
+//           @"hasLandscape": @YES,
+//           @"media": @{
+//               @"content_type": @"image/gif",  // This is the key for GIF support
+//               @"url": @"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",  // Replace with your GIF URL
+//               @"alt_text": @"Test GIF Animation"
+//           },
+//           @"mediaLandscape": @{
+//               @"content_type": @"image/gif",
+//               @"url": @"https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",  // Same or different GIF for landscape
+//               @"alt_text": @"Test GIF Animation Landscape"
+//           }
+//       } mutableCopy];
+//       
+//       // Add to the in-app queue
+//       [self.inAppDisplayManager _addInAppNotificationsToQueue:@[
+////        testGifInApp
+////        ,
+//        @{
+//           @"ti": @"test_video_campaign",
+//           @"wzrk_id": @"video_test_001",
+//           @"type": @"cover-image",
+//           @"bg": @"#000000",
+//           @"close": @YES,
+//           @"media": @{
+//               @"content_type": @"video/mp4",
+//                      @"url": @"https://assets.mixkit.co/active_storage/video_items/100627/1730161415/100627-video-720.mp4"
+//           }}
+//       ]];
+       CleverTapLogDebug(self.config.logLevel, @"DEBUG: Injected test GIF in-app notification");
+
+
+    
     // Legacy SS in-apps meta (inapp_notifs_meta -> IN-ACTION in-app campaigns WITHOUT advance display rules)
     InActionOnly *partitionedLegacyMetaInApps = [InAppDurationPartitioner partitionLegacyMetaInApps:jsonResp[CLTAP_INAPP_META_KEY]];
     if ([partitionedLegacyMetaInApps hasInActionInApps]) {

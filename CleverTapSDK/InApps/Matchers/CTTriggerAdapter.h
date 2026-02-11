@@ -8,9 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "CTTriggerCondition.h"
-#import "CTTriggerRadius.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class CTTriggerRadius;
 
 @interface CTTriggerAdapter : NSObject
 

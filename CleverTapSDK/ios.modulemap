@@ -32,9 +32,6 @@ framework module CleverTapSDK {
     header "CTLocalInApp.h"
     header "CleverTap+PushPermission.h"
     header "CTJsonTemplateProducer.h"
-    header "CTDelayedInAppResult.h"
-    header "CTInActionResult.h"
-    header "CTTimerResult.h"
     header "CTInAppStore.h"
     export *
 }

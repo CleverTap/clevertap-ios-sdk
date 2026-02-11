@@ -8,7 +8,6 @@
 
 #import "CTTriggersMatcher.h"
 #import "CTTriggerAdapter.h"
-#import "CTTriggerValue.h"
 #import "CTConstants.h"
 #import "CTTriggerEvaluator.h"
 #import "CTUtils.h"

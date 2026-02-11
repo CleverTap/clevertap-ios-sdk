@@ -7,9 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CTTriggerValue.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class CTTriggerValue;
 
 typedef NS_ENUM(NSUInteger, CTTriggerOperator){
     CTTriggerOperatorGreaterThan = 0,

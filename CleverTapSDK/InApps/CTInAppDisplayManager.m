@@ -49,9 +49,6 @@
 #else
 #import "CleverTapSDK-Swift.h"
 #endif
-#import "CTTimerResult.h"
-#import "CTDelayedInAppResult.h"
-#import "CTInActionResult.h"
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static const NSString *kInAppNotificationKey = @"inAppNotification";
