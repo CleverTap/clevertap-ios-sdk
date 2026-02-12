@@ -198,12 +198,14 @@ static CTDataValidator *_eventDataValidator;
     NSMutableDictionary *notif = [[NSMutableDictionary alloc] init];
     @try {
         NSDictionary *data = notification.jsonDescription;
+        // Extract all wzrk_* properties from notification JSON
         for (NSString *x in [data allKeys]) {
             if (![CTUtils doesString:x startWith:@"wzrk_"])
                 continue;
             id value = data[x];
             notif[x] = value;
         }
+        // Merge query parameters including wzrk_c2a (CTA text) and wzrk_dl (deep link)
         if (params) {
             [notif addEntriesFromDictionary:params];
         }
