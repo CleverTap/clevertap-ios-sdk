@@ -1,11 +1,12 @@
 #import "CTFileDownloadManager.h"
 #import "CTConstants.h"
 #import "CleverTapInstanceConfig.h"
+#import "CTPrivateStorageProvider.h"
 
 @interface CTFileDownloadManager()
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
-@property (nonatomic, strong) NSString *documentsDirectory;
+@property (nonatomic, strong) NSString *appSupportDirectory;
 @property (nonatomic, strong) NSMutableSet<NSURL *> *downloadInProgressUrls;
 @property (nonatomic, strong) NSMutableDictionary<NSURL *, NSMutableArray<DownloadCompletionHandler> *> *downloadInProgressHandlers;
 @property (nonatomic, strong) NSURLSession *session;
@@ -29,8 +30,10 @@
     self = [super init];
     if (self) {
         self.config = config;
-        NSString *documents = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-        self.documentsDirectory = [documents stringByAppendingPathComponent:CLTAP_FILES_DIRECTORY_NAME];
+        NSString *appSupport = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject];
+        self.appSupportDirectory = [appSupport stringByAppendingPathComponent:CLTAP_FILES_DIRECTORY_NAME];
+        
+        [CTPrivateStorageProvider ensureDirectoryInApplicationSupport:CLTAP_FILES_DIRECTORY_NAME];
 
         _downloadInProgressUrls = [NSMutableSet new];
         _downloadInProgressHandlers = [NSMutableDictionary new];
@@ -136,7 +139,7 @@
 }
 
 - (NSString *)filePath:(NSURL *)url {
-    return [self.documentsDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
+    return [self.appSupportDirectory stringByAppendingPathComponent:[self hashedFileNameForURL:url]];
 }
 
 - (void)deleteFiles:(NSArray<NSString *> *)urls withCompletionBlock:(CTFilesDeleteCompletedBlock)completion {
@@ -180,7 +183,7 @@
     dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     NSMutableDictionary<NSString *,id> *filesDeleteStatus = [NSMutableDictionary new];
     NSError *error;
-    NSURL *path = [NSURL fileURLWithPath:self.documentsDirectory];
+    NSURL *path = [NSURL fileURLWithPath:self.appSupportDirectory];
     NSArray<NSURL *> *files = [self.fileManager contentsOfDirectoryAtURL:path
                                               includingPropertiesForKeys:nil
                                                                  options:NSDirectoryEnumerationSkipsHiddenFiles
@@ -232,8 +235,8 @@
         
         NSFileManager *fileManager = self.fileManager;
         NSError *createDirectoryError;
-        if (![fileManager fileExistsAtPath:self.documentsDirectory]) {
-            [fileManager createDirectoryAtURL:[NSURL fileURLWithPath:self.documentsDirectory]
+        if (![fileManager fileExistsAtPath:self.appSupportDirectory]) {
+            [fileManager createDirectoryAtURL:[NSURL fileURLWithPath:self.appSupportDirectory]
                                      withIntermediateDirectories:YES
                                                       attributes:nil
                                                            error:&createDirectoryError];

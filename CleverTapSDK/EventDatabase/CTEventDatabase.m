@@ -9,6 +9,7 @@
 #import "CTEventDatabase.h"
 #import "CTConstants.h"
 #import "CTSystemClock.h"
+#import "CTPrivateStorageProvider.h"
 
 @interface CTEventDatabase()
 
@@ -578,9 +579,7 @@ normalizedEventName:(NSString *)normalizedEventName
 }
 
 - (NSString *)databasePath {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    return [documentsDirectory stringByAppendingPathComponent:@"CleverTap-Events.db"];
+    return [CTPrivateStorageProvider pathForDatabaseFile:@"CleverTap-Events.db"];
 }
 
 @end
