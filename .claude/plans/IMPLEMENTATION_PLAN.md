@@ -374,16 +374,7 @@ if (templateDeepLink && templateDeepLink.length > 0) {
    - When: User clicks
    - Then: Both `wzrk_c2a` and `wzrk_dl` populated correctly
 
-#### 9.2 Integration Tests
-**Test File:** `CleverTapSDKTests/InApp/CTInAppDeepLinkIntegrationTests.m`
-
-**Scenarios:**
-1. End-to-end event tracking with deep link
-2. Deep link opening + attribution in same flow
-3. Event queuing with `wzrk_dl` property
-4. Network request validation (check payload includes `wzrk_dl`)
-
-#### 9.3 Manual Testing Checklist
+#### 9.2 Manual Testing Checklist
 
 **Template Matrix Validation:**
 
@@ -422,20 +413,6 @@ if (templateDeepLink && templateDeepLink.length > 0) {
 - Template-specific behavior
 - Migration guide (if any breaking changes)
 - Code examples
-
-#### 10.3 Changelog Entry
-**File:** `CHANGELOG.md`
-
-```markdown
-## [Version X.X.X]
-
-### Added
-- **InApp Deep Link Attribution**: InApp click events now include `wzrk_dl` property capturing the destination deep link URL
-  - Supports CTA button deep links
-  - Supports template-level deep links for non-CTA templates
-  - Captures specific deep link for multi-CTA scenarios
-  - Includes personalized deep link values
-```
 
 ---
 
@@ -486,15 +463,9 @@ if (templateDeepLink && templateDeepLink.length > 0) {
 13. **CleverTapSDKTests/InApp/CTInAppDeepLinkAttributionTests.m** (NEW)
     - Unit tests for deep link attribution
 
-14. **CleverTapSDKTests/InApp/CTInAppDeepLinkIntegrationTests.m** (NEW)
-    - Integration tests
-
 ### Documentation (New)
-15. **docs/InApp-Deep-Link-Attribution.md** (NEW)
+14. **docs/InApp-Deep-Link-Attribution.md** (NEW)
     - Feature documentation
-
-16. **CHANGELOG.md**
-    - Add entry for new feature
 
 ---
 
@@ -526,15 +497,13 @@ if (templateDeepLink && templateDeepLink.length > 0) {
 
 ### Sprint 5: Testing & Validation (Days 9-10)
 1. Complete unit test suite
-2. Run integration tests
-3. Manual testing with template matrix
-4. Fix any bugs found
+2. Manual testing with template matrix
+3. Fix any bugs found
 
 ### Sprint 6: Documentation & Polish (Days 11-12)
 1. Add inline code documentation
 2. Create feature documentation
-3. Update changelog
-4. Code review and refactoring
+3. Code review and refactoring
 
 ---
 
@@ -605,7 +574,6 @@ if (templateDeepLink && templateDeepLink.length > 0) {
 
 ### Pre-Release Checklist
 - [ ] All unit tests passing
-- [ ] Integration tests passing
 - [ ] Manual template matrix completed
 - [ ] Regression tests passing (existing functionality)
 - [ ] Code review completed
@@ -671,15 +639,13 @@ This feature is **DONE** when:
 
 1. ✅ Code implementation complete for all template types
 2. ✅ Unit tests written and passing (≥90% coverage)
-3. ✅ Integration tests passing
-4. ✅ Manual testing completed for all templates
-5. ✅ Code reviewed and approved
-6. ✅ Documentation written and reviewed
-7. ✅ Changelog updated
-8. ✅ No regressions in existing functionality
-9. ✅ Sample app testing completed
-10. ✅ Feature merged to develop branch
-11. ✅ QA sign-off received
+3. ✅ Manual testing completed for all templates
+4. ✅ Code reviewed and approved
+5. ✅ Documentation written and reviewed
+6. ✅ No regressions in existing functionality
+7. ✅ Sample app testing completed
+8. ✅ Feature merged to develop branch
+9. ✅ QA sign-off received
 
 ---
 
