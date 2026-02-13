@@ -137,12 +137,14 @@
 
 - (void)testNotificationButtonWithDeepLink {
     // Given: A notification button with a deep link action
-    NSURL *deepLinkURL = [NSURL URLWithString:@"myapp://product/123"];
-    CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:deepLinkURL];
-
-    CTNotificationButton *button = [[CTNotificationButton alloc] init];
-    button.text = @"View Product";
-    button.action = action;
+    NSDictionary *buttonJSON = @{
+        @"text": @"View Product",
+        @"actions": @{
+            @"ios": @"myapp://product/123",
+            @"type": @"url"
+        }
+    };
+    CTNotificationButton *button = [[CTNotificationButton alloc] initWithJSON:buttonJSON];
 
     // Then: Button should have accessible action URL
     XCTAssertNotNil(button.action, @"Button action should not be nil");
@@ -152,12 +154,14 @@
 
 - (void)testNotificationButtonWithHTTPDeepLink {
     // Given: A notification button with HTTP deep link
-    NSURL *deepLinkURL = [NSURL URLWithString:@"https://shop.example.com/sale?utm_source=inapp&user_id=12345"];
-    CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:deepLinkURL];
-
-    CTNotificationButton *button = [[CTNotificationButton alloc] init];
-    button.text = @"Shop Sale";
-    button.action = action;
+    NSDictionary *buttonJSON = @{
+        @"text": @"Shop Sale",
+        @"actions": @{
+            @"ios": @"https://shop.example.com/sale?utm_source=inapp&user_id=12345",
+            @"type": @"url"
+        }
+    };
+    CTNotificationButton *button = [[CTNotificationButton alloc] initWithJSON:buttonJSON];
 
     // Then: Button should preserve full URL with query parameters
     XCTAssertNotNil(button.action.actionURL, @"Action URL should not be nil");
@@ -169,12 +173,15 @@
 
 - (void)testNotificationButtonWithoutDeepLink {
     // Given: A notification button with close action (no URL)
-    CTNotificationAction *action = [[CTNotificationAction alloc] init];
-    action.type = CTInAppActionTypeClose;
-
-    CTNotificationButton *button = [[CTNotificationButton alloc] init];
-    button.text = @"Close";
-    button.action = action;
+    NSDictionary *buttonJSON = @{
+        @"text": @"Close",
+        @"actions": @{
+            @"ios": @"",
+            @"type": @"close",
+            @"close": @1
+        }
+    };
+    CTNotificationButton *button = [[CTNotificationButton alloc] initWithJSON:buttonJSON];
 
     // Then: Button should have nil action URL
     XCTAssertNil(button.action.actionURL, @"Action URL should be nil for close actions");
@@ -184,19 +191,23 @@
 
 - (void)testMultipleCTAButtonsWithDifferentDeepLinks {
     // Given: Multiple buttons with different deep links
-    NSURL *deepLink1 = [NSURL URLWithString:@"https://example.com/page1"];
-    NSURL *deepLink2 = [NSURL URLWithString:@"https://example.com/page2"];
+    NSDictionary *button1JSON = @{
+        @"text": @"Option A",
+        @"actions": @{
+            @"ios": @"https://example.com/page1",
+            @"type": @"url"
+        }
+    };
+    CTNotificationButton *button1 = [[CTNotificationButton alloc] initWithJSON:button1JSON];
 
-    CTNotificationAction *action1 = [[CTNotificationAction alloc] initWithOpenURL:deepLink1];
-    CTNotificationAction *action2 = [[CTNotificationAction alloc] initWithOpenURL:deepLink2];
-
-    CTNotificationButton *button1 = [[CTNotificationButton alloc] init];
-    button1.text = @"Option A";
-    button1.action = action1;
-
-    CTNotificationButton *button2 = [[CTNotificationButton alloc] init];
-    button2.text = @"Option B";
-    button2.action = action2;
+    NSDictionary *button2JSON = @{
+        @"text": @"Option B",
+        @"actions": @{
+            @"ios": @"https://example.com/page2",
+            @"type": @"url"
+        }
+    };
+    CTNotificationButton *button2 = [[CTNotificationButton alloc] initWithJSON:button2JSON];
 
     // Then: Each button should maintain its own deep link
     XCTAssertEqualObjects(button1.action.actionURL.absoluteString, @"https://example.com/page1",
