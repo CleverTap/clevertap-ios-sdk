@@ -5,8 +5,12 @@
 #import "CleverTap.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
-#import "CTUtils.h"
 #import "CTDeviceInfo.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTValidationResult.h"
 #import "CleverTapBuildInfo.h"
 #import "CleverTapInstanceConfig.h"

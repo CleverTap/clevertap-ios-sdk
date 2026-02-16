@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "CTSystemTemplateActionHandler.h"
 #import "CTConstants.h"
-#import "CTUtils.h"
 #import "CTUIUtils.h"
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>

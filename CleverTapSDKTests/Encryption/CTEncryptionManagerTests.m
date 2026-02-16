@@ -12,7 +12,11 @@
 #import "CTEncryptionManager.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"
-#import "CTUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 // Define the prefix and suffix if they're not accessible from test
 // These should match the actual values used in the implementation

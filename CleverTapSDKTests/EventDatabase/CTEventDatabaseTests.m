@@ -8,8 +8,12 @@
 
 #import <XCTest/XCTest.h>
 #import "CTEventDatabase+Tests.h"
-#import "CTUtils.h"
 #import "CTClockMock.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 static NSString *kEventName = @"Test Event";
 static NSString *kDeviceID = @"Test Device";

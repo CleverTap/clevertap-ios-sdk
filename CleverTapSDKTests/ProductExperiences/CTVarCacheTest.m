@@ -9,8 +9,12 @@
 #import <XCTest/XCTest.h>
 #import "CTVariables.h"
 #import "CTVarCache.h"
-#import "CTUtils.h"
 #import "CTPreferences.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTVarCache+Tests.h"
 #import "CTVarCacheMock.h"
 #import "CTVariables+Tests.h"

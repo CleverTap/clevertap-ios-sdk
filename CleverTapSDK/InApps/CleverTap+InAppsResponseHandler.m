@@ -13,7 +13,6 @@
 #import "CTUIUtils.h"
 #import "CTConstants.h"
 #import "CleverTapInternal.h"
-#import "CTUtils.h"
 #import "CTCustomTemplatesManager-Internal.h"
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>

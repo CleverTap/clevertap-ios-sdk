@@ -3,7 +3,11 @@
 #import "CTPreferences.h"
 #import "CleverTapInstanceConfig.h"
 #import "CleverTapProductConfigPrivate.h"
-#import "CTUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @class CleverTapConfigValue;
 

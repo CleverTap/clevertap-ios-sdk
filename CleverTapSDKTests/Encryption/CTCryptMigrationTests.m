@@ -6,8 +6,12 @@
 #import "CTConstants.h"
 #import "CTLocalDataStore.h"
 #import "CTProfileBuilder.h"
-#import "CTUtils.h"
 #import "CTPreferences.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @interface CTCryptMigrationTests : XCTestCase
 @property (nonatomic, strong) NSString *region;

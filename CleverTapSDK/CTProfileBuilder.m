@@ -3,8 +3,12 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTLocalDataStore.h"
-#import "CTUtils.h"
 #import "CTPropertyKeyValidator.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTDataValidator.h"
 
 @implementation CTProfileBuilder

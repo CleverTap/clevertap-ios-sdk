@@ -16,8 +16,12 @@
 #import "CTInAppTriggerManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CTInAppNotification.h"
-#import "CTUtils.h"
 #import "CTPreferences.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
 #else

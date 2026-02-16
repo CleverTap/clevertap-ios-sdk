@@ -15,8 +15,12 @@
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CTEventBuilder.h"
-#import "CTUtils.h"
 #import "CTUIUtils.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CleverTapURLDelegate.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT

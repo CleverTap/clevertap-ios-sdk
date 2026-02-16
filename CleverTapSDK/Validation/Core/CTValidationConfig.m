@@ -6,8 +6,12 @@
 //
 #import "CTValidationConfig.h"
 #import "CTConstants.h"
-#import "CTUtils.h"
 #import "CTValidationResult.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 static const int kMaxKeyChars = 120;
 static const int kMaxValueChars = 1024;
