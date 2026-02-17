@@ -69,13 +69,38 @@
     NSString *appSupportPath = [self applicationSupportDirectoryPath];
     NSString *targetPath = [appSupportPath stringByAppendingPathComponent:filename];
     
-    [self migrateDatabaseFileIfNeeded:filename toPath:targetPath];
+    static NSMutableSet *migratedFiles = nil;
+    static NSMutableDictionary *fileLocks = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        migratedFiles = [NSMutableSet set];
+        fileLocks = [NSMutableDictionary dictionary];
+    });
+    
+    NSLock *lock = nil;
+    @synchronized(fileLocks) {
+        lock = fileLocks[filename];
+        if (!lock) {
+            lock = [[NSLock alloc] init];
+            fileLocks[filename] = lock;
+        }
+    }
+    
+    [lock lock];
+    @try {
+        if (![migratedFiles containsObject:filename]) {
+            [self migrateDatabaseFileIfNeeded:filename toPath:targetPath];
+            [migratedFiles addObject:filename];
+        }
+    } @finally {
+        [lock unlock];
+    }
     
     return targetPath;
 }
 
 + (NSURL *)urlForDatabaseFile:(NSString *)filename {
-    if (!filename || filename.length == 0) {
+    if (!filename || [filename stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0) {
         CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] ERROR: Invalid filename");
         return nil;
     }
@@ -91,6 +116,16 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *documentsPath = [self documentsDirectoryPath];
     NSString *oldPath = [documentsPath stringByAppendingPathComponent:filename];
+    
+    if ([self isSameLocation:oldPath andPath:targetPath]) {
+            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target paths are identical, skipping migration: %@", filename);
+            return;
+    }
+    
+    if ([oldPath isEqualToString:targetPath]) {
+        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target are the same, skipping migration for: %@", filename);
+        return;
+    }
     
     if ([fileManager fileExistsAtPath:targetPath]) {
         CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] File already exists in Application Support: %@", filename);
@@ -147,6 +182,11 @@
                  fromDirectory:(NSString *)sourceDir
                    toDirectory:(NSString *)targetDir {
     NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    if ([self isSameLocation:sourceDir andPath:targetDir]) {
+            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target directories are identical, skipping associated files migration");
+            return;
+    }
     
     NSArray *extensions = @[@"-shm", @"-wal", @"-journal"];
     
@@ -216,6 +256,11 @@
     
     BOOL oldDirectoryExists = [fileManager fileExistsAtPath:oldDirectory];
     BOOL newDirectoryExists = [fileManager fileExistsAtPath:newDirectory];
+    
+    if ([self isSameLocation:oldDirectory andPath:newDirectory]) {
+            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target directories are identical, skipping associated files migration");
+            return;
+    }
     
     if (!oldDirectoryExists && !newDirectoryExists) {
         CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Fresh install detected - creating %@ in Application Support", directoryName);
@@ -302,6 +347,22 @@
         }
         return;
     }
+}
+
++ (BOOL)isSameLocation:(NSString *)path1 andPath:(NSString *)path2 {
+    NSString *standardized1 = [path1 stringByStandardizingPath];
+    NSString *standardized2 = [path2 stringByStandardizingPath];
+    
+    if ([standardized1 isEqualToString:standardized2]) {
+        return YES;
+    }
+    
+    NSURL *url1 = [NSURL fileURLWithPath:standardized1];
+    NSURL *url2 = [NSURL fileURLWithPath:standardized2];
+    NSString *resolved1 = [[url1 URLByResolvingSymlinksInPath] path];
+    NSString *resolved2 = [[url2 URLByResolvingSymlinksInPath] path];
+    
+    return [resolved1 isEqualToString:resolved2];
 }
 
 @end

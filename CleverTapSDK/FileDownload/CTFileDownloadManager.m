@@ -241,7 +241,7 @@
                                                       attributes:nil
                                                            error:&createDirectoryError];
             if (createDirectoryError) {
-                CleverTapLogInternal(self.config.logLevel, @"Error creating documents folder: %@", createDirectoryError);
+                CleverTapLogInternal(self.config.logLevel, @"Error creating application support folder: %@", createDirectoryError);
                 completedBlock(NO);
                 return;
             }
