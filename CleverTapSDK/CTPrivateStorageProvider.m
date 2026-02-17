@@ -122,11 +122,6 @@
             return;
     }
     
-    if ([oldPath isEqualToString:targetPath]) {
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target are the same, skipping migration for: %@", filename);
-        return;
-    }
-    
     if ([fileManager fileExistsAtPath:targetPath]) {
         CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] File already exists in Application Support: %@", filename);
         
@@ -197,18 +192,47 @@
         
         if ([fileManager fileExistsAtPath:sourcePath]) {
             NSError *error = nil;
-            BOOL success = [fileManager moveItemAtPath:sourcePath toPath:targetPath error:&error];
+            BOOL success = NO;
+            
+            if ([fileManager fileExistsAtPath:targetPath]) {
+                NSURL *sourceURL = [NSURL fileURLWithPath:sourcePath];
+                NSURL *targetURL = [NSURL fileURLWithPath:targetPath];
+                NSURL *resultingURL = nil;
+                
+                success = [fileManager replaceItemAtURL:targetURL
+                                          withItemAtURL:sourceURL
+                                         backupItemName:nil
+                                                options:NSFileManagerItemReplacementUsingNewMetadataOnly
+                                       resultingItemURL:&resultingURL
+                                                  error:&error];
+                
+                if (success) {
+                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Replaced associated file: %@", associatedFilename);
+                    continue;
+                } else {
+                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Atomic replacement failed for %@: %@. Falling back to remove+move...",
+                                             associatedFilename, error);
+                    
+                    error = nil;
+                    [fileManager removeItemAtPath:targetPath error:&error];
+                }
+            }
+            
+            error = nil;
+            success = [fileManager moveItemAtPath:sourcePath toPath:targetPath error:&error];
             
             if (success) {
                 CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Migrated associated file: %@", associatedFilename);
             } else {
+                CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Move failed for %@: %@. Attempting copy...",
+                                         associatedFilename, error);
                 error = nil;
                 success = [fileManager copyItemAtPath:sourcePath toPath:targetPath error:&error];
                 if (success) {
                     CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Copied associated file: %@", associatedFilename);
                     [fileManager removeItemAtPath:sourcePath error:nil];
                 } else {
-                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] WARNING: Could not migrate associated file %@: %@",
+                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] ERROR: Could not migrate associated file %@: %@",
                                              associatedFilename, error);
                 }
             }
