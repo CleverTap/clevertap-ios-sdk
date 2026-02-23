@@ -93,6 +93,9 @@ static dispatch_once_t coordinatorOnceToken;
 + (void)initializeSharedCoordinator {
     dispatch_once(&coordinatorOnceToken, ^{
         @try {
+            // Migrate Inbox sqlite file from Documents to Application Support
+            [CTPrivateStorageProvider performMigrationIfNeededForDatabase:@"CleverTap-Inbox.sqlite"];
+            
             // Load Core Data model
             NSURL *modelURL = [[CTInboxUtils bundle:self.class]
                                URLForResource:@"Inbox" withExtension:@"momd"];

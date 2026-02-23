@@ -33,7 +33,7 @@
         NSString *appSupport = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject];
         self.appSupportDirectory = [appSupport stringByAppendingPathComponent:CLTAP_FILES_DIRECTORY_NAME];
         
-        [CTPrivateStorageProvider ensureDirectoryInApplicationSupport:CLTAP_FILES_DIRECTORY_NAME];
+        [CTPrivateStorageProvider migrateDirectoryToApplicationSupportIfNeeded:CLTAP_FILES_DIRECTORY_NAME];
 
         _downloadInProgressUrls = [NSMutableSet new];
         _downloadInProgressHandlers = [NSMutableDictionary new];

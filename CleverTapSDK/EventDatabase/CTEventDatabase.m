@@ -481,6 +481,7 @@ normalizedEventName:(NSString *)normalizedEventName
 #pragma mark - Private methods
 
 - (void)openDatabase {
+    [CTPrivateStorageProvider performMigrationIfNeededForDatabase:@"CleverTap-Events.db"];
     NSString *databasePath = [self databasePath];
     void (^taskBlock)(void) = ^{
         if (sqlite3_open_v2([databasePath UTF8String], &self->_eventDatabase, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL) == SQLITE_OK) {

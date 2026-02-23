@@ -12,11 +12,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface  CTPrivateStorageProvider : NSObject
 
-+ (NSString *)applicationSupportDirectoryPath;
-+ (NSURL *)applicationSupportDirectoryURL;
 + (NSString *)pathForDatabaseFile:(NSString *)filename;
 + (NSURL *)urlForDatabaseFile:(NSString *)filename;
-+ (void)ensureDirectoryInApplicationSupport:(NSString *)directoryName;
++ (void)migrateDirectoryToApplicationSupportIfNeeded:(NSString *)directoryName;
++ (void)performMigrationIfNeededForDatabase:(NSString *)filename;
 @end
 
 NS_ASSUME_NONNULL_END

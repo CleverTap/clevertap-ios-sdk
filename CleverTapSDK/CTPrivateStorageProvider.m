@@ -11,7 +11,7 @@
 
 @implementation CTPrivateStorageProvider
 
-+ (NSString *)applicationSupportDirectoryPath{
++ (NSString *)applicationSupportDirectoryPath {
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
@@ -19,7 +19,6 @@
                                                              YES);
     NSString *appSupportPath = [paths firstObject];
     if (!appSupportPath) {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] ERROR: Could not get Application Support directory");
             NSArray *docPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                                     NSUserDomainMask,
                                                                     YES);
@@ -35,7 +34,6 @@
                                                         error:&error];
             
             if (!created) {
-                CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] ERROR: Failed to create Application Support: %@", error);
                 NSArray *docPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                                         NSUserDomainMask,
                                                                         YES);
@@ -43,7 +41,6 @@
                 CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] FALLBACK: Using Documents directory: %@", fallbackPath);
                 return fallbackPath;
             }
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Created Application Support directory: %@", appSupportPath);
         }
         return appSupportPath;
 }
@@ -67,36 +64,7 @@
     }
     
     NSString *appSupportPath = [self applicationSupportDirectoryPath];
-    NSString *targetPath = [appSupportPath stringByAppendingPathComponent:filename];
-    
-    static NSMutableSet *migratedFiles = nil;
-    static NSMutableDictionary *fileLocks = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        migratedFiles = [NSMutableSet set];
-        fileLocks = [NSMutableDictionary dictionary];
-    });
-    
-    NSLock *lock = nil;
-    @synchronized(fileLocks) {
-        lock = fileLocks[filename];
-        if (!lock) {
-            lock = [[NSLock alloc] init];
-            fileLocks[filename] = lock;
-        }
-    }
-    
-    [lock lock];
-    @try {
-        if (![migratedFiles containsObject:filename]) {
-            [self migrateDatabaseFileIfNeeded:filename toPath:targetPath];
-            [migratedFiles addObject:filename];
-        }
-    } @finally {
-        [lock unlock];
-    }
-    
-    return targetPath;
+    return [appSupportPath stringByAppendingPathComponent:filename];
 }
 
 + (NSURL *)urlForDatabaseFile:(NSString *)filename {
@@ -111,6 +79,39 @@
 
 #pragma mark - Migration Logic
 
++ (void)performMigrationIfNeededForDatabase:(NSString *)filename {
+//    if (!filename) return;
+
+    static NSMutableSet *migratedFiles = nil;
+    static NSMutableDictionary *fileLocks = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        migratedFiles = [NSMutableSet set];
+        fileLocks = [NSMutableDictionary dictionary];
+    });
+
+    NSLock *lock = nil;
+    @synchronized(fileLocks) {
+        lock = fileLocks[filename];
+        if (!lock) {
+            lock = [[NSLock alloc] init];
+            fileLocks[filename] = lock;
+        }
+    }
+
+    [lock lock];
+    @try {
+        if (![migratedFiles containsObject:filename]) {
+            NSString *targetPath = [self pathForDatabaseFile:filename];
+            [self migrateDatabaseFileIfNeeded:filename toPath:targetPath];
+            [migratedFiles addObject:filename];
+        }
+    } @finally {
+        [lock unlock];
+    }
+}
+
+
 + (void)migrateDatabaseFileIfNeeded:(NSString *)filename toPath:(NSString *)targetPath {
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -118,16 +119,11 @@
     NSString *oldPath = [documentsPath stringByAppendingPathComponent:filename];
     
     if ([self isSameLocation:oldPath andPath:targetPath]) {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target paths are identical, skipping migration: %@", filename);
             return;
     }
     
     if ([fileManager fileExistsAtPath:targetPath]) {
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] File already exists in Application Support: %@", filename);
-        
         if ([fileManager fileExistsAtPath:oldPath]){
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] File also exists in the Document Directory: %@", filename);
-            
             NSError *error = nil;
             [fileManager removeItemAtPath:oldPath error:&error];
             if(!error){
@@ -141,20 +137,13 @@
     }
         
     if (![fileManager fileExistsAtPath:oldPath]) {
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] No migration needed for: %@", filename);
+        [self cleanupOldDatabaseFiles:filename inDirectory:documentsPath];
         return;
     }
-    
-    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Starting migration for: %@", filename);
-    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] From: %@", oldPath);
-    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] To: %@", targetPath);
-    
     NSError *error = nil;
     BOOL success = [fileManager moveItemAtPath:oldPath toPath:targetPath error:&error];
     
     if (success) {
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Successfully migrated: %@", filename);
-        
         [self migrateAssociatedFiles:filename fromDirectory:documentsPath toDirectory:[self applicationSupportDirectoryPath]];
     } else {
         CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] ERROR: Migration failed for %@: %@", filename, error);
@@ -163,7 +152,6 @@
         success = [fileManager copyItemAtPath:oldPath toPath:targetPath error:&error];
         
         if (success) {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Successfully copied (fallback) : %@", filename);
             [self migrateAssociatedFiles:filename fromDirectory:documentsPath toDirectory:[self applicationSupportDirectoryPath]];
             
             [fileManager removeItemAtPath:oldPath error:nil];
@@ -179,7 +167,6 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     if ([self isSameLocation:sourceDir andPath:targetDir]) {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target directories are identical, skipping associated files migration");
             return;
     }
     
@@ -207,12 +194,13 @@
                                                   error:&error];
                 
                 if (success) {
-                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Replaced associated file: %@", associatedFilename);
+                    NSError *removeError = nil;
+                    [fileManager removeItemAtPath:sourcePath error:&removeError];
+                    if (removeError) {
+                        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Could not remove source after replace: %@", removeError);
+                    }
                     continue;
                 } else {
-                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Atomic replacement failed for %@: %@. Falling back to remove+move...",
-                                             associatedFilename, error);
-                    
                     error = nil;
                     [fileManager removeItemAtPath:targetPath error:&error];
                 }
@@ -224,8 +212,6 @@
             if (success) {
                 CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Migrated associated file: %@", associatedFilename);
             } else {
-                CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Move failed for %@: %@. Attempting copy...",
-                                         associatedFilename, error);
                 error = nil;
                 success = [fileManager copyItemAtPath:sourcePath toPath:targetPath error:&error];
                 if (success) {
@@ -244,8 +230,6 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSArray *extensions = @[@"-shm", @"-wal", @"-journal"];
     
-    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Cleaning up associated files for: %@", baseFilename);
-    
     for (NSString *extension in extensions) {
         NSString *filename = [baseFilename stringByAppendingString:extension];
         NSString *filePath = [directory stringByAppendingPathComponent:filename];
@@ -255,8 +239,6 @@
             [fileManager removeItemAtPath:filePath error:&error];
             if (error) {
                 CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Could not cleanup %@: %@", filename, error);
-            } else {
-                CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Cleaned up: %@", filename);
             }
         }
     }
@@ -264,7 +246,7 @@
 
 #pragma mark - Directory Migration
 
-+ (void)ensureDirectoryInApplicationSupport:(NSString *)directoryName {
++ (void)migrateDirectoryToApplicationSupportIfNeeded:(NSString *)directoryName {
     if (!directoryName || directoryName.length == 0) {
         CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] ERROR: Invalid directory name");
         return;
@@ -282,12 +264,10 @@
     BOOL newDirectoryExists = [fileManager fileExistsAtPath:newDirectory];
     
     if ([self isSameLocation:oldDirectory andPath:newDirectory]) {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Source and target directories are identical, skipping associated files migration");
             return;
     }
     
     if (!oldDirectoryExists && !newDirectoryExists) {
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Fresh install detected - creating %@ in Application Support", directoryName);
         
         NSError *error = nil;
         BOOL created = [fileManager createDirectoryAtPath:newDirectory
@@ -296,8 +276,6 @@
                                                       error:&error];
         if (!created) {
             CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Failed to create directory %@: %@", directoryName, error);
-        } else {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Created %@ in Application Support", directoryName);
         }
         return;
     }
@@ -306,10 +284,7 @@
         NSArray *filesToMigrate = [fileManager contentsOfDirectoryAtPath:oldDirectory error:nil];
         NSUInteger fileCount = filesToMigrate ? filesToMigrate.count : 0;
         
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] SDK upgrade detected - found %lu items in Documents/%@", (unsigned long)fileCount, directoryName);
-        
         if (fileCount == 0) {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Old directory is empty, recreating in Application Support");
             [fileManager removeItemAtPath:oldDirectory error:nil];
             
             NSError *error = nil;
@@ -323,9 +298,6 @@
             return;
         }
         
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Starting migration of %lu items from %@", (unsigned long)fileCount, directoryName);
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider]    From: %@", oldDirectory);
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider]    To: %@", newDirectory);
         
         NSError *error = nil;
         BOOL success = [fileManager moveItemAtPath:oldDirectory toPath:newDirectory error:&error];
@@ -333,9 +305,6 @@
         if (success) {
             CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Successfully migrated %lu items to Application Support", (unsigned long)fileCount);
         } else {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Move failed: %@", error);
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Attempting copy fallback...");
-      
             error = nil;
             success = [fileManager copyItemAtPath:oldDirectory toPath:newDirectory error:&error];
             
@@ -346,8 +315,6 @@
                 BOOL removed = [fileManager removeItemAtPath:oldDirectory error:&removeError];
                 if (!removed) {
                     CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Could not remove old directory: %@", removeError);
-                } else {
-                    CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Cleaned up old Documents directory");
                 }
             } else {
                 CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Copy fallback failed: %@", error);
@@ -356,7 +323,6 @@
         return;
     }
     if (newDirectoryExists && !oldDirectoryExists) {
-        CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] %@ already in Application Support", directoryName);
         return;
     }
     if (oldDirectoryExists && newDirectoryExists) {
@@ -366,8 +332,6 @@
         BOOL removed = [fileManager removeItemAtPath:oldDirectory error:&error];
         if (!removed) {
             CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Could not remove Documents directory: %@", error);
-        } else {
-            CleverTapLogStaticInternal(@"[CTPrivateStorageProvider] Cleaned up orphaned Documents directory");
         }
         return;
     }
