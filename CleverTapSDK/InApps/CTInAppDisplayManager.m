@@ -762,22 +762,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
-
-    // Ensure wzrk_dl is included in extras for attribution
-    NSMutableDictionary *mutableExtras = extras ? [extras mutableCopy] : [NSMutableDictionary new];
-    if (action.actionURL != nil && mutableExtras[CLTAP_PROP_WZRK_DL] == nil) {
-        NSString *deepLink = action.actionURL.absoluteString;
-        if (deepLink.length > 0) {
-            mutableExtras[CLTAP_PROP_WZRK_DL] = deepLink;
-        }
-    }
-
-    // record the notification clicked event with deep link attribution
-    [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:mutableExtras];
+    // record the notification clicked event
+    [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
 
     // add the action extras so they can be passed to the dismissedWithExtras delegate
-    if (mutableExtras) {
-        notification.actionExtras = mutableExtras;
+    if (extras) {
+        notification.actionExtras = extras;
     }
     
     switch (action.type) {
