@@ -49,8 +49,7 @@
         [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     }
 
-    // Hide playback controls for autoplay videos
-    self.showsPlaybackControls = !self.autoplay;
+    self.showsPlaybackControls = YES;
     self.view.backgroundColor = [UIColor clearColor];
     self.view.translatesAutoresizingMaskIntoConstraints = NO;
 
