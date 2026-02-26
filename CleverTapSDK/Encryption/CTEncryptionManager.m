@@ -348,6 +348,7 @@ API_AVAILABLE(ios(13.0))
         BOOL encryptionNeeded = (self.previousEncryptionLevel == CleverTapEncryptionNone) && (self.encryptionLevel == CleverTapEncryptionMedium || self.encryptionLevel == CleverTapEncryptionHigh);
         if (decryptionNeeded) {
             processedIdentifier = [self decryptString:identifier];
+            processedIdentifier = [self decryptString:processedIdentifier];
         }
         else if (encryptionNeeded) {
             processedIdentifier = [self encryptString:identifier];

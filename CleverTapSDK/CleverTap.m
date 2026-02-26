@@ -2137,15 +2137,16 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)inflateProfileQueue {
     // If the previous encryption level was 2/high, decrypt the object
-    BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
+    BOOL decryptionNeeded = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh || self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionMedium) && self.config.encryptionLevel == CleverTapEncryptionNone;
+    BOOL encryptionNeeded = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionNone) && (self.config.encryptionLevel == CleverTapEncryptionMedium || self.config.encryptionLevel == CleverTapEncryptionHigh);
 
-    if (wasEncrypted) {
+    if (decryptionNeeded) {
         // File was encrypted, so decrypt when reading
         self.profileQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
             [CTPreferences unarchiveFromFile:[self profileEventsFileName]
                                        ofType:[NSMutableArray class]
                                     removeFile:YES]];
-    } else {
+    } else if (encryptionNeeded) {
         // File was stored raw
         self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     }
