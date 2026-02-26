@@ -33,12 +33,10 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     if (!guid) guid = self.deviceInfo.deviceId;
     if (!guid || [self.deviceInfo isErrorDeviceID] || !key || !identifier) return;
     
-    // Get current cache
     NSDictionary *cache = [self getCachedGUIDs];
     if (!cache) cache = @{};
     NSMutableDictionary *newCache = [NSMutableDictionary dictionaryWithDictionary:cache];
     
-    // Check if a GUID already exists for this key and identifier (decrypted)
     NSString *keyPrefix = [NSString stringWithFormat:@"%@_", key];
     BOOL existingEntryFound = NO;
     NSString *existingCacheKey = nil;
@@ -48,34 +46,45 @@ NSString *const kCachedIdentities = @"CachedIdentities";
             if ([cacheKey hasPrefix:keyPrefix]) {
                 NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
                 NSString *decryptedIdentifier = encryptedIdentifier;
-                @try {
+                
+                if (_config.encryptionLevel == CleverTapEncryptionMedium || _config.encryptionLevel == CleverTapEncryptionHigh) {
                     
-                    if (_config.encryptionLevel == CleverTapEncryptionMedium || _config.encryptionLevel == CleverTapEncryptionHigh) {
-                        NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+                    NSInteger maxIterations = 10;
+                    NSInteger iterations = 0;
+                    
+                    while (iterations < maxIterations) {
+                        NSString *attempt = [self.config.cryptManager decryptString:encryptedIdentifier];
+                        if (!attempt) break;
                         
-                        decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
+                        decryptedIdentifier = attempt;
+                        iterations++;
+                        
+                        BOOL stillEncrypted = [decryptedIdentifier hasPrefix:AES_GCM_PREFIX] &&
+                                              [decryptedIdentifier hasSuffix:AES_GCM_SUFFIX];
+                        if (!stillEncrypted) break;
+                        
+                        encryptedIdentifier = decryptedIdentifier;
                     }
-                        // If we found a match, update that entry instead of creating a new one
-                    if ([decryptedIdentifier isEqualToString:identifier]) {
-                        existingEntryFound = YES;
-                        existingCacheKey = cacheKey;
-                        break;
-                    }
-                    
-                    
-                } @catch (NSException *exception) {
-                    // Continue to next key if decryption fails
-                    continue;
+                }
+                
+                if ([decryptedIdentifier isEqualToString:identifier]) {
+                    existingEntryFound = YES;
+                    existingCacheKey = cacheKey;
+                    break;
                 }
             }
         }
     }
     
     if (existingEntryFound && existingCacheKey) {
-        // Update the existing entry
+        // Update the existing entry, preserving its existing (possibly multi-layered)
+        // cache key as-is. The key's encryption state is whatever updateCachedGUIDS
+        // left it in — we only update the GUID value, not the key.
         newCache[existingCacheKey] = guid;
     } else {
-        // Create a new entry with the newly encrypted identifier
+        // New entry: always write with a single encryptString at the current level.
+        // updateCachedGUIDS owns the responsibility of re-keying on level transitions,
+        // not this method.
         NSString *encryptedIdentifier = identifier;
         if (self.config.cryptManager) {
             encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
@@ -122,29 +131,51 @@ NSString *const kCachedIdentities = @"CachedIdentities";
     
     NSString *keyPrefix = [NSString stringWithFormat:@"%@_", key];
     
-    // Iterate through all cache keys
     for (NSString *cacheKey in cache.allKeys) {
-        // Check if the current key starts with the correct prefix (e.g., "Email_")
         if ([cacheKey hasPrefix:keyPrefix]) {
-            // Extract the encrypted part (everything after "Email_")
             NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
             NSString *decryptedIdentifier = encryptedIdentifier;
-            if (_config.encryptionLevel == CleverTapEncryptionMedium || _config.encryptionLevel == CleverTapEncryptionHigh) {
-                // Decrypt the encrypted identifier
-                NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
+            
+            if (_config.encryptionLevel == CleverTapEncryptionMedium ||
+                _config.encryptionLevel == CleverTapEncryptionHigh) {
                 
-                decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
+                // Max iterations guard: copyWithZone double-trigger gives 2 layers normally,
+                // and the worst-case 1→2 corruption gives 3. Cap at 10 to be safe without
+                // risking an infinite loop on any unexpected data.
+                NSInteger maxIterations = 10;
+                NSInteger iterations = 0;
+                
+                while (iterations < maxIterations) {
+                    NSString *attempt = [self.config.cryptManager decryptString:encryptedIdentifier];
+                    
+                    // Nil guard: decryptString failed (wrong key, corrupted data, or
+                    // already plaintext that isn't AES-GCM wrapped). Stop here and use
+                    // whatever we have so far.
+                    if (!attempt) break;
+                    
+                    decryptedIdentifier = attempt;
+                    iterations++;
+                    
+                    // Exit when the result is no longer AES-GCM wrapped.
+                    // For old AES-CBC entries (iOS < 13) this exits after the first
+                    // successful decrypt since they carry no <ct< >ct> framing.
+                    BOOL stillEncrypted = [decryptedIdentifier hasPrefix:AES_GCM_PREFIX] &&
+                                          [decryptedIdentifier hasSuffix:AES_GCM_SUFFIX];
+                    if (!stillEncrypted) break;
+                    
+                    encryptedIdentifier = decryptedIdentifier;
+                }
             }
-            // Check if the decrypted identifier matches our input identifier
+            
             if ([decryptedIdentifier isEqualToString:identifier]) {
                 return cache[cacheKey];
             }
         }
     }
     
-    // No match found
     return nil;
 }
+
 - (BOOL)isAnonymousDevice {
     NSDictionary *cache = [self getCachedGUIDs];
     if (!cache) cache = @{};
