@@ -2150,7 +2150,8 @@ static BOOL sharedInstanceErrorLogged;
         // File was stored raw
         self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     }
-    if (!self.profileQueue || [self isMuted]) {
+    // fallback incase decryption fails
+    if (!self.profileQueue || ![self.profileQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
         self.profileQueue = [NSMutableArray array];
     }
 }
@@ -2169,7 +2170,8 @@ static BOOL sharedInstanceErrorLogged;
         // File was stored raw
         self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
     }
-    if (!self.notificationsQueue || [self isMuted]) {
+    // fallback incase decryption fails
+    if (!self.notificationsQueue || ![self.notificationsQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
         self.notificationsQueue = [NSMutableArray array];
     }
 }
