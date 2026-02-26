@@ -50,7 +50,7 @@ NSString *const kCachedIdentities = @"CachedIdentities";
                 NSString *decryptedIdentifier = encryptedIdentifier;
                 @try {
                     
-                    if (_config.encryptionLevel == CleverTapEncryptionMedium) {
+                    if (_config.encryptionLevel == CleverTapEncryptionMedium || _config.encryptionLevel == CleverTapEncryptionHigh) {
                         NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
                         
                         decryptedIdentifier = [self.config.cryptManager decryptString:partiallyDecryptedIdentifier];
@@ -129,7 +129,7 @@ NSString *const kCachedIdentities = @"CachedIdentities";
             // Extract the encrypted part (everything after "Email_")
             NSString *encryptedIdentifier = [cacheKey substringFromIndex:keyPrefix.length];
             NSString *decryptedIdentifier = encryptedIdentifier;
-            if (_config.encryptionLevel == CleverTapEncryptionMedium) {
+            if (_config.encryptionLevel == CleverTapEncryptionMedium || _config.encryptionLevel == CleverTapEncryptionHigh) {
                 // Decrypt the encrypted identifier
                 NSString *partiallyDecryptedIdentifier = [self.config.cryptManager decryptString:encryptedIdentifier];
                 

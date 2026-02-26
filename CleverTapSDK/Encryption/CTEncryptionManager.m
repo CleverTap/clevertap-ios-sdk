@@ -343,8 +343,18 @@ API_AVAILABLE(ios(13.0))
         
         NSString *key = components[0];
         NSString *identifier = components[1];
-        NSString *processedIdentifier = (self->_encryptionLevel == CleverTapEncryptionMedium || self->_encryptionLevel == CleverTapEncryptionHigh) ?
-        [self encryptString:identifier] : [self decryptString:identifier];
+        NSString *processedIdentifier;
+        BOOL decryptionNeeded = (self.previousEncryptionLevel == CleverTapEncryptionHigh || self.previousEncryptionLevel == CleverTapEncryptionMedium) && self.encryptionLevel == CleverTapEncryptionNone;
+        BOOL encryptionNeeded = (self.previousEncryptionLevel == CleverTapEncryptionNone) && (self.encryptionLevel == CleverTapEncryptionMedium || self.encryptionLevel == CleverTapEncryptionHigh);
+        if (decryptionNeeded) {
+            processedIdentifier = [self decryptString:identifier];
+        }
+        else if (encryptionNeeded) {
+            processedIdentifier = [self encryptString:identifier];
+        }
+        else {
+            processedIdentifier = identifier;
+        }
         
         if (processedIdentifier) {
             newCache[[NSString stringWithFormat:@"%@_%@", key, processedIdentifier]] = value;
