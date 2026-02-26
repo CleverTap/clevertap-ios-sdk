@@ -8,6 +8,13 @@
 - (void)setup {
     self.avPlayerContainerView.hidden = YES;
     self.actionView.hidden = YES;
+#if TARGET_OS_TV
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
+                                          initWithTarget:self
+                                          action:@selector(handleOnMessageTapGesture:)];
+    self.userInteractionEnabled = YES;
+    [self addGestureRecognizer:tapGesture];
+#endif
 }
 
 - (void)awakeFromNib {

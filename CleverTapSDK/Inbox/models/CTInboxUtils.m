@@ -30,12 +30,17 @@ static NSDictionary *_inboxMessageTypeMap;
     return nil;
 #else
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
+#if TARGET_OS_TV
+    // tvOS does not support device rotation; always use the portrait XIB variant
+    [xib appendString:@"~port"];
+#else
     BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
     if (landscape) {
         [xib appendString:@"~land"];
     } else {
         [xib appendString:@"~port"];
     }
+#endif
     return xib;
 #endif
 }

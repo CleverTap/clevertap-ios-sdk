@@ -16,6 +16,86 @@ static const float kPageControlViewHeight = 30.f;
     self.containerView.layer.masksToBounds = YES;
 }
 
+#if TARGET_OS_TV
+- (void)setupTVLayout {
+    // containerView — fills contentView (do NOT call [super setupTVLayout]; carousel has its own hierarchy)
+    self.containerView = [[UIView alloc] init];
+    self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.containerView.backgroundColor = [UIColor whiteColor];
+    self.containerView.layer.masksToBounds = YES;
+    [self.contentView addSubview:self.containerView];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.containerView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor],
+        [self.containerView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor],
+        [self.containerView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor],
+        [self.containerView.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor],
+    ]];
+
+    // carouselView — top of containerView, fixed height (default 200)
+    self.carouselView = [[UIView alloc] init];
+    self.carouselView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.carouselView.clipsToBounds = YES;
+    [self.containerView addSubview:self.carouselView];
+
+    self.carouselViewHeight = [self.carouselView.heightAnchor constraintEqualToConstant:200];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.carouselView.topAnchor constraintEqualToAnchor:self.containerView.topAnchor],
+        [self.carouselView.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [self.carouselView.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        self.carouselViewHeight,
+    ]];
+
+    // infoView — below carouselView, holds dateLabel + readView, height 38
+    UIView *infoView = [[UIView alloc] init];
+    infoView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.containerView addSubview:infoView];
+    [NSLayoutConstraint activateConstraints:@[
+        [infoView.topAnchor constraintEqualToAnchor:self.carouselView.bottomAnchor],
+        [infoView.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [infoView.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        [infoView.bottomAnchor constraintEqualToAnchor:self.containerView.bottomAnchor],
+        [infoView.heightAnchor constraintEqualToConstant:38],
+    ]];
+
+    // dateLabel — right side of infoView
+    self.dateLabel = [[UILabel alloc] init];
+    self.dateLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.dateLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
+    self.dateLabel.textColor = [CTUIUtils ct_colorWithHexString:@"#757575"];
+    self.dateLabel.textAlignment = NSTextAlignmentRight;
+    [infoView addSubview:self.dateLabel];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.dateLabel.centerYAnchor constraintEqualToAnchor:infoView.centerYAnchor],
+        [self.dateLabel.trailingAnchor constraintEqualToAnchor:infoView.trailingAnchor constant:-40],
+    ]];
+
+    // readView + readIndicator
+    self.readView = [[UIView alloc] init];
+    self.readView.translatesAutoresizingMaskIntoConstraints = NO;
+    [infoView addSubview:self.readView];
+
+    self.readViewWidthConstraint = [self.readView.widthAnchor constraintEqualToConstant:16];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.readView.trailingAnchor constraintEqualToAnchor:infoView.trailingAnchor constant:-20],
+        [self.readView.centerYAnchor constraintEqualToAnchor:self.dateLabel.centerYAnchor],
+        [self.readView.heightAnchor constraintEqualToConstant:10],
+        self.readViewWidthConstraint,
+    ]];
+
+    UIView *readIndicator = [[UIView alloc] init];
+    readIndicator.translatesAutoresizingMaskIntoConstraints = NO;
+    readIndicator.backgroundColor = [CTUIUtils ct_colorWithHexString:@"#3D7DFF"];
+    readIndicator.layer.cornerRadius = 5;
+    [self.readView addSubview:readIndicator];
+    [NSLayoutConstraint activateConstraints:@[
+        [readIndicator.centerXAnchor constraintEqualToAnchor:self.readView.centerXAnchor],
+        [readIndicator.centerYAnchor constraintEqualToAnchor:self.readView.centerYAnchor],
+        [readIndicator.widthAnchor constraintEqualToConstant:10],
+        [readIndicator.heightAnchor constraintEqualToConstant:10],
+    ]];
+}
+#endif
+
 - (CGFloat)heightForPageControl {
     return kPageControlViewHeight;
 }
@@ -39,7 +119,11 @@ static const float kPageControlViewHeight = 30.f;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
+#if TARGET_OS_TV
+            carouselItemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds];
+#else
             carouselItemView  = [[[CTUIUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
+#endif
             carouselItemView.backgroundColor = [UIColor clearColor];
             [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
@@ -194,8 +278,10 @@ static const float kPageControlViewHeight = 30.f;
 }
 
 - (void)copyTapped:(NSString *)text {
+#if !TARGET_OS_TV
     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
     pasteboard.string = text;
+#endif
 }
 
 - (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender {

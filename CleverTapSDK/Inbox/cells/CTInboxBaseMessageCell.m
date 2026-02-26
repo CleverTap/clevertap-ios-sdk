@@ -37,6 +37,227 @@ static NSString * const kOrientationPortrait = @"p";
     return self;
 }
 
+#if TARGET_OS_TV
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self _sharedInit];
+        [self setupTVLayout];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        [self setup];
+    }
+    return self;
+}
+
+- (void)setupTVLayout {
+    // containerView — fills contentView, but bottom at priority 250 so cell self-sizes by content
+    self.containerView = [[UIView alloc] init];
+    self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.containerView.backgroundColor = [UIColor whiteColor];
+    [self.contentView addSubview:self.containerView];
+    NSLayoutConstraint *containerBottom = [self.containerView.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor];
+    containerBottom.priority = 250; // matches XIB — lets cell height be driven by content
+    [NSLayoutConstraint activateConstraints:@[
+        [self.containerView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor],
+        [self.containerView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor],
+        [self.containerView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor],
+        containerBottom,
+    ]];
+
+    // mediaContainerView — top of containerView
+    self.mediaContainerView = [[UIView alloc] init];
+    self.mediaContainerView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.mediaContainerView.clipsToBounds = YES;
+    [self.containerView addSubview:self.mediaContainerView];
+
+    // imageViewHeightConstraint: constant 0, priority 999 — collapses media area when no media.
+    // doLayoutForMessage: drops this to 750 when media is present, letting ratio constraints win.
+    self.imageViewHeightConstraint = [self.mediaContainerView.heightAnchor constraintEqualToConstant:0];
+    self.imageViewHeightConstraint.priority = 999;
+
+    // Ratio constraints: width:height of mediaContainerView. Priority 750 — only active when
+    // imageViewHeightConstraint is dropped to 750 by doLayoutForMessage:.
+    // On tvOS the screen is 1920pt wide, so we cap height to 40% of screen height to prevent
+    // the image from becoming taller than the display.
+    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    CGFloat maxMediaHeight = screenHeight * 0.40;
+    NSLayoutConstraint *maxHeightConstraint = [self.mediaContainerView.heightAnchor constraintLessThanOrEqualToConstant:maxMediaHeight];
+    maxHeightConstraint.priority = 998; // just below imageViewHeightConstraint priority
+
+    self.imageViewPRatioConstraint = [self.mediaContainerView.widthAnchor constraintEqualToAnchor:self.mediaContainerView.heightAnchor multiplier:1.0];
+    self.imageViewPRatioConstraint.priority = 750;
+
+    self.imageViewLRatioConstraint = [self.mediaContainerView.widthAnchor constraintEqualToAnchor:self.mediaContainerView.heightAnchor multiplier:(16.0/9.0)];
+    self.imageViewLRatioConstraint.priority = 750;
+
+    [NSLayoutConstraint activateConstraints:@[
+        [self.mediaContainerView.topAnchor constraintEqualToAnchor:self.containerView.topAnchor],
+        [self.mediaContainerView.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [self.mediaContainerView.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        self.imageViewHeightConstraint,
+        maxHeightConstraint,
+        self.imageViewPRatioConstraint,
+        self.imageViewLRatioConstraint,
+    ]];
+
+    // avPlayerContainerView — fills mediaContainerView
+    self.avPlayerContainerView = [[UIView alloc] init];
+    self.avPlayerContainerView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.avPlayerContainerView.backgroundColor = [UIColor clearColor];
+    self.avPlayerContainerView.hidden = YES;
+    [self.mediaContainerView addSubview:self.avPlayerContainerView];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.avPlayerContainerView.topAnchor constraintEqualToAnchor:self.mediaContainerView.topAnchor],
+        [self.avPlayerContainerView.leadingAnchor constraintEqualToAnchor:self.mediaContainerView.leadingAnchor],
+        [self.avPlayerContainerView.trailingAnchor constraintEqualToAnchor:self.mediaContainerView.trailingAnchor],
+        [self.avPlayerContainerView.bottomAnchor constraintEqualToAnchor:self.mediaContainerView.bottomAnchor],
+    ]];
+
+    // cellImageView — fills mediaContainerView, hidden by default
+    self.cellImageView = [[SDAnimatedImageView alloc] init];
+    self.cellImageView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.cellImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.cellImageView.clipsToBounds = YES;
+    self.cellImageView.hidden = YES;
+    [self.mediaContainerView addSubview:self.cellImageView];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.cellImageView.topAnchor constraintEqualToAnchor:self.mediaContainerView.topAnchor],
+        [self.cellImageView.leadingAnchor constraintEqualToAnchor:self.mediaContainerView.leadingAnchor],
+        [self.cellImageView.trailingAnchor constraintEqualToAnchor:self.mediaContainerView.trailingAnchor],
+        [self.cellImageView.bottomAnchor constraintEqualToAnchor:self.mediaContainerView.bottomAnchor],
+    ]];
+
+    // activityIndicator — centered in mediaContainerView
+    UIActivityIndicatorViewStyle indicatorStyle;
+    if (@available(tvOS 13.0, iOS 13.0, *)) {
+        indicatorStyle = UIActivityIndicatorViewStyleMedium;
+    } else {
+        indicatorStyle = UIActivityIndicatorViewStyleWhite;
+    }
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:indicatorStyle];
+    self.activityIndicator.translatesAutoresizingMaskIntoConstraints = NO;
+    self.activityIndicator.hidden = YES;
+    [self.mediaContainerView addSubview:self.activityIndicator];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.activityIndicator.centerXAnchor constraintEqualToAnchor:self.mediaContainerView.centerXAnchor],
+        [self.activityIndicator.centerYAnchor constraintEqualToAnchor:self.mediaContainerView.centerYAnchor],
+    ]];
+
+    // avPlayerControlsView — fills mediaContainerView, overlays player
+    self.avPlayerControlsView = [[UIView alloc] init];
+    self.avPlayerControlsView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.avPlayerControlsView.alpha = 0.0;
+    [self.mediaContainerView addSubview:self.avPlayerControlsView];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.avPlayerControlsView.topAnchor constraintEqualToAnchor:self.mediaContainerView.topAnchor],
+        [self.avPlayerControlsView.leadingAnchor constraintEqualToAnchor:self.mediaContainerView.leadingAnchor],
+        [self.avPlayerControlsView.trailingAnchor constraintEqualToAnchor:self.mediaContainerView.trailingAnchor],
+        [self.avPlayerControlsView.bottomAnchor constraintEqualToAnchor:self.mediaContainerView.bottomAnchor],
+    ]];
+
+    // playButton — 60×60, centered in avPlayerControlsView
+    self.playButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.playButton.translatesAutoresizingMaskIntoConstraints = NO;
+    self.playButton.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.56];
+    self.playButton.layer.cornerRadius = 30;
+    self.playButton.layer.borderWidth = 2.0;
+    self.playButton.layer.borderColor = [[UIColor whiteColor] CGColor];
+    [self.avPlayerControlsView addSubview:self.playButton];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.playButton.centerXAnchor constraintEqualToAnchor:self.avPlayerControlsView.centerXAnchor],
+        [self.playButton.centerYAnchor constraintEqualToAnchor:self.avPlayerControlsView.centerYAnchor],
+        [self.playButton.widthAnchor constraintEqualToConstant:60],
+        [self.playButton.heightAnchor constraintEqualToConstant:60],
+    ]];
+
+    // actionView — 45pt tall, pinned to bottom of containerView
+    self.actionView = [[CTInboxMessageActionView alloc] init];
+    self.actionView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.actionView.hidden = YES;
+    [self.containerView addSubview:self.actionView];
+
+    self.actionViewHeightConstraint = [self.actionView.heightAnchor constraintEqualToConstant:45];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.actionView.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [self.actionView.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        [self.actionView.bottomAnchor constraintEqualToAnchor:self.containerView.bottomAnchor],
+        self.actionViewHeightConstraint,
+    ]];
+
+    // bodyTextContainer — between mediaContainerView and actionView
+    UIView *bodyTextContainer = [[UIView alloc] init];
+    bodyTextContainer.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.containerView addSubview:bodyTextContainer];
+    [NSLayoutConstraint activateConstraints:@[
+        [bodyTextContainer.topAnchor constraintEqualToAnchor:self.mediaContainerView.bottomAnchor],
+        [bodyTextContainer.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [bodyTextContainer.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        [bodyTextContainer.bottomAnchor constraintEqualToAnchor:self.actionView.topAnchor],
+    ]];
+
+    // titleLabel
+    self.titleLabel = [[UILabel alloc] init];
+    self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightSemibold];
+    self.titleLabel.numberOfLines = 1;
+    [bodyTextContainer addSubview:self.titleLabel];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.titleLabel.topAnchor constraintEqualToAnchor:bodyTextContainer.topAnchor constant:20],
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:bodyTextContainer.leadingAnchor constant:20],
+        [self.titleLabel.trailingAnchor constraintEqualToAnchor:bodyTextContainer.trailingAnchor constant:-20],
+    ]];
+
+    // bodyLabel
+    self.bodyLabel = [[UILabel alloc] init];
+    self.bodyLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.bodyLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightRegular];
+    self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:@"#7E7E7E"];
+    self.bodyLabel.numberOfLines = 0;
+    [bodyTextContainer addSubview:self.bodyLabel];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.bodyLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:7],
+        [self.bodyLabel.leadingAnchor constraintEqualToAnchor:bodyTextContainer.leadingAnchor constant:20],
+        [self.bodyLabel.trailingAnchor constraintEqualToAnchor:bodyTextContainer.trailingAnchor constant:-20],
+    ]];
+
+    // dateLabel — bottom-right of bodyTextContainer
+    self.dateLabel = [[UILabel alloc] init];
+    self.dateLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.dateLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
+    self.dateLabel.textColor = [CTUIUtils ct_colorWithHexString:@"#757575"];
+    self.dateLabel.textAlignment = NSTextAlignmentRight;
+    [bodyTextContainer addSubview:self.dateLabel];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.dateLabel.bottomAnchor constraintEqualToAnchor:bodyTextContainer.bottomAnchor constant:-15],
+        [self.dateLabel.trailingAnchor constraintEqualToAnchor:bodyTextContainer.trailingAnchor constant:-40],
+    ]];
+
+    // readView + readIndicator — to the right of dateLabel
+    self.readView = [[UIView alloc] init];
+    self.readView.translatesAutoresizingMaskIntoConstraints = NO;
+    [bodyTextContainer addSubview:self.readView];
+
+    self.readViewWidthConstraint = [self.readView.widthAnchor constraintEqualToConstant:16];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.readView.trailingAnchor constraintEqualToAnchor:bodyTextContainer.trailingAnchor constant:-20],
+        [self.readView.centerYAnchor constraintEqualToAnchor:self.dateLabel.centerYAnchor],
+        [self.readView.heightAnchor constraintEqualToConstant:10],
+        self.readViewWidthConstraint,
+    ]];
+
+    UIView *readIndicator = [[UIView alloc] init];
+    readIndicator.translatesAutoresizingMaskIntoConstraints = NO;
+    readIndicator.backgroundColor = [CTUIUtils ct_colorWithHexString:@"#3D7DFF"];
+    readIndicator.layer.cornerRadius = 5;
+    [self.readView addSubview:readIndicator];
+    [NSLayoutConstraint activateConstraints:@[
+        [readIndicator.centerXAnchor constraintEqualToAnchor:self.readView.centerXAnchor],
+        [readIndicator.centerYAnchor constraintEqualToAnchor:self.readView.centerYAnchor],
+        [readIndicator.widthAnchor constraintEqualToConstant:10],
+        [readIndicator.heightAnchor constraintEqualToConstant:10],
+    ]];
+}
+#endif
+
 - (void)_sharedInit {
     self.sdWebImageOptions = (SDWebImageRetryFailed);
     self.sdWebImageContext = @{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)};
@@ -171,7 +392,11 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)deviceOrientationIsLandscape {
+#if TARGET_OS_TV
+    return NO;
+#else
     return [CTUIUtils isDeviceOrientationLandscape];
+#endif
 }
 
 
@@ -248,7 +473,9 @@ static NSString * const kOrientationPortrait = @"p";
     [self.playButton setImage:[self getPauseImage] forState:UIControlStateSelected];
     [self.playButton addTarget:self action:@selector(togglePlay) forControlEvents:UIControlEventTouchUpInside];
     
+#if !TARGET_OS_TV
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+#endif
     self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:content.mediaUrl]];
     self.avPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
     self.avPlayerLayer.videoGravity = AVLayerVideoGravityResizeAspect;

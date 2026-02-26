@@ -9,6 +9,63 @@
     [self addGestureRecognizer:tapGesture];
 }
 
+#if TARGET_OS_TV
+- (void)setupTVLayout {
+    [super setupTVLayout];
+
+    // cellIcon — placed to the left of the titleLabel and bodyLabel.
+    // We pin it to the leading edge of containerView and align with the text area.
+    self.cellIcon = [[UIImageView alloc] init];
+    self.cellIcon.translatesAutoresizingMaskIntoConstraints = NO;
+    self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;
+    self.cellIcon.clipsToBounds = YES;
+    self.cellIcon.layer.cornerRadius = 4;
+    [self.containerView addSubview:self.cellIcon];
+
+    // Default height = 28 (no icon), ratio 1:1
+    self.cellIconHeightContraint = [self.cellIcon.heightAnchor constraintEqualToConstant:28];
+    self.cellIconRatioContraint = [self.cellIcon.widthAnchor constraintEqualToAnchor:self.cellIcon.heightAnchor multiplier:1.0];
+    self.cellIconRatioContraint.priority = 750;
+    self.cellIconWidthContraint = [self.cellIcon.widthAnchor constraintEqualToConstant:0];
+    self.cellIconWidthContraint.priority = 999;
+
+    [NSLayoutConstraint activateConstraints:@[
+        [self.cellIcon.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor constant:10],
+        [self.cellIcon.topAnchor constraintGreaterThanOrEqualToAnchor:self.mediaContainerView.bottomAnchor constant:10],
+        [self.cellIcon.bottomAnchor constraintLessThanOrEqualToAnchor:self.actionView.topAnchor constant:-10],
+        [self.cellIcon.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
+        self.cellIconHeightContraint,
+        self.cellIconRatioContraint,
+        self.cellIconWidthContraint,
+    ]];
+
+    // Shift titleLabel and bodyLabel to the right of cellIcon
+    // (Remove and re-add the leading constraints on titleLabel and bodyLabel)
+    for (NSLayoutConstraint *c in self.containerView.constraints) {
+        if ((c.firstItem == self.titleLabel || c.firstItem == self.bodyLabel) &&
+            c.firstAttribute == NSLayoutAttributeLeading) {
+            c.active = NO;
+        }
+    }
+    // Also check bodyTextContainer (superview of titleLabel/bodyLabel) constraints
+    for (NSLayoutConstraint *c in self.titleLabel.superview.constraints) {
+        if ((c.firstItem == self.titleLabel || c.firstItem == self.bodyLabel) &&
+            c.firstAttribute == NSLayoutAttributeLeading) {
+            c.active = NO;
+        }
+    }
+    [NSLayoutConstraint activateConstraints:@[
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.cellIcon.trailingAnchor constant:10],
+        [self.bodyLabel.leadingAnchor constraintEqualToAnchor:self.cellIcon.trailingAnchor constant:10],
+    ]];
+
+    // Add tap gesture (replaces awakeFromNib on tvOS)
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleOnMessageTapGesture:)];
+    self.userInteractionEnabled = YES;
+    [self addGestureRecognizer:tapGesture];
+}
+#endif
+
 - (void)prepareForReuse {
     [super prepareForReuse];
     [self.cellIcon sd_cancelCurrentImageLoad];

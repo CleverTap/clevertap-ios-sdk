@@ -60,7 +60,11 @@ static const int kMaxTags = 3;
                           config:(CleverTapInboxStyleConfig *)config
                         delegate:(id<CleverTapInboxViewControllerDelegate>)delegate
                analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate>)analyticsDelegate {
+#if TARGET_OS_TV
+    self = [self initWithStyle:UITableViewStyleGrouped];
+#else
     self = [self initWithNibName:NSStringFromClass([CleverTapInboxViewController class]) bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
+#endif
     if (self) {
         _config = [config copy];
         _delegate = delegate;
@@ -171,16 +175,20 @@ static const int kMaxTags = 3;
     self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
-    if (@available(iOS 11.0, *)) {
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
         self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     } else {
+#if !TARGET_OS_TV
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         self.automaticallyAdjustsScrollViewInsets = NO;
 #pragma clang diagnostic pop
+#endif
     }
     self.edgesForExtendedLayout = UIRectEdgeNone;
+#if !TARGET_OS_TV
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+#endif
 }
 
 - (void)updateInboxLayout {
@@ -192,6 +200,12 @@ static const int kMaxTags = 3;
 }
 
 - (void)registerNibs {
+#if TARGET_OS_TV
+    [self.tableView registerClass:[CTInboxSimpleMessageCell class] forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerClass:[CTCarouselMessageCell class] forCellReuseIdentifier:kCellCarouselMessageIdentifier];
+    [self.tableView registerClass:[CTCarouselImageMessageCell class] forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
+    [self.tableView registerClass:[CTInboxIconMessageCell class] forCellReuseIdentifier:kCellIconMessageIdentifier];
+#else
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTInboxSimpleMessageCell.class]]
          forCellReuseIdentifier:kCellSimpleMessageIdentifier];
@@ -204,6 +218,7 @@ static const int kMaxTags = 3;
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
          forCellReuseIdentifier:kCellIconMessageIdentifier];
+#endif
 }
 
 - (NSString *)getTitle {
@@ -228,11 +243,13 @@ static const int kMaxTags = 3;
 
 - (void)calculateTableViewVisibleFrame {
     CGRect frame = self.tableView.frame;
+#if !TARGET_OS_TV
     BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
     if (landscape) {
         frame.origin.y += self.topContentOffset;
         frame.size.height -= self.topContentOffset;
     }
+#endif
     self.tableViewVisibleFrame = frame;
 }
 
@@ -432,9 +449,13 @@ static const int kMaxTags = 3;
         NSString *actionType = link[@"type"];
         if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
             NSString *copy = link[@"copyText"][@"text"];
+#if !TARGET_OS_TV
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
             [self.parentViewController.view ct_makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
+#else
+#pragma unused(copy)
+#endif
         } else if ([actionType caseInsensitiveCompare:@"rfp"] == NSOrderedSame) {
             BOOL fbSettings = link[@"fbSettings"] ? [link[@"fbSettings"] boolValue] : NO;
             [self.analyticsDelegate messageDidSelectForPushPermission:fbSettings];

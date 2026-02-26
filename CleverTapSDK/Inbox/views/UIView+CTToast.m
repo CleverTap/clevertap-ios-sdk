@@ -156,7 +156,9 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(ct_cs_handleToastTapped:)];
         [toast addGestureRecognizer:recognizer];
         toast.userInteractionEnabled = YES;
+#if !TARGET_OS_TV
         toast.exclusiveTouch = YES;
+#endif
     }
     
     [[self ct_cs_activeToasts] addObject:toast];
@@ -395,7 +397,7 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         activityView.layer.shadowOffset = style.shadowOffset;
     }
     UIActivityIndicatorView *activityIndicatorView;
-    if (@available(iOS 13.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
     } else {
 #pragma clang diagnostic push

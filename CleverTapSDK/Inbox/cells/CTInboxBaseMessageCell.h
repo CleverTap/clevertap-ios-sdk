@@ -86,4 +86,8 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 - (void)setupInboxMessageActions:(CleverTapInboxMessageContent *)content;
 - (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender;
 
+#if TARGET_OS_TV
+- (void)setupTVLayout;
+#endif
+
 @end

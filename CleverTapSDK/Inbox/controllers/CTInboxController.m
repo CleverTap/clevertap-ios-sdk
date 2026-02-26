@@ -66,8 +66,8 @@ static dispatch_once_t coordinatorOnceToken;
             // Configure merge policy for conflict resolution
             _context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
             
-            // Automatically merge changes from other contexts (iOS 10+)
-            if (@available(iOS 10.0, *)) {
+            // Automatically merge changes from other contexts (iOS 10+ / tvOS 10+)
+            if (@available(iOS 10.0, tvOS 10.0, *)) {
                 _context.automaticallyMergesChangesFromParent = YES;
             }
             
