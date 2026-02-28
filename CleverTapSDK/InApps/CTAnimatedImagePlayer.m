@@ -20,6 +20,19 @@
 #import "CTAnimatedImagePlayer.h"
 #import "CTDisplayLink.h"
 #import "CTImageFramePool.h"
+#import <mach/mach.h>
+
+// Mirrors SDDeviceHelper.freeMemory — queries actual available RAM via mach_host_statistics.
+// Returns 0 on failure; callers fall back to total * 0.2 in that case.
+static NSUInteger CTFreeMemory(void) {
+    mach_port_t host_port = mach_host_self();
+    mach_msg_type_number_t host_size = sizeof(vm_statistics_data_t) / sizeof(integer_t);
+    vm_size_t page_size;
+    vm_statistics_data_t vm_stat;
+    if (host_page_size(host_port, &page_size) != KERN_SUCCESS) return 0;
+    if (host_statistics(host_port, HOST_VM_INFO, (host_info_t)&vm_stat, &host_size) != KERN_SUCCESS) return 0;
+    return (NSUInteger)vm_stat.free_count * (NSUInteger)page_size;
+}
 
 @interface CTAnimatedImagePlayer () {
     NSRunLoopMode _runLoopMode;
@@ -258,8 +271,10 @@
         maxBytes = self.maxBufferSize;
     } else {
         // Use 20% of total RAM or 60% of free RAM, whichever is smaller.
+        // Mirrors SDAnimatedImagePlayer.m which uses SDDeviceHelper.freeMemory (mach_host_statistics).
         NSUInteger total = (NSUInteger)[NSProcessInfo processInfo].physicalMemory;
-        int64_t freeRAM = total / 4; // conservative fallback
+        NSUInteger freeRAM = CTFreeMemory();
+        if (freeRAM == 0) freeRAM = total / 4; // fallback if mach query fails
         maxBytes = (NSUInteger)MIN(total * 0.2, freeRAM * 0.6);
     }
 

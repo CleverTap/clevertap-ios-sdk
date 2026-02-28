@@ -12,7 +12,18 @@
     BOOL _cancelled;
 }
 
-@synthesize cancelled = _cancelled;
+// ---------------------------------------------------------------------------
+// isCancelled — custom getter wraps the ivar read in @synchronized so that
+// reads from the NSURLSession completion queue (a background thread) always
+// observe the most recent value written by cancel (potentially called from
+// a different thread). Mirrors the thread-safety intent of SDWebImageCombinedOperation.
+// ---------------------------------------------------------------------------
+
+- (BOOL)isCancelled {
+    @synchronized (self) {
+        return _cancelled;
+    }
+}
 
 // ---------------------------------------------------------------------------
 // cancel — mirrors SDWebImageCombinedOperation.cancel (SDWebImageManager.m:797–814)
