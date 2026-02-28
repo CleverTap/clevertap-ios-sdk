@@ -41,8 +41,7 @@
 #endif
 
 #if !(TARGET_OS_TV)
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/SDAnimatedImageView.h>
+#import "CTAnimatedImage.h"
 #endif
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
@@ -477,7 +476,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
         } else {
             if ([contentType isEqualToString:@"image/gif"]) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
+                CTAnimatedImage *gif = [CTAnimatedImage imageWithData:imageData];
                 if (gif == nil) {
                     result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
                 }
