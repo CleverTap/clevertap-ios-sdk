@@ -41,9 +41,9 @@ static const float kPageControlViewHeight = 30.f;
         if (carouselItemView == nil){
             carouselItemView  = [[[CTUIUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
             carouselItemView.backgroundColor = [UIColor clearColor];
-            [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+            [carouselItemView.cellImageView ct_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                                                       options:self.sdWebImageOptions context:self.sdWebImageContext];
+                                                       options:self.ctWebImageOptions context:self.ctWebImageContext];
             carouselItemView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
             carouselItemView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
             carouselItemView.titleLabel.text = content.title;

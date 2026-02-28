@@ -38,8 +38,8 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (void)_sharedInit {
-    self.sdWebImageOptions = (SDWebImageRetryFailed);
-    self.sdWebImageContext = @{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)};
+    self.ctWebImageOptions = CTWebImageRetryFailed;
+    self.ctWebImageContext = @{CTWebImageContextStoreCacheType : @(CTImageCacheTypeMemory)};
 }
 
 - (void)dealloc {
@@ -293,9 +293,9 @@ static NSString * const kOrientationPortrait = @"p";
         self.cellImageView.alpha = 1.0;
         self.hasVideoPoster = YES;
         if (content.videoPosterUrl != nil && content.videoPosterUrl.length > 0) {
-            [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
+            [self.cellImageView ct_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
                                   placeholderImage: [self getVideoPlaceHolderImage]
-                                           options:self.sdWebImageOptions context:self.sdWebImageContext];
+                                           options:self.ctWebImageOptions context:self.ctWebImageContext];
         } else {
             self.cellImageView.image = [self getVideoPlaceHolderImage];
             if (!self.thumbnailGenerator) {

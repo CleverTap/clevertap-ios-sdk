@@ -655,6 +655,16 @@
 		D0D4C9F52414EE770029477E /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9356ED42487FE4600B4F507 /* CleverTapPushNotificationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		446F4482E3BA43768F73EC87 /* CTWebImageDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = ED5E8AB1F9FC4F8BA8B9777C /* CTWebImageDefines.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		05CB08D2AD97472BAF56CE50 /* CTWebImageCache.h in Headers */ = {isa = PBXBuildFile; fileRef = C84F7CEFF5944E48B7966C71 /* CTWebImageCache.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		6A0E6B13EA734954BF9D4A71 /* CTWebImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = CF78F1DAA97B4182AA0E30C7 /* CTWebImageCache.m */; };
+		0C0ED2007ABE4D6B963E2FA0 /* CTWebImageOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 551C5E3EA3174E7AA6ECFB2C /* CTWebImageOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		2980B74C166441CF9D9A351C /* CTWebImageOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 522CDEEB6321460CA6C15CD6 /* CTWebImageOperation.m */; };
+		A4163A52DAA446F59C16F4E3 /* CTWebImageDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4673F35BFE4B1E9FFD6964 /* CTWebImageDefines.m */; };
+		7ADE12FD7E32416885E8A582 /* UIView+CTWebCacheOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FA1A463D1434496AB353BAD /* UIView+CTWebCacheOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		BD21694B821642BA92C302B0 /* UIView+CTWebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 02A7935FCCDB4768A9CDCFFA /* UIView+CTWebCacheOperation.m */; };
+		F726D34C256A4BE1ABE5DF8B /* UIImageView+CTWebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 49A31845C283498F8D8D9735 /* UIImageView+CTWebCache.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		AB2FCBE8F6C344B5937EC3CF /* UIImageView+CTWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA4685EEC1A4A7A82C322B6 /* UIImageView+CTWebCache.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1247,6 +1257,16 @@
 		D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapFeatureFlagsPrivate.h; sourceTree = "<group>"; };
 		F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapPushNotificationDelegate.h; sourceTree = "<group>"; };
 		FDEB997F2814D751B104059E /* Pods-shared-CleverTapSDKTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.release.xcconfig"; sourceTree = "<group>"; };
+		ED5E8AB1F9FC4F8BA8B9777C /* CTWebImageDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTWebImageDefines.h; sourceTree = "<group>"; };
+		CD4673F35BFE4B1E9FFD6964 /* CTWebImageDefines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTWebImageDefines.m; sourceTree = "<group>"; };
+		C84F7CEFF5944E48B7966C71 /* CTWebImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTWebImageCache.h; sourceTree = "<group>"; };
+		CF78F1DAA97B4182AA0E30C7 /* CTWebImageCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTWebImageCache.m; sourceTree = "<group>"; };
+		551C5E3EA3174E7AA6ECFB2C /* CTWebImageOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTWebImageOperation.h; sourceTree = "<group>"; };
+		522CDEEB6321460CA6C15CD6 /* CTWebImageOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTWebImageOperation.m; sourceTree = "<group>"; };
+		6FA1A463D1434496AB353BAD /* UIView+CTWebCacheOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+CTWebCacheOperation.h"; sourceTree = "<group>"; };
+		02A7935FCCDB4768A9CDCFFA /* UIView+CTWebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+CTWebCacheOperation.m"; sourceTree = "<group>"; };
+		49A31845C283498F8D8D9735 /* UIImageView+CTWebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+CTWebCache.h"; sourceTree = "<group>"; };
+		9EA4685EEC1A4A7A82C322B6 /* UIImageView+CTWebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+CTWebCache.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1417,6 +1437,16 @@
 		07B94520219EA33800D4C542 /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
+				ED5E8AB1F9FC4F8BA8B9777C /* CTWebImageDefines.h */,
+				CD4673F35BFE4B1E9FFD6964 /* CTWebImageDefines.m */,
+				C84F7CEFF5944E48B7966C71 /* CTWebImageCache.h */,
+				CF78F1DAA97B4182AA0E30C7 /* CTWebImageCache.m */,
+				551C5E3EA3174E7AA6ECFB2C /* CTWebImageOperation.h */,
+				522CDEEB6321460CA6C15CD6 /* CTWebImageOperation.m */,
+				6FA1A463D1434496AB353BAD /* UIView+CTWebCacheOperation.h */,
+				02A7935FCCDB4768A9CDCFFA /* UIView+CTWebCacheOperation.m */,
+				49A31845C283498F8D8D9735 /* UIImageView+CTWebCache.h */,
+				9EA4685EEC1A4A7A82C322B6 /* UIImageView+CTWebCache.m */,
 				495EA4BE25554718006CADFF /* resources */,
 				0797134121A338B40011C9A3 /* views */,
 				07B94521219EA34300D4C542 /* cells */,
@@ -2497,6 +2527,11 @@
 				071EB4D6217F6427008F0FAB /* CTInAppFCManager.h in Headers */,
 				0796FB6321AE5B2900FC380D /* CTCarouselMessageCell.h in Headers */,
 				6A3EBD322AA0703A00CE97D4 /* CTEventAdapter.h in Headers */,
+				446F4482E3BA43768F73EC87 /* CTWebImageDefines.h in Headers */,
+				05CB08D2AD97472BAF56CE50 /* CTWebImageCache.h in Headers */,
+				0C0ED2007ABE4D6B963E2FA0 /* CTWebImageOperation.h in Headers */,
+				7ADE12FD7E32416885E8A582 /* UIView+CTWebCacheOperation.h in Headers */,
+				F726D34C256A4BE1ABE5DF8B /* UIImageView+CTWebCache.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3146,6 +3181,11 @@
 				071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */,
 				48F9FD1D2C3D30BF00617770 /* CTFileDownloadManager.m in Sources */,
 				D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */,
+				6A0E6B13EA734954BF9D4A71 /* CTWebImageCache.m in Sources */,
+				2980B74C166441CF9D9A351C /* CTWebImageOperation.m in Sources */,
+				A4163A52DAA446F59C16F4E3 /* CTWebImageDefines.m in Sources */,
+				BD21694B821642BA92C302B0 /* UIView+CTWebCacheOperation.m in Sources */,
+				AB2FCBE8F6C344B5937EC3CF /* UIImageView+CTWebCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

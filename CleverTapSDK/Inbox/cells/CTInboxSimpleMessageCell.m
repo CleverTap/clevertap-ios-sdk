@@ -1,7 +1,5 @@
 
 #import "CTInboxSimpleMessageCell.h"
-#import <SDWebImage/SDAnimatedImageView+WebCache.h>
-#import <SDWebImage/UIImageView+WebCache.h>
 
 @implementation CTInboxSimpleMessageCell
 
@@ -21,7 +19,7 @@
 
 - (void)prepareForReuse {
     [super prepareForReuse];
-    [self.cellImageView sd_cancelCurrentImageLoad];
+    [self.cellImageView ct_cancelCurrentImageLoad];
     self.cellImageView.image = nil;
 }
 
@@ -82,9 +80,9 @@
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
         self.cellImageView.alpha = 1.0;
-        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+        [self.cellImageView ct_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                                       options:self.sdWebImageOptions context:self.sdWebImageContext];
+                                       options:self.ctWebImageOptions context:self.ctWebImageContext];
         self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         [self setupMediaPlayer];
