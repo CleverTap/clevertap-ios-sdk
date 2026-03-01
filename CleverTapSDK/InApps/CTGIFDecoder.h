@@ -15,7 +15,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSUInteger loopCount;
 
 /// Returns nil if data cannot be decoded as a valid animated GIF (mirrors SDAnimatedImage behavior).
+/// Scale defaults to 1.0 (matches SDAnimatedImage.initWithData: → initWithData:scale:1).
 - (nullable instancetype)initWithData:(NSData *)data;
+
+/// Designated initializer. Scale is applied to each decoded UIImage frame
+/// (mirrors SDImageIOAnimatedCoder.createFrameAtIndex:...: which passes scale to UIImage init).
+- (nullable instancetype)initWithData:(NSData *)data scale:(CGFloat)scale;
 
 - (nullable UIImage *)frameAtIndex:(NSUInteger)index;
 - (NSTimeInterval)durationAtIndex:(NSUInteger)index;

@@ -8,12 +8,13 @@
  *   - createFrameAtIndex:source:...     → SDImageIOAnimatedCoder.m:448–570
  *   - initWithAnimatedImageData:options → SDImageIOAnimatedCoder.m:994–1066
  *   - SDCGImageCreateMutableCopy        → SDImageIOAnimatedCoder.m:40–54
+ *   - didReceiveMemoryWarning:          → SDImageIOAnimatedCoder.m:314–320
  *   - GIF property keys                 → SDImageGIFCoder.m:38–56
  */
 
 #import "CTGIFDecoder.h"
-#import "CTImageFrame.h"
 #import <ImageIO/ImageIO.h>
+#import <UIKit/UIKit.h>
 
 // Strips the internal CGImageSourceRef retained by CGImageRef on iOS 15+.
 // This avoids thread-safety issues when rendering on a display link thread.
@@ -38,23 +39,42 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
 @interface CTGIFDecoder () {
     CGImageSourceRef _imageSource;
     NSData *_imageData;
-    NSMutableArray<CTImageFrame *> *_frames; // per-frame duration cache
+    // Scale factor applied to each decoded UIImage frame.
+    // Mirrors SDImageIOAnimatedCoder which passes scale to UIImage initWithCGImage:scale:orientation:.
+    CGFloat _scale;
+    // Lightweight per-frame duration storage — mirrors SDImageIOCoderFrame (index+duration only).
+    // SDImageIOAnimatedCoder.scanAndCheckFramesValidWithImageSource: (line 1076) uses a private
+    // SDImageIOCoderFrame with only `index` and `duration`; no UIImage placeholder is allocated
+    // during the scan phase (images are decoded lazily in frameAtIndex:).
+    NSArray<NSNumber *> *_frameDurations; // per-frame duration in seconds
 }
 @end
 
 @implementation CTGIFDecoder
 
 - (void)dealloc {
+    // Mirrors SDImageIOAnimatedCoder.dealloc — remove observer before releasing source.
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (_imageSource) {
         CFRelease(_imageSource);
         _imageSource = NULL;
     }
 }
 
+// Mirrors SDAnimatedImage.initWithData: → initWithData:scale:1.
+// Scale defaults to 1.0 for raw data (same as SD; file-based loading would derive scale from filename).
 - (nullable instancetype)initWithData:(NSData *)data {
+    return [self initWithData:data scale:1];
+}
+
+// Mirrors SDImageIOAnimatedCoder.initWithAnimatedImageData:options: (line 994).
+// The scale is stored and applied per-frame in frameAtIndex: so UIImage reports the correct
+// logical size (matching SDImageIOAnimatedCoder.createFrameAtIndex:…:scale: line 576).
+- (nullable instancetype)initWithData:(NSData *)data scale:(CGFloat)scale {
     if (!data || data.length == 0) return nil;
     self = [super init];
     if (self) {
+        _scale = MAX(scale, 1);
         CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
         if (!source) return nil;
 
@@ -65,11 +85,31 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
         }
         _imageSource = source;
         _imageData = data;
+
+        // Register for memory warnings to purge ImageIO's internal per-frame decode cache.
+        // Mirrors SDImageIOAnimatedCoder.initWithAnimatedImageData:options: (line 1062).
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(didReceiveMemoryWarning:)
+                                                     name:UIApplicationDidReceiveMemoryWarningNotification
+                                                   object:nil];
     }
     return self;
 }
 
+// Mirrors SDImageIOAnimatedCoder.didReceiveMemoryWarning: (SDImageIOAnimatedCoder.m:314–320).
+// Calls CGImageSourceRemoveCacheAtIndex for every frame so ImageIO releases its internal
+// per-frame CGImage decode cache, reducing memory pressure during low-memory conditions.
+- (void)didReceiveMemoryWarning:(NSNotification *)notification {
+    if (_imageSource) {
+        for (size_t i = 0; i < _frameCount; i++) {
+            CGImageSourceRemoveCacheAtIndex(_imageSource, i);
+        }
+    }
+}
+
 // Mirrors SDImageIOAnimatedCoder.scanAndCheckFramesValidWithImageSource: (line 1068).
+// Uses lightweight NSNumber-boxed durations instead of full CTImageFrame objects,
+// matching SD's SDImageIOCoderFrame which only stores index + duration (no UIImage).
 - (BOOL)scanFramesFromSource:(CGImageSourceRef)source {
     NSUInteger count = CGImageSourceGetCount(source);
     if (count == 0) return NO;
@@ -77,15 +117,13 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
     _loopCount = [CTGIFDecoder loopCountFromSource:source];
     _frameCount = count;
 
-    NSMutableArray<CTImageFrame *> *frames = [NSMutableArray arrayWithCapacity:count];
+    NSMutableArray<NSNumber *> *durations = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger i = 0; i < count; i++) {
         NSTimeInterval duration = [CTGIFDecoder frameDurationAtIndex:i source:source];
-        // Use a placeholder UIImage (nil-safe) — image decoding is lazy
-        CTImageFrame *frame = [CTImageFrame frameWithImage:(UIImage * _Nonnull)[UIImage new] duration:duration];
-        [frames addObject:frame];
+        [durations addObject:@(duration)];
     }
-    if (frames.count != count) return NO;
-    _frames = frames;
+    if (durations.count != count) return NO;
+    _frameDurations = [durations copy];
     return YES;
 }
 
@@ -130,8 +168,8 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
 }
 
 - (NSTimeInterval)durationAtIndex:(NSUInteger)index {
-    if (index >= _frames.count) return 0;
-    return _frames[index].duration;
+    if (index >= _frameDurations.count) return 0;
+    return [_frameDurations[index] doubleValue];
 }
 
 // Mirrors SDImageIOAnimatedCoder.safeAnimatedImageFrameAtIndex: and createFrameAtIndex:... (line 1148, 448).
@@ -154,7 +192,10 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
         }
     }
 
-    UIImage *frame = [UIImage imageWithCGImage:cgImage];
+    // Apply scale — mirrors SDImageIOAnimatedCoder.createFrameAtIndex:...: (line 576):
+    //   UIImage *image = [[UIImage alloc] initWithCGImage:imageRef scale:scale orientation:imageOrientation];
+    // GIFs do not carry EXIF orientation metadata, so UIImageOrientationUp is correct here.
+    UIImage *frame = [[UIImage alloc] initWithCGImage:cgImage scale:_scale orientation:UIImageOrientationUp];
     CGImageRelease(cgImage);
     return frame;
 }

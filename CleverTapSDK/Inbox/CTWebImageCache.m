@@ -9,16 +9,22 @@
 #import "CTWebImageCache.h"
 
 // ---------------------------------------------------------------------------
-// Memory cost helper — mirrors sd_memoryCost from UIImage+MemoryCacheCost.m
-// SDWebImage: cost = width * scale * height * scale * frameCount
-// For animated images (GIFs), multiplied by frame count so NSCache correctly
-// accounts for the true memory footprint of all decoded frames.
+// Memory cost helper — mirrors SDMemoryCacheCostForImage from UIImage+MemoryCacheCost.m
+// SDWebImage: cost = CGImageGetBytesPerRow * CGImageGetHeight (real bytes), × deduped frameCount.
+// Using actual bytes per row is more accurate than pixel_count because it accounts for
+// row padding (e.g. 16-byte alignment) and the true bitsPerPixel of the CGImage.
+// NSSet deduplication mirrors SD's handling of _UIAnimatedImage where the same frame
+// object can appear multiple times in image.images.
 // ---------------------------------------------------------------------------
 static inline NSUInteger CTMemoryCostForImage(UIImage *image) {
-    CGFloat scale = image.scale;
-    NSUInteger singleFrameCost = (NSUInteger)(image.size.width * scale * image.size.height * scale);
-    NSUInteger frameCount = image.images.count > 1 ? image.images.count : 1;
-    return singleFrameCost * frameCount;
+    CGImageRef imageRef = image.CGImage;
+    if (!imageRef) {
+        return 0;
+    }
+    NSUInteger bytesPerFrame = CGImageGetBytesPerRow(imageRef) * CGImageGetHeight(imageRef);
+    // Filter duplicate frame references — mirrors SDMemoryCacheCostForImage
+    NSUInteger frameCount = image.images.count > 1 ? [NSSet setWithArray:image.images].count : 1;
+    return bytesPerFrame * frameCount;
 }
 
 @implementation CTWebImageCache {

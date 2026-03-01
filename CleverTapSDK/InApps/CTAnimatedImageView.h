@@ -26,16 +26,30 @@ NS_SWIFT_UI_ACTOR
 @property (nonatomic, assign, readonly) NSUInteger currentLoopCount;
 
 /// Auto-play when view becomes visible. Default is YES.
+/// Mirrors SDAnimatedImageView.autoPlayAnimatedImage.
 @property (nonatomic, assign) BOOL autoPlayAnimatedImage;
 
 /// Playback rate. Default is 1.0.
+/// Mirrors SDAnimatedImageView.playbackRate.
 @property (nonatomic, assign) double playbackRate;
 
 /// RunLoop mode. Default is NSRunLoopCommonModes (multi-core) or NSDefaultRunLoopMode (single-core).
+/// Mirrors SDAnimatedImageView.runLoopMode.
 @property (nonatomic, copy) NSRunLoopMode runLoopMode;
 
 /// Max buffer size in bytes. 0 = auto. Default is 0.
+/// Mirrors SDAnimatedImageView.maxBufferSize.
 @property (nonatomic, assign) NSUInteger maxBufferSize;
+
+/// Whether to reset the frame index to 0 when stopAnimating is called.
+/// When NO (default), stopAnimating pauses at the current frame.
+/// When YES, stopAnimating resets to frame 0 (calls stopPlaying instead of pausePlaying).
+/// Mirrors SDAnimatedImageView.resetFrameIndexWhenStopped (SDAnimatedImageView.h:108).
+@property (nonatomic, assign) BOOL resetFrameIndexWhenStopped;
+
+/// Whether to clear the frame buffer when stopAnimating is called.
+/// Default is NO. Mirrors SDAnimatedImageView.clearBufferWhenStopped (SDAnimatedImageView.h:101).
+@property (nonatomic, assign) BOOL clearBufferWhenStopped;
 
 @end
 

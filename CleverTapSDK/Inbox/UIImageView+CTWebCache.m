@@ -96,6 +96,16 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
                            options:(CTWebImageOptions)options
                            context:(nullable CTWebImageContext *)context {
 
+    // URL type safety — mirrors SDWebImageManager.loadImageWithURL: (SDWebImageManager.m:199–206).
+    // Very common mistake is to pass an NSString instead of NSURL; Xcode won't warn for this mismatch.
+    if ([url isKindOfClass:NSString.class]) {
+        url = [NSURL URLWithString:(NSString *)url];
+    }
+    // Prevents crash when NSNull or other unexpected type is passed
+    if (![url isKindOfClass:NSURL.class]) {
+        url = nil;
+    }
+
     // 1. Cancel any prior operation (mirrors sd_internalSetImageWithURL step 1)
     [self ct_cancelImageLoadOperationWithKey:kCTImageViewOperationKey];
 
@@ -160,11 +170,24 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
         if (operation.isCancelled) return;
 
         if (error) {
-            // Record failed URL unless it was a cancellation (mirrors SDWebImageManager)
-            if (error.code != NSURLErrorCancelled && url) {
-                [_failedURLsLock lock];
-                [_failedURLs addObject:url];
-                [_failedURLsLock unlock];
+            // Blacklist only permanent failures — mirrors SDWebImageDownloader(SDImageLoader)
+            // shouldBlockFailedURLWithURL:error: (SDWebImageDownloader.m:644–663).
+            // Transient errors (timeout, no connectivity, roaming, network loss, host not found,
+            // cannot connect) must NOT blacklist the URL so the next attempt can succeed.
+            if (url && [error.domain isEqualToString:NSURLErrorDomain]) {
+                BOOL shouldBlock = (error.code != NSURLErrorCancelled
+                                    && error.code != NSURLErrorTimedOut
+                                    && error.code != NSURLErrorNotConnectedToInternet
+                                    && error.code != NSURLErrorInternationalRoamingOff
+                                    && error.code != NSURLErrorDataNotAllowed
+                                    && error.code != NSURLErrorCannotFindHost
+                                    && error.code != NSURLErrorCannotConnectToHost
+                                    && error.code != NSURLErrorNetworkConnectionLost);
+                if (shouldBlock) {
+                    [_failedURLsLock lock];
+                    [_failedURLs addObject:url];
+                    [_failedURLsLock unlock];
+                }
             }
             // Restore placeholder on failure
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -186,14 +209,19 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
         // Mirrors SDWebImageManager's image transformation step.
         UIImage *image = [strongSelf ct_decodeImageFromData:data response:response];
 
-        // 5b. Cache the decoded image (mirrors SDWebImageManager's store step)
-        if (image && storeCacheType != CTImageCacheTypeNone && cacheKey) {
-            BOOL toDisk = (storeCacheType == CTImageCacheTypeDisk ||
-                           storeCacheType == CTImageCacheTypeAll);
-            [[CTWebImageCache sharedImageCache] storeImage:image
-                                                    forKey:cacheKey
-                                                    toDisk:toDisk
-                                                completion:nil];
+        // 5b. Cache the decoded image — mirrors SDWebImageManager's store step.
+        // CTWebImageCache is memory-only. SD skips memory when cacheType == Disk;
+        // we mirror that by only writing when the type includes memory.
+        // (SDImageCache.m storeImage:forKey:cacheType:completion: check)
+        if (image && cacheKey) {
+            BOOL storeToMemory = (storeCacheType == CTImageCacheTypeMemory ||
+                                  storeCacheType == CTImageCacheTypeAll);
+            if (storeToMemory) {
+                [[CTWebImageCache sharedImageCache] storeImage:image
+                                                        forKey:cacheKey
+                                                        toDisk:NO
+                                                    completion:nil];
+            }
         }
 
         // 5c. Set the image on the view — mirrors UIView+WebCache's setImageBlock path

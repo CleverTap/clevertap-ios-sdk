@@ -11,7 +11,6 @@ s.module_name               = 'CleverTapSDK'
 s.resources                 = 'CleverTapSDK/*.{cer}'
 s.resource_bundles          = {'CleverTapSDK' => ['CleverTapSDK/*.{xcprivacy}']}
 s.swift_version             = '5.0'
-s.ios.dependency             'SDWebImage', '~> 5.11'
 s.ios.resource_bundle       = {'CleverTapSDK' => ['CleverTapSDK/**/*.{png,xib,html}', 'CleverTapSDK/**/*.xcdatamodeld']}
 s.ios.deployment_target     = '9.0'
 s.ios.source_files          = 'CleverTapSDK/**/*.{h,m,swift}'

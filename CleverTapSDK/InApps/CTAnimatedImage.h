@@ -25,8 +25,21 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NONISOLATED
 @interface CTAnimatedImage : UIImage <CTAnimatedImageProviding>
 
+/// Convenience factory. Scale defaults to 1.0.
+/// Mirrors SDAnimatedImage.imageWithData: → imageWithData:scale:1.
 + (nullable instancetype)imageWithData:(nonnull NSData *)data;
+
+/// Convenience factory with explicit scale.
+/// Mirrors SDAnimatedImage.imageWithData:scale:.
++ (nullable instancetype)imageWithData:(nonnull NSData *)data scale:(CGFloat)scale;
+
+/// Initializer. Scale defaults to 1.0.
+/// Mirrors SDAnimatedImage.initWithData: → initWithData:scale:1.
 - (nullable instancetype)initWithData:(nonnull NSData *)data;
+
+/// Designated initializer.
+/// Mirrors SDAnimatedImage.initWithData:scale:options: → initWithAnimatedCoder:scale:.
+- (nullable instancetype)initWithData:(nonnull NSData *)data scale:(CGFloat)scale;
 
 @property (nonatomic, readonly) NSUInteger animatedImageFrameCount;
 @property (nonatomic, readonly) NSUInteger animatedImageLoopCount;

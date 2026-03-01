@@ -85,8 +85,12 @@
 
     super.image = image;
 
-    // Check if the new image is a CTAnimatedImage with multiple frames
-    if ([image conformsToProtocol:@protocol(CTAnimatedImageProviding)] &&
+    // Check if the new image is a CTAnimatedImage with multiple frames.
+    // Mirrors SDAnimatedImageView.setImage: (line 196): [image.class conformsToProtocol:...]
+    // Using image.class (not image) is correct because conformsToProtocol: on a class checks the
+    // class's own declarations, while on an instance it only checks the instance's runtime class
+    // without consulting the class hierarchy in all cases on ObjC runtime.
+    if ([image.class conformsToProtocol:@protocol(CTAnimatedImageProviding)] &&
         [(id<CTAnimatedImageProviding>)image animatedImageFrameCount] > 1) {
 
         id<CTAnimatedImageProviding> provider = (id<CTAnimatedImageProviding>)image;
@@ -194,9 +198,20 @@
     }
 }
 
+// Mirrors SDAnimatedImageView.stopAnimating (SDAnimatedImageView.m:429–447).
+// resetFrameIndexWhenStopped → stopPlaying (resets frame index to 0).
+// default (NO)              → pausePlaying (holds current frame).
+// clearBufferWhenStopped    → clearFrameBuffer (releases buffered decoded frames).
 - (void)stopAnimating {
     if (self.player) {
-        [self.player pausePlaying];
+        if (self.resetFrameIndexWhenStopped) {
+            [self.player stopPlaying];
+        } else {
+            [self.player pausePlaying];
+        }
+        if (self.clearBufferWhenStopped) {
+            [self.player clearFrameBuffer];
+        }
     } else {
         [super stopAnimating];
     }
