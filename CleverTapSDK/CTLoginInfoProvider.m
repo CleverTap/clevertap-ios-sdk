@@ -80,11 +80,15 @@ NSString *const kCachedIdentities = @"CachedIdentities";
         // Update the existing entry, preserving its existing (possibly multi-layered)
         // cache key as-is. The key's encryption state is whatever updateCachedGUIDS
         // left it in — we only update the GUID value, not the key.
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Updated existing GUID entry for key type: %@", self, key);
         newCache[existingCacheKey] = guid;
     } else {
         // New entry: always write with a single encryptString at the current level.
         // updateCachedGUIDS owns the responsibility of re-keying on level transitions,
         // not this method.
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Created new GUID entry for key type: %@", self, key);
         NSString *encryptedIdentifier = identifier;
         if (self.config.cryptManager) {
             encryptedIdentifier = [self.config.cryptManager encryptString:identifier];
@@ -168,11 +172,15 @@ NSString *const kCachedIdentities = @"CachedIdentities";
             }
             
             if ([decryptedIdentifier isEqualToString:identifier]) {
+                CleverTapLogDebug(self.config.logLevel,
+                    @"%@: Found GUID for key type: %@", self, key);
                 return cache[cacheKey];
             }
         }
     }
-    
+
+    CleverTapLogDebug(self.config.logLevel,
+        @"%@: No GUID found for key type: %@", self, key);
     return nil;
 }
 

@@ -87,7 +87,7 @@ API_AVAILABLE(ios(13.0))
     self.previousEncryptionLevel = (CleverTapEncryptionLevel)lastEncryptionLevel;
     
     if (lastEncryptionLevel != _encryptionLevel) {
-        CleverTapLogStaticInternal(@"CleverTap Encryption level changed for account: %@ to: %d", _accountID, _encryptionLevel);
+        CleverTapLogStaticInternal(@"CleverTap Encryption level changed for account: %@ from: %d to: %d", _accountID, (int)self.previousEncryptionLevel, (int)_encryptionLevel);
         [self updateCachedGUIDS];
         if (!_isDefaultInstance) {
             // For Default instance, we are updating this after updating Local DB values on App Launch.
@@ -333,7 +333,11 @@ API_AVAILABLE(ios(13.0))
     NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:_accountID];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
     if (!cachedGUIDS) return;
-    
+
+    CleverTapLogStaticInternal(@"CleverTap updating cached GUIDs for account: %@ — %lu entries, transition %d→%d",
+        _accountID, (unsigned long)cachedGUIDS.count,
+        (int)self.previousEncryptionLevel, (int)self.encryptionLevel);
+
     NSMutableDictionary *newCache = [NSMutableDictionary new];
     [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString* cachedKey,
                                                     NSString* value,
@@ -397,6 +401,8 @@ API_AVAILABLE(ios(13.0))
         }
     }];
     
+    CleverTapLogStaticInternal(@"CleverTap cached GUIDs updated for account: %@ — %lu entries saved",
+        _accountID, (unsigned long)newCache.count);
     [CTPreferences putObject:newCache forKey:cacheKey];
 }
 

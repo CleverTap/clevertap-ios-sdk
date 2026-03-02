@@ -2118,12 +2118,17 @@ static BOOL sharedInstanceErrorLogged;
     BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
 
     if (wasEncrypted) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Inflating events queue — decrypting (previous level: High)", self);
         // File was encrypted, so decrypt when reading
         self.eventsQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
             [CTPreferences unarchiveFromFile:[self eventsFileName]
                                        ofType:[NSMutableArray class]
                                     removeFile:YES]];
     } else {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Inflating events queue — reading raw (previous level: %d)",
+            self, (int)self.config.cryptManager.previousEncryptionLevel);
         // File was stored raw
         self.eventsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:
             [self eventsFileName] ofType:[NSMutableArray class] removeFile:YES];
@@ -2131,6 +2136,8 @@ static BOOL sharedInstanceErrorLogged;
 
     // fallback incase decryption fails
     if (!self.eventsQueue || ![self.eventsQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Events queue empty or invalid after inflate, starting fresh", self);
         self.eventsQueue = [NSMutableArray array];
     }
 }
@@ -2141,17 +2148,27 @@ static BOOL sharedInstanceErrorLogged;
     BOOL encryptionNeeded = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionNone) && (self.config.encryptionLevel == CleverTapEncryptionMedium || self.config.encryptionLevel == CleverTapEncryptionHigh);
 
     if (decryptionNeeded) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Inflating profile queue — decrypting (previous: %d → current: %d)",
+            self, (int)self.config.cryptManager.previousEncryptionLevel,
+            (int)self.config.encryptionLevel);
         // File was encrypted, so decrypt when reading
         self.profileQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
             [CTPreferences unarchiveFromFile:[self profileEventsFileName]
                                        ofType:[NSMutableArray class]
                                     removeFile:YES]];
     } else if (encryptionNeeded) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Inflating profile queue — reading raw (previous: %d → current: %d)",
+            self, (int)self.config.cryptManager.previousEncryptionLevel,
+            (int)self.config.encryptionLevel);
         // File was stored raw
         self.profileQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self profileEventsFileName] ofType:[NSMutableArray class] removeFile:YES];
     }
     // fallback incase decryption fails
     if (!self.profileQueue || ![self.profileQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Profile queue empty or invalid after inflate, starting fresh", self);
         self.profileQueue = [NSMutableArray array];
     }
 }
@@ -2161,17 +2178,24 @@ static BOOL sharedInstanceErrorLogged;
     BOOL wasEncrypted = (self.config.cryptManager.previousEncryptionLevel == CleverTapEncryptionHigh);
 
     if (wasEncrypted) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Inflating notifications queue — decrypting (previous level: High)", self);
         // File was encrypted, so decrypt when reading
         self.notificationsQueue = (NSMutableArray *)[self.config.cryptManager decryptObject:
             [CTPreferences unarchiveFromFile:[self notificationsFileName]
                                        ofType:[NSMutableArray class]
                                     removeFile:YES]];
     } else {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Inflating notifications queue — reading raw (previous level: %d)",
+            self, (int)self.config.cryptManager.previousEncryptionLevel);
         // File was stored raw
         self.notificationsQueue = (NSMutableArray *)[CTPreferences unarchiveFromFile:[self notificationsFileName] ofType:[NSMutableArray class] removeFile:YES];
     }
     // fallback incase decryption fails
     if (!self.notificationsQueue || ![self.notificationsQueue isKindOfClass:[NSMutableArray class]] || [self isMuted]) {
+        CleverTapLogInternal(self.config.logLevel,
+            @"%@: Notifications queue empty or invalid after inflate, starting fresh", self);
         self.notificationsQueue = [NSMutableArray array];
     }
 }
