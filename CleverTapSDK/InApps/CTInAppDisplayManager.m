@@ -465,26 +465,42 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (ImageLoadingResult *)loadImageWithURL:(NSURL *)url contentType:(NSString *)contentType {
     ImageLoadingResult *result = [[ImageLoadingResult alloc] init];
-    
-    UIImage *loadedImage = [self loadImageIfPresentInDiskCache:url];
-    if (loadedImage) {
-        result.image = loadedImage;
-    } else {
-        NSError *loadError = nil;
-        NSData *imageData = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&loadError];
-        if (loadError || !imageData) {
-            result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
+
+    // 1. SDWebImage-compatible disk cache (Library/Caches/com.hackemist.SDImageCache/default/).
+    //    Populated by prefetchInAppImages: on CS in-app receipt, or write-through below.
+    //    Same path as old SDK → downgrade transparent (old SDK's SDWebImage finds these files).
+    NSData *cachedData = [self.fileDownloader loadInAppImageDataFromDisk:url];
+    if (cachedData) {
+        result.imageData = cachedData;
+        if ([contentType isEqualToString:@"image/gif"]) {
+            result.image = [CTAnimatedImage imageWithData:cachedData];
         } else {
-            if ([contentType isEqualToString:@"image/gif"]) {
-                CTAnimatedImage *gif = [CTAnimatedImage imageWithData:imageData];
-                if (gif == nil) {
-                    result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
-                }
-            }
-            result.imageData = imageData;
+            result.image = [UIImage imageWithData:cachedData];
+        }
+        return result;
+    }
+
+    // 2. Cache miss — download synchronously (called on background thread by prepareNotification:).
+    NSError *loadError = nil;
+    NSData *imageData = [NSData dataWithContentsOfURL:url
+                                              options:NSDataReadingMappedIfSafe
+                                               error:&loadError];
+    if (loadError || !imageData) {
+        result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
+        return result;
+    }
+
+    // 3. Write-through: persist for future offline triggers.
+    [self.fileDownloader storeInAppImageData:imageData forURL:url];
+
+    // 4. Validate GIF decodability; downstream rendering uses imageData to create CTAnimatedImage.
+    if ([contentType isEqualToString:@"image/gif"]) {
+        CTAnimatedImage *gif = [CTAnimatedImage imageWithData:imageData];
+        if (gif == nil) {
+            result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
         }
     }
-    
+    result.imageData = imageData;
     return result;
 }
 

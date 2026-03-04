@@ -92,10 +92,44 @@
     if (image) {
         return image;
     }
-    
+
     CleverTapLogInternal(self.config.logLevel, @"%@ Failed to load image from path %@", self, imagePath);
     return nil;
 }
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (nullable NSData *)loadInAppImageDataFromDisk:(NSURL *)imageURL {
+    NSString *path = CTSDWebImageCachePath(imageURL.absoluteString);
+    return [NSData dataWithContentsOfFile:path];
+}
+
+- (void)storeInAppImageData:(NSData *)data forURL:(NSURL *)url {
+    if (!data || !url) return;
+    NSString *path = CTSDWebImageCachePath(url.absoluteString);
+    NSString *dir = [path stringByDeletingLastPathComponent];
+    [[NSFileManager defaultManager] createDirectoryAtPath:dir
+                                withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:nil];
+    [data writeToFile:path atomically:YES];
+}
+
+- (void)prefetchInAppImages:(NSArray<NSString *> *)imageURLs {
+    if (!imageURLs.count) return;
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    for (NSString *urlString in imageURLs) {
+        dispatch_async(queue, ^{
+            NSURL *url = [NSURL URLWithString:urlString];
+            if (!url) return;
+            if ([self loadInAppImageDataFromDisk:url]) return; // already cached
+            NSData *data = [NSData dataWithContentsOfURL:url];
+            if (data) {
+                [self storeInAppImageData:data forURL:url];
+            }
+        });
+    }
+}
+#endif
 
 #pragma mark - Private
 

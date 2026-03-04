@@ -140,7 +140,8 @@
 
 - (void)downloadMediaURLs:(NSArray *)inApps {
     NSArray<NSString *> *imageURLs = [self imageURLs:inApps];
-    [self.fileDownloader downloadFiles:imageURLs withCompletionBlock:nil];
+    // Store at the SDWebImage-compatible path so old SDK can find files on downgrade.
+    [self.fileDownloader prefetchInAppImages:imageURLs];
 }
 
 - (void)downloadCustomTemplatesFileURLs:(NSArray *)inApps {
