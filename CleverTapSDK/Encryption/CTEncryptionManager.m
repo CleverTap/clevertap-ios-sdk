@@ -87,7 +87,7 @@ API_AVAILABLE(ios(13.0))
     self.previousEncryptionLevel = (CleverTapEncryptionLevel)lastEncryptionLevel;
     
     if (lastEncryptionLevel != _encryptionLevel) {
-        CleverTapLogStaticInternal(@"CleverTap Encryption level changed for account: %@ to: %d", _accountID, _encryptionLevel);
+        CleverTapLogStaticInternal(@"CleverTap Encryption level changed for account: %@ from: %d to: %d", _accountID, (int)self.previousEncryptionLevel, (int)_encryptionLevel);
         [self updateCachedGUIDS];
         if (!_isDefaultInstance) {
             // For Default instance, we are updating this after updating Local DB values on App Launch.
@@ -333,7 +333,11 @@ API_AVAILABLE(ios(13.0))
     NSString *cacheKey = [CTUtils getKeyWithSuffix:CLTAP_CachedGUIDSKey accountID:_accountID];
     NSDictionary *cachedGUIDS = [CTPreferences getObjectForKey:cacheKey];
     if (!cachedGUIDS) return;
-    
+
+    CleverTapLogStaticInternal(@"CleverTap updating cached GUIDs for account: %@ — %lu entries, transition %d→%d",
+        _accountID, (unsigned long)cachedGUIDS.count,
+        (int)self.previousEncryptionLevel, (int)self.encryptionLevel);
+
     NSMutableDictionary *newCache = [NSMutableDictionary new];
     [cachedGUIDS enumerateKeysAndObjectsUsingBlock:^(NSString* cachedKey,
                                                     NSString* value,
@@ -343,14 +347,62 @@ API_AVAILABLE(ios(13.0))
         
         NSString *key = components[0];
         NSString *identifier = components[1];
-        NSString *processedIdentifier = (self->_encryptionLevel == CleverTapEncryptionMedium || self->_encryptionLevel == CleverTapEncryptionHigh) ?
-        [self encryptString:identifier] : [self decryptString:identifier];
+        NSString *processedIdentifier;
+        
+        BOOL decryptionNeeded = (self.previousEncryptionLevel == CleverTapEncryptionHigh ||
+                                 self.previousEncryptionLevel == CleverTapEncryptionMedium) &&
+                                 self.encryptionLevel == CleverTapEncryptionNone;
+        BOOL encryptionNeeded = (self.previousEncryptionLevel == CleverTapEncryptionNone) &&
+                                (self.encryptionLevel == CleverTapEncryptionMedium ||
+                                 self.encryptionLevel == CleverTapEncryptionHigh);
+        
+        if (decryptionNeeded) {
+            // Use a loop instead of hard-coded double-decrypt because:
+            // 1. The double copyWithZone trigger means Call #2 reads already-decrypted
+            //    plaintext from prefs — hard-coded double-decrypt would crash on nil.
+            // 2. Accumulated layers from 1→2→0 paths may exceed 2.
+            // The loop exits safely when decryption returns nil (already plaintext)
+            // or when the result no longer has AES-GCM framing.
+            NSString *current = identifier;
+            NSInteger maxIterations = 10;
+            NSInteger iterations = 0;
+            
+            while (iterations < maxIterations) {
+                NSString *attempt = [self decryptString:current];
+                if (!attempt) break;  // nil means current is already plaintext — stop here
+                
+                processedIdentifier = attempt;
+                iterations++;
+                
+                BOOL stillEncrypted = [processedIdentifier hasPrefix:AES_GCM_PREFIX] &&
+                                      [processedIdentifier hasSuffix:AES_GCM_SUFFIX];
+                if (!stillEncrypted) break;
+                
+                current = processedIdentifier;
+            }
+            
+            // If no iteration succeeded (e.g. identifier was already plaintext on Call #2),
+            // fall back to the identifier as-is so the entry is preserved, not dropped.
+            if (!processedIdentifier) {
+                processedIdentifier = identifier;
+            }
+        }
+        else if (encryptionNeeded) {
+            processedIdentifier = [self encryptString:identifier];
+        }
+        else {
+            // Covers 1↔2 transitions: both levels use the same AES-GCM algorithm,
+            // so the cache key format is identical — no re-keying needed.
+            processedIdentifier = identifier;
+        }
         
         if (processedIdentifier) {
             newCache[[NSString stringWithFormat:@"%@_%@", key, processedIdentifier]] = value;
         }
     }];
     
+    CleverTapLogStaticInternal(@"CleverTap cached GUIDs updated for account: %@ — %lu entries saved",
+        _accountID, (unsigned long)newCache.count);
     [CTPreferences putObject:newCache forKey:cacheKey];
 }
 
