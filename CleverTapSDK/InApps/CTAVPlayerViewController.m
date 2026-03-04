@@ -3,11 +3,11 @@
 #import "CTInAppNotification.h"
 #import "CTUIUtils.h"
 
-@interface CTAVPlayerViewController () 
+@interface CTAVPlayerViewController ()
 
 @property (nonatomic, strong) CTInAppNotification *notification;
 @property (nonatomic, strong) UIImageView *imageView;
-
+@property (nonatomic, strong) UIButton *ctaButton;
 
 @end
 
@@ -66,6 +66,11 @@
     if (self.autoplay) {
         [self.player play];
     }
+
+    // Add CTA button overlay if handler and buttons are available
+    if (self.ctaTapHandler && self.notification.buttons.count > 0) {
+        [self setupCTAButton];
+    }
 }
 
 - (void)viewDidLayoutSubviews {
@@ -97,6 +102,38 @@
         if (self.autoplay) {
             [self.player play];
         }
+    }
+}
+
+- (void)setupCTAButton {
+    CTNotificationButton *btn = self.notification.buttons[0];
+
+    self.ctaButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.ctaButton.translatesAutoresizingMaskIntoConstraints = NO;
+    UIColor *textColor = [CTUIUtils ct_colorWithHexString:btn.textColor];
+    [self.ctaButton setTitle:btn.text forState:UIControlStateNormal];
+    [self.ctaButton setTitleColor:textColor forState:UIControlStateNormal];
+    [self.ctaButton setImage:[UIImage systemImageNamed:@"arrow.up.right.square.fill"] forState:UIControlStateNormal];
+    self.ctaButton.tintColor = textColor;
+    self.ctaButton.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
+    self.ctaButton.imageEdgeInsets = UIEdgeInsetsMake(0, 8, 0, 0);
+    [self.ctaButton setBackgroundColor:[CTUIUtils ct_colorWithHexString:btn.backgroundColor]];
+    self.ctaButton.layer.cornerRadius = [btn.borderRadius floatValue];
+    self.ctaButton.layer.masksToBounds = YES;
+    self.ctaButton.contentEdgeInsets = UIEdgeInsetsMake(8, 16, 8, 16);
+    [self.ctaButton addTarget:self action:@selector(handleCTATapped) forControlEvents:UIControlEventTouchUpInside];
+
+    [self.contentOverlayView addSubview:self.ctaButton];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.ctaButton.centerXAnchor constraintEqualToAnchor:self.contentOverlayView.centerXAnchor],
+        [self.ctaButton.bottomAnchor constraintEqualToAnchor:self.contentOverlayView.bottomAnchor constant:-100],
+        [self.ctaButton.heightAnchor constraintEqualToConstant:44],
+    ]];
+}
+
+- (void)handleCTATapped {
+    if (self.ctaTapHandler) {
+        self.ctaTapHandler();
     }
 }
 

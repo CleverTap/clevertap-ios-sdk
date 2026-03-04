@@ -118,6 +118,14 @@ static const CGFloat kSpacingConstant = 160.f;
         self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
                                                                                   muted:YES
                                                                                autoplay:YES];
+        if (self.notification.buttons.count > 0) {
+            __weak typeof(self) weakSelf = self;
+            self.playerController.ctaTapHandler = ^{
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                [strongSelf handleButtonClickFromIndex:0];
+                [strongSelf hide:YES];
+            };
+        }
         self.imageView.hidden = YES;
         [self addChildViewController:self.playerController];
         self.playerController.view.frame = self.containerView.bounds;
