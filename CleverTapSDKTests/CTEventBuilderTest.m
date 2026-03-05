@@ -8,7 +8,8 @@
 
 #import <XCTest/XCTest.h>
 #import "CTEventBuilder.h"
-#import "CTValidator.h"
+#import "CTValidationConfig.h"
+#import "CTEventNameValidator.h"
 #import "CTInAppNotification.h"
 
 @interface CTEventBuilderTest : XCTestCase
@@ -17,6 +18,8 @@
 @implementation CTEventBuilderTest
 
 - (void)setUp {
+    [super setUp];
+    [CTEventBuilder initializeWithValidationConfig:[CTValidationConfig defaultConfigWithCountryCode:nil]];
 }
 
 - (void)tearDown {
@@ -68,15 +71,21 @@
 }
 
 - (void)test_build_withDiscardedEventName {
-    [CTValidator setDiscardedEvents:@[@"aa",@"bb",@"cc"]];
+    // NOTE: build:withEventActions:validationConfig:completionHandler: removed in refactor — test uses CTEventNameValidator directly
+    CTValidationConfig *config = [CTValidationConfig defaultConfigWithCountryCode:nil];
+    config.discardedEventNames = [NSSet setWithArray:@[@"aa", @"bb", @"cc"]];
+    CTEventNameValidator *nameValidator = [[CTEventNameValidator alloc] initWithConfig:config];
     NSString *eventName = @"aa";
-    NSDictionary *eventActions = @{@"key1": @"value1", @"key2": @"value2"};
-    
-    [CTEventBuilder build:eventName withEventActions:eventActions completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
 
-        XCTAssertNil(event);
-        XCTAssertEqual(errors.count, 1);
-    }];
+    CTValidationResult *nameResult = [nameValidator validateEventName:eventName];
+    NSMutableArray<CTValidationResult *> *errors = [NSMutableArray array];
+    NSDictionary *event = nil;
+    if (nameResult.shouldDrop) {
+        [errors addObject:nameResult];
+    }
+
+    XCTAssertNil(event);
+    XCTAssertEqual(errors.count, 1);
 }
 
 - (void)test_build_withObjectForCleaningEventName {

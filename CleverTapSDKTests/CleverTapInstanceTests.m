@@ -13,7 +13,7 @@
 #import "CleverTap+Tests.h"
 #import <OCMock/OCMock.h>
 #import "CTConstants.h"
-#import "CTValidator.h"
+#import "CTValidationConfig.h"
 
 @interface CleverTapInstanceTests : BaseTestCase
 
@@ -145,7 +145,7 @@
     self.cleverTapInstance.currentUserOptedOut = YES;
     self.cleverTapInstance.currentUserOptedOutAllowSystemEvents = NO;
 
-    id validatorMock = OCMClassMock([CTValidator class]);
+    id validatorMock = OCMClassMock([CTValidationConfig class]);
     OCMStub([validatorMock isRestrictedEventName:@"_system_event_name"]).andReturn(YES);
 
     BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123]; // any non-fetch type
@@ -159,7 +159,7 @@
     self.cleverTapInstance.currentUserOptedOut = YES;
     self.cleverTapInstance.currentUserOptedOutAllowSystemEvents = YES;
 
-    id validatorMock = OCMClassMock([CTValidator class]);
+    id validatorMock = OCMClassMock([CTValidationConfig class]);
     OCMStub([validatorMock isRestrictedEventName:@"_system_event_name"]).andReturn(YES);
 
     BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123];
@@ -173,7 +173,7 @@
     self.cleverTapInstance.currentUserOptedOut = YES;
     self.cleverTapInstance.currentUserOptedOutAllowSystemEvents = NO;
 
-    id validatorMock = OCMClassMock([CTValidator class]);
+    id validatorMock = OCMClassMock([CTValidationConfig class]);
     OCMStub([validatorMock isRestrictedEventName:@"custom_event"]).andReturn(NO);
 
     BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123];
@@ -186,7 +186,7 @@
     NSDictionary *event = @{CLTAP_EVENT_NAME: @"custom_event"};
     self.cleverTapInstance.currentUserOptedOut = NO;
 
-    id validatorMock = OCMClassMock([CTValidator class]);
+    id validatorMock = OCMClassMock([CTValidationConfig class]);
     OCMStub([validatorMock isRestrictedEventName:@"custom_event"]).andReturn(NO);
 
     BOOL result = [self.cleverTapInstance _shouldDropEvent:event withType:123];
