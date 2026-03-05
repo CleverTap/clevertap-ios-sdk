@@ -1,0 +1,68 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode and show Swift version
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_16.4.app
+          swift --version
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: pods-${{ hashFiles('Podfile.lock') }}
+          restore-keys: pods-
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+
+      - name: Install xcpretty and slather
+        run: gem install xcpretty slather --no-document
+
+      - name: Run Tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -workspace CleverTapSDK.xcworkspace \
+            -scheme CleverTapSDKTests \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
+            -enableCodeCoverage YES \
+            -derivedDataPath build \
+            | xcpretty --color
+
+      - name: Generate Coverage Report with Slather
+        if: always()
+        run: |
+          mkdir -p coverage
+          slather coverage
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: coverage/cobertura.xml
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload Coverage XML Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-xml
+          path: coverage/cobertura.xml
