@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.5.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.5.1) (March 4, 2026)
+#### Added
+- Adds deep link URL capture in InApp notification click events, providing consistent attribution with Push notifications. Supports button-level deep links for CTA clicks and template-level deep links for image-only and HTML templates.
+#### Fixed
+- Fixes a bug where onUserLogin was creating additional guids only for encryption level `high`.
+
 ### [Version 7.5.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.5.0) (February 9, 2026)
 #### Added
 - Nested Objects Ingestion: Adds support for ingestion of nested objects in both event and profile properties, enabling richer engagement through more structured analytics. Please contact the `CleverTap` team to enable it for your account.
