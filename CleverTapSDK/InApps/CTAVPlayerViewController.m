@@ -113,7 +113,7 @@
     UIColor *textColor = [CTUIUtils ct_colorWithHexString:btn.textColor];
     [self.ctaButton setTitle:btn.text forState:UIControlStateNormal];
     [self.ctaButton setTitleColor:textColor forState:UIControlStateNormal];
-    [self.ctaButton setImage:[UIImage systemImageNamed:@"arrow.up.right.square.fill"] forState:UIControlStateNormal];
+//    [self.ctaButton setImage:[UIImage systemImageNamed:@"arrow.up.right.square.fill"] forState:UIControlStateNormal];
     self.ctaButton.tintColor = textColor;
     self.ctaButton.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
     self.ctaButton.imageEdgeInsets = UIEdgeInsetsMake(0, 8, 0, 0);
