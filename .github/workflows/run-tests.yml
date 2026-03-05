@@ -41,7 +41,7 @@ jobs:
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -enableCodeCoverage YES \
             -derivedDataPath build \
             | xcpretty --color
