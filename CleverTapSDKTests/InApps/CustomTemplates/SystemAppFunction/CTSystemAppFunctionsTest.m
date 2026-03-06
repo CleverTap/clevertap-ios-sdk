@@ -41,11 +41,13 @@
     
     // Verify Push Permission template
     XCTAssertEqualObjects(pushPermissionTemplate.name, CLTAP_PUSH_PERMISSION_TEMPLATE_NAME);
+    XCTAssertGreaterThanOrEqual(pushPermissionTemplate.arguments.count, 1);
     XCTAssertEqualObjects(pushPermissionTemplate.arguments[0].name, CLTAP_FB_SETTINGS_KEY);
     XCTAssertEqualObjects(pushPermissionTemplate.arguments[0].defaultValue, @(NO));
-    
+
     // Verify Open Url template
     XCTAssertEqualObjects(openUrlTemplate.name, CLTAP_OPEN_URL_TEMPLATE_NAME);
+    XCTAssertGreaterThanOrEqual(openUrlTemplate.arguments.count, 1);
     XCTAssertEqualObjects(openUrlTemplate.arguments[0].name, CLTAP_OPEN_URL_ACTION_KEY);
     XCTAssertEqualObjects(openUrlTemplate.arguments[0].defaultValue, @(""));
     

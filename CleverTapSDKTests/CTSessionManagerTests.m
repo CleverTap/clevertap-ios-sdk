@@ -16,7 +16,6 @@
 #import <OCMock/OCMock.h>
 
 @interface CTSessionManagerTests : XCTestCase
-//@property (nonatomic, strong) CTSessionManager *classObject;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CleverTap *instance;
 @end
@@ -34,7 +33,6 @@
 
 - (void)tearDown {
     [_instance.sessionManager resetSession];
-//    _classObject = nil;
     _config = nil;
     _instance = nil;
 }

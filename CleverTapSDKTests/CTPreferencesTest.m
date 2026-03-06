@@ -117,7 +117,7 @@
 
     [CTPreferences removeObjectForKey:@"objectValueForTesting"];
     
-    id checkValue = [CTPreferences getObjectForKey:@"WizRocketobjectValueForTesting"];
+    id checkValue = [CTPreferences getObjectForKey:@"objectValueForTesting"];
     
     XCTAssertNil(checkValue);
 }
