@@ -25,14 +25,8 @@ let package = Package(
     dependencies: [],
     targets: [
         .binaryTarget(
-            name: "SDWebImageCT",
-            url: "https://github.com/SDWebImage/SDWebImage/releases/download/5.21.0/SDWebImage-dynamic.xcframework.zip",
-            checksum: "e034ea04f5e86866bc3081d009941bd5b2a2ed705b3a06336656484514116638"
-        ),
-        .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.5.1.xcframework.zip",
-            checksum: "5e9ff89dfd5e1f2c51c697b25be2ceef1a88eae5c47b519fe82e7599cd31584f"
+            path: "Framework/CleverTapSDK.xcframework"
         ),
         .target(
             name: "CleverTapLocation",
@@ -51,8 +45,7 @@ let package = Package(
         .target(
             name: "CleverTapSDKWrapper",
             dependencies: [
-                "CleverTapSDK",
-                .target(name: "SDWebImageCT", condition: .when(platforms: [.iOS]))
+                "CleverTapSDK"
             ],
             path: "CleverTapSDKWrapper",
             linkerSettings: [

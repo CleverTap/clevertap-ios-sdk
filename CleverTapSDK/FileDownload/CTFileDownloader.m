@@ -3,7 +3,7 @@
 #import "CTPreferences.h"
 #import "CTFileDownloadManager.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-#import <SDWebImage/SDImageCache.h>
+#import <CommonCrypto/CommonDigest.h>
 #endif
 
 @interface CTFileDownloader()
@@ -92,10 +92,44 @@
     if (image) {
         return image;
     }
-    
+
     CleverTapLogInternal(self.config.logLevel, @"%@ Failed to load image from path %@", self, imagePath);
     return nil;
 }
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (nullable NSData *)loadInAppImageDataFromDisk:(NSURL *)imageURL {
+    NSString *path = CTSDWebImageCachePath(imageURL.absoluteString);
+    return [NSData dataWithContentsOfFile:path];
+}
+
+- (void)storeInAppImageData:(NSData *)data forURL:(NSURL *)url {
+    if (!data || !url) return;
+    NSString *path = CTSDWebImageCachePath(url.absoluteString);
+    NSString *dir = [path stringByDeletingLastPathComponent];
+    [[NSFileManager defaultManager] createDirectoryAtPath:dir
+                                withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:nil];
+    [data writeToFile:path atomically:YES];
+}
+
+- (void)prefetchInAppImages:(NSArray<NSString *> *)imageURLs {
+    if (!imageURLs.count) return;
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    for (NSString *urlString in imageURLs) {
+        dispatch_async(queue, ^{
+            NSURL *url = [NSURL URLWithString:urlString];
+            if (!url) return;
+            if ([self loadInAppImageDataFromDisk:url]) return; // already cached
+            NSData *data = [NSData dataWithContentsOfURL:url];
+            if (data) {
+                [self storeInAppImageData:data forURL:url];
+            }
+        });
+    }
+}
+#endif
 
 #pragma mark - Private
 
@@ -217,7 +251,52 @@
     return [[NSDate date] timeIntervalSince1970];
 }
 
+// ---------------------------------------------------------------------------
+// CTSDWebImageCachePath — computes the on-disk path that SDWebImage (5.x)
+// would have used for a given URL string.
+//
+// Faithful port of:
+//   SDDiskCacheFileNameForKey  (SDDiskCache.m:360–387)
+//   SDSanitizeFileNameString   (SDDiskCache.m:345–354)
+//   SDImageCache.defaultDiskCacheDirectory (SDImageCache.m:94–98)
+//
+// Used exclusively by removeLegacyAssets: to locate and delete files that
+// older SDK versions cached via SDWebImage, so they don't accumulate on device.
+// ---------------------------------------------------------------------------
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+static NSString *CTSDWebImageCachePath(NSString *urlString) {
+    // Directory: SDImageCache.defaultDiskCacheDirectory + namespace "default"
+    NSString *cacheDir = [[[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)
+                            firstObject]
+                           stringByAppendingPathComponent:@"com.hackemist.SDImageCache"]
+                          stringByAppendingPathComponent:@"default"];
+
+    // MD5 of the URL string (mirrors SDDiskCacheFileNameForKey)
+    const char *str = urlString.UTF8String ?: "";
+    unsigned char r[CC_MD5_DIGEST_LENGTH];
+    CC_MD5(str, (CC_LONG)strlen(str), r);
+    NSString *md5 = [NSString stringWithFormat:
+        @"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+        r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],
+        r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15]];
+
+    // Extension: URL path extension, sanitized and length-capped
+    // SDSanitizeFileNameString strips \0 and : (the only invalid chars on Apple FS)
+    // SD_MAX_FILE_EXTENSION_LENGTH = NAME_MAX - CC_MD5_DIGEST_LENGTH*2 - 1 = 222
+    NSString *ext = [NSURL URLWithString:urlString].pathExtension;
+    if (ext.length > 0) {
+        NSCharacterSet *illegal = [NSCharacterSet characterSetWithCharactersInString:@"\0:"];
+        ext = [[ext componentsSeparatedByCharactersInSet:illegal] componentsJoinedByString:@""];
+        if (ext.length > (NAME_MAX - CC_MD5_DIGEST_LENGTH * 2 - 1)) {
+            ext = nil;
+        }
+    }
+    NSString *filename = (ext.length > 0)
+        ? [NSString stringWithFormat:@"%@.%@", md5, ext]
+        : md5;
+    return [cacheDir stringByAppendingPathComponent:filename];
+}
+
 - (void)removeLegacyAssets:(void (^)(void))completion {
     NSArray<NSString *> *activeAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
     NSArray<NSString *> *inactiveAssetsArray = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
@@ -228,29 +307,24 @@
     if (inactiveAssetsArray && inactiveAssetsArray.count > 0) {
         [urls addObjectsFromArray:inactiveAssetsArray];
     }
-    
+
     if (!inactiveAssetsArray && !activeAssetsArray) {
         return;
     }
-    
+
     dispatch_group_t deleteGroup = dispatch_group_create();
     dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    SDImageCache *sdImageCache = [SDImageCache sharedImageCache];
     for (NSString *url in urls) {
         dispatch_group_enter(deleteGroup);
         dispatch_async(deleteConcurrentQueue, ^{
-            if ([sdImageCache diskImageDataExistsWithKey:url]) {
-                [sdImageCache removeImageForKey:url
-                                       fromDisk:YES
-                                 withCompletion:^{
-                    dispatch_group_leave(deleteGroup);
-                }];
-            } else {
-                dispatch_group_leave(deleteGroup);
+            NSString *path = CTSDWebImageCachePath(url);
+            if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+                [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
             }
+            dispatch_group_leave(deleteGroup);
         });
     }
-    
+
     dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
         [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
         [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
@@ -263,3 +337,11 @@
 #endif
 
 @end
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+@implementation CTFileDownloader(Tests)
++ (NSString *)legacyCachePathForURL:(NSString *)urlString {
+    return CTSDWebImageCachePath(urlString);
+}
+@end
+#endif

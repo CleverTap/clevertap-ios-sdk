@@ -11,8 +11,8 @@
 
 - (void)prepareForReuse {
     [super prepareForReuse];
-    [self.cellIcon sd_cancelCurrentImageLoad];
-    [self.imageView sd_cancelCurrentImageLoad];
+    [self.cellIcon ct_cancelCurrentImageLoad];
+    [self.imageView ct_cancelCurrentImageLoad];
     self.cellImageView.image = nil;
     self.cellIcon.image = nil;
 }
@@ -81,9 +81,9 @@
     if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
         self.cellImageView.hidden = NO;
         self.cellImageView.alpha = 1.0;
-        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+        [self.cellImageView ct_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                                       options:self.sdWebImageOptions context:self.sdWebImageContext];
+                                       options:self.ctWebImageOptions context:self.ctWebImageContext];
         
         self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
@@ -94,8 +94,8 @@
     
     if (content.iconUrl) {
         self.cellIconHeightContraint.constant = 75;
-        [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
-                         placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions context:self.sdWebImageContext];
+        [self.cellIcon ct_setImageWithURL:[NSURL URLWithString:content.iconUrl]
+                         placeholderImage: [self getPortraitPlaceHolderImage] options:self.ctWebImageOptions context:self.ctWebImageContext];
         self.cellIconRatioContraint.priority = 999;
         self.cellIconWidthContraint.priority = 750;
         self.cellIcon.accessibilityLabel = content.iconDescription ? content.iconDescription : @"Icon Image";

@@ -6,8 +6,6 @@
 #import "CTFileDownloadTestHelper.h"
 #import "CTFileDownloader+Tests.h"
 #import "CTFileDownloaderMock.h"
-#import <SDWebImage/SDImageCache.h>
-#import <SDWebImage/SDWebImageManager.h>
 
 @interface CTFileDownloaderTests : XCTestCase
 
@@ -59,37 +57,27 @@
     NSArray<NSString *> *inactiveAssetsArray = @[urls[2], urls[3]];
     [CTPreferences putObject:activeAssetsArray forKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];
     [CTPreferences putObject:inactiveAssetsArray forKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]];
-    
+
     long ts = (long)[[NSDate date] timeIntervalSince1970];
     self.fileDownloader.mockCurrentTimeInterval = ts;
     [CTPreferences putInt:ts forKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]];
-    
-    SDWebImageManager *sdWebImageManager = [SDWebImageManager sharedManager];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"SDWebImage loadImageWithURL"];
-    dispatch_group_t downloads = dispatch_group_create();
-    dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+    // Simulate legacy SDWebImage disk-cached files by writing dummy data to the
+    // exact paths SDWebImage would have used (via legacyCachePathForURL:, which
+    // mirrors SDDiskCacheFileNameForKey + SDImageCache.defaultDiskCacheDirectory).
     for (NSString *url in urls) {
-        dispatch_group_enter(downloads);
-        dispatch_async(concurrentQueue, ^{
-            [sdWebImageManager loadImageWithURL:[NSURL URLWithString:url]
-                                        options:SDWebImageRetryFailed
-                                        context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeDisk)}
-                                       progress:nil
-                                      completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
-                dispatch_group_leave(downloads);
-            }];
-        });
+        NSString *path = [CTFileDownloader legacyCachePathForURL:url];
+        NSError *dirError = nil;
+        [[NSFileManager defaultManager] createDirectoryAtPath:[path stringByDeletingLastPathComponent]
+                                  withIntermediateDirectories:YES
+                                                   attributes:nil
+                                                        error:&dirError];
+        XCTAssertNil(dirError);
+        [@"dummy" writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        XCTAssertTrue([[NSFileManager defaultManager] fileExistsAtPath:path],
+                      @"Pre-condition: dummy legacy cache file should exist at %@", path);
     }
-    dispatch_group_notify(downloads, concurrentQueue, ^{
-        [expectation fulfill];
-    });
-    
-    [self waitForExpectations:@[expectation] timeout:2.0];
-    SDImageCache *sdImageCache = [SDImageCache sharedImageCache];
-    for (NSString *url in urls) {
-        XCTAssertNotNil([sdImageCache imageFromDiskCacheForKey:url]);
-    }
-    
+
     // Remove legacy assets
     XCTestExpectation *expectationRemoveLegacyAssets = [self expectationWithDescription:@"RemoveLegacyAssets"];
     [self.fileDownloader removeLegacyAssets:^{
@@ -97,11 +85,13 @@
         XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_INACTIVE_ASSETS]]);
         XCTAssertNil([CTPreferences getObjectForKey:[self.fileDownloader storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ASSETS_LAST_DELETED_TS]]);
         for (NSString *url in urls) {
-            XCTAssertNil([sdImageCache imageFromDiskCacheForKey:url]);
+            NSString *path = [CTFileDownloader legacyCachePathForURL:url];
+            XCTAssertFalse([[NSFileManager defaultManager] fileExistsAtPath:path],
+                           @"Post-condition: legacy cache file should have been deleted at %@", path);
         }
         [expectationRemoveLegacyAssets fulfill];
     }];
-    
+
     [self waitForExpectations:@[expectationRemoveLegacyAssets] timeout:2.0];
 }
 
