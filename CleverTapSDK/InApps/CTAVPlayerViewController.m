@@ -106,28 +106,18 @@
 }
 
 - (void)setupCTAButton {
-    CTNotificationButton *btn = self.notification.buttons[0];
-
     self.ctaButton = [UIButton buttonWithType:UIButtonTypeCustom];
     self.ctaButton.translatesAutoresizingMaskIntoConstraints = NO;
-    UIColor *textColor = [CTUIUtils ct_colorWithHexString:btn.textColor];
-    [self.ctaButton setTitle:btn.text forState:UIControlStateNormal];
-    [self.ctaButton setTitleColor:textColor forState:UIControlStateNormal];
-//    [self.ctaButton setImage:[UIImage systemImageNamed:@"arrow.up.right.square.fill"] forState:UIControlStateNormal];
-    self.ctaButton.tintColor = textColor;
-    self.ctaButton.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
-    self.ctaButton.imageEdgeInsets = UIEdgeInsetsMake(0, 8, 0, 0);
-    [self.ctaButton setBackgroundColor:[CTUIUtils ct_colorWithHexString:btn.backgroundColor]];
-    self.ctaButton.layer.cornerRadius = [btn.borderRadius floatValue];
-    self.ctaButton.layer.masksToBounds = YES;
-    self.ctaButton.contentEdgeInsets = UIEdgeInsetsMake(8, 16, 8, 16);
+    [self.ctaButton setImage:[UIImage systemImageNamed:@"arrow.up.right.circle.fill"] forState:UIControlStateNormal];
+    self.ctaButton.tintColor = [UIColor whiteColor];
     [self.ctaButton addTarget:self action:@selector(handleCTATapped) forControlEvents:UIControlEventTouchUpInside];
 
     [self.contentOverlayView addSubview:self.ctaButton];
     [NSLayoutConstraint activateConstraints:@[
-        [self.ctaButton.centerXAnchor constraintEqualToAnchor:self.contentOverlayView.centerXAnchor],
+        [self.ctaButton.trailingAnchor constraintEqualToAnchor:self.contentOverlayView.trailingAnchor constant:-16],
         [self.ctaButton.bottomAnchor constraintEqualToAnchor:self.contentOverlayView.bottomAnchor constant:-100],
-        [self.ctaButton.heightAnchor constraintEqualToConstant:44],
+        [self.ctaButton.widthAnchor constraintEqualToConstant:160],
+        [self.ctaButton.heightAnchor constraintEqualToConstant:160],
     ]];
 }
 
