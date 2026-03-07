@@ -104,4 +104,17 @@
     XCTAssertEqualObjects(request.urlRequest.URL.absoluteString, @"https://example.com/defineVars");
 }
 
+#pragma mark - eventRequest with additionalHeaders
+
+- (void)test_eventRequest_withAdditionalHeaders_setsHeaders {
+    NSDictionary *headers = @{@"X-Custom-Header": @"custom-value", @"X-Another": @"another-value"};
+    CTRequest *request = [CTRequestFactory eventRequestWithConfig:self.config
+                                                          params:nil
+                                                             url:@"https://api.clevertap.com/1/event"
+                                               additionalHeaders:headers];
+    XCTAssertNotNil(request);
+    XCTAssertEqualObjects([request.urlRequest valueForHTTPHeaderField:@"X-Custom-Header"], @"custom-value");
+    XCTAssertEqualObjects([request.urlRequest valueForHTTPHeaderField:@"X-Another"], @"another-value");
+}
+
 @end

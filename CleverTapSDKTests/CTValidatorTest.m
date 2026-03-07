@@ -346,6 +346,46 @@
     XCTAssertFalse(result);
 }
 
+#pragma mark - CTEventNameValidator: restricted / discarded outcome
+
+- (void)test_validateEventName_withRestrictedName_shouldDrop {
+    CTEventNameValidator *validator = [[CTEventNameValidator alloc] initWithConfig:[CTValidationConfig defaultConfigWithCountryCode:nil]];
+    CTValidationResult *result = [validator validateEventName:@"App Launched"];
+    XCTAssertTrue([result shouldDrop]);
+    XCTAssertEqual(result.outcome, CTValidationOutcomeDrop);
+    XCTAssertNil(result.object);
+}
+
+- (void)test_validateEventName_withDiscardedName_shouldDrop {
+    CTValidationConfig *config = [CTValidationConfig defaultConfigWithCountryCode:nil];
+    config.discardedEventNames = [NSSet setWithObject:@"spam event"];
+    CTEventNameValidator *validator = [[CTEventNameValidator alloc] initWithConfig:config];
+    CTValidationResult *result = [validator validateEventName:@"spam event"];
+    XCTAssertTrue([result shouldDrop]);
+    XCTAssertEqual(result.outcome, CTValidationOutcomeDrop);
+}
+
+#pragma mark - CTDataValidator: validateEventData gaps
+
+- (void)test_validateEventData_withNilInput_returnsEmptyDict {
+    CTDataValidator *dataValidator = [[CTDataValidator alloc] initWithConfig:[CTValidationConfig defaultConfigWithCountryCode:nil]];
+    CTValidationResult *result = [dataValidator validateEventData:nil];
+    XCTAssertNotNil(result);
+    XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+    XCTAssertEqualObjects(result.cleanedData, @{});
+}
+
+- (void)test_validateEventData_withNullValue_removesKeyWithWarning {
+    NSDictionary *input = @{@"validKey": @"validValue", @"nullKey": [NSNull null]};
+    CTDataValidator *dataValidator = [[CTDataValidator alloc] initWithConfig:[CTValidationConfig defaultConfigWithCountryCode:nil]];
+    CTValidationResult *result = [dataValidator validateEventData:input];
+    XCTAssertNotNil(result);
+    NSDictionary *cleaned = result.cleanedData;
+    XCTAssertNotNil(cleaned[@"validKey"]);
+    XCTAssertNil(cleaned[@"nullKey"]);
+    XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+}
+
 #pragma mark - isValidCleverTapId (now CTUtils.isValidCleverTapId:)
 
 - (void)test_isValidCleverTapId_withValidInput {

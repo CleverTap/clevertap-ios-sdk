@@ -195,4 +195,89 @@
     XCTAssertFalse([CTUtils areEqualNormalizedName:@"Event 1" andName:@"Event 2"]);
 }
 
+#pragma mark - isNullOrEmpty
+
+- (void)test_isNullOrEmpty_nil_returnsYes {
+    XCTAssertTrue([CTUtils isNullOrEmpty:nil]);
+}
+
+- (void)test_isNullOrEmpty_emptyString_returnsYes {
+    XCTAssertTrue([CTUtils isNullOrEmpty:@""]);
+}
+
+- (void)test_isNullOrEmpty_emptyArray_returnsYes {
+    XCTAssertTrue([CTUtils isNullOrEmpty:@[]]);
+}
+
+- (void)test_isNullOrEmpty_emptyDict_returnsYes {
+    XCTAssertTrue([CTUtils isNullOrEmpty:@{}]);
+}
+
+- (void)test_isNullOrEmpty_nonEmptyString_returnsNo {
+    XCTAssertFalse([CTUtils isNullOrEmpty:@"hello"]);
+}
+
+- (void)test_isNullOrEmpty_nonEmptyArray_returnsNo {
+    XCTAssertFalse([CTUtils isNullOrEmpty:@[@1]]);
+}
+
+#pragma mark - jsonObjectToString
+
+- (void)test_jsonObjectToString_stringInput_returnsStringPassthrough {
+    NSString *result = [CTUtils jsonObjectToString:@"hello"];
+    XCTAssertEqualObjects(result, @"hello");
+}
+
+- (void)test_jsonObjectToString_dictInput_returnsJsonString {
+    NSString *result = [CTUtils jsonObjectToString:@{@"k": @"v"}];
+    XCTAssertNotNil(result);
+    NSData *data = [result dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *roundTripped = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    XCTAssertEqualObjects(roundTripped[@"k"], @"v");
+}
+
+- (void)test_jsonObjectToString_arrayInput_returnsJsonString {
+    NSString *result = [CTUtils jsonObjectToString:@[@1, @2]];
+    XCTAssertNotNil(result);
+    NSData *data = [result dataUsingEncoding:NSUTF8StringEncoding];
+    NSArray *roundTripped = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    XCTAssertEqualObjects(roundTripped, (@[@1, @2]));
+}
+
+#pragma mark - isValidCleverTapId
+
+- (void)test_isValidCleverTapId_validAlphanumeric_returnsYes {
+    XCTAssertTrue([CTUtils isValidCleverTapId:@"User_123"]);
+}
+
+- (void)test_isValidCleverTapId_allowedSpecialChars_returnsYes {
+    XCTAssertTrue([CTUtils isValidCleverTapId:@"user@domain.com"]);
+    XCTAssertTrue([CTUtils isValidCleverTapId:@"id-123_abc"]);
+}
+
+- (void)test_isValidCleverTapId_nil_returnsNo {
+    XCTAssertFalse([CTUtils isValidCleverTapId:nil]);
+}
+
+- (void)test_isValidCleverTapId_empty_returnsNo {
+    XCTAssertFalse([CTUtils isValidCleverTapId:@""]);
+}
+
+- (void)test_isValidCleverTapId_tooLong_returnsNo {
+    NSString *longId = [@"" stringByPaddingToLength:65 withString:@"a" startingAtIndex:0];
+    XCTAssertFalse([CTUtils isValidCleverTapId:longId]);
+}
+
+- (void)test_isValidCleverTapId_invalidSpecialChars_returnsNo {
+    XCTAssertFalse([CTUtils isValidCleverTapId:@"bad#id"]);
+    XCTAssertFalse([CTUtils isValidCleverTapId:@"bad&id"]);
+}
+
+#pragma mark - getKeyWithSuffix
+
+- (void)test_getKeyWithSuffix_returnsFormattedKey {
+    NSString *result = [CTUtils getKeyWithSuffix:@"prefs" accountID:@"abc123"];
+    XCTAssertEqualObjects(result, @"abc123:prefs");
+}
+
 @end
