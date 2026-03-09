@@ -79,7 +79,7 @@
         [exp fulfill];
     }];
     [timer start];
-    [timer start]; // second call is a no-op
+    [timer start]; // second call is a no-op (timer already exists)
     [self waitForExpectations:@[exp] timeout:0.5];
 }
 

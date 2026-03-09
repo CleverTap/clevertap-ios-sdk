@@ -280,4 +280,38 @@
     XCTAssertEqualObjects(result, @"abc123:prefs");
 }
 
+#pragma mark - runSyncMainQueue:
+
+- (void)test_runSyncMainQueue_calledFromMainThread_executesBlock {
+    __block BOOL executed = NO;
+    [CTUtils runSyncMainQueue:^{ executed = YES; }];
+    XCTAssertTrue(executed);
+}
+
+- (void)test_runSyncMainQueue_calledFromBackgroundThread_executesBlockOnMain {
+    XCTestExpectation *exp = [self expectationWithDescription:@"sync main queue"];
+    __block BOOL onMain = NO;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [CTUtils runSyncMainQueue:^{
+            onMain = [NSThread isMainThread];
+        }];
+        XCTAssertTrue(onMain);
+        [exp fulfill];
+    });
+    [self waitForExpectations:@[exp] timeout:1.0];
+}
+
+#pragma mark - runAsyncMainQueue:
+
+- (void)test_runAsyncMainQueue_executesBlockOnMainThread {
+    XCTestExpectation *exp = [self expectationWithDescription:@"async main queue"];
+    __block BOOL onMain = NO;
+    [CTUtils runAsyncMainQueue:^{
+        onMain = [NSThread isMainThread];
+        [exp fulfill];
+    }];
+    [self waitForExpectations:@[exp] timeout:1.0];
+    XCTAssertTrue(onMain);
+}
+
 @end

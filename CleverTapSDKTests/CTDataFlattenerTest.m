@@ -73,4 +73,27 @@
     XCTAssertEqualObjects(result[@"tags"], tags);
 }
 
+- (void)test_flatten_dateStringValue_processesDatePrefix {
+    // $D_ strings are processed by CTProfileOperationUtils.processDatePrefixes
+    NSDictionary *input = @{@"dob": @"$D_1000"};
+    NSDictionary *result = [CTDataFlattener flatten:input];
+    XCTAssertEqualObjects(result[@"dob"], @1000LL);
+}
+
+- (void)test_flatten_arrayWithDateString_processesDatePrefixes {
+    NSDictionary *input = @{@"dates": @[@"$D_2000", @"plain"]};
+    NSDictionary *result = [CTDataFlattener flatten:input];
+    NSArray *dates = result[@"dates"];
+    XCTAssertEqualObjects(dates[0], @2000LL);
+    XCTAssertEqualObjects(dates[1], @"plain");
+}
+
+- (void)test_flatten_multipleFlatKeys_returnsAll {
+    NSDictionary *input = @{@"a": @1, @"b": @"two", @"c": @3.0};
+    NSDictionary *result = [CTDataFlattener flatten:input];
+    XCTAssertEqual(result.count, 3u);
+    XCTAssertEqualObjects(result[@"a"], @1);
+    XCTAssertEqualObjects(result[@"b"], @"two");
+}
+
 @end

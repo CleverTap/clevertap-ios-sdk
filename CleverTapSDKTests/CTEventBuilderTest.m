@@ -340,12 +340,113 @@
 - (void)test_buildInboxMessageStateEvent_withClickedFalseAndInvalidKey {
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
-    
+
     [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Viewed");
         XCTAssertEqual([event[@"evtData"] count], 1);
         XCTAssertEqual(errors.count, 0);
+    }];
+}
+
+#pragma mark - build:completionHandler: (no actions)
+
+- (void)test_build_withNoActions_returnsNonNilEvent {
+    [CTEventBuilder build:@"MyEvent" completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"MyEvent");
+        XCTAssertEqual(errors.count, 0);
+    }];
+}
+
+- (void)test_build_withNoActions_nilName_returnsNilEvent {
+    [CTEventBuilder build:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNil(event);
+    }];
+}
+
+#pragma mark - buildChargedEventWithDetails: with > 50 items
+
+- (void)test_buildChargedEventWithDetails_with51Items_returnsEventAndError522 {
+    NSMutableArray *items = [NSMutableArray array];
+    for (int i = 0; i < 51; i++) {
+        [items addObject:@{@"item": [NSString stringWithFormat:@"val%d", i]}];
+    }
+    [CTEventBuilder buildChargedEventWithDetails:@{@"charge": @"val"} andItems:items completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqual(errors.count, 1);
+        XCTAssertEqual([errors[0] errorCode], 522);
+    }];
+}
+
+#pragma mark - buildGeofenceStateEvent:
+
+- (void)test_buildGeofenceStateEvent_entered_setsEnteredEventName {
+    NSDictionary *details = @{@"id": @"geo1"};
+    [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:details completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"Geocluster Entered");
+    }];
+}
+
+- (void)test_buildGeofenceStateEvent_exited_setsExitedEventName {
+    NSDictionary *details = @{@"id": @"geo1"};
+    [CTEventBuilder buildGeofenceStateEvent:NO forGeofenceDetails:details completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"Geocluster Exited");
+    }];
+}
+
+- (void)test_buildGeofenceStateEvent_withDetails_includesInEventData {
+    NSDictionary *details = @{@"latitude": @(37.3382), @"longitude": @(-121.8863)};
+    [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:details completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtData"][@"latitude"], @(37.3382));
+    }];
+}
+
+#pragma mark - buildSignedCallEvent:
+
+- (void)test_buildSignedCallEvent_outgoing_setsOutgoingEventName {
+    [CTEventBuilder buildSignedCallEvent:0 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"SCOutgoing");
+    }];
+}
+
+- (void)test_buildSignedCallEvent_incoming_setsIncomingEventName {
+    [CTEventBuilder buildSignedCallEvent:1 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"SCIncoming");
+    }];
+}
+
+- (void)test_buildSignedCallEvent_end_setsEndEventName {
+    [CTEventBuilder buildSignedCallEvent:2 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"SCEnd");
+    }];
+}
+
+- (void)test_buildSignedCallEvent_invalidRawValue_returnsNilEventWithError525 {
+    [CTEventBuilder buildSignedCallEvent:99 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNil(event);
+        BOOL found525 = NO;
+        for (CTValidationResult *e in errors) {
+            if ([e errorCode] == 525) { found525 = YES; break; }
+        }
+        XCTAssertTrue(found525);
+    }];
+}
+
+- (void)test_buildSignedCallEvent_emptyCallDetails_addsError524 {
+    [CTEventBuilder buildSignedCallEvent:0 forCallDetails:@{} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        BOOL found524 = NO;
+        for (CTValidationResult *e in errors) {
+            if ([e errorCode] == 524) { found524 = YES; break; }
+        }
+        XCTAssertTrue(found524);
     }];
 }
 

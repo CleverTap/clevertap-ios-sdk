@@ -189,4 +189,111 @@
     XCTAssertEqualObjects(result, @7);
 }
 
+#pragma mark - build: additional system fields
+
+- (void)test_build_withNameField_putsInSystemFields {
+    NSDictionary *profile = @{@"Name": @"John Doe"};
+    [CTProfileBuilder build:profile completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray *errors) {
+        XCTAssertEqualObjects(systemFields[@"Name"], @"John Doe");
+        XCTAssertNil(customFields[@"Name"]);
+    }];
+}
+
+- (void)test_build_withPhoneField_putsInSystemFields {
+    NSDictionary *profile = @{@"Phone": @"+15555551234"};
+    [CTProfileBuilder build:profile completionHandler:^(NSDictionary *customFields, NSDictionary *systemFields, NSArray *errors) {
+        XCTAssertEqualObjects(systemFields[@"Phone"], @"+15555551234");
+        XCTAssertNil(customFields[@"Phone"]);
+    }];
+}
+
+#pragma mark - buildSetMultiValues:
+
+- (void)test_buildSetMultiValues_validArray_returnsSetCommand {
+    [CTProfileBuilder buildSetMultiValues:@[@"a", @"b"] forKey:@"tags" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNotNil(customFields[@"tags"]);
+        XCTAssertNotNil(customFields[@"tags"][kCLTAP_COMMAND_SET]);
+        XCTAssertEqual(errors.count, 0U);
+    }];
+}
+
+- (void)test_buildSetMultiValues_emptyArray_completesWithError {
+    [CTProfileBuilder buildSetMultiValues:@[] forKey:@"tags" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNil(customFields);
+        XCTAssertGreaterThan(errors.count, 0U);
+    }];
+}
+
+- (void)test_buildSetMultiValues_nilKey_completesWithNilFields {
+    [CTProfileBuilder buildSetMultiValues:@[@"a"] forKey:nil localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNil(customFields);
+    }];
+}
+
+#pragma mark - buildAddMultiValues: (plural)
+
+- (void)test_buildAddMultiValues_validArray_returnsAddCommand {
+    [CTProfileBuilder buildAddMultiValues:@[@"x", @"y"] forKey:@"colors" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNotNil(customFields[@"colors"]);
+        XCTAssertNotNil(customFields[@"colors"][kCLTAP_COMMAND_ADD]);
+        XCTAssertEqual(errors.count, 0U);
+    }];
+}
+
+- (void)test_buildAddMultiValues_nilValues_completesWithError {
+    [CTProfileBuilder buildAddMultiValues:nil forKey:@"colors" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNil(customFields);
+        XCTAssertGreaterThan(errors.count, 0U);
+    }];
+}
+
+#pragma mark - buildRemoveMultiValue: (singular)
+
+- (void)test_buildRemoveMultiValue_nilValue_completesWithError {
+    [CTProfileBuilder buildRemoveMultiValue:nil forKey:@"tags" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNil(customFields);
+        XCTAssertGreaterThan(errors.count, 0U);
+    }];
+}
+
+- (void)test_buildRemoveMultiValue_emptyValue_completesWithError {
+    [CTProfileBuilder buildRemoveMultiValue:@"" forKey:@"tags" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNil(customFields);
+        XCTAssertGreaterThan(errors.count, 0U);
+    }];
+}
+
+- (void)test_buildRemoveMultiValue_validValue_returnsRemoveCommand {
+    [CTProfileBuilder buildRemoveMultiValue:@"red" forKey:@"tags" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNotNil(customFields[@"tags"]);
+        XCTAssertNotNil(customFields[@"tags"][kCLTAP_COMMAND_REMOVE]);
+    }];
+}
+
+#pragma mark - buildRemoveMultiValues: (plural)
+
+- (void)test_buildRemoveMultiValues_validArray_returnsRemoveCommand {
+    [CTProfileBuilder buildRemoveMultiValues:@[@"a", @"b"] forKey:@"tags" localDataStore:nil completionHandler:^(NSDictionary *customFields, NSArray *updatedMultiValue, NSArray *errors) {
+        XCTAssertNotNil(customFields[@"tags"]);
+        XCTAssertNotNil(customFields[@"tags"][kCLTAP_COMMAND_REMOVE]);
+        XCTAssertEqual(errors.count, 0U);
+    }];
+}
+
+#pragma mark - buildDecrementValueBy: additional cases
+
+- (void)test_buildDecrementValueBy_negativeValue_completesWithError {
+    [CTProfileBuilder buildDecrementValueBy:@(-2) forKey:@"score" localDataStore:nil completionHandler:^(NSDictionary *operatorDict, NSArray *errors) {
+        XCTAssertNil(operatorDict);
+        XCTAssertGreaterThan(errors.count, 0U);
+    }];
+}
+
+- (void)test_buildDecrementValueBy_emptyKey_completesWithError {
+    [CTProfileBuilder buildDecrementValueBy:@3 forKey:@"" localDataStore:nil completionHandler:^(NSDictionary *operatorDict, NSArray *errors) {
+        XCTAssertNil(operatorDict);
+        XCTAssertGreaterThan(errors.count, 0U);
+    }];
+}
+
 @end

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		028C2A233D5938DDD88ACC53 /* CTPlistInfoTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A358DAEFE421FAF0F204FB73 /* CTPlistInfoTest.m */; };
+		02BFCD20137CFABB41FD2CFE /* CleverTapProductConfigTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 66EFE13AB9558473A73BC740 /* CleverTapProductConfigTest.m */; };
 		0701E95C2372BA250034AAC2 /* CleverTap+DisplayUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = 0701E95A2372BA250034AAC2 /* CleverTap+DisplayUnit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0701E9622372C1950034AAC2 /* CTDisplayUnitController.h in Headers */ = {isa = PBXBuildFile; fileRef = 0701E9602372C1950034AAC2 /* CTDisplayUnitController.h */; };
 		0701E9632372C1950034AAC2 /* CTDisplayUnitController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0701E9612372C1950034AAC2 /* CTDisplayUnitController.m */; };
@@ -151,13 +152,20 @@
 		07D8C08B21DDEC54006F5A1B /* CTCarouselImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07D8C08A21DDEC54006F5A1B /* CTCarouselImageView.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		07FD65A2223BC26300A845B7 /* CTCoverViewController~iphoneland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A1223BC26300A845B7 /* CTCoverViewController~iphoneland.xib */; };
 		07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07FD65A3223BCB8200A845B7 /* CTCoverViewController~ipadland.xib */; };
+		09F7AFFEAAEDEE9E52CD92CC /* CleverTapUTMDetailTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CAC789775681E2BD7F8A34D0 /* CleverTapUTMDetailTest.m */; };
 		0B5564562C25946C00B87284 /* CTUserInfoMigratorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B5564552C25946C00B87284 /* CTUserInfoMigratorTest.m */; };
 		0B660ACA2D899BE100683869 /* SDWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D09A5E0221EA33C50032DDDF /* SDWebImage.framework */; };
 		0B82CD102DC2407200756998 /* CTAESGCMCryptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B82CD0F2DC2407200756998 /* CTAESGCMCryptTests.swift */; };
 		0B836117E159C83D50F7571F /* InAppDurationPartitionerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C16E1FBDB18DC1C7AA2479 /* InAppDurationPartitionerTests.swift */; };
 		0B995A4A2C36AEDC00AF6006 /* CTLocalDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */; };
+		0D4CEABE7531E4DE87CF23A9 /* CTIdentityRepoFactoryTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FA88FE3C12519A1823AF5285 /* CTIdentityRepoFactoryTest.m */; };
+		1575C4AB40B59C398B075DC0 /* CTValidationResult+Tests.h in Headers */ = {isa = PBXBuildFile; fileRef = AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */; };
+		19DB8405F88B0C57F8435D1D /* CTSystemAppFunctionPresenterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C5C8A9A90E47228E000DE2AE /* CTSystemAppFunctionPresenterTest.m */; };
+		1F19A11DA23B857DFFE5AD7F /* CTRequestSenderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */; };
 		2340298D08E15BE1679366F2 /* CTInActionResultTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DBD5E0D8AC568761F545800 /* CTInActionResultTest.m */; };
+		2442D1D1E7FE285425A7E8DD /* CTFeatureFlagsControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8151DB170479BCCFE1871E36 /* CTFeatureFlagsControllerTest.m */; };
 		282AE5F702CAC07D04153E0A /* CTValidationResultTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 76EC66D158F4EC2EB93792E5 /* CTValidationResultTest.m */; };
+		29ACA9A041789B384CFBC6CB /* CTSwizzleTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C13218D1018B2B052E92F7C1 /* CTSwizzleTest.m */; };
 		2CA2F9709966DC1A1988CFC7 /* CTFlattenedEventDataTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 14A6E5036771123B9E893C2D /* CTFlattenedEventDataTest.m */; };
 		3030225BA9AB94FACBE92C13 /* CTDispatchQueueManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F30C2F59E51A711189E774E /* CTDispatchQueueManagerTest.m */; };
 		31BABE240B3515D9472BCB67 /* CTLoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A32E1BDC683BDA0963C6AD /* CTLoggerTests.swift */; };
@@ -223,6 +231,8 @@
 		49E2B18324178E7400AD704B /* CleverTapConfigValue.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E2B18124178E7400AD704B /* CleverTapConfigValue.m */; };
 		49E2B18824237DCB00AD704B /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4ABB80A0173C15BEE7F38D2A /* CTInAppUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 10405BF7AEB9D1E6730686C3 /* CTInAppUtilsTest.m */; };
+		4AC798B15F651BBDFE83CBD1 /* CleverTapInboxStyleConfigTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A17C1360ECB81CD13FBA0F1F /* CleverTapInboxStyleConfigTest.m */; };
+		4B9EC4A508B8BAD71A648089 /* CTDisplayUnitControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF294AF34ACB6DFF4DEB35C /* CTDisplayUnitControllerTest.m */; };
 		4E0653EC2DC62E0600CDA1FD /* NetworkEncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E150CDC2DC61F4400A4CE68 /* NetworkEncryptionTests.swift */; };
 		4E0721512D0974B6000DE9C6 /* CTLocalDataStore+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0721502D0974B6000DE9C6 /* CTLocalDataStore+Tests.m */; };
 		4E1F155227692A11009387AE /* CleverTap+Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = D02AC2E8276402CF0031C1BE /* CleverTap+Tests.m */; };
@@ -403,6 +413,7 @@
 		5DCE8FADF7136FB54F52E985 /* CTInAppNotificationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = BA302D038C45C5590835082F /* CTInAppNotificationTest.m */; };
 		6000BB9914565AB7E0BADE91 /* CTProfileBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 86B31B1A29258B885EAFFB8C /* CTProfileBuilderTest.m */; };
 		616E08502C60FEB9CEE271EA /* CTInAppTimerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EB3252FE1750DCBAEC87778 /* CTInAppTimerTest.m */; };
+		65BC8CCF1A8E8D2E2667367F /* CTFlexibleIdentityRepoTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D79C2B6FCEBDB269140A380 /* CTFlexibleIdentityRepoTest.m */; };
 		6A11D83A2A8FC71F007F5D21 /* CTImpressionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A11D8382A8FC71F007F5D21 /* CTImpressionManager.h */; };
 		6A11D83B2A8FC71F007F5D21 /* CTImpressionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A11D8392A8FC71F007F5D21 /* CTImpressionManager.m */; };
 		6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E0B9029CCCC8500FCEA5F /* ContentMergerTest.m */; };
@@ -546,17 +557,22 @@
 		6BFC61AC2DDB6A5A00022EFF /* CTContentFetchManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */; };
 		6BFC61B02DDF3F2800022EFF /* CTContentFetchManagerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */; };
 		6BFC61C92DE8534500022EFF /* CTContentFetchManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61C82DE8534500022EFF /* CTContentFetchManagerTests.m */; };
+		6CA8C6B2712DE77E59FB0BD0 /* CTUIUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */; };
 		737A2C01FAC27C20D9012552 /* CTEventNameValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EAE785650386875EC8E9091 /* CTEventNameValidatorTest.m */; };
 		76B45B38A5B1283E8D7BFDBF /* CleverTapFeatureFlagsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EB6D79842FF5DDE75C6D08 /* CleverTapFeatureFlagsTest.m */; };
 		784FEA3C94ECE9143D761BCB /* InAppSelectionStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE6298F5BDD0BCAE1740F0D /* InAppSelectionStrategyTests.swift */; };
 		7ACDCC2E32FD54E579929F45 /* CTMultiDelegateManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A5858A0E994EC529904E271C /* CTMultiDelegateManagerTest.m */; };
 		7DD6BFD3CE84075AB727F21C /* CTLoginInfoProviderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 919D12C82BD89CE13EDE525C /* CTLoginInfoProviderTest.m */; };
+		837036E25A3D14C8BE2785F5 /* CTAppRatingSystemAppFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A415F802C7FFE6DD7712EE2C /* CTAppRatingSystemAppFunctionTest.m */; };
 		83999BF9B2CD23F1A6141576 /* CTLegacyIdentityRepoTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 997881C7B7B5276373B4FD43 /* CTLegacyIdentityRepoTest.m */; };
+		8577DD4B5938E7AB87A3E0F7 /* CTProductConfigControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ABEB37D9ED903F97B1383C2 /* CTProductConfigControllerTest.m */; };
 		858146CE681E075D7643AC50 /* CTTriggerAdapterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E0B3C6F086E8508C95EA002 /* CTTriggerAdapterTest.m */; };
+		85C53B3EE66A70D12CFCCD87 /* CTInAppFCManagerLegacyTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CA2AD4E8B23AC03B702C341 /* CTInAppFCManagerLegacyTest.m */; };
 		8FE6339D575F3B6002B7B9CB /* CleverTapConfigValueTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C01EA2F0707085512F68B1F /* CleverTapConfigValueTest.m */; };
 		996618D659D00AAE332278DF /* CTNestedJsonBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */; };
 		A26852306058A41BBC48790F /* CleverTapEventDetailTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C332A38933BEF47388B4D45B /* CleverTapEventDetailTest.m */; };
 		A5324FD2D644B9AC9E6D2F32 /* InactionInAppStorageStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B02535120793C05F208D08 /* InactionInAppStorageStrategyTests.swift */; };
+		BC11CD63900D9784D9FB6DDF /* CleverTapJSInterfaceTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 792DF5CE4919F6210CB0FC85 /* CleverTapJSInterfaceTest.m */; };
 		BFF757D022DE58A267422972 /* CTTriggerConditionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C646892F681993452269F8F6 /* CTTriggerConditionTest.m */; };
 		C050C5EEED858395D13F6F40 /* CTLocalInAppTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6CCFFCC2ACB74DAA6882AA51 /* CTLocalInAppTest.m */; };
 		C2D137364FFF300D97EDD30D /* CTTriggerEvaluatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C4A8604AEEF48751E5EEA85C /* CTTriggerEvaluatorTest.m */; };
@@ -673,10 +689,13 @@
 		D0D4C9F32414EE6C0029477E /* CleverTapFeatureFlags.m in Sources */ = {isa = PBXBuildFile; fileRef = D0D4C9F22414EE6C0029477E /* CleverTapFeatureFlags.m */; };
 		D0D4C9F52414EE770029477E /* CleverTapFeatureFlagsPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9F42414EE770029477E /* CleverTapFeatureFlagsPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D1E38C858AE9BB640747639E /* CTPushPermissionSystemAppFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */; };
 		D32A10A5B51B17C08B5AB5AB /* CTLimitAdapterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D492CA816AAB83934731001D /* CTLimitAdapterTest.m */; };
 		D501AEF14AE5D4E4C79FBC5D /* CleverTapDisplayUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6197020C8A776A8C08F7F832 /* CleverTapDisplayUnitTest.m */; };
 		DA8C6EA860BC6CA53FDB4D08 /* CTProfileChangeTrackerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F97F9D45A580F979772C056 /* CTProfileChangeTrackerTest.m */; };
 		DC653C430A8402BC49CF8FF6 /* CTKnownProfileFieldsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 90EA8490BDF49C5E1A996A34 /* CTKnownProfileFieldsTest.m */; };
+		E1A2B3C4D5E6F7A8B9C0D1E3 /* InAppDataExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A8B9C0D1E2 /* InAppDataExtractorTests.swift */; };
+		EA12196A266AB201761B9196 /* CTOpenUrlSystemAppFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4829D979A1725EB6A183B1B9 /* CTOpenUrlSystemAppFunctionTest.m */; };
 		EAB2F832C6A9C83BA87D1D00 /* CTRequestTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5189FED230150188EAC2A45D /* CTRequestTest.m */; };
 		ED21D02E0336FA1255CDA6C0 /* CTRequestFactoryTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D09A9B84887B9016376A6F7C /* CTRequestFactoryTest.m */; };
 		EEEE5E607B425C9BF156BFF8 /* CTInboxUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E06B27A37880EEEC453EAC38 /* CTInboxUtilsTest.m */; };
@@ -876,6 +895,7 @@
 		0B995A492C36AEDC00AF6006 /* CTLocalDataStoreTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStoreTests.m; sourceTree = "<group>"; };
 		10405BF7AEB9D1E6730686C3 /* CTInAppUtilsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppUtilsTest.m; sourceTree = "<group>"; };
 		14A6E5036771123B9E893C2D /* CTFlattenedEventDataTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTFlattenedEventDataTest.m; sourceTree = "<group>"; };
+		1D79C2B6FCEBDB269140A380 /* CTFlexibleIdentityRepoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTFlexibleIdentityRepoTest.m; sourceTree = "<group>"; };
 		1E0B3C6F086E8508C95EA002 /* CTTriggerAdapterTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTTriggerAdapterTest.m; sourceTree = "<group>"; };
 		1F97F9D45A580F979772C056 /* CTProfileChangeTrackerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTProfileChangeTrackerTest.m; sourceTree = "<group>"; };
 		28763B03838C48B82760CF56 /* CTTimerResultTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTTimerResultTest.m; sourceTree = "<group>"; };
@@ -896,6 +916,7 @@
 		4808030D292EB4FB00C06E2F /* CleverTap+PushPermission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+PushPermission.h"; sourceTree = "<group>"; };
 		4808030F292EB50D00C06E2F /* CTLocalInApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTLocalInApp.h; sourceTree = "<group>"; };
 		48080310292EB50D00C06E2F /* CTLocalInApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTLocalInApp.m; sourceTree = "<group>"; };
+		4829D979A1725EB6A183B1B9 /* CTOpenUrlSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTOpenUrlSystemAppFunctionTest.m; sourceTree = "<group>"; };
 		4847D16C2CCB90E0008DC327 /* CTEventDatabase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTEventDatabase.h; sourceTree = "<group>"; };
 		4847D16E2CCB90F5008DC327 /* CTEventDatabase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEventDatabase.m; sourceTree = "<group>"; };
 		4847D1712CDA17C2008DC327 /* CTEventDatabaseTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEventDatabaseTests.m; sourceTree = "<group>"; };
@@ -1053,7 +1074,9 @@
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
 		58E6C9F7C391AC2F28D91FA6 /* CTPropertyKeyValidatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPropertyKeyValidatorTest.m; sourceTree = "<group>"; };
 		5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shared_CleverTapSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPushPermissionSystemAppFunctionTest.m; sourceTree = "<group>"; };
 		6197020C8A776A8C08F7F832 /* CleverTapDisplayUnitTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapDisplayUnitTest.m; sourceTree = "<group>"; };
+		66EFE13AB9558473A73BC740 /* CleverTapProductConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapProductConfigTest.m; sourceTree = "<group>"; };
 		68D4127C4CE0437B085909D7 /* CTDataFlattenerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTDataFlattenerTest.m; sourceTree = "<group>"; };
 		6A11D8382A8FC71F007F5D21 /* CTImpressionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImpressionManager.h; sourceTree = "<group>"; };
 		6A11D8392A8FC71F007F5D21 /* CTImpressionManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImpressionManager.m; sourceTree = "<group>"; };
@@ -1204,24 +1227,36 @@
 		6CCFFCC2ACB74DAA6882AA51 /* CTLocalInAppTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLocalInAppTest.m; sourceTree = "<group>"; };
 		6DBD5E0D8AC568761F545800 /* CTInActionResultTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInActionResultTest.m; sourceTree = "<group>"; };
 		6EB3252FE1750DCBAEC87778 /* CTInAppTimerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppTimerTest.m; sourceTree = "<group>"; };
+		763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTRequestSenderTest.m; sourceTree = "<group>"; };
 		76EC66D158F4EC2EB93792E5 /* CTValidationResultTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultTest.m; sourceTree = "<group>"; };
+		792DF5CE4919F6210CB0FC85 /* CleverTapJSInterfaceTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapJSInterfaceTest.m; sourceTree = "<group>"; };
+		7ABEB37D9ED903F97B1383C2 /* CTProductConfigControllerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTProductConfigControllerTest.m; sourceTree = "<group>"; };
+		7FF294AF34ACB6DFF4DEB35C /* CTDisplayUnitControllerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTDisplayUnitControllerTest.m; sourceTree = "<group>"; };
+		8151DB170479BCCFE1871E36 /* CTFeatureFlagsControllerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTFeatureFlagsControllerTest.m; sourceTree = "<group>"; };
 		83B02535120793C05F208D08 /* InactionInAppStorageStrategyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InactionInAppStorageStrategyTests.swift; sourceTree = "<group>"; };
 		8524F613D3C5CBEBAEAB9BC3 /* DurationPartitionedInAppsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DurationPartitionedInAppsTests.swift; sourceTree = "<group>"; };
 		86B31B1A29258B885EAFFB8C /* CTProfileBuilderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTProfileBuilderTest.m; sourceTree = "<group>"; };
+		8CA2AD4E8B23AC03B702C341 /* CTInAppFCManagerLegacyTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManagerLegacyTest.m; sourceTree = "<group>"; };
 		90EA8490BDF49C5E1A996A34 /* CTKnownProfileFieldsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTKnownProfileFieldsTest.m; sourceTree = "<group>"; };
 		919D12C82BD89CE13EDE525C /* CTLoginInfoProviderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLoginInfoProviderTest.m; sourceTree = "<group>"; };
 		997881C7B7B5276373B4FD43 /* CTLegacyIdentityRepoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLegacyIdentityRepoTest.m; sourceTree = "<group>"; };
 		9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTNestedJsonBuilderTest.m; sourceTree = "<group>"; };
+		A17C1360ECB81CD13FBA0F1F /* CleverTapInboxStyleConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxStyleConfigTest.m; sourceTree = "<group>"; };
 		A358DAEFE421FAF0F204FB73 /* CTPlistInfoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPlistInfoTest.m; sourceTree = "<group>"; };
+		A415F802C7FFE6DD7712EE2C /* CTAppRatingSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTAppRatingSystemAppFunctionTest.m; sourceTree = "<group>"; };
 		A5858A0E994EC529904E271C /* CTMultiDelegateManagerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManagerTest.m; sourceTree = "<group>"; };
 		A707C7242FCD743740402E63 /* CleverTapInboxMessageTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxMessageTest.m; sourceTree = "<group>"; };
+		AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "CTValidationResult+Tests.h"; path = "CleverTapSDKTests/CTValidationResult+Tests.h"; sourceTree = "<group>"; };
 		BA302D038C45C5590835082F /* CTInAppNotificationTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppNotificationTest.m; sourceTree = "<group>"; };
 		C0A8EB982691084E65068439 /* Pods-shared-CleverTapSDKTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.debug.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C13218D1018B2B052E92F7C1 /* CTSwizzleTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTSwizzleTest.m; sourceTree = "<group>"; };
 		C332A38933BEF47388B4D45B /* CleverTapEventDetailTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapEventDetailTest.m; sourceTree = "<group>"; };
 		C3ACF17534ADA323BF0D31ED /* CTNotificationButtonTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTNotificationButtonTest.m; sourceTree = "<group>"; };
 		C4A8604AEEF48751E5EEA85C /* CTTriggerEvaluatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTTriggerEvaluatorTest.m; sourceTree = "<group>"; };
 		C4EB6D79842FF5DDE75C6D08 /* CleverTapFeatureFlagsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapFeatureFlagsTest.m; sourceTree = "<group>"; };
+		C5C8A9A90E47228E000DE2AE /* CTSystemAppFunctionPresenterTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTSystemAppFunctionPresenterTest.m; sourceTree = "<group>"; };
 		C646892F681993452269F8F6 /* CTTriggerConditionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTTriggerConditionTest.m; sourceTree = "<group>"; };
+		CAC789775681E2BD7F8A34D0 /* CleverTapUTMDetailTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapUTMDetailTest.m; sourceTree = "<group>"; };
 		D0047B082098D45B0019C6FD /* CTLocalDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLocalDataStore.h; sourceTree = "<group>"; };
 		D0047B092098D45B0019C6FD /* CTLocalDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTLocalDataStore.m; sourceTree = "<group>"; };
 		D0047B0C2098E2F00019C6FD /* CTProfileBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTProfileBuilder.h; sourceTree = "<group>"; };
@@ -1302,8 +1337,11 @@
 		DF7EABBC67ABB936E7104DDE /* CleverTapInstanceConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInstanceConfigTest.m; sourceTree = "<group>"; };
 		E06B27A37880EEEC453EAC38 /* CTInboxUtilsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInboxUtilsTest.m; sourceTree = "<group>"; };
 		E7A8F7CE1749EBE904E5BECA /* CTBatchSentDelegateHelperTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTBatchSentDelegateHelperTest.m; sourceTree = "<group>"; };
+		F1A2B3C4D5E6F7A8B9C0D1E2 /* InAppDataExtractorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InAppDataExtractorTests.swift; sourceTree = "<group>"; };
 		F281C3FD89B293DF67D40928 /* CTDataValidatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTDataValidatorTest.m; sourceTree = "<group>"; };
+		F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTUIUtilsTest.m; sourceTree = "<group>"; };
 		F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapPushNotificationDelegate.h; sourceTree = "<group>"; };
+		FA88FE3C12519A1823AF5285 /* CTIdentityRepoFactoryTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTIdentityRepoFactoryTest.m; sourceTree = "<group>"; };
 		FDEB997F2814D751B104059E /* Pods-shared-CleverTapSDKTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.release.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1582,6 +1620,10 @@
 			children = (
 				48FA82C22DAD17E300AB8651 /* CTSystemAppFunctionsTest.m */,
 				48FA82C92DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m */,
+				C5C8A9A90E47228E000DE2AE /* CTSystemAppFunctionPresenterTest.m */,
+				4829D979A1725EB6A183B1B9 /* CTOpenUrlSystemAppFunctionTest.m */,
+				612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */,
+				A415F802C7FFE6DD7712EE2C /* CTAppRatingSystemAppFunctionTest.m */,
 			);
 			path = SystemAppFunction;
 			sourceTree = "<group>";
@@ -1847,6 +1889,7 @@
 				4806346E2CEB620400E39E9B /* CTInAppDisplayViewControllerTests.m */,
 				6B453EF72CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.h */,
 				6B453EF82CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m */,
+				8CA2AD4E8B23AC03B702C341 /* CTInAppFCManagerLegacyTest.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2026,6 +2069,7 @@
 				76EC66D158F4EC2EB93792E5 /* CTValidationResultTest.m */,
 				8524F613D3C5CBEBAEAB9BC3 /* DurationPartitionedInAppsTests.swift */,
 				39C16E1FBDB18DC1C7AA2479 /* InAppDurationPartitionerTests.swift */,
+				F1A2B3C4D5E6F7A8B9C0D1E2 /* InAppDataExtractorTests.swift */,
 				83B02535120793C05F208D08 /* InactionInAppStorageStrategyTests.swift */,
 				10405BF7AEB9D1E6730686C3 /* CTInAppUtilsTest.m */,
 				3CE6298F5BDD0BCAE1740F0D /* InAppSelectionStrategyTests.swift */,
@@ -2062,6 +2106,19 @@
 				A707C7242FCD743740402E63 /* CleverTapInboxMessageTest.m */,
 				BA302D038C45C5590835082F /* CTInAppNotificationTest.m */,
 				919D12C82BD89CE13EDE525C /* CTLoginInfoProviderTest.m */,
+				1D79C2B6FCEBDB269140A380 /* CTFlexibleIdentityRepoTest.m */,
+				FA88FE3C12519A1823AF5285 /* CTIdentityRepoFactoryTest.m */,
+				A17C1360ECB81CD13FBA0F1F /* CleverTapInboxStyleConfigTest.m */,
+				CAC789775681E2BD7F8A34D0 /* CleverTapUTMDetailTest.m */,
+				8151DB170479BCCFE1871E36 /* CTFeatureFlagsControllerTest.m */,
+				7ABEB37D9ED903F97B1383C2 /* CTProductConfigControllerTest.m */,
+				792DF5CE4919F6210CB0FC85 /* CleverTapJSInterfaceTest.m */,
+				7FF294AF34ACB6DFF4DEB35C /* CTDisplayUnitControllerTest.m */,
+				66EFE13AB9558473A73BC740 /* CleverTapProductConfigTest.m */,
+				C13218D1018B2B052E92F7C1 /* CTSwizzleTest.m */,
+				F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */,
+				763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */,
+				AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -2580,6 +2637,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FEC16FD4E7FC62DCDFD6AC63 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1575C4AB40B59C398B075DC0 /* CTValidationResult+Tests.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -2628,6 +2693,7 @@
 				D02AC2D5276044F60031C1BE /* Frameworks */,
 				D02AC2D6276044F60031C1BE /* Resources */,
 				D02AC2E327604DF10031C1BE /* CopyFiles */,
+				FEC16FD4E7FC62DCDFD6AC63 /* Headers */,
 			);
 			buildRules = (
 			);
@@ -3050,6 +3116,7 @@
 				282AE5F702CAC07D04153E0A /* CTValidationResultTest.m in Sources */,
 				46A5042E615F1874527D10FB /* DurationPartitionedInAppsTests.swift in Sources */,
 				0B836117E159C83D50F7571F /* InAppDurationPartitionerTests.swift in Sources */,
+				E1A2B3C4D5E6F7A8B9C0D1E3 /* InAppDataExtractorTests.swift in Sources */,
 				A5324FD2D644B9AC9E6D2F32 /* InactionInAppStorageStrategyTests.swift in Sources */,
 				4ABB80A0173C15BEE7F38D2A /* CTInAppUtilsTest.m in Sources */,
 				784FEA3C94ECE9143D761BCB /* InAppSelectionStrategyTests.swift in Sources */,
@@ -3086,6 +3153,23 @@
 				43C438211ABCF8AA15A15C25 /* CleverTapInboxMessageTest.m in Sources */,
 				5DCE8FADF7136FB54F52E985 /* CTInAppNotificationTest.m in Sources */,
 				7DD6BFD3CE84075AB727F21C /* CTLoginInfoProviderTest.m in Sources */,
+				65BC8CCF1A8E8D2E2667367F /* CTFlexibleIdentityRepoTest.m in Sources */,
+				0D4CEABE7531E4DE87CF23A9 /* CTIdentityRepoFactoryTest.m in Sources */,
+				4AC798B15F651BBDFE83CBD1 /* CleverTapInboxStyleConfigTest.m in Sources */,
+				09F7AFFEAAEDEE9E52CD92CC /* CleverTapUTMDetailTest.m in Sources */,
+				85C53B3EE66A70D12CFCCD87 /* CTInAppFCManagerLegacyTest.m in Sources */,
+				2442D1D1E7FE285425A7E8DD /* CTFeatureFlagsControllerTest.m in Sources */,
+				19DB8405F88B0C57F8435D1D /* CTSystemAppFunctionPresenterTest.m in Sources */,
+				8577DD4B5938E7AB87A3E0F7 /* CTProductConfigControllerTest.m in Sources */,
+				BC11CD63900D9784D9FB6DDF /* CleverTapJSInterfaceTest.m in Sources */,
+				4B9EC4A508B8BAD71A648089 /* CTDisplayUnitControllerTest.m in Sources */,
+				02BFCD20137CFABB41FD2CFE /* CleverTapProductConfigTest.m in Sources */,
+				29ACA9A041789B384CFBC6CB /* CTSwizzleTest.m in Sources */,
+				EA12196A266AB201761B9196 /* CTOpenUrlSystemAppFunctionTest.m in Sources */,
+				D1E38C858AE9BB640747639E /* CTPushPermissionSystemAppFunctionTest.m in Sources */,
+				837036E25A3D14C8BE2785F5 /* CTAppRatingSystemAppFunctionTest.m in Sources */,
+				6CA8C6B2712DE77E59FB0BD0 /* CTUIUtilsTest.m in Sources */,
+				1F19A11DA23B857DFFE5AD7F /* CTRequestSenderTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

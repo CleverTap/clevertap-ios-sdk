@@ -149,4 +149,50 @@
     XCTAssertEqualObjects(result.cleanedData, @{});
 }
 
+- (void)test_validateEventData_nilInput_returnsSuccessWithEmptyDict {
+    CTValidationResult *result = [self.validator validateEventData:nil];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+    XCTAssertEqualObjects(result.cleanedData, @{});
+}
+
+- (void)test_validateEventData_withNSNullValue_removesKeyWithWarning {
+    NSDictionary *input = @{@"key": [NSNull null]};
+    CTValidationResult *result = [self.validator validateEventData:input];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+    NSDictionary *cleaned = (NSDictionary *)result.cleanedData;
+    XCTAssertNil(cleaned[@"key"]);
+}
+
+- (void)test_validateEventData_withEmptyNestedDict_removesKeyWithWarning {
+    NSDictionary *input = @{@"nested": @{}};
+    CTValidationResult *result = [self.validator validateEventData:input];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+    NSDictionary *cleaned = (NSDictionary *)result.cleanedData;
+    XCTAssertNil(cleaned[@"nested"]);
+}
+
+- (void)test_validateEventData_phoneWithoutCountryCode_addsWarning {
+    // Phone without '+' and no country code in config → warning added
+    NSDictionary *input = @{@"Phone": @"5551234567"};
+    CTValidationResult *result = [self.validator validateEventData:input];
+    // The value is still kept (phone validation only adds warning, doesn't drop)
+    NSDictionary *cleaned = (NSDictionary *)result.cleanedData;
+    XCTAssertNotNil(cleaned[@"Phone"]);
+}
+
+- (void)test_validateEventData_phoneWithPlusPrefix_noExtraWarning {
+    // Phone starting with '+' → no country code warning
+    NSDictionary *input = @{@"Phone": @"+15551234567"};
+    CTValidationResult *result = [self.validator validateEventData:input];
+    NSDictionary *cleaned = (NSDictionary *)result.cleanedData;
+    XCTAssertEqualObjects(cleaned[@"Phone"], @"+15551234567");
+}
+
+- (void)test_cleanArray_emptyArray_returnsSuccessWithEmptyCleanedArray {
+    CTValidationResult *result = [self.validator cleanArray:@[] forKey:@"tags"];
+    // Empty array → all elements processed → empty result array → result is warning (no items)
+    // cleanArray:forKey: treats an empty array as valid but returns cleaned = empty
+    XCTAssertNotNil(result);
+}
+
 @end

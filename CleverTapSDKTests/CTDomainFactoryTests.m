@@ -216,4 +216,81 @@
     XCTAssertFalse([self.domainFactory isMuted], @"Should not be muted 1 second after expiry");
 }
 
+#pragma mark - needsHandshake Tests
+
+- (void)testNeedsHandshake_returnsTrueWhenNoDomainAndNotMuted {
+    // Config without region or proxy so no explicit domain is set
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testNoRegion" accountToken:@"testToken"];
+    CTDomainFactory *factory = [[CTDomainFactory alloc] initWithConfig:config];
+    XCTAssertTrue([factory needsHandshake], @"needsHandshake should be YES when no domain is set and not muted");
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
+}
+
+- (void)testNeedsHandshake_returnsFalseWhenRedirectDomainAlreadySet {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testRedirectDomain" accountToken:@"testToken"];
+    CTDomainFactory *factory = [[CTDomainFactory alloc] initWithConfig:config];
+    factory.redirectDomain = @"eu1.clevertap-prod.com";
+    XCTAssertFalse([factory needsHandshake], @"needsHandshake should be NO when redirectDomain is already set");
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
+}
+
+- (void)testNeedsHandshake_returnsFalseWhenExplicitEndpointDomain {
+    // Region config sets explicitEndpointDomain
+    XCTAssertFalse([self.domainFactory needsHandshake], @"needsHandshake should be NO when an explicit endpoint domain is configured via region");
+}
+
+#pragma mark - updateDomainFromResponseHeaders Tests
+
+- (void)testUpdateDomainFromResponseHeaders_setsRedirectDomain {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testUpdateDomain" accountToken:@"testToken"];
+    CTDomainFactory *factory = [[CTDomainFactory alloc] initWithConfig:config];
+
+    NSDictionary *headers = @{@"X-WZRK-RD": @"in1.clevertap-prod.com"};
+    BOOL shouldRedirect = [factory updateDomainFromResponseHeaders:headers];
+
+    XCTAssertTrue(shouldRedirect, @"Should indicate a redirect when a new domain is received");
+    XCTAssertEqualObjects(factory.redirectDomain, @"in1.clevertap-prod.com");
+
+    [factory clearRedirectDomain];
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
+}
+
+- (void)testUpdateDomainFromResponseHeaders_returnsFalseWhenSameDomain {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testSameDomain" accountToken:@"testToken"];
+    CTDomainFactory *factory = [[CTDomainFactory alloc] initWithConfig:config];
+    factory.redirectDomain = @"eu1.clevertap-prod.com";
+
+    NSDictionary *headers = @{@"X-WZRK-RD": @"eu1.clevertap-prod.com"};
+    BOOL shouldRedirect = [factory updateDomainFromResponseHeaders:headers];
+
+    XCTAssertFalse(shouldRedirect, @"shouldRedirect should be NO when the domain header matches the current domain");
+
+    [factory clearRedirectDomain];
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
+}
+
+- (void)testUpdateDomainFromResponseHeaders_noHeaderDoesNotChangeRedirectDomain {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testNoRedirectHeader" accountToken:@"testToken"];
+    CTDomainFactory *factory = [[CTDomainFactory alloc] initWithConfig:config];
+
+    BOOL shouldRedirect = [factory updateDomainFromResponseHeaders:@{}];
+
+    XCTAssertFalse(shouldRedirect, @"No redirect header should not trigger a redirect");
+    XCTAssertNil(factory.redirectDomain, @"redirectDomain should remain nil when no redirect header is present");
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
+}
+
+- (void)testUpdateNotificationViewedDomainFromResponseHeaders_setsDomain {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testNotifViewedDomain" accountToken:@"testToken"];
+    CTDomainFactory *factory = [[CTDomainFactory alloc] initWithConfig:config];
+
+    NSDictionary *headers = @{@"X-WZRK-SPIKY-RD": @"spiky.clevertap-prod.com"};
+    BOOL shouldRedirect = [factory updateNotificationViewedDomainFromResponseHeaders:headers];
+
+    XCTAssertTrue(shouldRedirect);
+    XCTAssertEqualObjects(factory.redirectNotifViewedDomain, @"spiky.clevertap-prod.com");
+
+    [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
+}
+
 @end

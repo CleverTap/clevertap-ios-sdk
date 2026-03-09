@@ -7,6 +7,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTValidationResult.h"
+#import "CTValidationResult+Tests.h"
 
 @interface CTValidationResultTest : XCTestCase
 @end
@@ -52,6 +53,81 @@
     CTValidationResult *result = [CTValidationResult dropWithSubResults:@[] reason:CTDropReasonNullEventName];
     XCTAssertEqual(result.outcome, CTValidationOutcomeDrop);
     XCTAssertEqual(result.subResults.count, 0u);
+}
+
+#pragma mark - success
+
+- (void)test_success_outcomeIsSuccess {
+    CTValidationResult *result = [CTValidationResult success];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+}
+
+- (void)test_success_errorCodeIsZero {
+    CTValidationResult *result = [CTValidationResult success];
+    XCTAssertEqual(result.errorCode, 0);
+}
+
+#pragma mark - successWithData:
+
+- (void)test_successWithData_setsCleanedData {
+    CTValidationResult *result = [CTValidationResult successWithData:@"cleanValue"];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+    XCTAssertEqualObjects(result.cleanedData, @"cleanValue");
+}
+
+- (void)test_successWithData_nilData_outcomeIsSuccess {
+    CTValidationResult *result = [CTValidationResult successWithData:nil];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeSuccess);
+    XCTAssertNil(result.cleanedData);
+}
+
+#pragma mark - warningWithCode:message:data:
+
+- (void)test_warningWithCode_setsOutcomeAndCode {
+    CTValidationResult *result = [CTValidationResult warningWithCode:520 message:@"msg" data:@"val"];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+    XCTAssertEqual(result.errorCode, 520);
+    XCTAssertEqualObjects(result.errorDesc, @"msg");
+    XCTAssertEqualObjects(result.cleanedData, @"val");
+}
+
+#pragma mark - dropWithCode:message:reason:
+
+- (void)test_dropWithCode_setsOutcomeAndReason {
+    CTValidationResult *result = [CTValidationResult dropWithCode:513 message:@"drop" reason:CTDropReasonEmptyKey];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeDrop);
+    XCTAssertEqual(result.errorCode, 513);
+    XCTAssertEqualObjects(result.errorDesc, @"drop");
+    XCTAssertEqual(result.dropReason, CTDropReasonEmptyKey);
+    XCTAssertNil(result.cleanedData);
+}
+
+#pragma mark - warningWithSubResults:data:
+
+- (void)test_warningWithSubResults_setsOutcomeAndSubResults {
+    CTValidationResult *sub = [CTValidationResult resultWithErrorCode:520 andMessage:@"sub warning"];
+    CTValidationResult *result = [CTValidationResult warningWithSubResults:@[sub] data:@"data"];
+    XCTAssertEqual(result.outcome, CTValidationOutcomeWarning);
+    XCTAssertEqual(result.subResults.count, 1u);
+    XCTAssertEqualObjects(result.cleanedData, @"data");
+    XCTAssertEqual(result.errorCode, 520); // aggregated from first sub-result
+}
+
+#pragma mark - shouldDrop
+
+- (void)test_shouldDrop_dropOutcome_returnsYES {
+    CTValidationResult *result = [CTValidationResult dropWithCode:513 message:@"drop" reason:CTDropReasonEmptyKey];
+    XCTAssertTrue([result shouldDrop]);
+}
+
+- (void)test_shouldDrop_warningOutcome_returnsNO {
+    CTValidationResult *result = [CTValidationResult resultWithErrorCode:512 andMessage:@"warn"];
+    XCTAssertFalse([result shouldDrop]);
+}
+
+- (void)test_shouldDrop_successOutcome_returnsNO {
+    CTValidationResult *result = [CTValidationResult success];
+    XCTAssertFalse([result shouldDrop]);
 }
 
 @end

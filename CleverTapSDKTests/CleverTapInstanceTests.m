@@ -208,4 +208,29 @@
     [instanceMock stopMocking];
 }
 
+- (void)testShouldNotDropFetchEventWhenMuted {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"any_event"};
+
+    id instanceMock = OCMPartialMock(self.cleverTapInstance);
+    OCMStub([instanceMock isMuted]).andReturn(YES);
+
+    BOOL result = [instanceMock _shouldDropEvent:event withType:CleverTapEventTypeFetch];
+    XCTAssertFalse(result, @"Fetch events should never be dropped, even when the SDK is muted");
+
+    [instanceMock stopMocking];
+}
+
+- (void)testShouldNotDropEventWhenNotMutedAndNotOptedOut {
+    NSDictionary *event = @{CLTAP_EVENT_NAME: @"custom_event"};
+    self.cleverTapInstance.currentUserOptedOut = NO;
+
+    id instanceMock = OCMPartialMock(self.cleverTapInstance);
+    OCMStub([instanceMock isMuted]).andReturn(NO);
+
+    BOOL result = [instanceMock _shouldDropEvent:event withType:CleverTapEventTypeRaised];
+    XCTAssertFalse(result, @"Events should not be dropped when the SDK is neither muted nor opted out");
+
+    [instanceMock stopMocking];
+}
+
 @end
