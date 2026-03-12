@@ -60,7 +60,7 @@ static const int kMaxTags = 3;
                           config:(CleverTapInboxStyleConfig *)config
                         delegate:(id<CleverTapInboxViewControllerDelegate>)delegate
                analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate>)analyticsDelegate {
-    self = [self initWithNibName:NSStringFromClass([CleverTapInboxViewController class]) bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
+    self = [self initWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CleverTapInboxViewController class])] bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
     if (self) {
         _config = [config copy];
         _delegate = delegate;
@@ -168,9 +168,16 @@ static const int kMaxTags = 3;
 
 - (void)setUpTableViewLayout {
     self.tableView.rowHeight = UITableViewAutomaticDimension;
-    self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
+#if TARGET_OS_TV
+    self.tableView.estimatedRowHeight = 400.0;
+    if (@available(tvOS 11.0, *)) {
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentAutomatic;
+    }
+#else
+    self.tableView.estimatedRowHeight = 44.0;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     if (@available(iOS 11.0, *)) {
         self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     } else {
@@ -180,7 +187,7 @@ static const int kMaxTags = 3;
 #pragma clang diagnostic pop
     }
     self.edgesForExtendedLayout = UIRectEdgeNone;
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+#endif
 }
 
 - (void)updateInboxLayout {
@@ -195,15 +202,17 @@ static const int kMaxTags = 3;
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTInboxSimpleMessageCell.class]]
          forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
+         forCellReuseIdentifier:kCellIconMessageIdentifier];
+#if !TARGET_OS_TV
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselMessageIdentifier];
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselImageMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
-                                               bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
-         forCellReuseIdentifier:kCellIconMessageIdentifier];
+#endif
 }
 
 - (NSString *)getTitle {
@@ -228,11 +237,13 @@ static const int kMaxTags = 3;
 
 - (void)calculateTableViewVisibleFrame {
     CGRect frame = self.tableView.frame;
+#if !TARGET_OS_TV
     BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
     if (landscape) {
         frame.origin.y += self.topContentOffset;
         frame.size.height -= self.topContentOffset;
     }
+#endif
     self.tableViewVisibleFrame = frame;
 }
 
@@ -381,10 +392,18 @@ static const int kMaxTags = 3;
             identifier = kCellSimpleMessageIdentifier;
             break;
         case CTInboxMessageTypeCarousel:
+#if TARGET_OS_TV
+            identifier = kCellSimpleMessageIdentifier;
+#else
             identifier = kCellCarouselMessageIdentifier;
+#endif
             break;
         case CTInboxMessageTypeCarouselImage:
+#if TARGET_OS_TV
+            identifier = kCellSimpleMessageIdentifier;
+#else
             identifier = kCellCarouselImgMessageIdentifier;
+#endif
             break;
         case CTInboxMessageTypeMessageIcon:
             identifier = kCellIconMessageIdentifier;
@@ -432,9 +451,11 @@ static const int kMaxTags = 3;
         NSString *actionType = link[@"type"];
         if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
             NSString *copy = link[@"copyText"][@"text"];
+#if !TARGET_OS_TV
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
             [self.parentViewController.view ct_makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
+#endif
         } else if ([actionType caseInsensitiveCompare:@"rfp"] == NSOrderedSame) {
             BOOL fbSettings = link[@"fbSettings"] ? [link[@"fbSettings"] boolValue] : NO;
             [self.analyticsDelegate messageDidSelectForPushPermission:fbSettings];

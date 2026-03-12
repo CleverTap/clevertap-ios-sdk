@@ -138,7 +138,8 @@ final class ViewController: UIViewController {
     }
 
     @objc private func recordEvent() {
-        CleverTap.sharedInstance()?.recordEvent("Product viewed")
+        CleverTap.sharedInstance()?.recordEvent("tesr")
+        CleverTap.sharedInstance()?.recordEvent("oooo")
     }
 
     @objc private func recordProductViewedEvent() {
@@ -190,7 +191,16 @@ final class ViewController: UIViewController {
     }
 
     @objc private func showInbox() {
-        print("Show App Inbox")
+        CleverTap.sharedInstance()?.initializeInbox { [weak self] success in
+            guard success, let self else { return }
+            let config = CleverTapInboxStyleConfig()
+            config.title = "Inbox"
+            guard let vc = CleverTap.sharedInstance()?
+                    .newInboxViewController(with: config, andDelegate: nil) else { return }
+            let nav = UINavigationController(rootViewController: vc)
+            nav.modalPresentationStyle = .fullScreen
+            DispatchQueue.main.async { self.present(nav, animated: true) }
+        }
     }
 }
 

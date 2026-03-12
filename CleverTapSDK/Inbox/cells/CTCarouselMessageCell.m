@@ -194,8 +194,10 @@ static const float kPageControlViewHeight = 30.f;
 }
 
 - (void)copyTapped:(NSString *)text {
+#if !TARGET_OS_TV
     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
     pasteboard.string = text;
+#endif
 }
 
 - (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender {

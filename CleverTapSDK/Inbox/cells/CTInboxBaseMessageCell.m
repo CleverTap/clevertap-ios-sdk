@@ -171,7 +171,11 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)deviceOrientationIsLandscape {
+#if TARGET_OS_TV
+    return NO;
+#else
     return [CTUIUtils isDeviceOrientationLandscape];
+#endif
 }
 
 
