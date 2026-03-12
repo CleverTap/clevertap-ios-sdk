@@ -110,12 +110,16 @@
     _scrollView.bounces = _bounces && !_wrapEnabled;
     _scrollView.alwaysBounceHorizontal = !_vertical && _bounces;
     _scrollView.alwaysBounceVertical = _vertical && _bounces;
+#if !TARGET_OS_TV
     _scrollView.pagingEnabled = _pagingEnabled;
+#endif
     _scrollView.scrollEnabled = _scrollEnabled;
     _scrollView.decelerationRate = _decelerationRate;
     _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.showsVerticalScrollIndicator = NO;
+#if !TARGET_OS_TV
     _scrollView.scrollsToTop = NO;
+#endif
     _scrollView.clipsToBounds = NO;
     
     _decelerationRate = _scrollView.decelerationRate;
@@ -226,7 +230,9 @@
     if (_pagingEnabled != pagingEnabled)
     {
         _pagingEnabled = pagingEnabled;
+#if !TARGET_OS_TV
         _scrollView.pagingEnabled = pagingEnabled;
+#endif
         [self setNeedsLayout];
     }
 }

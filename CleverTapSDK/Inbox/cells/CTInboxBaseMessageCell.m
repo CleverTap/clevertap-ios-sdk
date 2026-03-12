@@ -207,7 +207,11 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 }
 
 - (BOOL)deviceOrientationIsLandscape {
+#if TARGET_OS_TV
+    return NO;
+#else
     return [CTUIUtils isDeviceOrientationLandscape];
+#endif
 }
 
 
