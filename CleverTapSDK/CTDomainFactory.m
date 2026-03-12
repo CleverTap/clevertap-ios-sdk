@@ -86,8 +86,9 @@ NSTimeInterval const kMUTE_SECONDS = 24 * 60 * 60;
     self.redirectDomain = nil;
     self.redirectNotifViewedDomain = nil;
     [self persistRedirectDomain]; // if nil persist will remove
+    [self persistRedirectNotifViewedDomain]; // if nil persist will remove
     self.redirectDomain = [self loadRedirectDomain]; // reload explicit domain if we have one else will be nil
-    self.redirectNotifViewedDomain = [self loadRedirectNotifViewedDomain]; // reload explicit notification viewe domain if we have one else will be nil
+    self.redirectNotifViewedDomain = [self loadRedirectNotifViewedDomain]; // reload explicit notification viewed domain if we have one else will be nil
 }
 
 - (NSString *)loadRedirectDomain {

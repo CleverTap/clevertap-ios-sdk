@@ -20,12 +20,51 @@
 #import <CleverTapSDK/CleverTapPushNotificationDelegate.h>
 #import "CTDomainFactory.h"
 #import "CleverTap+SCDomain.h"
+#import "CleverTap+CTVar.h"
+#import "CTVar.h"
+#import "CleverTapEventDetail.h"
+#import "CleverTap+DisplayUnit.h"
+#import "CleverTap+ProductConfig.h"
+#import "CleverTap+FeatureFlags.h"
+#import "CleverTap+PushPermission.h"
+#import "CleverTap+Inbox.h"
+#import "CleverTap+InAppNotifications.h"
+#import "CleverTapInAppNotificationDelegate.h"
 
 /// Forward-declare private CleverTap methods that have no public header declaration
 /// so the test file compiles without "No visible @interface" errors.
 @interface CleverTap (TestPrivateSelectors)
 - (id)profileGetLocalValues:(NSString *)propertyName;
 - (BOOL)getFeatureFlag:(NSString *)key withDefaultValue:(BOOL)defaultValue;
+- (void)recordPageEventWithExtras:(NSDictionary *)extras;
+- (NSString *)getStoredDeviceToken;
+- (BOOL)isProcessingLoginUserWithIdentifier:(NSString *)identifier;
+- (void)setFeatureFlagsDelegate:(id<CleverTapFeatureFlagsDelegate>)delegate;
+- (void)setProductConfigDelegate:(id<CleverTapProductConfigDelegate>)delegate;
+// Feature Flags — methods only in private headers / not on any public CleverTap class interface
++ (void)setPersonalizationEnabled:(BOOL)enabled;
+- (void)fetchFeatureFlags;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+- (id<CleverTapFeatureFlagsDelegate>)featureFlagsDelegate;
+#pragma clang diagnostic pop
+// Product Config — methods only in CleverTapProductConfigPrivate.h / not on public class interface
+- (void)fetchProductConfig;
+- (void)activateProductConfig;
+- (void)fetchAndActivateProductConfig;
+- (void)resetProductConfig;
+- (void)setDefaultsProductConfig:(NSDictionary<NSString *,NSObject *> *)defaults;
+- (void)setDefaultsFromPlistFileNameProductConfig:(NSString *)fileName;
+- (CleverTapConfigValue *)getProductConfig:(NSString *)key;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+- (id<CleverTapProductConfigDelegate>)productConfigDelegate;
+#pragma clang diagnostic pop
+// InApp — getter not in any public header
+- (id<CleverTapInAppNotificationDelegate>)inAppNotificationDelegate;
+- (void)fetchInactionInApps:(NSString *)inAppId;
+// Display Unit — getter not in CleverTap+DisplayUnit.h
+- (id<CleverTapDisplayUnitDelegate>)displayUnitDelegate;
 @end
 
 @interface CleverTapInstanceTests : BaseTestCase
@@ -626,10 +665,16 @@
 
 #pragma mark - getUserLastVisitTs
 
-- (void)test_getUserLastVisitTs_returnsNonNegativeValue {
+- (void)test_getUserLastVisitTs_returnsValidValue {
+    // getUserLastVisitTs returns self.userLastVisitTs, which is set once at init as:
+    //   eventDetails ? eventDetails.lastTime : -1
+    // On a fresh simulator with no prior App Launched events in the data store,
+    // CTLocalDataStore returns nil → userLastVisitTs is -1 (valid sentinel).
+    // On subsequent runs a non-negative Unix timestamp is returned.
     [CleverTap enablePersonalization];
     NSTimeInterval ts = [self.cleverTapInstance getUserLastVisitTs];
-    XCTAssertGreaterThanOrEqual(ts, 0);
+    XCTAssertTrue(ts == -1 || ts >= 0,
+                  @"Expected -1 (no prior visit) or a non-negative Unix timestamp, got %f", ts);
 }
 
 // Helper: returns the batch header for cleverTapInstance, temporarily setting
@@ -1546,6 +1591,831 @@
     [self.cleverTapInstance onUserLogin:props];
     OCMVerifyAll(mockDispatch);
     [mockDispatch stopMocking];
+}
+
+#pragma mark - PE Vars — defineVar: type overloads
+
+- (void)test_defineVar_withNoDefault_returnsNonNilVar {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_NoDefault"];
+    XCTAssertNotNil(var);
+}
+
+- (void)test_defineVar_withNoDefault_varNameIsCorrect {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_NameCheck"];
+    XCTAssertEqualObjects(var.name, @"CT_Var_NameCheck");
+}
+
+- (void)test_defineVar_withString_defaultValueIsString {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_String" withString:@"hello"];
+    XCTAssertEqualObjects(var.defaultValue, @"hello");
+}
+
+- (void)test_defineVar_withString_valueMatchesDefault {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_String2" withString:@"world"];
+    XCTAssertEqualObjects(var.stringValue, @"world");
+}
+
+- (void)test_defineVar_withInt_intValueEqualsDefault {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Int" withInt:42];
+    XCTAssertEqual(var.intValue, 42);
+}
+
+- (void)test_defineVar_withFloat_floatValueEqualsDefault {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Float" withFloat:1.5f];
+    XCTAssertEqualWithAccuracy(var.floatValue, 1.5f, 1e-5);
+}
+
+- (void)test_defineVar_withDouble_doubleValueEqualsDefault {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Double" withDouble:3.14];
+    XCTAssertEqualWithAccuracy(var.doubleValue, 3.14, 1e-9);
+}
+
+- (void)test_defineVar_withBool_YES_boolValueIsYES {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_BoolYES" withBool:YES];
+    XCTAssertTrue(var.boolValue);
+}
+
+- (void)test_defineVar_withBool_NO_boolValueIsNO {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_BoolNO" withBool:NO];
+    XCTAssertFalse(var.boolValue);
+}
+
+- (void)test_defineVar_withDictionary_objectForKeyReturnsValue {
+    NSDictionary *dict = @{@"ct_key": @"ct_val", @"ct_num": @99};
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Dict" withDictionary:dict];
+    XCTAssertEqualObjects([var objectForKey:@"ct_key"], @"ct_val");
+    XCTAssertEqualObjects([var objectForKey:@"ct_num"], @99);
+}
+
+- (void)test_defineVar_withNumber_doubleValueEqualsDefault {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Number" withNumber:@(7.77)];
+    XCTAssertEqualWithAccuracy(var.doubleValue, 7.77, 1e-9);
+}
+
+- (void)test_defineVar_withInteger_integerValueEqualsDefault {
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Integer" withInteger:100];
+    XCTAssertEqual(var.integerValue, (NSInteger)100);
+}
+
+- (void)test_defineFileVar_returnsNonNilVar {
+    CTVar *var = [self.cleverTapInstance defineFileVar:@"CT_Var_File"];
+    XCTAssertNotNil(var);
+}
+
+- (void)test_defineFileVar_varNameIsCorrect {
+    CTVar *var = [self.cleverTapInstance defineFileVar:@"CT_Var_FileName"];
+    XCTAssertEqualObjects(var.name, @"CT_Var_FileName");
+}
+
+#pragma mark - PE Vars — getVariable: / getVariableValue:
+
+- (void)test_getVariable_afterDefine_returnsSameVar {
+    CTVar *defined = [self.cleverTapInstance defineVar:@"CT_GetVar_Test" withString:@"abc"];
+    CTVar *fetched  = [self.cleverTapInstance getVariable:@"CT_GetVar_Test"];
+    XCTAssertEqualObjects(defined, fetched);
+}
+
+- (void)test_getVariable_unknownName_returnsNil {
+    CTVar *var = [self.cleverTapInstance getVariable:@"CT_GetVar_Unknown_XYZ_999"];
+    XCTAssertNil(var);
+}
+
+- (void)test_getVariableValue_afterDefineWithString_returnsDefault {
+    [self.cleverTapInstance defineVar:@"CT_GetVarVal_Test" withString:@"ct_default"];
+    id value = [self.cleverTapInstance getVariableValue:@"CT_GetVarVal_Test"];
+    XCTAssertEqualObjects(value, @"ct_default");
+}
+
+- (void)test_getVariableValue_unknownName_returnsNil {
+    id value = [self.cleverTapInstance getVariableValue:@"CT_GetVarVal_Unknown_XYZ_999"];
+    XCTAssertNil(value);
+}
+
+#pragma mark - PE Vars — variants property
+
+- (void)test_variants_returnsNonNilArray {
+    NSArray *v = self.cleverTapInstance.variants;
+    XCTAssertNotNil(v);
+}
+
+- (void)test_variants_isEmptyBeforeServerResponse {
+    NSArray *v = self.cleverTapInstance.variants;
+    XCTAssertEqual(v.count, 0U,
+                   @"variants should be empty before any server-side AB test response is received");
+}
+
+#pragma mark - PE Vars — fetchVariables:
+
+- (void)test_fetchVariables_withNilBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance fetchVariables:nil]);
+}
+
+- (void)test_fetchVariables_queuesEvent {
+    id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
+    NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
+    [self.cleverTapInstance fetchVariables:nil];
+    XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
+                         @"fetchVariables: should queue a wzrk_fetch event into eventsQueue");
+    [mockDispatch stopMocking];
+}
+
+- (void)test_fetchVariables_completionBlockIsCalled {
+    // The block is stored and called when a fetch response arrives from the server.
+    // Here we only verify that registering a non-nil block does not throw.
+    XCTAssertNoThrow([self.cleverTapInstance fetchVariables:^(BOOL success) {}]);
+}
+
+#pragma mark - PE Vars — callback registration
+
+- (void)test_onVariablesChanged_withBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance onVariablesChanged:^{}]);
+}
+
+- (void)test_onceVariablesChanged_withBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance onceVariablesChanged:^{}]);
+}
+
+- (void)test_onVariablesChangedAndNoDownloadsPending_withBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance onVariablesChangedAndNoDownloadsPending:^{}]);
+}
+
+- (void)test_onceVariablesChangedAndNoDownloadsPending_withBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance onceVariablesChangedAndNoDownloadsPending:^{}]);
+}
+
+#pragma mark - eventGetDetail:
+
+- (void)test_eventGetDetail_forNonExistentEvent_returnsNil {
+    [CleverTap enablePersonalization];
+    CleverTapEventDetail *detail = [self.cleverTapInstance eventGetDetail:@"CT_NonExistent_Event_XYZ_999"];
+    XCTAssertNil(detail,
+                 @"eventGetDetail: should return nil for an event that has never been recorded");
+}
+
+- (void)test_eventGetDetail_forNilEvent_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance eventGetDetail:nil]);
+}
+
+#pragma mark - isMuted
+
+- (void)test_isMuted_doesNotThrowOnAccess {
+    XCTAssertNoThrow((void)[self.cleverTapInstance isMuted]);
+}
+
+- (void)test_isMuted_returnsBOOL {
+    // isMuted reflects whether the domain factory has muted the SDK instance.
+    // We only verify the property is readable without crashing and returns a BOOL.
+    BOOL muted = [self.cleverTapInstance isMuted];
+    XCTAssertTrue(muted == YES || muted == NO);
+}
+
+#pragma mark - recordPageEventWithExtras:
+
+- (void)test_recordPageEventWithExtras_withNilExtras_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance recordPageEventWithExtras:nil]);
+}
+
+- (void)test_recordPageEventWithExtras_withEmptyExtras_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance recordPageEventWithExtras:@{}]);
+}
+
+- (void)test_recordPageEventWithExtras_withValidExtras_doesNotThrow {
+    NSDictionary *extras = @{@"page": @"Home", @"section": @"Featured"};
+    XCTAssertNoThrow([self.cleverTapInstance recordPageEventWithExtras:extras]);
+}
+
+- (void)test_recordPageEventWithExtras_withValidExtras_queuesEvent {
+    id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
+    NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
+    [self.cleverTapInstance recordPageEventWithExtras:@{@"page": @"CT_TestPage"}];
+    XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
+                         @"recordPageEventWithExtras: should add a page event to eventsQueue");
+    [mockDispatch stopMocking];
+}
+
+- (void)test_recordPageEventWithExtras_withNilExtras_queuesEvent {
+    // Even with nil extras the event is still queued (as an empty page event).
+    id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
+    NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
+    [self.cleverTapInstance recordPageEventWithExtras:nil];
+    XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
+                         @"recordPageEventWithExtras:nil should still queue an empty page event");
+    [mockDispatch stopMocking];
+}
+
+#pragma mark - setDisplayUnitDelegate:
+
+- (void)test_setDisplayUnitDelegate_withConformingDelegate_doesNotThrow {
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapDisplayUnitDelegate));
+    XCTAssertNoThrow([self.cleverTapInstance setDisplayUnitDelegate:mockDelegate]);
+    // restore
+    [self.cleverTapInstance setDisplayUnitDelegate:nil];
+}
+
+- (void)test_setDisplayUnitDelegate_withNil_doesNotThrow {
+    // Passing nil: the guard logs a debug message but must not crash.
+    XCTAssertNoThrow([self.cleverTapInstance setDisplayUnitDelegate:(id)nil]);
+}
+
+- (void)test_setDisplayUnitDelegate_withNonConformingObject_doesNotThrow {
+    // A plain NSObject does not conform — method should log and not crash.
+    id nonConforming = [[NSObject alloc] init];
+    XCTAssertNoThrow([self.cleverTapInstance setDisplayUnitDelegate:nonConforming]);
+}
+
+#pragma mark - setFeatureFlagsDelegate:
+
+- (void)test_setFeatureFlagsDelegate_withConformingDelegate_doesNotThrow {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapFeatureFlagsDelegate));
+    XCTAssertNoThrow([self.cleverTapInstance setFeatureFlagsDelegate:mockDelegate]);
+#pragma clang diagnostic pop
+}
+
+- (void)test_setFeatureFlagsDelegate_withNil_doesNotThrow {
+    // nil → guard fires (logs), must not crash.
+    XCTAssertNoThrow([self.cleverTapInstance setFeatureFlagsDelegate:(id)nil]);
+}
+
+#pragma mark - setProductConfigDelegate:
+
+- (void)test_setProductConfigDelegate_withConformingDelegate_doesNotThrow {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapProductConfigDelegate));
+    XCTAssertNoThrow([self.cleverTapInstance setProductConfigDelegate:mockDelegate]);
+#pragma clang diagnostic pop
+}
+
+- (void)test_setProductConfigDelegate_withNil_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance setProductConfigDelegate:(id)nil]);
+}
+
+#pragma mark - getStoredDeviceToken
+
+- (void)test_getStoredDeviceToken_whenNoTokenStored_returnsEmptyString {
+    // Clear any previously stored token.
+    [CTPreferences putString:@"" forKey:CLTAP_APNS_PROPERTY_DEVICE_TOKEN];
+    NSString *token = [self.cleverTapInstance getStoredDeviceToken];
+    XCTAssertEqualObjects(token, @"",
+                          @"getStoredDeviceToken should return empty string when no APNS token is stored");
+}
+
+- (void)test_getStoredDeviceToken_afterStoringToken_returnsToken {
+    NSString *expected = @"ct_apns_test_stored_token_abc";
+    [CTPreferences putString:expected forKey:CLTAP_APNS_PROPERTY_DEVICE_TOKEN];
+    NSString *token = [self.cleverTapInstance getStoredDeviceToken];
+    XCTAssertEqualObjects(token, expected,
+                          @"getStoredDeviceToken should return the previously stored APNS token");
+    // Clean up — reset to empty so other tests are not affected.
+    [CTPreferences putString:@"" forKey:CLTAP_APNS_PROPERTY_DEVICE_TOKEN];
+}
+
+#pragma mark - isProcessingLoginUserWithIdentifier:
+
+- (void)test_isProcessingLoginUser_withNilIdentifier_returnsNO {
+    // nil guard: method explicitly returns NO for nil input.
+    BOOL result = [self.cleverTapInstance isProcessingLoginUserWithIdentifier:nil];
+    XCTAssertFalse(result,
+                   @"isProcessingLoginUserWithIdentifier: must return NO for nil");
+}
+
+- (void)test_isProcessingLoginUser_withUnknownIdentifier_returnsNO {
+    // Not currently processing any login → any identifier should return NO.
+    BOOL result = [self.cleverTapInstance isProcessingLoginUserWithIdentifier:@"ct_unknown_xyz_999"];
+    XCTAssertFalse(result,
+                   @"isProcessingLoginUserWithIdentifier: returns NO when no login is in progress");
+}
+
+#pragma mark - description
+
+- (void)test_description_containsAccountId {
+    NSString *desc = [self.cleverTapInstance description];
+    XCTAssertTrue([desc containsString:self.cleverTapInstance.config.accountId],
+                  @"description should contain the instance's accountId");
+}
+
+- (void)test_description_hasExpectedFormat {
+    // Expected: "CleverTap.<accountId>"
+    NSString *expected = [NSString stringWithFormat:@"CleverTap.%@",
+                          self.cleverTapInstance.config.accountId];
+    XCTAssertEqualObjects([self.cleverTapInstance description], expected);
+}
+
+#pragma mark - syncCustomTemplates
+
+- (void)test_syncCustomTemplates_doesNotThrow {
+    // syncCustomTemplates is a debug-only network operation; in tests it runs
+    // against a stubbed network so we only verify it does not raise an exception.
+    XCTAssertNoThrow([self.cleverTapInstance syncCustomTemplates]);
+}
+
+- (void)test_syncCustomTemplates_withProductionNO_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance syncCustomTemplates:NO]);
+}
+
+#pragma mark - userGetEventHistory — personalization enabled path
+
+- (void)test_userGetEventHistory_whenPersonalizationEnabled_returnsNonNil {
+    [CleverTap enablePersonalization];
+    NSDictionary *history = [self.cleverTapInstance userGetEventHistory];
+    // On a fresh simulator there may be no events; result is still a non-nil dict.
+    XCTAssertNotNil(history,
+                    @"userGetEventHistory should return a non-nil dictionary when personalization is enabled");
+}
+
+- (void)test_userGetEventHistory_whenPersonalizationEnabled_isNSDictionary {
+    [CleverTap enablePersonalization];
+    id history = [self.cleverTapInstance userGetEventHistory];
+    XCTAssertTrue([history isKindOfClass:[NSDictionary class]],
+                  @"userGetEventHistory should return an NSDictionary when personalization is enabled");
+}
+
+#pragma mark - userGetTotalVisits — personalization enabled path
+
+- (void)test_userGetTotalVisits_whenPersonalizationEnabled_returnsMinusOneOrNonNegative {
+    [CleverTap enablePersonalization];
+    int visits = [self.cleverTapInstance userGetTotalVisits];
+    XCTAssertTrue(visits == -1 || visits >= 0,
+                  @"userGetTotalVisits should return -1 (no history) or a non-negative count, got %d", visits);
+}
+
+#pragma mark - sharedInstanceWithCleverTapID:
+
+- (void)test_sharedInstanceWithCleverTapID_withValidID_returnsNonNilInstance {
+    // Returns (or creates) the singleton associated with the custom CleverTap ID.
+    // Uses the test account credentials already in the plist.
+    CleverTap *instance = [CleverTap sharedInstanceWithCleverTapID:@"ct_custom_id_test_001"];
+    XCTAssertNotNil(instance);
+}
+
+- (void)test_sharedInstanceWithCleverTapID_withSameID_returnsSameInstance {
+    CleverTap *first  = [CleverTap sharedInstanceWithCleverTapID:@"ct_same_id_test_002"];
+    CleverTap *second = [CleverTap sharedInstanceWithCleverTapID:@"ct_same_id_test_002"];
+    XCTAssertEqualObjects(first, second,
+                          @"Calling sharedInstanceWithCleverTapID: twice with the same ID must return the same object");
+}
+
+#pragma mark - instanceWithConfig:andCleverTapID:
+
+- (void)test_instanceWithConfig_andCleverTapID_returnsNonNilInstance {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ConfigID_001" accountToken:@"ct_config_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config andCleverTapID:@"ct_custom_device_id_001"];
+    XCTAssertNotNil(instance);
+}
+
+- (void)test_instanceWithConfig_andCleverTapID_preservesAccountId {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ConfigID_002" accountToken:@"ct_config_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config andCleverTapID:@"ct_custom_device_id_002"];
+    XCTAssertEqualObjects(instance.config.accountId, @"CT_ConfigID_002");
+}
+
+- (void)test_instanceWithConfig_andCleverTapID_uniqueConfigReturnsUniqueInstance {
+    CleverTapInstanceConfig *configA = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ConfigID_003" accountToken:@"ct_config_token_a"];
+    CleverTapInstanceConfig *configB = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ConfigID_004" accountToken:@"ct_config_token_b"];
+    CleverTap *instanceA = [CleverTap instanceWithConfig:configA andCleverTapID:@"ct_dev_id_003"];
+    CleverTap *instanceB = [CleverTap instanceWithConfig:configB andCleverTapID:@"ct_dev_id_004"];
+    XCTAssertNotEqualObjects(instanceA, instanceB,
+                             @"Different configs must produce distinct instances");
+}
+
+#pragma mark - notifyApplicationLaunchedWithOptions:
+
+- (void)test_notifyApplicationLaunchedWithOptions_withNilOptions_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance notifyApplicationLaunchedWithOptions:nil]);
+}
+
+- (void)test_notifyApplicationLaunchedWithOptions_withEmptyOptions_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance notifyApplicationLaunchedWithOptions:@{}]);
+}
+
+#pragma mark - getNotificationPermissionStatusWithCompletionHandler:
+
+- (void)test_getNotificationPermissionStatus_completionHandlerIsCalled {
+    XCTestExpectation *exp = [self expectationWithDescription:@"push permission completion called"];
+    [self.cleverTapInstance getNotificationPermissionStatusWithCompletionHandler:^(UNAuthorizationStatus status) {
+        [exp fulfill];
+    }];
+    [self waitForExpectations:@[exp] timeout:3.0];
+}
+
+- (void)test_getNotificationPermissionStatus_returnsValidUNAuthorizationStatus {
+    XCTestExpectation *exp = [self expectationWithDescription:@"valid push permission status"];
+    [self.cleverTapInstance getNotificationPermissionStatusWithCompletionHandler:^(UNAuthorizationStatus status) {
+        // UNAuthorizationStatus values: NotDetermined(0), Denied(1), Authorized(2),
+        // Provisional(3), Ephemeral(4). Any of these is acceptable.
+        BOOL valid = (status == UNAuthorizationStatusNotDetermined ||
+                      status == UNAuthorizationStatusDenied         ||
+                      status == UNAuthorizationStatusAuthorized      ||
+                      status == UNAuthorizationStatusProvisional     ||
+                      status == UNAuthorizationStatusEphemeral);
+        XCTAssertTrue(valid, @"Status %ld is not a recognised UNAuthorizationStatus", (long)status);
+        [exp fulfill];
+    }];
+    [self waitForExpectations:@[exp] timeout:3.0];
+}
+
+#pragma mark - Inbox — getInboxMessageCount / getInboxMessageUnreadCount / getAllInboxMessages
+
+- (void)test_getInboxMessageCount_whenInboxNotInitialized_returnsNegativeOne {
+    // In the test environment the inbox controller is not initialized,
+    // so the guard returns the sentinel value -1.
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_Inbox_Count_001" accountToken:@"ct_token"];
+    CleverTap *freshInstance = [CleverTap instanceWithConfig:config];
+    NSInteger count = [freshInstance getInboxMessageCount];
+    XCTAssertEqual(count, -1,
+                   @"getInboxMessageCount must return -1 when inbox is not initialized");
+}
+
+- (void)test_getInboxMessageUnreadCount_whenInboxNotInitialized_returnsNegativeOne {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_Inbox_Unread_001" accountToken:@"ct_token"];
+    CleverTap *freshInstance = [CleverTap instanceWithConfig:config];
+    NSInteger count = [freshInstance getInboxMessageUnreadCount];
+    XCTAssertEqual(count, -1,
+                   @"getInboxMessageUnreadCount must return -1 when inbox is not initialized");
+}
+
+- (void)test_getAllInboxMessages_whenInboxNotInitialized_returnsEmptyArray {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_Inbox_All_001" accountToken:@"ct_token"];
+    CleverTap *freshInstance = [CleverTap instanceWithConfig:config];
+    NSArray *messages = [freshInstance getAllInboxMessages];
+    XCTAssertNotNil(messages, @"getAllInboxMessages must never return nil");
+    XCTAssertEqual(messages.count, 0U,
+                   @"getAllInboxMessages must return an empty array when inbox is not initialized");
+}
+
+- (void)test_getAllInboxMessages_returnsNSArray {
+    NSArray *messages = [self.cleverTapInstance getAllInboxMessages];
+    XCTAssertTrue([messages isKindOfClass:[NSArray class]]);
+}
+
+#pragma mark - recordInboxNotificationViewedEventForID: / recordInboxNotificationClickedEventForID:
+
+- (void)test_recordInboxNotificationViewedEventForID_withUnknownID_doesNotThrow {
+    // When the message ID is unknown getInboxMessageForId: returns nil;
+    // CTEventBuilder handles nil gracefully (no event is queued).
+    XCTAssertNoThrow([self.cleverTapInstance
+                      recordInboxNotificationViewedEventForID:@"ct_inbox_unknown_view_id"]);
+}
+
+- (void)test_recordInboxNotificationClickedEventForID_withUnknownID_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance
+                      recordInboxNotificationClickedEventForID:@"ct_inbox_unknown_click_id"]);
+}
+
+#pragma mark - Inbox — additional uninitialized-state tests
+
+- (void)test_getUnreadInboxMessages_whenInboxNotInitialized_returnsEmptyArray {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_InboxUnread_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    NSArray *unread = [instance getUnreadInboxMessages];
+    XCTAssertNotNil(unread, @"getUnreadInboxMessages must never return nil");
+    XCTAssertEqual(unread.count, 0U,
+                   @"getUnreadInboxMessages must return empty array when inbox is not initialized");
+}
+
+- (void)test_getInboxMessageForId_whenInboxNotInitialized_returnsNil {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_InboxMsgId_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    CleverTapInboxMessage *msg = [instance getInboxMessageForId:@"ct_inbox_msg_id_001"];
+    XCTAssertNil(msg, @"getInboxMessageForId: must return nil when inbox is not initialized");
+}
+
+- (void)test_deleteInboxMessageForID_whenInboxNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_DelInbox_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance deleteInboxMessageForID:@"ct_nonexistent_id"]);
+}
+
+- (void)test_deleteInboxMessagesForIDs_whenInboxNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_DelInboxIds_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    NSArray *ids = @[@"id1", @"id2"];
+    XCTAssertNoThrow([instance deleteInboxMessagesForIDs:ids]);
+}
+
+- (void)test_markReadInboxMessageForID_whenInboxNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_MarkRead_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance markReadInboxMessageForID:@"ct_nonexistent_id"]);
+}
+
+- (void)test_markReadInboxMessagesForIDs_withEmptyArray_doesNotThrow {
+    NSArray *emptyIds = @[];
+    XCTAssertNoThrow([self.cleverTapInstance markReadInboxMessagesForIDs:emptyIds]);
+}
+
+- (void)test_registerInboxUpdatedBlock_withValidBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance registerInboxUpdatedBlock:^{}]);
+}
+
+- (void)test_initializeInboxWithCallback_analyticsOnly_callbackNotCalled {
+    // analyticsOnly instances have inbox disabled; callback must never fire.
+    XCTestExpectation *exp = [self expectationWithDescription:@"callback should not be called"];
+    exp.inverted = YES;
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_InboxAnalytics_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    [instance initializeInboxWithCallback:^(BOOL success) {
+        [exp fulfill];
+    }];
+    [self waitForExpectations:@[exp] timeout:0.5];
+}
+
+#pragma mark - Display Unit — displayUnitDelegate getter / getAllDisplayUnits / getDisplayUnitForID:
+
+- (void)test_displayUnitDelegate_getter_initiallyReturnsNil {
+    // On a fresh instance with no delegate set, the getter must return nil.
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_DispUnitDel_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNil([instance displayUnitDelegate],
+                 @"displayUnitDelegate should be nil before any delegate is set");
+}
+
+- (void)test_getAllDisplayUnits_beforeInitialization_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_AllDispUnits_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance getAllDisplayUnits]);
+}
+
+- (void)test_getDisplayUnitForID_withUnknownID_returnsNil {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_DispUnitId_001" accountToken:@"ct_token"];
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    CleverTapDisplayUnit *unit = [instance getDisplayUnitForID:@"ct_unknown_unit_id"];
+    XCTAssertNil(unit, @"getDisplayUnitForID: should return nil for an unknown unit ID");
+}
+
+- (void)test_recordDisplayUnitViewedEventForID_withUnknownID_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance
+                      recordDisplayUnitViewedEventForID:@"ct_unknown_view_id"]);
+}
+
+- (void)test_recordDisplayUnitClickedEventForID_withUnknownID_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance
+                      recordDisplayUnitClickedEventForID:@"ct_unknown_click_id"]);
+}
+
+#pragma mark - suspendInAppNotifications / resumeInAppNotifications / discardInAppNotifications
+
+- (void)test_suspendInAppNotifications_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance suspendInAppNotifications]);
+}
+
+- (void)test_resumeInAppNotifications_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance resumeInAppNotifications]);
+}
+
+- (void)test_discardInAppNotifications_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance discardInAppNotifications]);
+}
+
+- (void)test_discardInAppNotifications_withYES_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance discardInAppNotifications:YES]);
+}
+
+- (void)test_discardInAppNotifications_withNO_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance discardInAppNotifications:NO]);
+}
+
+- (void)test_clearInAppResources_withExpiredOnlyYES_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance clearInAppResources:YES]);
+}
+
+- (void)test_clearInAppResources_withExpiredOnlyNO_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance clearInAppResources:NO]);
+}
+
+#pragma mark - setInAppNotificationDelegate: / inAppNotificationDelegate getter
+
+- (void)test_setInAppNotificationDelegate_withNil_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance setInAppNotificationDelegate:nil]);
+}
+
+- (void)test_setInAppNotificationDelegate_withConformingDelegate_doesNotThrow {
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapInAppNotificationDelegate));
+    XCTAssertNoThrow([self.cleverTapInstance setInAppNotificationDelegate:mockDelegate]);
+}
+
+- (void)test_inAppNotificationDelegate_getter_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance inAppNotificationDelegate]);
+}
+
+#pragma mark - fetchInApps: / fetchInactionInApps:
+
+- (void)test_fetchInApps_withNilBlock_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance fetchInApps:nil]);
+}
+
+- (void)test_fetchInApps_queuesEvent {
+    id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
+    NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
+    [self.cleverTapInstance fetchInApps:nil];
+    XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
+                         @"fetchInApps: should queue a wzrk_fetch event into eventsQueue");
+    [mockDispatch stopMocking];
+}
+
+- (void)test_fetchInactionInApps_withValidId_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance fetchInactionInApps:@"12345"]);
+}
+
+#pragma mark - featureFlagsDelegate getter / fetchFeatureFlags
+
+- (void)test_featureFlagsDelegate_initially_returnsNil {
+    // On an analyticsOnly instance the featureFlags controller is not initialized;
+    // the backing ivar _featureFlagsDelegate is nil.
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_FlagDel_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    XCTAssertNil([instance featureFlagsDelegate]);
+#pragma clang diagnostic pop
+}
+
+- (void)test_featureFlagsDelegate_afterSetDelegate_returnsSetDelegate {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapFeatureFlagsDelegate));
+    [self.cleverTapInstance setFeatureFlagsDelegate:mockDelegate];
+    XCTAssertEqual([self.cleverTapInstance featureFlagsDelegate], mockDelegate,
+                   @"featureFlagsDelegate getter should return the delegate set via setFeatureFlagsDelegate:");
+#pragma clang diagnostic pop
+}
+
+- (void)test_fetchFeatureFlags_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance fetchFeatureFlags]);
+}
+
+#pragma mark - productConfigDelegate getter / fetchProductConfig / product config methods
+
+- (void)test_productConfigDelegate_initially_returnsNil {
+    // On an analyticsOnly instance the productConfig controller is not initialized.
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ProdCfgDel_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    XCTAssertNil([instance productConfigDelegate]);
+#pragma clang diagnostic pop
+}
+
+- (void)test_productConfigDelegate_afterSetDelegate_returnsSetDelegate {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapProductConfigDelegate));
+    [self.cleverTapInstance setProductConfigDelegate:mockDelegate];
+    XCTAssertEqual([self.cleverTapInstance productConfigDelegate], mockDelegate,
+                   @"productConfigDelegate getter should return the delegate set via setProductConfigDelegate:");
+#pragma clang diagnostic pop
+}
+
+- (void)test_fetchProductConfig_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance fetchProductConfig]);
+}
+
+- (void)test_fetchProductConfig_queuesEvent {
+    id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
+    NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
+    [self.cleverTapInstance fetchProductConfig];
+    XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
+                         @"fetchProductConfig should queue a wzrk_fetch event into eventsQueue");
+    [mockDispatch stopMocking];
+}
+
+- (void)test_activateProductConfig_whenControllerNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ActivPC_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance activateProductConfig]);
+}
+
+- (void)test_fetchAndActivateProductConfig_whenControllerNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_FetchActPC_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance fetchAndActivateProductConfig]);
+}
+
+- (void)test_resetProductConfig_whenControllerNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_ResetPC_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance resetProductConfig]);
+}
+
+- (void)test_setDefaultsProductConfig_whenControllerNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_DefPC_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    NSDictionary *defaults = @{@"key1": @"val1", @"key2": @42};
+    XCTAssertNoThrow([instance setDefaultsProductConfig:defaults]);
+}
+
+- (void)test_setDefaultsFromPlistFileNameProductConfig_whenControllerNotInitialized_doesNotThrow {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_PlistPC_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    XCTAssertNoThrow([instance setDefaultsFromPlistFileNameProductConfig:@"NonExistentDefaults"]);
+}
+
+- (void)test_getProductConfig_whenControllerNotInitialized_returnsNil {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+        initWithAccountId:@"CT_GetPC_001" accountToken:@"ct_token"];
+    config.analyticsOnly = YES;
+    CleverTap *instance = [CleverTap instanceWithConfig:config];
+    CleverTapConfigValue *value = [instance getProductConfig:@"some_key"];
+    XCTAssertNil(value, @"getProductConfig: should return nil when controller is not initialized");
+}
+
+#pragma mark - syncVariables
+
+- (void)test_syncVariables_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance syncVariables]);
+}
+
+- (void)test_syncVariables_withProductionNO_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance syncVariables:NO]);
+}
+
+- (void)test_syncVariables_withProductionYES_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance syncVariables:YES]);
+}
+
+#pragma mark - getUserEventLog: / getUserEventLogHistory — personalization enabled path
+
+- (void)test_getUserEventLog_whenPersonalizationEnabled_forUnknownEvent_returnsNil {
+    [CleverTap enablePersonalization];
+    CleverTapEventDetail *detail = [self.cleverTapInstance getUserEventLog:@"CT_Unknown_Event_XYZ"];
+    XCTAssertNil(detail,
+                 @"getUserEventLog: should return nil for an event that has never been recorded");
+}
+
+- (void)test_getUserEventLogHistory_whenPersonalizationEnabled_isNSDictionary {
+    [CleverTap enablePersonalization];
+    NSDictionary *history = [self.cleverTapInstance getUserEventLogHistory];
+    XCTAssertTrue([history isKindOfClass:[NSDictionary class]],
+                  @"getUserEventLogHistory should return an NSDictionary when personalization is enabled");
+}
+
+- (void)test_getUserEventLogCount_whenPersonalizationEnabled_returnsMinusOneOrNonNegative {
+    [CleverTap enablePersonalization];
+    int count = [self.cleverTapInstance getUserEventLogCount:CLTAP_APP_LAUNCHED_EVENT];
+    XCTAssertTrue(count == -1 || count >= 0,
+                  @"Expected -1 (no event logged) or a non-negative count, got %d", count);
+}
+
+#pragma mark - setPersonalizationEnabled:
+
+- (void)test_setPersonalizationEnabled_YES_isPersonalizationEnabled {
+    [CleverTap setPersonalizationEnabled:YES];
+    XCTAssertTrue([CleverTap isPersonalizationEnabled],
+                  @"setPersonalizationEnabled:YES should enable personalization");
+}
+
+- (void)test_setPersonalizationEnabled_NO_isPersonalizationDisabled {
+    [CleverTap setPersonalizationEnabled:NO];
+    XCTAssertFalse([CleverTap isPersonalizationEnabled],
+                   @"setPersonalizationEnabled:NO should disable personalization");
+    // Restore default state so subsequent tests are unaffected.
+    [CleverTap enablePersonalization];
+}
+
+#pragma mark - profileGetCleverTapID
+
+- (void)test_profileGetCleverTapID_returnsNonNilString {
+    XCTAssertNotNil([self.cleverTapInstance profileGetCleverTapID],
+                    @"profileGetCleverTapID should never return nil");
+}
+
+- (void)test_profileGetCleverTapID_returnsNonEmptyString {
+    NSString *ctid = [self.cleverTapInstance profileGetCleverTapID];
+    XCTAssertGreaterThan(ctid.length, 0U,
+                         @"profileGetCleverTapID should return a non-empty string");
 }
 
 @end

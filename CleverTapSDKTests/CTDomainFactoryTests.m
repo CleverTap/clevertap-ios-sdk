@@ -290,6 +290,8 @@
     XCTAssertTrue(shouldRedirect);
     XCTAssertEqualObjects(factory.redirectNotifViewedDomain, @"spiky.clevertap-prod.com");
 
+    // Clean up both persisted redirect domains so state does not bleed into subsequent runs
+    [factory clearRedirectDomain];
     [CTPreferences removeObjectForKey:[CTPreferences storageKeyWithSuffix:@"CLTAP_MUTE_EXPIRY_TS_KEY" config:config]];
 }
 
