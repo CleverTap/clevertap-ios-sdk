@@ -374,6 +374,14 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_FB_SETTINGS_KEY @"fbSettings"
 #define CLTAP_OPEN_URL_ACTION_KEY @"iOS"
 
+#pragma mark Constants for Live Activities
+// APNs push payload keys for incoming CT Live Activity pushes (update / end)
+#define CLTAP_LIVE_ACTIVITY_PUSH_MARKER       @"wzrk_la"
+#define CLTAP_LIVE_ACTIVITY_PUSH_ACTIVITY_ID  @"cleverTapActivityId"
+#define CLTAP_LIVE_ACTIVITY_PUSH_EVENT_KEY    @"event"
+#define CLTAP_LIVE_ACTIVITY_PUSH_EVENT_UPDATE @"update"
+#define CLTAP_LIVE_ACTIVITY_PUSH_EVENT_END    @"end"
+
 #pragma mark HTTP Codes
 #define HTTP_OK 200
 #define HTTP_EXPIRED 419

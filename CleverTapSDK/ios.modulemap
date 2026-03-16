@@ -1,4 +1,5 @@
-framework module CleverTapSDK {    
+framework module CleverTapSDK {
+    header "CleverTapSDK.h"
     header "CleverTap.h"
     header "CleverTap+Inbox.h"
     header "CleverTap+FeatureFlags.h"
@@ -36,5 +37,6 @@ framework module CleverTapSDK {
     header "CTInActionResult.h"
     header "CTTimerResult.h"
     header "CTInAppStore.h"
+    private header "CTLiveActivityDataQueue.h"
     export *
 }

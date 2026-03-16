@@ -63,4 +63,20 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  */
 - (void)fetchInactionInApps:(NSString *_Nonnull)inAppId;
 
+/*!
+ @method
+
+ @abstract
+ Queues a Live Activity data event (PTS token, activity registration, token update, or
+ activity end) to be sent to the CleverTap backend. The `data` dictionary becomes the
+ value of the top-level `"data"` key in the event payload.
+
+ @discussion
+ This is an internal helper used by the `CleverTap (LiveActivities)` category.
+ It must not be called from app code.
+
+ @param data A non-empty dictionary containing the Live Activity payload fields.
+ */
+- (void)pushLiveActivityData:(NSDictionary *_Nonnull)data;
+
 @end

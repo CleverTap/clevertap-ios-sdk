@@ -1,4 +1,5 @@
 framework module CleverTapSDK {
+    header "CleverTapSDK.h"
     header "CleverTap.h"
     header "CleverTap+SSLPinning.h"
     header "CleverTap+FeatureFlags.h"
@@ -12,5 +13,6 @@ framework module CleverTapSDK {
     header "CleverTap+CTVar.h"
     header "CTVar.h"
     header "LeanplumCT.h"
+    private header "CTLiveActivityDataQueue.h"
     export *
 }

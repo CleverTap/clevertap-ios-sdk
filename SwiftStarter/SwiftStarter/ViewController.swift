@@ -61,6 +61,7 @@ extension ViewController {
         eventList.append("Native Display")
         eventList.append("Variables")
         eventList.append("Sync Custom Templates")
+        eventList.append("Live Activities")
         self.tblEvent.reloadData()
     }
     
@@ -156,6 +157,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 20: navigateToVariables()
             break;
         case 21: CleverTap.sharedInstance()?.syncCustomTemplates()
+            break;
+        case 22: navigateToLiveActivities()
             break;
         default:
             break;
@@ -346,6 +349,13 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func createInAppCampaignPushPrimer() {
         CleverTap.sharedInstance()?.recordEvent("InAppCampaignPushPrimer")
+    }
+
+    func navigateToLiveActivities() {
+        if #available(iOS 13.0, *) {
+            let liveActivitiesVC = LiveActivitiesViewController()
+            self.navigationController?.pushViewController(liveActivitiesVC, animated: true)
+        }
     }
     
     // MARK: CleverTapPushPermissionDelegate

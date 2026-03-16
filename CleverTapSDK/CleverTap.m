@@ -1310,6 +1310,14 @@ static BOOL sharedInstanceErrorLogged;
     }
     return deviceToken;
 }
+- (void)pushLiveActivityData:(NSDictionary *)data {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    if (!data || data.count == 0) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[@"data"] = data;
+    [self queueEvent:event withType:CleverTapEventTypeData];
+}
+
 - (void)_handlePushNotification:(id)object {
     [self _handlePushNotification:object openDeepLinksInForeground:NO];
 }
@@ -1350,6 +1358,12 @@ static BOOL sharedInstanceErrorLogged;
     
     // check to see whether the push includes a test in-app notification, test inbox message or test display unit, if so don't process further
     if ([self _checkAndHandleTestPushPayload:notification]) return;
+
+    // check for CT Live Activity push (update or end) and track delivery
+    if (notification[CLTAP_LIVE_ACTIVITY_PUSH_MARKER]) {
+        [self _handleLiveActivityPush:notification];
+        return;
+    }
     
     // notify application with push notification custom extras
     [self _notifyPushNotificationTapped:notification];
@@ -1419,6 +1433,22 @@ static BOOL sharedInstanceErrorLogged;
     return NO;
 }
 #endif
+
+- (void)_handleLiveActivityPush:(NSDictionary *)notification {
+    // Live Activity update/end pushes are processed by iOS directly (the system updates
+    // the activity UI without app involvement). The SDK intercepts them here only to
+    // prevent them from being treated as regular CT push notifications and to log receipt.
+    NSDictionary *aps = notification[@"aps"];
+    NSString *pushEvent = aps[CLTAP_LIVE_ACTIVITY_PUSH_EVENT_KEY];
+    NSString *activityID = notification[CLTAP_LIVE_ACTIVITY_PUSH_ACTIVITY_ID];
+
+    CleverTapLogDebug(self.config.logLevel,
+        @"%@: received CT Live Activity push — event: %@, cleverTapActivityId: %@",
+        self, pushEvent ?: @"(unknown)", activityID ?: @"(none)");
+
+    // No further processing needed here; token lifecycle analytics are raised
+    // automatically by CTLiveActivityManager via Swift concurrency observation.
+}
 
 - (void)_notifyPushNotificationTapped:(NSDictionary *)notification {
     if (self.pushNotificationDelegate && [self.pushNotificationDelegate respondsToSelector:@selector(pushNotificationTappedWithCustomExtras:)]) {
