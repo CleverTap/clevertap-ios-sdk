@@ -216,6 +216,31 @@
     XCTAssertFalse([self.domainFactory isMuted], @"Should not be muted 1 second after expiry");
 }
 
+- (void)testUnmute_clearsMuteState {
+    NSTimeInterval twoDaysFromNow = [NSDate new].timeIntervalSince1970 + (2 * 24 * 60 * 60);
+    long long muteExpiryMs = (long long)(twoDaysFromNow * 1000);
+    NSDictionary *headers = @{
+        @"X-WZRK-MUTE": @"true",
+        @"X-WZRK-MUTE-DURATION": [NSString stringWithFormat:@"%lld", muteExpiryMs]
+    };
+    [self.domainFactory updateMutedFromResponseHeaders:headers];
+    XCTAssertTrue([self.domainFactory isMuted], @"Pre-condition: SDK should be muted");
+
+    [self.domainFactory unmute];
+    XCTAssertFalse([self.domainFactory isMuted], @"SDK should not be muted after unmute");
+    XCTAssertEqual(self.domainFactory.muteExpiryTs, 0, @"muteExpiryTs should be reset to 0");
+}
+
+- (void)testUnmute_persistedAcrossReinitialization {
+    NSTimeInterval twoDaysFromNow = [NSDate new].timeIntervalSince1970 + (2 * 24 * 60 * 60);
+    [self.domainFactory persistMutedExpiry:twoDaysFromNow];
+    XCTAssertTrue([self.domainFactory isMuted], @"Pre-condition: SDK should be muted");
+
+    [self.domainFactory unmute];
+    CTDomainFactory *newInstance = [[CTDomainFactory alloc] initWithConfig:self.config];
+    XCTAssertFalse([newInstance isMuted], @"Unmute should persist: new instance should not be muted");
+}
+
 #pragma mark - needsHandshake Tests
 
 - (void)testNeedsHandshake_returnsTrueWhenNoDomainAndNotMuted {

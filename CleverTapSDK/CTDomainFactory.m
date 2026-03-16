@@ -179,6 +179,11 @@ NSTimeInterval const kMUTE_SECONDS = 24 * 60 * 60;
     [CTPreferences putInt:self.muteExpiryTs forKey:[CTPreferences storageKeyWithSuffix:kMUTE_EXPIRY_TS_KEY config: self.config]];
 }
 
+- (void)unmute {
+    self.muteExpiryTs = 0;
+    [CTPreferences putInt:0 forKey:[CTPreferences storageKeyWithSuffix:kMUTE_EXPIRY_TS_KEY config:self.config]];
+}
+
 #pragma mark - Handshake Handling
 
 - (BOOL)needsHandshake {
