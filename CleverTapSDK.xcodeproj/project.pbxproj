@@ -304,6 +304,7 @@
 		4EB4C8BF2AAD91AC00B7F045 /* CTTriggerEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */; };
 		4ECB11CB2F1FE18D00399A2F /* CTLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ECB11CA2F1FE18D00399A2F /* CTLogger.swift */; };
 		4ECB11CC2F1FE18D00399A2F /* CTLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ECB11CA2F1FE18D00399A2F /* CTLogger.swift */; };
+		4ECD84082F62A39D00CE5B45 /* inapp_cta.png in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD84072F62A39D00CE5B45 /* inapp_cta.png */; };
 		4ECD88312ADC8A05003885CE /* CTSessionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */; };
 		4EEA76622ECF066C00E2CF1B /* CTInAppTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EEA76602ECF066C00E2CF1B /* CTInAppTimer.m */; };
 		4EEA76632ECF066C00E2CF1B /* CTInAppTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EEA765F2ECF066C00E2CF1B /* CTInAppTimer.h */; };
@@ -934,6 +935,7 @@
 		4EB4C8BD2AAD91AC00B7F045 /* CTTriggerEvaluator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTTriggerEvaluator.m; sourceTree = "<group>"; };
 		4EC2D084278AAD8000F4DE54 /* IdentityManagementTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentityManagementTests.m; sourceTree = "<group>"; };
 		4ECB11CA2F1FE18D00399A2F /* CTLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTLogger.swift; sourceTree = "<group>"; };
+		4ECD84072F62A39D00CE5B45 /* inapp_cta.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inapp_cta.png; sourceTree = "<group>"; };
 		4ECD88302ADC8A05003885CE /* CTSessionManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSessionManagerTests.m; sourceTree = "<group>"; };
 		4EDCDE4D278AC4DF0065E699 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4EEA765F2ECF066C00E2CF1B /* CTInAppTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTInAppTimer.h; sourceTree = "<group>"; };
@@ -1528,6 +1530,7 @@
 		49F9E6BA2552E97000EF2E5C /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				4ECD84072F62A39D00CE5B45 /* inapp_cta.png */,
 				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
 				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
 				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
@@ -2651,6 +2654,7 @@
 				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
 				071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */,
 				071EB507217F6427008F0FAB /* CTFooterViewController~iphoneport.xib in Resources */,
+				4ECD84082F62A39D00CE5B45 /* inapp_cta.png in Resources */,
 				071EB4E5217F6427008F0FAB /* ic_play@3x.png in Resources */,
 				07D86D45222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib in Resources */,
 				0796FB6521AE5B2900FC380D /* CTCarouselMessageCell~port.xib in Resources */,
