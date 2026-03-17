@@ -42,6 +42,11 @@
         self.imageViewLRatioConstraint.priority = 999;
     }
     
+#if TARGET_OS_TV
+    // tvOS is always landscape-equivalent; collapse the left media panel when no media
+    self.imageViewWidthConstraint.priority = [self mediaIsEmpty] ? 999 : 750;
+    self.dividerCenterXConstraint.priority = [self mediaIsEmpty] ? 750 : 999;
+#else
     // handle landscape
     if ([self deviceOrientationIsLandscape]) {
         if ([self mediaIsEmpty]) {
@@ -52,6 +57,7 @@
             self.dividerCenterXConstraint.priority = 999;
         }
     }
+#endif
     self.cellImageView.clipsToBounds = YES;
     self.cellIcon.clipsToBounds = YES;
     self.cellIcon.contentMode = UIViewContentModeScaleAspectFill;
@@ -113,7 +119,11 @@
     }
     
     if (content.iconUrl) {
+#if TARGET_OS_TV
+        self.cellIconHeightContraint.constant = 120;
+#else
         self.cellIconHeightContraint.constant = 75;
+#endif
         [self.cellIcon sd_setImageWithURL:[NSURL URLWithString:content.iconUrl]
                          placeholderImage: [self getPortraitPlaceHolderImage] options:self.sdWebImageOptions context:self.sdWebImageContext];
         self.cellIconRatioContraint.priority = 999;

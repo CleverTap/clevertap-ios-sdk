@@ -45,6 +45,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-
+    // MARK: - Custom URL Scheme Handling
+    // Handles deep-links of the form  swiftstarter://<path>
+    // Configure CleverTap inbox button URLs as e.g. "swiftstarter://home"
+    // instead of "https://..." (tvOS has no browser, but custom schemes work).
+    func application(_ app: UIApplication, open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        guard url.scheme == "swiftstarter" else { return false }
+        switch url.host {
+        case "home":
+            window?.rootViewController?.dismiss(animated: true, completion: nil)
+        default:
+            break
+        }
+        return true
+    }
 }
 
