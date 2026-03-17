@@ -60,7 +60,11 @@ static const int kMaxTags = 3;
                           config:(CleverTapInboxStyleConfig *)config
                         delegate:(id<CleverTapInboxViewControllerDelegate>)delegate
                analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate>)analyticsDelegate {
+#if TARGET_OS_TV
     self = [self initWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CleverTapInboxViewController class])] bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
+#else
+    self = [self initWithNibName:NSStringFromClass([CleverTapInboxViewController class]) bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
+#endif
     if (self) {
         _config = [config copy];
         _delegate = delegate;

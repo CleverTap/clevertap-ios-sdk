@@ -32,5 +32,16 @@
 	</array>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>swiftstarter</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.clevertap.SwiftTvOS</string>
+		</dict>
+	</array>
 </dict>
 </plist>
