@@ -74,16 +74,15 @@ static NSString * const kOrientationPortrait = @"p";
     self.containerView.layer.shadowOffset = CGSizeMake(0, 12);
     self.containerView.layer.masksToBounds = NO;
 
-    // Transparent button that acts as the "body" focus target.
-    // Added to contentView (not containerView) so the focus engine
-    // discovers it as a sibling of containerView. Frame is set in
-    // layoutSubviews to cover the body area above the action buttons.
     self.bodyFocusButton = [UIButton buttonWithType:UIButtonTypeCustom];
     self.bodyFocusButton.backgroundColor = [UIColor clearColor];
     [self.contentView addSubview:self.bodyFocusButton];
     [self.bodyFocusButton addTarget:self
                              action:@selector(bodyFocusButtonTapped)
                    forControlEvents:UIControlEventPrimaryActionTriggered];
+
+    self.clipsToBounds = NO;
+    self.contentView.clipsToBounds = NO;
 #endif
 }
 

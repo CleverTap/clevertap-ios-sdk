@@ -78,7 +78,11 @@ static const int kMaxTags = 3;
             // Use the first tab title if specified in the config, or else fallback to the Default one
             NSString *firstTabTitle = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTab;
             [tags insertObject:firstTabTitle atIndex:0];
+#if TARGET_OS_TV
+            _topContentOffset = 60.f;
+#else
             _topContentOffset = 33.f;
+#endif
         }
         if ([tags count] > kMaxTags) {
             _tags = [tags subarrayWithRange:NSMakeRange(0, kMaxTags)];
@@ -99,7 +103,9 @@ static const int kMaxTags = 3;
                                     action:@selector(dismissTapped)];
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
+#if !TARGET_OS_TV
     self.navigationController.navigationBar.translucent = false;
+#endif
     
     self.muted = YES;
     [self addObservers];
@@ -177,8 +183,15 @@ static const int kMaxTags = 3;
 #if TARGET_OS_TV
     self.tableView.estimatedRowHeight = 400.0;
     if (@available(tvOS 11.0, *)) {
-        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentAutomatic;
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
+    // Prevent the table from extending under the navigation bar.
+    // Without this, the nav bar height is added to adjustedContentInset.top by
+    // UIScrollViewContentInsetAdjustmentAutomatic, which causes the focus engine
+    // to scroll to a different offset than our manual -_topContentOffset, clipping
+    // the topmost cell on every tab switch. Matching the iOS setup keeps the two
+    // consistent: table frame starts at nav bar bottom, adjustedContentInset == contentInset.
+    self.edgesForExtendedLayout = UIRectEdgeNone;
 #else
     self.tableView.estimatedRowHeight = 44.0;
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -322,10 +335,15 @@ static const int kMaxTags = 3;
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:self.segmentedControlContainer attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:-25] setActive:YES];
+#if TARGET_OS_TV
+    CGFloat segmentHeight = 50.0;
+#else
+    CGFloat segmentHeight = 30.0;
+#endif
     [[NSLayoutConstraint constraintWithItem:segmentedControl
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:30] setActive:YES];
+                                 multiplier:1 constant:segmentHeight] setActive:YES];
 }
 
 - (void)segmentSelected:(UISegmentedControl *)sender {
