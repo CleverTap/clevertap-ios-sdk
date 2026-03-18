@@ -12,7 +12,6 @@
 static NSString *const kCRYPT_KEY_PREFIX = @"Lq3fz";
 static NSString *const kCRYPT_KEY_SUFFIX = @"bLti2";
 
-API_AVAILABLE(ios(13.0))
 @interface CTEncryptionManager () {}
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, assign) CleverTapEncryptionLevel encryptionLevel;
@@ -54,9 +53,7 @@ API_AVAILABLE(ios(13.0))
 }
 
 - (void)setupEncryptionWithLevel {
-    if (@available(iOS 13.0, tvOS 13.0, *)) {
-        _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:ENCRYPTION_KEY_TAG];
-    }
+    _ctaesgcm = [[CTAESGCMCrypt alloc] initWithKeychainTag:ENCRYPTION_KEY_TAG];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder {
@@ -114,20 +111,14 @@ API_AVAILABLE(ios(13.0))
     
     switch (algorithm) {
         case AES_GCM: {
-            if (@available(iOS 13.0, tvOS 13.0, *)) {
-                NSError *encryptError = nil;
-                NSString *encryptedString = [_ctaesgcm encryptString:plaintext error:&encryptError];
+            NSError *encryptError = nil;
+            NSString *encryptedString = [_ctaesgcm encryptString:plaintext error:&encryptError];
 
-                if (encryptError) {
-                    CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
-                    return plaintext;
-                }
-                return encryptedString;
+            if (encryptError) {
+                CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
+                return plaintext;
             }
-            
-            // Fallback to AES if iOS < 13
-            CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES encryption.");
-            // Intentional fallthrough to AES case
+            return encryptedString;
         }
         case AES: {
             @try {
@@ -157,20 +148,14 @@ API_AVAILABLE(ios(13.0))
 
     switch (algorithm) {
         case AES_GCM: {
-            if (@available(iOS 13.0, tvOS 13.0, *)) {
-                NSError *decryptError = nil;
-                NSString *decryptedString = [_ctaesgcm decryptString:ciphertext error:&decryptError];
+            NSError *decryptError = nil;
+            NSString *decryptedString = [_ctaesgcm decryptString:ciphertext error:&decryptError];
 
-                if (decryptError) {
-                    CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
-                    return ciphertext;
-                }
-                return decryptedString;
+            if (decryptError) {
+                CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
+                return ciphertext;
             }
-
-            // Fallback to AES if iOS < 13
-            CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES decryption.");
-            // Intentional fallthrough to AES case
+            return decryptedString;
         }
         case AES: {
             @try {
@@ -201,42 +186,24 @@ API_AVAILABLE(ios(13.0))
     }
     
     @try {
-        NSData *data;
-                
-        if (@available(iOS 11.0, tvOS 11.0, *)) {
-            NSError *archiveError = nil;
-            data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
-            
-            if (!data || archiveError) {
-                CleverTapLogStaticInternal(@"Failed to serialize object for encryption: %@", archiveError);
-                return nil;
-            }
-        } else {
-            // Fallback for iOS/tvOS versions below 11.0
-            data = [NSKeyedArchiver archivedDataWithRootObject:object];
-            
-            if (!data) {
-                CleverTapLogStaticInternal(@"Failed to serialize object for encryption.");
-                return nil;
-            }
+        NSError *archiveError = nil;
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&archiveError];
+
+        if (!data || archiveError) {
+            CleverTapLogStaticInternal(@"Failed to serialize object for encryption: %@", archiveError);
+            return nil;
         }
 
         switch (algorithm) {
             case AES_GCM: {
-                if (@available(iOS 13.0, tvOS 13.0, *)) {
-                    NSError *encryptError = nil;
-                    NSString *encryptedString = [_ctaesgcm encryptData:data error:&encryptError];
+                NSError *encryptError = nil;
+                NSString *encryptedString = [_ctaesgcm encryptData:data error:&encryptError];
 
-                    if (encryptError) {
-                        CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
-                        return nil;
-                    }
-                    return encryptedString;
+                if (encryptError) {
+                    CleverTapLogStaticInternal(@"AES-GCM Encryption failed: %@", encryptError.localizedDescription ?: @"Unknown error");
+                    return nil;
                 }
-
-                // Fallback to AES if iOS < 13
-                CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES encryption.");
-                // Intentional fallthrough to AES case
+                return encryptedString;
             }
             case AES: {
                 NSData *encryptedData = [self processData:data operation:kCCEncrypt];
@@ -265,55 +232,39 @@ API_AVAILABLE(ios(13.0))
     @try {
         switch (algorithm) {
             case AES_GCM: {
-                if (@available(iOS 13.0, tvOS 13.0, *)) {
-                    NSError *decryptError = nil;
-                    NSData *decryptedData = [_ctaesgcm decryptData:ciphertext error:&decryptError];
+                NSError *decryptError = nil;
+                NSData *decryptedData = [_ctaesgcm decryptData:ciphertext error:&decryptError];
 
-                    if (decryptError) {
-                        CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
-                        return nil;
-                    }
-                    
-                    if (decryptedData) {
-                        if (@available(iOS 11.0, tvOS 11.0, *)) {
-                            NSError *unarchiveError = nil;
-                            id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class, NSNull.class]] fromData:decryptedData error:&unarchiveError];
-                            
-                            if (unarchiveError) {
-                                CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
-                                return nil;
-                            }
-                            return unarchived;
-                        } else {
-                            // Fallback for iOS/tvOS versions below 11.0
-                            return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
-                        }
-                    }
+                if (decryptError) {
+                    CleverTapLogStaticInternal(@"AES-GCM Decryption failed: %@", decryptError.localizedDescription ?: @"Unknown error");
                     return nil;
                 }
 
-                // Fallback to AES if iOS < 13
-                CleverTapLogStaticInternal(@"AES-GCM not supported, falling back to AES decryption.");
-                // Intentional fallthrough to AES case
+                if (decryptedData) {
+                    NSError *unarchiveError = nil;
+                    id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class, NSNull.class]] fromData:decryptedData error:&unarchiveError];
+
+                    if (unarchiveError) {
+                        CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
+                        return nil;
+                    }
+                    return unarchived;
+                }
+                return nil;
             }
             case AES: {
                 NSData *data = [[NSData alloc] initWithBase64EncodedString:ciphertext options:0];
                 NSData *decryptedData = [self processData:data operation:kCCDecrypt];
-                
+
                 if (decryptedData) {
-                    if (@available(iOS 11.0, tvOS 11.0, *)) {
-                        NSError *unarchiveError = nil;
-                        id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class, NSNull.class]] fromData:decryptedData error:&unarchiveError];
-                        
-                        if (unarchiveError) {
-                            CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
-                            return nil;
-                        }
-                        return unarchived;
-                    } else {
-                        // Fallback for iOS/tvOS versions below 11.0
-                        return [NSKeyedUnarchiver unarchiveObjectWithData:decryptedData];
+                    NSError *unarchiveError = nil;
+                    id unarchived = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithArray:@[NSArray.class, NSDictionary.class, NSString.class, NSNumber.class, NSData.class, NSDate.class, NSNull.class]] fromData:decryptedData error:&unarchiveError];
+
+                    if (unarchiveError) {
+                        CleverTapLogStaticInternal(@"Unarchiving failed: %@", unarchiveError);
+                        return nil;
                     }
+                    return unarchived;
                 }
                 return nil;
             }

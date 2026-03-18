@@ -412,18 +412,10 @@ CTVariables *variables;
     NSString *fileName = [varCache dataArchiveFileName];
     NSString *filePath = [CTPreferences filePathfromFileName:fileName];
     NSData *diffsData = [NSData dataWithContentsOfFile:filePath];
-    NSKeyedUnarchiver *unarchiver;
     NSError *error = nil;
-    if (@available(iOS 12.0, *)) {
-        unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
-        XCTAssertNil(error);
-        unarchiver.requiresSecureCoding = NO;
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:diffsData];
-#pragma clang diagnostic pop
-    }
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
+    XCTAssertNil(error);
+    unarchiver.requiresSecureCoding = NO;
     NSDictionary *loadedVars = (NSDictionary *) [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
     XCTAssertTrue([diff isEqualToDictionary:loadedVars]);
     

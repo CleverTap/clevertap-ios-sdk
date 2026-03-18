@@ -42,20 +42,15 @@
 }
 
 - (void)updateWindowFrame {
-    if (@available(iOS 13, tvOS 13.0, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                
-                CGRect windowFrame = [self windowSceneFrame:windowScene];
-                self.window.frame = windowFrame;
-                break;
-            }
+    NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+    for (UIScene *scene in connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+
+            CGRect windowFrame = [self windowSceneFrame:windowScene];
+            self.window.frame = windowFrame;
+            break;
         }
-    } else {
-        CGRect windowFrame = [self windowFrame];
-        self.window.frame = windowFrame;
     }
 }
 
@@ -63,11 +58,9 @@
     self = [super init];
     if (self) {
         _notification = notification;
-        if (@available(iOS 13, tvOS 13.0, *)) {
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(sceneDidActivate:) name:UISceneDidActivateNotification
-                                                       object:nil];
-        }
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(sceneDidActivate:) name:UISceneDidActivateNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -228,43 +221,32 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)initializeWindowOfClass:(Class)windowClass animated:(BOOL)animated {
-    if (@available(iOS 13, tvOS 13.0, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                
-                if ([self isInAppAdvancedBuilder]) {
-                    CGRect windowFrame = [self windowSceneFrame:windowScene];
-                    self.window = [[windowClass alloc] initWithFrame:windowFrame];
-                    self.window.windowScene = windowScene;
-                } else {
-                    self.window = [[windowClass alloc] initWithFrame:
-                                                    windowScene.coordinateSpace.bounds];
-                    self.window.windowScene = windowScene;
-                }
+    NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+    for (UIScene *scene in connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+
+            if ([self isInAppAdvancedBuilder]) {
+                CGRect windowFrame = [self windowSceneFrame:windowScene];
+                self.window = [[windowClass alloc] initWithFrame:windowFrame];
+                self.window.windowScene = windowScene;
+            } else {
+                self.window = [[windowClass alloc] initWithFrame:
+                                                windowScene.coordinateSpace.bounds];
+                self.window.windowScene = windowScene;
             }
         }
-    } else {
-        if ([self isInAppAdvancedBuilder]) {
-            CGRect windowFrame = [self windowFrame];
-            self.window = [[windowClass alloc] initWithFrame: windowFrame];
-        } else {
-            self.window = [[windowClass alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
-        }
     }
-    
+
     if (!self.window) {
         CleverTapLogStaticDebug(@"%@:%@: UIWindow not initialized.", [CTInAppDisplayViewController class], self);
-        if (@available(iOS 13, tvOS 13.0, *)) {
-            // No active scene found to initialize the window from. Cannot present the view.
-            // Once a scene becomes active, the UISceneDidActivateNotification is posted.
-            // sceneDidActivate: will call again showFromWindow from the notification,
-            // so window is initialized from the scene that became active
-            CleverTapLogStaticDebug(@"%@:%@: Waiting for active scene.", [CTInAppDisplayViewController class], self);
-            self.animated = animated;
-            self.waitingForSceneWindow = YES;
-        }
+        // No active scene found to initialize the window from. Cannot present the view.
+        // Once a scene becomes active, the UISceneDidActivateNotification is posted.
+        // sceneDidActivate: will call again showFromWindow from the notification,
+        // so window is initialized from the scene that became active
+        CleverTapLogStaticDebug(@"%@:%@: Waiting for active scene.", [CTInAppDisplayViewController class], self);
+        self.animated = animated;
+        self.waitingForSceneWindow = YES;
     } else {
         CleverTapLogStaticInternal(@"%@:%@: Window initialized.", [CTInAppDisplayViewController class], self);
     }
@@ -522,9 +504,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)dealloc {
-    if (@available(iOS 13.0, tvOS 13.0, *)) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

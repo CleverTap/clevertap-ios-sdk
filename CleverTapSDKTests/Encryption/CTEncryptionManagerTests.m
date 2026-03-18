@@ -290,25 +290,21 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
 #pragma mark - Encryption Algorithm Tests
 
 - (void)testAESGCMEncryption {
-    if (@available(iOS 13.0, tvOS 13.0, *)) {
-        CTEncryptionManager *mgr = [[CTEncryptionManager alloc] initWithAccountID:@"test"
-                                                                encryptionLevel:CleverTapEncryptionMedium];
-        
-        NSString *plainText = @"test string";
-        NSString *encrypted = [mgr encryptString:plainText encryptionAlgorithm:AES_GCM];
-        
-        // Verify encryption occurred
-        XCTAssertNotEqualObjects(encrypted, plainText, @"AES_GCM encryption failed");
-        
-        // Test GCM prefix detection
-        XCTAssertTrue([mgr isTextAESGCMEncrypted:encrypted], @"isTextAESGCMEncrypted failed to detect AES_GCM encrypted text");
-        
-        // Test decryption
-        NSString *decrypted = [mgr decryptString:encrypted encryptionAlgorithm:AES_GCM];
-        XCTAssertEqualObjects(decrypted, plainText, @"AES_GCM decryption failed");
-    } else {
-        NSLog(@"Skipping AES_GCM test on iOS < 13.0");
-    }
+    CTEncryptionManager *mgr = [[CTEncryptionManager alloc] initWithAccountID:@"test"
+                                                            encryptionLevel:CleverTapEncryptionMedium];
+
+    NSString *plainText = @"test string";
+    NSString *encrypted = [mgr encryptString:plainText encryptionAlgorithm:AES_GCM];
+
+    // Verify encryption occurred
+    XCTAssertNotEqualObjects(encrypted, plainText, @"AES_GCM encryption failed");
+
+    // Test GCM prefix detection
+    XCTAssertTrue([mgr isTextAESGCMEncrypted:encrypted], @"isTextAESGCMEncrypted failed to detect AES_GCM encrypted text");
+
+    // Test decryption
+    NSString *decrypted = [mgr decryptString:encrypted encryptionAlgorithm:AES_GCM];
+    XCTAssertEqualObjects(decrypted, plainText, @"AES_GCM decryption failed");
 }
 
 - (void)testAESEncryption {
@@ -354,12 +350,10 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     NSString *aesEncrypted = [mgr encryptString:plainText encryptionAlgorithm:AES];
     NSString *decrypted = [mgr decryptString:aesEncrypted]; // Default decryption
     
-    if (@available(iOS 13.0, tvOS 13.0, *)) {
-        // Encrypt with AES_GCM but try to decrypt with default method
-        NSString *gcmEncrypted = [mgr encryptString:plainText encryptionAlgorithm:AES_GCM];
-        decrypted = [mgr decryptString:gcmEncrypted]; // Default decryption
-        XCTAssertEqualObjects(decrypted, plainText, @"Default decryption should handle AES_GCM");
-    }
+    // Encrypt with AES_GCM but try to decrypt with default method
+    NSString *gcmEncrypted = [mgr encryptString:plainText encryptionAlgorithm:AES_GCM];
+    decrypted = [mgr decryptString:gcmEncrypted]; // Default decryption
+    XCTAssertEqualObjects(decrypted, plainText, @"Default decryption should handle AES_GCM");
 }
 
 #pragma mark - String Encryption Edge Cases
@@ -441,13 +435,11 @@ static NSString *const kAESGCMSuffixForTest = @">ct>";
     NSArray *aesDecrypted = [mgr decryptObject:aesEncrypted encryptionAlgorithm:AES];
     XCTAssertEqualObjects(aesDecrypted, testObject, @"AES object decryption failed");
     
-    // Test AES_GCM (if iOS 13+)
-    if (@available(iOS 13.0, tvOS 13.0, *)) {
-        NSString *aesgcmEncrypted = [mgr encryptObject:testObject encryptionAlgorithm:AES_GCM];
-        XCTAssertNotNil(aesgcmEncrypted, @"AES_GCM object encryption failed");
-        NSArray *aesgcmDecrypted = [mgr decryptObject:aesgcmEncrypted encryptionAlgorithm:AES_GCM];
-        XCTAssertEqualObjects(aesgcmDecrypted, testObject, @"AES_GCM object decryption failed");
-    }
+    // Test AES_GCM
+    NSString *aesgcmEncrypted = [mgr encryptObject:testObject encryptionAlgorithm:AES_GCM];
+    XCTAssertNotNil(aesgcmEncrypted, @"AES_GCM object encryption failed");
+    NSArray *aesgcmDecrypted = [mgr decryptObject:aesgcmEncrypted encryptionAlgorithm:AES_GCM];
+    XCTAssertEqualObjects(aesgcmDecrypted, testObject, @"AES_GCM object decryption failed");
 }
 
 - (void)testObjectEncryptionVariousTypes {

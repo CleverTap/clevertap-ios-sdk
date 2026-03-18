@@ -171,14 +171,7 @@ static const int kMaxTags = 3;
     self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
-    if (@available(iOS 11.0, *)) {
-        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        self.automaticallyAdjustsScrollViewInsets = NO;
-#pragma clang diagnostic pop
-    }
+    self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
@@ -255,11 +248,7 @@ static const int kMaxTags = 3;
                forControlEvents:UIControlEventValueChanged];
     
     /// Update the Segment Control Tint Color
-    if (@available(iOS 13.0, *)) {
-        segmentedControl.selectedSegmentTintColor = (_config && _config.tabSelectedBgColor) ? _config.tabSelectedBgColor : [UIColor whiteColor];
-    } else {
-        segmentedControl.tintColor = (_config && _config.tabSelectedBgColor) ? _config.tabSelectedBgColor : [UIColor whiteColor];
-    }
+    segmentedControl.selectedSegmentTintColor = (_config && _config.tabSelectedBgColor) ? _config.tabSelectedBgColor : [UIColor whiteColor];
     
     /// Update the Segment Control Tab Selected Color
     [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabSelectedTextColor) ? _config.tabSelectedTextColor : [UIColor blackColor]} forState:UIControlStateSelected];

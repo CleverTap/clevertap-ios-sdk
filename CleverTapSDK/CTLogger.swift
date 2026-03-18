@@ -20,7 +20,6 @@ public class CTLogger: NSObject {
     
     private static var debugLevel: Int32 = 0
     
-    @available(iOS 10.0, tvOS 10.0, *)
     private static let osLog = OSLog(subsystem: "com.clevertap.sdk", category: "CleverTap")
     
     public static func setDebugLevel(_ level: Int32) {
@@ -41,15 +40,11 @@ public class CTLogger: NSObject {
         
         let fullMessage = "[CleverTap]: \(message)"
         
-        if #available(iOS 10.0, tvOS 10.0, *) {
-            switch logType {
-            case .info:
-                os_log("%{public}@", log: osLog, type: .info, fullMessage)
-            case .debug:
-                os_log("%{public}@", log: osLog, type: .debug, fullMessage)
-            }
-        } else {
-            NSLog("%@", fullMessage)
+        switch logType {
+        case .info:
+            os_log("%{public}@", log: osLog, type: .info, fullMessage)
+        case .debug:
+            os_log("%{public}@", log: osLog, type: .debug, fullMessage)
         }
     }
     

@@ -182,21 +182,13 @@
             [self applyVariableDiffs:@{}];
             return;
         }
-        NSKeyedUnarchiver *unarchiver;
-        if (@available(iOS 12.0, tvOS 11.0, *)) {
-            NSError *error = nil;
-            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
-            if (error != nil) {
-                CleverTapLogDebug(self.config.logLevel, @"%@: Error while loading variables: %@", self, error.localizedDescription);
-                return;
-            }
-            unarchiver.requiresSecureCoding = NO;
-        } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:diffsData];
-#pragma clang diagnostic pop
+        NSError *error = nil;
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:diffsData error:&error];
+        if (error != nil) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Error while loading variables: %@", self, error.localizedDescription);
+            return;
         }
+        unarchiver.requiresSecureCoding = NO;
         NSDictionary *loadedDiffs = (NSDictionary *) [unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
         
         // Decrypt diffs if they were encrypted
@@ -256,24 +248,16 @@
             return;
         }
         
-        NSKeyedUnarchiver *unarchiver;
-        if (@available(iOS 12.0, tvOS 11.0, *)) {
-            NSError *error = nil;
-            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:variantsData error:&error];
-            if (error != nil) {
-                CleverTapLogDebug(self.config.logLevel, @"%@: Error loading variants: %@", self, error.localizedDescription);
-                @synchronized (self) {
-                    self.variants = @[];
-                }
-                return;
+        NSError *error = nil;
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:variantsData error:&error];
+        if (error != nil) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Error loading variants: %@", self, error.localizedDescription);
+            @synchronized (self) {
+                self.variants = @[];
             }
-            unarchiver.requiresSecureCoding = NO;
-        } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:variantsData];
-#pragma clang diagnostic pop
+            return;
         }
+        unarchiver.requiresSecureCoding = NO;
         
         NSArray *loadedVariants = (NSArray *)[unarchiver decodeObjectForKey:CLEVERTAP_DEFAULTS_VARIANTS_KEY];
         

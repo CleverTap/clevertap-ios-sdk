@@ -65,7 +65,7 @@
         
         // Notification Handling
 #if !defined(CLEVERTAP_TVOS)
-        if (@available(iOS 10.0, *)) {
+        {
             Class ncdCls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
             if ([UNUserNotificationCenter class] && !ncdCls) {
                 [[UNUserNotificationCenter currentNotificationCenter] addObserver:[CleverTap sharedInstance] forKeyPath:@"delegate" options:0 context:nil];
@@ -135,23 +135,12 @@
                 [invocation invokeWithTarget:obj];
             } error:nil];
         } else {
-            if (@available(iOS 9.0, *)) {
-                sel = NSSelectorFromString(@"application:openURL:options:");
-                SEL newSel = @selector(ct_application:openURL:options:);
-                Method newMeth = class_getClassMethod([self class], newSel);
-                IMP imp = method_getImplementation(newMeth);
-                const char* methodTypeEncoding = method_getTypeEncoding(newMeth);
-                class_addMethod(cls, sel, imp, methodTypeEncoding);
-            } else {
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
-                sel = NSSelectorFromString(@"application:openURL:sourceApplication:annotation:");
-                SEL newSel = @selector(ct_application:openURL:sourceApplication:annotation:);
-                Method newMeth = class_getClassMethod([self class], newSel);
-                IMP imp = method_getImplementation(newMeth);
-                const char* methodTypeEncoding = method_getTypeEncoding(newMeth);
-                class_addMethod(cls, sel, imp, methodTypeEncoding);
-#endif
-            }
+            sel = NSSelectorFromString(@"application:openURL:options:");
+            SEL newSel = @selector(ct_application:openURL:options:);
+            Method newMeth = class_getClassMethod([self class], newSel);
+            IMP imp = method_getImplementation(newMeth);
+            const char* methodTypeEncoding = method_getTypeEncoding(newMeth);
+            class_addMethod(cls, sel, imp, methodTypeEncoding);
             // UIApplication caches whether or not the delegate responds to certain selectors. Clearing out the delegate and resetting it gaurantees that gets updated
             [sharedApplication setDelegate:nil];
             // UIApplication won't assume ownership of AppDelegate for setDelegate calls add a retain here

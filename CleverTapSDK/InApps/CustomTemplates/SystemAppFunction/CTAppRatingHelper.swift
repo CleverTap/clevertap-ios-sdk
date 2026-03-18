@@ -33,12 +33,6 @@ public class CTAppRatingHelper : NSObject {
                     SKStoreReviewController.requestReview(in: windowScene)
                 }
                 CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "App rating request successful.")
-            } else if #available(iOS 10.3, *) {
-                presented = true
-                SKStoreReviewController.requestReview()
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "App rating request successful.")
-            } else {
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Cannot request for App rating prompt for iOS version 10.2 and below.")
             }
             completion(presented)
         }

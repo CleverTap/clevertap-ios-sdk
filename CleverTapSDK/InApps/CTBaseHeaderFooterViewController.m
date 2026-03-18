@@ -365,18 +365,14 @@ typedef enum {
 
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
-    if (@available(iOS 13, *)) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIScene *scene in connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindowScene *windowScene = (UIWindowScene *)scene;
-                self.window = [[CTInAppPassThroughWindow alloc] initWithFrame:
-                               windowScene.coordinateSpace.bounds];
-                self.window.windowScene = windowScene;
-            }
+    NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+    for (UIScene *scene in connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+            self.window = [[CTInAppPassThroughWindow alloc] initWithFrame:
+                           windowScene.coordinateSpace.bounds];
+            self.window.windowScene = windowScene;
         }
-    } else {
-        self.window = [[CTInAppPassThroughWindow alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
     }
     self.window.alpha = 0;
     self.window.backgroundColor = [UIColor clearColor];

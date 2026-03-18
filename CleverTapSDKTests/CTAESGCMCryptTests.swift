@@ -2,7 +2,6 @@ import XCTest
 import CleverTapSDK
 import CryptoKit
 
-@available(iOS 13.0, tvOS 13.0, *)
 class AESGCMCryptTests: XCTestCase {
     
     // Test constants

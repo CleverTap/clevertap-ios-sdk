@@ -65,11 +65,7 @@ static dispatch_once_t coordinatorOnceToken;
             
             // Configure merge policy for conflict resolution
             _context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-            
-            // Automatically merge changes from other contexts (iOS 10+)
-            if (@available(iOS 10.0, *)) {
-                _context.automaticallyMergesChangesFromParent = YES;
-            }
+            _context.automaticallyMergesChangesFromParent = YES;
             
             // Create or fetch user on the context's queue
             __weak typeof(self) weakSelf = self;

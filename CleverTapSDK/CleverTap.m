@@ -368,20 +368,18 @@ static BOOL sharedInstanceErrorLogged;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 #if !defined(CLEVERTAP_TVOS)
     if ([keyPath isEqualToString:@"delegate"]) {
-        if (@available(iOS 10.0, *)) {
-            Class cls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
-            if (class_getInstanceMethod(cls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
-                SEL sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
-                if (sel) {
-                    __block NSInvocation *invocation = nil;
-                    invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
-                        [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
-                        [invocation setArgument:&center atIndex:2];
-                        [invocation setArgument:&response atIndex:3];
-                        [invocation setArgument:&completion atIndex:4];
-                        [invocation invokeWithTarget:obj];
-                    } error:nil];
-                }
+        Class cls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
+        if (class_getInstanceMethod(cls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
+            SEL sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
+            if (sel) {
+                __block NSInvocation *invocation = nil;
+                invocation = [cls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
+                    [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
+                    [invocation setArgument:&center atIndex:2];
+                    [invocation setArgument:&response atIndex:3];
+                    [invocation setArgument:&completion atIndex:4];
+                    [invocation invokeWithTarget:obj];
+                } error:nil];
             }
         }
     }
@@ -1121,12 +1119,10 @@ static BOOL sharedInstanceErrorLogged;
 #if !defined(CLEVERTAP_TVOS)
     // check for a launching push and handle
     if (isAutoIntegrated) {
-        if (@available(iOS 10.0, *)) {
-            Class ncdCls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
-            if ([UNUserNotificationCenter class] && ncdCls) {
-                CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap autoIntegration enabled in iOS10+ with a UNUserNotificationCenterDelegate, not manually checking for push notification at launch", self);
-                return;
-            }
+        Class ncdCls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
+        if ([UNUserNotificationCenter class] && ncdCls) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: CleverTap autoIntegration enabled with a UNUserNotificationCenterDelegate, not manually checking for push notification at launch", self);
+            return;
         }
     }
     if (launchOptions && launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
@@ -1444,25 +1440,19 @@ static BOOL sharedInstanceErrorLogged;
             if (dlURL) {
                 [CTUtils runSyncMainQueue:^{
                     CleverTapLogDebug(self.config.logLevel, @"%@: Firing deep link: %@", self, dlURL.absoluteString);
-                    if (@available(iOS 10.0, *)) {
-                        if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-                            NSMethodSignature *signature = [UIApplication
-                                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-                            NSInvocation *invocation = [NSInvocation
-                                                        invocationWithMethodSignature:signature];
-                            [invocation setTarget:application];
-                            [invocation setSelector:@selector(openURL:options:completionHandler:)];
-                            NSDictionary *options = @{};
-                            id completionHandler = nil;
-                            [invocation setArgument:&dlURL atIndex:2];
-                            [invocation setArgument:&options atIndex:3];
-                            [invocation setArgument:&completionHandler atIndex:4];
-                            [invocation invoke];
-                        } else {
-                            if ([application respondsToSelector:@selector(openURL:)]) {
-                                [application performSelector:@selector(openURL:) withObject:dlURL];
-                            }
-                        }
+                    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+                        NSMethodSignature *signature = [UIApplication
+                                                        instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+                        NSInvocation *invocation = [NSInvocation
+                                                    invocationWithMethodSignature:signature];
+                        [invocation setTarget:application];
+                        [invocation setSelector:@selector(openURL:options:completionHandler:)];
+                        NSDictionary *options = @{};
+                        id completionHandler = nil;
+                        [invocation setArgument:&dlURL atIndex:2];
+                        [invocation setArgument:&options atIndex:3];
+                        [invocation setArgument:&completionHandler atIndex:4];
+                        [invocation invoke];
                     } else {
                         if ([application respondsToSelector:@selector(openURL:)]) {
                             [application performSelector:@selector(openURL:) withObject:dlURL];
@@ -1520,20 +1510,9 @@ static BOOL sharedInstanceErrorLogged;
 - (NSDictionary *)getNotificationDictionary:(id)object {
     NSDictionary *notification;
     
-    if (@available(iOS 10.0, tvOS 10.0, *)) {
-        if ([object isKindOfClass:[UNNotification class]]) {
-            notification = ((UNNotification *) object).request.content.userInfo;
-        } else if ([object isKindOfClass:[NSDictionary class]]) {
-            notification = object;
-        }
-    }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    else if ([object isKindOfClass:[UILocalNotification class]]) {
-        notification = [((UILocalNotification *) object) userInfo];
-    }
-#pragma clang diagnostic pop
-    else if ([object isKindOfClass:[NSDictionary class]]) {
+    if ([object isKindOfClass:[UNNotification class]]) {
+        notification = ((UNNotification *) object).request.content.userInfo;
+    } else if ([object isKindOfClass:[NSDictionary class]]) {
         notification = object;
     }
     return notification;
@@ -1643,27 +1622,20 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     CleverTapLogDebug(self.config.logLevel, @"%@: %@: firing deep link: %@", module, self, ctaURL);
-    id dlURL;
-    if (@available(iOS 10.0, *)) {
-        if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-            NSMethodSignature *signature = [UIApplication
-                                            instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
-            NSInvocation *invocation = [NSInvocation
-                                        invocationWithMethodSignature:signature];
-            [invocation setTarget:sharedApplication];
-            [invocation setSelector:@selector(openURL:options:completionHandler:)];
-            NSDictionary *options = @{};
-            id completionHandler = nil;
-            dlURL = ctaURL;
-            [invocation setArgument:&dlURL atIndex:2];
-            [invocation setArgument:&options atIndex:3];
-            [invocation setArgument:&completionHandler atIndex:4];
-            [invocation invoke];
-        } else {
-            if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
-                [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
-            }
-        }
+    if ([sharedApplication respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+        id dlURL = ctaURL;
+        NSMethodSignature *signature = [UIApplication
+                                        instanceMethodSignatureForSelector:@selector(openURL:options:completionHandler:)];
+        NSInvocation *invocation = [NSInvocation
+                                    invocationWithMethodSignature:signature];
+        [invocation setTarget:sharedApplication];
+        [invocation setSelector:@selector(openURL:options:completionHandler:)];
+        NSDictionary *options = @{};
+        id completionHandler = nil;
+        [invocation setArgument:&dlURL atIndex:2];
+        [invocation setArgument:&options atIndex:3];
+        [invocation setArgument:&completionHandler atIndex:4];
+        [invocation invoke];
     } else {
         if ([sharedApplication respondsToSelector:@selector(openURL:)]) {
             [sharedApplication performSelector:@selector(openURL:) withObject:ctaURL];
@@ -2322,23 +2294,19 @@ static BOOL sharedInstanceErrorLogged;
         @try {
             // Encrypt in transit only if the config/plist flag is true, for event queues only and server side encryption hasn't failed yet.
             if (_config.encryptionInTransitEnabled && !self.sessionManager.encryptionInTransitFailed && queueType != CTQueueTypeNotifications) {
-                if (@available(iOS 13.0, *)) {
-                    NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
-                    if (encryptedDict.count > 0) {
-                        additionalHeaders[ENCRYPTION_HEADER] = @"true";
-                        
-                        NSString *encryptedPayload = encryptedDict[@"encryptedPayload"];
-                        NSString *nonceData = encryptedDict[@"nonceData"];
-                        finalPayload = @{
-                            NetworkEncryptionManager.ITP: encryptedPayload,
-                            NetworkEncryptionManager.ITK: [[NetworkEncryptionManager shared]getSessionKeyBase64],
-                            NetworkEncryptionManager.ITV: nonceData
-                        };
-                        NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
-                        CleverTapLogDebug(self.config.logLevel, @"%@: Encrypted request: %@", self, jsonBody);
-                    }
-                } else {
-                    CleverTapLogStaticDebug(@"Encryption in transit is only available from iOS 13 and later.");
+                NSDictionary *encryptedDict = [[NetworkEncryptionManager shared]encryptWithObject:batchWithHeader];
+                if (encryptedDict.count > 0) {
+                    additionalHeaders[ENCRYPTION_HEADER] = @"true";
+
+                    NSString *encryptedPayload = encryptedDict[@"encryptedPayload"];
+                    NSString *nonceData = encryptedDict[@"nonceData"];
+                    finalPayload = @{
+                        NetworkEncryptionManager.ITP: encryptedPayload,
+                        NetworkEncryptionManager.ITK: [[NetworkEncryptionManager shared]getSessionKeyBase64],
+                        NetworkEncryptionManager.ITV: nonceData
+                    };
+                    NSString *jsonBody = [CTUtils jsonObjectToString:finalPayload];
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Encrypted request: %@", self, jsonBody);
                 }
             }
             
@@ -2554,14 +2522,9 @@ static BOOL sharedInstanceErrorLogged;
     if (responseData) {
         @try {
             if (responseEncrypted) {
-                if (@available(iOS 13.0, *)) {
-                    NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
-                    if (decryptedData.length > 0) {
-                        responseData = decryptedData;
-                    }
-                }
-                else {
-                    return;
+                NSData *decryptedData = [[NetworkEncryptionManager shared]decryptWithResponseData:responseData];
+                if (decryptedData.length > 0) {
+                    responseData = decryptedData;
                 }
             }
             

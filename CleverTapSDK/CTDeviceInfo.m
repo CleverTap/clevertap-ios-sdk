@@ -488,34 +488,19 @@ static void CleverTapReachabilityHandler(SCNetworkReachabilityRef target, SCNetw
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (CTCarrier *)getCarrier {
-    if (@available(iOS 12.0, *)) {
-        NSString *providerKey = _networkInfo.serviceSubscriberCellularProviders.allKeys.lastObject;
-        return _networkInfo.serviceSubscriberCellularProviders[providerKey];
-    } else {
-        
-        return _networkInfo.subscriberCellularProvider;
-    }
+    NSString *providerKey = _networkInfo.serviceSubscriberCellularProviders.allKeys.lastObject;
+    return _networkInfo.serviceSubscriberCellularProviders[providerKey];
 }
 #pragma clang diagnostic pop
 
 - (NSString *)getCurrentRadioAccessTechnology {
     __block NSString *radioValue;
-    if (@available(iOS 12, *)) {
-        NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
-        [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
-            if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
-                radioValue = [NSString stringWithString:[value substringFromIndex:23]];
-            }
-        }];
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        NSString *radio = _networkInfo.currentRadioAccessTechnology;
-#pragma clang diagnostic pop
-        if (radio && [radio hasPrefix:@"CTRadioAccessTechnology"]) {
-            radioValue = [radio substringFromIndex:23];
+    NSDictionary *radioDict = _networkInfo.serviceCurrentRadioAccessTechnology;
+    [radioDict enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL * _Nonnull stop) {
+        if (value && [value hasPrefix:@"CTRadioAccessTechnology"]) {
+            radioValue = [NSString stringWithString:[value substringFromIndex:23]];
         }
-    }
+    }];
     return radioValue;
 }
 #endif

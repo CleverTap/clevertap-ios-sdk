@@ -9,10 +9,10 @@ s.source                    = { :git => "https://github.com/CleverTap/clevertap-
 s.requires_arc              = true
 s.module_name               = 'CleverTapLocation'
 s.resource_bundles          = {'CleverTapLocation' => ['CleverTapLocation/**/*.xcprivacy']}
-s.ios.deployment_target     = '9.0'
+s.ios.deployment_target     = '13.0'
 s.ios.source_files          = 'CleverTapLocation/**/**/*.{h,m}'
 s.ios.public_header_files   = 'CleverTapLocation/CleverTapLocation/Classes/CTLocationManager.h'
-s.tvos.deployment_target    = '9.0'
+s.tvos.deployment_target    = '13.0'
 s.tvos.source_files         = 'CleverTapLocation/**/**/*.{h,m}'
 s.tvos.public_header_files  = 'CleverTapLocation/CleverTapLocation/Classes/CTLocationManager.h'
 end

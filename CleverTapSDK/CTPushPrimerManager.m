@@ -55,17 +55,13 @@
 }
 
 - (void)promptPushPrimer:(NSDictionary *_Nonnull)json {
-    if (@available(iOS 10.0, *)) {
-        [self getNotificationPermissionStatusWithCompletionHandler:^(UNAuthorizationStatus status) {
-            if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
-                [self->inAppDisplayManager prepareNotificationForDisplay:json];
-            } else {
-                CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
-            }
-        }];
-    } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
-    }
+    [self getNotificationPermissionStatusWithCompletionHandler:^(UNAuthorizationStatus status) {
+        if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
+            [self->inAppDisplayManager prepareNotificationForDisplay:json];
+        } else {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
+        }
+    }];
 }
 
 - (void)promptForPushPermission:(BOOL)isFallbackToSettings {
@@ -73,17 +69,12 @@
 }
 
 - (void)getNotificationPermissionStatusWithCompletionHandler:(void (^)(UNAuthorizationStatus))completion {
-    if (@available(iOS 10.0, *)) {
-        [self.dispatchQueueManager runSerialAsync:^{
-            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-            [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
-                completion(settings.authorizationStatus);
-            }];
+    [self.dispatchQueueManager runSerialAsync:^{
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+            completion(settings.authorizationStatus);
         }];
-    } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
-        completion(UNAuthorizationStatusDenied);
-    }
+    }];
 }
 
 - (void)notifyPushPermissionResponse:(BOOL)accepted {
@@ -103,53 +94,46 @@
 - (void)promptForOSPushNotificationWithFallbackToSettings:(BOOL)isFallbackToSettings
                                       withCompletionBlock:(void (^_Nullable)(BOOL presented))completion {
     __block BOOL pushPermissionPresented = NO;
-    if (@available(iOS 10.0, *)) {
-        [self.dispatchQueueManager runSerialAsync:^{
-            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-            [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
-                if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
-                    pushPermissionPresented = YES;
-                    [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error) {
-                        if (granted) {
-                            [self notifyPushPermissionResponse:YES];
-                        } else {
-                            [self notifyPushPermissionResponse:NO];
-                        }
-                        
-                        if (!error) {
-                            [CTUtils runSyncMainQueue: ^{
-                                UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
-                                if (sharedApplication == nil) {
-                                    return;
-                                }
-
-                                [sharedApplication registerForRemoteNotifications];
-                            }];
-                        } else {
-                            CleverTapLogDebug(self.config.logLevel, @"%@: Error in request authorization for remote notification: %@", self, error);
-                        }
-                    }];
-                } else if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
-                    if (isFallbackToSettings) {
-                        [self openAppSettingsForPushNotification];
+    [self.dispatchQueueManager runSerialAsync:^{
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+            if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
+                pushPermissionPresented = YES;
+                [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                    if (granted) {
+                        [self notifyPushPermissionResponse:YES];
                     } else {
-                        CleverTapLogDebug(self.config.logLevel, @"%@: Notification permission is denied. Please grant notification permission access in your app's settings to send notifications.", self);
+                        [self notifyPushPermissionResponse:NO];
                     }
+
+                    if (!error) {
+                        [CTUtils runSyncMainQueue: ^{
+                            UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
+                            if (sharedApplication == nil) {
+                                return;
+                            }
+
+                            [sharedApplication registerForRemoteNotifications];
+                        }];
+                    } else {
+                        CleverTapLogDebug(self.config.logLevel, @"%@: Error in request authorization for remote notification: %@", self, error);
+                    }
+                }];
+            } else if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
+                if (isFallbackToSettings) {
+                    [self openAppSettingsForPushNotification];
                 } else {
-                    CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
+                    CleverTapLogDebug(self.config.logLevel, @"%@: Notification permission is denied. Please grant notification permission access in your app's settings to send notifications.", self);
                 }
-                
-                if (completion) {
-                    completion(pushPermissionPresented);
-                }
-            }];
+            } else {
+                CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification permission is already granted.", self);
+            }
+
+            if (completion) {
+                completion(pushPermissionPresented);
+            }
         }];
-    } else {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Push Notification is avaliable from iOS v10.0 or later", self);
-        if (completion) {
-            completion(NO);
-        }
-    }
+    }];
 }
 
 - (void)openAppSettingsForPushNotification {
@@ -165,17 +149,13 @@
 }
 
 - (void)checkAndUpdatePushPermissionStatusWithCompletion:(void (^_Nonnull)(CTPushPermissionStatus status))completionHandler {
-    if (@available(iOS 10.0, *)) {
-        [self getNotificationPermissionStatusWithCompletionHandler: ^(UNAuthorizationStatus status) {
-            if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
-                completionHandler(CTPushNotEnabled);
-            } else {
-                completionHandler(CTPushEnabled);
-            }
-        }];
-    } else {
-        completionHandler(CTPushNotKnown);
-    }
+    [self getNotificationPermissionStatusWithCompletionHandler: ^(UNAuthorizationStatus status) {
+        if (status == UNAuthorizationStatusNotDetermined || status == UNAuthorizationStatusDenied) {
+            completionHandler(CTPushNotEnabled);
+        } else {
+            completionHandler(CTPushEnabled);
+        }
+    }];
 }
 #endif
 

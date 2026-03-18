@@ -88,11 +88,7 @@ typedef enum {
     WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     wkConfig.userContentController = wkController;
     wkConfig.allowsInlineMediaPlayback = YES;
-    if (@available(iOS 10.0, *)) {
-        [wkConfig setMediaTypesRequiringUserActionForPlayback:WKAudiovisualMediaTypeNone];
-    } else {
-        // Fallback on earlier versions
-    }
+    [wkConfig setMediaTypesRequiringUserActionForPlayback:WKAudiovisualMediaTypeNone];
     webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:wkConfig];
     webView.scrollView.showsHorizontalScrollIndicator = NO;
     webView.scrollView.showsVerticalScrollIndicator = NO;
@@ -149,24 +145,14 @@ typedef enum {
 }
 
 - (void)configureWebViewConstraints {
-    if (@available(iOS 11.0, *)) {
-        UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
-        [NSLayoutConstraint activateConstraints:@[
-            // Use the safe area layout guide to position the view
-            [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
-            [webView.leadingAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
-            [webView.trailingAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
-            [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
-        ]];
-    } else {
-        // Fallback on earlier versions
-        [NSLayoutConstraint activateConstraints:@[
-            [webView.topAnchor constraintEqualToAnchor:self.topLayoutGuide.topAnchor],
-            [webView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-            [webView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-            [webView.bottomAnchor constraintEqualToAnchor:self.bottomLayoutGuide.bottomAnchor]
-        ]];
-    }
+    UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
+    [NSLayoutConstraint activateConstraints:@[
+        // Use the safe area layout guide to position the view
+        [webView.topAnchor constraintEqualToAnchor: safeArea.topAnchor],
+        [webView.leadingAnchor constraintEqualToAnchor: safeArea.leadingAnchor],
+        [webView.trailingAnchor constraintEqualToAnchor: safeArea.trailingAnchor],
+        [webView.bottomAnchor constraintEqualToAnchor: safeArea.bottomAnchor]
+    ]];
 }
 
 // Added to handle webview for Advanced Builder InApps
@@ -201,10 +187,8 @@ typedef enum {
     }
     
     // prevent webview content insets for Cover
-    if (@available(iOS 11.0, *)) {
-        if (self.notification.heightPercent == 100.0) {
-            webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-        }
+    if (self.notification.heightPercent == 100.0) {
+        webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
     
     CleverTapLogStaticInternal(@"%@: In-app notification size: %f x %f", [self class], size.width, size.height);
@@ -215,15 +199,7 @@ typedef enum {
     
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     char pos = self.notification.position;
-    CGFloat statusBarFrameHeight = 0.0;
-    if (@available(iOS 13.0, *)) {
-        statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        statusBarFrameHeight = [[CTUIUtils getSharedApplication] statusBarFrame].size.height;
-#pragma clang diagnostic pop
-    }
+    CGFloat statusBarFrameHeight = [[CTUIUtils getKeyWindow] windowScene].statusBarManager.statusBarFrame.size.height;
     CGFloat statusBarHeight = self.notification.heightPercent == 100.0 ? statusBarFrameHeight : 0.0;
     
     int extra = (int) (self.notification.showClose ? (self.notification.heightPercent == 100.0 ? (CLTAP_INAPP_CLOSE_IV_WIDTH) :  CLTAP_INAPP_CLOSE_IV_WIDTH / 2.0f) : 0.0f);
