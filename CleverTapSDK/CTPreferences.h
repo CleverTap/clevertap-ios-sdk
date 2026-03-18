@@ -27,6 +27,4 @@
 
 + (NSString *_Nonnull)filePathfromFileName:(NSString *_Nonnull)filename;
 
-+ (void) migrateCTUserDefaultsData;
-
 @end

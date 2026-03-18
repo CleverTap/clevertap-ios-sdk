@@ -3,10 +3,9 @@
 #import "CTPlistInfo.h"
 #import "CTConstants.h"
 #import "CTAES.h"
-#import "CTPreferences.h"
+#import "CTPreferencesPrivate.h"
 
 @implementation CleverTapInstanceConfig
-static BOOL userDefaultsMigrated;
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
@@ -219,10 +218,10 @@ static BOOL userDefaultsMigrated;
 - (void) checkIfAvailableAccountId:(NSString *)accountId
                        accountToken:(NSString *)accountToken {
     // MIGRATE USER DEFAULTS HERE BECAUSE CONFIGS ARE CREATED BEFORE CT INSTANCES
-    if (!userDefaultsMigrated) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         [CTPreferences migrateCTUserDefaultsData];
-        userDefaultsMigrated = YES;
-    }
+    });
     if (accountId.length <= 0) {
         CleverTapLogStaticInfo("CleverTap accountId is empty");
     }
