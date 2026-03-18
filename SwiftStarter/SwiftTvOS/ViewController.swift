@@ -139,7 +139,6 @@ final class ViewController: UIViewController {
 
     @objc private func recordEvent() {
         CleverTap.sharedInstance()?.recordEvent("tesr")
-        CleverTap.sharedInstance()?.recordEvent("oooo")
     }
 
     @objc private func recordProductViewedEvent() {
@@ -194,7 +193,15 @@ final class ViewController: UIViewController {
         CleverTap.sharedInstance()?.initializeInbox { [weak self] success in
             guard success, let self else { return }
             let config = CleverTapInboxStyleConfig()
+            
             config.title = "Inbox"
+            config.messageTags = ["Test", "Demo"]
+            config.navigationBarTintColor = UIColor.red
+            config.navigationTintColor = UIColor.white
+            config.tabSelectedBgColor = UIColor.green
+            config.tabSelectedTextColor = UIColor.black
+            config.tabUnSelectedTextColor = UIColor.blue
+            
             guard let vc = CleverTap.sharedInstance()?
                     .newInboxViewController(with: config, andDelegate: nil) else { return }
             let nav = UINavigationController(rootViewController: vc)
