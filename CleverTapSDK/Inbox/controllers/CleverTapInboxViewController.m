@@ -79,7 +79,7 @@ static const int kMaxTags = 3;
             NSString *firstTabTitle = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTab;
             [tags insertObject:firstTabTitle atIndex:0];
 #if TARGET_OS_TV
-            _topContentOffset = 60.f;
+            _topContentOffset = 80.f;
 #else
             _topContentOffset = 33.f;
 #endif
@@ -181,7 +181,7 @@ static const int kMaxTags = 3;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
 #if TARGET_OS_TV
-    self.tableView.estimatedRowHeight = 400.0;
+    self.tableView.estimatedRowHeight = 550.0;
     if (@available(tvOS 11.0, *)) {
         self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
@@ -226,10 +226,10 @@ static const int kMaxTags = 3;
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselMessageIdentifier];
+#endif
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselImageMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-#endif
 }
 
 - (NSString *)getTitle {
@@ -290,9 +290,17 @@ static const int kMaxTags = 3;
     }
     
     /// Update the Segment Control Tab Selected Color
-    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabSelectedTextColor) ? _config.tabSelectedTextColor : [UIColor blackColor]} forState:UIControlStateSelected];
+    UIColor *selectedTextColor = (_config && _config.tabSelectedTextColor) ? _config.tabSelectedTextColor : [UIColor blackColor];
+    UIColor *unselectedTextColor = (_config && _config.tabUnSelectedTextColor) ? _config.tabUnSelectedTextColor : [UIColor blackColor];
+#if TARGET_OS_TV
+    UIFont *segFont = [UIFont systemFontOfSize:28 weight:UIFontWeightMedium];
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: selectedTextColor, NSFontAttributeName: segFont} forState:UIControlStateSelected];
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: unselectedTextColor, NSFontAttributeName: segFont} forState:UIControlStateNormal];
+#else
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: selectedTextColor} forState:UIControlStateSelected];
     /// Update the Segment Control Tab UnSelected Color
-    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabUnSelectedTextColor) ? _config.tabUnSelectedTextColor : [UIColor blackColor]} forState:UIControlStateNormal];
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: unselectedTextColor} forState:UIControlStateNormal];
+#endif
     /// Add Segment Control
     [self.segmentedControlContainer addSubview:segmentedControl];
     [self.tableView setContentInset:UIEdgeInsetsMake(_topContentOffset, 0, 0, 0)];
@@ -336,7 +344,7 @@ static const int kMaxTags = 3;
                                      toItem:self.segmentedControlContainer attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:-25] setActive:YES];
 #if TARGET_OS_TV
-    CGFloat segmentHeight = 50.0;
+    CGFloat segmentHeight = 70.0;
 #else
     CGFloat segmentHeight = 30.0;
 #endif
@@ -421,11 +429,7 @@ static const int kMaxTags = 3;
 #endif
             break;
         case CTInboxMessageTypeCarouselImage:
-#if TARGET_OS_TV
-            identifier = kCellSimpleMessageIdentifier;
-#else
             identifier = kCellCarouselImgMessageIdentifier;
-#endif
             break;
         case CTInboxMessageTypeMessageIcon:
             identifier = kCellIconMessageIdentifier;

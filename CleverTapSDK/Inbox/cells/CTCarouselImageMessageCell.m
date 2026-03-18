@@ -45,6 +45,11 @@
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     
+#if TARGET_OS_TV
+    CGFloat viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width;
+    CGFloat viewHeight = round(viewWidth * 0.25);
+    self.carouselViewHeight.constant = viewHeight;
+#else
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = [CTUIUtils getLeftMargin];
         CGFloat viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width - margins*2;
@@ -63,6 +68,7 @@
         self.carouselViewHeight.constant = viewHeight;
         self.carouselView.frame = frame;
     }
+#endif
     
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
@@ -77,5 +83,50 @@
     [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.containerView.frame.size.width, [self heightForPageControl])];
     [self.swipeView reloadData];
 }
+
+#if TARGET_OS_TV
+- (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender {
+    NSInteger index = self.swipeView.currentItemIndex;
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION
+                                                        object:self.message
+                                                      userInfo:userInfo];
+}
+
+- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context {
+    if ([context.nextFocusedView isDescendantOfView:self]) {
+        return YES;
+    }
+    UIFocusHeading heading = context.focusHeading;
+    if (heading == UIFocusHeadingLeft || heading == UIFocusHeadingRight) {
+        return NO;
+    }
+    return YES;
+}
+
+- (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    for (UIPress *press in presses) {
+        if (press.type == UIPressTypeLeftArrow) {
+            NSInteger prev = self.swipeView.currentItemIndex - 1;
+            if (prev >= 0) {
+                [self.swipeView scrollToItemAtIndex:prev duration:0.3];
+                self.pageControl.currentPage = (int)prev;
+            }
+            return;
+        }
+        if (press.type == UIPressTypeRightArrow) {
+            NSInteger next = self.swipeView.currentItemIndex + 1;
+            if (next < (NSInteger)self.itemViews.count) {
+                [self.swipeView scrollToItemAtIndex:next duration:0.3];
+                self.pageControl.currentPage = (int)next;
+            }
+            return;
+        }
+    }
+    [super pressesBegan:presses withEvent:event];
+}
+#endif
 
 @end

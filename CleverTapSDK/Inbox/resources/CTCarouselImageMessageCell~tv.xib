@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.AppleTV.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="appleTV" orientation="landscape">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="tvOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBAppleTVPlugin" version="14490.49"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="400" id="tv1-AA-001" customClass="CTCarouselImageMessageCell">
+            <rect key="frame" x="0.0" y="0.0" width="960" height="400"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="tv1-AA-001" id="tv2-BB-002">
+                <rect key="frame" x="0.0" y="0.0" width="960" height="399.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <!-- containerView: fills content view -->
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tv3-CC-003">
+                        <rect key="frame" x="0.0" y="0.0" width="960" height="399.5"/>
+                        <subviews>
+                            <!-- carouselView: full-width, height controlled by carouselViewHeight constraint -->
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tv4-DD-004">
+                                <rect key="frame" x="0.0" y="0.0" width="960" height="360"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="360" id="tv5-EE-005"/>
+                                </constraints>
+                            </view>
+                            <!-- date + read row -->
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tv6-FF-006">
+                                <rect key="frame" x="0.0" y="360" width="960" height="39.5"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tv7-GG-007">
+                                        <rect key="frame" x="900" y="12" width="14" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                        <color key="textColor" red="0.45882352939999999" green="0.45882352939999999" blue="0.45882352939999999" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tv8-HH-008">
+                                        <rect key="frame" x="914" y="14.5" width="16" height="10"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" horizontalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="tv9-II-009">
+                                                <rect key="frame" x="6" y="0.0" width="10" height="10"/>
+                                                <color key="backgroundColor" red="0.20000000000000001" green="0.49019607840000001" blue="0.99215686270000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                        <integer key="value" value="5"/>
+                                                    </userDefinedRuntimeAttribute>
+                                                </userDefinedRuntimeAttributes>
+                                            </view>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="16" id="tvA-JJ-010"/>
+                                            <constraint firstAttribute="height" constant="10" id="tvB-KK-011"/>
+                                            <constraint firstAttribute="trailing" secondItem="tv9-II-009" secondAttribute="trailing" id="tvC-LL-012"/>
+                                            <constraint firstAttribute="bottom" secondItem="tv9-II-009" secondAttribute="bottom" id="tvD-MM-013"/>
+                                            <constraint firstItem="tv9-II-009" firstAttribute="top" secondItem="tv8-HH-008" secondAttribute="top" id="tvE-NN-014"/>
+                                            <constraint firstItem="tv9-II-009" firstAttribute="leading" secondItem="tv8-HH-008" secondAttribute="leading" priority="750" constant="6" id="tvF-OO-015"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="tv8-HH-008" firstAttribute="leading" secondItem="tv7-GG-007" secondAttribute="trailing" id="tvG-PP-016"/>
+                                    <constraint firstItem="tv8-HH-008" firstAttribute="centerY" secondItem="tv7-GG-007" secondAttribute="centerY" id="tvH-QQ-017"/>
+                                    <constraint firstItem="tv7-GG-007" firstAttribute="centerY" secondItem="tv6-FF-006" secondAttribute="centerY" id="tvI-RR-018"/>
+                                    <constraint firstAttribute="trailing" secondItem="tv8-HH-008" secondAttribute="trailing" constant="20" id="tvJ-SS-019"/>
+                                    <constraint firstAttribute="height" constant="50" id="tvK-TT-020"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="tv4-DD-004" firstAttribute="leading" secondItem="tv3-CC-003" secondAttribute="leading" id="tvL-UU-021"/>
+                            <constraint firstAttribute="trailing" secondItem="tv4-DD-004" secondAttribute="trailing" id="tvM-VV-022"/>
+                            <constraint firstItem="tv4-DD-004" firstAttribute="top" secondItem="tv3-CC-003" secondAttribute="top" id="tvN-WW-023"/>
+                            <constraint firstItem="tv6-FF-006" firstAttribute="top" secondItem="tv4-DD-004" secondAttribute="bottom" id="tvO-XX-024"/>
+                            <constraint firstItem="tv6-FF-006" firstAttribute="leading" secondItem="tv3-CC-003" secondAttribute="leading" id="tvP-YY-025"/>
+                            <constraint firstAttribute="trailing" secondItem="tv6-FF-006" secondAttribute="trailing" id="tvQ-ZZ-026"/>
+                            <constraint firstAttribute="bottom" secondItem="tv6-FF-006" secondAttribute="bottom" id="tvR-00-027"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="tv3-CC-003" firstAttribute="leading" secondItem="tv2-BB-002" secondAttribute="leading" constant="40" id="tvS-11-028"/>
+                    <constraint firstItem="tv3-CC-003" firstAttribute="top" secondItem="tv2-BB-002" secondAttribute="top" id="tvT-22-029"/>
+                    <constraint firstAttribute="trailing" secondItem="tv3-CC-003" secondAttribute="trailing" constant="40" id="tvU-33-030"/>
+                    <constraint firstAttribute="bottom" secondItem="tv3-CC-003" secondAttribute="bottom" priority="750" id="tvV-44-031"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="carouselView" destination="tv4-DD-004" id="tvW-55-032"/>
+                <outlet property="carouselViewHeight" destination="tv5-EE-005" id="tvX-66-033"/>
+                <outlet property="containerView" destination="tv3-CC-003" id="tvY-77-034"/>
+                <outlet property="dateLabel" destination="tv7-GG-007" id="tvZ-88-035"/>
+                <outlet property="readView" destination="tv8-HH-008" id="tv0-99-036"/>
+                <outlet property="readViewWidthConstraint" destination="tvA-JJ-010" id="tv1-00-037"/>
+            </connections>
+            <point key="canvasLocation" x="296.0" y="284.0"/>
+        </tableViewCell>
+    </objects>
+</document>
