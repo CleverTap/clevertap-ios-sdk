@@ -156,7 +156,12 @@ static const int kMaxTags = 3;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleMediaMutedNotification:)
                                                  name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
-    
+
+#if TARGET_OS_TV
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleVideoPlayerRequested:)
+                                                 name:CLTAP_INBOX_VIDEO_PLAYER_REQUESTED_NOTIFICATION object:nil];
+#endif
 }
 
 - (void)setUpInboxLayout {
@@ -539,6 +544,20 @@ static const int kMaxTags = 3;
         self.playingCell = cell;
     }
 }
+
+#if TARGET_OS_TV
+- (void)handleVideoPlayerRequested:(NSNotification *)notification {
+    NSString *mediaUrl = notification.userInfo[@"mediaUrl"];
+    if (!mediaUrl) return;
+    AVPlayer *player = [AVPlayer playerWithURL:[NSURL URLWithString:mediaUrl]];
+    AVPlayerViewController *playerVC = [[AVPlayerViewController alloc] init];
+    playerVC.player = player;
+    playerVC.showsPlaybackControls = YES;
+    [self presentViewController:playerVC animated:YES completion:^{
+        [player play];
+    }];
+}
+#endif
 
 - (void)handleMediaMutedNotification:(NSNotification*)notification {
     self.muted = [notification.userInfo[@"muted"] boolValue];

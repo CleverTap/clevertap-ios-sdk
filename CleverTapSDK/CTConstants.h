@@ -341,6 +341,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION @"CleverTapInboxMessageTappedNotification"
 #define CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION @"CleverTapInboxMediaPlayingNotification"
 #define CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION @"CleverTapInboxMediaMutedNotification"
+#define CLTAP_INBOX_VIDEO_PLAYER_REQUESTED_NOTIFICATION @"CleverTapInboxVideoPlayerRequestedNotification"
 
 #pragma mark Constants for Geofences update notification
 #define CLTAP_GEOFENCES_DID_UPDATE_NOTIFICATION @"CleverTapGeofencesDidUpdateNotification"
