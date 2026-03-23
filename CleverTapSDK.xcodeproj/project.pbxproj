@@ -399,6 +399,13 @@
 		581161972F617EFD00273F76 /* CTInboxSimpleMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618C2F60462100273F76 /* CTInboxSimpleMessageCell~tv.xib */; };
 		58D237AE2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */; };
 		58D237AF2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */; };
+		58D237B12F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */; };
+		58D237B22F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */; };
+		58D237B42F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B32F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib */; };
+		58D237B52F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B32F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib */; };
+		58D237B62F6BD00000063FB9 /* CTCarouselImageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3822255087009EE610 /* CTCarouselImageView.xib */; };
+		58D237B72F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B62F6AD23B00063FB9 /* CTCarouselImageView~tv.xib */; };
+		58D237B82F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B62F6AD23B00063FB9 /* CTCarouselImageView~tv.xib */; };
 		6147266D7FC444B1AA1776DD /* CTInboxController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B9452A219EA34300D4C542 /* CTInboxController.m */; };
 		627B9D461E104BCF80DAE705 /* CTMessageMO+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B94534219EA34300D4C542 /* CTMessageMO+CoreDataProperties.m */; };
 		684469531F6E4C98886BA0F7 /* CTVideoThumbnailGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D079742821FE2F2300773602 /* CTVideoThumbnailGenerator.m */; };
@@ -1024,6 +1031,9 @@
 		5811618F2F60472600273F76 /* CTInboxIconMessageCell~tv.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInboxIconMessageCell~tv.xib"; sourceTree = "<group>"; };
 		581161922F6048C000273F76 /* CleverTapInboxViewController~tv.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CleverTapInboxViewController~tv.xib"; sourceTree = "<group>"; };
 		58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCarouselImageMessageCell~tv.xib"; sourceTree = "<group>"; };
+		58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCarouselMessageCell~tv.xib"; sourceTree = "<group>"; };
+		58D237B32F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCarouselMessageCell~tv.xib"; sourceTree = "<group>"; };
+		58D237B62F6AD23B00063FB9 /* CTCarouselImageView~tv.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCarouselImageView~tv.xib"; sourceTree = "<group>"; };
 		5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shared_CleverTapSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A11D8382A8FC71F007F5D21 /* CTImpressionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImpressionManager.h; sourceTree = "<group>"; };
 		6A11D8392A8FC71F007F5D21 /* CTImpressionManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImpressionManager.m; sourceTree = "<group>"; };
@@ -1532,6 +1542,9 @@
 		495EA4BE25554718006CADFF /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				58D237B62F6AD23B00063FB9 /* CTCarouselImageView~tv.xib */,
+				58D237B32F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib */,
+				58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */,
 				58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */,
 				581161922F6048C000273F76 /* CleverTapInboxViewController~tv.xib */,
 				5811618F2F60472600273F76 /* CTInboxIconMessageCell~tv.xib */,
@@ -2650,10 +2663,14 @@
 			files = (
 				581161972F617EFD00273F76 /* CTInboxSimpleMessageCell~tv.xib in Resources */,
 				58D237AE2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */,
+				58D237B22F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */,
+				58D237B62F6BD00000063FB9 /* CTCarouselImageView.xib in Resources */,
 				6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */,
 				581161942F6048C000273F76 /* CleverTapInboxViewController~tv.xib in Resources */,
+				58D237B82F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */,
 				581161912F60472600273F76 /* CTInboxIconMessageCell~tv.xib in Resources */,
 				4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
+				58D237B42F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2686,9 +2703,12 @@
 			files = (
 				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
 				07D86D3B22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib in Resources */,
+				58D237B52F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */,
 				07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */,
 				072F9E3F21B1368000BC6313 /* CTInboxIconMessageCell~port.xib in Resources */,
 				071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */,
+				58D237B72F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */,
+				58D237B12F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */,
 				07D86D4722269638009EE610 /* CTHeaderViewController~ipadland.xib in Resources */,
 				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
 				071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */,

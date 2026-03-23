@@ -222,11 +222,9 @@ static const int kMaxTags = 3;
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
          forCellReuseIdentifier:kCellIconMessageIdentifier];
-#if !TARGET_OS_TV
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselMessageIdentifier];
-#endif
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselImageMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
@@ -422,11 +420,7 @@ static const int kMaxTags = 3;
             identifier = kCellSimpleMessageIdentifier;
             break;
         case CTInboxMessageTypeCarousel:
-#if TARGET_OS_TV
-            identifier = kCellSimpleMessageIdentifier;
-#else
             identifier = kCellCarouselMessageIdentifier;
-#endif
             break;
         case CTInboxMessageTypeCarouselImage:
             identifier = kCellCarouselImgMessageIdentifier;
