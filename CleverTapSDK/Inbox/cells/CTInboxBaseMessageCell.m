@@ -116,6 +116,15 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 }
 
 - (void)bodyFocusButtonTapped {
+    CleverTapInboxMessageContent *content = self.message.content.firstObject;
+    if (content.mediaIsVideo && content.mediaUrl.length > 0) {
+        [self pause];
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:CLTAP_INBOX_VIDEO_PLAYER_REQUESTED_NOTIFICATION
+            object:self
+            userInfo:@{@"mediaUrl": content.mediaUrl}];
+        return;
+    }
     [self handleOnMessageTapGesture:nil];
 }
 #endif
