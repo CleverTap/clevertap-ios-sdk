@@ -117,7 +117,12 @@
 
 - (void)setupCTAButton {
     // Frosted-glass container matching system button style
-    UIBlurEffect *blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark];
+    UIBlurEffect *blur;
+    if (@available(iOS 14, *)) {
+        blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark];
+    } else {
+        blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+    }
     self.ctaContainerView = [[UIVisualEffectView alloc] initWithEffect:blur];
     self.ctaContainerView.translatesAutoresizingMaskIntoConstraints = NO;
     self.ctaContainerView.layer.cornerRadius = 14;
@@ -130,10 +135,13 @@
     self.ctaButton.translatesAutoresizingMaskIntoConstraints = NO;
     UIImage *icon = [CTUIUtils getImageForName:@"inapp_cta"];
     if (!icon) {
-        UIImageSymbolConfiguration *symConfig = [UIImageSymbolConfiguration
-            configurationWithPointSize:17 weight:UIImageSymbolWeightBold];
-        icon = [[UIImage systemImageNamed:@"arrow.up.right"]
-            imageByApplyingSymbolConfiguration:symConfig];
+        if (@available(iOS 13, *)) {
+            UIImageSymbolConfiguration *symConfig = [UIImageSymbolConfiguration
+                configurationWithPointSize:17 weight:UIImageSymbolWeightBold];
+            icon = [[UIImage systemImageNamed:@"arrow.up.right"]
+                imageByApplyingSymbolConfiguration:symConfig];
+        }
+        // else: no bundle image and no SF Symbols on < iOS 13 — button still tappable
     }
     [self.ctaButton setImage:icon forState:UIControlStateNormal];
     self.ctaButton.tintColor = [UIColor whiteColor];
@@ -236,15 +244,19 @@ willBeginFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTran
     
     // If nil, search all active scene windows for the fullscreen one
     if (!window) {
-        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
-        for (UIWindowScene *scene in connectedScenes) {
-            if (![scene isKindOfClass:[UIWindowScene class]]) continue;
-            for (UIWindow *w in scene.windows) {
-                if (w.isKeyWindow && w != self.view.window) {
-                    window = w;
-                    break;
+        if (@available(iOS 13, *)) {
+            NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+            for (UIWindowScene *scene in connectedScenes) {
+                if (![scene isKindOfClass:[UIWindowScene class]]) continue;
+                for (UIWindow *w in scene.windows) {
+                    if (w.isKeyWindow && w != self.view.window) {
+                        window = w;
+                        break;
+                    }
                 }
             }
+        } else {
+            window = [CTUIUtils getSharedApplication].keyWindow;
         }
     }
 
