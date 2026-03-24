@@ -11,7 +11,6 @@ typedef void (^CTAVPlayerCTATapHandler)(void);
 @property (nonatomic, assign) BOOL loopVideo;
 @property (nonatomic, copy) CTAVPlayerCTATapHandler ctaTapHandler;
 
-- (instancetype)initWithNotification:(CTInAppNotification*)notification;
 - (instancetype)initWithNotification:(CTInAppNotification*)notification muted:(BOOL)muted autoplay:(BOOL)autoplay;
 
 @end

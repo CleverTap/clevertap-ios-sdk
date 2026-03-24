@@ -18,10 +18,6 @@
 
 @implementation CTAVPlayerViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification *)notification {
-    return [self initWithNotification:notification muted:NO autoplay:NO];
-}
-
 - (instancetype)initWithNotification:(CTInAppNotification *)notification muted:(BOOL)muted autoplay:(BOOL)autoplay {
     self = [super init];
     if (self) {
@@ -90,33 +86,6 @@
                 }
             }
         }
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)),
-                   dispatch_get_main_queue(), ^{
-        [self logControlFrames];
-    });
-}
-
-- (void)logControlFrames {
-    for (UIView *sub in self.view.subviews) {
-        if (sub == self.contentOverlayView) continue;
-        [self logSubviewFrames:sub depth:0];
-    }
-}
-
-- (void)logSubviewFrames:(UIView *)view depth:(int)depth {
-    if (CGRectIsEmpty(view.frame)) return; // skip zero-frame views
-    NSString *indent = [@"" stringByPaddingToLength:depth * 2 withString:@" " startingAtIndex:0];
-    NSLog(@"[CTA]%@%@ frame:%@ maxX:%.1f",
-          indent, view.class,
-          NSStringFromCGRect(view.frame),
-          CGRectGetMaxX(view.frame));
-    for (UIView *child in view.subviews) {
-        [self logSubviewFrames:child depth:depth + 1];
-    }
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -280,10 +249,8 @@ willBeginFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTran
     }
 
     if (window) {
-        NSLog(@"[CTA] fullscreen window found: %@", window);
         [self addOverlayTapToView:window];
     } else {
-        NSLog(@"[CTA] window not ready, retrying... (%d attempts left)", attempts);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)),
                        dispatch_get_main_queue(), ^{
             [self attachFullscreenGestureToPlayerViewController:playerViewController attempts:attempts - 1];
