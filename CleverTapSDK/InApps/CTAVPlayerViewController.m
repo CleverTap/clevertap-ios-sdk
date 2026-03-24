@@ -78,14 +78,6 @@
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     [self adjustAudioDefaultImage];
-    
-    for (UIView *sub in self.view.subviews) {
-            if (sub != self.contentOverlayView) {
-                for (UIView *control in sub.subviews) {
-                    NSLog(@"[CTA] control: %@ frame: %@", control.class, NSStringFromCGRect(control.frame));
-                }
-            }
-        }
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -216,7 +208,6 @@
     tap.delegate = self;
     [view addGestureRecognizer:tap];
     self.overlayTap = tap;
-    NSLog(@"[CTA] gesture added to: %@ userInteractionEnabled: %d", view, view.userInteractionEnabled);
 }
 
 #pragma mark - AVPlayerViewControllerDelegate
@@ -235,7 +226,6 @@ willBeginFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTran
 - (void)attachFullscreenGestureToPlayerViewController:(AVPlayerViewController *)playerViewController
                                              attempts:(int)attempts {
     if (attempts <= 0) {
-        NSLog(@"[CTA] gave up waiting for fullscreen window");
         return;
     }
 
