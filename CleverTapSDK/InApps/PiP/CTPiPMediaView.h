@@ -23,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Returns current mute state for video. Always NO for image/GIF.
 @property (nonatomic, readonly) BOOL isMuted;
 
+/// The content type of the media.
+@property (nonatomic, readonly) CTPiPContentType contentType;
+
 /// Load and display the media. Should be called after being added to the view hierarchy.
 - (void)loadMedia;
 

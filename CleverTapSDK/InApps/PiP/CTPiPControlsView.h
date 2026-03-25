@@ -8,24 +8,29 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pipControlsDidTapExpandCollapse:(BOOL)isExpanded;
 - (void)pipControlsDidTapMute;
 - (void)pipControlsDidTapPlayPause;
+- (void)pipControlsDidTapDeeplink;
 @end
 
-/// Overlay view containing Close, Expand/Collapse, Mute, and Play/Pause buttons.
-/// Visibility of each button is controlled by the CTPiPControlsModel config.
+/// Overlay view containing control buttons.
+/// Layout adapts based on media type (image/GIF vs video) and collapsed/expanded state.
 @interface CTPiPControlsView : UIView
 
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithConfig:(CTPiPConfigModel *)config;
+- (instancetype)initWithConfig:(CTPiPConfigModel *)config isVideoType:(BOOL)isVideoType;
 
 @property (nonatomic, weak, nullable) id<CTPiPControlsViewDelegate> delegate;
 
 /// Show or hide the close button independently of control config.
 - (void)setCloseButtonVisible:(BOOL)visible;
 
-/// Update button states to reflect current media state.
+/// Update mute button icon to reflect current mute state.
 - (void)updateMuteButtonMuted:(BOOL)isMuted;
+
+/// Update play/pause button icon to reflect current playback state.
 - (void)updatePlayPauseButtonPlaying:(BOOL)isPlaying;
-- (void)updateExpandCollapseButtonExpanded:(BOOL)isExpanded;
+
+/// Update button layout and icons for expanded/collapsed state transition.
+- (void)updateLayout:(BOOL)isExpanded;
 
 @end
 

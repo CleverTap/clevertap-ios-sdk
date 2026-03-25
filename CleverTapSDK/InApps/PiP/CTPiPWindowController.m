@@ -82,9 +82,7 @@
                                           showClose:self.pipPayload.showClose
                                           mediaView:mediaView];
     container.delegate = self;
-    if (media.contentType == CTPiPContentTypeVideo) {
-        container.autoHideControls = YES;
-    }
+    container.autoHideControls = YES;
     [self.view addSubview:container];
     self.containerView = container;
 }
@@ -208,6 +206,12 @@
     }
     [self startTTLTimerIfNeeded];
     [self observeAppLifecycle];
+
+    // Image/GIF: show controls immediately then auto-hide after 3 sec.
+    // Video: controls stay hidden until user taps.
+    if (self.pipPayload.media.contentType != CTPiPContentTypeVideo) {
+        [self.containerView showControlsAndScheduleAutoHide];
+    }
 }
 
 - (void)hide:(BOOL)animated {

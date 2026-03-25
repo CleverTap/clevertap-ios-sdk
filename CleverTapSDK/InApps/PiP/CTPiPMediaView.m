@@ -6,6 +6,7 @@
 
 @interface CTPiPMediaView ()
 @property (nonatomic, strong) CTPiPMediaModel *media;
+@property (nonatomic, readwrite) CTPiPContentType contentType;
 
 // Image / GIF
 @property (nonatomic, strong) SDAnimatedImageView *imageView;
@@ -25,6 +26,7 @@
     self = [super init];
     if (self) {
         _media = media;
+        _contentType = media.contentType;
         _isMuted = YES;
         self.clipsToBounds = YES;
         self.backgroundColor = UIColor.blackColor;

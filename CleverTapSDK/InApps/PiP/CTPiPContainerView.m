@@ -1,5 +1,7 @@
 #import "CTPiPContainerView.h"
 
+static const NSTimeInterval kPiPAutoHideDelay = 3.0;
+
 @interface CTPiPContainerView () <CTPiPControlsViewDelegate, CTPiPCTAOverlayViewDelegate>
 @property (nonatomic, strong) CTPiPConfigModel *config;
 @property (nonatomic, assign) BOOL showClose;
@@ -11,6 +13,8 @@
 @property (nonatomic, assign) BOOL isExpanded;
 @property (nonatomic, assign) CGRect collapsedFrame;
 @property (nonatomic, assign) BOOL controlsVisible;
+@property (nonatomic, assign) BOOL isVideoType;
+@property (nonatomic, strong, nullable) NSTimer *autoHideTimer;
 @end
 
 @implementation CTPiPContainerView
@@ -23,6 +27,7 @@
         _config = config;
         _showClose = showClose;
         _mediaView = mediaView;
+        _isVideoType = (mediaView.contentType == CTPiPContentTypeVideo);
         [self setupAppearance];
         [self setupSubviews];
         if (config.controls.drag) {
@@ -51,6 +56,39 @@
     } completion:^(BOOL finished) {
         self.controlsView.userInteractionEnabled = show;
     }];
+
+    [self cancelAutoHideTimer];
+    if (show) {
+        [self scheduleAutoHideTimer];
+    }
+}
+
+- (void)showControlsAndScheduleAutoHide {
+    self.controlsVisible = YES;
+    self.controlsView.alpha = 1.0;
+    self.controlsView.userInteractionEnabled = YES;
+    [self cancelAutoHideTimer];
+    [self scheduleAutoHideTimer];
+}
+
+- (void)scheduleAutoHideTimer {
+    self.autoHideTimer = [NSTimer scheduledTimerWithTimeInterval:kPiPAutoHideDelay
+                                                         target:self
+                                                       selector:@selector(autoHideTimerFired)
+                                                       userInfo:nil
+                                                        repeats:NO];
+}
+
+- (void)cancelAutoHideTimer {
+    [self.autoHideTimer invalidate];
+    self.autoHideTimer = nil;
+}
+
+- (void)autoHideTimerFired {
+    self.autoHideTimer = nil;
+    if (self.controlsVisible) {
+        [self toggleControlsAnimated];
+    }
 }
 
 // MARK: - Appearance
@@ -91,7 +129,8 @@
     self.ctaOverlay = cta;
 
     // Controls overlay (top layer)
-    CTPiPControlsView *controls = [[CTPiPControlsView alloc] initWithConfig:self.config];
+    CTPiPControlsView *controls = [[CTPiPControlsView alloc] initWithConfig:self.config
+                                                                isVideoType:self.isVideoType];
     controls.delegate = self;
     controls.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:controls];
@@ -168,23 +207,23 @@
     CGFloat vm = self.config.margins.vertical;
     CGFloat hm = self.config.margins.horizontal;
 
-    CGFloat left = insets.left + hm;
-    CGFloat right = bounds.size.width - insets.right - hm - size.width;
-    CGFloat top = insets.top + vm;
-    CGFloat bottom = bounds.size.height - insets.bottom - vm - size.height;
-    CGFloat centerX = (bounds.size.width - size.width) / 2.0;
+    CGFloat left    = insets.left  + hm;
+    CGFloat right   = bounds.size.width  - insets.right  - hm - size.width;
+    CGFloat top     = insets.top   + vm;
+    CGFloat bottom  = bounds.size.height - insets.bottom - vm  - size.height;
+    CGFloat centerX = (bounds.size.width  - size.width)  / 2.0;
     CGFloat centerY = (bounds.size.height - size.height) / 2.0;
 
     switch (position) {
-        case CTPiPPositionTopLeft:     return CGPointMake(left, top);
-        case CTPiPPositionTopCenter:   return CGPointMake(centerX, top);
-        case CTPiPPositionTopRight:    return CGPointMake(right, top);
-        case CTPiPPositionCenterLeft:  return CGPointMake(left, centerY);
-        case CTPiPPositionCenter:      return CGPointMake(centerX, centerY);
-        case CTPiPPositionCenterRight: return CGPointMake(right, centerY);
-        case CTPiPPositionBottomLeft:  return CGPointMake(left, bottom);
-        case CTPiPPositionBottomCenter:return CGPointMake(centerX, bottom);
-        case CTPiPPositionBottomRight: return CGPointMake(right, bottom);
+        case CTPiPPositionTopLeft:      return CGPointMake(left,    top);
+        case CTPiPPositionTopCenter:    return CGPointMake(centerX, top);
+        case CTPiPPositionTopRight:     return CGPointMake(right,   top);
+        case CTPiPPositionCenterLeft:   return CGPointMake(left,    centerY);
+        case CTPiPPositionCenter:       return CGPointMake(centerX, centerY);
+        case CTPiPPositionCenterRight:  return CGPointMake(right,   centerY);
+        case CTPiPPositionBottomLeft:   return CGPointMake(left,    bottom);
+        case CTPiPPositionBottomCenter: return CGPointMake(centerX, bottom);
+        case CTPiPPositionBottomRight:  return CGPointMake(right,   bottom);
     }
 }
 
@@ -200,11 +239,9 @@
                                          pipSize:self.bounds.size
                                           bounds:bounds
                                   safeAreaInsets:insets];
-        CGPoint anchorCenter = CGPointMake(origin.x + self.bounds.size.width / 2.0,
+        CGPoint anchorCenter = CGPointMake(origin.x + self.bounds.size.width  / 2.0,
                                            origin.y + self.bounds.size.height / 2.0);
-        CGFloat dx = currentCenter.x - anchorCenter.x;
-        CGFloat dy = currentCenter.y - anchorCenter.y;
-        CGFloat distance = fabs(dx) + fabs(dy); // Manhattan distance
+        CGFloat distance = fabs(currentCenter.x - anchorCenter.x) + fabs(currentCenter.y - anchorCenter.y);
         if (distance < bestDistance) {
             bestDistance = distance;
             bestPosition = (CTPiPPosition)pos;
@@ -234,6 +271,7 @@
     self.collapsedFrame = self.frame;
     self.isExpanded = YES;
     [self.mediaView setContentFitMode:YES];
+    [self.controlsView updateLayout:YES];
     [UIView animateWithDuration:0.35
                           delay:0
          usingSpringWithDamping:0.85
@@ -247,7 +285,20 @@
 
 - (void)collapseToFrame:(CGRect)frame {
     self.isExpanded = NO;
+    [self cancelAutoHideTimer];
     [self.mediaView setContentFitMode:YES];
+    [self.controlsView updateLayout:NO];
+
+    if (self.isVideoType) {
+        // Video collapsed: reset to hidden state
+        self.controlsVisible = NO;
+        self.controlsView.alpha = 0;
+        self.controlsView.userInteractionEnabled = NO;
+    } else {
+        // Image/GIF: show controls and restart the 3-sec auto-hide timer
+        [self showControlsAndScheduleAutoHide];
+    }
+
     [UIView animateWithDuration:0.35
                           delay:0
          usingSpringWithDamping:0.85
@@ -280,6 +331,10 @@
 
 - (void)pipControlsDidTapPlayPause {
     [self.delegate pipContainerDidTapPlayPause];
+}
+
+- (void)pipControlsDidTapDeeplink {
+    [self.delegate pipContainerDidTapCTA];
 }
 
 // MARK: - CTPiPCTAOverlayViewDelegate

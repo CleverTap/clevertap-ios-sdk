@@ -41,8 +41,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// Returns the controls overlay view.
 @property (nonatomic, strong, readonly) CTPiPControlsView *controlsView;
 
-/// When YES, controls are hidden initially and toggled on each tap (video mode).
+/// When YES, controls are toggled on each tap and auto-hidden after 3 sec.
 @property (nonatomic, assign) BOOL autoHideControls;
+
+/// Shows controls immediately and starts the 3-sec auto-hide timer.
+/// Call this after the PiP finishes animating in for image/GIF types.
+- (void)showControlsAndScheduleAutoHide;
 
 @end
 
