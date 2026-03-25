@@ -7,15 +7,15 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="865" id="6Ez-iY-JO1" customClass="CTInboxSimpleMessageCell">
-            <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="410" id="6Ez-iY-JO1" customClass="CTInboxSimpleMessageCell">
+            <rect key="frame" x="0.0" y="0.0" width="667" height="410"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6Ez-iY-JO1" id="G99-A8-Ctn">
-                <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+                <rect key="frame" x="0.0" y="0.0" width="667" height="410"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FwL-V1-IzQ">
-                        <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+                        <rect key="frame" x="0.0" y="0.0" width="667" height="410"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MTr-im-lnH">
                                 <rect key="frame" x="0.0" y="0.0" width="333" height="187"/>
@@ -154,7 +154,7 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v1V-X5-Ym9" customClass="CTInboxMessageActionView">
-                                <rect key="frame" x="0.0" y="330" width="667" height="45"/>
+                                <rect key="frame" x="0.0" y="330" width="667" height="80"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2gC-Da-oGx">
                                         <rect key="frame" x="0.0" y="0.0" width="667" height="1"/>
@@ -164,12 +164,12 @@
                                         </constraints>
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tNp-hZ-n1O">
-                                        <rect key="frame" x="0.0" y="1" width="222.5" height="44"/>
+                                        <rect key="frame" x="0.0" y="1" width="222.5" height="79"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="28"/>
                                         <state key="normal" title="Button 1"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6HR-4n-3kW">
-                                        <rect key="frame" x="222.5" y="1" width="222" height="44"/>
+                                        <rect key="frame" x="222.5" y="1" width="222" height="79"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="dlI-8G-GZi"/>
                                         </constraints>
@@ -177,7 +177,7 @@
                                         <state key="normal" title="Button 2"/>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gK8-Zm-MZc">
-                                        <rect key="frame" x="444.5" y="1" width="222.5" height="44"/>
+                                        <rect key="frame" x="444.5" y="1" width="222.5" height="79"/>
                                         <constraints>
                                             <constraint firstAttribute="width" priority="750" id="h2I-7h-XWN"/>
                                         </constraints>

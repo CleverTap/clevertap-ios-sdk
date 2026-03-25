@@ -118,11 +118,16 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 - (void)bodyFocusButtonTapped {
     CleverTapInboxMessageContent *content = self.message.content.firstObject;
     if (content.mediaIsVideo && content.mediaUrl.length > 0) {
+        CMTime currentTime = self.avPlayer ? self.avPlayer.currentTime : kCMTimeZero;
         [self pause];
         [[NSNotificationCenter defaultCenter]
             postNotificationName:CLTAP_INBOX_VIDEO_PLAYER_REQUESTED_NOTIFICATION
             object:self
-            userInfo:@{@"mediaUrl": content.mediaUrl}];
+            userInfo:@{
+                @"mediaUrl": content.mediaUrl,
+                @"currentTime": [NSValue valueWithCMTime:currentTime],
+                @"title": content.title ?: @""
+            }];
         return;
     }
     [self handleOnMessageTapGesture:nil];
@@ -139,9 +144,6 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         });
     }
 #if TARGET_OS_TV
-    // Size the body-focus button to cover the containerView area above the
-    // action buttons. Uses containerView's frame (in contentView coords)
-    // so the button sits exactly over the message body.
     if (self.bodyFocusButton) {
         CGRect cvFrame = self.containerView.frame;
         CGFloat actionHeight = self.actionView.isHidden ? 0 : self.actionViewHeightConstraint.constant;

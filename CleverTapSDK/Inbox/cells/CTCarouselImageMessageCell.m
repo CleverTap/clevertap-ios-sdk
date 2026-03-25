@@ -47,8 +47,9 @@
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     
 #if TARGET_OS_TV
-    CGFloat viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width;
-    CGFloat viewHeight = round(viewWidth * 0.25);
+    CGFloat screenWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width;
+    CGFloat viewWidth = screenWidth - 80; 
+    CGFloat viewHeight = round(screenWidth * 0.25);
     self.carouselViewHeight.constant = viewHeight;
 #else
     if ([self deviceOrientationIsLandscape]) {
@@ -86,6 +87,9 @@
     }
     [self layoutIfNeeded];
     [self layoutSubviews];
+#if TARGET_OS_TV
+    self.carouselView.frame = CGRectMake(0, 0, viewWidth, viewHeight);
+#endif
     [self configureSwipeViewWithHeightAdjustment:0];
     [self populateItemViews];
     [self configurePageControlWithRect:CGRectMake(0, self.carouselView.frame.size.height, self.containerView.frame.size.width, [self heightForPageControl])];
