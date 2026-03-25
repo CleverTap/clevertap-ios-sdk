@@ -392,7 +392,6 @@
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		581161912F60472600273F76 /* CTInboxIconMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618F2F60472600273F76 /* CTInboxIconMessageCell~tv.xib */; };
 		581161942F6048C000273F76 /* CleverTapInboxViewController~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 581161922F6048C000273F76 /* CleverTapInboxViewController~tv.xib */; };
-		581161952F617EBA00273F76 /* SDWebImage.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B660AC62D8999A200683869 /* SDWebImage.xcframework */; };
 		581161972F617EFD00273F76 /* CTInboxSimpleMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618C2F60462100273F76 /* CTInboxSimpleMessageCell~tv.xib */; };
 		58D237AE2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */; };
 		58D237B22F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */; };
@@ -1263,7 +1262,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				581161952F617EBA00273F76 /* SDWebImage.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
