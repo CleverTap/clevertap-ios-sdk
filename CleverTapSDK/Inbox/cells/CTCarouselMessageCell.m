@@ -119,13 +119,10 @@ static const float kPageControlViewHeight = 30.f;
     }
 
 #if TARGET_OS_TV
-    CGFloat viewWidth = self.carouselView.bounds.size.width;
-    if (viewWidth <= 0) {
-        viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width - 80; // 40pt padding each side
-    }
-    // Use landscape-style layout: image on left, text on right (loaded from CTCarouselImageView XIB)
+    CGFloat viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width - 80;
     CGFloat viewHeight = viewWidth / 3.5;
     self.carouselViewHeight.constant = viewHeight;
+    self.carouselView.frame = CGRectMake(0, 0, viewWidth, viewHeight);
     [self populateLandscapeViews];
     [self configurePageControlWithRect:CGRectMake(viewWidth / 2, viewHeight - kPageControlViewHeight, 64 * [self.itemViews count], kPageControlViewHeight)];
 #else

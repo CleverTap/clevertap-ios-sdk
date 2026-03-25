@@ -548,12 +548,21 @@ static const int kMaxTags = 3;
 #if TARGET_OS_TV
 - (void)handleVideoPlayerRequested:(NSNotification *)notification {
     NSString *mediaUrl = notification.userInfo[@"mediaUrl"];
+    NSValue *currentTimeValue = notification.userInfo[@"currentTime"];
+    NSString *title = notification.userInfo[@"title"];
     if (!mediaUrl) return;
     AVPlayer *player = [AVPlayer playerWithURL:[NSURL URLWithString:mediaUrl]];
     AVPlayerViewController *playerVC = [[AVPlayerViewController alloc] init];
     playerVC.player = player;
     playerVC.showsPlaybackControls = YES;
+    if (title.length > 0) {
+        playerVC.title = title;
+    }
     [self presentViewController:playerVC animated:YES completion:^{
+        if (currentTimeValue) {
+            CMTime seekTime = [currentTimeValue CMTimeValue];
+            [player seekToTime:seekTime toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+        }
         [player play];
     }];
 }

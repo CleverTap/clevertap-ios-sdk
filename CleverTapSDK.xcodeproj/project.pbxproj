@@ -390,21 +390,14 @@
 		57CDEE412F163C4E001161F5 /* InAppDurationPartitioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		5811618E2F60462100273F76 /* CTInboxSimpleMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618C2F60462100273F76 /* CTInboxSimpleMessageCell~tv.xib */; };
-		581161902F60472600273F76 /* CTInboxIconMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618F2F60472600273F76 /* CTInboxIconMessageCell~tv.xib */; };
 		581161912F60472600273F76 /* CTInboxIconMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618F2F60472600273F76 /* CTInboxIconMessageCell~tv.xib */; };
-		581161932F6048C000273F76 /* CleverTapInboxViewController~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 581161922F6048C000273F76 /* CleverTapInboxViewController~tv.xib */; };
 		581161942F6048C000273F76 /* CleverTapInboxViewController~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 581161922F6048C000273F76 /* CleverTapInboxViewController~tv.xib */; };
 		581161952F617EBA00273F76 /* SDWebImage.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B660AC62D8999A200683869 /* SDWebImage.xcframework */; };
 		581161972F617EFD00273F76 /* CTInboxSimpleMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5811618C2F60462100273F76 /* CTInboxSimpleMessageCell~tv.xib */; };
 		58D237AE2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */; };
-		58D237AF2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237AD2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib */; };
-		58D237B12F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */; };
 		58D237B22F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B02F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib */; };
 		58D237B42F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B32F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib */; };
-		58D237B52F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B32F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib */; };
 		58D237B62F6BD00000063FB9 /* CTCarouselImageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07D86D3822255087009EE610 /* CTCarouselImageView.xib */; };
-		58D237B72F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B62F6AD23B00063FB9 /* CTCarouselImageView~tv.xib */; };
 		58D237B82F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */ = {isa = PBXBuildFile; fileRef = 58D237B62F6AD23B00063FB9 /* CTCarouselImageView~tv.xib */; };
 		6147266D7FC444B1AA1776DD /* CTInboxController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B9452A219EA34300D4C542 /* CTInboxController.m */; };
 		627B9D461E104BCF80DAE705 /* CTMessageMO+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B94534219EA34300D4C542 /* CTMessageMO+CoreDataProperties.m */; };
@@ -2703,13 +2696,10 @@
 			files = (
 				071EB4CA217F6427008F0FAB /* CTHalfInterstitialViewController~ipad.xib in Resources */,
 				07D86D3B22268C1F009EE610 /* CTInterstitialViewController~ipadland.xib in Resources */,
-				58D237B52F6ACEC100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */,
-				07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */,
+					07D86D3922255087009EE610 /* CTCarouselImageView.xib in Resources */,
 				072F9E3F21B1368000BC6313 /* CTInboxIconMessageCell~port.xib in Resources */,
 				071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */,
-				58D237B72F6AD23B00063FB9 /* CTCarouselImageView~tv.xib in Resources */,
-				58D237B12F6AC54100063FB9 /* CTCarouselMessageCell~tv.xib in Resources */,
-				07D86D4722269638009EE610 /* CTHeaderViewController~ipadland.xib in Resources */,
+						07D86D4722269638009EE610 /* CTHeaderViewController~ipadland.xib in Resources */,
 				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
 				071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */,
 				071EB507217F6427008F0FAB /* CTFooterViewController~iphoneport.xib in Resources */,
@@ -2722,9 +2712,7 @@
 				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
 				07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
-				581161902F60472600273F76 /* CTInboxIconMessageCell~tv.xib in Resources */,
-				58D237AF2F6ABD9B00063FB9 /* CTCarouselImageMessageCell~tv.xib in Resources */,
-				3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */,
+					3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */,
 				070229AD22084B0B0093CA41 /* ct_default_portrait_image.png in Resources */,
 				0796FB6B21AE5B6300FC380D /* CTCarouselImageMessageCell~port.xib in Resources */,
 				070BB5CC21E70BC000428DEE /* ct_volume_on.png in Resources */,
@@ -2750,8 +2738,7 @@
 				6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
-				581161932F6048C000273F76 /* CleverTapInboxViewController~tv.xib in Resources */,
-				07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,
+					07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,
 				07B9453D219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib in Resources */,
 				070229A9220831CB0093CA41 /* ct_default_video.png in Resources */,
 				071EB4E1217F6427008F0FAB /* ic_pause@1x.png in Resources */,
@@ -2761,8 +2748,7 @@
 				071EB4CB217F6427008F0FAB /* CTHalfInterstitialViewController~iphoneport.xib in Resources */,
 				071EB50A217F6427008F0FAB /* CTHalfInterstitialImageViewController~ipad.xib in Resources */,
 				071EB514217F6427008F0FAB /* CTCoverImageViewController~ipad.xib in Resources */,
-				5811618E2F60462100273F76 /* CTInboxSimpleMessageCell~tv.xib in Resources */,
-				07238E41221E7A270012DFAE /* CTCarouselImageMessageCell~land.xib in Resources */,
+					07238E41221E7A270012DFAE /* CTCarouselImageMessageCell~land.xib in Resources */,
 				07D86D41222694ED009EE610 /* CTHalfInterstitialImageViewController~ipadland.xib in Resources */,
 				07238E3D221E79F80012DFAE /* CTInboxSimpleMessageCell~land.xib in Resources */,
 			);
