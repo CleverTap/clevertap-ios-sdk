@@ -191,6 +191,83 @@
 
 @end
 
+// MARK: - CTPiPAnimationModel (Private)
+
+@interface CTPiPAnimationModel ()
+@property (nonatomic, readwrite) CTPiPAnimationType type;
+@property (nonatomic, readwrite) NSTimeInterval duration;
+@property (nonatomic, readwrite) CTPiPAnimationEasing easing;
+@property (nonatomic, readwrite) CGFloat bezierX1;
+@property (nonatomic, readwrite) CGFloat bezierY1;
+@property (nonatomic, readwrite) CGFloat bezierX2;
+@property (nonatomic, readwrite) CGFloat bezierY2;
+@property (nonatomic, readwrite) CTPiPMoveInDirection moveInDirection;
+@end
+
+@implementation CTPiPAnimationModel
+
++ (instancetype)modelFromJSON:(NSDictionary *)json {
+    CTPiPAnimationModel *model = [CTPiPAnimationModel new];
+
+    // Type
+    NSString *typeStr = [json isKindOfClass:[NSDictionary class]] ? json[@"type"] : nil;
+    if ([typeStr isEqualToString:@"dissolve"]) {
+        model.type = CTPiPAnimationTypeDissolve;
+    } else if ([typeStr isEqualToString:@"movein"]) {
+        model.type = CTPiPAnimationTypeMoveIn;
+    } else {
+        model.type = CTPiPAnimationTypeInstant;
+    }
+
+    // Duration — JSON is in milliseconds, convert to seconds; sensible defaults per type
+    NSTimeInterval defaultDuration = (model.type == CTPiPAnimationTypeMoveIn) ? 0.4 : 0.3;
+    id rawDuration = [json isKindOfClass:[NSDictionary class]] ? json[@"duration"] : nil;
+    model.duration = rawDuration ? ([rawDuration doubleValue] / 1000.0) : defaultDuration;
+    if (model.duration <= 0) { model.duration = defaultDuration; }
+
+    // Easing
+    NSString *easingStr = [json isKindOfClass:[NSDictionary class]] ? json[@"easing"] : nil;
+    if ([easingStr isEqualToString:@"linear"]) {
+        model.easing = CTPiPAnimationEasingLinear;
+    } else if ([easingStr isEqualToString:@"ease-in"]) {
+        model.easing = CTPiPAnimationEasingEaseIn;
+    } else if ([easingStr isEqualToString:@"ease-out"]) {
+        model.easing = CTPiPAnimationEasingEaseOut;
+    } else if ([easingStr isEqualToString:@"cubic-bezier"]) {
+        model.easing = CTPiPAnimationEasingCubicBezier;
+    } else {
+        model.easing = CTPiPAnimationEasingEaseInOut; // default
+    }
+
+    // Bezier control points — "x1,y1,x2,y2"
+    NSString *bezierStr = [json isKindOfClass:[NSDictionary class]] ? json[@"bezier"] : nil;
+    if (bezierStr.length > 0) {
+        NSArray<NSString *> *parts = [bezierStr componentsSeparatedByString:@","];
+        if (parts.count == 4) {
+            model.bezierX1 = [parts[0] floatValue];
+            model.bezierY1 = [parts[1] floatValue];
+            model.bezierX2 = [parts[2] floatValue];
+            model.bezierY2 = [parts[3] floatValue];
+        }
+    }
+
+    // MoveIn direction
+    NSString *dirStr = [json isKindOfClass:[NSDictionary class]] ? json[@"moveInDirection"] : nil;
+    if ([dirStr isEqualToString:@"left"]) {
+        model.moveInDirection = CTPiPMoveInDirectionLeft;
+    } else if ([dirStr isEqualToString:@"right"]) {
+        model.moveInDirection = CTPiPMoveInDirectionRight;
+    } else if ([dirStr isEqualToString:@"top"]) {
+        model.moveInDirection = CTPiPMoveInDirectionTop;
+    } else {
+        model.moveInDirection = CTPiPMoveInDirectionBottom; // default
+    }
+
+    return model;
+}
+
+@end
+
 // MARK: - CTPiPConfigModel (Private)
 
 @interface CTPiPConfigModel ()
@@ -202,7 +279,7 @@
 @property (nonatomic, strong, readwrite) CTPiPBorderModel *border;
 @property (nonatomic, strong, readwrite) CTPiPControlsModel *controls;
 @property (nonatomic, strong, readwrite) CTPiPOnClickModel *onClick;
-@property (nonatomic, readwrite) CTPiPAnimation animation;
+@property (nonatomic, strong, readwrite) CTPiPAnimationModel *animation;
 @end
 
 @implementation CTPiPConfigModel
@@ -223,9 +300,7 @@
     model.border = [CTPiPBorderModel modelFromJSON:json[@"border"]];
     model.controls = [CTPiPControlsModel modelFromJSON:json[@"controls"]];
     model.onClick = [CTPiPOnClickModel modelFromJSON:json[@"onClick"]];
-
-    NSString *animationString = json[@"animation"] ?: @"dissolve";
-    model.animation = [CTPiPConfigModel animationFromString:animationString];
+    model.animation = [CTPiPAnimationModel modelFromJSON:json[@"animation"]];
 
     return model;
 }
@@ -244,12 +319,6 @@
     };
     NSNumber *value = map[string];
     return value ? [value unsignedIntegerValue] : CTPiPPositionBottomRight;
-}
-
-+ (CTPiPAnimation)animationFromString:(NSString *)string {
-    if ([string isEqualToString:@"instant"]) return CTPiPAnimationInstant;
-    if ([string isEqualToString:@"movein"]) return CTPiPAnimationMoveIn;
-    return CTPiPAnimationDissolve;
 }
 
 @end

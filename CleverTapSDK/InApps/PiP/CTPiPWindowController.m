@@ -1,5 +1,6 @@
 #import "CTPiPWindowController.h"
 #import "CTPiPPayloadModel.h"
+#import <QuartzCore/QuartzCore.h>
 #import "CTPiPContainerView.h"
 #import "CTPiPMediaView.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
@@ -155,49 +156,73 @@
 }
 
 - (void)animateIn:(BOOL)animated {
-    CTPiPAnimation animationType = self.pipPayload.config ? self.pipPayload.config.animation : CTPiPAnimationDissolve;
+    CTPiPAnimationModel *anim = self.pipPayload.config.animation;
+    CTPiPAnimationType type = anim ? anim.type : CTPiPAnimationTypeInstant;
 
-    if (!animated || animationType == CTPiPAnimationInstant) {
+    if (!animated || type == CTPiPAnimationTypeInstant) {
         self.window.alpha = 1.0;
         [self didFinishAnimatingIn];
         return;
     }
 
-    if (animationType == CTPiPAnimationDissolve) {
-        // window.alpha is already 0 (set in initializePiPWindow:)
-        [UIView animateWithDuration:0.3 animations:^{
-            self.window.alpha = 1.0;
-        } completion:^(BOOL finished) {
-            [self didFinishAnimatingIn];
-        }];
-    } else if (animationType == CTPiPAnimationMoveIn) {
-        // Slide in from nearest off-screen edge based on position
+    if (type == CTPiPAnimationTypeDissolve) {
+        [self applyTimingFunction:anim];
+        [UIView animateWithDuration:anim.duration
+                         animations:^{ self.window.alpha = 1.0; }
+                         completion:^(BOOL f) { [self didFinishAnimatingIn]; }];
+
+    } else if (type == CTPiPAnimationTypeMoveIn) {
         CGRect finalFrame = self.containerView.frame;
-        CGFloat offScreenX = finalFrame.origin.x;
-        CGFloat offScreenY = finalFrame.origin.y;
-        CTPiPPosition pos = self.pipPayload.config.position;
-        if (pos == CTPiPPositionTopLeft || pos == CTPiPPositionTopCenter || pos == CTPiPPositionTopRight) {
-            offScreenY = -finalFrame.size.height;
-        } else if (pos == CTPiPPositionBottomLeft || pos == CTPiPPositionBottomCenter || pos == CTPiPPositionBottomRight) {
-            offScreenY = self.view.bounds.size.height;
-        } else if (pos == CTPiPPositionCenterLeft) {
-            offScreenX = -finalFrame.size.width;
-        } else if (pos == CTPiPPositionCenterRight) {
-            offScreenX = self.view.bounds.size.width;
-        }
-        self.containerView.frame = CGRectMake(offScreenX, offScreenY, finalFrame.size.width, finalFrame.size.height);
+        CGRect startFrame = [self startFrameForMoveIn:finalFrame direction:anim.moveInDirection];
+        self.containerView.frame = startFrame;
         self.window.alpha = 1.0;
-        [UIView animateWithDuration:0.4
+
+        [self applyTimingFunction:anim];
+        [UIView animateWithDuration:anim.duration
                               delay:0
-             usingSpringWithDamping:0.8
-              initialSpringVelocity:0.5
-                            options:UIViewAnimationOptionCurveEaseOut
-                         animations:^{
-            self.containerView.frame = finalFrame;
-        } completion:^(BOOL finished) {
-            [self didFinishAnimatingIn];
-        }];
+                            options:[self animationOptionsForEasing:anim.easing]
+                         animations:^{ self.containerView.frame = finalFrame; }
+                         completion:^(BOOL f) { [self didFinishAnimatingIn]; }];
     }
+}
+
+/// Returns UIViewAnimationOptions curve flag for non-bezier easings.
+- (UIViewAnimationOptions)animationOptionsForEasing:(CTPiPAnimationEasing)easing {
+    switch (easing) {
+        case CTPiPAnimationEasingLinear:     return UIViewAnimationOptionCurveLinear;
+        case CTPiPAnimationEasingEaseIn:     return UIViewAnimationOptionCurveEaseIn;
+        case CTPiPAnimationEasingEaseOut:    return UIViewAnimationOptionCurveEaseOut;
+        case CTPiPAnimationEasingEaseInOut:
+        case CTPiPAnimationEasingCubicBezier:
+        default:                             return UIViewAnimationOptionCurveEaseInOut;
+    }
+}
+
+/// For cubic-bezier easing, sets CATransaction timing function before the UIView animation block.
+- (void)applyTimingFunction:(CTPiPAnimationModel *)anim {
+    if (anim.easing != CTPiPAnimationEasingCubicBezier) { return; }
+    CAMediaTimingFunction *tf = [CAMediaTimingFunction functionWithControlPoints:anim.bezierX1
+                                                                                :anim.bezierY1
+                                                                                :anim.bezierX2
+                                                                                :anim.bezierY2];
+    [CATransaction begin];
+    [CATransaction setAnimationTimingFunction:tf];
+    // CATransaction commit is called after the animation block is set up in animateIn:
+    // Use dispatch_async to commit after UIView picks it up.
+    dispatch_async(dispatch_get_main_queue(), ^{ [CATransaction commit]; });
+}
+
+/// Calculates the off-screen start frame for a move-in animation.
+- (CGRect)startFrameForMoveIn:(CGRect)finalFrame direction:(CTPiPMoveInDirection)direction {
+    CGFloat x = finalFrame.origin.x;
+    CGFloat y = finalFrame.origin.y;
+    switch (direction) {
+        case CTPiPMoveInDirectionTop:    y = -finalFrame.size.height; break;
+        case CTPiPMoveInDirectionBottom: y = self.view.bounds.size.height; break;
+        case CTPiPMoveInDirectionLeft:   x = -finalFrame.size.width; break;
+        case CTPiPMoveInDirectionRight:  x = self.view.bounds.size.width; break;
+    }
+    return CGRectMake(x, y, finalFrame.size.width, finalFrame.size.height);
 }
 
 - (void)didFinishAnimatingIn {
