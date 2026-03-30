@@ -48,6 +48,15 @@ NS_ASSUME_NONNULL_BEGIN
 /// Call this after the PiP finishes animating in for image/GIF types.
 - (void)showControlsAndScheduleAutoHide;
 
+/// Rotate and reposition the container to match the given device orientation.
+/// Call this when UIDeviceOrientationDidChangeNotification fires.
+/// @param orientation  The new device orientation.
+/// @param windowBounds The portrait window bounds (always portrait since window doesn't auto-rotate).
+/// @param insets       Safe area insets from the view (in portrait window space).
+- (void)applyDeviceOrientation:(UIDeviceOrientation)orientation
+                  windowBounds:(CGRect)windowBounds
+               safeAreaInsets:(UIEdgeInsets)insets;
+
 @end
 
 NS_ASSUME_NONNULL_END

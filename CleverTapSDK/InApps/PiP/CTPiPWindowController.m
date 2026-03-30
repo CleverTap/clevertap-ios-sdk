@@ -31,6 +31,8 @@
 @property (nonatomic, assign) BOOL hasPerformedInitialLayout;
 /// Stores the animated flag from show: so viewSafeAreaInsetsDidChange can use it.
 @property (nonatomic, assign) BOOL pendingAnimated;
+/// Last bounds size applied to the container — used to skip duplicate layout passes.
+@property (nonatomic, assign) CGSize lastKnownViewSize;
 @end
 
 @implementation CTPiPWindowController
@@ -51,6 +53,7 @@
 - (void)loadView {
     CTPiPRootView *root = [[CTPiPRootView alloc] initWithFrame:UIScreen.mainScreen.bounds];
     root.backgroundColor = UIColor.clearColor;
+    root.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.view = root;
 }
 
@@ -103,9 +106,10 @@
             if (scene.activationState == UISceneActivationStateForegroundActive
                 && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *ws = (UIWindowScene *)scene;
-                CTInAppPassThroughWindow *win = [[CTInAppPassThroughWindow alloc]
-                                                 initWithFrame:ws.coordinateSpace.bounds];
-                win.windowScene = ws;
+                // initWithWindowScene: lets the scene fully manage the window's geometry,
+                // so its bounds automatically update on rotation (unlike initWithFrame: +
+                // setting windowScene post-init, which is not scene-managed for resizing).
+                CTInAppPassThroughWindow *win = [[CTInAppPassThroughWindow alloc] initWithWindowScene:ws];
                 self.window = win;
                 break;
             }
@@ -141,20 +145,22 @@
             return;
         }
 
-        // self.view.safeAreaInsets is now valid — it accounts for Dynamic Island,
-        // notch, status bar height, and home indicator.
+        self.lastKnownViewSize = self.view.bounds.size;
         [self.containerView placeInitialPositionInBounds:self.view.bounds
                                          safeAreaInsets:self.view.safeAreaInsets];
         [self.containerView.mediaView loadMedia];
         [self animateIn:self.pendingAnimated];
-    } else if (self.containerView) {
-        // Rotation or other layout change — keep stored safe area in sync so
-        // subsequent drag snaps remain safe-area-aware.
-        [self.containerView updateBounds:self.view.bounds
-                         safeAreaInsets:self.view.safeAreaInsets];
+        return;
     }
+
+    // After rotation, safe area insets are recomputed with the new orientation values.
+    // Refine the container position using lastKnownViewSize (already set in
+    // viewWillTransitionToSize:) and the now-correct insets.
+    [self.containerView updateBounds:CGRectMake(0, 0, self.lastKnownViewSize.width, self.lastKnownViewSize.height)
+                     safeAreaInsets:self.view.safeAreaInsets];
 }
 
+// MARK: - Animation
 - (void)animateIn:(BOOL)animated {
     CTPiPAnimationModel *anim = self.pipPayload.config.animation;
     CTPiPAnimationType type = anim ? anim.type : CTPiPAnimationTypeInstant;
@@ -291,7 +297,7 @@
     }];
 }
 
-// MARK: - App lifecycle (pause/resume video)
+// MARK: - App lifecycle (pause/resume video + rotation)
 
 - (void)observeAppLifecycle {
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -302,6 +308,10 @@
                                              selector:@selector(appWillEnterForeground)
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(deviceOrientationDidChange)
+                                                 name:UIDeviceOrientationDidChangeNotification
+                                               object:nil];
 }
 
 - (void)removeAppLifecycleObservers {
@@ -311,6 +321,18 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UIApplicationWillEnterForegroundNotification
                                                   object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIDeviceOrientationDidChangeNotification
+                                                  object:nil];
+}
+
+- (void)deviceOrientationDidChange {
+    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    if (!UIDeviceOrientationIsValidInterfaceOrientation(orientation)) { return; }
+    if (!self.hasPerformedInitialLayout || !self.containerView) { return; }
+    [self.containerView applyDeviceOrientation:orientation
+                                  windowBounds:self.view.bounds
+                               safeAreaInsets:self.view.safeAreaInsets];
 }
 
 - (void)appDidEnterBackground {
