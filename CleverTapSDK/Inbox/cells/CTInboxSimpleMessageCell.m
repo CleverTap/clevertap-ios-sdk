@@ -22,7 +22,10 @@
 - (void)prepareForReuse {
     [super prepareForReuse];
     [self.cellImageView sd_cancelCurrentImageLoad];
+    [self.defaultCellImageView sd_cancelCurrentImageLoad];
     self.cellImageView.image = nil;
+    self.defaultCellImageView.image = nil;
+    self.defaultCellImageView.hidden = YES;
 }
 
 - (void)doLayoutForMessage:(CleverTapInboxMessage *)message {
@@ -38,6 +41,8 @@
         self.imageViewHeightConstraint.priority = 999;
         self.imageViewLRatioConstraint.priority = 750;
         self.imageViewPRatioConstraint.priority = 750;
+    } else if ([self shouldUseDefaultMediaLayout]) {
+        [self configureDefaultMediaLayoutWithFallbackRatio:0.5625f];
     } else {
         self.imageViewHeightConstraint.priority = 750;
         self.imageViewLRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
@@ -78,17 +83,33 @@
     self.readView.hidden = message.isRead;
     self.readViewWidthConstraint.constant = message.isRead ? 0 : 16;
     [self setupInboxMessageActions:content];
-    self.cellImageView.contentMode = content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
-    if (content.mediaUrl && !content.mediaIsVideo && !content.mediaIsAudio) {
-        self.cellImageView.hidden = NO;
-        self.cellImageView.alpha = 1.0;
-        [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                                       options:self.sdWebImageOptions context:self.sdWebImageContext];
-        self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
+    [self configureDefaultMediaViewIfNeeded];
+    self.cellImageView.hidden = YES;
+    self.defaultCellImageView.hidden = YES;
+    SDAnimatedImageView *activeImageView = [self activeMediaImageView];
+    BOOL useDefaultLayout = [self shouldUseDefaultMediaLayout];
+    activeImageView.contentMode = useDefaultLayout || content.mediaIsGif ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
+    if (content.mediaUrl.length > 0 && !content.mediaIsVideo && !content.mediaIsAudio) {
+        activeImageView.hidden = NO;
+        activeImageView.alpha = 1.0;
+        UIImage *placeholder = useDefaultLayout ? [self getLandscapePlaceHolderImage] : ([self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]);
+        [activeImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+                           placeholderImage:placeholder
+                                    options:self.sdWebImageOptions
+                                    context:self.sdWebImageContext
+                                   progress:nil
+                                  completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+            if (useDefaultLayout) {
+                [self updateDefaultMediaLayoutForImage:image fallbackRatio:0.5625f];
+            }
+        }];
+        activeImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
+        if (content.mediaUrl.length == 0) {
+            return;
+        }
         [self setupMediaPlayer];
-        self.cellImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
+        [self activeMediaImageView].accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
         self.avPlayerContainerView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
     }
 }
