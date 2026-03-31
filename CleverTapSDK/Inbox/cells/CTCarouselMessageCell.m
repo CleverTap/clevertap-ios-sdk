@@ -36,10 +36,11 @@ static const float kPageControlViewHeight = 30.f;
 
 - (void)populateLandscapeViews {
     self.itemViews = [NSMutableArray new];
-    NSUInteger index = 0;
+    NSUInteger originalIndex = 0;
     int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         if (content.mediaUrl.length == 0) {
+            originalIndex++;
             continue;
         }
         CTCarouselImageView *carouselItemView;
@@ -67,16 +68,16 @@ static const float kPageControlViewHeight = 30.f;
         
         UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         carouselItemView.userInteractionEnabled = YES;
-        carouselItemView.tag = index;
+        carouselItemView.tag = originalIndex;
         [carouselItemView addGestureRecognizer:carouselViewTapGesture];
         [self.itemViews addObject:carouselItemView];
-        index++;
+        originalIndex++;
     }
 }
 
 - (void)populateItemViews {
     self.itemViews = [NSMutableArray new];
-    NSUInteger index = 0;
+    NSUInteger originalIndex = 0;
     int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         NSString *caption = content.title;
@@ -89,6 +90,7 @@ static const float kPageControlViewHeight = 30.f;
         imageNumber = imageNumber + 1;
         
         if (imageUrl == nil || imageUrl.length == 0) {
+            originalIndex++;
             continue;
         }
         CTCarouselImageView *itemView;
@@ -109,10 +111,10 @@ static const float kPageControlViewHeight = 30.f;
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         itemView.userInteractionEnabled = YES;
-        itemView.tag = index;
+        itemView.tag = originalIndex;
         [itemView addGestureRecognizer:itemViewTapGesture];
         [self.itemViews addObject:itemView];
-        index++;
+        originalIndex++;
     }
 }
 

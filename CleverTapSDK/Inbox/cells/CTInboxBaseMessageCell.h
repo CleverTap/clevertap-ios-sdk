@@ -65,6 +65,9 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
 @property (nonatomic, strong) SDAnimatedImageView *defaultCellImageView;
 @property (nonatomic, strong) NSLayoutConstraint *defaultMediaHeightConstraint;
+@property (nonatomic, assign) CGFloat originalImageViewHeightConstant;
+@property (nonatomic, assign) UILayoutPriority originalImageViewHeightPriority;
+@property (nonatomic, assign) BOOL didCaptureImageViewHeightDefaults;
 
 
 @property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;

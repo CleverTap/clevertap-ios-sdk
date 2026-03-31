@@ -103,6 +103,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message {
     self.message = message;
+    [self resetDefaultMediaView];
     if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
         self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:message.backgroundColor];
     } else {
@@ -637,6 +638,10 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         self.defaultMediaHeightConstraint.constant = 0;
         self.defaultMediaHeightConstraint.active = NO;
     }
+    if (self.imageViewHeightConstraint && self.didCaptureImageViewHeightDefaults) {
+        self.imageViewHeightConstraint.constant = self.originalImageViewHeightConstant;
+        self.imageViewHeightConstraint.priority = self.originalImageViewHeightPriority;
+    }
 }
 
 - (void)configureDefaultMediaLayoutWithFallbackRatio:(CGFloat)fallbackRatio {
@@ -651,7 +656,12 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         self.imageViewPRatioConstraint.priority = 250;
     }
     if (self.imageViewHeightConstraint) {
-        self.imageViewHeightConstraint.priority = 999;
+        if (!self.didCaptureImageViewHeightDefaults) {
+            self.originalImageViewHeightConstant = self.imageViewHeightConstraint.constant;
+            self.originalImageViewHeightPriority = self.imageViewHeightConstraint.priority;
+            self.didCaptureImageViewHeightDefaults = YES;
+        }
+        self.imageViewHeightConstraint.priority = 250;
     }
     [self updateDefaultMediaLayoutForImage:nil fallbackRatio:fallbackRatio];
 }
@@ -670,16 +680,12 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         width = CGRectGetWidth([UIScreen mainScreen].bounds);
     }
     CGFloat height = MAX(1.0, width * ratio);
-    if (self.imageViewHeightConstraint) {
-        self.imageViewHeightConstraint.constant = height;
-    } else {
-        if (!self.defaultMediaHeightConstraint) {
-            self.defaultMediaHeightConstraint = [self.mediaContainerView.heightAnchor constraintEqualToConstant:height];
-            self.defaultMediaHeightConstraint.priority = 999;
-        }
-        self.defaultMediaHeightConstraint.constant = height;
-        self.defaultMediaHeightConstraint.active = YES;
+    if (!self.defaultMediaHeightConstraint) {
+        self.defaultMediaHeightConstraint = [self.mediaContainerView.heightAnchor constraintEqualToConstant:height];
+        self.defaultMediaHeightConstraint.priority = 999;
     }
+    self.defaultMediaHeightConstraint.constant = height;
+    self.defaultMediaHeightConstraint.active = YES;
 }
 
 @end
