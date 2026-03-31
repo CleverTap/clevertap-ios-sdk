@@ -159,7 +159,12 @@
     
     // handle video or audio
     if (self.notification.mediaUrl) {
-        self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification];
+        // Use enhanced video player with mute and autoplay for videos
+        BOOL shouldMute = self.notification.mediaIsVideo;
+        BOOL shouldAutoplay = self.notification.mediaIsVideo;
+        self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
+                                                                                  muted:shouldMute
+                                                                               autoplay:shouldAutoplay];
         self.imageView.hidden = YES;
         self.avPlayerContainerView.hidden = NO;
         [self configureAvPlayerController];

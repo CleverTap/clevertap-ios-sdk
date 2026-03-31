@@ -4,6 +4,8 @@
 #import "CTImageInAppViewControllerPrivate.h"
 #import "CTDismissButton.h"
 #import "CTUIUtils.h"
+#import "CTAVPlayerViewController.h"
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 
 static const CGFloat kTabletSpacingConstant = 40.f;
 static const CGFloat kSpacingConstant = 160.f;
@@ -12,8 +14,9 @@ static const CGFloat kSpacingConstant = 160.f;
 
 @property (nonatomic, assign) CGFloat aspectMultiplier;
 @property (nonatomic, strong) IBOutlet UIView *containerView;
-@property (nonatomic, strong) IBOutlet UIImageView *imageView;
+@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
+@property (nonatomic, strong) CTAVPlayerViewController *playerController;
 
 @end
 
@@ -110,25 +113,60 @@ static const CGFloat kSpacingConstant = 160.f;
 }
 
 - (void)setUpImage {
-    // set image
+    // Handle video media
+    if (self.notification.mediaIsVideo && self.notification.mediaUrl) {
+        self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
+                                                                                  muted:YES
+                                                                               autoplay:YES];
+        if (self.notification.buttons.count > 0) {
+            __weak typeof(self) weakSelf = self;
+            self.playerController.ctaTapHandler = ^{
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                [strongSelf handleButtonClickFromIndex:0];
+                [strongSelf hide:YES];
+            };
+        }
+        self.imageView.hidden = YES;
+        [self addChildViewController:self.playerController];
+        self.playerController.view.frame = self.containerView.bounds;
+        self.playerController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        // Insert video player below close button instead of adding on top
+        [self.containerView insertSubview:self.playerController.view belowSubview:self.closeButton];
+        [self.playerController didMoveToParentViewController:self];
+        return;
+    }
+
+    // Handle image/GIF media
     self.imageView.clipsToBounds = YES;
     self.imageView.userInteractionEnabled = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
     [self.imageView addGestureRecognizer:imageTapGesture];
-    
+
     if (![self deviceOrientationIsLandscape]) {
         if (self.notification.inAppImage) {
             self.imageView.image = self.notification.inAppImage;
         } else if (self.notification.imageData) {
-            self.imageView.image  = [UIImage imageWithData:self.notification.imageData];
+            // Support for GIFs
+            if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+                self.imageView.image = gif;
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
         } else if (self.notification.imageLandscapeData) {
-            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            // Support for GIFs in landscape
+            if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
+                self.imageView.image = gif;
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }
