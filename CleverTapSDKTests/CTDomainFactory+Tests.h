@@ -11,4 +11,6 @@
 
 @interface CTDomainFactory (Tests)
 - (NSString *)loadRedirectDomain;
+- (void)persistMutedExpiry:(NSTimeInterval)expiryTs;
+@property (nonatomic, assign) NSTimeInterval muteExpiryTs;
 @end

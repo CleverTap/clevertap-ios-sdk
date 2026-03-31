@@ -109,8 +109,34 @@
     result.object = @"testObject";
     [self.classObject pushValidationResult:result];
     CTValidationResult *popedResult = [self.classObject popValidationResult];
-       
+
     XCTAssertFalse([self.classObject.pendingValidationResults containsObject:popedResult]);
+}
+
+-(void)test_pushValidationResult_withNilInput {
+    [self.classObject pushValidationResult:nil];
+    XCTAssertEqual(self.classObject.pendingValidationResults.count, 0);
+}
+
+-(void)test_pushValidationResult_maxCapacity {
+    CTValidationResult *firstResult = [[CTValidationResult alloc] init];
+    firstResult.object = @"firstObject";
+    [self.classObject pushValidationResult:firstResult];
+
+    for (int i = 0; i < 50; i++) {
+        CTValidationResult *result = [[CTValidationResult alloc] init];
+        result.object = [NSString stringWithFormat:@"object%d", i];
+        [self.classObject pushValidationResult:result];
+    }
+
+    // Stack should be capped at 50; the first item should have been removed
+    XCTAssertEqual(self.classObject.pendingValidationResults.count, 50);
+    XCTAssertFalse([self.classObject.pendingValidationResults containsObject:firstResult]);
+}
+
+-(void)test_popValidationResult_whenEmpty {
+    CTValidationResult *result = [self.classObject popValidationResult];
+    XCTAssertNil(result);
 }
 
 @end
