@@ -131,33 +131,77 @@
     [self.window setHidden:NO];
 }
 
+/// Override to prevent CTInAppDisplayViewController from calling loadView + viewDidLoad on
+/// rotation (which would destroy the PiP container). Capture the incoming size so that
+/// viewSafeAreaInsetsDidChange can use it for the post-rotation layout pass.
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    // Do NOT call super — the parent class calls loadView + viewDidLoad there,
+    // which would tear down and rebuild the entire container view.
+    self.lastKnownViewSize = size;
+}
+
 /// Called by the system after safe area insets are established — the correct place
 /// to read valid top/bottom insets (Dynamic Island, status bar, home indicator).
 - (void)viewSafeAreaInsetsDidChange {
     [super viewSafeAreaInsetsDidChange];
 
     if (!self.hasPerformedInitialLayout) {
-        self.hasPerformedInitialLayout = YES;
-
-        if (!self.containerView) {
-            CleverTapLogStaticDebug(@"CTPiPWindowController: containerView is nil, cannot show PiP.");
-            [self hide:NO];
-            return;
-        }
-
-        self.lastKnownViewSize = self.view.bounds.size;
-        [self.containerView placeInitialPositionInBounds:self.view.bounds
-                                         safeAreaInsets:self.view.safeAreaInsets];
-        [self.containerView.mediaView loadMedia];
-        [self animateIn:self.pendingAnimated];
+        // On iPad 13" the system can fire this before the view has been laid out,
+        // resulting in zero bounds. Skip here and let viewDidLayoutSubviews handle it.
+        if (CGSizeEqualToSize(self.view.bounds.size, CGSizeZero)) { return; }
+        [self performInitialLayoutAnimated:self.pendingAnimated];
         return;
     }
 
     // After rotation, safe area insets are recomputed with the new orientation values.
-    // Refine the container position using lastKnownViewSize (already set in
-    // viewWillTransitionToSize:) and the now-correct insets.
-    [self.containerView updateBounds:CGRectMake(0, 0, self.lastKnownViewSize.width, self.lastKnownViewSize.height)
-                     safeAreaInsets:self.view.safeAreaInsets];
+    // Use the current view bounds (already updated for iPad) and the new insets.
+    self.lastKnownViewSize = self.view.bounds.size;
+    [self.containerView updateBounds:self.view.bounds safeAreaInsets:self.view.safeAreaInsets];
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    // Fallback for iPad 13" where viewSafeAreaInsetsDidChange fires before the view
+    // has proper bounds. Once layout completes with non-zero bounds, run initial setup.
+    if (!self.hasPerformedInitialLayout && !CGSizeEqualToSize(self.view.bounds.size, CGSizeZero)) {
+        [self performInitialLayoutAnimated:self.pendingAnimated];
+    }
+}
+
+- (void)performInitialLayoutAnimated:(BOOL)animated {
+    self.hasPerformedInitialLayout = YES;
+
+    if (!self.containerView) {
+        CleverTapLogStaticDebug(@"CTPiPWindowController: containerView is nil, cannot show PiP.");
+        [self hide:NO];
+        return;
+    }
+
+    self.lastKnownViewSize = self.view.bounds.size;
+    [self.containerView placeInitialPositionInBounds:self.view.bounds
+                                     safeAreaInsets:self.view.safeAreaInsets];
+
+    // UIDeviceOrientationDidChangeNotification only fires on change. If the device
+    // is already in a non-portrait orientation when PiP is first shown, we must
+    // apply the current orientation now — the notification will not fire for us.
+    // Skip when the window has already rotated to match the device (iPad path),
+    // since placeInitialPositionInBounds: has already placed the PiP correctly.
+    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    if (UIDeviceOrientationIsValidInterfaceOrientation(orientation) &&
+        orientation != UIDeviceOrientationPortrait) {
+        BOOL isDeviceLandscape = UIDeviceOrientationIsLandscape(orientation);
+        BOOL isWindowLandscape = (self.view.bounds.size.width > self.view.bounds.size.height);
+        // iPad: window already in landscape → no transform needed.
+        // iPhone/other: window is still portrait → apply transform rotation.
+        if (!(isDeviceLandscape && isWindowLandscape)) {
+            [self.containerView applyDeviceOrientation:orientation
+                                          windowBounds:self.view.bounds
+                                       safeAreaInsets:self.view.safeAreaInsets];
+        }
+    }
+
+    [self.containerView.mediaView loadMedia];
+    [self animateIn:animated];
 }
 
 // MARK: - Animation
@@ -330,9 +374,38 @@
     UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
     if (!UIDeviceOrientationIsValidInterfaceOrientation(orientation)) { return; }
     if (!self.hasPerformedInitialLayout || !self.containerView) { return; }
-    [self.containerView applyDeviceOrientation:orientation
-                                  windowBounds:self.view.bounds
-                               safeAreaInsets:self.view.safeAreaInsets];
+
+    // UIDeviceOrientationDidChangeNotification fires before UIKit has finished rotating
+    // the window on iPad. Defer to the next run-loop turn so viewWillTransitionToSize:
+    // can run first, updating lastKnownViewSize to the post-rotation dimensions.
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf || !strongSelf.containerView) { return; }
+
+        BOOL isDeviceLandscape = UIDeviceOrientationIsLandscape(orientation);
+        BOOL isWindowLandscape = (strongSelf.lastKnownViewSize.width > strongSelf.lastKnownViewSize.height);
+        BOOL hasTransform = !CGAffineTransformIsIdentity(strongSelf.containerView.transform);
+
+        // On iPad the window auto-rotates with the device, so lastKnownViewSize already
+        // reflects the new orientation after viewWillTransitionToSize: fires.
+        // Matching orientations with no stale transform → window already rotated (iPad).
+        // Use updateBounds: to reposition without applying a redundant transform.
+        if (isDeviceLandscape == isWindowLandscape && !hasTransform) {
+            CGRect windowBounds = CGRectMake(0, 0, strongSelf.lastKnownViewSize.width,
+                                                    strongSelf.lastKnownViewSize.height);
+            [strongSelf.containerView updateBounds:windowBounds
+                                   safeAreaInsets:strongSelf.view.safeAreaInsets];
+            return;
+        }
+
+        // On iPhone the window stays portrait, so we apply a transform-based rotation.
+        CGRect windowBounds = CGRectMake(0, 0, strongSelf.lastKnownViewSize.width,
+                                                strongSelf.lastKnownViewSize.height);
+        [strongSelf.containerView applyDeviceOrientation:orientation
+                                            windowBounds:windowBounds
+                                         safeAreaInsets:strongSelf.view.safeAreaInsets];
+    });
 }
 
 - (void)appDidEnterBackground {
