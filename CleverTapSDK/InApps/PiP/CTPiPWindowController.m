@@ -279,7 +279,6 @@
     if (self.delegate) {
         [self.delegate notificationDidShow:self.notification];
     }
-    [self startTTLTimerIfNeeded];
     [self observeAppLifecycle];
 
     // Image/GIF: show controls immediately then auto-hide after 3 sec.
@@ -290,7 +289,6 @@
 }
 
 - (void)hide:(BOOL)animated {
-    [self stopTTLTimer];
     [self removeAppLifecycleObservers];
     [self.containerView.mediaView releaseMedia];
 
@@ -314,31 +312,6 @@
     } else {
         completion();
     }
-}
-
-// MARK: - TTL
-
-- (void)startTTLTimerIfNeeded {
-    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
-    NSTimeInterval remaining = self.notification.timeToLive - now;
-    if (remaining > 0) {
-        self.ttlTimer = [NSTimer scheduledTimerWithTimeInterval:remaining
-                                                        target:self
-                                                      selector:@selector(ttlExpired)
-                                                      userInfo:nil
-                                                       repeats:NO];
-    }
-}
-
-- (void)stopTTLTimer {
-    [self.ttlTimer invalidate];
-    self.ttlTimer = nil;
-}
-
-- (void)ttlExpired {
-    [CTUtils runSyncMainQueue:^{
-        [self hide:YES];
-    }];
 }
 
 // MARK: - App lifecycle (pause/resume video + rotation)
@@ -500,7 +473,6 @@
 // MARK: - Dealloc
 
 - (void)dealloc {
-    [self stopTTLTimer];
     [self removeAppLifecycleObservers];
 }
 

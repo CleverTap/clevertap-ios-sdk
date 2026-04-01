@@ -158,6 +158,10 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
 }
 
 - (void)handlePan:(UIPanGestureRecognizer *)pan {
+    if (self.isExpanded) {
+        return;
+    }
+
     CGPoint translation = [pan translationInView:self.superview];
     [pan setTranslation:CGPointZero inView:self.superview];
 

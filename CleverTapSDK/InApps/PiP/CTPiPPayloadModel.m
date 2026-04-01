@@ -95,7 +95,7 @@
 }
 
 - (CGFloat)ratio {
-    if (self.numerator <= 0) return 1.0;
+    if (self.numerator <= 0 || self.denominator <= 0) return 1.0;
     return (CGFloat)self.denominator / (CGFloat)self.numerator;
 }
 
