@@ -90,8 +90,8 @@ typedef NS_ENUM(NSUInteger, CTPiPOnClickActionType) {
 // MARK: - CTPiPAspectRatioModel
 
 @interface CTPiPAspectRatioModel : NSObject
-@property (nonatomic, readonly) NSInteger numerator;
-@property (nonatomic, readonly) NSInteger denominator;
+@property (nonatomic, readonly) CGFloat numerator;
+@property (nonatomic, readonly) CGFloat denominator;
 /// Computed ratio: numerator / denominator (width / height). Returns 1.0 if invalid.
 @property (nonatomic, readonly) CGFloat ratio;
 @end

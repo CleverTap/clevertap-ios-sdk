@@ -76,8 +76,8 @@
 // MARK: - CTPiPAspectRatioModel (Private)
 
 @interface CTPiPAspectRatioModel ()
-@property (nonatomic, readwrite) NSInteger numerator;
-@property (nonatomic, readwrite) NSInteger denominator;
+@property (nonatomic, readwrite) CGFloat numerator;
+@property (nonatomic, readwrite) CGFloat denominator;
 @end
 
 @implementation CTPiPAspectRatioModel
@@ -85,8 +85,8 @@
 + (instancetype)modelFromJSON:(NSDictionary *)json {
     CTPiPAspectRatioModel *model = [CTPiPAspectRatioModel new];
     if ([json isKindOfClass:[NSDictionary class]]) {
-        model.numerator = json[@"numerator"] ? [json[@"numerator"] integerValue] : 9;
-        model.denominator = json[@"denominator"] ? [json[@"denominator"] integerValue] : 16;
+        model.numerator = json[@"numerator"] ? [json[@"numerator"] floatValue] : 9;
+        model.denominator = json[@"denominator"] ? [json[@"denominator"] floatValue] : 16;
     } else {
         model.numerator = 9;
         model.denominator = 16;
