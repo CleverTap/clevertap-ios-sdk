@@ -1058,6 +1058,11 @@ static BOOL sharedInstanceErrorLogged;
     return [self.domainFactory isMuted];
 }
 
+- (void)unmute {
+    CleverTapLogDebug(self.config.logLevel, @"%@: unmute called, clearing mute state", self);
+    [self.domainFactory unmute];
+}
+
 
 #pragma mark - Lifecycle Handling
 

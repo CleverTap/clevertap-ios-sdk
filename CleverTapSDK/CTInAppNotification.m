@@ -203,7 +203,8 @@
     switch (self.inAppType) {
         case CTInAppTypeHeader:
         case CTInAppTypeFooter:
-            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
+            // GIF support added, video and audio not supported
+            if  (_mediaIsAudio || _mediaIsVideo){
                 self.imageURL = nil;
                 CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
             }
@@ -211,13 +212,15 @@
         case CTInAppTypeCoverImage:
         case CTInAppTypeInterstitialImage:
         case CTInAppTypeHalfInterstitialImage:
-            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
+            // GIF and Video support added for image-only templates
+            if  (_mediaIsAudio){
                 self.error = [NSString stringWithFormat:@"wrong media type for template"];
             }
             break;
         case CTInAppTypeCover:
         case CTInAppTypeHalfInterstitial:
-            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
+            // GIF support added, video and audio not supported
+            if  (_mediaIsAudio || _mediaIsVideo){
                 self.imageURL = nil;
                 CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
             }

@@ -39,4 +39,31 @@
     XCTAssertNotEqual([template hash], [differentName hash]);
 }
 
+- (void)testIsEqual_withNilObject {
+    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    XCTAssertFalse([template isEqual:nil]);
+}
+
+- (void)testIsEqual_withNonTemplateObject {
+    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"template" templateType:TEMPLATE_TYPE isVisual:true arguments:@[] presenter:nil isSystemDefined:NO];
+    XCTAssertFalse([template isEqual:@"template"]);
+    XCTAssertFalse([template isEqual:@42]);
+}
+
+- (void)testDebugDescription {
+    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"myTemplate" templateType:TEMPLATE_TYPE isVisual:YES arguments:@[] presenter:nil isSystemDefined:NO];
+    NSString *desc = [template debugDescription];
+    XCTAssertNotNil(desc);
+    XCTAssertTrue([desc isKindOfClass:[NSString class]]);
+    XCTAssertTrue([desc containsString:@"myTemplate"]);
+    XCTAssertTrue([desc containsString:@"YES"]);
+}
+
+- (void)testDebugDescription_notVisual {
+    CTCustomTemplate *template = [[CTCustomTemplate alloc] initWithTemplateName:@"funcTemplate" templateType:FUNCTION_TYPE isVisual:NO arguments:@[] presenter:nil isSystemDefined:NO];
+    NSString *desc = [template debugDescription];
+    XCTAssertTrue([desc containsString:@"funcTemplate"]);
+    XCTAssertTrue([desc containsString:@"NO"]);
+}
+
 @end

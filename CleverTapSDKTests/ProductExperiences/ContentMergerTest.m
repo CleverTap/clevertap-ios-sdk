@@ -400,14 +400,30 @@
     NSDictionary *vars = @{
         @"arr": @[@1, @2, @3, @4],
     };
-    
+
     NSDictionary *diff = @{
         @"arr": @[@1, @2, @3, @5],
     };
-    
+
     // ContentMerger does not support merging arrays, expect vars dictionary
     id result = (NSDictionary *)[ContentMerger mergeWithVars:vars diff:diff];
     XCTAssertTrue([vars isEqualToDictionary:result]);
+}
+
+- (void)testMergeWithNilDiff {
+    // nil diff → vars returned unchanged
+    NSString *vars = @"someString";
+    id result = [ContentMerger mergeWithVars:vars diff:nil];
+    XCTAssertEqualObjects(result, vars);
+}
+
+- (void)testMergeArrayVarsWithDictDiff {
+    // vars is NSArray (non-primitive, non-dict), diff is NSDictionary
+    // → should return diff since vars is not a dict
+    NSArray *vars = @[@1, @2];
+    NSDictionary *diff = @{@"key": @"val"};
+    id result = [ContentMerger mergeWithVars:vars diff:diff];
+    XCTAssertEqualObjects(result, diff);
 }
 
 @end
