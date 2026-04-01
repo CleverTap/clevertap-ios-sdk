@@ -38,6 +38,7 @@
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
+#import "CTPiPWindowController.h"
 #endif
 
 #if !(TARGET_OS_TV)
@@ -404,8 +405,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)checkOrientationSupport:(CTInAppNotification *)notification {
-    if (notification.inAppType == CTInAppTypeCustom) {
-        // The in-app orientation support depends on the custom in-app presenter.
+    if (notification.inAppType == CTInAppTypeCustom || notification.inAppType == CTInAppTypePiP) {
+        // Orientation support is handled internally by the custom/PiP presenter.
         return;
     }
     
@@ -626,6 +627,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             break;
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypePiP:
+            controller = [[CTPiPWindowController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
             currentlyDisplayingNotification = notification;

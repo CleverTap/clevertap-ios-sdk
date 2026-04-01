@@ -206,6 +206,25 @@
 		48A2C4BA2BD67DDC006C61BC /* samplePDFStub.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 48A2C4B82BD67DDB006C61BC /* samplePDFStub.pdf */; };
 		48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */; };
 		48C121BC2D9D8D51001A4ABA /* CTAppRatingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C121BB2D9D8D51001A4ABA /* CTAppRatingHelper.swift */; };
+		48D6AC8C2F7CFD3F00A17777 /* CTPiPPayloadModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 48D6AC872F7CFD3F00A17777 /* CTPiPPayloadModel.h */; };
+		48D6AC8D2F7CFD3F00A17777 /* CTPiPCTAOverlayView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48D6AC832F7CFD3F00A17777 /* CTPiPCTAOverlayView.h */; };
+		48D6AC8E2F7CFD3F00A17777 /* CTPiPMediaView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48D6AC852F7CFD3F00A17777 /* CTPiPMediaView.h */; };
+		48D6AC8F2F7CFD3F00A17777 /* CTPiPControlsView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48D6AC812F7CFD3F00A17777 /* CTPiPControlsView.h */; };
+		48D6AC902F7CFD3F00A17777 /* CTPiPContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48D6AC7F2F7CFD3F00A17777 /* CTPiPContainerView.h */; };
+		48D6AC912F7CFD3F00A17777 /* CTPiPWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 48D6AC892F7CFD3F00A17777 /* CTPiPWindowController.h */; };
+		48D6AC922F7CFD3F00A17777 /* CTPiPMediaView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D6AC862F7CFD3F00A17777 /* CTPiPMediaView.m */; };
+		48D6AC932F7CFD3F00A17777 /* CTPiPContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D6AC802F7CFD3F00A17777 /* CTPiPContainerView.m */; };
+		48D6AC942F7CFD3F00A17777 /* CTPiPCTAOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D6AC842F7CFD3F00A17777 /* CTPiPCTAOverlayView.m */; };
+		48D6AC952F7CFD3F00A17777 /* CTPiPPayloadModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D6AC882F7CFD3F00A17777 /* CTPiPPayloadModel.m */; };
+		48D6AC962F7CFD3F00A17777 /* CTPiPControlsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D6AC822F7CFD3F00A17777 /* CTPiPControlsView.m */; };
+		48D6AC972F7CFD3F00A17777 /* CTPiPWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 48D6AC8A2F7CFD3F00A17777 /* CTPiPWindowController.m */; };
+		48D6AC982F7CFD3F00A17777 /* ct_pip_mute.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC7A2F7CFD3F00A17777 /* ct_pip_mute.png */; };
+		48D6AC992F7CFD3F00A17777 /* ct_pip_play.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC7C2F7CFD3F00A17777 /* ct_pip_play.png */; };
+		48D6AC9A2F7CFD3F00A17777 /* ct_pip_pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC7B2F7CFD3F00A17777 /* ct_pip_pause.png */; };
+		48D6AC9B2F7CFD3F00A17777 /* ct_pip_speaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC7D2F7CFD3F00A17777 /* ct_pip_speaker.png */; };
+		48D6AC9C2F7CFD3F00A17777 /* ct_pip_deeplink.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC782F7CFD3F00A17777 /* ct_pip_deeplink.png */; };
+		48D6AC9D2F7CFD3F00A17777 /* ct_pip_expand.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC792F7CFD3F00A17777 /* ct_pip_expand.png */; };
+		48D6AC9E2F7CFD3F00A17777 /* ct_pip_collapse.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC772F7CFD3F00A17777 /* ct_pip_collapse.png */; };
 		48DC69B42D3FDF1F000E7BE4 /* CTEventDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 4847D16C2CCB90E0008DC327 /* CTEventDatabase.h */; };
 		48DC69B52D3FDF23000E7BE4 /* CTEventDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4847D16E2CCB90F5008DC327 /* CTEventDatabase.m */; };
 		48DC69B62D3FDF35000E7BE4 /* CTNotificationAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778C92BED21CE00A41628 /* CTNotificationAction.h */; };
@@ -703,6 +722,7 @@
 		F0BE2AC2FC88DFDB6C2EA83B /* CleverTapInstanceConfigTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DF7EABBC67ABB936E7104DDE /* CleverTapInstanceConfigTest.m */; };
 		F521F765FEC8B69C7976B9C2 /* CTBatchSentDelegateHelperTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A8F7CE1749EBE904E5BECA /* CTBatchSentDelegateHelperTest.m */; };
 		F9356ED42487FE4600B4F507 /* CleverTapPushNotificationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FB3399D8E1539EE9C9B19842 /* Pods_shared_CleverTapSDKTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */; };
 		FED8DD552574154A5299394A /* CTDataValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F281C3FD89B293DF67D40928 /* CTDataValidatorTest.m */; };
 /* End PBXBuildFile section */
 
@@ -940,6 +960,25 @@
 		48C0FD6E2BCD522100E01EA9 /* CTFileDownloadManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManagerTests.m; sourceTree = "<group>"; };
 		48C121BA2D9D8D51001A4ABA /* CleverTapSDKTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTapSDKTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		48C121BB2D9D8D51001A4ABA /* CTAppRatingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTAppRatingHelper.swift; sourceTree = "<group>"; };
+		48D6AC772F7CFD3F00A17777 /* ct_pip_collapse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_collapse.png; sourceTree = "<group>"; };
+		48D6AC782F7CFD3F00A17777 /* ct_pip_deeplink.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_deeplink.png; sourceTree = "<group>"; };
+		48D6AC792F7CFD3F00A17777 /* ct_pip_expand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_expand.png; sourceTree = "<group>"; };
+		48D6AC7A2F7CFD3F00A17777 /* ct_pip_mute.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_mute.png; sourceTree = "<group>"; };
+		48D6AC7B2F7CFD3F00A17777 /* ct_pip_pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_pause.png; sourceTree = "<group>"; };
+		48D6AC7C2F7CFD3F00A17777 /* ct_pip_play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_play.png; sourceTree = "<group>"; };
+		48D6AC7D2F7CFD3F00A17777 /* ct_pip_speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_speaker.png; sourceTree = "<group>"; };
+		48D6AC7F2F7CFD3F00A17777 /* CTPiPContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPContainerView.h; sourceTree = "<group>"; };
+		48D6AC802F7CFD3F00A17777 /* CTPiPContainerView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPContainerView.m; sourceTree = "<group>"; };
+		48D6AC812F7CFD3F00A17777 /* CTPiPControlsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPControlsView.h; sourceTree = "<group>"; };
+		48D6AC822F7CFD3F00A17777 /* CTPiPControlsView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPControlsView.m; sourceTree = "<group>"; };
+		48D6AC832F7CFD3F00A17777 /* CTPiPCTAOverlayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPCTAOverlayView.h; sourceTree = "<group>"; };
+		48D6AC842F7CFD3F00A17777 /* CTPiPCTAOverlayView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPCTAOverlayView.m; sourceTree = "<group>"; };
+		48D6AC852F7CFD3F00A17777 /* CTPiPMediaView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPMediaView.h; sourceTree = "<group>"; };
+		48D6AC862F7CFD3F00A17777 /* CTPiPMediaView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPMediaView.m; sourceTree = "<group>"; };
+		48D6AC872F7CFD3F00A17777 /* CTPiPPayloadModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPPayloadModel.h; sourceTree = "<group>"; };
+		48D6AC882F7CFD3F00A17777 /* CTPiPPayloadModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPPayloadModel.m; sourceTree = "<group>"; };
+		48D6AC892F7CFD3F00A17777 /* CTPiPWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPWindowController.h; sourceTree = "<group>"; };
+		48D6AC8A2F7CFD3F00A17777 /* CTPiPWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPWindowController.m; sourceTree = "<group>"; };
 		48F9FD172C3D30B600617770 /* CTFileDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFileDownloadManager.h; sourceTree = "<group>"; };
 		48F9FD182C3D30B600617770 /* CTFileDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManager.m; sourceTree = "<group>"; };
 		48F9FD192C3D30B600617770 /* CTFileDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloader.m; sourceTree = "<group>"; };
@@ -1422,6 +1461,7 @@
 		071EB476217F6427008F0FAB /* InApps */ = {
 			isa = PBXGroup;
 			children = (
+				48D6AC8B2F7CFD3F00A17777 /* PiP */,
 				57B7E7542F220A9300CF22E1 /* InAppsScheduler */,
 				57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */,
 				4E3B613B2F336ED600C12F79 /* DurationPartitionedInApps.swift */,
@@ -1615,6 +1655,40 @@
 				487C71882D8AD18B0052986F /* CTSystemAppFunctions.m */,
 			);
 			path = SystemAppFunction;
+			sourceTree = "<group>";
+		};
+		48D6AC7E2F7CFD3F00A17777 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				48D6AC772F7CFD3F00A17777 /* ct_pip_collapse.png */,
+				48D6AC782F7CFD3F00A17777 /* ct_pip_deeplink.png */,
+				48D6AC792F7CFD3F00A17777 /* ct_pip_expand.png */,
+				48D6AC7A2F7CFD3F00A17777 /* ct_pip_mute.png */,
+				48D6AC7B2F7CFD3F00A17777 /* ct_pip_pause.png */,
+				48D6AC7C2F7CFD3F00A17777 /* ct_pip_play.png */,
+				48D6AC7D2F7CFD3F00A17777 /* ct_pip_speaker.png */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		48D6AC8B2F7CFD3F00A17777 /* PiP */ = {
+			isa = PBXGroup;
+			children = (
+				48D6AC7E2F7CFD3F00A17777 /* resources */,
+				48D6AC7F2F7CFD3F00A17777 /* CTPiPContainerView.h */,
+				48D6AC802F7CFD3F00A17777 /* CTPiPContainerView.m */,
+				48D6AC812F7CFD3F00A17777 /* CTPiPControlsView.h */,
+				48D6AC822F7CFD3F00A17777 /* CTPiPControlsView.m */,
+				48D6AC832F7CFD3F00A17777 /* CTPiPCTAOverlayView.h */,
+				48D6AC842F7CFD3F00A17777 /* CTPiPCTAOverlayView.m */,
+				48D6AC852F7CFD3F00A17777 /* CTPiPMediaView.h */,
+				48D6AC862F7CFD3F00A17777 /* CTPiPMediaView.m */,
+				48D6AC872F7CFD3F00A17777 /* CTPiPPayloadModel.h */,
+				48D6AC882F7CFD3F00A17777 /* CTPiPPayloadModel.m */,
+				48D6AC892F7CFD3F00A17777 /* CTPiPWindowController.h */,
+				48D6AC8A2F7CFD3F00A17777 /* CTPiPWindowController.m */,
+			);
+			path = PiP;
 			sourceTree = "<group>";
 		};
 		48FA82BF2DAD176200AB8651 /* SystemAppFunction */ = {
@@ -2500,6 +2574,12 @@
 				6B535FB62AD56C60002A2663 /* CTMultiDelegateManager.h in Headers */,
 				4EF0D5452AD84BCA0044C48F /* CTSessionManager.h in Headers */,
 				D0213D4C207D905800FE5740 /* CleverTapSyncDelegate.h in Headers */,
+				48D6AC8C2F7CFD3F00A17777 /* CTPiPPayloadModel.h in Headers */,
+				48D6AC8D2F7CFD3F00A17777 /* CTPiPCTAOverlayView.h in Headers */,
+				48D6AC8E2F7CFD3F00A17777 /* CTPiPMediaView.h in Headers */,
+				48D6AC8F2F7CFD3F00A17777 /* CTPiPControlsView.h in Headers */,
+				48D6AC902F7CFD3F00A17777 /* CTPiPContainerView.h in Headers */,
+				48D6AC912F7CFD3F00A17777 /* CTPiPWindowController.h in Headers */,
 				6BB778D92BFD277400A41628 /* CTCustomTemplatesManager-Internal.h in Headers */,
 				07B94546219EA34300D4C542 /* CTMessageMO+CoreDataProperties.h in Headers */,
 				6BB727332B8F787D009CE7D0 /* CTCustomTemplatesManager.h in Headers */,
@@ -2861,6 +2941,13 @@
 				07D86D45222695F1009EE610 /* CTInterstitialImageViewController~ipadland.xib in Resources */,
 				0796FB6521AE5B2900FC380D /* CTCarouselMessageCell~port.xib in Resources */,
 				070229A8220831CB0093CA41 /* ct_default_landscape_image.png in Resources */,
+				48D6AC982F7CFD3F00A17777 /* ct_pip_mute.png in Resources */,
+				48D6AC992F7CFD3F00A17777 /* ct_pip_play.png in Resources */,
+				48D6AC9A2F7CFD3F00A17777 /* ct_pip_pause.png in Resources */,
+				48D6AC9B2F7CFD3F00A17777 /* ct_pip_speaker.png in Resources */,
+				48D6AC9C2F7CFD3F00A17777 /* ct_pip_deeplink.png in Resources */,
+				48D6AC9D2F7CFD3F00A17777 /* ct_pip_expand.png in Resources */,
+				48D6AC9E2F7CFD3F00A17777 /* ct_pip_collapse.png in Resources */,
 				070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */,
 				070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */,
 				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
@@ -3238,6 +3325,12 @@
 				4987C666251B5E79003E6BE8 /* CTImageInAppViewController.m in Sources */,
 				D0405B4722050C5200D64EC3 /* CTInboxUtils.m in Sources */,
 				6B32A09F2B9901AA009ADC57 /* CTCustomTemplateBuilder.m in Sources */,
+				48D6AC922F7CFD3F00A17777 /* CTPiPMediaView.m in Sources */,
+				48D6AC932F7CFD3F00A17777 /* CTPiPContainerView.m in Sources */,
+				48D6AC942F7CFD3F00A17777 /* CTPiPCTAOverlayView.m in Sources */,
+				48D6AC952F7CFD3F00A17777 /* CTPiPPayloadModel.m in Sources */,
+				48D6AC962F7CFD3F00A17777 /* CTPiPControlsView.m in Sources */,
+				48D6AC972F7CFD3F00A17777 /* CTPiPWindowController.m in Sources */,
 				49C189A2243B08A40003E4D4 /* CTFeatureFlagsController.m in Sources */,
 				6A3EBD2E2AA06EB300CE97D4 /* CTInAppEvaluationManager.m in Sources */,
 				57B7E75C2F2222C800CF22E1 /* InAppScheduler.swift in Sources */,
