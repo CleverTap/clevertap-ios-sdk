@@ -83,7 +83,9 @@ typedef NS_ENUM(NSUInteger, CTPiPOnClickActionType) {
 // MARK: - CTPiPMarginsModel
 
 @interface CTPiPMarginsModel : NSObject
+/// Vertical margin as a percentage of the container height (e.g. 2 = 2%).
 @property (nonatomic, readonly) CGFloat vertical;
+/// Horizontal margin as a percentage of the container width (e.g. 2 = 2%).
 @property (nonatomic, readonly) CGFloat horizontal;
 @end
 

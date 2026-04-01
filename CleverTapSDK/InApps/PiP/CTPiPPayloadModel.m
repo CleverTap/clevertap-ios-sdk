@@ -62,11 +62,11 @@
 + (instancetype)modelFromJSON:(NSDictionary *)json {
     CTPiPMarginsModel *model = [CTPiPMarginsModel new];
     if ([json isKindOfClass:[NSDictionary class]]) {
-        model.vertical = json[@"vertical"] ? [json[@"vertical"] floatValue] : 10.0;
-        model.horizontal = json[@"horizontal"] ? [json[@"horizontal"] floatValue] : 10.0;
+        model.vertical = json[@"vertical"] ? [json[@"vertical"] floatValue] : 2.0;
+        model.horizontal = json[@"horizontal"] ? [json[@"horizontal"] floatValue] : 2.0;
     } else {
-        model.vertical = 10.0;
-        model.horizontal = 10.0;
+        model.vertical = 2.0;
+        model.horizontal = 2.0;
     }
     return model;
 }

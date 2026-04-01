@@ -240,8 +240,8 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
                      pipSize:(CGSize)size
                       bounds:(CGRect)bounds
               safeAreaInsets:(UIEdgeInsets)insets {
-    CGFloat vm = self.config.margins.vertical;
-    CGFloat hm = self.config.margins.horizontal;
+    CGFloat vm = (self.config.margins.vertical   / 100.0) * bounds.size.height;
+    CGFloat hm = (self.config.margins.horizontal / 100.0) * bounds.size.width;
 
     CGFloat left    = insets.left  + hm;
     CGFloat right   = bounds.size.width  - insets.right  - hm - size.width;
@@ -293,8 +293,8 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
             li = UIEdgeInsetsMake(pi.left, pi.bottom, pi.right, pi.top);
         }
 
-        CGFloat vm = self.config.margins.vertical;
-        CGFloat hm = self.config.margins.horizontal;
+        CGFloat vm = (self.config.margins.vertical   / 100.0) * lH;
+        CGFloat hm = (self.config.margins.horizontal / 100.0) * lW;
         CGFloat l  = li.left   + hm;
         CGFloat r  = lW - li.right  - hm - visualW;
         CGFloat t  = li.top    + vm;
@@ -517,8 +517,8 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
                                   portraitInsets.right, portraitInsets.top);
         }
 
-        CGFloat vm = self.config.margins.vertical;
-        CGFloat hm = self.config.margins.horizontal;
+        CGFloat vm = (self.config.margins.vertical   / 100.0) * lH;
+        CGFloat hm = (self.config.margins.horizontal / 100.0) * lW;
 
         CGFloat l  = li.left  + hm;
         CGFloat r  = lW - li.right  - hm - visualW;
