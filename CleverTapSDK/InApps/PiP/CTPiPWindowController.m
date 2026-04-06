@@ -509,9 +509,8 @@
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
     }
 
-    if (onClick.close || onClick.type == CTPiPOnClickActionTypeClose) {
-        [self hide:YES];
-    }
+    // Always close PiP after any CTA tap — do not rely on the close flag in the payload.
+    [self hide:YES];
 }
 
 - (nullable CTNotificationAction *)actionForOnClick:(CTPiPOnClickModel *)onClick {
@@ -530,7 +529,15 @@
             NSDictionary *json = @{@"type": @"kv", @"kv": onClick.kv ?: @{}};
             return [[CTNotificationAction alloc] initWithJSON:json];
         }
-        case CTPiPOnClickActionTypeCustomCode:
+        case CTPiPOnClickActionTypeCustomCode: {
+            // Pass the raw onClick JSON directly to CTNotificationAction. It already
+            // contains "type": "custom-code" which satisfies CTCustomTemplateInAppData's
+            // createWithJSON: check, plus "templateName" and "vars" for the template.
+            if (onClick.rawJSON) {
+                return [[CTNotificationAction alloc] initWithJSON:onClick.rawJSON];
+            }
+            return nil;
+        }
         case CTPiPOnClickActionTypeUnknown:
             return nil;
     }

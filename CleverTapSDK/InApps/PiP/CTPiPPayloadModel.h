@@ -125,6 +125,9 @@ typedef NS_ENUM(NSUInteger, CTPiPOnClickActionType) {
 @property (nonatomic, strong, nullable, readonly) NSDictionary *kv;
 /// Whether to close PiP after executing the action.
 @property (nonatomic, readonly) BOOL close;
+/// Raw onClick JSON — used by custom-code to build a CTNotificationAction with
+/// the full template name and vars without re-parsing the payload.
+@property (nonatomic, strong, nullable, readonly) NSDictionary *rawJSON;
 @end
 
 // MARK: - CTPiPConfigModel
