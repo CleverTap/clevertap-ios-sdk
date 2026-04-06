@@ -635,8 +635,8 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     self.defaultCellImageView.image = nil;
     self.defaultCellImageView.hidden = YES;
     if (self.defaultMediaHeightConstraint) {
-        self.defaultMediaHeightConstraint.constant = 0;
         self.defaultMediaHeightConstraint.active = NO;
+        self.defaultMediaHeightConstraint = nil;
     }
     if (self.imageViewHeightConstraint && self.didCaptureImageViewHeightDefaults) {
         self.imageViewHeightConstraint.constant = self.originalImageViewHeightConstant;
@@ -666,6 +666,14 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     [self updateDefaultMediaLayoutForImage:nil fallbackRatio:fallbackRatio];
 }
 
+- (UITableView *)containingTableView {
+    UIView *view = self.superview;
+    while (view && ![view isKindOfClass:[UITableView class]]) {
+        view = view.superview;
+    }
+    return (UITableView *)view;
+}
+
 - (void)updateDefaultMediaLayoutForImage:(UIImage *)image fallbackRatio:(CGFloat)fallbackRatio {
     if (![self shouldUseDefaultMediaLayout] || !self.mediaContainerView) {
         return;
@@ -674,18 +682,31 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     if (image && image.size.width > 0.0) {
         ratio = image.size.height / image.size.width;
     }
-    [self layoutIfNeeded];
-    CGFloat width = CGRectGetWidth(self.mediaContainerView.bounds);
-    if (width <= 0.0) {
-        width = CGRectGetWidth([UIScreen mainScreen].bounds);
+    CGFloat previousMultiplier = self.defaultMediaHeightConstraint ? self.defaultMediaHeightConstraint.multiplier : 0;
+    if (self.defaultMediaHeightConstraint) {
+        self.defaultMediaHeightConstraint.active = NO;
     }
-    CGFloat height = MAX(1.0, width * ratio);
-    if (!self.defaultMediaHeightConstraint) {
-        self.defaultMediaHeightConstraint = [self.mediaContainerView.heightAnchor constraintEqualToConstant:height];
-        self.defaultMediaHeightConstraint.priority = 999;
-    }
-    self.defaultMediaHeightConstraint.constant = height;
+    self.defaultMediaHeightConstraint = [NSLayoutConstraint constraintWithItem:self.mediaContainerView
+                                                                      attribute:NSLayoutAttributeHeight
+                                                                      relatedBy:NSLayoutRelationEqual
+                                                                         toItem:self.mediaContainerView
+                                                                      attribute:NSLayoutAttributeWidth
+                                                                     multiplier:ratio
+                                                                       constant:0];
+    self.defaultMediaHeightConstraint.priority = 999;
     self.defaultMediaHeightConstraint.active = YES;
+    if (image && fabs(ratio - previousMultiplier) > 0.01) {
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UITableView *tableView = [weakSelf containingTableView];
+            if (tableView) {
+                [UIView performWithoutAnimation:^{
+                    [tableView beginUpdates];
+                    [tableView endUpdates];
+                }];
+            }
+        });
+    }
 }
 
 @end
