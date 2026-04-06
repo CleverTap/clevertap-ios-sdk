@@ -9,15 +9,54 @@
 #import "CTUtils.h"
 #import "CTConstants.h"
 
-/// Transparent root view that passes through touches not hitting any subview.
-@interface CTPiPRootView : UIView
+// MARK: - CTPiPPassThroughWindow
+
+/// A UIWindow subclass for the PiP overlay.
+///
+/// Problem: On iPad with UIWindowScene, when hitTest returns nil for a non-PiP point,
+/// UIKit does NOT automatically forward the touch to the next window — it is silently
+/// discarded. This means background views (table views, scroll views, buttons) never
+/// receive the touch even though the PiP window has no content there.
+///
+/// Fix: when the touch is NOT over any PiP content (super returns nil), we explicitly
+/// look up the correct view in the underlying app window and return it. UIKit then
+/// dispatches the UITouch directly to that view, making scroll/tap/etc. work normally.
+/// Both windows are full-screen at the same origin so coordinate space is identical —
+/// no conversion error occurs.
+@interface CTPiPPassThroughWindow : CTInAppPassThroughWindow
 @end
 
-@implementation CTPiPRootView
+@implementation CTPiPPassThroughWindow
+
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView *view = [super hitTest:point withEvent:event];
-    return (view == self) ? nil : view;
+    // On iPad, UIKit adds internal system subviews to UIWindow (Slide Over /
+    // Split View resize handles, etc.) that are full-screen and return non-nil
+    // from hitTest even for touches in the transparent area around the PiP.
+    // Checking view != nil is therefore not enough to know the touch is on PiP
+    // content. We verify the hit view actually belongs to our own PiP hierarchy
+    // (is a descendant of the root view controller's view). System views are not.
+    if (view != nil && self.rootViewController != nil &&
+        [view isDescendantOfView:self.rootViewController.view]) {
+        return view; // Touch is genuinely on PiP content — handle normally.
+    }
+    // Touch is in the transparent area (or landed on a system-managed view).
+    // Forward to the app's underlying window so background content stays fully
+    // interactive on iPad, where UIWindowScene does not automatically route
+    // nil-hitTest touches to other windows.
+    for (UIWindow *window in [CTUIUtils getSharedApplication].windows) {
+        if (window == self || window.isHidden || window.alpha <= 0) {
+            continue;
+        }
+        CGPoint convertedPoint = [window convertPoint:point fromWindow:self];
+        UIView *backgroundView = [window hitTest:convertedPoint withEvent:event];
+        if (backgroundView) {
+            return backgroundView;
+        }
+    }
+    return nil;
 }
+
 @end
 
 // MARK: -
@@ -44,6 +83,11 @@
     if (self) {
         _pipPayload = [CTPiPPayloadModel modelFromJSON:notification.jsonDescription];
         _isVideoPlaying = YES;
+        // Match CTBaseHeaderFooterViewController: opt into the pass-through mechanism
+        // so that CTInAppPassThroughView is used as the root view. On iPad, this is
+        // required for background touches to work — the view's delegate callback is
+        // wired into the SDK's touch-routing path.
+        self.shouldPassThroughTouches = YES;
     }
     return self;
 }
@@ -51,9 +95,12 @@
 // MARK: - View lifecycle
 
 - (void)loadView {
-    CTPiPRootView *root = [[CTPiPRootView alloc] initWithFrame:UIScreen.mainScreen.bounds];
+    // Use CTInAppPassThroughView (same root view class as CTBaseHeaderFooterViewController)
+    // so that the SDK's touch-routing path is identical to the working banner in-app on iPad.
+    CTInAppPassThroughView *root = [[CTInAppPassThroughView alloc] initWithFrame:UIScreen.mainScreen.bounds];
     root.backgroundColor = UIColor.clearColor;
     root.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    root.delegate = self;
     self.view = root;
 }
 
@@ -91,6 +138,15 @@
     self.containerView = container;
 }
 
+// MARK: - CTInAppPassThroughViewDelegate
+
+/// Override the base class behaviour: for PiP we want background touches to pass
+/// through without dismissing. The base class calls [self hide:NO] here, which
+/// is correct for banners but wrong for a persistent floating widget.
+- (void)viewWillPassThroughTouch {
+    // Intentionally empty — PiP stays visible; touch passes to the app behind it.
+}
+
 // MARK: - show / hide
 
 - (void)show:(BOOL)animated {
@@ -106,10 +162,16 @@
             if (scene.activationState == UISceneActivationStateForegroundActive
                 && [scene isKindOfClass:[UIWindowScene class]]) {
                 UIWindowScene *ws = (UIWindowScene *)scene;
-                // initWithWindowScene: lets the scene fully manage the window's geometry,
-                // so its bounds automatically update on rotation (unlike initWithFrame: +
-                // setting windowScene post-init, which is not scene-managed for resizing).
-                CTInAppPassThroughWindow *win = [[CTInAppPassThroughWindow alloc] initWithWindowScene:ws];
+                // Use initWithFrame: + windowScene (not initWithWindowScene:).
+                // On iPad, initWithWindowScene: creates a fully scene-managed window whose
+                // touch routing bypasses hitTest nil returns — taps on the transparent area
+                // never reach the underlying app window even when hitTest correctly returns nil.
+                // initWithFrame: + .windowScene = attaches to the scene without giving the
+                // scene full touch-routing control. This is exactly what
+                // CTBaseHeaderFooterViewController does and it works on all devices.
+                CTPiPPassThroughWindow *win = [[CTPiPPassThroughWindow alloc]
+                                                 initWithFrame:ws.coordinateSpace.bounds];
+                win.windowScene = ws;
                 self.window = win;
                 break;
             }
@@ -117,11 +179,15 @@
     }
 
     if (!self.window) {
-        self.window = [[CTInAppPassThroughWindow alloc]
+        self.window = [[CTPiPPassThroughWindow alloc]
                        initWithFrame:UIScreen.mainScreen.bounds];
     }
 
-    self.window.windowLevel = UIWindowLevelAlert - 1;
+    // UIWindowLevelNormal matches CTBaseHeaderFooterViewController. At this level,
+    // returning nil from hitTest properly forwards untouched areas to the app window.
+    // UIWindowLevelAlert - 1 (1999) is high enough that on iPad the scene intercepts
+    // touches before they can fall through to lower windows.
+    self.window.windowLevel = UIWindowLevelNormal;
     self.window.backgroundColor = UIColor.clearColor;
     self.window.alpha = 0;
     self.window.rootViewController = self;
@@ -443,9 +509,8 @@
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
     }
 
-    if (onClick.close || onClick.type == CTPiPOnClickActionTypeClose) {
-        [self hide:YES];
-    }
+    // Always close PiP after any CTA tap — do not rely on the close flag in the payload.
+    [self hide:YES];
 }
 
 - (nullable CTNotificationAction *)actionForOnClick:(CTPiPOnClickModel *)onClick {
@@ -464,7 +529,15 @@
             NSDictionary *json = @{@"type": @"kv", @"kv": onClick.kv ?: @{}};
             return [[CTNotificationAction alloc] initWithJSON:json];
         }
-        case CTPiPOnClickActionTypeCustomCode:
+        case CTPiPOnClickActionTypeCustomCode: {
+            // Pass the raw onClick JSON directly to CTNotificationAction. It already
+            // contains "type": "custom-code" which satisfies CTCustomTemplateInAppData's
+            // createWithJSON: check, plus "templateName" and "vars" for the template.
+            if (onClick.rawJSON) {
+                return [[CTNotificationAction alloc] initWithJSON:onClick.rawJSON];
+            }
+            return nil;
+        }
         case CTPiPOnClickActionTypeUnknown:
             return nil;
     }
