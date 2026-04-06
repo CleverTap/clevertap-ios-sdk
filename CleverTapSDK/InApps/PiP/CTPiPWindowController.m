@@ -333,10 +333,10 @@
     CGFloat x = finalFrame.origin.x;
     CGFloat y = finalFrame.origin.y;
     switch (direction) {
-        case CTPiPMoveInDirectionTop:    y = -finalFrame.size.height; break;
-        case CTPiPMoveInDirectionBottom: y = self.view.bounds.size.height; break;
-        case CTPiPMoveInDirectionLeft:   x = -finalFrame.size.width; break;
-        case CTPiPMoveInDirectionRight:  x = self.view.bounds.size.width; break;
+        case CTPiPMoveInDirectionTop:    y = self.view.bounds.size.height; break;
+        case CTPiPMoveInDirectionBottom: y = -finalFrame.size.height; break;
+        case CTPiPMoveInDirectionLeft:   x = self.view.bounds.size.width; break;
+        case CTPiPMoveInDirectionRight:  x = -finalFrame.size.width; break;
     }
     return CGRectMake(x, y, finalFrame.size.width, finalFrame.size.height);
 }
