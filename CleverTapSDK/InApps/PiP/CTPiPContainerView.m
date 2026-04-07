@@ -3,7 +3,7 @@
 static const NSTimeInterval kPiPAutoHideDelay = 3.0;
 static const CGFloat kPiPMaxHeightPercent = 40.0;
 
-@interface CTPiPContainerView () <CTPiPControlsViewDelegate, CTPiPCTAOverlayViewDelegate>
+@interface CTPiPContainerView () <CTPiPControlsViewDelegate, CTPiPCTAOverlayViewDelegate, CTPiPMediaViewDelegate>
 @property (nonatomic, strong) CTPiPConfigModel *config;
 @property (nonatomic, assign) BOOL showClose;
 @property (nonatomic, strong, readwrite) CTPiPMediaView *mediaView;
@@ -31,6 +31,7 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
         _showClose = showClose;
         _mediaView = mediaView;
         _isVideoType = (mediaView.contentType == CTPiPContentTypeVideo);
+        mediaView.delegate = self;
         [self setupAppearance];
         [self setupSubviews];
         if (config.controls.drag) {
@@ -678,6 +679,14 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
 
 - (void)pipControlsDidTapDeeplink {
     [self.delegate pipContainerDidTapCTA];
+}
+
+// MARK: - CTPiPMediaViewDelegate
+
+- (void)pipMediaDidShowVideoFallback {
+    // Video failed — switch to image control layout (correct button positions,
+    // mute/play-pause hidden) since a static image is now displayed.
+    [self.controlsView switchToImageLayout];
 }
 
 // MARK: - CTPiPCTAOverlayViewDelegate

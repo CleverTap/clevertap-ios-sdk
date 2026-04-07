@@ -266,6 +266,14 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
     self.closeButton.hidden = !visible;
 }
 
+- (void)switchToImageLayout {
+    self.isVideoType = NO;
+    self.muteButton.hidden = YES;
+    self.playPauseButton.hidden = YES;
+    [self setNeedsLayout];
+    [self layoutIfNeeded];
+}
+
 // MARK: - Helpers
 
 - (UIImageView *)imageViewForButton:(UIButton *)btn {

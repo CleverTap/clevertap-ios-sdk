@@ -14,8 +14,11 @@
 // Video
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) AVPlayerLayer *playerLayer;
+@property (nonatomic, strong) AVPlayerItem *playerItem;
 @property (nonatomic, strong) UIImageView *posterImageView;
 @property (nonatomic, strong) id playerEndObserver;
+@property (nonatomic, strong) id playerFailObserver;
+@property (nonatomic, assign) BOOL playerItemStatusObserved;
 
 @property (nonatomic, readwrite) BOOL isMuted;
 @end
@@ -152,14 +155,20 @@
     player.muted = YES;
     self.isMuted = YES;
     self.player = player;
+    self.playerItem = item;
 
     AVPlayerLayer *layer = [AVPlayerLayer playerLayerWithPlayer:player];
     layer.videoGravity = AVLayerVideoGravityResizeAspect;
     [self.layer insertSublayer:layer above:poster.layer];
     self.playerLayer = layer;
 
-    // Loop video
+    // Observe item status for load failures (bad URL, format errors, etc.)
+    [item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:NULL];
+    self.playerItemStatusObserved = YES;
+
     __weak typeof(self) weakSelf = self;
+
+    // Loop video on successful completion
     self.playerEndObserver = [[NSNotificationCenter defaultCenter]
         addObserverForName:AVPlayerItemDidPlayToEndTimeNotification
                     object:item
@@ -169,7 +178,41 @@
         [weakSelf.player play];
     }];
 
+    // Show fallback image on mid-stream failure
+    self.playerFailObserver = [[NSNotificationCenter defaultCenter]
+        addObserverForName:AVPlayerItemFailedToPlayToEndTimeNotification
+                    object:item
+                     queue:NSOperationQueue.mainQueue
+                usingBlock:^(NSNotification *note) {
+        [weakSelf showVideoFallback];
+    }];
+
     [player play];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context {
+    if ([keyPath isEqualToString:@"status"] && object == self.playerItem) {
+        AVPlayerItemStatus status = (AVPlayerItemStatus)[change[NSKeyValueChangeNewKey] integerValue];
+        if (status == AVPlayerItemStatusFailed) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self showVideoFallback];
+            });
+        }
+        return;
+    }
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+- (void)showVideoFallback {
+    if (!self.media.fallbackURL) return;
+    self.playerLayer.hidden = YES;
+    [self.posterImageView sd_setImageWithURL:self.media.fallbackURL];
+    if ([self.delegate respondsToSelector:@selector(pipMediaDidShowVideoFallback)]) {
+        [self.delegate pipMediaDidShowVideoFallback];
+    }
 }
 
 - (void)layoutSubviews {
@@ -211,10 +254,19 @@
 
 - (void)releaseMedia {
     [self.player pause];
+    if (self.playerItemStatusObserved) {
+        [self.playerItem removeObserver:self forKeyPath:@"status"];
+        self.playerItemStatusObserved = NO;
+    }
     if (self.playerEndObserver) {
         [[NSNotificationCenter defaultCenter] removeObserver:self.playerEndObserver];
         self.playerEndObserver = nil;
     }
+    if (self.playerFailObserver) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self.playerFailObserver];
+        self.playerFailObserver = nil;
+    }
+    self.playerItem = nil;
     self.player = nil;
     [self.playerLayer removeFromSuperlayer];
     self.playerLayer = nil;

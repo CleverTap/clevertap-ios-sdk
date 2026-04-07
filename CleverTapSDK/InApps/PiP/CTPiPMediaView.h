@@ -3,8 +3,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol CTPiPMediaViewDelegate <NSObject>
+@optional
+/// Called when video fails to load/stream and the fallback image is displayed instead.
+- (void)pipMediaDidShowVideoFallback;
+@end
+
 /// Renders Image, GIF, or Video for the PiP overlay.
 @interface CTPiPMediaView : UIView
+
+@property (nonatomic, weak, nullable) id<CTPiPMediaViewDelegate> delegate;
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithMedia:(CTPiPMediaModel *)media;
