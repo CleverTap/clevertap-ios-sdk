@@ -208,6 +208,18 @@ static NSString * const kOrientationPortrait = @"p";
     
     [self doLayoutForMessage:message];
     [self setupMessage:message];
+#if TARGET_OS_TV
+    if (self.bodyFocusButton) {
+        self.bodyFocusButton.isAccessibilityElement = YES;
+        CleverTapInboxMessageContent *content = message.content.firstObject;
+        NSMutableArray *parts = [NSMutableArray array];
+        if (content.title.length > 0) [parts addObject:content.title];
+        if (content.message.length > 0) [parts addObject:content.message];
+        self.bodyFocusButton.accessibilityLabel = parts.count > 0
+            ? [parts componentsJoinedByString:@". "]
+            : @"Inbox message";
+    }
+#endif
     [self layoutIfNeeded];
     [self layoutSubviews];
 }

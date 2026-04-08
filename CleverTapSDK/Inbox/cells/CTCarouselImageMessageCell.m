@@ -104,8 +104,11 @@
         return YES;
     }
     UIFocusHeading heading = context.focusHeading;
-    if (heading == UIFocusHeadingLeft || heading == UIFocusHeadingRight) {
-        return NO;
+    if (heading == UIFocusHeadingLeft) {
+        return !(self.swipeView.currentItemIndex - 1 >= 0);
+    }
+    if (heading == UIFocusHeadingRight) {
+        return !(self.swipeView.currentItemIndex + 1 < (NSInteger)self.itemViews.count);
     }
     return YES;
 }
