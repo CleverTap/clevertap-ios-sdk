@@ -266,8 +266,9 @@
         }
     }
 
+    // Do NOT call animateIn: here. The window stays hidden (alpha = 0) until
+    // pipMediaIsReadyToShow fires, so a video that fails never becomes visible.
     [self.containerView.mediaView loadMedia];
-    [self animateIn:animated];
 }
 
 // MARK: - Animation
@@ -461,6 +462,17 @@
 
 - (void)pipContainerDidTapClose {
     [self hide:YES];
+}
+
+- (void)pipContainerIsReadyToShow {
+    [self animateIn:self.pendingAnimated];
+}
+
+- (void)pipContainerDidFailToLoad {
+    CleverTapLogStaticDebug(@"%@: Not showing PiP InApp %@ because media failed to load.", self, self.notification.campaignId);
+    // Window is still hidden (alpha = 0) — just tear it down silently.
+    [self.window setHidden:YES];
+    self.window = nil;
 }
 
 - (void)pipContainerDidTapCTA {

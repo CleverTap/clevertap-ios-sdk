@@ -42,18 +42,30 @@
         case CTPiPContentTypeImage:
             [self setupImageView];
             [self loadImage];
+            // Image loads in background — signal ready immediately so PiP animates in.
+            [self notifyReadyToShow];
             break;
         case CTPiPContentTypeGif:
             [self setupImageView];
             [self loadGIF];
+            [self notifyReadyToShow];
             break;
         case CTPiPContentTypeVideo:
+            // Video: do NOT signal ready yet. Wait for AVPlayerItemStatusReadyToPlay
+            // (or failure) so the window stays hidden until we know the video works.
             [self setupVideoPlayer];
             break;
         default:
             [self setupImageView];
             [self loadFallbackImage];
+            [self notifyReadyToShow];
             break;
+    }
+}
+
+- (void)notifyReadyToShow {
+    if ([self.delegate respondsToSelector:@selector(pipMediaIsReadyToShow)]) {
+        [self.delegate pipMediaIsReadyToShow];
     }
 }
 
@@ -196,7 +208,11 @@
                        context:(void *)context {
     if ([keyPath isEqualToString:@"status"] && object == self.playerItem) {
         AVPlayerItemStatus status = (AVPlayerItemStatus)[change[NSKeyValueChangeNewKey] integerValue];
-        if (status == AVPlayerItemStatusFailed) {
+        if (status == AVPlayerItemStatusReadyToPlay) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self notifyReadyToShow];
+            });
+        } else if (status == AVPlayerItemStatusFailed) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self showVideoFallback];
             });
@@ -207,12 +223,31 @@
 }
 
 - (void)showVideoFallback {
-    if (!self.media.fallbackURL) return;
-    self.playerLayer.hidden = YES;
-    [self.posterImageView sd_setImageWithURL:self.media.fallbackURL];
-    if ([self.delegate respondsToSelector:@selector(pipMediaDidShowVideoFallback)]) {
-        [self.delegate pipMediaDidShowVideoFallback];
+    if (!self.media.fallbackURL) {
+        // No fallback available — nothing to show, dismiss PiP.
+        if ([self.delegate respondsToSelector:@selector(pipMediaDidFailToLoad)]) {
+            [self.delegate pipMediaDidFailToLoad];
+        }
+        return;
     }
+    self.playerLayer.hidden = YES;
+    __weak typeof(self) weakSelf = self;
+    [self.posterImageView sd_setImageWithURL:self.media.fallbackURL
+                            placeholderImage:nil
+                                     options:SDWebImageRetryFailed
+                                   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *url) {
+        if (error || !image) {
+            // Fallback image also failed — dismiss PiP.
+            if ([weakSelf.delegate respondsToSelector:@selector(pipMediaDidFailToLoad)]) {
+                [weakSelf.delegate pipMediaDidFailToLoad];
+            }
+            return;
+        }
+        if ([weakSelf.delegate respondsToSelector:@selector(pipMediaDidShowVideoFallback)]) {
+            [weakSelf.delegate pipMediaDidShowVideoFallback];
+        }
+        [weakSelf notifyReadyToShow];
+    }];
 }
 
 - (void)layoutSubviews {

@@ -683,10 +683,18 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
 
 // MARK: - CTPiPMediaViewDelegate
 
+- (void)pipMediaIsReadyToShow {
+    [self.delegate pipContainerIsReadyToShow];
+}
+
 - (void)pipMediaDidShowVideoFallback {
     // Video failed — switch to image control layout (correct button positions,
     // mute/play-pause hidden) since a static image is now displayed.
     [self.controlsView switchToImageLayout];
+}
+
+- (void)pipMediaDidFailToLoad {
+    [self.delegate pipContainerDidFailToLoad];
 }
 
 // MARK: - CTPiPCTAOverlayViewDelegate
