@@ -470,9 +470,7 @@
 
 - (void)pipContainerDidFailToLoad {
     CleverTapLogStaticDebug(@"%@: Not showing PiP InApp %@ because media failed to load.", self, self.notification.campaignId);
-    // Window is still hidden (alpha = 0) — just tear it down silently.
-    [self.window setHidden:YES];
-    self.window = nil;
+    [self hide:NO];
 }
 
 - (void)pipContainerDidTapCTA {
