@@ -45,8 +45,9 @@
 		57FB79F92DF81FED0097FB65 /* CustomAppInboxScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FB79F82DF81FED0097FB65 /* CustomAppInboxScreen.swift */; };
 		57FB79FC2DF825680097FB65 /* AppInboxTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57FB79FB2DF825680097FB65 /* AppInboxTableViewCell.xib */; };
 		57FB79FD2DF825680097FB65 /* AppInboxTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FB79FA2DF825680097FB65 /* AppInboxTableViewCell.swift */; };
+		581161892F60240E00273F76 /* CardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581161882F60240E00273F76 /* CardModel.swift */; };
+		5811618B2F60245D00273F76 /* CardViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5811618A2F60245D00273F76 /* CardViewCell.swift */; };
 		679BC290E9C031925118BB08 /* Pods_SwiftStarterUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F4216C29362779E4C0FEB3D /* Pods_SwiftStarterUITests.framework */; };
-		AFB2589C851917BB401BB9B1 /* Pods_SwiftWatchOS_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFFE852570BBC5FEAF733E90 /* Pods_SwiftWatchOS_Extension.framework */; };
 		6B53F59C2DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5962DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift */; };
 		6B53F59D2DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5982DFAFCB9007BBEA3 /* CTCustomTemplatesProducer.swift */; };
 		6B53F59E2DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5992DFAFCB9007BBEA3 /* CTCustomInterstitialPresenter.swift */; };
@@ -57,6 +58,7 @@
 		6B53F5A52DFC3653007BBEA3 /* CTBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A42DFC3653007BBEA3 /* CTBaseViewModel.swift */; };
 		6B53F5A72DFC3771007BBEA3 /* UIViewController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B53F5A62DFC3771007BBEA3 /* UIViewController+Extensions.swift */; };
 		6B68DA442DF34F4A00761CFE /* CTCustomInterstitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B68DA432DF34F4A00761CFE /* CTCustomInterstitialViewController.swift */; };
+		AFB2589C851917BB401BB9B1 /* Pods_SwiftWatchOS_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFFE852570BBC5FEAF733E90 /* Pods_SwiftWatchOS_Extension.framework */; };
 		CC6E947AF5932FBFF7927364 /* Pods_SwiftTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E6707AE6E92C7ECEB9BBDA7 /* Pods_SwiftTvOS.framework */; };
 		D4BC5A2400463249E0AD5442 /* Pods_SwiftStarter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68BBFE42CB635CB313734F6A /* Pods_SwiftStarter.framework */; };
 		F0DB1AFCE7692FA86F4E7196 /* Pods_SwiftStarter_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 074BE1EA48A6A4147773BB1D /* Pods_SwiftStarter_NotificationService.framework */; };
@@ -212,6 +214,8 @@
 		57FB79F82DF81FED0097FB65 /* CustomAppInboxScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAppInboxScreen.swift; sourceTree = "<group>"; };
 		57FB79FA2DF825680097FB65 /* AppInboxTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInboxTableViewCell.swift; sourceTree = "<group>"; };
 		57FB79FB2DF825680097FB65 /* AppInboxTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppInboxTableViewCell.xib; sourceTree = "<group>"; };
+		581161882F60240E00273F76 /* CardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardModel.swift; sourceTree = "<group>"; };
+		5811618A2F60245D00273F76 /* CardViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewCell.swift; sourceTree = "<group>"; };
 		68BBFE42CB635CB313734F6A /* Pods_SwiftStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B533584248FEB40486A8517 /* Pods-SwiftStarterUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftStarterUITests.debug.xcconfig"; path = "Target Support Files/Pods-SwiftStarterUITests/Pods-SwiftStarterUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		6B53F5962DFAFCB9007BBEA3 /* CTOpenURLConfirmPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTOpenURLConfirmPresenter.swift; sourceTree = "<group>"; };
@@ -411,6 +415,8 @@
 				079F54FF20F34BB500343925 /* Main.storyboard */,
 				079F550220F34BB600343925 /* Assets.xcassets */,
 				079F550420F34BB600343925 /* Info.plist */,
+				581161882F60240E00273F76 /* CardModel.swift */,
+				5811618A2F60245D00273F76 /* CardViewCell.swift */,
 			);
 			path = SwiftTvOS;
 			sourceTree = "<group>";
@@ -1093,6 +1099,8 @@
 			files = (
 				079F54FE20F34BB500343925 /* ViewController.swift in Sources */,
 				079F54FC20F34BB500343925 /* AppDelegate.swift in Sources */,
+				5811618B2F60245D00273F76 /* CardViewCell.swift in Sources */,
+				581161892F60240E00273F76 /* CardModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -44,11 +44,17 @@
         self.imageViewPRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
     }
     
+#if TARGET_OS_TV
+    // tvOS is always landscape-equivalent; collapse the left media panel when no media
+    self.imageViewWidthConstraint.priority = [self mediaIsEmpty] ? 999 : 750;
+    self.dividerCenterXConstraint.priority = [self mediaIsEmpty] ? 750 : 999;
+#else
     // handle landscape
     if ([self deviceOrientationIsLandscape]) {
         self.imageViewWidthConstraint.priority = [self mediaIsEmpty] ? 999 : 750;
         self.dividerCenterXConstraint.priority = [self mediaIsEmpty] ? 750 : 999;
     }
+#endif
     
     [self configureActionView:!content.actionHasLinks];
     self.playButton.layer.borderWidth = 2.0;

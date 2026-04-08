@@ -11,6 +11,12 @@ static UIImage *portraitPlaceholderImage;
 static UIImage *landscapePlaceholderImage;
 static NSString * const kOrientationPortrait = @"p";
 
+#if TARGET_OS_TV
+@interface CTInboxBaseMessageCell ()
+@property (nonatomic, strong) UIButton *bodyFocusButton;
+@end
+#endif
+
 @implementation CTInboxBaseMessageCell
 
 - (instancetype)init {
@@ -58,7 +64,68 @@ static NSString * const kOrientationPortrait = @"p";
 - (void)awakeFromNib {
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
+#if TARGET_OS_TV
+    self.backgroundColor = [UIColor clearColor];
+    self.contentView.backgroundColor = [UIColor clearColor];
+    self.containerView.layer.cornerRadius = 16.0;
+    self.containerView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.containerView.layer.shadowOpacity = 0.0;
+    self.containerView.layer.shadowRadius = 20.0;
+    self.containerView.layer.shadowOffset = CGSizeMake(0, 12);
+    self.containerView.layer.masksToBounds = NO;
+
+    self.bodyFocusButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.bodyFocusButton.backgroundColor = [UIColor clearColor];
+    [self.contentView addSubview:self.bodyFocusButton];
+    [self.bodyFocusButton addTarget:self
+                             action:@selector(bodyFocusButtonTapped)
+                   forControlEvents:UIControlEventPrimaryActionTriggered];
+
+    self.clipsToBounds = NO;
+    self.contentView.clipsToBounds = NO;
+#endif
 }
+
+#if TARGET_OS_TV
+// Cell itself is never focused — focus goes to bodyFocusButton and/or
+// action buttons. When canBecomeFocused=NO on a UITableViewCell, the
+// focus engine searches the cell's subview tree for focusable items.
+- (BOOL)canBecomeFocused {
+    return NO;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+       withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
+    [coordinator addCoordinatedAnimations:^{
+        BOOL hasFocus = [context.nextFocusedView isDescendantOfView:self];
+        if (hasFocus) {
+            self.containerView.transform = CGAffineTransformMakeScale(1.04, 1.04);
+            self.containerView.layer.shadowOpacity = 0.35;
+        } else {
+            self.containerView.transform = CGAffineTransformIdentity;
+            self.containerView.layer.shadowOpacity = 0.0;
+        }
+    } completion:nil];
+}
+
+- (void)bodyFocusButtonTapped {
+    CleverTapInboxMessageContent *content = self.message.content.firstObject;
+    if (content.mediaIsVideo && content.mediaUrl.length > 0) {
+        CMTime currentTime = self.avPlayer ? self.avPlayer.currentTime : kCMTimeZero;
+        [self pause];
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:CLTAP_INBOX_VIDEO_PLAYER_REQUESTED_NOTIFICATION
+            object:self
+            userInfo:@{
+                @"mediaUrl": content.mediaUrl,
+                @"currentTime": [NSValue valueWithCMTime:currentTime],
+                @"title": content.title ?: @""
+            }];
+        return;
+    }
+    [self handleOnMessageTapGesture:nil];
+}
+#endif
 
 - (void)layoutSubviews {
     [super layoutSubviews];
@@ -68,6 +135,16 @@ static NSString * const kOrientationPortrait = @"p";
             self.avPlayerLayer.frame = self.avPlayerContainerView.bounds;
         });
     }
+#if TARGET_OS_TV
+    if (self.bodyFocusButton) {
+        CGRect cvFrame = self.containerView.frame;
+        CGFloat actionHeight = self.actionView.isHidden ? 0 : self.actionViewHeightConstraint.constant;
+        self.bodyFocusButton.frame = CGRectMake(cvFrame.origin.x,
+                                                cvFrame.origin.y,
+                                                cvFrame.size.width,
+                                                cvFrame.size.height - actionHeight);
+    }
+#endif
 }
 
 - (void)prepareForReuse {
@@ -131,6 +208,18 @@ static NSString * const kOrientationPortrait = @"p";
     
     [self doLayoutForMessage:message];
     [self setupMessage:message];
+#if TARGET_OS_TV
+    if (self.bodyFocusButton) {
+        self.bodyFocusButton.isAccessibilityElement = YES;
+        CleverTapInboxMessageContent *content = message.content.firstObject;
+        NSMutableArray *parts = [NSMutableArray array];
+        if (content.title.length > 0) [parts addObject:content.title];
+        if (content.message.length > 0) [parts addObject:content.message];
+        self.bodyFocusButton.accessibilityLabel = parts.count > 0
+            ? [parts componentsJoinedByString:@". "]
+            : @"Inbox message";
+    }
+#endif
     [self layoutIfNeeded];
     [self layoutSubviews];
 }
@@ -143,7 +232,11 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (void)configureActionView:(BOOL)hide {
     self.actionView.hidden = hide;
+#if TARGET_OS_TV
+    self.actionViewHeightConstraint.constant = hide ? 0 : 80;
+#else
     self.actionViewHeightConstraint.constant = hide ? 0 : 45;
+#endif
     self.actionView.delegate = hide ? nil : self;
 }
 
@@ -171,7 +264,11 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)deviceOrientationIsLandscape {
+#if TARGET_OS_TV
+    return NO;
+#else
     return [CTUIUtils isDeviceOrientationLandscape];
+#endif
 }
 
 

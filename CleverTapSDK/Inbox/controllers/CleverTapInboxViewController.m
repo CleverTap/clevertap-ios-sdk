@@ -60,7 +60,11 @@ static const int kMaxTags = 3;
                           config:(CleverTapInboxStyleConfig *)config
                         delegate:(id<CleverTapInboxViewControllerDelegate>)delegate
                analyticsDelegate:(id<CleverTapInboxViewControllerAnalyticsDelegate>)analyticsDelegate {
+#if TARGET_OS_TV
+    self = [self initWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CleverTapInboxViewController class])] bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
+#else
     self = [self initWithNibName:NSStringFromClass([CleverTapInboxViewController class]) bundle:[CTInboxUtils bundle: CleverTapInboxViewController.class]];
+#endif
     if (self) {
         _config = [config copy];
         _delegate = delegate;
@@ -74,7 +78,11 @@ static const int kMaxTags = 3;
             // Use the first tab title if specified in the config, or else fallback to the Default one
             NSString *firstTabTitle = (config.firstTabTitle && config.firstTabTitle.length > 0) ? config.firstTabTitle : kDefaultTab;
             [tags insertObject:firstTabTitle atIndex:0];
+#if TARGET_OS_TV
+            _topContentOffset = 80.f;
+#else
             _topContentOffset = 33.f;
+#endif
         }
         if ([tags count] > kMaxTags) {
             _tags = [tags subarrayWithRange:NSMakeRange(0, kMaxTags)];
@@ -95,7 +103,9 @@ static const int kMaxTags = 3;
                                     action:@selector(dismissTapped)];
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
+#if !TARGET_OS_TV
     self.navigationController.navigationBar.translucent = false;
+#endif
     
     self.muted = YES;
     [self addObservers];
@@ -146,7 +156,12 @@ static const int kMaxTags = 3;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleMediaMutedNotification:)
                                                  name:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:nil];
-    
+
+#if TARGET_OS_TV
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleVideoPlayerRequested:)
+                                                 name:CLTAP_INBOX_VIDEO_PLAYER_REQUESTED_NOTIFICATION object:nil];
+#endif
 }
 
 - (void)setUpInboxLayout {
@@ -168,9 +183,23 @@ static const int kMaxTags = 3;
 
 - (void)setUpTableViewLayout {
     self.tableView.rowHeight = UITableViewAutomaticDimension;
-    self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, kCellSpacing)];
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 1.0)];
+#if TARGET_OS_TV
+    self.tableView.estimatedRowHeight = 550.0;
+    if (@available(tvOS 11.0, *)) {
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+    // Prevent the table from extending under the navigation bar.
+    // Without this, the nav bar height is added to adjustedContentInset.top by
+    // UIScrollViewContentInsetAdjustmentAutomatic, which causes the focus engine
+    // to scroll to a different offset than our manual -_topContentOffset, clipping
+    // the topmost cell on every tab switch. Matching the iOS setup keeps the two
+    // consistent: table frame starts at nav bar bottom, adjustedContentInset == contentInset.
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+#else
+    self.tableView.estimatedRowHeight = 44.0;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     if (@available(iOS 11.0, *)) {
         self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     } else {
@@ -180,7 +209,7 @@ static const int kMaxTags = 3;
 #pragma clang diagnostic pop
     }
     self.edgesForExtendedLayout = UIRectEdgeNone;
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+#endif
 }
 
 - (void)updateInboxLayout {
@@ -195,15 +224,15 @@ static const int kMaxTags = 3;
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxSimpleMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTInboxSimpleMessageCell.class]]
          forCellReuseIdentifier:kCellSimpleMessageIdentifier];
+    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
+                                               bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
+         forCellReuseIdentifier:kCellIconMessageIdentifier];
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselMessageIdentifier];
     [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselImageMessageCell class])]
                                                bundle:[CTInboxUtils bundle: CTCarouselImageMessageCell.class]]
          forCellReuseIdentifier:kCellCarouselImgMessageIdentifier];
-    [self.tableView registerNib:[UINib nibWithNibName:[CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTInboxIconMessageCell class])]
-                                               bundle:[CTInboxUtils bundle: CTInboxIconMessageCell.class]]
-         forCellReuseIdentifier:kCellIconMessageIdentifier];
 }
 
 - (NSString *)getTitle {
@@ -228,11 +257,13 @@ static const int kMaxTags = 3;
 
 - (void)calculateTableViewVisibleFrame {
     CGRect frame = self.tableView.frame;
+#if !TARGET_OS_TV
     BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
     if (landscape) {
         frame.origin.y += self.topContentOffset;
         frame.size.height -= self.topContentOffset;
     }
+#endif
     self.tableViewVisibleFrame = frame;
 }
 
@@ -262,9 +293,17 @@ static const int kMaxTags = 3;
     }
     
     /// Update the Segment Control Tab Selected Color
-    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabSelectedTextColor) ? _config.tabSelectedTextColor : [UIColor blackColor]} forState:UIControlStateSelected];
+    UIColor *selectedTextColor = (_config && _config.tabSelectedTextColor) ? _config.tabSelectedTextColor : [UIColor blackColor];
+    UIColor *unselectedTextColor = (_config && _config.tabUnSelectedTextColor) ? _config.tabUnSelectedTextColor : [UIColor blackColor];
+#if TARGET_OS_TV
+    UIFont *segFont = [UIFont systemFontOfSize:28 weight:UIFontWeightMedium];
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: selectedTextColor, NSFontAttributeName: segFont} forState:UIControlStateSelected];
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: unselectedTextColor, NSFontAttributeName: segFont} forState:UIControlStateNormal];
+#else
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: selectedTextColor} forState:UIControlStateSelected];
     /// Update the Segment Control Tab UnSelected Color
-    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName :(_config && _config.tabUnSelectedTextColor) ? _config.tabUnSelectedTextColor : [UIColor blackColor]} forState:UIControlStateNormal];
+    [segmentedControl setTitleTextAttributes:@{NSForegroundColorAttributeName: unselectedTextColor} forState:UIControlStateNormal];
+#endif
     /// Add Segment Control
     [self.segmentedControlContainer addSubview:segmentedControl];
     [self.tableView setContentInset:UIEdgeInsetsMake(_topContentOffset, 0, 0, 0)];
@@ -307,10 +346,15 @@ static const int kMaxTags = 3;
                                   attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                      toItem:self.segmentedControlContainer attribute:NSLayoutAttributeTrailing
                                  multiplier:1 constant:-25] setActive:YES];
+#if TARGET_OS_TV
+    CGFloat segmentHeight = 70.0;
+#else
+    CGFloat segmentHeight = 30.0;
+#endif
     [[NSLayoutConstraint constraintWithItem:segmentedControl
                                   attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                      toItem:nil attribute:NSLayoutAttributeNotAnAttribute
-                                 multiplier:1 constant:30] setActive:YES];
+                                 multiplier:1 constant:segmentHeight] setActive:YES];
 }
 
 - (void)segmentSelected:(UISegmentedControl *)sender {
@@ -432,9 +476,11 @@ static const int kMaxTags = 3;
         NSString *actionType = link[@"type"];
         if ([actionType caseInsensitiveCompare:@"copy"] == NSOrderedSame) {
             NSString *copy = link[@"copyText"][@"text"];
+#if !TARGET_OS_TV
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             pasteboard.string = copy;
             [self.parentViewController.view ct_makeToast:@"Copied to clipboard" duration:2.0 position:CTToastPositionBottom];
+#endif
         } else if ([actionType caseInsensitiveCompare:@"rfp"] == NSOrderedSame) {
             BOOL fbSettings = link[@"fbSettings"] ? [link[@"fbSettings"] boolValue] : NO;
             [self.analyticsDelegate messageDidSelectForPushPermission:fbSettings];
@@ -498,6 +544,31 @@ static const int kMaxTags = 3;
         self.playingCell = cell;
     }
 }
+
+#if TARGET_OS_TV
+- (void)handleVideoPlayerRequested:(NSNotification *)notification {
+    NSString *mediaUrl = notification.userInfo[@"mediaUrl"];
+    NSValue *currentTimeValue = notification.userInfo[@"currentTime"];
+    NSString *title = notification.userInfo[@"title"];
+    if (!mediaUrl) return;
+    NSURL *url = [NSURL URLWithString:mediaUrl];
+    if (!url) return;
+    AVPlayer *player = [AVPlayer playerWithURL:url];
+    AVPlayerViewController *playerVC = [[AVPlayerViewController alloc] init];
+    playerVC.player = player;
+    playerVC.showsPlaybackControls = YES;
+    if (title.length > 0) {
+        playerVC.title = title;
+    }
+    [self presentViewController:playerVC animated:YES completion:^{
+        if (currentTimeValue) {
+            CMTime seekTime = [currentTimeValue CMTimeValue];
+            [player seekToTime:seekTime toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+        }
+        [player play];
+    }];
+}
+#endif
 
 - (void)handleMediaMutedNotification:(NSNotification*)notification {
     self.muted = [notification.userInfo[@"muted"] boolValue];

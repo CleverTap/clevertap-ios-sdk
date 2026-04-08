@@ -39,7 +39,12 @@ static const float kPageControlViewHeight = 30.f;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
-            carouselItemView  = [[[CTUIUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
+#if TARGET_OS_TV
+            NSString *nibName = [CTInboxUtils getXibNameForControllerName:NSStringFromClass([CTCarouselImageView class])];
+#else
+            NSString *nibName = NSStringFromClass([CTCarouselImageView class]);
+#endif
+            carouselItemView  = [[[CTUIUtils bundle] loadNibNamed:nibName owner:nil options:nil] lastObject];
             carouselItemView.backgroundColor = [UIColor clearColor];
             [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                                               placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
@@ -56,10 +61,12 @@ static const float kPageControlViewHeight = 30.f;
             carouselItemView.viewDescription = [NSString stringWithFormat:@"%@ %@ %@", imageDescription, content.title, content.message];
         }
         
-        UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         carouselItemView.userInteractionEnabled = YES;
         carouselItemView.tag = index;
+#if !TARGET_OS_TV
+        UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         [carouselItemView addGestureRecognizer:carouselViewTapGesture];
+#endif
         [self.itemViews addObject:carouselItemView];
         index++;
     }
@@ -89,10 +96,12 @@ static const float kPageControlViewHeight = 30.f;
             itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait] imageDescription:imageDescription];
         }
         
-        UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         itemView.userInteractionEnabled = YES;
         itemView.tag = index;
+#if !TARGET_OS_TV
+        UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         [itemView addGestureRecognizer:itemViewTapGesture];
+#endif
         [self.itemViews addObject:itemView];
         index++;
     }
@@ -108,7 +117,15 @@ static const float kPageControlViewHeight = 30.f;
     for (UIView *subview in [self.carouselView subviews]) {
         [subview removeFromSuperview];
     }
-    
+
+#if TARGET_OS_TV
+    CGFloat viewWidth = (CGFloat)[[UIScreen mainScreen] bounds].size.width - 80;
+    CGFloat viewHeight = viewWidth / 3.5;
+    self.carouselViewHeight.constant = viewHeight;
+    self.carouselView.frame = CGRectMake(0, 0, viewWidth, viewHeight);
+    [self populateLandscapeViews];
+    [self configurePageControlWithRect:CGRectMake(viewWidth / 2, viewHeight - kPageControlViewHeight, 64 * [self.itemViews count], kPageControlViewHeight)];
+#else
     if ([self deviceOrientationIsLandscape]) {
         CGFloat margins = [CTUIUtils getLeftMargin];
         CGFloat viewWidth = (CGFloat)  [[UIScreen mainScreen] bounds].size.width - margins*2;
@@ -132,6 +149,7 @@ static const float kPageControlViewHeight = 30.f;
         [self populateItemViews];
         [self configurePageControlWithRect:CGRectMake(0, viewHeight-(captionHeight), viewWidth, kPageControlViewHeight)];
     }
+#endif
     [self configureSwipeViewWithHeightAdjustment:0];
     [self.swipeView reloadData];
 }
@@ -194,8 +212,10 @@ static const float kPageControlViewHeight = 30.f;
 }
 
 - (void)copyTapped:(NSString *)text {
+#if !TARGET_OS_TV
     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
     pasteboard.string = text;
+#endif
 }
 
 - (void)handleItemViewTapGesture:(UITapGestureRecognizer *)sender {
@@ -206,5 +226,50 @@ static const float kPageControlViewHeight = 30.f;
     [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
 }
+
+#if TARGET_OS_TV
+- (void)handleOnMessageTapGesture:(UITapGestureRecognizer *)sender {
+    NSInteger index = self.swipeView.currentItemIndex;
+    NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
+    [userInfo setObject:[NSNumber numberWithInt:(int)index] forKey:@"index"];
+    [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION
+                                                        object:self.message
+                                                      userInfo:userInfo];
+}
+
+- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context {
+    if ([context.nextFocusedView isDescendantOfView:self]) {
+        return YES;
+    }
+    UIFocusHeading heading = context.focusHeading;
+    if (heading == UIFocusHeadingLeft || heading == UIFocusHeadingRight) {
+        return NO;
+    }
+    return YES;
+}
+
+- (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    for (UIPress *press in presses) {
+        if (press.type == UIPressTypeLeftArrow) {
+            NSInteger prev = self.swipeView.currentItemIndex - 1;
+            if (prev >= 0) {
+                [self.swipeView scrollToItemAtIndex:prev duration:0.3];
+                self.pageControl.currentPage = (int)prev;
+            }
+            return;
+        }
+        if (press.type == UIPressTypeRightArrow) {
+            NSInteger next = self.swipeView.currentItemIndex + 1;
+            if (next < (NSInteger)self.itemViews.count) {
+                [self.swipeView scrollToItemAtIndex:next duration:0.3];
+                self.pageControl.currentPage = (int)next;
+            }
+            return;
+        }
+    }
+    [super pressesBegan:presses withEvent:event];
+}
+#endif
 
 @end
