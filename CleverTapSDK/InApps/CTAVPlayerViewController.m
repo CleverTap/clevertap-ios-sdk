@@ -25,7 +25,10 @@
         _muted = muted;
         _autoplay = autoplay;
         _loopVideo = YES; // Default to looping
-        AVPlayerItem *avPlayerItem = [AVPlayerItem playerItemWithURL:[NSURL URLWithString:self.notification.mediaUrl]];
+        NSString *videoUrlString = ([CTUIUtils isDeviceOrientationLandscape] && self.notification.mediaUrlLandscape)
+            ? self.notification.mediaUrlLandscape
+            : self.notification.mediaUrl;
+        AVPlayerItem *avPlayerItem = [AVPlayerItem playerItemWithURL:[NSURL URLWithString:videoUrlString]];
         self.player = [AVPlayer playerWithPlayerItem:avPlayerItem];
         self.player.muted = muted;
 
@@ -262,6 +265,14 @@ willBeginFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTran
 
 
 - (void)playerViewController:(AVPlayerViewController *)playerViewController
+restoreUserInterfaceForFullScreenExitWithCompletionHandler:(void (^)(BOOL))completionHandler {
+    completionHandler(YES);
+    if (self.autoplay) {
+        [self.player play];
+    }
+}
+
+- (void)playerViewController:(AVPlayerViewController *)playerViewController
 willEndFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [self hideCTAButton];
     self.isFullscreen = NO;
@@ -269,7 +280,9 @@ willEndFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTransi
     [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
         // back to inline — restore gesture on self.view
         [self addOverlayTapToView:self.view];
-        
+        if (self.autoplay) {
+            [self.player play];
+        }
     }];
 }
 

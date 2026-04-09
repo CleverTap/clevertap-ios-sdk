@@ -24,6 +24,7 @@
 @property (nonatomic, copy, readwrite) NSString *contentType;
 @property (nonatomic, copy, readwrite) NSString *landscapeContentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
+@property (nonatomic, copy, readwrite) NSString *mediaUrlLandscape;
 @property (nonatomic, copy, readwrite) NSString *contentDescription;
 @property (nonatomic, copy, readwrite) NSString *landscapeContentDescription;
 
@@ -172,6 +173,8 @@
                 if (![self.landscapeContentType isEqualToString:@"image/gif"] ) {
                     _mediaIsImage = YES;
                 }
+            } else if ([self.landscapeContentType hasPrefix:@"video"]) {
+                self.mediaUrlLandscape = _mediaUrlLandscape;
             }
         }
     }

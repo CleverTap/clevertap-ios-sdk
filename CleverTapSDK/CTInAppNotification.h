@@ -37,6 +37,7 @@
 @property (nonatomic, strong, readonly) NSURL *imageUrlLandscape;
 @property (nonatomic, copy, readonly) NSString *contentType;
 @property (nonatomic, copy, readonly) NSString *mediaUrl;
+@property (nonatomic, copy, readonly) NSString *mediaUrlLandscape;
 @property (nonatomic, readonly, assign) BOOL mediaIsVideo;
 @property (nonatomic, readonly, assign) BOOL mediaIsAudio;
 @property (nonatomic, readonly, assign) BOOL mediaIsImage;

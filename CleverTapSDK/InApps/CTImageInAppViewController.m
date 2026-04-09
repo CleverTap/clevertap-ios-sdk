@@ -112,9 +112,32 @@ static const CGFloat kSpacingConstant = 160.f;
                                  multiplier:multiplier constant:constant] setActive:YES];
 }
 
+- (void)embedPlayerInContainer {
+    // Insert video player below close button and pin it to all edges via Auto Layout.
+    // translatesAutoresizingMaskIntoConstraints is NO on the player's view, so constraints
+    // are required - a frame + autoresizingMask approach would be ignored.
+    // Cross-view constraints are owned by containerView, so they're automatically released
+    // when the XIB reloads and creates a fresh containerView on rotation.
+    UIView *playerView = self.playerController.view;
+    [self.containerView insertSubview:playerView belowSubview:self.closeButton];
+    [NSLayoutConstraint activateConstraints:@[
+        [playerView.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [playerView.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        [playerView.topAnchor constraintEqualToAnchor:self.containerView.topAnchor],
+        [playerView.bottomAnchor constraintEqualToAnchor:self.containerView.bottomAnchor],
+    ]];
+}
+
 - (void)setUpImage {
     // Handle video media
     if (self.notification.mediaIsVideo && self.notification.mediaUrl) {
+        if (self.playerController) {
+            // Player already exists (rotation reloaded the XIB) - re-embed its view into
+            // the refreshed containerView without recreating the player or changing the URL.
+            self.imageView.hidden = YES;
+            [self embedPlayerInContainer];
+            return;
+        }
         self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
                                                                                   muted:YES
                                                                                autoplay:YES];
@@ -128,10 +151,7 @@ static const CGFloat kSpacingConstant = 160.f;
         }
         self.imageView.hidden = YES;
         [self addChildViewController:self.playerController];
-        self.playerController.view.frame = self.containerView.bounds;
-        self.playerController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        // Insert video player below close button instead of adding on top
-        [self.containerView insertSubview:self.playerController.view belowSubview:self.closeButton];
+        [self embedPlayerInContainer];
         [self.playerController didMoveToParentViewController:self];
         return;
     }
