@@ -2,7 +2,7 @@
 #import "CTConstants.h"
 #import "CTPreferences.h"
 #import "CTFileDownloadManager.h"
-#if !CLEVERTAP_NO_INAPP_SUPPORT
+#if !CLEVERTAP_NO_INAPP_SUPPORT && !(TARGET_OS_TV)
 #import <SDWebImage/SDImageCache.h>
 #endif
 
@@ -235,6 +235,7 @@
     
     dispatch_group_t deleteGroup = dispatch_group_create();
     dispatch_queue_t deleteConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+#if !(TARGET_OS_TV)
     SDImageCache *sdImageCache = [SDImageCache sharedImageCache];
     for (NSString *url in urls) {
         dispatch_group_enter(deleteGroup);
@@ -250,6 +251,7 @@
             }
         });
     }
+#endif
     
     dispatch_group_notify(deleteGroup, deleteConcurrentQueue, ^{
         [CTPreferences removeObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_CS_INAPP_ACTIVE_ASSETS]];

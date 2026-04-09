@@ -15,6 +15,10 @@ public class CTAppRatingHelper : NSObject {
 
     @MainActor
     @objc class public func requestRating(completion: @escaping (Bool) -> Void) {
+#if os(tvOS)
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "App rating is not supported on tvOS.")
+        completion(false)
+#else
         CTAppRatingHelper.runSyncMainQueue {
             var presented: Bool = false
             if #available(iOS 14.0, *) {
@@ -25,7 +29,7 @@ public class CTAppRatingHelper : NSObject {
                     completion(presented)
                     return
                 }
-                
+
                 presented = true
                 if #available(iOS 18.0, *) {
                     AppStore.requestReview(in: windowScene)
@@ -42,6 +46,7 @@ public class CTAppRatingHelper : NSObject {
             }
             completion(presented)
         }
+#endif
     }
     
     class private func getSharedApplication() -> UIApplication? {
