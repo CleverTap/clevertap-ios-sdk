@@ -138,6 +138,18 @@
     self.containerView = container;
 }
 
+// MARK: - Orientation
+
+/// PiP manages its own rotation via device orientation notifications and transforms.
+/// Always return the full set of orientations the host app supports so the PiP
+/// window never forces the background content to rotate to a different orientation.
+#if !(TARGET_OS_TV)
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    UIWindow *window = [CTUIUtils getKeyWindow];
+    return [[CTUIUtils getSharedApplication] supportedInterfaceOrientationsForWindow:window];
+}
+#endif
+
 // MARK: - CTInAppPassThroughViewDelegate
 
 /// Override the base class behaviour: for PiP we want background touches to pass
