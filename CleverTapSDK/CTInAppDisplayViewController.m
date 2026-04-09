@@ -370,7 +370,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
-    return nil;
+    return NO;
 #else
     return [CTUIUtils isDeviceOrientationLandscape];
 #endif

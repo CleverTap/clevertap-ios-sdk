@@ -5,8 +5,10 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTAVPlayerViewController.h"
+#if !(TARGET_OS_TV)
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#endif
 
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
@@ -16,7 +18,11 @@
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
 @property (nonatomic, strong) IBOutlet UILabel *bodyLabel;
+#if !(TARGET_OS_TV)
 @property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
+#else
+@property (nonatomic, strong) IBOutlet UIImageView *imageView;
+#endif
 @property (nonatomic, strong) IBOutlet UIView *avPlayerContainerView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
@@ -148,12 +154,16 @@
         self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else if (self.notification.imageData) {
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+#if !(TARGET_OS_TV)
         if ([self.notification.contentType isEqualToString:@"image/gif"] ) {
             SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
             self.imageView.image = gif;
         } else {
             self.imageView.image = [UIImage imageWithData:self.notification.imageData];
         }
+#else
+        self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+#endif
         self.imageView.accessibilityLabel = self.notification.contentDescription;
     }
     

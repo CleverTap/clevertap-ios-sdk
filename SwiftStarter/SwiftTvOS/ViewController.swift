@@ -7,7 +7,8 @@ final class ViewController: UIViewController {
     private let sectionColors: [UIColor] = [
         UIColor(red: 0.15, green: 0.40, blue: 0.80, alpha: 1.0),
         UIColor(red: 0.60, green: 0.20, blue: 0.70, alpha: 1.0),
-        UIColor(red: 0.13, green: 0.55, blue: 0.45, alpha: 1.0)
+        UIColor(red: 0.13, green: 0.55, blue: 0.45, alpha: 1.0),
+        UIColor(red: 0.75, green: 0.35, blue: 0.10, alpha: 1.0)
     ]
     
     private lazy var sections: [Section] = [
@@ -20,6 +21,9 @@ final class ViewController: UIViewController {
             CardItem(title: "Record Product Viewed Event", action: #selector(recordProductViewedEvent)),
             CardItem(title: "Record Charged Event",        action: #selector(recordChargedEvent)),
             CardItem(title: "Record Custom Event",         action: #selector(recordCustomEvent))
+        ]),
+        Section(title: "In-App Notifications", items: [
+            CardItem(title: "Trigger Alert In-App", action: #selector(triggerAlertInApp))
         ]),
         Section(title: "App Inbox", items: [
             CardItem(title: "Show Inbox",   action: #selector(showInbox)),
@@ -187,6 +191,10 @@ final class ViewController: UIViewController {
                ] as [String : Any]
 
         CleverTap.sharedInstance()?.recordEvent("Custom Event", withProps: props)
+    }
+
+    @objc private func triggerAlertInApp() {
+        CleverTap.sharedInstance()?.recordEvent("tesr")
     }
 
     @objc private func showInbox() {

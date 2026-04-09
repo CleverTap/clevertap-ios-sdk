@@ -11,7 +11,6 @@
 #import "CTConstants.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
-#import "CleverTapJSInterface.h"
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CTEventBuilder.h"
@@ -20,8 +19,11 @@
 #import "CleverTapURLDelegate.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+#if !(TARGET_OS_TV)
 #import "CleverTapJSInterface.h"
 #import "CTInAppHTMLViewController.h"
+#import "CleverTapJSInterfacePrivate.h"
+#endif
 #import "CTInterstitialViewController.h"
 #import "CTHalfInterstitialViewController.h"
 #import "CTCoverViewController.h"
@@ -34,7 +36,6 @@
 #import "CleverTap+InAppNotifications.h"
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
-#import "CleverTapJSInterfacePrivate.h"
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
@@ -422,7 +423,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
-    return nil;
+    return NO;
 #else
     return [CTUIUtils isDeviceOrientationLandscape];
 #endif
@@ -476,12 +477,14 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         if (loadError || !imageData) {
             result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
         } else {
+#if !(TARGET_OS_TV)
             if ([contentType isEqualToString:@"image/gif"]) {
                 SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
                 if (gif == nil) {
                     result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
                 }
             }
+#endif
             result.imageData = imageData;
         }
     }
@@ -597,6 +600,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
     switch (notification.inAppType) {
+#if !(TARGET_OS_TV)
         case CTInAppTypeHTML:
             controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
             break;
@@ -615,9 +619,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeFooter:
             controller = [[CTFooterViewController alloc] initWithNotification:notification];
             break;
+#endif
         case CTInAppTypeAlert:
             controller = [[CTAlertViewController alloc] initWithNotification:notification];
             break;
+#if !(TARGET_OS_TV)
         case CTInAppTypeInterstitialImage:
             controller = [[CTInterstitialImageViewController alloc] initWithNotification:notification];
             break;
@@ -637,6 +643,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
                                notification.customTemplateInAppData.templateName];
             }
             break;
+#endif
         default:
             errorString = [NSString stringWithFormat:@"Unhandled notification type: %lu", (unsigned long)notification.inAppType];
             break;

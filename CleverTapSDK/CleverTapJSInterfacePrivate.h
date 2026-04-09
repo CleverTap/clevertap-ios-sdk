@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 
+#if !(TARGET_OS_TV)
 @interface CleverTapJSInterface () {}
 - (instancetype)initWithConfigForInApps:(CleverTapInstanceConfig *)config fromController:(CTInAppDisplayViewController *)controller;
 
@@ -9,3 +10,4 @@
 - (WKUserScript *)versionScript;
 
 @end
+#endif // !(TARGET_OS_TV)
