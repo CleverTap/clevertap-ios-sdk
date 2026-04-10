@@ -102,9 +102,11 @@ static NSDictionary<NSNumber *, NSString *> *_inAppActionTypeTypeToStringMap;
 }
 
 + (NSString *)getXibNameForControllerName:(NSString *)controllerName {
-#if CLEVERTAP_NO_INAPP_SUPPORT || TARGET_OS_TV
+#if CLEVERTAP_NO_INAPP_SUPPORT
     return nil;
-#else    
+#elif TARGET_OS_TV
+    return [controllerName stringByAppendingString:@"~tvOS"];
+#else
     NSMutableString *xib = [NSMutableString stringWithString:controllerName];
     BOOL landscape = [CTUIUtils isDeviceOrientationLandscape];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {

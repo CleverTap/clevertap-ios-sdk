@@ -430,22 +430,22 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)prepareNotification:(CTInAppNotification *)notification withCompletion:(void (^)(void))completionHandler {
-#if !(TARGET_OS_TV)
     if ([NSThread isMainThread]) {
         notification.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
         completionHandler();
         return;
     }
-    
+
     if (notification.imageURL) {
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageURL contentType:notification.contentType];
         [notification setPreparedInAppImage:result.image inAppImageData:result.imageData error:result.error];
     }
+#if !(TARGET_OS_TV)
     if (notification.imageUrlLandscape && notification.hasLandscape) {
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageUrlLandscape contentType:notification.landscapeContentType];
         [notification setPreparedInAppImageLandscape:result.image inAppImageLandscapeData:result.imageData error:result.error];
     }
-    
+
     NSArray *urls = [[self.templatesManager fileArgsURLsForInAppData:notification.customTemplateInAppData] allObjects];
     if (urls.count > 0) {
         [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
@@ -459,9 +459,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         }];
         return;
     }
-    
 #endif
-    
+
     completionHandler();
 }
 
@@ -600,12 +599,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
     switch (notification.inAppType) {
+        case CTInAppTypeInterstitial:
+            controller = [[CTInterstitialViewController alloc] initWithNotification:notification];
+            break;
 #if !(TARGET_OS_TV)
         case CTInAppTypeHTML:
             controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
-            break;
-        case CTInAppTypeInterstitial:
-            controller = [[CTInterstitialViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeHalfInterstitial:
             controller = [[CTHalfInterstitialViewController alloc] initWithNotification:notification];
