@@ -20,6 +20,7 @@ s.ios.public_header_files   = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTa
     'CleverTapSDK/InApps/CTInAppStore.h',
     'CleverTapSDK/CTSwitchUserDelegate.h',
     'CleverTapSDK/InApps/InAppsScheduler/*.h'
+s.tvos.resource_bundle      = {'CleverTapSDK' => ['CleverTapSDK/**/*~tvOS.{xib}']}
 s.tvos.deployment_target    = '9.0'
 s.tvos.source_files         = 'CleverTapSDK/*.{h,m,swift}', 'CleverTapSDK/Encryption/*.{h,m,swift}', 'CleverTapSDK/FileDownload/*.{h,m}', 'CleverTapSDK/ProductConfig/**/*.{h,m}', 'CleverTapSDK/FeatureFlags/**/*.{h,m}', 'CleverTapSDK/ProductExperiences/*.{h,m}', 'CleverTapSDK/Swizzling/*.{h,m}', 'CleverTapSDK/Session/*.{h,m}', 'CleverTapSDK/EventDatabase/*.{h,m}', 'CleverTapSDK/Validation/*.{h,m,swift}', 'CleverTapSDK/Validation/Core/*.{h,m,swift}', 'CleverTapSDK/Validation/Validators/*.{h,m,swift}', 'CleverTapSDK/Profile/*.{h,m,swift}', 'CleverTapSDK/InApps/**/*.{h,m,swift}'
 s.tvos.exclude_files        = 'CleverTapSDK/include/**/*.h', 'CleverTapSDK/CleverTapJSInterface.{h,m}', 'CleverTapSDK/CTContentFetchManager.{h,m}'
