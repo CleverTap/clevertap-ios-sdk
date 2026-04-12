@@ -1,8 +1,8 @@
 #import "CTPiPControlsView.h"
 #import "CTUIUtils.h"
 
-static const CGFloat kPiPControlButtonSizeCollapsed = 20.0;
-static const CGFloat kPiPControlButtonSizeExpanded  = 40.0;
+static const CGFloat kPiPControlButtonSizeCollapsed = 24.0;
+static const CGFloat kPiPControlButtonSizeExpanded  = 48.0;
 static const CGFloat kPiPControlPadding             = 8.0;
 static const CGFloat kPiPRowSpacing                 = 20.0;
 
@@ -13,6 +13,7 @@ static NSString * const kPiPImagePause    = @"ct_pip_pause.png";
 static NSString * const kPiPImageExpand   = @"ct_pip_expand.png";
 static NSString * const kPiPImageCollapse = @"ct_pip_collapse.png";
 static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
+static NSString * const kPiPImageClose   = @"ct_pip_close.png";
 
 @interface CTPiPControlsView ()
 @property (nonatomic, strong) CTPiPConfigModel *config;
@@ -48,7 +49,7 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
 
 - (void)setupButtons {
     // Close — always present
-    UIButton *close = [self makeButtonWithImage:[self closeImage]];
+    UIButton *close = [self makeButtonWithImage:[CTUIUtils getImageForName:kPiPImageClose]];
     [close addTarget:self action:@selector(closeButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     close.accessibilityLabel = @"Close";
     [self addSubview:close];
@@ -282,21 +283,6 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
 
 - (void)setImage:(UIImage *)image forButton:(UIButton *)btn {
     [self imageViewForButton:btn].image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-}
-
-- (UIImage *)closeImage {
-    if (@available(iOS 13.0, *)) {
-        return [UIImage systemImageNamed:@"xmark.circle.fill"];
-    }
-    CGSize size = CGSizeMake(kPiPControlButtonSizeCollapsed, kPiPControlButtonSizeCollapsed);
-    UIGraphicsBeginImageContextWithOptions(size, NO, 0);
-    NSAttributedString *x = [[NSAttributedString alloc] initWithString:@"✕"
-        attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:18 weight:UIFontWeightMedium],
-                     NSForegroundColorAttributeName: UIColor.whiteColor}];
-    [x drawAtPoint:CGPointMake(13, 13)];
-    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return img;
 }
 
 @end
