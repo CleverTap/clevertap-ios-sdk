@@ -1,4 +1,5 @@
 #import "CTPiPMediaView.h"
+#import "CTConstants.h"
 #import <AVFoundation/AVFoundation.h>
 #import <SDWebImage/SDAnimatedImageView.h>
 #import <SDWebImage/UIImageView+WebCache.h>
@@ -16,9 +17,11 @@
 @property (nonatomic, strong) AVPlayerLayer *playerLayer;
 @property (nonatomic, strong) AVPlayerItem *playerItem;
 @property (nonatomic, strong) UIImageView *posterImageView;
+@property (nonatomic, strong) UIActivityIndicatorView *spinner;
 @property (nonatomic, strong) id playerEndObserver;
 @property (nonatomic, strong) id playerFailObserver;
 @property (nonatomic, assign) BOOL playerItemStatusObserved;
+@property (nonatomic, assign) BOOL hasSignaledReady;
 
 @property (nonatomic, readwrite) BOOL isMuted;
 @end
@@ -64,6 +67,8 @@
 }
 
 - (void)notifyReadyToShow {
+    if (self.hasSignaledReady) return;
+    self.hasSignaledReady = YES;
     if ([self.delegate respondsToSelector:@selector(pipMediaIsReadyToShow)]) {
         [self.delegate pipMediaIsReadyToShow];
     }
@@ -158,23 +163,35 @@
         [poster sd_setImageWithURL:self.media.posterURL];
     }
 
-    // Configure audio session to avoid interrupting host app
+    // Spinner shown during initial load and while the buffer is empty.
+    UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc]
+                                        initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    spinner.hidesWhenStopped = YES;
+    spinner.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:spinner];
+    [NSLayoutConstraint activateConstraints:@[
+        [spinner.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
+        [spinner.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+    ]];
+    [spinner startAnimating];
+    self.spinner = spinner;
+
     NSError *audioError = nil;
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:&audioError];
 
-    AVPlayerItem *item = [AVPlayerItem playerItemWithURL:self.media.url];
-    AVPlayer *player = [AVPlayer playerWithPlayerItem:item];
+    AVPlayer *player = [AVPlayer new];
     player.muted = YES;
     self.isMuted = YES;
     self.player = player;
-    self.playerItem = item;
 
     AVPlayerLayer *layer = [AVPlayerLayer playerLayerWithPlayer:player];
     layer.videoGravity = AVLayerVideoGravityResizeAspect;
     [self.layer insertSublayer:layer above:poster.layer];
     self.playerLayer = layer;
 
-    // Observe item status for load failures (bad URL, format errors, etc.)
+    AVPlayerItem *item = [AVPlayerItem playerItemWithURL:self.media.url];
+    self.playerItem = item;
+
     [item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:NULL];
     self.playerItemStatusObserved = YES;
 
@@ -190,15 +207,19 @@
         [weakSelf.player play];
     }];
 
-    // Show fallback image on mid-stream failure
+    // Mid-stream failure (e.g. internet drops while playing) — show spinner.
     self.playerFailObserver = [[NSNotificationCenter defaultCenter]
         addObserverForName:AVPlayerItemFailedToPlayToEndTimeNotification
                     object:item
                      queue:NSOperationQueue.mainQueue
                 usingBlock:^(NSNotification *note) {
-        [weakSelf showVideoFallback];
+        NSError *err = note.userInfo[AVPlayerItemFailedToPlayToEndTimeErrorKey];
+        CleverTapLogStaticDebug(@"%@: PiP AVPlayerItem mid-stream failure — %@ %ld",
+                                self, err.domain, (long)err.code);
+        [weakSelf.spinner startAnimating];
     }];
 
+    [player replaceCurrentItemWithPlayerItem:item];
     [player play];
 }
 
@@ -206,20 +227,29 @@
                       ofObject:(id)object
                         change:(NSDictionary<NSKeyValueChangeKey,id> *)change
                        context:(void *)context {
-    if ([keyPath isEqualToString:@"status"] && object == self.playerItem) {
+    if (object != self.playerItem) {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"status"]) {
         AVPlayerItemStatus status = (AVPlayerItemStatus)[change[NSKeyValueChangeNewKey] integerValue];
         if (status == AVPlayerItemStatusReadyToPlay) {
             dispatch_async(dispatch_get_main_queue(), ^{
+                [self.spinner stopAnimating];
                 [self notifyReadyToShow];
+                [self.player play];
             });
         } else if (status == AVPlayerItemStatusFailed) {
+            NSError *error = self.playerItem.error;
+            CleverTapLogStaticDebug(@"%@: PiP AVPlayerItem failed — %@ %ld: %@",
+                                    self, error.domain, (long)error.code, error.localizedDescription);
             dispatch_async(dispatch_get_main_queue(), ^{
+                [self.spinner stopAnimating];
                 [self showVideoFallback];
             });
         }
-        return;
     }
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
 - (void)showVideoFallback {
