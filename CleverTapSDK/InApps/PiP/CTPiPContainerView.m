@@ -3,7 +3,7 @@
 static const NSTimeInterval kPiPAutoHideDelay = 3.0;
 static const CGFloat kPiPMaxHeightPercent = 40.0;
 
-@interface CTPiPContainerView () <CTPiPControlsViewDelegate, CTPiPCTAOverlayViewDelegate>
+@interface CTPiPContainerView () <CTPiPControlsViewDelegate, CTPiPCTAOverlayViewDelegate, CTPiPMediaViewDelegate>
 @property (nonatomic, strong) CTPiPConfigModel *config;
 @property (nonatomic, assign) BOOL showClose;
 @property (nonatomic, strong, readwrite) CTPiPMediaView *mediaView;
@@ -31,6 +31,7 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
         _showClose = showClose;
         _mediaView = mediaView;
         _isVideoType = (mediaView.contentType == CTPiPContentTypeVideo);
+        mediaView.delegate = self;
         [self setupAppearance];
         [self setupSubviews];
         if (config.controls.drag) {
@@ -191,7 +192,20 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
     self.parentBounds = bounds;
     self.pipSafeAreaInsets = insets;
 
-    if (self.isExpanded || CGRectIsEmpty(bounds)) { return; }
+    if (CGRectIsEmpty(bounds)) { return; }
+
+    if (self.isExpanded) {
+        // When expanded (full-screen), update frame to fill the new bounds after rotation.
+        self.frame = bounds;
+        // Also update collapsedFrame so collapsing after rotation lands at the correct position.
+        CGSize newSize = [self pipSizeForBounds:bounds];
+        CGPoint origin = [self originForPosition:self.currentPosition
+                                         pipSize:newSize
+                                          bounds:bounds
+                                  safeAreaInsets:insets];
+        self.collapsedFrame = CGRectMake(origin.x, origin.y, newSize.width, newSize.height);
+        return;
+    }
 
     CGSize newSize = [self pipSizeForBounds:bounds];
     CGPoint origin = [self originForPosition:self.currentPosition
@@ -431,13 +445,28 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
         [self showControlsAndScheduleAutoHide];
     }
 
+    BOOL hasTransform = !CGAffineTransformIsIdentity(self.transform);
     [UIView animateWithDuration:0.35
                           delay:0
          usingSpringWithDamping:0.85
           initialSpringVelocity:0
                         options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
-        self.frame = frame;
+        if (hasTransform) {
+            // Never set self.frame on a transformed view — use bounds + center instead.
+            // collapsedFrame for landscape (±90°) stores the bounding box, so its
+            // width/height are the pip bounds height/width (swapped). Invert the swap.
+            BOOL isLandscape = (self.currentOrientation == UIDeviceOrientationLandscapeLeft ||
+                                self.currentOrientation == UIDeviceOrientationLandscapeRight);
+            if (isLandscape) {
+                self.bounds = CGRectMake(0, 0, frame.size.height, frame.size.width);
+            } else {
+                self.bounds = CGRectMake(0, 0, frame.size.width, frame.size.height);
+            }
+            self.center = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame));
+        } else {
+            self.frame = frame;
+        }
         self.layer.cornerRadius = self.config.cornerRadius;
     } completion:nil];
 }
@@ -447,8 +476,6 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
 - (void)applyDeviceOrientation:(UIDeviceOrientation)orientation
                   windowBounds:(CGRect)windowBounds
                safeAreaInsets:(UIEdgeInsets)portraitInsets {
-    if (self.isExpanded) { return; }
-
     // Store orientation first — portraitCenterForPosition: reads this during snap after drag.
     self.currentOrientation = orientation;
 
@@ -478,6 +505,44 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
         default:
             transform = CGAffineTransformIdentity;
             break;
+    }
+
+    if (self.isExpanded) {
+        // When expanded (full-screen), fill the entire visible screen for the new orientation.
+        if (isLandscape) {
+            // Landscape visual size: portrait width/height are swapped.
+            self.bounds = CGRectMake(0, 0, wH, wW);
+            self.transform = transform;
+            self.center = CGPointMake(wW / 2.0, wH / 2.0);
+        } else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
+            self.bounds = CGRectMake(0, 0, wW, wH);
+            self.transform = transform;
+            self.center = CGPointMake(wW / 2.0, wH / 2.0);
+        } else {
+            self.transform = CGAffineTransformIdentity;
+            self.frame = windowBounds;
+        }
+        self.parentBounds = windowBounds;
+        self.pipSafeAreaInsets = portraitInsets;
+        // Recalculate collapsedFrame for the new orientation so that collapsing after
+        // rotation restores the pip to the correct position/size.
+        // portraitCenterForPosition: uses the properties we just updated above.
+        CGPoint collapseCenter = [self portraitCenterForPosition:self.currentPosition];
+        if (isLandscape) {
+            // Landscape pip size is computed against landscape bounds (lW=wH, lH=wW).
+            CGSize lSize = [self pipSizeForBounds:CGRectMake(0, 0, wH, wW)];
+            // After ±90° rotation the view's bounds are (lSize.width x lSize.height),
+            // so self.frame (bounding box) has dimensions swapped: width=lSize.height, height=lSize.width.
+            self.collapsedFrame = CGRectMake(collapseCenter.x - lSize.height / 2.0,
+                                             collapseCenter.y - lSize.width  / 2.0,
+                                             lSize.height, lSize.width);
+        } else {
+            CGSize pipSize = [self pipSizeForBounds:windowBounds];
+            self.collapsedFrame = CGRectMake(collapseCenter.x - pipSize.width  / 2.0,
+                                             collapseCenter.y - pipSize.height / 2.0,
+                                             pipSize.width, pipSize.height);
+        }
+        return;
     }
 
     // --- 2. PiP size ---
@@ -614,6 +679,22 @@ static const CGFloat kPiPMaxHeightPercent = 40.0;
 
 - (void)pipControlsDidTapDeeplink {
     [self.delegate pipContainerDidTapCTA];
+}
+
+// MARK: - CTPiPMediaViewDelegate
+
+- (void)pipMediaIsReadyToShow {
+    [self.delegate pipContainerIsReadyToShow];
+}
+
+- (void)pipMediaDidShowVideoFallback {
+    // Video failed — switch to image control layout (correct button positions,
+    // mute/play-pause hidden) since a static image is now displayed.
+    [self.controlsView switchToImageLayout];
+}
+
+- (void)pipMediaDidFailToLoad {
+    [self.delegate pipContainerDidFailToLoad];
 }
 
 // MARK: - CTPiPCTAOverlayViewDelegate

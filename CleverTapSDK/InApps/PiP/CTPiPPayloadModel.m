@@ -160,6 +160,7 @@
 @property (nonatomic, strong, nullable, readwrite) NSDictionary *kv;
 @property (nonatomic, readwrite) BOOL close;
 @property (nonatomic, strong, nullable, readwrite) NSDictionary *rawJSON;
+@property (nonatomic, copy, nullable, readwrite) NSString *c2a;
 @end
 
 @implementation CTPiPOnClickModel
@@ -185,6 +186,12 @@
         model.kv = [kv isKindOfClass:[NSDictionary class]] ? kv : nil;
         model.close = [json[@"close"] boolValue];
         model.rawJSON = json;
+        id rawC2A = json[@"c2a"];
+        if ([rawC2A isKindOfClass:[NSString class]] && [((NSString *)rawC2A) length] > 0) {
+            model.c2a = (NSString *)rawC2A;
+        } else {
+            model.c2a = nil;
+        }
     } else {
         model.type = CTPiPOnClickActionTypeUnknown;
     }

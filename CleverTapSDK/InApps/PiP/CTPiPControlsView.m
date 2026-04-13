@@ -1,10 +1,11 @@
 #import "CTPiPControlsView.h"
 #import "CTUIUtils.h"
 
-static const CGFloat kPiPControlButtonSizeCollapsed = 20.0;
-static const CGFloat kPiPControlButtonSizeExpanded  = 40.0;
+static const CGFloat kPiPControlButtonSizeCollapsed = 24.0;
+static const CGFloat kPiPControlButtonSizeExpanded  = 48.0;
 static const CGFloat kPiPControlPadding             = 8.0;
-static const CGFloat kPiPRowSpacing                 = 20.0;
+static const CGFloat kPiPRowSpacingCollapsed        = 8.0;
+static const CGFloat kPiPRowSpacingExpanded         = 16.0;
 
 static NSString * const kPiPImageMute     = @"ct_pip_mute.png";
 static NSString * const kPiPImageSpeaker  = @"ct_pip_speaker.png";
@@ -13,6 +14,7 @@ static NSString * const kPiPImagePause    = @"ct_pip_pause.png";
 static NSString * const kPiPImageExpand   = @"ct_pip_expand.png";
 static NSString * const kPiPImageCollapse = @"ct_pip_collapse.png";
 static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
+static NSString * const kPiPImageClose   = @"ct_pip_close.png";
 
 @interface CTPiPControlsView ()
 @property (nonatomic, strong) CTPiPConfigModel *config;
@@ -48,7 +50,7 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
 
 - (void)setupButtons {
     // Close — always present
-    UIButton *close = [self makeButtonWithImage:[self closeImage]];
+    UIButton *close = [self makeButtonWithImage:[CTUIUtils getImageForName:kPiPImageClose]];
     [close addTarget:self action:@selector(closeButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     close.accessibilityLabel = @"Close";
     [self addSubview:close];
@@ -72,12 +74,11 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
         self.muteButton = btn;
     }
 
-    // Play/Pause — video only, hidden in collapsed state
+    // Play/Pause — video only, centred in both collapsed and expanded
     if (self.isVideoType && self.config.controls.playPause) {
         UIButton *btn = [self makeButtonWithImage:[CTUIUtils getImageForName:kPiPImagePause]];
         [btn addTarget:self action:@selector(playPauseButtonTapped) forControlEvents:UIControlEventTouchUpInside];
         btn.accessibilityLabel = @"Pause";
-        btn.hidden = YES; // shown only when expanded
         [self addSubview:btn];
         self.playPauseButton = btn;
     }
@@ -148,76 +149,93 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
     btn.layer.cornerRadius = s / 2.0;
 }
 
-/// Image/GIF — same layout for both collapsed and expanded.
-/// Close: top-right | Expand/Collapse: bottom-right | Deeplink: bottom-left
+/// Image/GIF — Close: top-right | Bottom-right row: deeplink → expand/collapse
 - (void)layoutImageGIF {
     UIEdgeInsets safe = self.safeAreaInsets;
-    CGFloat p = kPiPControlPadding;
-    CGFloat s = [self buttonSize];
-    CGFloat w = self.bounds.size.width;
-    CGFloat h = self.bounds.size.height;
+    CGFloat p       = kPiPControlPadding;
+    CGFloat s       = [self buttonSize];
+    CGFloat spacing = self.isExpanded ? kPiPRowSpacingExpanded : kPiPRowSpacingCollapsed;
+    CGFloat w       = self.bounds.size.width;
 
-    CGFloat topY    = safe.top + p;
-    CGFloat bottomY = h - safe.bottom - s - p;
-    CGFloat leftX   = safe.left + p;
-    CGFloat rightX  = w - safe.right - s - p;
-
-    if (self.closeButton)          [self placeButton:self.closeButton          x:rightX y:topY];
-    if (self.expandCollapseButton) [self placeButton:self.expandCollapseButton x:rightX y:bottomY];
-    if (self.deeplinkButton)       [self placeButton:self.deeplinkButton       x:leftX  y:bottomY];
-}
-
-/// Video collapsed: Close: top-right | Expand: bottom-right | Deeplink: top-left | Mute: bottom-left
-- (void)layoutVideoCollapsed {
-    UIEdgeInsets safe = self.safeAreaInsets;
-    CGFloat p = kPiPControlPadding;
-    CGFloat s = [self buttonSize];
-    CGFloat w = self.bounds.size.width;
-    CGFloat h = self.bounds.size.height;
-
-    CGFloat topY    = safe.top + p;
-    CGFloat bottomY = h - safe.bottom - s - p;
-    CGFloat leftX   = safe.left + p;
-    CGFloat rightX  = w - safe.right - s - p;
-
-    if (self.closeButton)          [self placeButton:self.closeButton          x:rightX y:topY];
-    if (self.expandCollapseButton) [self placeButton:self.expandCollapseButton x:rightX y:bottomY];
-    if (self.deeplinkButton)       [self placeButton:self.deeplinkButton       x:leftX  y:topY];
-    if (self.muteButton)           [self placeButton:self.muteButton           x:leftX  y:bottomY];
-    if (self.playPauseButton)      self.playPauseButton.hidden = YES;
-}
-
-/// Video expanded: Close: top-right | Bottom-center row: [deeplink,] mute, play, expand
-- (void)layoutVideoExpanded {
-    UIEdgeInsets safe = self.safeAreaInsets;
-    CGFloat p = kPiPControlPadding;
-    CGFloat s = [self buttonSize];
-    CGFloat w = self.bounds.size.width;
-    CGFloat h = self.bounds.size.height;
-
-    // Close — top-right
     if (self.closeButton) {
         [self placeButton:self.closeButton x:w - safe.right - s - p y:safe.top + p];
     }
 
-    // Bottom-center row: [deeplink, mute, play, expand]
-    NSMutableArray<UIButton *> *rowButtons = [NSMutableArray array];
-    if (self.deeplinkButton)       [rowButtons addObject:self.deeplinkButton];
-    if (self.muteButton)           [rowButtons addObject:self.muteButton];
-    if (self.playPauseButton)      [rowButtons addObject:self.playPauseButton];
-    if (self.expandCollapseButton) [rowButtons addObject:self.expandCollapseButton];
+    [self layoutBottomRightRowWithSpacing:spacing buttonSize:s safeInsets:safe];
+}
 
-    NSInteger count = rowButtons.count;
+/// Video collapsed:
+/// - Close: top-right
+/// - Play/Pause: centre
+/// - Bottom-right row (8pt gap, left→right): deeplink → mute → expand/collapse
+- (void)layoutVideoCollapsed {
+    UIEdgeInsets safe = self.safeAreaInsets;
+    CGFloat p       = kPiPControlPadding;
+    CGFloat s       = [self buttonSize];
+    CGFloat spacing = kPiPRowSpacingCollapsed;
+    CGFloat w       = self.bounds.size.width;
+    CGFloat h       = self.bounds.size.height;
+
+    if (self.closeButton) {
+        [self placeButton:self.closeButton x:w - safe.right - s - p y:safe.top + p];
+    }
+
+    if (self.playPauseButton) {
+        self.playPauseButton.hidden = NO;
+        [self placeButton:self.playPauseButton x:(w - s) / 2.0 y:(h - s) / 2.0];
+    }
+
+    [self layoutBottomRightRowWithSpacing:spacing buttonSize:s safeInsets:safe];
+}
+
+/// Video expanded:
+/// - Close: top-right
+/// - Play/Pause: centre
+/// - Bottom-right row (16pt gap, left→right): deeplink → mute → expand/collapse
+- (void)layoutVideoExpanded {
+    UIEdgeInsets safe = self.safeAreaInsets;
+    CGFloat p       = kPiPControlPadding;
+    CGFloat s       = [self buttonSize];
+    CGFloat spacing = kPiPRowSpacingExpanded;
+    CGFloat w       = self.bounds.size.width;
+    CGFloat h       = self.bounds.size.height;
+
+    if (self.closeButton) {
+        [self placeButton:self.closeButton x:w - safe.right - s - p y:safe.top + p];
+    }
+
+    if (self.playPauseButton) {
+        self.playPauseButton.hidden = NO;
+        [self placeButton:self.playPauseButton x:(w - s) / 2.0 y:(h - s) / 2.0];
+    }
+
+    [self layoutBottomRightRowWithSpacing:spacing buttonSize:s safeInsets:safe];
+}
+
+/// Places the additional buttons (deeplink → mute → expand/collapse) anchored to the
+/// bottom-right corner, growing leftward with the given gap between each button.
+- (void)layoutBottomRightRowWithSpacing:(CGFloat)spacing
+                             buttonSize:(CGFloat)s
+                             safeInsets:(UIEdgeInsets)safe {
+    // Only include buttons that are currently visible — respects hidden state set
+    // by switchToImageLayout (e.g. mute is hidden when video falls back to image).
+    NSMutableArray<UIButton *> *row = [NSMutableArray array];
+    if (self.deeplinkButton       && !self.deeplinkButton.hidden)       [row addObject:self.deeplinkButton];
+    if (self.muteButton           && !self.muteButton.hidden)           [row addObject:self.muteButton];
+    if (self.expandCollapseButton && !self.expandCollapseButton.hidden) [row addObject:self.expandCollapseButton];
+
+    NSInteger count = row.count;
     if (count == 0) return;
 
-    CGFloat totalWidth = count * s + (count - 1) * kPiPRowSpacing;
-    CGFloat startX = (w - totalWidth) / 2.0;
-    CGFloat rowY = h - safe.bottom - s - p;
+    CGFloat w          = self.bounds.size.width;
+    CGFloat h          = self.bounds.size.height;
+    CGFloat rowY       = h - safe.bottom - s - kPiPControlPadding;
+    CGFloat rightEdge  = w - safe.right - kPiPControlPadding;
 
+    // i=0 → leftmost (deeplink), i=count-1 → rightmost (expand/collapse)
     for (NSInteger i = 0; i < count; i++) {
-        UIButton *btn = rowButtons[i];
-        btn.hidden = NO;
-        [self placeButton:btn x:startX + i * (s + kPiPRowSpacing) y:rowY];
+        CGFloat x = rightEdge - (count - i) * s - (count - i - 1) * spacing;
+        [self placeButton:row[i] x:x y:rowY];
     }
 }
 
@@ -266,6 +284,14 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
     self.closeButton.hidden = !visible;
 }
 
+- (void)switchToImageLayout {
+    self.isVideoType = NO;
+    self.muteButton.hidden = YES;
+    self.playPauseButton.hidden = YES;
+    [self setNeedsLayout];
+    [self layoutIfNeeded];
+}
+
 // MARK: - Helpers
 
 - (UIImageView *)imageViewForButton:(UIButton *)btn {
@@ -274,21 +300,6 @@ static NSString * const kPiPImageDeeplink = @"ct_pip_deeplink.png";
 
 - (void)setImage:(UIImage *)image forButton:(UIButton *)btn {
     [self imageViewForButton:btn].image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-}
-
-- (UIImage *)closeImage {
-    if (@available(iOS 13.0, *)) {
-        return [UIImage systemImageNamed:@"xmark.circle.fill"];
-    }
-    CGSize size = CGSizeMake(kPiPControlButtonSizeCollapsed, kPiPControlButtonSizeCollapsed);
-    UIGraphicsBeginImageContextWithOptions(size, NO, 0);
-    NSAttributedString *x = [[NSAttributedString alloc] initWithString:@"✕"
-        attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:18 weight:UIFontWeightMedium],
-                     NSForegroundColorAttributeName: UIColor.whiteColor}];
-    [x drawAtPoint:CGPointMake(13, 13)];
-    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return img;
 }
 
 @end

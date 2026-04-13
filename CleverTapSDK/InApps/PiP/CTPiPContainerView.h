@@ -12,6 +12,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pipContainerDidTapMute;
 - (void)pipContainerDidTapPlayPause;
 - (void)pipContainerDidToggleExpand:(BOOL)isExpanded;
+/// Called when media is ready to display. PiP should animate in now.
+- (void)pipContainerIsReadyToShow;
+/// Called when all media (video + fallback) fails to load. PiP should not be shown.
+- (void)pipContainerDidFailToLoad;
 @end
 
 /// Draggable PiP floating container. Manages layout, border/radius, drag + 9-point snap,
