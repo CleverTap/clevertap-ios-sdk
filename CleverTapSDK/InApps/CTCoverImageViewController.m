@@ -26,8 +26,12 @@
     [super layoutNotification];
 }
 
+#if !(TARGET_OS_TV)
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+    // Push closeButton below the status bar on iPhone using safe area / topLayoutGuide.
+    // Not needed on tvOS — closeButton position is set frame-based in the base class
+    // viewWillLayoutSubviews (15pt from top-right corner of the full-screen card).
     CGFloat topLength;
     if (@available(iOS 11.0, *)) {
         topLength = self.view.safeAreaInsets.top;
@@ -43,6 +47,7 @@
                                   attribute:NSLayoutAttributeTop
                                  multiplier:1.0 constant:topLength] setActive:YES];
 }
+#endif
 
 
 @end

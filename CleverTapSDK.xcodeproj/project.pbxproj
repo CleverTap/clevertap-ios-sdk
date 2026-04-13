@@ -392,6 +392,12 @@
 		5853275C2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */; };
 		5853275E2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */; };
 		5853275F2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */; };
+		585327632F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */; };
+		585327642F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */; };
+		585327652F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */; };
+		585327662F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */; };
+		585327672F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */; };
+		585327682F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */; };
 		6A11D83A2A8FC71F007F5D21 /* CTImpressionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A11D8382A8FC71F007F5D21 /* CTImpressionManager.h */; };
 		6A11D83B2A8FC71F007F5D21 /* CTImpressionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A11D8392A8FC71F007F5D21 /* CTImpressionManager.m */; };
 		6A2E0B9129CCCC8600FCEA5F /* ContentMergerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E0B9029CCCC8500FCEA5F /* ContentMergerTest.m */; };
@@ -1006,6 +1012,9 @@
 		585327552F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHeaderViewController~tvOS.xib"; sourceTree = "<group>"; };
 		5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~tvOS.xib"; sourceTree = "<group>"; };
 		5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverImageViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~tvOS.xib"; sourceTree = "<group>"; };
 		5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shared_CleverTapSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A11D8382A8FC71F007F5D21 /* CTImpressionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImpressionManager.h; sourceTree = "<group>"; };
 		6A11D8392A8FC71F007F5D21 /* CTImpressionManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImpressionManager.m; sourceTree = "<group>"; };
@@ -1543,6 +1552,9 @@
 		49F9E6BA2552E97000EF2E5C /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */,
+				585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */,
+				585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */,
 				5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */,
 				5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */,
 				585327542F8CC40000F0C75C /* CTFooterViewController~tvOS.xib */,
@@ -2631,6 +2643,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				585327582F8CC40000F0C75C /* CTFooterViewController~tvOS.xib in Resources */,
+				585327632F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */,
+				585327642F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */,
+				585327652F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */,
 				585327592F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib in Resources */,
 				5853275E2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */,
 				585327532F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib in Resources */,
@@ -2716,6 +2731,9 @@
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
 				5853275F2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */,
+				585327662F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */,
+				585327672F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */,
+				585327682F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */,
 				07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,
 				07B9453D219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib in Resources */,
 				070229A9220831CB0093CA41 /* ct_default_video.png in Resources */,

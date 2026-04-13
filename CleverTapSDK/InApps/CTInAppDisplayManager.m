@@ -622,7 +622,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeAlert:
             controller = [[CTAlertViewController alloc] initWithNotification:notification];
             break;
-#if !(TARGET_OS_TV)
         case CTInAppTypeInterstitialImage:
             controller = [[CTInterstitialImageViewController alloc] initWithNotification:notification];
             break;
@@ -632,6 +631,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
+#if !(TARGET_OS_TV)
         case CTInAppTypeCustom:
             currentlyDisplayingNotification = notification;
             if (![self.templatesManager presentNotification:notification
