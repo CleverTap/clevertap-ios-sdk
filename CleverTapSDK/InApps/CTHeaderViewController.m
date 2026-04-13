@@ -23,6 +23,17 @@
     [super layoutNotification];
 }
 
+#if TARGET_OS_TV
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    // Frame-based layout: full-width bar pinned to top of the 1920x1080 screen.
+    CGFloat screenW = [UIScreen mainScreen].bounds.size.width;
+    self.containerView.frame = CGRectMake(0, 0, screenW, 200.0f);
+}
+
+#else
+
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     CGFloat topLength;
@@ -39,6 +50,8 @@
                                      toItem:self.view attribute:NSLayoutAttributeTop
                                  multiplier:1.0 constant:topLength] setActive:YES];
 }
+
+#endif
 
 
 @end
