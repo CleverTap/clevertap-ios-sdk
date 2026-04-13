@@ -412,6 +412,23 @@ typedef enum {
     } completion:nil];
 }
 
+- (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    // Intercept the Menu button at the *began* phase.
+    // If we call super here, UIKit schedules its default "back navigation"
+    // action before pressesEnded: ever fires — causing the app to navigate
+    // back while our in-app banner stays on screen.  Swallowing the event
+    // here prevents that; we act on it in pressesEnded: instead.
+    NSMutableSet *forwardPresses = [NSMutableSet set];
+    for (UIPress *press in presses) {
+        if (press.type != UIPressTypeMenu) {
+            [forwardPresses addObject:press];
+        }
+    }
+    if (forwardPresses.count > 0) {
+        [super pressesBegan:forwardPresses withEvent:event];
+    }
+}
+
 - (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
     for (UIPress *press in presses) {
         if (press.type == UIPressTypeMenu) {
@@ -449,7 +466,16 @@ typedef enum {
     self.window.backgroundColor = [UIColor clearColor];
     self.window.windowLevel = UIWindowLevelNormal;
     self.window.rootViewController = self;
+#if TARGET_OS_TV
+    // Must be the key window so that remote button presses (Menu, Select, …)
+    // are delivered to this window's responder chain rather than the app's
+    // original key window.  Save the previous key window so hideFromWindow:
+    // (base class) can restore it on dismiss.
+    self.previousKeyWindow = [CTUIUtils getKeyWindow];
+    [self.window makeKeyAndVisible];
+#else
     [self.window setHidden:NO];
+#endif
     
     void (^completionBlock)(void) = ^ {
         if (self.delegate) {

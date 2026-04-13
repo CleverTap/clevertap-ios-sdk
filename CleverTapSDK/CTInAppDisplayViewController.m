@@ -29,9 +29,6 @@
 
 @property (nonatomic, assign) BOOL waitingForSceneWindow;
 @property (nonatomic, assign) BOOL animated;
-#if TARGET_OS_TV
-@property (nonatomic, weak) UIWindow *previousKeyWindow;
-#endif
 
 @end
 
