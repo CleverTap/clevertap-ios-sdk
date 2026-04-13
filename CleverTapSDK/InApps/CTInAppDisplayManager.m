@@ -606,13 +606,13 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeHTML:
             controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
             break;
+#endif
         case CTInAppTypeHalfInterstitial:
             controller = [[CTHalfInterstitialViewController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCover:
             controller = [[CTCoverViewController alloc] initWithNotification:notification];
             break;
-#endif
         case CTInAppTypeHeader:
             controller = [[CTHeaderViewController alloc] initWithNotification:notification];
             break;

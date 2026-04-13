@@ -35,6 +35,7 @@
     [self layoutNotification];
 }
 
+#if !(TARGET_OS_TV)
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
@@ -54,17 +55,75 @@
                                      multiplier:1.0 constant:topLength] setActive:YES];
     }
 }
+#endif
+
+#if TARGET_OS_TV
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    // Cover is full-screen on tvOS — force the frame every layout pass so Auto Layout can't override.
+    CGFloat screenW = [UIScreen mainScreen].bounds.size.width;   // 1920
+    CGFloat screenH = [UIScreen mainScreen].bounds.size.height;  // 1080
+    self.containerView.frame = CGRectMake(0, 0, screenW, screenH);
+    // Close button: top-right corner, 15pt inset from each edge
+    self.closeButton.frame = CGRectMake(screenW - 15.0f - 44.0f, 15.0f, 44.0f, 44.0f);
+}
+
+- (BOOL)canBecomeFocused {
+    return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+      withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
+    [coordinator addCoordinatedAnimations:^{
+        context.nextFocusedView.transform = CGAffineTransformMakeScale(1.1, 1.1);
+    } completion:nil];
+    [coordinator addCoordinatedAnimations:^{
+        context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+    } completion:nil];
+}
+
+- (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    // Select press is handled natively by buttons via UIControlEventPrimaryActionTriggered.
+    // Only handle Menu button here for dismiss.
+    for (UIPress *press in presses) {
+        if (press.type == UIPressTypeMenu) {
+            [self tappedDismiss];
+            return;
+        }
+    }
+    [super pressesEnded:presses withEvent:event];
+}
+
+#endif
 
 
 #pragma mark - Setup Notification
 
 - (void)layoutNotification {
-    
+
     self.view.backgroundColor = [UIColor clearColor];
-    
+
     // UIView container which holds all other subviews
     self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
-    
+
+#if TARGET_OS_TV
+    // Deactivate all XIB constraints on root view that involve containerView or closeButton,
+    // then switch both to frame-based layout. viewWillLayoutSubviews re-applies the frame on
+    // every layout pass so Auto Layout can never claw back control.
+    NSMutableArray *toDeactivate = [NSMutableArray array];
+    for (NSLayoutConstraint *c in self.view.constraints) {
+        if (c.firstItem == self.containerView || c.secondItem == self.containerView ||
+            c.firstItem == self.closeButton   || c.secondItem == self.closeButton) {
+            [toDeactivate addObject:c];
+        }
+    }
+    [NSLayoutConstraint deactivateConstraints:toDeactivate];
+    self.containerView.translatesAutoresizingMaskIntoConstraints = YES;
+    self.closeButton.translatesAutoresizingMaskIntoConstraints = YES;
+    self.containerView.clipsToBounds = YES;
+#endif
+
     self.closeButton.hidden = !self.notification.showCloseButton;
     
     // set image
@@ -111,20 +170,39 @@
             self.secondButton = [self setupViewForButton:self.secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
             [self.secondButton setHidden:YES];
+#if TARGET_OS_TV
+            // tvOS: always collapse width so firstButton fills the full buttons container width.
+            [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
+                                          attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                             toItem:nil attribute:NSLayoutAttributeNotAnAttribute
+                                         multiplier:1 constant:0] setActive:YES];
+#else
             if ([self deviceOrientationIsLandscape]) {
                 [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
                                               attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                                  toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                              multiplier:1 constant:0] setActive:YES];
-                
             } else {
                 [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
                                               attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                                  toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                              multiplier:1 constant:0] setActive:YES];
             }
+#endif
         }
     }
+#if TARGET_OS_TV
+    // On tvOS, UIButton fires UIControlEventPrimaryActionTriggered on Select press.
+    // setupViewForButton: registers touchUpInside which doesn't fire on tvOS.
+    if (!self.firstButton.hidden) {
+        [self.firstButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
+    }
+    if (!self.secondButton.hidden) {
+        [self.secondButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
+    }
+    // Close button: XIB connects closeButtonTapped: via touchUpInside; add primaryActionTriggered for remote Select
+    [self.closeButton addTarget:self action:@selector(closeButtonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
+#endif
 }
 
 
