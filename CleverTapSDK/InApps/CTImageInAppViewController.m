@@ -17,6 +17,7 @@ static const CGFloat kSpacingConstant = 160.f;
 @property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
 @property (nonatomic, strong) CTAVPlayerViewController *playerController;
+@property (nonatomic, strong) UIImage *initialImage;
 
 @end
 
@@ -129,15 +130,34 @@ static const CGFloat kSpacingConstant = 160.f;
 }
 
 - (void)setUpImage {
-    // Handle video media
-    if (self.notification.mediaIsVideo && self.notification.mediaUrl) {
-        if (self.playerController) {
-            // Player already exists (rotation reloaded the XIB) - re-embed its view into
-            // the refreshed containerView without recreating the player or changing the URL.
-            self.imageView.hidden = YES;
-            [self embedPlayerInContainer];
-            return;
-        }
+    // Phase A: video player already created - re-embed into refreshed containerView, keep URL.
+    if (self.playerController) {
+        self.imageView.hidden = YES;
+        [self embedPlayerInContainer];
+        return;
+    }
+
+    // Phase B: image already chosen at first render - re-show it without switching.
+    if (self.initialImage) {
+        self.imageView.clipsToBounds = YES;
+        self.imageView.userInteractionEnabled = YES;
+        // Use ScaleAspectFit so a landscape image shown in a portrait container (or vice versa)
+        // is not cropped/zoomed. ScaleAspectFill would be correct only when image and container
+        // share the same orientation, which is not guaranteed after rotation.
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        self.imageView.image = self.initialImage;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
+        [self.imageView addGestureRecognizer:tap];
+        return;
+    }
+
+    // Phase C: first render - decide what to show based on current orientation.
+    BOOL isLandscape = [self deviceOrientationIsLandscape];
+    BOOL hasPortraitVideo = self.notification.mediaIsVideo && self.notification.mediaUrl.length > 0;
+    BOOL hasLandscapeVideo = self.notification.mediaUrlLandscape.length > 0;
+    BOOL shouldShowVideo = isLandscape ? hasLandscapeVideo : hasPortraitVideo;
+
+    if (shouldShowVideo) {
         self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
                                                                                   muted:YES
                                                                                autoplay:YES];
@@ -156,21 +176,19 @@ static const CGFloat kSpacingConstant = 160.f;
         return;
     }
 
-    // Handle image/GIF media
+    // Image/GIF: pick by orientation, fall back to portrait if no landscape image exists.
     self.imageView.clipsToBounds = YES;
     self.imageView.userInteractionEnabled = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
     [self.imageView addGestureRecognizer:imageTapGesture];
 
-    if (![self deviceOrientationIsLandscape]) {
+    if (!isLandscape) {
         if (self.notification.inAppImage) {
             self.imageView.image = self.notification.inAppImage;
         } else if (self.notification.imageData) {
-            // Support for GIFs
             if ([self.notification.contentType isEqualToString:@"image/gif"]) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
-                self.imageView.image = gif;
+                self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageData];
             } else {
                 self.imageView.image = [UIImage imageWithData:self.notification.imageData];
             }
@@ -179,17 +197,31 @@ static const CGFloat kSpacingConstant = 160.f;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
+            self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
         } else if (self.notification.imageLandscapeData) {
-            // Support for GIFs in landscape
             if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
-                self.imageView.image = gif;
+                self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
             } else {
                 self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
             }
+            self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
+        } else {
+            // No landscape image (landscape media may be a video or absent) - fall back to portrait.
+            if (self.notification.inAppImage) {
+                self.imageView.image = self.notification.inAppImage;
+            } else if (self.notification.imageData) {
+                if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+                    self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageData];
+                } else {
+                    self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+                }
+            }
+            self.imageView.accessibilityLabel = self.notification.contentDescription;
         }
-        self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }
+
+    // Lock in the chosen image so rotation re-renders show the same one.
+    self.initialImage = self.imageView.image;
 }
 
 
