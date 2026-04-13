@@ -20,6 +20,9 @@
 
 - (void)layoutNotification {
     [super layoutNotification];
+#if !(TARGET_OS_TV)
+    // iPhone 3.5" (480pt height) workaround — not applicable on tvOS (screen height = 1080)
+    // and would conflict with the frame-based layout applied by the base class on tvOS.
     if ([UIScreen mainScreen].bounds.size.height == 480) {
         [self.containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [[NSLayoutConstraint constraintWithItem:self.containerView
@@ -28,8 +31,8 @@
                                          toItem:self.containerView
                                       attribute:NSLayoutAttributeHeight
                                      multiplier:0.6 constant:0] setActive:YES];
-        
     }
+#endif
 }
 
 @end
