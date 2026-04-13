@@ -3,6 +3,9 @@
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CTUIUtils.h"
+#if TARGET_OS_TV
+#import "CTDismissButton.h"
+#endif
 
 typedef enum {
     kWRSlideStatusNormal = 0,
@@ -40,6 +43,10 @@ typedef enum {
 @property(nonatomic, retain) UIPanGestureRecognizer *panGesture;
 @property(nonatomic, assign) CGFloat initialHorizontalCenter;
 @property(nonatomic, assign) CGFloat initialTouchPositionX;
+
+#if TARGET_OS_TV
+@property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
+#endif
 
 @property(nonatomic, assign) WRSlideCellDirection lastDirection;
 @property(nonatomic, assign) CGFloat originalCenter;
@@ -81,8 +88,12 @@ typedef enum {
     [self setUpContent];
     [self setUpButtons];
     
-    // This will make element inside Header/Footer not accessible.
+    // On iOS/iPadOS: block VoiceOver from reaching views outside the in-app banner.
+    // On tvOS: do NOT set this — it prevents the focus engine from traversing
+    // into child buttons (CTDismissButton, firstButton, secondButton).
+#if !(TARGET_OS_TV)
     self.view.accessibilityViewIsModal = YES;
+#endif
 }
 
 - (void)setUpImage {
@@ -128,7 +139,8 @@ typedef enum {
 }
 
 - (void)setUpButtons {
-    
+
+#if !(TARGET_OS_TV)
     if (!self.notification.showClose) {
         _panGesture = [[UIPanGestureRecognizer alloc]
                        initWithTarget:self
@@ -136,14 +148,27 @@ typedef enum {
         _panGesture.delegate = self;
         [self.containerView addGestureRecognizer:_panGesture];
     }
-    
+#endif
+
     self.firstButton.hidden = YES;
     self.secondButton.hidden = YES;
-    
+
     if (self.notification.buttons && self.notification.buttons.count > 0) {
         self.firstButton = [self setupViewForButton:self.firstButton withData:self.notification.buttons[0]  withIndex:0];
+#if TARGET_OS_TV
+        if (!self.firstButton.hidden) {
+            [self.firstButton addTarget:self action:@selector(buttonTapped:)
+                      forControlEvents:UIControlEventPrimaryActionTriggered];
+        }
+#endif
         if (self.notification.buttons.count == 2) {
             _secondButton = [self setupViewForButton:_secondButton withData:self.notification.buttons[1] withIndex:1];
+#if TARGET_OS_TV
+            if (!self.secondButton.hidden) {
+                [self.secondButton addTarget:self action:@selector(buttonTapped:)
+                          forControlEvents:UIControlEventPrimaryActionTriggered];
+            }
+#endif
         } else {
             [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
                                           attribute:NSLayoutAttributeWidth
@@ -153,6 +178,8 @@ typedef enum {
         }
     }
 }
+
+#if !(TARGET_OS_TV)
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES;
@@ -362,6 +389,46 @@ typedef enum {
     }
     return YES;
 }
+
+#endif // !(TARGET_OS_TV)
+
+#if TARGET_OS_TV
+
+- (BOOL)canBecomeFocused {
+    return YES;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+      withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
+    [coordinator addCoordinatedAnimations:^{
+        if (context.nextFocusedView) {
+            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        }
+    } completion:nil];
+    [coordinator addCoordinatedAnimations:^{
+        if (context.previouslyFocusedView) {
+            context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+        }
+    } completion:nil];
+}
+
+- (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    for (UIPress *press in presses) {
+        if (press.type == UIPressTypeMenu) {
+            [self hide:NO];
+            return;
+        }
+    }
+    [super pressesEnded:presses withEvent:event];
+}
+
+#endif // TARGET_OS_TV
+
+#if TARGET_OS_TV
+- (IBAction)closeButtonTapped:(id)sender {
+    [self tappedDismiss];
+}
+#endif
 
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
