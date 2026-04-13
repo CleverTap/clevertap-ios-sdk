@@ -186,8 +186,12 @@
         model.kv = [kv isKindOfClass:[NSDictionary class]] ? kv : nil;
         model.close = [json[@"close"] boolValue];
         model.rawJSON = json;
-        NSString *c2a = json[@"c2a"];
-        model.c2a = c2a.length > 0 ? c2a : nil;
+        id rawC2A = json[@"c2a"];
+        if ([rawC2A isKindOfClass:[NSString class]] && [((NSString *)rawC2A) length] > 0) {
+            model.c2a = (NSString *)rawC2A;
+        } else {
+            model.c2a = nil;
+        }
     } else {
         model.type = CTPiPOnClickActionTypeUnknown;
     }
