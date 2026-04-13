@@ -528,6 +528,9 @@
         if (action.actionURL) {
             extras[CLTAP_PROP_WZRK_DL] = action.actionURL.absoluteString;
         }
+        if (onClick.c2a) {
+            extras[CLTAP_PROP_WZRK_CTA] = onClick.c2a;
+        }
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
     }
 
