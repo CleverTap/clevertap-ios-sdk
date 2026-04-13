@@ -3,8 +3,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol CTPiPMediaViewDelegate <NSObject>
+@optional
+/// Called when media is ready to be displayed. PiP should animate in now.
+- (void)pipMediaIsReadyToShow;
+/// Called when video fails to load/stream and the fallback image is displayed instead.
+- (void)pipMediaDidShowVideoFallback;
+/// Called when all media (video + fallback) fails to load. PiP should not be shown.
+- (void)pipMediaDidFailToLoad;
+@end
+
 /// Renders Image, GIF, or Video for the PiP overlay.
 @interface CTPiPMediaView : UIView
+
+@property (nonatomic, weak, nullable) id<CTPiPMediaViewDelegate> delegate;
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithMedia:(CTPiPMediaModel *)media;

@@ -128,6 +128,8 @@ typedef NS_ENUM(NSUInteger, CTPiPOnClickActionType) {
 /// Raw onClick JSON — used by custom-code to build a CTNotificationAction with
 /// the full template name and vars without re-parsing the payload.
 @property (nonatomic, strong, nullable, readonly) NSDictionary *rawJSON;
+/// Call-to-action label sent as wzrk_c2a in the notification clicked event. May be nil.
+@property (nonatomic, copy, nullable, readonly) NSString *c2a;
 @end
 
 // MARK: - CTPiPConfigModel

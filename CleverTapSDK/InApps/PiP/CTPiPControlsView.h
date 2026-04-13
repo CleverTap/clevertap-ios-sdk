@@ -23,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Show or hide the close button independently of control config.
 - (void)setCloseButtonVisible:(BOOL)visible;
 
+/// Switch to image/GIF control layout. Used when a video falls back to a static image.
+- (void)switchToImageLayout;
+
 /// Update mute button icon to reflect current mute state.
 - (void)updateMuteButtonMuted:(BOOL)isMuted;
 

@@ -138,6 +138,18 @@
     self.containerView = container;
 }
 
+// MARK: - Orientation
+
+/// PiP manages its own rotation via device orientation notifications and transforms.
+/// Always return the full set of orientations the host app supports so the PiP
+/// window never forces the background content to rotate to a different orientation.
+#if !(TARGET_OS_TV)
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    UIWindow *window = [CTUIUtils getKeyWindow];
+    return [[CTUIUtils getSharedApplication] supportedInterfaceOrientationsForWindow:window];
+}
+#endif
+
 // MARK: - CTInAppPassThroughViewDelegate
 
 /// Override the base class behaviour: for PiP we want background touches to pass
@@ -266,8 +278,9 @@
         }
     }
 
+    // Do NOT call animateIn: here. The window stays hidden (alpha = 0) until
+    // pipMediaIsReadyToShow fires, so a video that fails never becomes visible.
     [self.containerView.mediaView loadMedia];
-    [self animateIn:animated];
 }
 
 // MARK: - Animation
@@ -333,10 +346,10 @@
     CGFloat x = finalFrame.origin.x;
     CGFloat y = finalFrame.origin.y;
     switch (direction) {
-        case CTPiPMoveInDirectionTop:    y = -finalFrame.size.height; break;
-        case CTPiPMoveInDirectionBottom: y = self.view.bounds.size.height; break;
-        case CTPiPMoveInDirectionLeft:   x = -finalFrame.size.width; break;
-        case CTPiPMoveInDirectionRight:  x = self.view.bounds.size.width; break;
+        case CTPiPMoveInDirectionTop:    y = self.view.bounds.size.height; break;
+        case CTPiPMoveInDirectionBottom: y = -finalFrame.size.height; break;
+        case CTPiPMoveInDirectionLeft:   x = self.view.bounds.size.width; break;
+        case CTPiPMoveInDirectionRight:  x = -finalFrame.size.width; break;
     }
     return CGRectMake(x, y, finalFrame.size.width, finalFrame.size.height);
 }
@@ -463,6 +476,15 @@
     [self hide:YES];
 }
 
+- (void)pipContainerIsReadyToShow {
+    [self animateIn:self.pendingAnimated];
+}
+
+- (void)pipContainerDidFailToLoad {
+    CleverTapLogStaticDebug(@"%@: Not showing PiP InApp %@ because media failed to load.", self, self.notification.campaignId);
+    [self hide:NO];
+}
+
 - (void)pipContainerDidTapCTA {
     CTPiPOnClickModel *onClick = self.pipPayload.config.onClick;
     if (!onClick) {
@@ -505,6 +527,9 @@
         extras[CLTAP_NOTIFICATION_ID_TAG] = campaignId;
         if (action.actionURL) {
             extras[CLTAP_PROP_WZRK_DL] = action.actionURL.absoluteString;
+        }
+        if (onClick.c2a) {
+            extras[CLTAP_PROP_WZRK_CTA] = onClick.c2a;
         }
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
     }

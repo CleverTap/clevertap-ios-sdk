@@ -225,6 +225,15 @@
 		48D6AC9C2F7CFD3F00A17777 /* ct_pip_deeplink.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC782F7CFD3F00A17777 /* ct_pip_deeplink.png */; };
 		48D6AC9D2F7CFD3F00A17777 /* ct_pip_expand.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC792F7CFD3F00A17777 /* ct_pip_expand.png */; };
 		48D6AC9E2F7CFD3F00A17777 /* ct_pip_collapse.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC772F7CFD3F00A17777 /* ct_pip_collapse.png */; };
+		48D6ACA82F8C0B5D00A17777 /* ct_pip_deeplink@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA22F8C0B5D00A17777 /* ct_pip_deeplink@2x.png */; };
+		48D6ACA92F8C0B5D00A17777 /* ct_pip_play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA62F8C0B5D00A17777 /* ct_pip_play@2x.png */; };
+		48D6ACAA2F8C0B5D00A17777 /* ct_pip_collapse@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA12F8C0B5D00A17777 /* ct_pip_collapse@2x.png */; };
+		48D6ACAB2F8C0B5D00A17777 /* ct_pip_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA02F8C0B5D00A17777 /* ct_pip_close@2x.png */; };
+		48D6ACAC2F8C0B5D00A17777 /* ct_pip_expand@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA32F8C0B5D00A17777 /* ct_pip_expand@2x.png */; };
+		48D6ACAD2F8C0B5D00A17777 /* ct_pip_pause@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA52F8C0B5D00A17777 /* ct_pip_pause@2x.png */; };
+		48D6ACAE2F8C0B5D00A17777 /* ct_pip_close.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6AC9F2F8C0B5D00A17777 /* ct_pip_close.png */; };
+		48D6ACAF2F8C0B5D00A17777 /* ct_pip_mute@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA42F8C0B5D00A17777 /* ct_pip_mute@2x.png */; };
+		48D6ACB02F8C0B5D00A17777 /* ct_pip_speaker@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 48D6ACA72F8C0B5D00A17777 /* ct_pip_speaker@2x.png */; };
 		48DC69B42D3FDF1F000E7BE4 /* CTEventDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 4847D16C2CCB90E0008DC327 /* CTEventDatabase.h */; };
 		48DC69B52D3FDF23000E7BE4 /* CTEventDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4847D16E2CCB90F5008DC327 /* CTEventDatabase.m */; };
 		48DC69B62D3FDF35000E7BE4 /* CTNotificationAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BB778C92BED21CE00A41628 /* CTNotificationAction.h */; };
@@ -722,7 +731,6 @@
 		F0BE2AC2FC88DFDB6C2EA83B /* CleverTapInstanceConfigTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DF7EABBC67ABB936E7104DDE /* CleverTapInstanceConfigTest.m */; };
 		F521F765FEC8B69C7976B9C2 /* CTBatchSentDelegateHelperTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A8F7CE1749EBE904E5BECA /* CTBatchSentDelegateHelperTest.m */; };
 		F9356ED42487FE4600B4F507 /* CleverTapPushNotificationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = F9356ED32487FE4600B4F507 /* CleverTapPushNotificationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		FB3399D8E1539EE9C9B19842 /* Pods_shared_CleverTapSDKTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */; };
 		FED8DD552574154A5299394A /* CTDataValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F281C3FD89B293DF67D40928 /* CTDataValidatorTest.m */; };
 /* End PBXBuildFile section */
 
@@ -979,6 +987,15 @@
 		48D6AC882F7CFD3F00A17777 /* CTPiPPayloadModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPPayloadModel.m; sourceTree = "<group>"; };
 		48D6AC892F7CFD3F00A17777 /* CTPiPWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPiPWindowController.h; sourceTree = "<group>"; };
 		48D6AC8A2F7CFD3F00A17777 /* CTPiPWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPiPWindowController.m; sourceTree = "<group>"; };
+		48D6AC9F2F8C0B5D00A17777 /* ct_pip_close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ct_pip_close.png; sourceTree = "<group>"; };
+		48D6ACA02F8C0B5D00A17777 /* ct_pip_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_close@2x.png"; sourceTree = "<group>"; };
+		48D6ACA12F8C0B5D00A17777 /* ct_pip_collapse@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_collapse@2x.png"; sourceTree = "<group>"; };
+		48D6ACA22F8C0B5D00A17777 /* ct_pip_deeplink@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_deeplink@2x.png"; sourceTree = "<group>"; };
+		48D6ACA32F8C0B5D00A17777 /* ct_pip_expand@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_expand@2x.png"; sourceTree = "<group>"; };
+		48D6ACA42F8C0B5D00A17777 /* ct_pip_mute@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_mute@2x.png"; sourceTree = "<group>"; };
+		48D6ACA52F8C0B5D00A17777 /* ct_pip_pause@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_pause@2x.png"; sourceTree = "<group>"; };
+		48D6ACA62F8C0B5D00A17777 /* ct_pip_play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_play@2x.png"; sourceTree = "<group>"; };
+		48D6ACA72F8C0B5D00A17777 /* ct_pip_speaker@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ct_pip_speaker@2x.png"; sourceTree = "<group>"; };
 		48F9FD172C3D30B600617770 /* CTFileDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFileDownloadManager.h; sourceTree = "<group>"; };
 		48F9FD182C3D30B600617770 /* CTFileDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloadManager.m; sourceTree = "<group>"; };
 		48F9FD192C3D30B600617770 /* CTFileDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFileDownloader.m; sourceTree = "<group>"; };
@@ -1660,6 +1677,15 @@
 		48D6AC7E2F7CFD3F00A17777 /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				48D6AC9F2F8C0B5D00A17777 /* ct_pip_close.png */,
+				48D6ACA02F8C0B5D00A17777 /* ct_pip_close@2x.png */,
+				48D6ACA12F8C0B5D00A17777 /* ct_pip_collapse@2x.png */,
+				48D6ACA22F8C0B5D00A17777 /* ct_pip_deeplink@2x.png */,
+				48D6ACA32F8C0B5D00A17777 /* ct_pip_expand@2x.png */,
+				48D6ACA42F8C0B5D00A17777 /* ct_pip_mute@2x.png */,
+				48D6ACA52F8C0B5D00A17777 /* ct_pip_pause@2x.png */,
+				48D6ACA62F8C0B5D00A17777 /* ct_pip_play@2x.png */,
+				48D6ACA72F8C0B5D00A17777 /* ct_pip_speaker@2x.png */,
 				48D6AC772F7CFD3F00A17777 /* ct_pip_collapse.png */,
 				48D6AC782F7CFD3F00A17777 /* ct_pip_deeplink.png */,
 				48D6AC792F7CFD3F00A17777 /* ct_pip_expand.png */,
@@ -2950,6 +2976,15 @@
 				48D6AC9E2F7CFD3F00A17777 /* ct_pip_collapse.png in Resources */,
 				070CDC0B2223C02F00CA787D /* CTInterstitialImageViewController~iphoneland.xib in Resources */,
 				070CDC0D2223C1C800CA787D /* CTHalfInterstitialImageViewController~iphoneland.xib in Resources */,
+				48D6ACA82F8C0B5D00A17777 /* ct_pip_deeplink@2x.png in Resources */,
+				48D6ACA92F8C0B5D00A17777 /* ct_pip_play@2x.png in Resources */,
+				48D6ACAA2F8C0B5D00A17777 /* ct_pip_collapse@2x.png in Resources */,
+				48D6ACAB2F8C0B5D00A17777 /* ct_pip_close@2x.png in Resources */,
+				48D6ACAC2F8C0B5D00A17777 /* ct_pip_expand@2x.png in Resources */,
+				48D6ACAD2F8C0B5D00A17777 /* ct_pip_pause@2x.png in Resources */,
+				48D6ACAE2F8C0B5D00A17777 /* ct_pip_close.png in Resources */,
+				48D6ACAF2F8C0B5D00A17777 /* ct_pip_mute@2x.png in Resources */,
+				48D6ACB02F8C0B5D00A17777 /* ct_pip_speaker@2x.png in Resources */,
 				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
 				07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
@@ -3006,9 +3041,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
