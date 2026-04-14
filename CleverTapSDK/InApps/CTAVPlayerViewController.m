@@ -2,10 +2,12 @@
 #import "CTAVPlayerViewController.h"
 #import "CTInAppNotification.h"
 #import "CTUIUtils.h"
+#import "CTConstants.h"
 
 @interface CTAVPlayerViewController ()<AVPlayerViewControllerDelegate>
 
 @property (nonatomic, strong) CTInAppNotification *notification;
+@property (nonatomic, strong) AVPlayerItem *playerItem;
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UIVisualEffectView *ctaContainerView;
 @property (nonatomic, strong) UIButton *ctaButton;
@@ -26,13 +28,26 @@
             ? self.notification.mediaUrlLandscape
             : self.notification.mediaUrl;
         AVPlayerItem *avPlayerItem = [AVPlayerItem playerItemWithURL:[NSURL URLWithString:videoUrlString]];
+        self.playerItem = avPlayerItem;
         self.player = [AVPlayer playerWithPlayerItem:avPlayerItem];
         self.player.muted = muted;
+
+        // Observe status to detect load failure before playback begins
+        [avPlayerItem addObserver:self
+                       forKeyPath:@"status"
+                          options:NSKeyValueObservingOptionNew
+                          context:NULL];
 
         // Setup looping notification
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(playerItemDidReachEnd:)
                                                      name:AVPlayerItemDidPlayToEndTimeNotification
+                                                   object:avPlayerItem];
+
+        // Log mid-stream failures (network drops etc.) but do not dismiss
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(playerItemFailedMidStream:)
+                                                     name:AVPlayerItemFailedToPlayToEndTimeNotification
                                                    object:avPlayerItem];
     }
     return self;
@@ -65,6 +80,12 @@
         [self.contentOverlayView addSubview:self.imageView];
     }
 
+    // Resume playback when app returns to foreground
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(appWillEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification
+                                               object:nil];
+
     // Autoplay if configured
     if (self.autoplay) {
         [self.player play];
@@ -96,6 +117,39 @@
             self.imageView.frame = self.view.bounds;
         }
     }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context {
+    if (object != self.playerItem || ![keyPath isEqualToString:@"status"]) {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+    AVPlayerItemStatus status = (AVPlayerItemStatus)[change[NSKeyValueChangeNewKey] integerValue];
+    if (status == AVPlayerItemStatusFailed) {
+        NSError *error = self.playerItem.error;
+        CleverTapLogStaticDebug(@"%@: InApp AVPlayerItem failed to load — %@ %ld: %@",
+                                self, error.domain, (long)error.code, error.localizedDescription);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self.videoDidFailHandler) {
+                self.videoDidFailHandler();
+            }
+        });
+    }
+}
+
+- (void)appWillEnterForeground {
+    if (self.autoplay) {
+        [self.player play];
+    }
+}
+
+- (void)playerItemFailedMidStream:(NSNotification *)notification {
+    NSError *error = notification.userInfo[AVPlayerItemFailedToPlayToEndTimeErrorKey];
+    CleverTapLogStaticDebug(@"%@: InApp AVPlayerItem mid-stream failure — %@ %ld",
+                            self, error.domain, (long)error.code);
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification {
@@ -187,6 +241,9 @@ willEndFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTransi
 }
 
 - (void)dealloc {
+    if (self.playerItem) {
+        [self.playerItem removeObserver:self forKeyPath:@"status"];
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

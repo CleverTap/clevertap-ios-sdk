@@ -58,6 +58,7 @@
 
 @property (nonatomic, copy, readonly) NSDictionary *jsonDescription;
 @property (nonatomic) NSString *error;
+@property (nonatomic) NSString *errorLandscape;
 
 @property (nonatomic, copy, readonly) NSDictionary *customExtras;
 @property (nonatomic, copy, readwrite) NSDictionary *actionExtras;

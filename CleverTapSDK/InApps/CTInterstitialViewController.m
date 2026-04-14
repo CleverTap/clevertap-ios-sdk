@@ -172,6 +172,11 @@
             self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
                                                                                       muted:shouldMute
                                                                                    autoplay:shouldAutoplay];
+            __weak typeof(self) weakSelf = self;
+            self.playerController.videoDidFailHandler = ^{
+                CleverTapLogStaticDebug(@"InApp: dismissing due to video load failure.");
+                [weakSelf hide:YES];
+            };
             [self configureAvPlayerController];
         }
     }

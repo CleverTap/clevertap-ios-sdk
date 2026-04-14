@@ -299,7 +299,7 @@
 
 - (void)setPreparedInAppImageLandscape:(UIImage *)inAppImageLandscape
                inAppImageLandscapeData:(NSData *)inAppImageLandscapeData error:(NSString *)error {
-    self.error = error;
+    self.errorLandscape = error;
     self.inAppImageLandscape = inAppImageLandscape;
     self.imageLandscapeData = inAppImageLandscapeData;
 }
