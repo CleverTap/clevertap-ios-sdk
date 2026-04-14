@@ -284,6 +284,10 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 #if TARGET_OS_TV
     self.previousKeyWindow = [CTUIUtils getKeyWindow];
     [self.window makeKeyAndVisible];
+    // Force the focus engine to run immediately after the window becomes key so
+    // the VC's preferredFocusEnvironments is honoured from the very first frame.
+    [self setNeedsFocusUpdate];
+    [self updateFocusIfNeeded];
 #else
     [self.window setHidden:NO];
 #endif

@@ -33,6 +33,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self layoutNotification];
+#if TARGET_OS_TV
+    // After layoutNotification hides/shows buttons, force the focus engine to
+    // re-read preferredFocusEnvironments so initial focus is deterministic.
+    [self setNeedsFocusUpdate];
+    [self updateFocusIfNeeded];
+#endif
 }
 
 #if !(TARGET_OS_TV)
@@ -73,13 +79,24 @@
     return YES;
 }
 
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments {
+    if (!self.firstButton.isHidden) return @[self.firstButton];
+    if (!self.secondButton.isHidden) return @[self.secondButton];
+    if (!self.closeButton.isHidden) return @[self.closeButton];
+    return [super preferredFocusEnvironments];
+}
+
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
       withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
     [coordinator addCoordinatedAnimations:^{
-        context.nextFocusedView.transform = CGAffineTransformMakeScale(1.1, 1.1);
+        if (context.nextFocusedView) {
+            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.1, 1.1);
+        }
     } completion:nil];
     [coordinator addCoordinatedAnimations:^{
-        context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+        if (context.previouslyFocusedView) {
+            context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+        }
     } completion:nil];
 }
 
