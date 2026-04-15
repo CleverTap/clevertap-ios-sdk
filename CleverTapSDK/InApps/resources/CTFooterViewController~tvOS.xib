@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder.AppleTV.XIB" version="3.0" toolsVersion="13142" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.AppleTV.XIB" version="3.0" toolsVersion="24412" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="appleTV" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12042"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -10,7 +11,6 @@
             <connections>
                 <outlet property="bodyLabel" destination="lPX-Qb-DIJ" id="Q7D-Od-Hkk"/>
                 <outlet property="buttonsContainer" destination="885-lR-rSi" id="gOt-X8-mkv"/>
-                <outlet property="closeButton" destination="ftr-close-btn" id="ftr-close-btn-out"/>
                 <outlet property="containerView" destination="038-G8-Ljf" id="3uK-e3-4bf"/>
                 <outlet property="firstButton" destination="coH-Uf-tpg" id="0Qp-0N-F9v"/>
                 <outlet property="imageContainer" destination="J01-gZ-bfb" id="nIk-lv-iX0"/>
@@ -26,16 +26,14 @@
             <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <!-- containerView: full-width banner pinned to bottom, height 200 -->
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="038-G8-Ljf">
                     <rect key="frame" x="0.0" y="880" width="1920" height="200"/>
                     <subviews>
-                        <!-- imageContainer: left side, 160x140 -->
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="J01-gZ-bfb">
                             <rect key="frame" x="0.0" y="0.0" width="160" height="140"/>
                             <subviews>
                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6Vq-Ve-zYX">
-                                    <rect key="frame" x="20" y="20" width="120" height="100"/>
+                                    <rect key="frame" x="30" y="20" width="100" height="100"/>
                                     <accessibility key="accessibilityConfiguration" label="InApp Image">
                                         <bool key="isElement" value="YES"/>
                                     </accessibility>
@@ -53,18 +51,17 @@
                                 <constraint firstItem="6Vq-Ve-zYX" firstAttribute="top" secondItem="J01-gZ-bfb" secondAttribute="top" constant="20" id="vsd-TY-x2P"/>
                             </constraints>
                         </view>
-                        <!-- text area: title + body, right of imageContainer -->
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="47x-7r-GU0">
                             <rect key="frame" x="160" y="0.0" width="1760" height="140"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Eko-4Q-GpL">
-                                    <rect key="frame" x="0.0" y="20" width="1740" height="42"/>
+                                    <rect key="frame" x="0.0" y="20" width="1750" height="43"/>
                                     <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="36"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Body" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lPX-Qb-DIJ">
-                                    <rect key="frame" x="0.0" y="68" width="1740" height="32"/>
+                                    <rect key="frame" x="0.0" y="69" width="1750" height="34"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="28"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -81,7 +78,6 @@
                                 <constraint firstItem="lPX-Qb-DIJ" firstAttribute="top" secondItem="Eko-4Q-GpL" secondAttribute="bottom" constant="6" id="vcu-h2-fo0"/>
                             </constraints>
                         </view>
-                        <!-- buttonsContainer: below content, full width, height 60 -->
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="885-lR-rSi">
                             <rect key="frame" x="0.0" y="140" width="1920" height="60"/>
                             <subviews>
@@ -124,17 +120,6 @@
                             </constraints>
                         </view>
                     </subviews>
-                        <!-- CTDismissButton: top-right corner of containerView, 66x66pt -->
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="custom" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ftr-close-btn" customClass="CTDismissButton">
-                            <rect key="frame" x="1854" y="0.0" width="66" height="66"/>
-                            <constraints>
-                                <constraint firstAttribute="width" constant="66" id="ftr-close-w"/>
-                                <constraint firstAttribute="height" constant="66" id="ftr-close-h"/>
-                            </constraints>
-                            <connections>
-                                <action selector="closeButtonTapped:" destination="-1" eventType="primaryActionTriggered" id="ftr-close-action"/>
-                            </connections>
-                        </button>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstItem="885-lR-rSi" firstAttribute="top" secondItem="47x-7r-GU0" secondAttribute="bottom" id="D0g-Ku-rFg"/>
@@ -149,16 +134,12 @@
                         <constraint firstItem="47x-7r-GU0" firstAttribute="top" secondItem="038-G8-Ljf" secondAttribute="top" id="vsG-ml-sFB"/>
                         <constraint firstAttribute="trailing" secondItem="47x-7r-GU0" secondAttribute="trailing" id="wF4-vz-IIL"/>
                         <constraint firstItem="885-lR-rSi" firstAttribute="top" secondItem="J01-gZ-bfb" secondAttribute="bottom" id="xTG-6g-ape"/>
-                        <!-- closeButton: top-right of containerView -->
-                        <constraint firstAttribute="trailing" secondItem="ftr-close-btn" secondAttribute="trailing" constant="0" id="ftr-close-trail"/>
-                        <constraint firstItem="ftr-close-btn" firstAttribute="top" secondItem="038-G8-Ljf" secondAttribute="top" id="ftr-close-top"/>
                     </constraints>
                 </view>
             </subviews>
-            <color key="backgroundColor" red="0" green="0" blue="0" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
             <viewLayoutGuide key="safeArea" id="tvos-ftr-safe"/>
+            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <!-- pin to bottom at priority 250 so layoutNotification frame override wins -->
                 <constraint firstAttribute="bottom" secondItem="038-G8-Ljf" secondAttribute="bottom" priority="250" id="7eg-Wt-ohq"/>
                 <constraint firstItem="038-G8-Ljf" firstAttribute="leading" secondItem="e9q-81-ePd" secondAttribute="leading" id="BNy-WR-inW"/>
                 <constraint firstAttribute="trailing" secondItem="038-G8-Ljf" secondAttribute="trailing" id="jWz-EO-ddN"/>

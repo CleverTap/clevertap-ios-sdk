@@ -31,6 +31,11 @@
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
 @property (nonatomic, strong) CTAVPlayerViewController *playerController;
 
+#if TARGET_OS_TV
+@property (nonatomic, strong) UIFocusGuide *buttonLeftFocusGuide;
+@property (nonatomic, strong) UIFocusGuide *buttonRightFocusGuide;
+#endif
+
 @end
 
 @implementation CTInterstitialViewController
@@ -48,6 +53,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self layoutNotification];
+#if TARGET_OS_TV
+    [self setupFocusGuides];
+    [self setNeedsFocusUpdate];
+    [self updateFocusIfNeeded];
+#endif
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -76,14 +86,100 @@
     return YES;
 }
 
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments {
+    if (!self.firstButton.isHidden) return @[self.firstButton];
+    if (!self.secondButton.isHidden) return @[self.secondButton];
+    if (!self.closeButton.isHidden) return @[self.closeButton];
+    return [super preferredFocusEnvironments];
+}
+
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
       withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
+    [super didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
     [coordinator addCoordinatedAnimations:^{
-        context.nextFocusedView.transform = CGAffineTransformMakeScale(1.1, 1.1);
+        if (context.nextFocusedView) {
+            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        }
+        if (context.previouslyFocusedView) {
+            context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+        }
     } completion:nil];
-    [coordinator addCoordinatedAnimations:^{
-        context.previouslyFocusedView.transform = CGAffineTransformIdentity;
-    } completion:nil];
+}
+
+- (void)setupFocusGuides {
+    // Close-button guides
+    if (!self.closeButton.isHidden) {
+        UIFocusGuide *upGuide = [UIFocusGuide new];
+        [self.view addLayoutGuide:upGuide];
+        [NSLayoutConstraint activateConstraints:@[
+            [upGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor],
+            [upGuide.heightAnchor   constraintEqualToConstant:60.0],
+            [upGuide.leadingAnchor  constraintEqualToAnchor:self.view.leadingAnchor],
+            [upGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        ]];
+        upGuide.preferredFocusEnvironments = @[self.closeButton];
+
+        UIFocusGuide *downGuide = [UIFocusGuide new];
+        [self.view addLayoutGuide:downGuide];
+        id<UIFocusEnvironment> downTarget = !self.firstButton.isHidden
+            ? (id<UIFocusEnvironment>)self.firstButton
+            : (id<UIFocusEnvironment>)self.secondButton;
+        [NSLayoutConstraint activateConstraints:@[
+            [downGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:60.0],
+            [downGuide.bottomAnchor   constraintEqualToAnchor:self.view.bottomAnchor],
+            [downGuide.leadingAnchor  constraintEqualToAnchor:self.closeButton.leadingAnchor constant:-20.0],
+            [downGuide.trailingAnchor constraintEqualToAnchor:self.closeButton.trailingAnchor constant:20.0],
+        ]];
+        downGuide.preferredFocusEnvironments = @[downTarget];
+    }
+
+    // Button-to-button guides (two-button mode only)
+    if (self.firstButton.isHidden || self.secondButton.isHidden) return;
+
+    UIFocusGuide *leftGuide = [UIFocusGuide new];
+    [self.buttonsContainer addLayoutGuide:leftGuide];
+    [NSLayoutConstraint activateConstraints:@[
+        [leftGuide.leadingAnchor  constraintEqualToAnchor:self.buttonsContainer.leadingAnchor],
+        [leftGuide.trailingAnchor constraintEqualToAnchor:self.secondButton.leadingAnchor],
+        [leftGuide.topAnchor      constraintEqualToAnchor:self.buttonsContainer.topAnchor],
+        [leftGuide.bottomAnchor   constraintEqualToAnchor:self.buttonsContainer.bottomAnchor],
+    ]];
+    leftGuide.preferredFocusEnvironments = @[self.firstButton];
+    self.buttonLeftFocusGuide = leftGuide;
+
+    UIFocusGuide *rightGuide = [UIFocusGuide new];
+    [self.buttonsContainer addLayoutGuide:rightGuide];
+    [NSLayoutConstraint activateConstraints:@[
+        [rightGuide.leadingAnchor  constraintEqualToAnchor:self.firstButton.trailingAnchor],
+        [rightGuide.trailingAnchor constraintEqualToAnchor:self.buttonsContainer.trailingAnchor],
+        [rightGuide.topAnchor      constraintEqualToAnchor:self.buttonsContainer.topAnchor],
+        [rightGuide.bottomAnchor   constraintEqualToAnchor:self.buttonsContainer.bottomAnchor],
+    ]];
+    rightGuide.preferredFocusEnvironments = @[self.secondButton];
+    self.buttonRightFocusGuide = rightGuide;
+}
+
+- (void)layoutSingleButtonForTvOS {
+    for (NSLayoutConstraint *c in self.buttonsContainer.constraints) {
+        if (c.firstAttribute == NSLayoutAttributeTrailing &&
+            c.secondItem == self.secondButtonContainer &&
+            c.secondAttribute == NSLayoutAttributeTrailing) {
+            c.active = NO;
+        }
+        else if (c.firstItem == self.firstButton &&
+                 c.firstAttribute == NSLayoutAttributeLeading) {
+            c.active = NO;
+        }
+        else if (c.firstItem  == self.secondButton &&
+                 c.firstAttribute  == NSLayoutAttributeWidth &&
+                 c.secondItem == self.firstButton) {
+            c.active = NO;
+        }
+    }
+    [NSLayoutConstraint activateConstraints:@[
+        [self.firstButton.centerXAnchor constraintEqualToAnchor:self.buttonsContainer.centerXAnchor],
+        [self.firstButton.widthAnchor   constraintEqualToConstant:640.0],
+    ]];
 }
 
 - (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
@@ -123,6 +219,7 @@
             [toDeactivate addObject:c];
         }
     }
+    [toDeactivate addObjectsFromArray:self.closeButton.constraints];
     [NSLayoutConstraint deactivateConstraints:toDeactivate];
     self.containerView.translatesAutoresizingMaskIntoConstraints = YES;
     self.closeButton.translatesAutoresizingMaskIntoConstraints = YES;
@@ -262,12 +359,11 @@
         } else {
             [self.secondButton setHidden: YES];
 #if TARGET_OS_TV
-            // tvOS is always landscape; collapsing height would make buttonsContainer height=0.
-            // Collapse width instead so buttonsContainer keeps its height and firstButton is visible.
             [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                              toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                          multiplier:1 constant:0] setActive:YES];
+            [self layoutSingleButtonForTvOS];
 #else
             if ([self deviceOrientationIsLandscape]) {
                 [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
@@ -296,6 +392,14 @@
     }
     // Close button: XIB connects closeButtonTapped: via touchUpInside, add primaryActionTriggered
     [self.closeButton addTarget:self action:@selector(closeButtonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
+
+    NSMutableArray *a11yElements = [NSMutableArray array];
+    if (self.titleLabel.text.length > 0)  [a11yElements addObject:self.titleLabel];
+    if (self.bodyLabel.text.length > 0)   [a11yElements addObject:self.bodyLabel];
+    if (!self.firstButton.isHidden)       [a11yElements addObject:self.firstButton];
+    if (!self.secondButton.isHidden)      [a11yElements addObject:self.secondButton];
+    if (!self.closeButton.isHidden)       [a11yElements addObject:self.closeButton];
+    self.view.accessibilityElements = a11yElements;
 #endif
 }
 
