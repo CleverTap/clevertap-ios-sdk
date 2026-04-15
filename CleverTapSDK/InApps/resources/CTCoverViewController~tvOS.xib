@@ -101,17 +101,27 @@
                         <constraint firstItem="Fk0-A3-ZZm" firstAttribute="leading" secondItem="sMo-0l-7n9" secondAttribute="leading" id="cvr-img-lead"/>
                         <constraint firstAttribute="trailing" secondItem="Fk0-A3-ZZm" secondAttribute="trailing" id="cvr-img-trail"/>
                         <constraint firstAttribute="bottom" secondItem="Fk0-A3-ZZm" secondAttribute="bottom" id="cvr-img-bot"/>
-                        <!-- titleLabel: inset 80pt each side; bottom linked to bodyLabel top -->
+                        <!-- titleLabel: 80pt from each side; 80pt from containerView top so the
+                             vertical stack flows title → body → buttons from the top of the screen.
+                             Without cvr-title-top the only vertical anchor is cvr-btns-bot (bottom
+                             of buttonsContainer pinned 60pt from the container bottom), which pulls
+                             all content to the bottom quarter of the 1080pt canvas. -->
+                        <constraint firstItem="up4-az-80G" firstAttribute="top" secondItem="sMo-0l-7n9" secondAttribute="top" constant="80" id="cvr-title-top"/>
                         <constraint firstItem="up4-az-80G" firstAttribute="leading" secondItem="sMo-0l-7n9" secondAttribute="leading" constant="80" id="cvr-title-lead"/>
                         <constraint firstAttribute="trailing" secondItem="up4-az-80G" secondAttribute="trailing" constant="80" id="cvr-title-trail"/>
-                        <!-- bodyLabel: below titleLabel + 10pt, same insets -->
-                        <constraint firstItem="hma-rT-vS9" firstAttribute="top" secondItem="up4-az-80G" secondAttribute="bottom" constant="10" id="cvr-body-top"/>
+                        <!-- bodyLabel: vertically centred between title and buttons.
+                             cvr-body-top (≥) and cvr-btns-top (≥) provide minimum spacing from
+                             the title above and buttons below.  cvr-body-centerY pins the body
+                             to the vertical midpoint of containerView so it floats in the middle
+                             third of the 1080pt canvas. -->
+                        <constraint firstItem="hma-rT-vS9" firstAttribute="top" relation="greaterThanOrEqual" secondItem="up4-az-80G" secondAttribute="bottom" constant="10" id="cvr-body-top"/>
+                        <constraint firstItem="hma-rT-vS9" firstAttribute="centerY" secondItem="sMo-0l-7n9" secondAttribute="centerY" id="cvr-body-centerY"/>
                         <constraint firstItem="hma-rT-vS9" firstAttribute="leading" secondItem="up4-az-80G" secondAttribute="leading" id="cvr-body-lead"/>
                         <constraint firstItem="hma-rT-vS9" firstAttribute="trailing" secondItem="up4-az-80G" secondAttribute="trailing" id="cvr-body-trail"/>
-                        <!-- bodyLabel bottom to buttonsContainer top -->
-                        <constraint firstItem="j0u-Ro-rdY" firstAttribute="top" secondItem="hma-rT-vS9" secondAttribute="bottom" constant="10" id="cvr-btns-top"/>
-                        <!-- buttonsContainer: bottom 60pt, inset 80pt -->
-                        <constraint firstAttribute="bottom" secondItem="j0u-Ro-rdY" secondAttribute="bottom" constant="60" id="cvr-btns-bot"/>
+                        <!-- buttonsContainer: anchored to the bottom of the screen (60pt inset).
+                             cvr-btns-top (≥) ensures it never overlaps with bodyLabel. -->
+                        <constraint firstItem="j0u-Ro-rdY" firstAttribute="top" relation="greaterThanOrEqual" secondItem="hma-rT-vS9" secondAttribute="bottom" constant="10" id="cvr-btns-top"/>
+                        <constraint firstAttribute="bottom" secondItem="j0u-Ro-rdY" secondAttribute="bottom" constant="60" priority="750" id="cvr-btns-bot"/>
                         <constraint firstItem="j0u-Ro-rdY" firstAttribute="leading" secondItem="sMo-0l-7n9" secondAttribute="leading" constant="80" id="cvr-btns-lead"/>
                         <constraint firstAttribute="trailing" secondItem="j0u-Ro-rdY" secondAttribute="trailing" constant="80" id="cvr-btns-trail"/>
                     </constraints>
