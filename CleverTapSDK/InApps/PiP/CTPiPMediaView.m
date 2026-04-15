@@ -261,6 +261,7 @@
         return;
     }
     self.playerLayer.hidden = YES;
+    self.posterImageView.contentMode = UIViewContentModeScaleAspectFill;
     __weak typeof(self) weakSelf = self;
     [self.posterImageView sd_setImageWithURL:self.media.fallbackURL
                             placeholderImage:nil
@@ -310,7 +311,7 @@
     if (self.playerLayer) {
         self.playerLayer.videoGravity = fit ? AVLayerVideoGravityResizeAspect : AVLayerVideoGravityResizeAspectFill;
     }
-    if (self.posterImageView) {
+    if (self.posterImageView && !self.playerLayer.hidden) {
         self.posterImageView.contentMode = mode;
     }
 }
