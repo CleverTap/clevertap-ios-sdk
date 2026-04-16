@@ -47,8 +47,6 @@
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    // Force the card geometry every layout pass — prevents Auto Layout from overriding
-    // the frame-based positioning set up in layoutNotification.
     CGFloat screenW = [UIScreen mainScreen].bounds.size.width;   // 1920
     CGFloat screenH = [UIScreen mainScreen].bounds.size.height;  // 1080
     CGFloat margin  = 160.0f;
@@ -57,7 +55,6 @@
     CGFloat cX = (screenW - cW) * 0.5f;     // 288
     CGFloat cY = margin;                     // 160
     self.containerView.frame = CGRectMake(cX, cY, cW, cH);
-    // Close button: top-right corner of the card, overlapping 15pt into it
     self.closeButton.frame = CGRectMake(cX + cW - 15.0f, cY - 15.0f, 44.0f, 44.0f);
 }
 
@@ -73,25 +70,39 @@
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
-      withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
+       withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
     [super didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
+    
     [coordinator addCoordinatedAnimations:^{
-        if (context.nextFocusedView) {
-            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        
+        if (context.nextFocusedView == self.closeButton) {
+            self.closeButton.transform = CGAffineTransformMakeScale(1.15, 1.15);
         }
-        if (context.previouslyFocusedView) {
-            context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+        if (context.previouslyFocusedView == self.closeButton) {
+            self.closeButton.transform = CGAffineTransformIdentity;
         }
+        if (context.previouslyFocusedView == self.firstButton) {
+            self.firstButton.transform = CGAffineTransformIdentity;
+        }
+        if (context.previouslyFocusedView == self.secondButton) {
+            self.secondButton.transform = CGAffineTransformIdentity;
+        }
+        
     } completion:nil];
 }
 
 - (void)setupFocusGuides {
     if (!self.closeButton.isHidden) {
+        
+        id<UIFocusEnvironment> downTarget = !self.firstButton.isHidden
+            ? (id<UIFocusEnvironment>)self.firstButton
+            : (id<UIFocusEnvironment>)self.secondButton;
+
         UIFocusGuide *upGuide = [UIFocusGuide new];
         [self.view addLayoutGuide:upGuide];
         [NSLayoutConstraint activateConstraints:@[
-            [upGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor],
-            [upGuide.heightAnchor   constraintEqualToConstant:60.0],
+            [upGuide.bottomAnchor   constraintEqualToAnchor:self.buttonsContainer.topAnchor],
+            [upGuide.heightAnchor   constraintEqualToConstant:100.0],
             [upGuide.leadingAnchor  constraintEqualToAnchor:self.view.leadingAnchor],
             [upGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         ]];
@@ -99,16 +110,23 @@
 
         UIFocusGuide *downGuide = [UIFocusGuide new];
         [self.view addLayoutGuide:downGuide];
-        id<UIFocusEnvironment> downTarget = !self.firstButton.isHidden
-            ? (id<UIFocusEnvironment>)self.firstButton
-            : (id<UIFocusEnvironment>)self.secondButton;
         [NSLayoutConstraint activateConstraints:@[
-            [downGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:60.0],
+            [downGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:200.0],
             [downGuide.bottomAnchor   constraintEqualToAnchor:self.view.bottomAnchor],
-            [downGuide.leadingAnchor  constraintEqualToAnchor:self.closeButton.leadingAnchor constant:-20.0],
-            [downGuide.trailingAnchor constraintEqualToAnchor:self.closeButton.trailingAnchor constant:20.0],
+            [downGuide.leadingAnchor  constraintEqualToAnchor:self.view.trailingAnchor constant:-400.0],
+            [downGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         ]];
         downGuide.preferredFocusEnvironments = @[downTarget];
+        
+        UIFocusGuide *leftCloseGuide = [UIFocusGuide new];
+        [self.view addLayoutGuide:leftCloseGuide];
+        [NSLayoutConstraint activateConstraints:@[
+            [leftCloseGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:60.0],
+            [leftCloseGuide.bottomAnchor   constraintEqualToAnchor:self.view.topAnchor constant:200.0],
+            [leftCloseGuide.leadingAnchor  constraintEqualToAnchor:self.view.trailingAnchor constant:-440.0],
+            [leftCloseGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-370.0],
+        ]];
+        leftCloseGuide.preferredFocusEnvironments = @[downTarget];
     }
 
     if (self.firstButton.isHidden || self.secondButton.isHidden) return;
@@ -160,8 +178,6 @@
 }
 
 - (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
-    // Select press is handled natively by buttons via UIControlEventPrimaryActionTriggered.
-    // Only handle Menu button here for dismiss.
     for (UIPress *press in presses) {
         if (press.type == UIPressTypeMenu) {
             [self tappedDismiss];
@@ -182,9 +198,6 @@
     self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:self.notification.backgroundColor];
 
 #if TARGET_OS_TV
-    // Deactivate all XIB constraints on root view that involve containerView or closeButton,
-    // then switch both to frame-based layout. viewWillLayoutSubviews re-applies the frame on
-    // every layout pass so Auto Layout can never claw back control.
     NSMutableArray *toDeactivate = [NSMutableArray array];
     for (NSLayoutConstraint *c in self.view.constraints) {
         if (c.firstItem == self.containerView || c.secondItem == self.containerView ||
@@ -314,7 +327,6 @@
             self.secondButton = [self setupViewForButton:_secondButton withData:self.notification.buttons[1] withIndex:1];
         } else {
 #if TARGET_OS_TV
-            // tvOS: always collapse width so firstButton fills the full buttons container width.
             [[NSLayoutConstraint constraintWithItem:self.secondButtonContainer
                                           attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                              toItem:nil attribute:NSLayoutAttributeNotAnAttribute
@@ -335,18 +347,14 @@
         }
     }
 #if TARGET_OS_TV
-    // On tvOS, UIButton fires UIControlEventPrimaryActionTriggered on Select press.
-    // setupViewForButton: registers touchUpInside which doesn't fire on tvOS.
     if (!self.firstButton.hidden) {
         [self.firstButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
     if (!self.secondButton.hidden) {
         [self.secondButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
-    // Close button: XIB connects closeButtonTapped: via touchUpInside; add primaryActionTriggered for remote Select
     [self.closeButton addTarget:self action:@selector(closeButtonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
 
-    // Explicit VoiceOver traversal order: title → body → primary button → secondary button → close.
     NSMutableArray *a11yElements = [NSMutableArray array];
     if (self.titleLabel.text.length > 0)  [a11yElements addObject:self.titleLabel];
     if (self.bodyLabel.text.length > 0)   [a11yElements addObject:self.bodyLabel];
