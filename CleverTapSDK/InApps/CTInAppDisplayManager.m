@@ -410,7 +410,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         // Orientation support is handled internally by the custom/PiP presenter.
         return;
     }
-    
+
+#if TARGET_OS_TV
+    // tvOS has no rotation; orientation-based filtering does not apply.
+    return;
+#endif
+
     if (notification.hasPortrait && !notification.hasLandscape && [self deviceOrientationIsLandscape]) {
         notification.error = [NSString stringWithFormat:@"The InApp Notification supports %@ only, the app orientation is %@ dismissing the in-app.", @"portrait", @"landscape"];
         return;
@@ -442,12 +447,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageURL contentType:notification.contentType];
         [notification setPreparedInAppImage:result.image inAppImageData:result.imageData error:result.error];
     }
-#if !(TARGET_OS_TV)
     if (notification.imageUrlLandscape && notification.hasLandscape) {
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageUrlLandscape contentType:notification.landscapeContentType];
         [notification setPreparedInAppImageLandscape:result.image inAppImageLandscapeData:result.imageData error:result.error];
     }
 
+#if !(TARGET_OS_TV)
     NSArray *urls = [[self.templatesManager fileArgsURLsForInAppData:notification.customTemplateInAppData] allObjects];
     if (urls.count > 0) {
         [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
