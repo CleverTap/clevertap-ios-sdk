@@ -2058,7 +2058,13 @@ static BOOL sharedInstanceErrorLogged;
 - (void)evaluateOnEvent:(NSDictionary *)event withType:(CleverTapEventType)eventType flattenedEventData:(CTFlattenedEventData *)flattenedEventData {
     [self logFlattenedData:flattenedEventData];
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-    NSString *eventName = event[CLTAP_EVENT_NAME];
+    id rawEventName = event[CLTAP_EVENT_NAME];
+    NSString *eventName;
+    if ([rawEventName isKindOfClass:[NSNumber class]]) {
+        eventName = [(NSNumber *)rawEventName stringValue];
+    } else if ([rawEventName isKindOfClass:[NSString class]]) {
+        eventName = rawEventName;
+    }
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden

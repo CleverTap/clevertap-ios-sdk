@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Validates and normalizes an event name.
  * Returns CTValidationResult with cleaned name and outcome.
  */
-- (CTValidationResult *)validateEventName:(nullable NSString *)eventName;
+- (CTValidationResult *)validateEventName:(nullable id)eventName;
 
 @end
 
