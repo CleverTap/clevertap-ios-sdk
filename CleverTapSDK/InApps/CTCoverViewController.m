@@ -303,12 +303,21 @@
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
+            self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
         } else if (self.notification.imageLandscapeData) {
             self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
+        } else {
+            // No landscape image available — fall back to portrait asset.
+            if (self.notification.inAppImage) {
+                self.imageView.image = self.notification.inAppImage;
+            } else if (self.notification.imageData) {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+            }
+            self.imageView.accessibilityLabel = self.notification.contentDescription;
         }
-        self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }
-    
+
     if (self.notification.title) {
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
         self.titleLabel.backgroundColor = [UIColor clearColor];
