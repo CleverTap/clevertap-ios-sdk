@@ -93,27 +93,37 @@
     return [super preferredFocusEnvironments];
 }
 
-- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
-      withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
     [super didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
+    
     [coordinator addCoordinatedAnimations:^{
-        if (context.nextFocusedView) {
-            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        if (context.nextFocusedView == self.closeButton) {
+            self.closeButton.transform = CGAffineTransformMakeScale(1.15, 1.15);
         }
-        if (context.previouslyFocusedView) {
-            context.previouslyFocusedView.transform = CGAffineTransformIdentity;
+        if (context.previouslyFocusedView == self.closeButton) {
+            self.closeButton.transform = CGAffineTransformIdentity;
+        }
+        if (context.previouslyFocusedView == self.firstButton) {
+            self.firstButton.transform = CGAffineTransformIdentity;
+        }
+        if (context.previouslyFocusedView == self.secondButton) {
+            self.secondButton.transform = CGAffineTransformIdentity;
         }
     } completion:nil];
 }
 
 - (void)setupFocusGuides {
-    // Close-button guides
     if (!self.closeButton.isHidden) {
+        
+        id<UIFocusEnvironment> downTarget = !self.firstButton.isHidden
+            ? (id<UIFocusEnvironment>)self.firstButton
+            : (id<UIFocusEnvironment>)self.secondButton;
+
         UIFocusGuide *upGuide = [UIFocusGuide new];
         [self.view addLayoutGuide:upGuide];
         [NSLayoutConstraint activateConstraints:@[
-            [upGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor],
-            [upGuide.heightAnchor   constraintEqualToConstant:60.0],
+            [upGuide.bottomAnchor   constraintEqualToAnchor:self.buttonsContainer.topAnchor],
+            [upGuide.heightAnchor   constraintEqualToConstant:100.0],
             [upGuide.leadingAnchor  constraintEqualToAnchor:self.view.leadingAnchor],
             [upGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         ]];
@@ -121,19 +131,24 @@
 
         UIFocusGuide *downGuide = [UIFocusGuide new];
         [self.view addLayoutGuide:downGuide];
-        id<UIFocusEnvironment> downTarget = !self.firstButton.isHidden
-            ? (id<UIFocusEnvironment>)self.firstButton
-            : (id<UIFocusEnvironment>)self.secondButton;
         [NSLayoutConstraint activateConstraints:@[
-            [downGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:60.0],
+            [downGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:200.0],
             [downGuide.bottomAnchor   constraintEqualToAnchor:self.view.bottomAnchor],
-            [downGuide.leadingAnchor  constraintEqualToAnchor:self.closeButton.leadingAnchor constant:-20.0],
-            [downGuide.trailingAnchor constraintEqualToAnchor:self.closeButton.trailingAnchor constant:20.0],
+            [downGuide.leadingAnchor  constraintEqualToAnchor:self.view.trailingAnchor constant:-400.0],
+            [downGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         ]];
         downGuide.preferredFocusEnvironments = @[downTarget];
+        
+        UIFocusGuide *leftCloseGuide = [UIFocusGuide new];
+        [self.view addLayoutGuide:leftCloseGuide];
+        [NSLayoutConstraint activateConstraints:@[
+            [leftCloseGuide.topAnchor      constraintEqualToAnchor:self.view.topAnchor constant:60.0],
+            [leftCloseGuide.bottomAnchor   constraintEqualToAnchor:self.view.topAnchor constant:200.0],
+            [leftCloseGuide.leadingAnchor  constraintEqualToAnchor:self.view.trailingAnchor constant:-440.0],
+            [leftCloseGuide.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-370.0],
+        ]];
+        leftCloseGuide.preferredFocusEnvironments = @[downTarget];
     }
-
-    // Button-to-button guides (two-button mode only)
     if (self.firstButton.isHidden || self.secondButton.isHidden) return;
 
     UIFocusGuide *leftGuide = [UIFocusGuide new];

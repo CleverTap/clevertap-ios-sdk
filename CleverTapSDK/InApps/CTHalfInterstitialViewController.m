@@ -345,6 +345,15 @@
     }
     // Close button: XIB connects closeButtonTapped: via touchUpInside; add primaryActionTriggered for remote Select
     [self.closeButton addTarget:self action:@selector(closeButtonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
+
+    // Explicit VoiceOver traversal order: title → body → primary button → secondary button → close.
+    NSMutableArray *a11yElements = [NSMutableArray array];
+    if (self.titleLabel.text.length > 0)  [a11yElements addObject:self.titleLabel];
+    if (self.bodyLabel.text.length > 0)   [a11yElements addObject:self.bodyLabel];
+    if (!self.firstButton.isHidden)       [a11yElements addObject:self.firstButton];
+    if (!self.secondButton.isHidden)      [a11yElements addObject:self.secondButton];
+    if (!self.closeButton.isHidden)       [a11yElements addObject:self.closeButton];
+    self.view.accessibilityElements = a11yElements;
 #endif
 }
 
