@@ -1446,7 +1446,21 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 /*!
  @method
- 
+
+ @abstract
+ Clears any active mute state set by the backend, allowing the SDK to resume
+ normal event tracking and network operations immediately.
+
+ @discussion
+ The CleverTap backend can mute a client for a set duration (e.g., during a
+ detected abuse scenario). Call this method to override that mute and restore
+ normal SDK operation without waiting for the mute period to expire.
+ */
+- (void)unmute;
+
+/*!
+ @method
+
  @abstract
  Checks if a custom CleverTapID is valid
  */
