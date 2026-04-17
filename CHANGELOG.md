@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.6.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.6.0) (April 17, 2026)
+#### Added
+- **Picture-in-Picture (PiP) In-App Notifications:** Introduces Picture-in-Picture in-app notifications — a compact, draggable floating overlay that persists over app content. Supports image, GIF, and video media with configurable controls.
+- **InApp Media Support:** Adds GIF and video playback support across all in-app notification templates, enabling richer media experiences within the app.
+- **App Inbox Default Media View:** Introduces a fallback media view for App Inbox entries that lack a specified media orientation, rendering images, GIFs, video posters, and audio thumbnails at their natural aspect ratio.
+
 ### [Version 7.5.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.5.1) (March 4, 2026)
 #### Added
 - Adds deep link URL capture in InApp notification click events, providing consistent attribution with Push notifications. Supports button-level deep links for CTA clicks and template-level deep links for image-only and HTML templates.
