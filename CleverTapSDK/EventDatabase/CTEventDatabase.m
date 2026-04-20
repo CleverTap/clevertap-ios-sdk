@@ -9,6 +9,7 @@
 #import "CTEventDatabase.h"
 #import "CTConstants.h"
 #import "CTSystemClock.h"
+#import "CTPrivateStorageProvider.h"
 
 @interface CTEventDatabase()
 
@@ -480,6 +481,7 @@ normalizedEventName:(NSString *)normalizedEventName
 #pragma mark - Private methods
 
 - (void)openDatabase {
+    [CTPrivateStorageProvider performMigrationIfNeededForDatabase:@"CleverTap-Events.db"];
     NSString *databasePath = [self databasePath];
     void (^taskBlock)(void) = ^{
         if (sqlite3_open_v2([databasePath UTF8String], &self->_eventDatabase, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL) == SQLITE_OK) {
@@ -578,9 +580,7 @@ normalizedEventName:(NSString *)normalizedEventName
 }
 
 - (NSString *)databasePath {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    return [documentsDirectory stringByAppendingPathComponent:@"CleverTap-Events.db"];
+    return [CTPrivateStorageProvider pathForDatabaseFile:@"CleverTap-Events.db"];
 }
 
 @end

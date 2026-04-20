@@ -5,7 +5,7 @@
 #import "CTUserMO.h"
 #import "CTMessageMO.h"
 #import "CTInboxUtils.h"
-
+#import "CTPrivateStorageProvider.h"
 
 // Keep the persistent store coordinator static since the inbox file location is shared
 static NSPersistentStoreCoordinator *sharedCoordinator;
@@ -93,6 +93,9 @@ static dispatch_once_t coordinatorOnceToken;
 + (void)initializeSharedCoordinator {
     dispatch_once(&coordinatorOnceToken, ^{
         @try {
+            // Migrate Inbox sqlite file from Documents to Application Support
+            [CTPrivateStorageProvider performMigrationIfNeededForDatabase:@"CleverTap-Inbox.sqlite"];
+            
             // Load Core Data model
             NSURL *modelURL = [[CTInboxUtils bundle:self.class]
                                URLForResource:@"Inbox" withExtension:@"momd"];
@@ -109,10 +112,7 @@ static dispatch_once_t coordinatorOnceToken;
                                  initWithManagedObjectModel:mom];
             
             // Get store URL
-            NSFileManager *fileManager = [NSFileManager defaultManager];
-            NSURL *documentsURL = [[fileManager URLsForDirectory:NSDocumentDirectory
-                                                        inDomains:NSUserDomainMask] lastObject];
-            NSURL *storeURL = [documentsURL URLByAppendingPathComponent:@"CleverTap-Inbox.sqlite"];
+            NSURL *storeURL = [CTPrivateStorageProvider urlForDatabaseFile:@"CleverTap-Inbox.sqlite"];
             
             // Configure store options with WAL mode for better concurrency. This is backward compatible
             NSDictionary *options = @{
