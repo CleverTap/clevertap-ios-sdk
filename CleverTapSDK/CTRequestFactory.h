@@ -18,6 +18,9 @@
 + (CTRequest * _Nonnull)syncVarsRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params domain:(NSString * _Nonnull)domain;
 + (CTRequest * _Nonnull)syncTemplatesRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params domain:(NSString * _Nonnull)domain;
 + (CTRequest * _Nonnull)previewRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config url:(NSString * _Nonnull)url;
++ (CTRequest * _Nonnull)inboxV2FetchRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                               params:(id _Nullable)params
+                                               domain:(NSString * _Nonnull)domain;
 @end
 
 

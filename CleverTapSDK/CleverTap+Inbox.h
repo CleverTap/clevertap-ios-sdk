@@ -255,7 +255,28 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
 
 /*!
  @method
- 
+
+ @abstract
+ Record Notification Deleted for App Inbox.
+ Must be called before deleting the message so the message JSON is still available
+ for event serialisation. No-ops silently if the message is not found.
+ */
+- (void)recordInboxNotificationDeletedEventForID:(NSString *_Nonnull)messageId;
+
+/*!
+ @method
+
+ @abstract
+ Manually trigger an inbox refresh via /inbox/v2/getMessages.
+ callback(YES) — fetch was dispatched; new messages may arrive via registered update blocks.
+ callback(NO)  — throttled (< 5 min since last fetch) or inbox not initialised.
+ Pass nil if you do not need the completion signal.
+ */
+- (void)refreshInboxWithCallback:(CleverTapInboxSuccessBlock _Nullable)callback;
+
+/*!
+ @method
+
  @abstract
  This method dismisses the inbox controller
  */

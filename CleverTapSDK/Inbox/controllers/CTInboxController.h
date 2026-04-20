@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds;
 - (void)markReadMessageWithId:(NSString *)messageId;
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds;
+- (void)performExpiryPurge;
 
 @end
 

@@ -101,6 +101,34 @@ static const int kMaxTags = 3;
     [self addObservers];
     [self registerNibs];
     [self setUpInboxLayout];
+
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self
+                       action:@selector(_handlePullToRefresh:)
+             forControlEvents:UIControlEventValueChanged];
+    self.refreshControl = refreshControl;
+}
+
+- (void)_handlePullToRefresh:(UIRefreshControl *)sender {
+    if (![self.analyticsDelegate respondsToSelector:
+            @selector(inboxViewControllerDidRequestRefreshWithCallback:)]) {
+        [sender endRefreshing];
+        return;
+    }
+
+    __weak typeof(self) weakSelf = self;
+    NSTimer *watchdog = [NSTimer scheduledTimerWithTimeInterval:30.0 repeats:NO block:^(NSTimer * _Nonnull t) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weakSelf.refreshControl endRefreshing];
+        });
+    }];
+
+    [self.analyticsDelegate inboxViewControllerDidRequestRefreshWithCallback:^(BOOL success) {
+        [watchdog invalidate];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weakSelf.refreshControl endRefreshing];
+        });
+    }];
 }
 
 - (void)viewDidAppear:(BOOL)animated {

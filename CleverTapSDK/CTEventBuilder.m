@@ -242,6 +242,9 @@ static CTDataValidator *_eventDataValidator;
             id value = data[x];
             notif[x] = value;
         }
+        if (message.messageId) {
+            notif[@"_id"] = message.messageId;
+        }
         if (params) {
             [notif addEntriesFromDictionary:params];
         }

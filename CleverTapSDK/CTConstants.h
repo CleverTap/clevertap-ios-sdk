@@ -129,6 +129,12 @@ extern NSString *const kSessionId;
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
+#define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"
+#define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"
+#define CLTAP_INBOX_PENDING_DELETES_KEY_PREFIX @"CLTAP_inbox_pending_deletes_"
+#define CLTAP_INBOX_PENDING_READS_KEY_PREFIX @"CLTAP_inbox_pending_reads_"
+static const NSInteger kCTInboxFetchTypeInboxV2 = 7;
+static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"

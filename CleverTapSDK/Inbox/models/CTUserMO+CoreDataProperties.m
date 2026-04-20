@@ -108,6 +108,10 @@
             } else {
                 CleverTapLogStaticInternal(@"%@: already have message: %@, updating", self, message);
                 [msg setValue:message forKey:@"json"];
+                // Local read state wins — only promote to read if not already read locally.
+                if (!msg.isRead && [message[@"isRead"] boolValue]) {
+                    msg.isRead = YES;
+                }
                 haveUpdates = YES;
             }
             continue;

@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "CleverTap+Inbox.h"
 
 @protocol CleverTapInboxViewControllerDelegate;
 @class CleverTapInboxStyleConfig;
@@ -11,6 +12,12 @@
  Called when app inbox link is tapped for requesting push permission.
  */
 - (void)messageDidSelectForPushPermission:(BOOL)fallbackToSettings;
+@optional
+/**
+ Called when the user pulls to refresh. The callback must always be invoked
+ (throttled or success) so the refresh spinner can be ended.
+ */
+- (void)inboxViewControllerDidRequestRefreshWithCallback:(CleverTapInboxSuccessBlock _Nonnull)callback;
 @end
 
 @interface CleverTapInboxViewController ()

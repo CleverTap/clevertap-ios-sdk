@@ -375,6 +375,12 @@ static dispatch_once_t coordinatorOnceToken;
     [self _notifyUpdate];
 }
 
+- (void)performExpiryPurge {
+    [self.context performBlock:^{
+        [self _messagesFilteredByPredicate:nil];
+    }];
+}
+
 // Always call from inside context performBlock/performBlockAndWait
 - (NSArray<NSDictionary *> *)_messagesFilteredByPredicate:(NSPredicate *)predicate {
     NSTimeInterval now = (int)[[NSDate date] timeIntervalSince1970];
