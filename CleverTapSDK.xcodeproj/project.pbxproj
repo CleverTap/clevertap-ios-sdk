@@ -439,6 +439,10 @@
 		57CDEE412F163C4E001161F5 /* InAppDurationPartitioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5814D1832F96346200E3BEBA /* CTPrivateStorageProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 5814D1812F96346200E3BEBA /* CTPrivateStorageProvider.h */; };
+		5814D1842F96346200E3BEBA /* CTPrivateStorageProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 5814D1822F96346200E3BEBA /* CTPrivateStorageProvider.m */; };
+		5814D1852F96346200E3BEBA /* CTPrivateStorageProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 5814D1812F96346200E3BEBA /* CTPrivateStorageProvider.h */; };
+		5814D1862F96346200E3BEBA /* CTPrivateStorageProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 5814D1822F96346200E3BEBA /* CTPrivateStorageProvider.m */; };
 		5DCE8FADF7136FB54F52E985 /* CTInAppNotificationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = BA302D038C45C5590835082F /* CTInAppNotificationTest.m */; };
 		6000BB9914565AB7E0BADE91 /* CTProfileBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 86B31B1A29258B885EAFFB8C /* CTProfileBuilderTest.m */; };
 		616E08502C60FEB9CEE271EA /* CTInAppTimerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EB3252FE1750DCBAEC87778 /* CTInAppTimerTest.m */; };
@@ -1130,6 +1134,8 @@
 		57CDEE1D2F13D1B5001161F5 /* CTPropertyKeyValidator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPropertyKeyValidator.m; sourceTree = "<group>"; };
 		57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppDurationPartitioner.swift; sourceTree = "<group>"; };
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
+		5814D1812F96346200E3BEBA /* CTPrivateStorageProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTPrivateStorageProvider.h; sourceTree = "<group>"; };
+		5814D1822F96346200E3BEBA /* CTPrivateStorageProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPrivateStorageProvider.m; sourceTree = "<group>"; };
 		58E6C9F7C391AC2F28D91FA6 /* CTPropertyKeyValidatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPropertyKeyValidatorTest.m; sourceTree = "<group>"; };
 		5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shared_CleverTapSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPushPermissionSystemAppFunctionTest.m; sourceTree = "<group>"; };
@@ -2292,6 +2298,8 @@
 		D0C7BBBF207D82C0001345EF /* CleverTapSDK */ = {
 			isa = PBXGroup;
 			children = (
+				5814D1812F96346200E3BEBA /* CTPrivateStorageProvider.h */,
+				5814D1822F96346200E3BEBA /* CTPrivateStorageProvider.m */,
 				57B7E7A22F31413C00CF22E1 /* Profile */,
 				57CDEE1F2F13D1B5001161F5 /* Validation */,
 				57CDEE002F13D0DE001161F5 /* CTFlattenedEventData.h */,
@@ -2535,6 +2543,7 @@
 				57CDEE2F2F13D1B5001161F5 /* CTPropertyKeyValidator.h in Headers */,
 				57CDEE302F13D1B5001161F5 /* CTEventNameValidator.h in Headers */,
 				57CDEE322F13D1B5001161F5 /* CTValidationConfig.h in Headers */,
+				5814D1852F96346200E3BEBA /* CTPrivateStorageProvider.h in Headers */,
 				D014B8E120E2F9E9001E0780 /* CleverTap+SSLPinning.h in Headers */,
 				D014B91C20E2FBD1001E0780 /* CTCertificatePinning.h in Headers */,
 				48DC69B62D3FDF35000E7BE4 /* CTNotificationAction.h in Headers */,
@@ -2702,6 +2711,7 @@
 				D0213D50207D905800FE5740 /* CleverTapEventDetail.h in Headers */,
 				07B94550219EA39000D4C542 /* CleverTap+Inbox.h in Headers */,
 				6BD334EA2AF2A41F0099E33E /* CTBatchSentDelegateHelper.h in Headers */,
+				5814D1832F96346200E3BEBA /* CTPrivateStorageProvider.h in Headers */,
 				4EFC9E4F2DF9690D00104D52 /* CTEncryptionManager.h in Headers */,
 				4EFC9E502DF9690D00104D52 /* CTCryptMigrator.h in Headers */,
 				487C71A92D96CC150052986F /* CTAppRatingSystemAppFunction.h in Headers */,
@@ -3144,6 +3154,7 @@
 				4EB3638C2C087A8200C00AE2 /* CTUserInfoMigrator.m in Sources */,
 				D014B91D20E2FBD6001E0780 /* CTCertificatePinning.m in Sources */,
 				D014B90920E2FB71001E0780 /* CTLocalDataStore.m in Sources */,
+				5814D1862F96346200E3BEBA /* CTPrivateStorageProvider.m in Sources */,
 				D0BD75A7241769440006EE55 /* CleverTapProductConfig.m in Sources */,
 				57CDEE092F13D0DE001161F5 /* CTFlattenedEventData.m in Sources */,
 				D014B8EA20E2FA8D001E0780 /* CleverTapEventDetail.m in Sources */,
@@ -3385,6 +3396,7 @@
 				D0A6626E20801E7F00B403F3 /* CTDeviceInfo.m in Sources */,
 				6BD334EC2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */,
 				4EF390BA2F3373340097EE23 /* DelayedInAppStorageStrategy.swift in Sources */,
+				5814D1842F96346200E3BEBA /* CTPrivateStorageProvider.m in Sources */,
 				0797133A21A309720011C9A3 /* CTCarouselImageView.m in Sources */,
 				6BF5A59E2AD4303C00CDED20 /* CleverTap+InAppsResponseHandler.m in Sources */,
 				072F9E4321B14ECC00BC6313 /* CTInboxMessageActionView.m in Sources */,
