@@ -22,11 +22,11 @@ final class ViewController: UIViewController {
             CardItem(title: "Record Charged Event",        action: #selector(recordChargedEvent)),
             CardItem(title: "Record Custom Event",         action: #selector(recordCustomEvent))
         ]),
-        Section(title: "In-App Notifications", items: [
-            CardItem(title: "Trigger Alert In-App", action: #selector(triggerAlertInApp))
-        ]),
         Section(title: "App Inbox", items: [
             CardItem(title: "Show Inbox",   action: #selector(showInbox)),
+        ]),
+        Section(title: "In-App Notifications", items: [
+            CardItem(title: "Trigger In-App", action: #selector(triggerAlertInApp))
         ])
     ]
     private var collectionView: UICollectionView!
