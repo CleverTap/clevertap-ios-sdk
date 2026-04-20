@@ -11,7 +11,6 @@
 #import "CTConstants.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
-#import "CleverTapJSInterface.h"
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CTEventBuilder.h"
@@ -20,8 +19,11 @@
 #import "CleverTapURLDelegate.h"
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+#if !(TARGET_OS_TV)
 #import "CleverTapJSInterface.h"
 #import "CTInAppHTMLViewController.h"
+#import "CleverTapJSInterfacePrivate.h"
+#endif
 #import "CTInterstitialViewController.h"
 #import "CTHalfInterstitialViewController.h"
 #import "CTCoverViewController.h"
@@ -34,7 +36,6 @@
 #import "CleverTap+InAppNotifications.h"
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
-#import "CleverTapJSInterfacePrivate.h"
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
@@ -408,7 +409,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         // The in-app orientation support depends on the custom in-app presenter.
         return;
     }
-    
+
+#if TARGET_OS_TV
+    // tvOS has no rotation; orientation-based filtering does not apply.
+    return;
+#endif
+
     if (notification.hasPortrait && !notification.hasLandscape && [self deviceOrientationIsLandscape]) {
         notification.error = [NSString stringWithFormat:@"The InApp Notification supports %@ only, the app orientation is %@ dismissing the in-app.", @"portrait", @"landscape"];
         return;
@@ -422,20 +428,19 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
-    return nil;
+    return NO;
 #else
     return [CTUIUtils isDeviceOrientationLandscape];
 #endif
 }
 
 - (void)prepareNotification:(CTInAppNotification *)notification withCompletion:(void (^)(void))completionHandler {
-#if !(TARGET_OS_TV)
     if ([NSThread isMainThread]) {
         notification.error = [NSString stringWithFormat:@"[%@ prepareWithCompletionHandler] should not be called on the main thread", [self class]];
         completionHandler();
         return;
     }
-    
+
     if (notification.imageURL) {
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageURL contentType:notification.contentType];
         [notification setPreparedInAppImage:result.image inAppImageData:result.imageData error:result.error];
@@ -444,7 +449,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         ImageLoadingResult *result = [self loadImageWithURL:notification.imageUrlLandscape contentType:notification.landscapeContentType];
         [notification setPreparedInAppImageLandscape:result.image inAppImageLandscapeData:result.imageData error:result.error];
     }
-    
+
+#if !(TARGET_OS_TV)
     NSArray *urls = [[self.templatesManager fileArgsURLsForInAppData:notification.customTemplateInAppData] allObjects];
     if (urls.count > 0) {
         [self.fileDownloader downloadFiles:urls withCompletionBlock:^(NSDictionary<NSString *,NSNumber *> * _Nonnull status) {
@@ -458,9 +464,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         }];
         return;
     }
-    
 #endif
-    
+
     completionHandler();
 }
 
@@ -476,12 +481,14 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         if (loadError || !imageData) {
             result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
         } else {
+#if !(TARGET_OS_TV)
             if ([contentType isEqualToString:@"image/gif"]) {
                 SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
                 if (gif == nil) {
                     result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
                 }
             }
+#endif
             result.imageData = imageData;
         }
     }
@@ -597,12 +604,14 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     CTInAppDisplayViewController *controller;
     NSString *errorString = nil;
     switch (notification.inAppType) {
-        case CTInAppTypeHTML:
-            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
-            break;
         case CTInAppTypeInterstitial:
             controller = [[CTInterstitialViewController alloc] initWithNotification:notification];
             break;
+#if !(TARGET_OS_TV)
+        case CTInAppTypeHTML:
+            controller = [[CTInAppHTMLViewController alloc] initWithNotification:notification config:self.config];
+            break;
+#endif
         case CTInAppTypeHalfInterstitial:
             controller = [[CTHalfInterstitialViewController alloc] initWithNotification:notification];
             break;
@@ -627,6 +636,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
+#if !(TARGET_OS_TV)
         case CTInAppTypeCustom:
             currentlyDisplayingNotification = notification;
             if (![self.templatesManager presentNotification:notification
@@ -637,6 +647,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
                                notification.customTemplateInAppData.templateName];
             }
             break;
+#endif
         default:
             errorString = [NSString stringWithFormat:@"Unhandled notification type: %lu", (unsigned long)notification.inAppType];
             break;

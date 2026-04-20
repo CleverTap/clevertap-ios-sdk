@@ -281,7 +281,16 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     self.window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.75f];
     self.window.windowLevel = UIWindowLevelNormal;
     self.window.rootViewController = self;
+#if TARGET_OS_TV
+    self.previousKeyWindow = [CTUIUtils getKeyWindow];
+    [self.window makeKeyAndVisible];
+    // Force the focus engine to run immediately after the window becomes key so
+    // the VC's preferredFocusEnvironments is honoured from the very first frame.
+    [self setNeedsFocusUpdate];
+    [self updateFocusIfNeeded];
+#else
     [self.window setHidden:NO];
+#endif
     
     void (^completionBlock)(void) = ^ {
         if (self.delegate) {
@@ -317,6 +326,10 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
             return;
         }
         if (weakSelf.window) {
+#if TARGET_OS_TV
+            [weakSelf.previousKeyWindow makeKeyWindow];
+            weakSelf.previousKeyWindow = nil;
+#endif
             [weakSelf.window removeFromSuperview];
             weakSelf.window = nil;
         }
@@ -370,7 +383,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
-    return nil;
+    return YES;
 #else
     return [CTUIUtils isDeviceOrientationLandscape];
 #endif

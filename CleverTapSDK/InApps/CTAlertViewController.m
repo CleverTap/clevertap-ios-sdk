@@ -94,9 +94,13 @@
 }
 
 - (void)showFromWindow:(BOOL)animated {
-    
+
     if (!self.notification) return;
-    
+
+#if TARGET_OS_TV
+    NSLog(@"[CT-tvOS] showFromWindow: tvOS path entered, notification title: %@", self.notification.title);
+    [self showAlertFromTopViewController];
+#else
     if (@available(iOS 13, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
@@ -116,16 +120,108 @@
     self.window.rootViewController = self;
     [self.window makeKeyAndVisible];
     [self.window setHidden:NO];
-    
+
     void (^completionBlock)(void) = ^ {
         if (self.delegate) {
             [self.delegate notificationDidShow:self.notification];
         }
     };
-    
+
     self.window.alpha = 1.0;
     completionBlock();
+#endif
 }
+
+#if TARGET_OS_TV
+- (void)showAlertFromTopViewController {
+    NSLog(@"[CT-tvOS] showAlertFromTopViewController called, notification: %@", self.notification.title);
+
+    UIViewController *topVC = [self topViewController];
+    NSLog(@"[CT-tvOS] topViewController: %@", topVC);
+    if (!topVC) {
+        NSLog(@"[CT-tvOS] ERROR: No topViewController found, cannot present alert");
+        return;
+    }
+
+    NSLog(@"[CT-tvOS] Creating UIAlertController with title: %@, message: %@",
+          self.notification.title, self.notification.message);
+
+    UIAlertController *dialogBox = [UIAlertController
+                                    alertControllerWithTitle:self.notification.title
+                                    message:self.notification.message
+                                    preferredStyle:UIAlertControllerStyleAlert];
+
+    if (self.notification.buttons && self.notification.buttons.count > 0) {
+        NSLog(@"[CT-tvOS] Adding %lu buttons", (unsigned long)self.notification.buttons.count);
+        for (NSUInteger i = 0; i < self.notification.buttons.count && i < 3; i++) {
+            NSUInteger index = i;
+            UIAlertAction *button = [UIAlertAction
+                                     actionWithTitle:self.notification.buttons[i].text
+                                     style:UIAlertActionStyleDefault
+                                     handler:^(UIAlertAction * action) {
+                [self handleAlertButtonClickFromIndex:(int)index];
+            }];
+            [dialogBox addAction:button];
+        }
+    } else {
+        NSLog(@"[CT-tvOS] No buttons on notification");
+    }
+
+    if (self.delegate) {
+        [self.delegate notificationDidShow:self.notification];
+    }
+
+    NSLog(@"[CT-tvOS] Presenting alert on: %@", topVC);
+    [topVC presentViewController:dialogBox animated:YES completion:^{
+        NSLog(@"[CT-tvOS] Alert presentation completed");
+    }];
+}
+
+- (UIViewController *)topViewController {
+    UIWindow *keyWindow = nil;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    keyWindow = [CTUIUtils getSharedApplication].keyWindow;
+#pragma clang diagnostic pop
+    NSLog(@"[CT-tvOS] keyWindow from UIApplication: %@", keyWindow);
+
+    if (!keyWindow) {
+        if (@available(tvOS 13.0, *)) {
+            NSSet *scenes = [CTUIUtils getSharedApplication].connectedScenes;
+            NSLog(@"[CT-tvOS] connectedScenes count: %lu", (unsigned long)scenes.count);
+            for (UIScene *scene in scenes) {
+                NSLog(@"[CT-tvOS] scene: %@, state: %ld, isKindOfWindowScene: %d",
+                      scene, (long)scene.activationState, [scene isKindOfClass:[UIWindowScene class]]);
+                if ([scene isKindOfClass:[UIWindowScene class]]) {
+                    UIWindowScene *windowScene = (UIWindowScene *)scene;
+                    NSLog(@"[CT-tvOS] windowScene.windows count: %lu", (unsigned long)windowScene.windows.count);
+                    for (UIWindow *window in windowScene.windows) {
+                        NSLog(@"[CT-tvOS] window: %@, isKey: %d", window, window.isKeyWindow);
+                        if (window.isKeyWindow) {
+                            keyWindow = window;
+                            break;
+                        }
+                    }
+                    if (keyWindow) break;
+                }
+            }
+        }
+    }
+
+    if (!keyWindow) {
+        NSLog(@"[CT-tvOS] ERROR: No keyWindow found at all");
+        return nil;
+    }
+
+    UIViewController *topVC = keyWindow.rootViewController;
+    NSLog(@"[CT-tvOS] rootViewController: %@, presentedVC: %@", topVC, topVC.presentedViewController);
+    while (topVC.presentedViewController) {
+        topVC = topVC.presentedViewController;
+    }
+    return topVC;
+}
+#endif
 
 
 #pragma mark - Public

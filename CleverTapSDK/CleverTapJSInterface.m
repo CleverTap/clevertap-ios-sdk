@@ -1,3 +1,4 @@
+#if !(TARGET_OS_TV)
 #import "CleverTapJSInterface.h"
 #import "CleverTap.h"
 #import "CleverTapInstanceConfig.h"
@@ -125,3 +126,4 @@
 }
 
 @end
+#endif // !(TARGET_OS_TV)
