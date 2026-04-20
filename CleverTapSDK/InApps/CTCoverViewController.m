@@ -3,13 +3,14 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTUIUtils.h"
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 
 @interface CTCoverViewController ()
 
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
 @property (nonatomic, strong) IBOutlet UILabel *bodyLabel;
-@property (nonatomic, strong) IBOutlet UIImageView *imageView;
+@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
 @property (nonatomic, strong) IBOutlet UIButton *firstButton;
@@ -70,19 +71,31 @@
     // set image
     self.imageView.clipsToBounds = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-    
+
     if (![self deviceOrientationIsLandscape]) {
         if (self.notification.inAppImage) {
             self.imageView.image = self.notification.inAppImage;
         } else if (self.notification.imageData) {
-            self.imageView.image  = [UIImage imageWithData:self.notification.imageData];
+            // Support for GIFs
+            if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+                self.imageView.image = gif;
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
         } else if (self.notification.imageLandscapeData) {
-            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            // Support for GIFs in landscape
+            if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
+                self.imageView.image = gif;
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }

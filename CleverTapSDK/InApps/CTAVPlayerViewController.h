@@ -2,8 +2,16 @@
 
 @class CTInAppNotification;
 
+typedef void (^CTAVPlayerCTATapHandler)(void);
+
 @interface CTAVPlayerViewController : AVPlayerViewController
 
-- (instancetype)initWithNotification:(CTInAppNotification*)notification;
+@property (nonatomic, assign) BOOL muted;
+@property (nonatomic, assign) BOOL autoplay;
+@property (nonatomic, assign) BOOL loopVideo;
+@property (nonatomic, copy) CTAVPlayerCTATapHandler ctaTapHandler;
+@property (nonatomic, copy) dispatch_block_t videoDidFailHandler;
+
+- (instancetype)initWithNotification:(CTInAppNotification*)notification muted:(BOOL)muted autoplay:(BOOL)autoplay;
 
 @end

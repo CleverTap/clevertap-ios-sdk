@@ -80,8 +80,20 @@
 - (void)test_getQueryParameters_invalidURL{
     NSURL *url = nil;
     NSDictionary *params = [CTUriHelper getQueryParameters:url andDecode:false];
-    
+
     XCTAssertEqualObjects(params, @{});
+}
+
+- (void)test_getQueryParameters_withDecode_decodesPercentEncoding {
+    NSURL *url = [NSURL URLWithString:@"https://example.com?name=hello%20world"];
+    NSDictionary *params = [CTUriHelper getQueryParameters:url andDecode:YES];
+    XCTAssertEqualObjects(params[@"name"], @"hello world");
+}
+
+- (void)test_getQueryParameters_withoutDecode_keepsPercentEncoding {
+    NSURL *url = [NSURL URLWithString:@"https://example.com?name=hello%20world"];
+    NSDictionary *params = [CTUriHelper getQueryParameters:url andDecode:NO];
+    XCTAssertEqualObjects(params[@"name"], @"hello%20world");
 }
 
 @end

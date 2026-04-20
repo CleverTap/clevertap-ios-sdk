@@ -401,7 +401,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (buttonText == nil) {
         buttonText = @"";
     }
-    
+
     if (self.notification.isLocalInApp) {
         self.notification.actionExtras = @{CLTAP_NOTIFICATION_ID_TAG: campaignId, CLTAP_PROP_WZRK_CTA: buttonText};
         if  (index == 0) {
@@ -417,7 +417,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         }
         return;
     }
-    
+
     // For showing Push Permission through InApp Campaign, positive button type is "rfp".
     if (button.type == CTInAppActionTypeRequestForPermission) {
         if (self.delegate && [self.delegate respondsToSelector:@selector(handleInAppPushPrimer:fromViewController:withFallbackToSettings:)]) {
@@ -427,29 +427,43 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         }
         return;
     }
-    
+
+    // Build extras dictionary with CTA text and deep link (if present)
+    NSMutableDictionary *extras = [NSMutableDictionary dictionaryWithDictionary:@{
+        CLTAP_NOTIFICATION_ID_TAG: campaignId,
+        CLTAP_PROP_WZRK_CTA: buttonText
+    }];
+
+    // Extract deep link from button action for attribution
+    if (button.action.actionURL != nil) {
+        NSString *deepLink = button.action.actionURL.absoluteString;
+        if (deepLink.length > 0) {
+            extras[CLTAP_PROP_WZRK_DL] = deepLink;
+        }
+    }
+
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, CLTAP_PROP_WZRK_CTA: buttonText}];
+        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:extras];
     }
 }
 
 - (void)triggerInAppAction:(CTNotificationAction *)action callToAction:(NSString *)callToAction buttonId:(NSString *)buttonId {
     NSMutableDictionary *extras = [NSMutableDictionary new];
-    
+
     if (action.type == CTInAppActionTypeOpenURL) {
         NSString *urlString = [action.actionURL absoluteString];
         NSMutableDictionary *mutableParams = [CTInAppUtils getParametersFromURL:urlString];
-        
+
         if (mutableParams[@"params"]) {
             extras = [mutableParams[@"params"] mutableCopy];
-            
+
             // Use the url from the deeplink to update the action if such is set
             if (mutableParams[@"deeplink"]) {
                 action = [[CTNotificationAction alloc] initWithOpenURL:mutableParams[@"deeplink"]];
             }
         }
     }
-    
+
     // callToAction, buttonId and notification id take precedence over
     // the URL parameters if those have been set in the URL
     if (callToAction) {
@@ -463,6 +477,15 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         campaignId = @"";
     }
     extras[CLTAP_NOTIFICATION_ID_TAG] = campaignId;
+
+    // Extract deep link for attribution (template-level or action URL)
+    if (action.actionURL != nil) {
+        NSString *deepLink = action.actionURL.absoluteString;
+        if (deepLink.length > 0) {
+            extras[CLTAP_PROP_WZRK_DL] = deepLink;
+        }
+    }
+
     if (self.delegate &&
         [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
@@ -478,9 +501,23 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (campaignId == nil) {
         campaignId = @"";
     }
-    
+
+    // Build extras dictionary with empty CTA text (image-only) and deep link (if present)
+    NSMutableDictionary *extras = [NSMutableDictionary dictionaryWithDictionary:@{
+        CLTAP_NOTIFICATION_ID_TAG: campaignId,
+        CLTAP_PROP_WZRK_CTA: buttonText
+    }];
+
+    // Extract deep link from image tap action for attribution
+    if (button.action.actionURL != nil) {
+        NSString *deepLink = button.action.actionURL.absoluteString;
+        if (deepLink.length > 0) {
+            extras[CLTAP_PROP_WZRK_DL] = deepLink;
+        }
+    }
+
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:@{CLTAP_NOTIFICATION_ID_TAG:campaignId, CLTAP_PROP_WZRK_CTA: buttonText}];
+        [self.delegate handleNotificationAction:button.action forNotification:self.notification withExtras:extras];
     }
 }
 
