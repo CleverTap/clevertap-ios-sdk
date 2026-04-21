@@ -553,6 +553,9 @@ static BOOL sharedInstanceErrorLogged;
         
         [self _initFeatureFlags];
         [self _initProductConfig];
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+        [self _initInbox];
+#endif
         [self notifyUserProfileInitialized];
     }
     
@@ -3870,8 +3873,6 @@ static BOOL sharedInstanceErrorLogged;
             if (!self.inboxClickedDebounceMap) {
                 self.inboxClickedDebounceMap = [NSMutableDictionary new];
             }
-            [self.inboxController performExpiryPurge];
-            [self _fetchInboxV2WithCompletion:nil];
             [CTUtils runSyncMainQueue: ^{
                 callback(self.inboxController.isInitialized);
             }];
@@ -4096,6 +4097,33 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 #pragma mark Private
+
+- (void)_initInbox {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    if (_config.analyticsOnly) return;
+    if (sizeof(void*) == 4) return;
+
+    [self.dispatchQueueManager runSerialAsync:^{
+        if (self.inboxController) return;
+        if (!self.deviceInfo.deviceId) return;
+
+        self.inboxController = [[CTInboxController alloc]
+            initWithAccountId:[self.config.accountId copy]
+                         guid:[self.deviceInfo.deviceId copy]
+              encryptionLevel:self.config.encryptionLevel
+      previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel
+            encryptionManager:self.config.cryptManager];
+        self.inboxController.delegate = self;
+        if (!self.inboxViewedDebounceMap) {
+            self.inboxViewedDebounceMap = [NSMutableDictionary new];
+        }
+        if (!self.inboxClickedDebounceMap) {
+            self.inboxClickedDebounceMap = [NSMutableDictionary new];
+        }
+        [self.inboxController performExpiryPurge];
+        [self _fetchInboxV2WithCompletion:nil];
+    }];
+}
 
 - (void)_resetInbox {
     if (self.inboxController && self.inboxController.isInitialized && self.deviceInfo.deviceId) {
