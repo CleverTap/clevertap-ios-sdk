@@ -162,6 +162,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property(atomic, strong) CTInboxController *inboxController;
 @property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
 @property(atomic, assign) NSTimeInterval lastInboxRefreshTimestamp;
+@property(atomic, assign) BOOL disableInboxV2;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxViewedDebounceMap;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxClickedDebounceMap;
 @end
@@ -4298,6 +4299,12 @@ static BOOL sharedInstanceErrorLogged;
         if (completion) completion(NO);
         return;
     }
+    if (self.disableInboxV2) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 fetch skipped — API not enabled for this account", self);
+        if (completion) completion(NO);
+        return;
+    }
     if (!self.domainFactory.redirectDomain) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: InboxV2 fetch skipped — redirect domain not available", self);
@@ -4325,6 +4332,13 @@ static BOOL sharedInstanceErrorLogged;
         NSInteger statusCode = 0;
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
             statusCode = ((NSHTTPURLResponse *)response).statusCode;
+        }
+        if (statusCode == 403) {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
+            strongSelf.disableInboxV2 = YES;
+            if (completion) completion(NO);
+            return;
         }
         if (data) {
             id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
