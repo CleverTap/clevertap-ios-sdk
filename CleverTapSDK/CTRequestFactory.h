@@ -21,6 +21,10 @@
 + (CTRequest * _Nonnull)inboxV2FetchRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
                                                params:(id _Nullable)params
                                                domain:(NSString * _Nonnull)domain;
+
++ (CTRequest * _Nonnull)inboxV2NotificationEventRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                                           params:(id _Nullable)params
+                                                           domain:(NSString * _Nonnull)domain;
 @end
 
 

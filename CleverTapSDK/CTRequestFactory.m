@@ -52,6 +52,13 @@
     return [self _createPostRequestWithConfig:config params:params url:url];
 }
 
++ (CTRequest * _Nonnull)inboxV2NotificationEventRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                                           params:(id _Nullable)params
+                                                           domain:(NSString * _Nonnull)domain {
+    NSString *url = [self _urlWithDomain:domain andPath:@"inbox/v2/events"];
+    return [self _createPostRequestWithConfig:config params:params url:url];
+}
+
 + (CTRequest * _Nonnull)_createPostRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url {
     return [self _createPostRequestWithConfig:config params:params url:url additionalHeaders:nil];
 }

@@ -3996,7 +3996,6 @@ static BOOL sharedInstanceErrorLogged;
     if (!message) return;
 
     [self _addPendingDeleteForMessageId:messageId];
-    // V2 delete endpoint — blocked on Q-15 (backend contract TBD).
     [self _sendInboxDeleteForMessage:message];
 }
 
@@ -4389,9 +4388,58 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)_sendInboxDeleteForMessage:(CleverTapInboxMessage *)message {
-    // V2 delete endpoint is blocked on Q-15 (backend contract TBD).
-    CleverTapLogDebug(self.config.logLevel,
-        @"%@: Inbox: Notification Deleted pending — V2 delete endpoint not yet defined (Q-15)", self);
+    if (self.disableInboxV2) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: Notification Deleted skipped — InboxV2 API not enabled for this account", self);
+        return;
+    }
+    if (!self.domainFactory.redirectDomain) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: Notification Deleted skipped — redirect domain not available", self);
+        return;
+    }
+
+    NSString *domain = self.domainFactory.redirectDomain;
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+
+    [CTEventBuilder buildInboxMessageDeletedEventForMessage:message
+                                         andQueryParameters:nil
+                                          completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        if (!event) return;
+        if (errors) [self.validationResultStack pushValidationResults:errors];
+
+        NSMutableDictionary *eventWithType = [event mutableCopy];
+        eventWithType[@"type"] = @"event";
+        NSArray *params = @[meta, eventWithType];
+
+        CTRequest *request = [CTRequestFactory inboxV2NotificationEventRequestWithConfig:self.config
+                                                                                  params:params
+                                                                                  domain:domain];
+        __weak typeof(self) weakSelf = self;
+        [request onResponse:^(NSData *data, NSURLResponse *response) {
+            typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+            NSInteger statusCode = 0;
+            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                statusCode = ((NSHTTPURLResponse *)response).statusCode;
+            }
+            if (statusCode == 403) {
+                strongSelf.disableInboxV2 = YES;
+                CleverTapLogDebug(strongSelf.config.logLevel,
+                    @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
+                return;
+            }
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: Inbox: Notification Deleted event sent — status: %ld", strongSelf, (long)statusCode);
+        }];
+        [request onError:^(NSError *error) {
+            typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: Inbox: Notification Deleted event failed — error: %@", strongSelf, error.localizedDescription);
+        }];
+        [self.requestSender send:request];
+    }];
 }
 
 #pragma mark Inbox Pending Actions (R-15)
