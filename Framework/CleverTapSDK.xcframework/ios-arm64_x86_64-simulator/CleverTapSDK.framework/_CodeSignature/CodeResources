@@ -362,7 +362,7 @@
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		Hsgq9w47cb9IILIYh/QlzvFsMgw=
+		jcaog22lfvLSnNOEN23U7M5HEno=
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -382,7 +382,7 @@
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		kdnKn1QJHEl6u+SCVg32glevxEc=
+		Q9HJJMU+dn4MD68cnPwuEw8r3YY=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -1723,11 +1723,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Hsgq9w47cb9IILIYh/QlzvFsMgw=
+			jcaog22lfvLSnNOEN23U7M5HEno=
 			</data>
 			<key>hash2</key>
 			<data>
-			UiztKUoeGavZXVKzfIL2KRQ5uK3+LCjI3m0FN3FEQi8=
+			ELN9iTBs+5fG6aFtQCsEbLcbJoZdSlmKb8eI/gdB0Zc=
 			</data>
 		</dict>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -1778,11 +1778,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			kdnKn1QJHEl6u+SCVg32glevxEc=
+			Q9HJJMU+dn4MD68cnPwuEw8r3YY=
 			</data>
 			<key>hash2</key>
 			<data>
-			ua9WHlQ6Ec508A0jIlGJHkej8EslWoowtsSFF5D+thE=
+			Dp8DKxTKElVfagQTUfVQFWi1L5DBplvmZiEjRu0EVAE=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
