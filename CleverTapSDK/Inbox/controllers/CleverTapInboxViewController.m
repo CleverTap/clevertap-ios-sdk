@@ -546,6 +546,10 @@ static const int kMaxTags = 3;
             topOffset = 80.0 * multiplier;
             bottomOffset = 150.0 * multiplier;
             break;
+        case CTMediaPlayerCellTypeTopDefault:
+            topOffset = 60.0 * multiplier;
+            bottomOffset = 120.0 * multiplier;
+            break;
         case CTMediaPlayerCellTypeMiddleLandscape:
             topOffset = 75.0 * multiplier;
             bottomOffset = 100.0 * multiplier;
@@ -554,6 +558,10 @@ static const int kMaxTags = 3;
             topOffset = 125.0 * multiplier;
             bottomOffset = 150.0 * multiplier;
             break;
+        case CTMediaPlayerCellTypeMiddleDefault:
+            topOffset = 100.0 * multiplier;
+            bottomOffset = 130.0 * multiplier;
+            break;
         case CTMediaPlayerCellTypeBottomLandscape:
             topOffset = 100.0 * multiplier;
             bottomOffset = 50.0 * multiplier;
@@ -561,6 +569,10 @@ static const int kMaxTags = 3;
         case CTMediaPlayerCellTypeBottomPortrait:
             topOffset = 150.0 * multiplier;
             bottomOffset = 100.0 * multiplier;
+            break;
+        case CTMediaPlayerCellTypeBottomDefault:
+            topOffset = 120.0 * multiplier;
+            bottomOffset = 80.0 * multiplier;
             break;
         default:
             return NO;

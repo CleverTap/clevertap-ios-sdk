@@ -86,7 +86,7 @@ static const float kPageControlViewHeight = 30.f;
         if (itemView == nil){
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height;
-            itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationPortrait: [self orientationIsPortrait] imageDescription:imageDescription];
+            itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationKnown:YES orientationPortrait:[self orientationIsPortrait] imageDescription:imageDescription];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];

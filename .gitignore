@@ -39,3 +39,6 @@ Package.resolved
 
 Pods
 Podfile.lock
+
+.claude
+.claude/

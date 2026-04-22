@@ -26,7 +26,8 @@ static NSDictionary<NSNumber *, NSString *> *_inAppActionTypeTypeToStringMap;
             @"interstitial-image": @(CTInAppTypeInterstitialImage),
             @"half-interstitial-image": @(CTInAppTypeHalfInterstitialImage),
             @"cover-image": @(CTInAppTypeCoverImage),
-            @"custom-code": @(CTInAppTypeCustom)
+            @"custom-code": @(CTInAppTypeCustom),
+            @"pip": @(CTInAppTypePiP)
         };
     }
     return _inAppTypeMap;

@@ -24,6 +24,7 @@ static float captionHeight = 0.f;
 @property (nonatomic, strong) NSString *subcaptionColor;
 @property (nonatomic, strong) NSString *imageUrl;
 @property (nonatomic, assign) BOOL orientationPortrait;
+@property (nonatomic, assign) BOOL orientationKnown;
 
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *captionLabel;
@@ -48,6 +49,7 @@ static float captionHeight = 0.f;
                        subcaptionColor:(NSString * _Nullable)subcaptionColor
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
+                      orientationKnown:(BOOL)orientationKnown
                    orientationPortrait:(BOOL)orientationPortrait
                       imageDescription:(NSString * _Nonnull)imageDescription {
     
@@ -59,6 +61,7 @@ static float captionHeight = 0.f;
         self.captionColor = captionColor;
         self.subcaptionColor = subcaptionColor;
         self.actionUrl = actionUrl;
+        self.orientationKnown = orientationKnown;
         self.orientationPortrait = orientationPortrait;
         self.imageDescription = imageDescription;
         [self setup];
@@ -69,6 +72,7 @@ static float captionHeight = 0.f;
 - (instancetype _Nonnull)initWithFrame:(CGRect)frame
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
+                      orientationKnown:(BOOL)orientationKnown
                    orientationPortrait:(BOOL)orientationPortrait
                       imageDescription:(NSString * _Nonnull)imageDescription {
     
@@ -76,6 +80,7 @@ static float captionHeight = 0.f;
     if (self) {
         self.imageUrl = imageUrl;
         self.actionUrl = actionUrl;
+        self.orientationKnown = orientationKnown;
         self.orientationPortrait = orientationPortrait;
         self.imageDescription = imageDescription;
         [self setupImageOnly];
@@ -91,7 +96,7 @@ static float captionHeight = 0.f;
     
     // gyrations to draw a corresponding gray border below the image
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.f-kImageBorderWidth, 0.f-kImageBorderWidth, imageViewSize.width + (kImageBorderWidth*2), imageViewSize.height)];
-    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.contentMode = self.orientationKnown ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
     self.imageView.layer.masksToBounds = YES;
@@ -107,7 +112,7 @@ static float captionHeight = 0.f;
     
     // gyrations to draw a corresponding gray border below the image
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.f-kImageBorderWidth, 0.f-kImageBorderWidth, imageViewSize.width + (kImageBorderWidth*2), imageViewSize.height)];
-    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.contentMode = self.orientationKnown ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
     self.imageView.layer.masksToBounds = YES;
@@ -142,6 +147,10 @@ static float captionHeight = 0.f;
 
 - (void)loadImage {
     if (!self.imageUrl) return;
+    if (!self.orientationKnown) {
+        self.imageViewLandRatioConstraint.priority = 250;
+        self.imageViewPortRatioConstraint.priority = 250;
+    }
     [self.imageView ct_setImageWithURL:[NSURL URLWithString:self.imageUrl]
                       placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                options:CTWebImageRetryFailed context:@{CTWebImageContextStoreCacheType : @(CTImageCacheTypeMemory)}];

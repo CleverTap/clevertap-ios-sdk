@@ -253,10 +253,13 @@ class AESGCMCryptTests: XCTestCase {
         
         var errorBad: NSError?
         let encryptedBad = badCrypter.encryptString(testString, error: &errorBad)
-        
-        // We're not asserting specific behavior here because your implementation might handle
-        // these error cases differently. The point is to exercise the error paths in saveKeyToKeychain
-        // for code coverage purposes.
+
+        // The implementation either succeeds with a fallback or fails cleanly — assert one defined state
+        if errorBad != nil {
+            XCTAssertNil(encryptedBad, "Encrypted result should be nil when keychain tag causes an error")
+        } else {
+            XCTAssertNotNil(encryptedBad, "Encryption should succeed even if the keychain tag is problematic")
+        }
     }
     
     // MARK: - Performance Tests
