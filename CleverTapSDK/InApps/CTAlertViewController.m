@@ -136,10 +136,9 @@
 
     UIViewController *topVC = [self topViewController];
     if (!topVC) {
+        [self hide:NO];
         return;
     }
-
-          self.notification.title, self.notification.message);
 
     UIAlertController *dialogBox = [UIAlertController
                                     alertControllerWithTitle:self.notification.title

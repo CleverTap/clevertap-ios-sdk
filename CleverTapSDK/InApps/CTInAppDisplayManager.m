@@ -674,6 +674,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
     if (errorString) {
         CleverTapLogDebug(self.config.logLevel, @"%@: %@", self, errorString);
+        currentlyDisplayingNotification = nil;
+        [self _showInAppNotificationIfAny];
     }
 #endif
 }
