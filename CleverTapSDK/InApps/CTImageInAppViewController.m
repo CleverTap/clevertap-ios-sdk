@@ -39,19 +39,15 @@ static const CGFloat kSpacingConstant = 160.f;
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    // Force the card geometry every layout pass — prevents Auto Layout from overriding
-    // the frame-based positioning set up in layoutNotification.
-    CGFloat screenW = [UIScreen mainScreen].bounds.size.width;   // 1920
-    CGFloat screenH = [UIScreen mainScreen].bounds.size.height;  // 1080
+    CGFloat screenW = [UIScreen mainScreen].bounds.size.width;
+    CGFloat screenH = [UIScreen mainScreen].bounds.size.height;
     CGRect frame;
-    CGPoint closePt; // origin of the 44×44 close button
+    CGPoint closePt;
 
     if (self.notification.inAppType == CTInAppTypeCoverImage) {
-        // Full-screen card
         frame   = CGRectMake(0, 0, screenW, screenH);
         closePt = CGPointMake(screenW - 15.0f - 44.0f, 15.0f);
     } else if (self.notification.inAppType == CTInAppTypeHalfInterstitialImage) {
-        // Smaller centered card — 50% width × 50% height
         CGFloat cW = screenW * 0.50f;        // 960
         CGFloat cH = screenH * 0.50f;        // 540
         CGFloat cX = (screenW - cW) * 0.5f; // 480
@@ -59,7 +55,6 @@ static const CGFloat kSpacingConstant = 160.f;
         frame   = CGRectMake(cX, cY, cW, cH);
         closePt = CGPointMake(cX + cW - 15.0f, cY - 15.0f);
     } else {
-        // CTInAppTypeInterstitialImage — same geometry as Interstitial
         CGFloat margin = 160.0f;
         CGFloat cW = screenW * 0.70f;           // 1344
         CGFloat cH = screenH - 2.0f * margin;   // 760
@@ -114,9 +109,6 @@ static const CGFloat kSpacingConstant = 160.f;
     self.closeButton.hidden = !self.notification.showCloseButton;
 
 #if TARGET_OS_TV
-    // Deactivate all XIB constraints on root view that involve containerView or closeButton,
-    // then switch both to frame-based layout. viewWillLayoutSubviews re-applies the frame on
-    // every layout pass so Auto Layout can never claw back control.
     NSMutableArray *toDeactivate = [NSMutableArray array];
     for (NSLayoutConstraint *c in self.view.constraints) {
         if (c.firstItem == self.containerView || c.secondItem == self.containerView ||
@@ -148,8 +140,6 @@ static const CGFloat kSpacingConstant = 160.f;
     [self setUpImage];
 
 #if TARGET_OS_TV
-    // Close button: XIB connects closeButtonTapped: via touchUpInside;
-    // add primaryActionTriggered so the Siri Remote Select button also works.
     [self.closeButton addTarget:self action:@selector(closeButtonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
 #endif
 }

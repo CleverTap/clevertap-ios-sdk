@@ -399,6 +399,7 @@
     // Cover layout).  Filtering hidden elements prevents VoiceOver from announcing invisible
     // controls and trapping focus inside a non-interactive element.
     NSMutableArray *a11yElements = [NSMutableArray array];
+    if (self.imageView)                   [a11yElements addObject:self.imageView];
     if (self.titleLabel.text.length > 0)  [a11yElements addObject:self.titleLabel];
     if (self.bodyLabel.text.length > 0)   [a11yElements addObject:self.bodyLabel];
     if (!self.firstButton.isHidden)       [a11yElements addObject:self.firstButton];

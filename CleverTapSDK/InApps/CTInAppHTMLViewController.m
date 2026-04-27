@@ -1,3 +1,4 @@
+#include <TargetConditionals.h>
 #if !(TARGET_OS_TV)
 #import <WebKit/WebKit.h>
 #import "CTInAppHTMLViewController.h"
