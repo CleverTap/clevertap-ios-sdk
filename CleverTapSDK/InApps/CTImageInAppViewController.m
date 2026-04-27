@@ -124,6 +124,7 @@ static const CGFloat kSpacingConstant = 160.f;
             [toDeactivate addObject:c];
         }
     }
+    [toDeactivate addObjectsFromArray:self.closeButton.constraints];
     [NSLayoutConstraint deactivateConstraints:toDeactivate];
     self.containerView.translatesAutoresizingMaskIntoConstraints = YES;
     self.closeButton.translatesAutoresizingMaskIntoConstraints = YES;

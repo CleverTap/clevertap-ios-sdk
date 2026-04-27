@@ -440,22 +440,14 @@
 		57CDEE412F163C4E001161F5 /* InAppDurationPartitioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		585327522F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327512F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib */; };
 		585327532F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327512F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib */; };
-		585327562F8CC40000F0C75C /* CTFooterViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327542F8CC40000F0C75C /* CTFooterViewController~tvOS.xib */; };
-		585327572F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327552F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib */; };
 		585327582F8CC40000F0C75C /* CTFooterViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327542F8CC40000F0C75C /* CTFooterViewController~tvOS.xib */; };
 		585327592F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327552F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib */; };
-		5853275B2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */; };
 		5853275C2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */; };
 		5853275E2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */; };
-		5853275F2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */; };
 		585327632F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */; };
 		585327642F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */; };
 		585327652F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */; };
-		585327662F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */; };
-		585327672F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */; };
-		585327682F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */; };
 		5853AB012F8E000000000001 /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB478217F6427008F0FAB /* CTDismissButton.m */; };
 		5853AB022F8E000000000002 /* CTHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB479217F6427008F0FAB /* CTHeaderViewController.m */; };
 		5853AB032F8E000000000003 /* CTHalfInterstitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47C217F6427008F0FAB /* CTHalfInterstitialViewController.m */; };
@@ -3016,8 +3008,6 @@
 				071EB4D5217F6427008F0FAB /* CTCoverImageViewController~iphoneport.xib in Resources */,
 				07D86D4722269638009EE610 /* CTHeaderViewController~ipadland.xib in Resources */,
 				071EB4ED217F6427008F0FAB /* CTInterstitialImageViewController~iphoneport.xib in Resources */,
-				585327562F8CC40000F0C75C /* CTFooterViewController~tvOS.xib in Resources */,
-				585327572F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib in Resources */,
 				071EB4DB217F6427008F0FAB /* ic_play@1x.png in Resources */,
 				071EB507217F6427008F0FAB /* CTFooterViewController~iphoneport.xib in Resources */,
 				4ECD84082F62A39D00CE5B45 /* inapp_cta.png in Resources */,
@@ -3044,8 +3034,6 @@
 				48D6ACAF2F8C0B5D00A17777 /* ct_pip_mute@2x.png in Resources */,
 				48D6ACB02F8C0B5D00A17777 /* ct_pip_speaker@2x.png in Resources */,
 				07D86D43222695B7009EE610 /* CTCoverImageViewController~ipadland.xib in Resources */,
-				585327522F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib in Resources */,
-				5853275B2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib in Resources */,
 				07FD65A4223BCB8200A845B7 /* CTCoverViewController~ipadland.xib in Resources */,
 				071EB4F2217F6427008F0FAB /* CTCoverViewController~iphoneport.xib in Resources */,
 				3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */,
@@ -3074,10 +3062,6 @@
 				6B0063BB2B18EC9E0063BF79 /* image_interstitial.html in Resources */,
 				07238E43221E7A3E0012DFAE /* CTInboxIconMessageCell~land.xib in Resources */,
 				07B94543219EA34300D4C542 /* CleverTapInboxViewController.xib in Resources */,
-				5853275F2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */,
-				585327662F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */,
-				585327672F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */,
-				585327682F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */,
 				07238E3F221E7A100012DFAE /* CTCarouselMessageCell~land.xib in Resources */,
 				07B9453D219EA34300D4C542 /* CTInboxSimpleMessageCell~port.xib in Resources */,
 				070229A9220831CB0093CA41 /* ct_default_video.png in Resources */,

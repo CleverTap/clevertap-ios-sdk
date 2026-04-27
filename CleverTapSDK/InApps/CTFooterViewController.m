@@ -20,7 +20,7 @@
 - (void)layoutNotification {
     [super layoutNotification];
 #if TARGET_OS_TV
-    // Frame-based layout: full-width bar pinned to bottom of the 1920x1080 screen.
+    self.containerView.translatesAutoresizingMaskIntoConstraints = YES;
     CGFloat screenW = [UIScreen mainScreen].bounds.size.width;
     CGFloat screenH = [UIScreen mainScreen].bounds.size.height;
     CGFloat barH = 200.0f;

@@ -327,7 +327,12 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         }
         if (weakSelf.window) {
 #if TARGET_OS_TV
-            [weakSelf.previousKeyWindow makeKeyWindow];
+            if (weakSelf.previousKeyWindow) {
+                [weakSelf.previousKeyWindow makeKeyWindow];
+            } else {
+                UIWindow *fallback = [[UIApplication sharedApplication].windows firstObject];
+                [fallback makeKeyAndVisible];
+            }
             weakSelf.previousKeyWindow = nil;
 #endif
             [weakSelf.window removeFromSuperview];

@@ -1,3 +1,4 @@
+#include <TargetConditionals.h>
 #if !(TARGET_OS_TV)
 #import "CleverTapJSInterface.h"
 #import "CleverTap.h"

@@ -156,16 +156,12 @@
             }];
             [dialogBox addAction:button];
         }
-    } else {
-        NSLog(@"[CT-tvOS] No buttons on notification");
-    }
-
-    if (self.delegate) {
-        [self.delegate notificationDidShow:self.notification];
     }
 
     [topVC presentViewController:dialogBox animated:YES completion:^{
-        NSLog(@"[CT-tvOS] Alert presentation completed");
+        if (self.delegate) {
+            [self.delegate notificationDidShow:self.notification];
+        }
     }];
 }
 

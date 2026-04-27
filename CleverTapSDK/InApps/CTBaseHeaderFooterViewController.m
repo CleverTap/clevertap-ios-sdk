@@ -441,11 +441,21 @@ typedef enum {
 - (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
     for (UIPress *press in presses) {
         if (press.type == UIPressTypeMenu) {
-            [self hide:NO];
+            [self tappedDismiss];
             return;
         }
     }
     [super pressesEnded:presses withEvent:event];
+}
+
+- (void)pressesCancelled:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    for (UIPress *press in presses) {
+        if (press.type == UIPressTypeMenu) {
+            [self tappedDismiss];
+            return;
+        }
+    }
+    [super pressesCancelled:presses withEvent:event];
 }
 
 #endif // TARGET_OS_TV
