@@ -2598,7 +2598,6 @@ static BOOL sharedInstanceErrorLogged;
                 }
                 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-                NSLog(@"[CT-tvOS] About to call handleInAppResponse, keys: %@", [(NSDictionary *)jsonResp allKeys]);
                 [self handleInAppResponse:jsonResp];
 #endif
                 
