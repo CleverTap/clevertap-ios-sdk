@@ -3992,6 +3992,11 @@ static BOOL sharedInstanceErrorLogged;
             @"%@: Inbox: skipping Deleted event — message %@ not found", self, messageId);
         return;
     }
+    if (![self.inboxController isV2MessageId:messageId]) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Deleted event — message %@ is not a V2 message", self, messageId);
+        return;
+    }
     CleverTapInboxMessage *message = [[CleverTapInboxMessage alloc] initWithJSON:msgJSON];
     if (!message) return;
 
@@ -4286,6 +4291,10 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 
+    // Persist all V2 message IDs from this response; prune IDs no longer returned by server.
+    [self.inboxController addV2MessageIds:[responseIds allObjects]];
+    [self.inboxController pruneV2MessageIdsNotInSet:responseIds];
+
     if (filtered.count > 0) {
         [self.inboxController updateMessages:filtered];
     }
@@ -4429,6 +4438,7 @@ static BOOL sharedInstanceErrorLogged;
                     @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
                 return;
             }
+            [strongSelf.inboxController removeV2MessageId:message.messageId];
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: Inbox: Notification Deleted event sent — status: %ld", strongSelf, (long)statusCode);
         }];

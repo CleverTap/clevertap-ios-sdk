@@ -133,6 +133,7 @@ extern NSString *const kSessionId;
 #define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"
 #define CLTAP_INBOX_PENDING_DELETES_KEY_PREFIX @"CLTAP_inbox_pending_deletes_"
 #define CLTAP_INBOX_PENDING_READS_KEY_PREFIX @"CLTAP_inbox_pending_reads_"
+#define CLTAP_INBOX_V2_IDS_KEY_PREFIX @"CLTAP_inbox_v2_ids_"
 static const NSInteger kCTInboxFetchTypeInboxV2 = 7;
 static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"

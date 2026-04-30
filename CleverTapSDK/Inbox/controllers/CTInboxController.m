@@ -5,6 +5,7 @@
 #import "CTUserMO.h"
 #import "CTMessageMO.h"
 #import "CTInboxUtils.h"
+#import "CTPreferences.h"
 
 
 // Keep the persistent store coordinator static since the inbox file location is shared
@@ -492,6 +493,51 @@ static dispatch_once_t coordinatorOnceToken;
         return [self.encryptionManager isTextAESGCMEncrypted:jsonString];
     }
     return NO;
+}
+
+#pragma mark - V2 Message IDs
+
+- (NSString *)_v2MessageIdsKey {
+    return [NSString stringWithFormat:@"%@%@_%@",
+            CLTAP_INBOX_V2_IDS_KEY_PREFIX, self.accountId, self.guid];
+}
+
+- (BOOL)isV2MessageId:(NSString *)messageId {
+    if (!messageId) return NO;
+    NSArray *stored = [CTPreferences getObjectForKey:[self _v2MessageIdsKey]];
+    return stored ? [stored containsObject:messageId] : NO;
+}
+
+- (void)addV2MessageIds:(NSArray<NSString *> *)messageIds {
+    if (!messageIds.count) return;
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key] ?: @[];
+    NSMutableSet *merged = [NSMutableSet setWithArray:existing];
+    [merged addObjectsFromArray:messageIds];
+    [CTPreferences putObject:[merged allObjects] forKey:key];
+}
+
+- (void)removeV2MessageId:(NSString *)messageId {
+    if (!messageId) return;
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key];
+    if (!existing) return;
+    NSMutableArray *updated = [existing mutableCopy];
+    [updated removeObject:messageId];
+    [CTPreferences putObject:updated forKey:key];
+}
+
+- (void)pruneV2MessageIdsNotInSet:(NSSet<NSString *> *)responseIds {
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key];
+    if (!existing) return;
+    NSMutableArray *updated = [NSMutableArray arrayWithCapacity:existing.count];
+    for (NSString *msgId in existing) {
+        if ([responseIds containsObject:msgId]) {
+            [updated addObject:msgId];
+        }
+    }
+    [CTPreferences putObject:updated forKey:key];
 }
 
 #pragma mark - Delegate Notification
