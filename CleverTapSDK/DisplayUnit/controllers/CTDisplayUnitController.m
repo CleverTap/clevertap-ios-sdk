@@ -2,7 +2,7 @@
 #import "CTPreferences.h"
 
 @interface CTDisplayUnitController() {
-    
+
 }
 
 @property (nonatomic, copy, readonly) NSString *accountId;
@@ -24,8 +24,29 @@
     return self;
 }
 
+#pragma mark - CleverTapDisplayUnitCache
+
+- (NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits {
+    NSArray *units = self.displayUnits;
+    return units ?: @[];
+}
+
+- (CleverTapDisplayUnit *)getDisplayUnitForID:(NSString *)unitID {
+    if (unitID.length == 0) return nil;
+    for (CleverTapDisplayUnit *displayUnit in self.displayUnits) {
+        if ([displayUnit.unitID isEqualToString:unitID]) {
+            return displayUnit;
+        }
+    }
+    return nil;
+}
+
 - (void)updateDisplayUnits:(NSArray<NSDictionary *> *)displayUnits {
     [self _updateDisplayUnits:displayUnits];
+}
+
+- (void)reset {
+    _displayUnits = nil;
 }
 
 // be sure to call off the main thread
@@ -37,18 +58,11 @@
         [units addObject:displayUnit];
     }
     _displayUnits = units;
-    [self notifyUpdate];
 }
 
 - (NSArray *)displayUnits {
     if (!self.isInitialized) return nil;
     return _displayUnits;
-}
-
-- (void)notifyUpdate {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(displayUnitsDidUpdate)]) {
-        [self.delegate displayUnitsDidUpdate];
-    }
 }
 
 @end

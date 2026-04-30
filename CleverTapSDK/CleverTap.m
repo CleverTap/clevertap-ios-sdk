@@ -78,6 +78,7 @@ static NSArray *sslCertNames;
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
+#import "CleverTapDisplayUnitCache.h"
 #endif
 
 #import "CTBatchSentDelegate.h"
@@ -171,8 +172,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @end
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-@interface CleverTap () <CTDisplayUnitDelegate> {}
-@property (nonatomic, strong) CTDisplayUnitController *displayUnitController;
+@interface CleverTap () {}
+@property (nonatomic, strong) id<CleverTapDisplayUnitCache> displayUnitCache;
 @property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
 @end
 #endif
@@ -2463,7 +2464,8 @@ static BOOL sharedInstanceErrorLogged;
             [self initializeDisplayUnitWithCallback:^(BOOL success) {
                 if (success) {
                     NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
-                    [self.displayUnitController updateDisplayUnits:displayUnits];
+                    [self.displayUnitCache updateDisplayUnits:displayUnits];
+                    [self _notifyDisplayUnitsUpdated];
                 }
             }];
         }
@@ -4200,26 +4202,39 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)initializeDisplayUnitWithCallback:(CleverTapDisplayUnitSuccessBlock)callback {
     [self.dispatchQueueManager runSerialAsync:^{
-        if (self.displayUnitController) {
+        if (self.displayUnitCache) {
             [CTUtils runSyncMainQueue: ^{
-                callback(self.displayUnitController.isInitialized);
+                callback([self _isDisplayUnitCacheInitialized]);
             }];
             return;
         }
         if (self.deviceInfo.deviceId) {
-            self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-            self.displayUnitController.delegate = self;
+            self.displayUnitCache = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
             [CTUtils runSyncMainQueue: ^{
-                callback(self.displayUnitController.isInitialized);
+                callback([self _isDisplayUnitCacheInitialized]);
             }];
         }
     }];
 }
 
+- (BOOL)_isDisplayUnitCacheInitialized {
+    if ([self.displayUnitCache isKindOfClass:[CTDisplayUnitController class]]) {
+        return ((CTDisplayUnitController *)self.displayUnitCache).isInitialized;
+    }
+    return self.displayUnitCache != nil;
+}
+
 - (void)_resetDisplayUnit {
-    if (self.displayUnitController && self.displayUnitController.isInitialized && self.deviceInfo.deviceId) {
-        self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-        self.displayUnitController.delegate = self;
+    if ([self.displayUnitCache isKindOfClass:[CTDisplayUnitController class]]
+        && ((CTDisplayUnitController *)self.displayUnitCache).isInitialized
+        && self.deviceInfo.deviceId) {
+        self.displayUnitCache = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
+    }
+}
+
+- (void)_notifyDisplayUnitsUpdated {
+    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
+        [self.displayUnitDelegate displayUnitsUpdated:[self.displayUnitCache getAllDisplayUnits]];
     }
 }
 
@@ -4237,12 +4252,6 @@ static BOOL sharedInstanceErrorLogged;
 
 - (id<CleverTapDisplayUnitDelegate>)displayUnitDelegate {
     return _displayUnitDelegate;
-}
-
-- (void)displayUnitsDidUpdate {
-    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
-        [self.displayUnitDelegate displayUnitsUpdated:self.displayUnitController.displayUnits];
-    }
 }
 
 - (BOOL)didHandleDisplayUnitTestFromPushNotificaton:(NSDictionary*)notification {
@@ -4271,7 +4280,8 @@ static BOOL sharedInstanceErrorLogged;
                 @try {
                     [self initializeDisplayUnitWithCallback:^(BOOL success) {
                         if (success) {
-                            [self.displayUnitController updateDisplayUnits:displayUnits];
+                            [self.displayUnitCache updateDisplayUnits:displayUnits];
+                            [self _notifyDisplayUnitsUpdated];
                         }
                     }];
                 } @catch (NSException *e) {
@@ -4296,24 +4306,15 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark Display Unit Public
 
 - (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
-    return self.displayUnitController.displayUnits;
+    return [self.displayUnitCache getAllDisplayUnits];
 }
 
 - (CleverTapDisplayUnit *_Nullable)getDisplayUnitForID:(NSString *)unitID {
-    for (CleverTapDisplayUnit *displayUnit in self.displayUnitController.displayUnits) {
-        if ([displayUnit.unitID isEqualToString:unitID]) {
-            @try {
-                return displayUnit;
-            } @catch (NSException *e) {
-                CleverTapLogDebug(_config.logLevel, @"Error getting display unit: %@", e.debugDescription);
-            }
-        }
-    };
-    return nil;
+    return [self.displayUnitCache getDisplayUnitForID:unitID];
 }
 
 - (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
-    // get the display unit data
+    // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
 #if !defined(CLEVERTAP_TVOS)
     [self.dispatchQueueManager runSerialAsync:^{
