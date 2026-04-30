@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 @class CleverTapDisplayUnitContent;
+@protocol CleverTapDisplayUnitCache;
 
 /*!
  
@@ -147,12 +148,34 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
 
 /*!
  @method
- 
+
  @abstract
  Record Notification Clicked for display unit.
- 
+
  @param unitID       unique id of the display unit
  */
 - (void)recordDisplayUnitClickedEventForID:(NSString *_Nonnull)unitID;
+
+/*!
+ @method
+
+ @abstract
+ Replaces the SDK's display-unit cache with the supplied implementation.
+ Pass `nil` to clear the reference (subsequent server responses will lazily
+ install a fresh default cache).
+
+ The new instance receives subsequent `updateDisplayUnits:` calls (e.g. from
+ server responses) and serves all lookup sites: `getAllDisplayUnits`,
+ `getDisplayUnitForID:`, `recordDisplayUnitViewedEventForID:`, and
+ `recordDisplayUnitClickedEventForID:`.
+
+ Implementations must be thread-safe. The display-unit delegate registered
+ via `-setDisplayUnitDelegate:` fires only for server-pipeline activity —
+ replacing the cache or mutating its contents from outside the SDK does not
+ synthesise a delegate fire.
+
+ @since 7.x.0
+ */
+- (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache;
 
 @end

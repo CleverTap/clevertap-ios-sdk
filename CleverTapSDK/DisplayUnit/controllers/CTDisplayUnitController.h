@@ -1,25 +1,30 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap+DisplayUnit.h"
+#import "CleverTapDisplayUnitCache.h"
 
-@protocol CTDisplayUnitDelegate <NSObject>
-@required
-- (void)displayUnitsDidUpdate;
-@end
+NS_ASSUME_NONNULL_BEGIN
 
-@interface CTDisplayUnitController : NSObject
+/*!
+ Default `CleverTapDisplayUnitCache` implementation, populated by the SDK's
+ server-response pipeline.
+ */
+@interface CTDisplayUnitController : NSObject <CleverTapDisplayUnitCache>
 
 @property (nonatomic, assign, readonly) BOOL isInitialized;
-@property (nonatomic, copy, readonly) NSArray <CleverTapDisplayUnit *> * _Nullable displayUnits;
+@property (nonatomic, copy, readonly, nullable) NSArray<CleverTapDisplayUnit *> *displayUnits;
 
-@property (nonatomic, weak) id<CTDisplayUnitDelegate> _Nullable delegate;
-
-- (instancetype _Nullable ) init __unavailable;
+- (instancetype)init __unavailable;
 
 // blocking, call off main thread
-- (instancetype _Nullable)initWithAccountId:(NSString *_Nonnull)accountId
-                                       guid:(NSString *_Nonnull)guid;
+- (nullable instancetype)initWithAccountId:(NSString *)accountId
+                                      guid:(NSString *)guid;
 
-- (void)updateDisplayUnits:(NSArray<NSDictionary*> *_Nullable)displayUnits;
+// CleverTapDisplayUnitCache
+- (NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits;
+- (nullable CleverTapDisplayUnit *)getDisplayUnitForID:(NSString *)unitID;
+- (void)updateDisplayUnits:(nullable NSArray<NSDictionary *> *)displayUnits;
+- (void)reset;
 
 @end
 
+NS_ASSUME_NONNULL_END
