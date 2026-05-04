@@ -243,7 +243,7 @@ static CTDataValidator *_eventDataValidator;
             notif[x] = value;
         }
         if (message.messageId) {
-            notif[@"_id"] = message.messageId;
+            notif[@"wzrk_mid"] = message.messageId;
         }
         if (params) {
             [notif addEntriesFromDictionary:params];
