@@ -4352,7 +4352,7 @@ static BOOL sharedInstanceErrorLogged;
             id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
             if (jsonResp && [jsonResp isKindOfClass:[NSDictionary class]]) {
                 CleverTapLogDebug(strongSelf.config.logLevel,
-                    @"%@: InboxV2 fetch response received — status: %ld", strongSelf, (long)statusCode);
+                    @"%@: InboxV2 fetch response received — response: %@", strongSelf, jsonResp);
                 [strongSelf.dispatchQueueManager runSerialAsync:^{
                     [strongSelf handleAppInboxV2Response:jsonResp];
                 }];
@@ -4375,6 +4375,9 @@ static BOOL sharedInstanceErrorLogged;
             @"%@: InboxV2 fetch failed — error: %@", strongSelf, error.localizedDescription);
         if (completion) completion(NO);
     }];
+    NSString *fetchJsonBody = [CTUtils jsonObjectToString:params];
+    NSString *fetchEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/getMessages", domain];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, fetchJsonBody, fetchEndpoint);
     [self.requestSender send:request];
 }
 
@@ -4448,6 +4451,9 @@ static BOOL sharedInstanceErrorLogged;
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: Inbox: Notification Deleted event failed — error: %@", strongSelf, error.localizedDescription);
         }];
+        NSString *deleteJsonBody = [CTUtils jsonObjectToString:params];
+        NSString *deleteEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/events", domain];
+        CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, deleteJsonBody, deleteEndpoint);
         [self.requestSender send:request];
     }];
 }
