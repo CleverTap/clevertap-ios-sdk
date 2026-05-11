@@ -4330,9 +4330,13 @@ static BOOL sharedInstanceErrorLogged;
     };
     NSArray *params = @[meta, fetchEvent];
 
+    NSString *fetchEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/getMessages?os=iOS&t=%@&z=%@",
+                               domain, self.deviceInfo.sdkVersion, self.config.accountId];
+    fetchEndpoint = [fetchEndpoint stringByAppendingFormat:@"&ts=%d", (int)[[[NSDate alloc] init] timeIntervalSince1970]];
+
     CTRequest *request = [CTRequestFactory inboxV2FetchRequestWithConfig:self.config
                                                                   params:params
-                                                                  domain:domain];
+                                                                     url:fetchEndpoint];
     __weak typeof(self) weakSelf = self;
     [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
         typeof(self) strongSelf = weakSelf;
@@ -4376,7 +4380,6 @@ static BOOL sharedInstanceErrorLogged;
         if (completion) completion(NO);
     }];
     NSString *fetchJsonBody = [CTUtils jsonObjectToString:params];
-    NSString *fetchEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/getMessages", domain];
     CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, fetchJsonBody, fetchEndpoint);
     [self.requestSender send:request];
 }
@@ -4411,51 +4414,61 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
 
+    if (!message.messageId || !message.campaignId) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: deleteMessages skipped — missing messageId or campaignId", self);
+        return;
+    }
+
     NSString *domain = self.domainFactory.redirectDomain;
     NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
 
-    [CTEventBuilder buildInboxMessageDeletedEventForMessage:message
-                                         andQueryParameters:nil
-                                          completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
-        if (!event) return;
-        if (errors) [self.validationResultStack pushValidationResults:errors];
+    NSString *pivot = message.json[CLTAP_NOTIFICATION_PIVOT] ?: CLTAP_NOTIFICATION_PIVOT_DEFAULT;
+    NSDictionary *messageEntry = @{
+        @"wzrk_mid": message.messageId,
+        @"wzrk_id": message.campaignId,
+        CLTAP_NOTIFICATION_PIVOT: pivot
+    };
+    NSDictionary *deleteBody = @{
+        @"type": @"deleteMessages",
+        @"messages": @[messageEntry]
+    };
+    NSArray *params = @[meta, deleteBody];
 
-        NSMutableDictionary *eventWithType = [event mutableCopy];
-        eventWithType[@"type"] = @"event";
-        NSArray *params = @[meta, eventWithType];
+    NSString *deleteEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/deleteMessages?os=iOS&t=%@&z=%@",
+                                domain, self.deviceInfo.sdkVersion, self.config.accountId];
+    deleteEndpoint = [deleteEndpoint stringByAppendingFormat:@"&ts=%d", (int)[[[NSDate alloc] init] timeIntervalSince1970]];
 
-        CTRequest *request = [CTRequestFactory inboxV2NotificationEventRequestWithConfig:self.config
-                                                                                  params:params
-                                                                                  domain:domain];
-        __weak typeof(self) weakSelf = self;
-        [request onResponse:^(NSData *data, NSURLResponse *response) {
-            typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) return;
-            NSInteger statusCode = 0;
-            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-                statusCode = ((NSHTTPURLResponse *)response).statusCode;
-            }
-            if (statusCode == 403) {
-                strongSelf.disableInboxV2 = YES;
-                CleverTapLogDebug(strongSelf.config.logLevel,
-                    @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
-                return;
-            }
-            [strongSelf.inboxController removeV2MessageId:message.messageId];
+    CTRequest *request = [CTRequestFactory inboxV2DeleteMessagesRequestWithConfig:self.config
+                                                                           params:params
+                                                                              url:deleteEndpoint];
+    __weak typeof(self) weakSelf = self;
+    [request onResponse:^(NSData *data, NSURLResponse *response) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSInteger statusCode = 0;
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            statusCode = ((NSHTTPURLResponse *)response).statusCode;
+        }
+        if (statusCode == 403) {
+            strongSelf.disableInboxV2 = YES;
             CleverTapLogDebug(strongSelf.config.logLevel,
-                @"%@: Inbox: Notification Deleted event sent — status: %ld", strongSelf, (long)statusCode);
-        }];
-        [request onError:^(NSError *error) {
-            typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) return;
-            CleverTapLogDebug(strongSelf.config.logLevel,
-                @"%@: Inbox: Notification Deleted event failed — error: %@", strongSelf, error.localizedDescription);
-        }];
-        NSString *deleteJsonBody = [CTUtils jsonObjectToString:params];
-        NSString *deleteEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/events", domain];
-        CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, deleteJsonBody, deleteEndpoint);
-        [self.requestSender send:request];
+                @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
+            return;
+        }
+        [strongSelf.inboxController removeV2MessageId:message.messageId];
+        CleverTapLogDebug(strongSelf.config.logLevel,
+            @"%@: Inbox: deleteMessages sent — status: %ld", strongSelf, (long)statusCode);
     }];
+    [request onError:^(NSError *error) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        CleverTapLogDebug(strongSelf.config.logLevel,
+            @"%@: Inbox: deleteMessages failed — error: %@", strongSelf, error.localizedDescription);
+    }];
+    NSString *deleteJsonBody = [CTUtils jsonObjectToString:params];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, deleteJsonBody, deleteEndpoint);
+    [self.requestSender send:request];
 }
 
 #pragma mark Inbox Pending Actions (R-15)

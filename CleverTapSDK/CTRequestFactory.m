@@ -47,15 +47,13 @@
 
 + (CTRequest * _Nonnull)inboxV2FetchRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
                                                params:(id _Nullable)params
-                                               domain:(NSString * _Nonnull)domain {
-    NSString *url = [self _urlWithDomain:domain andPath:@"inbox/v2/getMessages"];
+                                                  url:(NSString * _Nonnull)url {
     return [self _createPostRequestWithConfig:config params:params url:url];
 }
 
-+ (CTRequest * _Nonnull)inboxV2NotificationEventRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
-                                                           params:(id _Nullable)params
-                                                           domain:(NSString * _Nonnull)domain {
-    NSString *url = [self _urlWithDomain:domain andPath:@"inbox/v2/events"];
++ (CTRequest * _Nonnull)inboxV2DeleteMessagesRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                                        params:(id _Nullable)params
+                                                           url:(NSString * _Nonnull)url {
     return [self _createPostRequestWithConfig:config params:params url:url];
 }
 

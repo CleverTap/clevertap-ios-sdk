@@ -20,11 +20,11 @@
 + (CTRequest * _Nonnull)previewRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config url:(NSString * _Nonnull)url;
 + (CTRequest * _Nonnull)inboxV2FetchRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
                                                params:(id _Nullable)params
-                                               domain:(NSString * _Nonnull)domain;
+                                                  url:(NSString * _Nonnull)url;
 
-+ (CTRequest * _Nonnull)inboxV2NotificationEventRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
-                                                           params:(id _Nullable)params
-                                                           domain:(NSString * _Nonnull)domain;
++ (CTRequest * _Nonnull)inboxV2DeleteMessagesRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                                        params:(id _Nullable)params
+                                                           url:(NSString * _Nonnull)url;
 @end
 
 
