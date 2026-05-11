@@ -18,6 +18,10 @@
  (throttled or success) so the refresh spinner can be ended.
  */
 - (void)inboxViewControllerDidRequestRefreshWithCallback:(CleverTapInboxSuccessBlock _Nonnull)callback;
+/**
+ Returns the current set of inbox messages to display after a refresh.
+ */
+- (NSArray<CleverTapInboxMessage *> * _Nonnull)inboxViewControllerGetMessages;
 @end
 
 @interface CleverTapInboxViewController ()

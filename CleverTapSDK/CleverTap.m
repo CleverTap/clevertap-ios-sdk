@@ -4226,6 +4226,10 @@ static BOOL sharedInstanceErrorLogged;
     [self refreshInboxWithCallback:callback];
 }
 
+- (NSArray<CleverTapInboxMessage *> *)inboxViewControllerGetMessages {
+    return [self getAllInboxMessages];
+}
+
 - (void)recordInboxMessageStateEvent:(BOOL)clicked
                           forMessage:(CleverTapInboxMessage *)message andQueryParameters:(NSDictionary *)params {
     

@@ -127,6 +127,17 @@ static const int kMaxTags = 3;
         [watchdog invalidate];
         dispatch_async(dispatch_get_main_queue(), ^{
             [weakSelf.refreshControl endRefreshing];
+            if (success && [weakSelf.analyticsDelegate respondsToSelector:@selector(inboxViewControllerGetMessages)]) {
+                NSArray *updatedMessages = [weakSelf.analyticsDelegate inboxViewControllerGetMessages];
+                weakSelf.messages = updatedMessages;
+                if (weakSelf.selectedSegmentIndex > 0 && weakSelf.selectedSegmentIndex < (int)weakSelf.tags.count) {
+                    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF.tagString CONTAINS[c] %@", weakSelf.tags[weakSelf.selectedSegmentIndex]];
+                    weakSelf.filterMessages = [updatedMessages filteredArrayUsingPredicate:predicate];
+                } else {
+                    weakSelf.filterMessages = updatedMessages;
+                }
+                [weakSelf _reloadTableView];
+            }
         });
     }];
 }
