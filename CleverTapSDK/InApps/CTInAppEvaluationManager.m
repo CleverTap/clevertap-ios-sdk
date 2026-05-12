@@ -222,10 +222,14 @@
     }];
     //Strategy-specific TTL update (only if context allows)
     if(shouldUpdateTTLForThisContext && [strategy shouldUpdateTTL]) {
+        NSMutableArray *updatedInApps = [NSMutableArray arrayWithCapacity:selectedInApps.count];
         for (NSDictionary *inApp in selectedInApps) {
-            NSMutableDictionary  *mutableInApp = [inApp mutableCopy];
+            NSMutableDictionary *mutableInApp = [inApp mutableCopy];
             [self.inAppStore updateTTL:mutableInApp];
+            [updatedInApps addObject:mutableInApp];
         }
+        [self.inAppStore storeClientSideInApps:updatedInApps];
+        return updatedInApps;
     }
     return selectedInApps;
 }
