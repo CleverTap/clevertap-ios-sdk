@@ -3881,18 +3881,26 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
+- (NSSet<NSString *> *)_locallyDeletedV2MessageIds {
+    NSArray *retryIds = [[self _retryDeleteEntries] valueForKey:@"wzrk_mid"];
+    NSSet *confirmed = [self _confirmedDeleteMessageIds];
+    NSMutableSet *deleted = [NSMutableSet setWithArray:retryIds];
+    [deleted unionSet:confirmed];
+    return deleted;
+}
+
 - (NSInteger)getInboxMessageCount {
     if (![self _isInboxInitialized]) {
         return -1;
     }
-    return self.inboxController.count;
+    return (NSInteger)[self getAllInboxMessages].count;
 }
 
 - (NSInteger)getInboxMessageUnreadCount {
     if (![self _isInboxInitialized]) {
         return -1;
     }
-    return self.inboxController.unreadCount;
+    return (NSInteger)[self getUnreadInboxMessages].count;
 }
 
 - (NSArray<CleverTapInboxMessage *> * _Nonnull )getAllInboxMessages {
@@ -3900,14 +3908,16 @@ static BOOL sharedInstanceErrorLogged;
     if (![self _isInboxInitialized]) {
         return all;
     }
+    NSSet *deleted = [self _locallyDeletedV2MessageIds];
     for (NSDictionary *m in self.inboxController.messages) {
         @try {
-            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+            NSString *msgId = m[@"_id"];
+            if (msgId && [deleted containsObject:msgId]) continue;
+            [all addObject:[[CleverTapInboxMessage alloc] initWithJSON:m]];
         } @catch (NSException *e) {
             CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
         }
-    };
-    
+    }
     return all;
 }
 
@@ -3916,18 +3926,24 @@ static BOOL sharedInstanceErrorLogged;
     if (![self _isInboxInitialized]) {
         return all;
     }
+    NSSet *deleted = [self _locallyDeletedV2MessageIds];
     for (NSDictionary *m in self.inboxController.unreadMessages) {
         @try {
-            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+            NSString *msgId = m[@"_id"];
+            if (msgId && [deleted containsObject:msgId]) continue;
+            [all addObject:[[CleverTapInboxMessage alloc] initWithJSON:m]];
         } @catch (NSException *e) {
             CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
         }
-    };
+    }
     return all;
 }
 
-- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString * _Nonnull)messageId {
+- (CleverTapInboxMessage * _Nullable)getInboxMessageForId:(NSString * _Nonnull)messageId {
     if (![self _isInboxInitialized]) {
+        return nil;
+    }
+    if ([[self _locallyDeletedV2MessageIds] containsObject:messageId]) {
         return nil;
     }
     NSDictionary *m = [self.inboxController messageForId:messageId];
