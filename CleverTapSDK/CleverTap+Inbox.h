@@ -253,15 +253,6 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  */
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId;
 
-/*!
- @method
-
- @abstract
- Record Notification Deleted for App Inbox.
- Must be called before deleting the message so the message JSON is still available
- for event serialisation. No-ops silently if the message is not found.
- */
-- (void)recordInboxNotificationDeletedEventForID:(NSString *_Nonnull)messageId;
 
 /*!
  @method
