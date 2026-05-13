@@ -1167,10 +1167,10 @@ static BOOL sharedInstanceErrorLogged;
         [self scheduleQueueFlush];
         CleverTapLogInternal(self.config.logLevel, @"%@: app is in foreground", self);
     }
-    
+
     // Set flag based on actual state
     self.isAppForeground = isActuallyInForeground;
-    
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (isActuallyInForeground && !_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
@@ -4129,23 +4129,7 @@ static BOOL sharedInstanceErrorLogged;
     if (sizeof(void*) == 4) return;
 
     [self.dispatchQueueManager runSerialAsync:^{
-        if (self.inboxController) return;
         if (!self.deviceInfo.deviceId) return;
-
-        self.inboxController = [[CTInboxController alloc]
-            initWithAccountId:[self.config.accountId copy]
-                         guid:[self.deviceInfo.deviceId copy]
-              encryptionLevel:self.config.encryptionLevel
-      previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel
-            encryptionManager:self.config.cryptManager];
-        self.inboxController.delegate = self;
-        if (!self.inboxViewedDebounceMap) {
-            self.inboxViewedDebounceMap = [NSMutableDictionary new];
-        }
-        if (!self.inboxClickedDebounceMap) {
-            self.inboxClickedDebounceMap = [NSMutableDictionary new];
-        }
-        [self.inboxController performExpiryPurge];
         [self _purgeExpiredConfirmedDeletes];
         [self _flushPendingRetryDeletes];
         [self _fetchInboxV2WithCompletion:nil];
@@ -4321,13 +4305,20 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 
-    // Persist all V2 message IDs from this response; prune IDs no longer returned by server.
-    [self.inboxController addV2MessageIds:[responseIds allObjects]];
-    [self.inboxController pruneV2MessageIdsNotInSet:responseIds];
+    NSSet *capturedResponseIds = [responseIds copy];
+    NSArray *capturedFiltered = [filtered copy];
 
-    if (filtered.count > 0) {
-        [self.inboxController updateMessages:filtered];
-    }
+    [self initializeInboxWithCallback:^(BOOL success) {
+        if (!success) return;
+        [self.dispatchQueueManager runSerialAsync:^{
+            [self.inboxController performExpiryPurge];
+            [self.inboxController addV2MessageIds:[capturedResponseIds allObjects]];
+            [self.inboxController pruneV2MessageIdsNotInSet:capturedResponseIds];
+            if (capturedFiltered.count > 0) {
+                [self.inboxController updateMessages:capturedFiltered];
+            }
+        }];
+    }];
 }
 
 - (void)_fetchInboxV2WithCompletion:(CleverTapInboxSuccessBlock)completion {
