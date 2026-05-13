@@ -540,6 +540,38 @@ static dispatch_once_t coordinatorOnceToken;
     [CTPreferences putObject:updated forKey:key];
 }
 
+- (void)deleteAbsentPersistentV2MessagesFromResponseIds:(NSSet<NSString *> *)responseIds {
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *storedIds = [CTPreferences getObjectForKey:key];
+    if (!storedIds || storedIds.count == 0) return;
+
+    NSMutableArray *idsToKeep = [NSMutableArray new];
+    __block NSMutableArray<CTMessageMO *> *msgsToDelete = [NSMutableArray new];
+
+    [self.context performBlockAndWait:^{
+        for (NSString *msgId in storedIds) {
+            if ([responseIds containsObject:msgId]) {
+                [idsToKeep addObject:msgId];
+                continue;
+            }
+            CTMessageMO *msg = [self _messageForId:msgId];
+            if (!msg) continue;
+            if (msg.expires == 0) {
+                // Non-persistent — keep in DB and preferences
+                [idsToKeep addObject:msgId];
+            } else {
+                // Persistent but absent from server — delete
+                [msgsToDelete addObject:msg];
+            }
+        }
+        if (msgsToDelete.count > 0) {
+            [self _deleteMessages:msgsToDelete];
+        }
+    }];
+
+    [CTPreferences putObject:idsToKeep forKey:key];
+}
+
 #pragma mark - Delegate Notification
 
 - (void)_notifyUpdate {

@@ -4313,7 +4313,7 @@ static BOOL sharedInstanceErrorLogged;
         [self.dispatchQueueManager runSerialAsync:^{
             [self.inboxController performExpiryPurge];
             [self.inboxController addV2MessageIds:[capturedResponseIds allObjects]];
-            [self.inboxController pruneV2MessageIdsNotInSet:capturedResponseIds];
+            [self.inboxController deleteAbsentPersistentV2MessagesFromResponseIds:capturedResponseIds];
             if (capturedFiltered.count > 0) {
                 [self.inboxController updateMessages:capturedFiltered];
             }
