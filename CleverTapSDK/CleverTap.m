@@ -4349,6 +4349,72 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 }
 
+- (void)recordDisplayUnitElementClickedEventForID:(NSString *)unitID
+                                        elementID:(NSString *)elementID
+                             additionalProperties:(NSDictionary *)additionalProperties {
+    CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    if (elementID.length > 0) {
+        params[@"wzrk_element_id"] = elementID;
+    }
+    NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
+    if (sanitized) {
+        [params addEntriesFromDictionary:sanitized];
+    }
+#if !defined(CLEVERTAP_TVOS)
+    [self.dispatchQueueManager runSerialAsync:^{
+        [CTEventBuilder buildDisplayViewStateEvent:YES
+                                   forDisplayUnit:displayUnit
+                               andQueryParameters:params
+                                completionHandler:^(NSDictionary *event,
+                                                    NSArray<CTValidationResult*> *errors) {
+            if (event) {
+                self.wzrkParams = [self ct_filteredWzrkFields:event[CLTAP_EVENT_DATA]];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            }
+            if (errors) {
+                [self.validationResultStack pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
+/// Strip @c wzrk_-prefixed keys, @c NSNull, and unsupported types from a
+/// caller-supplied dict. The @c wzrk_ namespace is reserved for server-
+/// controlled attribution fields; this keeps it one-way (server → client).
+- (nullable NSDictionary *)ct_sanitizedDisplayUnitProperties:(nullable NSDictionary *)props {
+    if (props.count == 0) return nil;
+    NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:props.count];
+    for (NSString *key in props) {
+        if (![key isKindOfClass:[NSString class]] || key.length == 0) continue;
+        if ([CTUtils doesString:key startWith:CLTAP_WZRK_PREFIX]) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Dropping reserved wzrk_* key from additionalProperties: %@",
+                self, key);
+            continue;
+        }
+        id value = props[key];
+        if (value == nil || value == [NSNull null]) continue;
+        out[key] = value;
+    }
+    return out.count > 0 ? [out copy] : nil;
+}
+
+/// Project only @c wzrk_* fields back out of the merged event data — so the
+/// existing @c wzrkParams contract (used for batch-header attachment as
+/// @c wzrk_ref) is unchanged; caller-supplied non-wzrk extras must not ride
+/// on subsequent batch headers.
+- (NSDictionary *)ct_filteredWzrkFields:(NSDictionary *)merged {
+    NSMutableDictionary *out = [NSMutableDictionary dictionary];
+    for (NSString *k in merged) {
+        if ([CTUtils doesString:k startWith:CLTAP_WZRK_PREFIX]) {
+            out[k] = merged[k];
+        }
+    }
+    return [out copy];
+}
+
 #endif
 
 
