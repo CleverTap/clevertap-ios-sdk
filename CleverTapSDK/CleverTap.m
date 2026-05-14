@@ -3973,38 +3973,42 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)recordInboxNotificationViewedEventForID:(NSString * _Nonnull)messageId {
-    CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
-    if (!msg) {
-        CleverTapLogDebug(self.config.logLevel,
-            @"%@: Inbox: skipping Viewed — message %@ not found or expired", self, messageId);
-        return;
-    }
-    if (msg.isRead) {
-        CleverTapLogDebug(self.config.logLevel,
-            @"%@: Inbox: skipping Viewed — message %@ already read", self, messageId);
-        return;
-    }
-    if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME forMessageId:messageId]) {
-        CleverTapLogDebug(self.config.logLevel,
-            @"%@: Inbox: skipping Viewed — duplicate within debounce window for %@", self, messageId);
-        return;
-    }
-    [self recordInboxMessageStateEvent:NO forMessage:msg andQueryParameters:nil];
+    [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
+        if (!msg) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Inbox: skipping Viewed — message %@ not found or expired", self, messageId);
+            return;
+        }
+        if (msg.isRead) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Inbox: skipping Viewed — message %@ already read", self, messageId);
+            return;
+        }
+        if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME forMessageId:messageId]) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Inbox: skipping Viewed — duplicate within debounce window for %@", self, messageId);
+            return;
+        }
+        [self recordInboxMessageStateEvent:NO forMessage:msg andQueryParameters:nil];
+    }];
 }
 
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId {
-    CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
-    if (!msg) {
-        CleverTapLogDebug(self.config.logLevel,
-            @"%@: Inbox: skipping Clicked — message %@ not found or expired", self, messageId);
-        return;
-    }
-    if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_CLICKED_EVENT_NAME forMessageId:messageId]) {
-        CleverTapLogDebug(self.config.logLevel,
-            @"%@: Inbox: skipping Clicked — duplicate within debounce window for %@", self, messageId);
-        return;
-    }
-    [self recordInboxMessageStateEvent:YES forMessage:msg andQueryParameters:nil];
+    [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
+        if (!msg) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Inbox: skipping Clicked — message %@ not found or expired", self, messageId);
+            return;
+        }
+        if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_CLICKED_EVENT_NAME forMessageId:messageId]) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Inbox: skipping Clicked — duplicate within debounce window for %@", self, messageId);
+            return;
+        }
+        [self recordInboxMessageStateEvent:YES forMessage:msg andQueryParameters:nil];
+    }];
 }
 
 
@@ -4012,6 +4016,18 @@ static BOOL sharedInstanceErrorLogged;
     if (!self.inboxController || !self.inboxController.isInitialized) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: Inbox refresh skipped — inbox not initialised", self);
+        if (callback) callback(NO);
+        return;
+    }
+    if (self.disableInboxV2) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 fetch skipped — API not enabled for this account", self);
+        if (callback) callback(NO);
+        return;
+    }
+    if (!self.domainFactory.redirectDomain) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 fetch skipped — redirect domain not available", self);
         if (callback) callback(NO);
         return;
     }
@@ -4382,8 +4398,12 @@ static BOOL sharedInstanceErrorLogged;
                     @"%@: InboxV2 fetch response received — response: %@", strongSelf, jsonResp);
                 [strongSelf.dispatchQueueManager runSerialAsync:^{
                     [strongSelf handleAppInboxV2Response:jsonResp];
+                    if (completion) {
+                        [CTUtils runSyncMainQueue:^{
+                            completion(YES);
+                        }];
+                    }
                 }];
-                if (completion) completion(YES);
             } else {
                 CleverTapLogDebug(strongSelf.config.logLevel,
                     @"%@: InboxV2 fetch failed — could not parse response, status: %ld", strongSelf, (long)statusCode);

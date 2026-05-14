@@ -259,33 +259,6 @@ static CTDataValidator *_eventDataValidator;
     }
 }
 
-+ (void)buildInboxMessageDeletedEventForMessage:(CleverTapInboxMessage *)message
-                             andQueryParameters:(NSDictionary *)params
-                              completionHandler:(void(^)(NSDictionary *event, NSArray<CTValidationResult*> *errors))completion {
-    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
-    NSMutableDictionary *notif = [[NSMutableDictionary alloc] init];
-    @try {
-        NSDictionary *data = message.json;
-        for (NSString *x in [data allKeys]) {
-            if (![CTUtils doesString:x startWith:@"wzrk_"])
-                continue;
-            id value = data[x];
-            notif[x] = value;
-        }
-        if (message.messageId) {
-            notif[@"_id"] = message.messageId;
-        }
-        if (params) {
-            [notif addEntriesFromDictionary:params];
-        }
-        event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_DELETED_EVENT_NAME;
-        event[CLTAP_EVENT_DATA] = notif;
-        completion(event, nil);
-    } @catch (NSException *e) {
-        completion(nil, nil);
-    }
-}
-
 /**
  * Raises the Native Display Clicked event, if clicked is true,
  * otherwise the Native Display Viewed event, if clicked is false.

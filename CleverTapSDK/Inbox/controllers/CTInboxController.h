@@ -40,7 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isV2MessageId:(NSString *)messageId;
 - (void)addV2MessageIds:(NSArray<NSString *> *)messageIds;
 - (void)removeV2MessageId:(NSString *)messageId;
-- (void)pruneV2MessageIdsNotInSet:(NSSet<NSString *> *)responseIds;
 - (void)deleteAbsentPersistentV2MessagesFromResponseIds:(NSSet<NSString *> *)responseIds;
 
 @end

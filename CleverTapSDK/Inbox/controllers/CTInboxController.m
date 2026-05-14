@@ -369,6 +369,7 @@ static dispatch_once_t coordinatorOnceToken;
     if (!messages || messages.count == 0) return;
     
     for (CTMessageMO *msg in messages) {
+        [self removeV2MessageId:msg.id];
         [self.context deleteObject:msg];
     }
     
@@ -524,19 +525,6 @@ static dispatch_once_t coordinatorOnceToken;
     if (!existing) return;
     NSMutableArray *updated = [existing mutableCopy];
     [updated removeObject:messageId];
-    [CTPreferences putObject:updated forKey:key];
-}
-
-- (void)pruneV2MessageIdsNotInSet:(NSSet<NSString *> *)responseIds {
-    NSString *key = [self _v2MessageIdsKey];
-    NSArray *existing = [CTPreferences getObjectForKey:key];
-    if (!existing) return;
-    NSMutableArray *updated = [NSMutableArray arrayWithCapacity:existing.count];
-    for (NSString *msgId in existing) {
-        if ([responseIds containsObject:msgId]) {
-            [updated addObject:msgId];
-        }
-    }
     [CTPreferences putObject:updated forKey:key];
 }
 
