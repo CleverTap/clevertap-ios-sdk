@@ -5,8 +5,8 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTAVPlayerViewController.h"
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#import "CTAnimatedImageView.h"
+#import "CTAnimatedImage.h"
 
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
@@ -16,7 +16,7 @@
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
 @property (nonatomic, strong) IBOutlet UILabel *bodyLabel;
-@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
+@property (nonatomic, strong) IBOutlet CTAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *avPlayerContainerView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
@@ -149,7 +149,7 @@
     } else if (self.notification.imageData) {
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         if ([self.notification.contentType isEqualToString:@"image/gif"] ) {
-            SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+            CTAnimatedImage *gif = [CTAnimatedImage imageWithData:self.notification.imageData];
             self.imageView.image = gif;
         } else {
             self.imageView.image = [UIImage imageWithData:self.notification.imageData];

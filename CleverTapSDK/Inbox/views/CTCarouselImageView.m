@@ -1,6 +1,7 @@
 
-#import <SDWebImage/UIImageView+WebCache.h>
 #import "CTCarouselImageView.h"
+#import "UIImageView+CTWebCache.h"
+#import "CTWebImageDefines.h"
 #import "CTUIUtils.h"
 #import "CTInboxUtils.h"
 
@@ -150,9 +151,9 @@ static float captionHeight = 0.f;
         self.imageViewLandRatioConstraint.priority = 250;
         self.imageViewPortRatioConstraint.priority = 250;
     }
-    [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
+    [self.imageView ct_setImageWithURL:[NSURL URLWithString:self.imageUrl]
                       placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
-                               options:(SDWebImageRetryFailed) context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)}];
+                               options:CTWebImageRetryFailed context:@{CTWebImageContextStoreCacheType : @(CTImageCacheTypeMemory)}];
     if (self.caption != nil || self.subcaption != nil) {
         // For carousel with caption
         self.viewDescription = [NSString stringWithFormat:@"%@ %@ %@", self.imageDescription, self.caption, self.subcaption];

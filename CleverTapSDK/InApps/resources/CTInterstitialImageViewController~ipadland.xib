@@ -26,7 +26,7 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="geG-Im-BIb">
                             <rect key="frame" x="0.0" y="0.0" width="1253" height="704"/>
                             <subviews>
-                                <imageView customClass="SDAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VJl-sd-Bwg">
+                                <imageView customClass="CTAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VJl-sd-Bwg">
                                     <rect key="frame" x="0.0" y="0.0" width="1253" height="704"/>
                                     <accessibility key="accessibilityConfiguration" label="InApp Image">
                                         <accessibilityTraits key="traits" image="YES" notEnabled="YES"/>

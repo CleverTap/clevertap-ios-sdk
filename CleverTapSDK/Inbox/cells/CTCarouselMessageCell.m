@@ -26,9 +26,7 @@ static const float kPageControlViewHeight = 30.f;
 
 - (CGFloat)calculateHeight:(CGFloat)viewWidth {
     CGFloat viewHeight = viewWidth + captionHeight;
-    if ([self shouldUseDefaultMediaLayout]) {
-        viewHeight = (viewWidth * kLandscapeMultiplier) + captionHeight;
-    } else if (![self orientationIsPortrait]) {
+    if (![self orientationIsPortrait]) {
         viewHeight = (viewWidth*kLandscapeMultiplier) + captionHeight;
     }
     return viewHeight;
@@ -36,26 +34,18 @@ static const float kPageControlViewHeight = 30.f;
 
 - (void)populateLandscapeViews {
     self.itemViews = [NSMutableArray new];
-    NSUInteger originalIndex = 0;
+    NSUInteger index = 0;
     int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
-        if (content.mediaUrl.length == 0) {
-            originalIndex++;
-            continue;
-        }
         CTCarouselImageView *carouselItemView;
         if (carouselItemView == nil){
             carouselItemView  = [[[CTUIUtils bundle] loadNibNamed: NSStringFromClass([CTCarouselImageView class]) owner:nil options:nil] lastObject];
             carouselItemView.backgroundColor = [UIColor clearColor];
-            BOOL useDefaultLayout = [self shouldUseDefaultMediaLayout];
-            if (content.mediaUrl.length > 0) {
-                [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
-                                                  placeholderImage:useDefaultLayout ? [self getLandscapePlaceHolderImage] : ([self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage])
-                                                           options:self.sdWebImageOptions context:self.sdWebImageContext];
-            }
-            carouselItemView.cellImageView.contentMode = useDefaultLayout ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
-            carouselItemView.imageViewLandRatioConstraint.priority = useDefaultLayout ? 250 : ([self orientationIsPortrait] ? 750 : 999);
-            carouselItemView.imageViewPortRatioConstraint.priority = useDefaultLayout ? 250 : ([self orientationIsPortrait] ? 999 : 750);
+            [carouselItemView.cellImageView ct_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+                                              placeholderImage:[self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
+                                                       options:self.ctWebImageOptions context:self.ctWebImageContext];
+            carouselItemView.imageViewLandRatioConstraint.priority = [self orientationIsPortrait] ? 750 : 999;
+            carouselItemView.imageViewPortRatioConstraint.priority = [self orientationIsPortrait] ? 999 : 750;
             carouselItemView.titleLabel.text = content.title;
             carouselItemView.titleLabel.textColor = content.titleColor ? [CTUIUtils ct_colorWithHexString:content.titleColor] : [CTUIUtils ct_colorWithHexString:@"#000000"];
             carouselItemView.bodyLabel.text = content.message;
@@ -68,16 +58,16 @@ static const float kPageControlViewHeight = 30.f;
         
         UITapGestureRecognizer *carouselViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         carouselItemView.userInteractionEnabled = YES;
-        carouselItemView.tag = originalIndex;
+        carouselItemView.tag = index;
         [carouselItemView addGestureRecognizer:carouselViewTapGesture];
         [self.itemViews addObject:carouselItemView];
-        originalIndex++;
+        index++;
     }
 }
 
 - (void)populateItemViews {
     self.itemViews = [NSMutableArray new];
-    NSUInteger originalIndex = 0;
+    NSUInteger index = 0;
     int imageNumber = 1;
     for (CleverTapInboxMessageContent *content in (self.message.content)) {
         NSString *caption = content.title;
@@ -89,32 +79,22 @@ static const float kPageControlViewHeight = 30.f;
         NSString *imageDescription = content.mediaDescription ? content.mediaDescription : [NSString stringWithFormat:@"Message Image %d", imageNumber];
         imageNumber = imageNumber + 1;
         
-        if (imageUrl == nil || imageUrl.length == 0) {
-            originalIndex++;
+        if (imageUrl == nil) {
             continue;
         }
         CTCarouselImageView *itemView;
         if (itemView == nil){
             CGRect frame = self.carouselView.bounds;
             frame.size.height =  frame.size.height;
-            itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds
-                                                          caption:caption
-                                                       subcaption:subcaption
-                                                     captionColor:captionColor
-                                                  subcaptionColor:subcaptionColor
-                                                         imageUrl:imageUrl
-                                                        actionUrl:actionUrl
-                                                 orientationKnown:![self shouldUseDefaultMediaLayout]
-                                              orientationPortrait:[self orientationIsPortrait]
-                                                 imageDescription:imageDescription];
+            itemView = [[CTCarouselImageView alloc] initWithFrame:self.carouselView.bounds caption:caption subcaption:subcaption captionColor:captionColor subcaptionColor:subcaptionColor imageUrl:imageUrl actionUrl:actionUrl orientationKnown:YES orientationPortrait:[self orientationIsPortrait] imageDescription:imageDescription];
         }
         
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         itemView.userInteractionEnabled = YES;
-        itemView.tag = originalIndex;
+        itemView.tag = index;
         [itemView addGestureRecognizer:itemViewTapGesture];
         [self.itemViews addObject:itemView];
-        originalIndex++;
+        index++;
     }
 }
 

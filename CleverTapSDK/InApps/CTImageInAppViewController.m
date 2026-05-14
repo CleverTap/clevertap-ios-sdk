@@ -5,7 +5,9 @@
 #import "CTDismissButton.h"
 #import "CTUIUtils.h"
 #import "CTAVPlayerViewController.h"
-#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#import "UIImageView+CTWebCache.h"
+#import "CTAnimatedImageView.h"
+#import "CTAnimatedImage.h"
 
 static const CGFloat kTabletSpacingConstant = 40.f;
 static const CGFloat kSpacingConstant = 160.f;
@@ -14,7 +16,7 @@ static const CGFloat kSpacingConstant = 160.f;
 
 @property (nonatomic, assign) CGFloat aspectMultiplier;
 @property (nonatomic, strong) IBOutlet UIView *containerView;
-@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
+@property (nonatomic, strong) IBOutlet CTAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
 @property (nonatomic, strong) CTAVPlayerViewController *playerController;
 @property (nonatomic, strong) UIImage *initialImage;
@@ -192,7 +194,7 @@ static const CGFloat kSpacingConstant = 160.f;
             self.imageView.image = self.notification.inAppImage;
         } else if (self.notification.imageData) {
             if ([self.notification.contentType isEqualToString:@"image/gif"]) {
-                self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageData];
+                self.imageView.image = [CTAnimatedImage imageWithData:self.notification.imageData];
             } else {
                 self.imageView.image = [UIImage imageWithData:self.notification.imageData];
             }
@@ -204,7 +206,7 @@ static const CGFloat kSpacingConstant = 160.f;
             self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
         } else if (self.notification.imageLandscapeData) {
             if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
-                self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
+                self.imageView.image = [CTAnimatedImage imageWithData:self.notification.imageLandscapeData];
             } else {
                 self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
             }
@@ -215,7 +217,7 @@ static const CGFloat kSpacingConstant = 160.f;
                 self.imageView.image = self.notification.inAppImage;
             } else if (self.notification.imageData) {
                 if ([self.notification.contentType isEqualToString:@"image/gif"]) {
-                    self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageData];
+                    self.imageView.image = [CTAnimatedImage imageWithData:self.notification.imageData];
                 } else {
                     self.imageView.image = [UIImage imageWithData:self.notification.imageData];
                 }

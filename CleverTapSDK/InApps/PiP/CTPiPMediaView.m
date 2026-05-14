@@ -1,16 +1,16 @@
 #import "CTPiPMediaView.h"
 #import "CTConstants.h"
 #import <AVFoundation/AVFoundation.h>
-#import <SDWebImage/SDAnimatedImageView.h>
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/SDAnimatedImage.h>
+#import "CTAnimatedImageView.h"
+#import "UIImageView+CTWebCache.h"
+#import "CTAnimatedImage.h"
 
 @interface CTPiPMediaView ()
 @property (nonatomic, strong) CTPiPMediaModel *media;
 @property (nonatomic, readwrite) CTPiPContentType contentType;
 
 // Image / GIF
-@property (nonatomic, strong) SDAnimatedImageView *imageView;
+@property (nonatomic, strong) CTAnimatedImageView *imageView;
 
 // Video
 @property (nonatomic, strong) AVPlayer *player;
@@ -77,7 +77,7 @@
 // MARK: - Image / GIF
 
 - (void)setupImageView {
-    SDAnimatedImageView *iv = [[SDAnimatedImageView alloc] init];
+    CTAnimatedImageView *iv = [[CTAnimatedImageView alloc] init];
     iv.contentMode = UIViewContentModeScaleAspectFit;
     iv.clipsToBounds = YES;
     iv.translatesAutoresizingMaskIntoConstraints = NO;
@@ -101,20 +101,15 @@
         self.imageView.image = [UIImage imageWithData:self.preloadedImageData];
         return;
     }
-    // Load via SDWebImage
-    [self.imageView sd_setImageWithURL:self.media.url
+    [self.imageView ct_setImageWithURL:self.media.url
                       placeholderImage:nil
-                               options:SDWebImageRetryFailed
-                             completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-        if (error) {
-            [self loadFallbackImage];
-        }
-    }];
+                               options:CTWebImageRetryFailed
+                               context:nil];
 }
 
 - (void)loadGIF {
     if (self.preloadedImageData) {
-        SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.preloadedImageData];
+        CTAnimatedImage *gif = [CTAnimatedImage imageWithData:self.preloadedImageData];
         if (gif) {
             self.imageView.image = gif;
             return;
@@ -124,21 +119,16 @@
         self.imageView.image = fallback;
         return;
     }
-    // Load via SDWebImage
-    [self.imageView sd_setImageWithURL:self.media.url
+    [self.imageView ct_setImageWithURL:self.media.url
                       placeholderImage:nil
-                               options:SDWebImageRetryFailed
-                             completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-        if (error) {
-            [self loadFallbackImage];
-        }
-    }];
+                               options:CTWebImageRetryFailed
+                               context:nil];
 }
 
 - (void)loadFallbackImage {
     if (!self.media.fallbackURL) return;
     if (self.imageView) {
-        [self.imageView sd_setImageWithURL:self.media.fallbackURL];
+        [self.imageView ct_setImageWithURL:self.media.fallbackURL];
     }
 }
 
@@ -160,7 +150,7 @@
     self.posterImageView = poster;
 
     if (self.media.posterURL) {
-        [poster sd_setImageWithURL:self.media.posterURL];
+        [poster ct_setImageWithURL:self.media.posterURL];
     }
 
     // Spinner shown during initial load and while the buffer is empty.
@@ -262,23 +252,27 @@
     }
     self.playerLayer.hidden = YES;
     self.posterImageView.contentMode = UIViewContentModeScaleAspectFill;
+    if (!self.media.fallbackURL) return;
     __weak typeof(self) weakSelf = self;
-    [self.posterImageView sd_setImageWithURL:self.media.fallbackURL
-                            placeholderImage:nil
-                                     options:SDWebImageRetryFailed
-                                   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *url) {
-        if (error || !image) {
-            // Fallback image also failed — dismiss PiP.
-            if ([weakSelf.delegate respondsToSelector:@selector(pipMediaDidFailToLoad)]) {
-                [weakSelf.delegate pipMediaDidFailToLoad];
+    [[[NSURLSession sharedSession] dataTaskWithURL:self.media.fallbackURL
+                                completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) return;
+            UIImage *image = data ? [UIImage imageWithData:data] : nil;
+            if (error || !image) {
+                if ([strongSelf.delegate respondsToSelector:@selector(pipMediaDidFailToLoad)]) {
+                    [strongSelf.delegate pipMediaDidFailToLoad];
+                }
+                return;
             }
-            return;
-        }
-        if ([weakSelf.delegate respondsToSelector:@selector(pipMediaDidShowVideoFallback)]) {
-            [weakSelf.delegate pipMediaDidShowVideoFallback];
-        }
-        [weakSelf notifyReadyToShow];
-    }];
+            strongSelf.posterImageView.image = image;
+            if ([strongSelf.delegate respondsToSelector:@selector(pipMediaDidShowVideoFallback)]) {
+                [strongSelf.delegate pipMediaDidShowVideoFallback];
+            }
+            [strongSelf notifyReadyToShow];
+        });
+    }] resume];
 }
 
 - (void)layoutSubviews {
