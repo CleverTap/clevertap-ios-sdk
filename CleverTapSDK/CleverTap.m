@@ -2435,7 +2435,9 @@ static BOOL sharedInstanceErrorLogged;
             if ([_eventsQueue count] > 0) {
                 [_eventsQueue removeObjectsInArray:batch];
             }
-            
+
+            [self _removePendingInboxReadsForSentBatch:batch];
+
             [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
             [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES withQueueType:queueType];
@@ -4555,6 +4557,16 @@ static BOOL sharedInstanceErrorLogged;
     NSMutableArray *updated = [existing mutableCopy];
     [updated removeObject:messageId];
     [CTPreferences putObject:updated forKey:key];
+}
+
+- (void)_removePendingInboxReadsForSentBatch:(NSArray *)batch {
+    for (NSDictionary *event in batch) {
+        if (![event[CLTAP_EVENT_NAME] isEqualToString:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME]) continue;
+        NSString *msgId = event[CLTAP_EVENT_DATA][@"wzrk_mid"];
+        if (msgId) {
+            [self _removePendingReadForMessageId:msgId];
+        }
+    }
 }
 
 // MARK: Confirmed deletes (got 200 from backend; filter until TTL passes)
