@@ -392,6 +392,14 @@
             id value = data[x];
             notif[key] = value;
         }
+        // Merge caller-supplied params (e.g. `wzrk_element_id` and
+        // `additionalProperties` from the element-aware click selector).
+        // Mirrors the inbox-event path above (~line 361) which already did
+        // this; the display-unit path missed it. Existing callers pass nil
+        // for `params` so they are unaffected.
+        if (params) {
+            [notif addEntriesFromDictionary:params];
+        }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
         event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
         event[CLTAP_EVENT_DATA] = notif;
