@@ -4042,8 +4042,7 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
 
-    self.lastInboxRefreshTimestamp = now;
-    [self _fetchInboxV2WithCompletion:^(BOOL success) {
+    [self _fetchInboxV2WithThrottle:YES completion:^(BOOL success) {
         if (callback) callback(success);
     }];
 }
@@ -4150,7 +4149,7 @@ static BOOL sharedInstanceErrorLogged;
         if (!self.deviceInfo.deviceId) return;
         [self _purgeExpiredConfirmedDeletes];
         [self _flushPendingRetryDeletes];
-        [self _fetchInboxV2WithCompletion:nil];
+        [self _fetchInboxV2WithThrottle:NO completion:nil];
     }];
 }
 
@@ -4159,7 +4158,7 @@ static BOOL sharedInstanceErrorLogged;
         self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
         self.inboxController.delegate = self;
         self.lastInboxRefreshTimestamp = 0;
-        [self _fetchInboxV2WithCompletion:nil];
+        [self _fetchInboxV2WithThrottle:NO completion:nil];
     }
 }
 
@@ -4339,7 +4338,7 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
-- (void)_fetchInboxV2WithCompletion:(CleverTapInboxSuccessBlock)completion {
+- (void)_fetchInboxV2WithThrottle:(BOOL)shouldThrottle completion:(CleverTapInboxSuccessBlock)completion {
     if (_config.analyticsOnly) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@ is configured as analytics only, InboxV2 fetch skipped", self);
@@ -4391,6 +4390,9 @@ static BOOL sharedInstanceErrorLogged;
             if (completion) completion(NO);
             return;
         }
+        if (shouldThrottle) {
+            strongSelf.lastInboxRefreshTimestamp = [[NSDate date] timeIntervalSince1970];
+        }
         if (data) {
             id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
             if (jsonResp && [jsonResp isKindOfClass:[NSDictionary class]]) {
@@ -4418,6 +4420,9 @@ static BOOL sharedInstanceErrorLogged;
     [request onError:^(NSError * _Nullable error) {
         typeof(self) strongSelf = weakSelf;
         if (!strongSelf) return;
+        if (shouldThrottle) {
+            strongSelf.lastInboxRefreshTimestamp = [[NSDate date] timeIntervalSince1970];
+        }
         CleverTapLogDebug(strongSelf.config.logLevel,
             @"%@: InboxV2 fetch failed — error: %@", strongSelf, error.localizedDescription);
         if (completion) completion(NO);
