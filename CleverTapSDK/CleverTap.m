@@ -163,6 +163,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
 @property(atomic, assign) NSTimeInterval lastInboxRefreshTimestamp;
 @property(atomic, assign) BOOL disableInboxV2;
+@property(nonatomic, assign) BOOL needsInboxFetchAfterProfileSend;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxViewedDebounceMap;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxClickedDebounceMap;
 @end
@@ -2679,6 +2680,13 @@ static BOOL sharedInstanceErrorLogged;
                 } @catch (NSException *ex) {
                     CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle ARP update: %@", self, ex.debugDescription);
                 }
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+                if (self.needsInboxFetchAfterProfileSend) {
+                    self.needsInboxFetchAfterProfileSend = NO;
+                    [self _fetchInboxV2WithThrottle:NO completion:nil];
+                }
+#endif
                 
                 // Handle dbg_lvl
                 @try {
@@ -4158,7 +4166,7 @@ static BOOL sharedInstanceErrorLogged;
         self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
         self.inboxController.delegate = self;
         self.lastInboxRefreshTimestamp = 0;
-        [self _fetchInboxV2WithThrottle:NO completion:nil];
+        self.needsInboxFetchAfterProfileSend = YES;
     }
 }
 
