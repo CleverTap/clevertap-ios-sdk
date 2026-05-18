@@ -4360,12 +4360,6 @@ static BOOL sharedInstanceErrorLogged;
         if (completion) completion(NO);
         return;
     }
-    if (!self.isInboxV2Enabled) {
-        CleverTapLogDebug(self.config.logLevel,
-            @"%@: InboxV2 fetch skipped — API not enabled for this account", self);
-        if (completion) completion(NO);
-        return;
-    }
     if (!self.domainFactory.redirectDomain) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: InboxV2 fetch skipped — redirect domain not available", self);
