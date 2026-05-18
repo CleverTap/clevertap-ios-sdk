@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.7.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.0) (May 18, 2026)
+#### New Features
+* **App Inbox Cross-Device Sync:** App Inbox messages now sync across a user's devices. If a user deletes or reads a message on one device, it is automatically reflected on their other devices.
+  * **New Inbox Fetch API:** The SDK already fetches inbox messages automatically on app launch and user login. Two new public methods have been added to this with on-demand refresh support:
+    * `fetchInbox()` — triggers an inbox refresh from the server (fire-and-forget).
+    * `fetchInbox(callback:)` — same as above, but invokes the callback with a success/failure result when the fetch completes.
+    * **Note:** Both methods are throttled to once every 5 minutes between consecutive calls. This throttle is shared with the built-in pull-to-refresh gesture.
+  * **Pull-to-Refresh in Built-in Inbox:** The built-in App Inbox now includes a pull-to-refresh gesture. Manual inbox fetches — including those triggered by `fetchInbox()` — are throttled to once every 5 minutes between consecutive calls.
+  * **Inbox Viewed and Clicked Event Deduplication:** Rapid duplicate `Notification Viewed` and `Notification Clicked` events for the same inbox message are now automatically suppressed to prevent analytics inflation. Additionally, a `Notification Viewed` event is not raised for messages that have already been read.
+    * **Note:** For custom inbox implementations, ensure `recordInboxNotificationViewedEvent(messageId)` is called when a message becomes visible to the user, before calling `markReadInboxMessage(messageId)` — calling them in reverse order will silently drop the Viewed event.
+
 ### [Version 7.6.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.6.0) (April 17, 2026)
 #### Added
 - **Picture-in-Picture (PiP) In-App Notifications:** Introduces Picture-in-Picture in-app notifications — a compact, draggable floating overlay that persists over app content. Supports image, GIF, and video media with configurable controls.
