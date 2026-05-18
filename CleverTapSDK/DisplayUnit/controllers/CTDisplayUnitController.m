@@ -41,23 +41,12 @@
     return nil;
 }
 
-- (void)updateDisplayUnits:(NSArray<NSDictionary *> *)displayUnits {
-    [self _updateDisplayUnits:displayUnits];
+- (void)updateDisplayUnits:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
+    _displayUnits = [displayUnits copy];
 }
 
 - (void)reset {
     _displayUnits = nil;
-}
-
-// be sure to call off the main thread
-- (void)_updateDisplayUnits:(NSArray<NSDictionary*> *)displayUnits {
-    NSMutableArray *units = [NSMutableArray new];
-    NSMutableArray *tempArray = [displayUnits mutableCopy];
-    for (NSDictionary *obj in tempArray) {
-        CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:obj];
-        [units addObject:displayUnit];
-    }
-    _displayUnits = units;
 }
 
 - (NSArray *)displayUnits {

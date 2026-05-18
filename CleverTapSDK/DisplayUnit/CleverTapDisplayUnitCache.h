@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  units. The default implementation replaces the cache contents; hosts may
  choose merge semantics for their own implementations.
  */
-- (void)updateDisplayUnits:(nullable NSArray<NSDictionary *> *)displayUnits;
+- (void)updateDisplayUnits:(nullable NSArray<CleverTapDisplayUnit *> *)displayUnits;
 
 /*! Clears all units. Called by the SDK on logout / reset flows. */
 - (void)reset;
