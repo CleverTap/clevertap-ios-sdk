@@ -162,7 +162,7 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property(atomic, strong) CTInboxController *inboxController;
 @property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
 @property(atomic, assign) NSTimeInterval lastInboxRefreshTimestamp;
-@property(atomic, assign) BOOL disableInboxV2;
+@property(atomic, assign) BOOL isInboxV2Enabled;
 @property(nonatomic, assign) BOOL needsInboxFetchAfterProfileSend;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxViewedDebounceMap;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxClickedDebounceMap;
@@ -4023,7 +4023,7 @@ static BOOL sharedInstanceErrorLogged;
         if (callback) callback(NO);
         return;
     }
-    if (self.disableInboxV2) {
+    if (!self.isInboxV2Enabled) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: InboxV2 fetch skipped — API not enabled for this account", self);
         if (callback) callback(NO);
@@ -4162,7 +4162,12 @@ static BOOL sharedInstanceErrorLogged;
         self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
         self.inboxController.delegate = self;
         self.lastInboxRefreshTimestamp = 0;
-        self.needsInboxFetchAfterProfileSend = YES;
+        if (!self.isInboxV2Enabled) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: InboxV2 fetch on user login skipped — API not enabled for this account", self);
+        } else {
+            self.needsInboxFetchAfterProfileSend = YES;
+        }
     }
 }
 
@@ -4251,6 +4256,10 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)inboxViewControllerDidRequestRefreshWithCallback:(CleverTapInboxSuccessBlock)callback {
     [self fetchInboxWithCallback:callback];
+}
+
+- (BOOL)inboxViewControllerIsInboxV2Enabled {
+    return self.isInboxV2Enabled;
 }
 
 - (NSArray<CleverTapInboxMessage *> *)inboxViewControllerGetMessages {
@@ -4351,7 +4360,7 @@ static BOOL sharedInstanceErrorLogged;
         if (completion) completion(NO);
         return;
     }
-    if (self.disableInboxV2) {
+    if (!self.isInboxV2Enabled) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: InboxV2 fetch skipped — API not enabled for this account", self);
         if (completion) completion(NO);
@@ -4392,9 +4401,12 @@ static BOOL sharedInstanceErrorLogged;
         if (statusCode == 403) {
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
-            strongSelf.disableInboxV2 = YES;
+            strongSelf.isInboxV2Enabled = NO;
             if (completion) completion(NO);
             return;
+        }
+        if (statusCode == 200) {
+            strongSelf.isInboxV2Enabled = YES;
         }
         if (shouldThrottle) {
             strongSelf.lastInboxRefreshTimestamp = [[NSDate date] timeIntervalSince1970];
@@ -4463,7 +4475,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)_sendInboxDeleteForMessages:(NSArray<CleverTapInboxMessage *> *)messages {
-    if (self.disableInboxV2) {
+    if (!self.isInboxV2Enabled) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: Inbox: deleteMessages skipped — InboxV2 API not enabled for this account", self);
         return;
@@ -4524,7 +4536,7 @@ static BOOL sharedInstanceErrorLogged;
             statusCode = ((NSHTTPURLResponse *)response).statusCode;
         }
         if (statusCode == 403) {
-            strongSelf.disableInboxV2 = YES;
+            strongSelf.isInboxV2Enabled = NO;
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
             return;
@@ -4676,7 +4688,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)_flushPendingRetryDeletes {
-    if (self.disableInboxV2) return;
+    if (!self.isInboxV2Enabled) return;
     if (!self.domainFactory.redirectDomain) return;
 
     NSArray<NSDictionary *> *entries = [self _retryDeleteEntries];
@@ -4713,7 +4725,7 @@ static BOOL sharedInstanceErrorLogged;
         NSInteger statusCode = [response isKindOfClass:[NSHTTPURLResponse class]]
             ? ((NSHTTPURLResponse *)response).statusCode : 0;
         if (statusCode == 403) {
-            strongSelf.disableInboxV2 = YES;
+            strongSelf.isInboxV2Enabled = NO;
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
             return;

@@ -22,6 +22,11 @@
  Returns the current set of inbox messages to display after a refresh.
  */
 - (NSArray<CleverTapInboxMessage *> * _Nonnull)inboxViewControllerGetMessages;
+/**
+ Returns YES if inbox V2 is enabled for this session, NO if disabled (e.g. 403 from server).
+ When NO, pull-to-refresh UI is hidden.
+ */
+- (BOOL)inboxViewControllerIsInboxV2Enabled;
 @end
 
 @interface CleverTapInboxViewController ()

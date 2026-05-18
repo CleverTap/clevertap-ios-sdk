@@ -102,11 +102,17 @@ static const int kMaxTags = 3;
     [self registerNibs];
     [self setUpInboxLayout];
 
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self
-                       action:@selector(_handlePullToRefresh:)
-             forControlEvents:UIControlEventValueChanged];
-    self.refreshControl = refreshControl;
+    BOOL inboxV2Enabled = NO;
+    if ([self.analyticsDelegate respondsToSelector:@selector(inboxViewControllerIsInboxV2Enabled)]) {
+        inboxV2Enabled = [self.analyticsDelegate inboxViewControllerIsInboxV2Enabled];
+    }
+    if (inboxV2Enabled) {
+        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+        [refreshControl addTarget:self
+                           action:@selector(_handlePullToRefresh:)
+                 forControlEvents:UIControlEventValueChanged];
+        self.refreshControl = refreshControl;
+    }
 }
 
 - (void)_handlePullToRefresh:(UIRefreshControl *)sender {
