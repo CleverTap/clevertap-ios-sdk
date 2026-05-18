@@ -2448,22 +2448,15 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
-    if (displayUnitJSON) {
+    if ([displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0) {
         if (self.isUserSwitching) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
             return;
         }
-        
-        NSMutableArray *displayUnitNotifs;
-        @try {
-            displayUnitNotifs = [[NSMutableArray alloc] initWithArray:displayUnitJSON];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Display Unit JSON: %@", self, e.debugDescription);
-        }
-        if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
+        NSArray<CleverTapDisplayUnit *> *displayUnits = [self _parseDisplayUnitsFromJSONArray:displayUnitJSON];
+        if (displayUnits.count > 0) {
             [self initializeDisplayUnitWithCallback:^(BOOL success) {
                 if (success) {
-                    NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
                     [self.displayUnitCache updateDisplayUnits:displayUnits];
                     [self _notifyDisplayUnitsUpdated];
                 }
@@ -4222,6 +4215,18 @@ static BOOL sharedInstanceErrorLogged;
     [self.displayUnitCache reset];
 }
 
+- (NSArray<CleverTapDisplayUnit *> *)_parseDisplayUnitsFromJSONArray:(NSArray *)jsonArray {
+    NSMutableArray<CleverTapDisplayUnit *> *units = [NSMutableArray new];
+    for (id obj in jsonArray) {
+        if (![obj isKindOfClass:[NSDictionary class]]) continue;
+        CleverTapDisplayUnit *unit = [[CleverTapDisplayUnit alloc] initWithJSON:(NSDictionary *)obj];
+        if (unit) {
+            [units addObject:unit];
+        }
+    }
+    return units;
+}
+
 - (void)_notifyDisplayUnitsUpdated {
     if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
         [self.displayUnitDelegate displayUnitsUpdated:[self.displayUnitCache getAllDisplayUnits]];
@@ -4256,15 +4261,16 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Received display unit from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_adunit"];
-        
+
         NSDictionary *displayUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
                                                                         options:0
                                                                           error:nil];
-        
-        NSMutableArray<NSDictionary*> *displayUnits = [NSMutableArray new];
-        [displayUnits addObject:displayUnitDict];
-        
-        if (displayUnits && displayUnits.count > 0) {
+
+        NSArray<CleverTapDisplayUnit *> *displayUnits = displayUnitDict
+            ? [self _parseDisplayUnitsFromJSONArray:@[displayUnitDict]]
+            : @[];
+
+        if (displayUnits.count > 0) {
             float delay = self.isAppForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 @try {
