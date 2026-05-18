@@ -3981,42 +3981,38 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)recordInboxNotificationViewedEventForID:(NSString * _Nonnull)messageId {
-    [self.dispatchQueueManager runSerialAsync:^{
-        CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
-        if (!msg) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Inbox: skipping Viewed — message %@ not found or expired", self, messageId);
-            return;
-        }
-        if (msg.isRead) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Inbox: skipping Viewed — message %@ already read", self, messageId);
-            return;
-        }
-        if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME forMessageId:messageId]) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Inbox: skipping Viewed — duplicate within debounce window for %@", self, messageId);
-            return;
-        }
-        [self recordInboxMessageStateEvent:NO forMessage:msg andQueryParameters:nil];
-    }];
+    CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
+    if (!msg) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Viewed — message %@ not found or expired", self, messageId);
+        return;
+    }
+    if ([self.inboxController isV2MessageId:messageId] && msg.isRead) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox V2: skipping Viewed — message %@ already read", self, messageId);
+        return;
+    }
+    if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME forMessageId:messageId]) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Viewed — duplicate within debounce window for %@", self, messageId);
+        return;
+    }
+    [self recordInboxMessageStateEvent:NO forMessage:msg andQueryParameters:nil];
 }
 
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId {
-    [self.dispatchQueueManager runSerialAsync:^{
-        CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
-        if (!msg) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Inbox: skipping Clicked — message %@ not found or expired", self, messageId);
-            return;
-        }
-        if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_CLICKED_EVENT_NAME forMessageId:messageId]) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Inbox: skipping Clicked — duplicate within debounce window for %@", self, messageId);
-            return;
-        }
-        [self recordInboxMessageStateEvent:YES forMessage:msg andQueryParameters:nil];
-    }];
+    CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
+    if (!msg) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Clicked — message %@ not found or expired", self, messageId);
+        return;
+    }
+    if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_CLICKED_EVENT_NAME forMessageId:messageId]) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Clicked — duplicate within debounce window for %@", self, messageId);
+        return;
+    }
+    [self recordInboxMessageStateEvent:YES forMessage:msg andQueryParameters:nil];
 }
 
 
@@ -4447,16 +4443,18 @@ static BOOL sharedInstanceErrorLogged;
 
     NSTimeInterval nowMs = [[NSDate date] timeIntervalSince1970] * 1000.0;
     BOOL isViewed = [eventName isEqualToString:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME];
-    NSMutableDictionary *map = isViewed ? self.inboxViewedDebounceMap : self.inboxClickedDebounceMap;
     NSTimeInterval intervalMs = isViewed ? 2000.0 : 5000.0;
 
-    if (!map) return NO;
+    @synchronized(self) {
+        NSMutableDictionary *map = isViewed ? self.inboxViewedDebounceMap : self.inboxClickedDebounceMap;
+        if (!map) return NO;
 
-    NSNumber *lastFired = map[messageId];
-    if (lastFired && (nowMs - lastFired.doubleValue) < intervalMs) {
-        return YES;
+        NSNumber *lastFired = map[messageId];
+        if (lastFired && (nowMs - lastFired.doubleValue) < intervalMs) {
+            return YES;
+        }
+        map[messageId] = @(nowMs);
     }
-    map[messageId] = @(nowMs);
     return NO;
 }
 
