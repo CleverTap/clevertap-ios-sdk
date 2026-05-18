@@ -263,7 +263,7 @@ typedef void (^CleverTapInboxUpdatedBlock)(void);
  callback(NO)  — throttled (< 5 min since last fetch) or inbox not initialised.
  Pass nil if you do not need the completion signal.
  */
-- (void)refreshInboxWithCallback:(CleverTapInboxSuccessBlock _Nullable)callback;
+- (void)fetchInboxWithCallback:(CleverTapInboxSuccessBlock _Nullable)callback;
 
 /*!
  @method

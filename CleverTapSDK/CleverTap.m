@@ -4020,7 +4020,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 
-- (void)refreshInboxWithCallback:(CleverTapInboxSuccessBlock)callback {
+- (void)fetchInboxWithCallback:(CleverTapInboxSuccessBlock)callback {
     if (!self.inboxController || !self.inboxController.isInitialized) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: Inbox refresh skipped — inbox not initialised", self);
@@ -4254,7 +4254,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)inboxViewControllerDidRequestRefreshWithCallback:(CleverTapInboxSuccessBlock)callback {
-    [self refreshInboxWithCallback:callback];
+    [self fetchInboxWithCallback:callback];
 }
 
 - (NSArray<CleverTapInboxMessage *> *)inboxViewControllerGetMessages {
