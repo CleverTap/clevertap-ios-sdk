@@ -4202,34 +4202,24 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)initializeDisplayUnitWithCallback:(CleverTapDisplayUnitSuccessBlock)callback {
     [self.dispatchQueueManager runSerialAsync:^{
-        if (self.displayUnitCache) {
+        id<CleverTapDisplayUnitCache> cache = self.displayUnitCache;
+        if (cache) {
             [CTUtils runSyncMainQueue: ^{
-                callback([self _isDisplayUnitCacheInitialized]);
+                callback(YES);
             }];
             return;
         }
         if (self.deviceInfo.deviceId) {
             self.displayUnitCache = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
             [CTUtils runSyncMainQueue: ^{
-                callback([self _isDisplayUnitCacheInitialized]);
+                callback(YES);
             }];
         }
     }];
 }
 
-- (BOOL)_isDisplayUnitCacheInitialized {
-    if ([self.displayUnitCache isKindOfClass:[CTDisplayUnitController class]]) {
-        return ((CTDisplayUnitController *)self.displayUnitCache).isInitialized;
-    }
-    return self.displayUnitCache != nil;
-}
-
 - (void)_resetDisplayUnit {
-    if ([self.displayUnitCache isKindOfClass:[CTDisplayUnitController class]]
-        && ((CTDisplayUnitController *)self.displayUnitCache).isInitialized
-        && self.deviceInfo.deviceId) {
-        self.displayUnitCache = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-    }
+    [self.displayUnitCache reset];
 }
 
 - (void)_notifyDisplayUnitsUpdated {
