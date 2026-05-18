@@ -2605,7 +2605,7 @@ static BOOL sharedInstanceErrorLogged;
                 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
                 if (jsonResp[CLTAP_INBOX_V2_RESPONSE_KEY]) {
-                    [self handleAppInboxV2Response:jsonResp];
+                    [self handleAppInboxV2Response:jsonResp isCompleteResponse:NO];
                 }
                 if (jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY]) {
                     [self handleAppInboxResponse:jsonResp];
@@ -4282,7 +4282,7 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark Inbox V2 private
 
-- (void)handleAppInboxV2Response:(NSDictionary *)jsonResp {
+- (void)handleAppInboxV2Response:(NSDictionary *)jsonResp isCompleteResponse:(BOOL)isCompleteResponse {
     NSArray *inboxV2JSON = jsonResp[CLTAP_INBOX_V2_RESPONSE_KEY];
     if (!inboxV2JSON) return;
     if (self.isUserSwitching) {
@@ -4338,7 +4338,9 @@ static BOOL sharedInstanceErrorLogged;
         [self.dispatchQueueManager runSerialAsync:^{
             [self.inboxController performExpiryPurge];
             [self.inboxController addV2MessageIds:[capturedResponseIds allObjects]];
-            [self.inboxController deleteAbsentPersistentV2MessagesFromResponseIds:capturedResponseIds];
+            if (isCompleteResponse) {
+                [self.inboxController deleteAbsentPersistentV2MessagesFromResponseIds:capturedResponseIds];
+            }
             if (capturedFiltered.count > 0) {
                 [self.inboxController updateMessages:capturedFiltered];
             }
@@ -4407,7 +4409,7 @@ static BOOL sharedInstanceErrorLogged;
                 CleverTapLogDebug(strongSelf.config.logLevel,
                     @"%@: InboxV2 fetch response received — response: %@", strongSelf, jsonResp);
                 [strongSelf.dispatchQueueManager runSerialAsync:^{
-                    [strongSelf handleAppInboxV2Response:jsonResp];
+                    [strongSelf handleAppInboxV2Response:jsonResp isCompleteResponse:YES];
                     if (completion) {
                         [CTUtils runSyncMainQueue:^{
                             completion(YES);
