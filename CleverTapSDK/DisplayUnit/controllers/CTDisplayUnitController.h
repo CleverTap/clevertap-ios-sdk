@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
                                       guid:(NSString *)guid;
 
 // CleverTapDisplayUnitCache
-- (NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits;
+- (nullable NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits;
 - (nullable CleverTapDisplayUnit *)getDisplayUnitForID:(NSString *)unitID;
 - (void)updateDisplayUnits:(nullable NSArray<CleverTapDisplayUnit *> *)displayUnits;
 - (void)reset;

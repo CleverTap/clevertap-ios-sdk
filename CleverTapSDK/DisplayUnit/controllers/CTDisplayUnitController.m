@@ -27,26 +27,34 @@
 #pragma mark - CleverTapDisplayUnitCache
 
 - (NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits {
-    NSArray *units = self.displayUnits;
-    return units ?: @[];
+    @synchronized (self) {
+        NSArray *units = self.displayUnits;
+        return units.count > 0 ? units : nil;
+    }
 }
 
 - (CleverTapDisplayUnit *)getDisplayUnitForID:(NSString *)unitID {
     if (unitID.length == 0) return nil;
-    for (CleverTapDisplayUnit *displayUnit in self.displayUnits) {
-        if ([displayUnit.unitID isEqualToString:unitID]) {
-            return displayUnit;
+    @synchronized (self) {
+        for (CleverTapDisplayUnit *displayUnit in self.displayUnits) {
+            if ([displayUnit.unitID isEqualToString:unitID]) {
+                return displayUnit;
+            }
         }
     }
     return nil;
 }
 
 - (void)updateDisplayUnits:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
-    _displayUnits = [displayUnits copy];
+    @synchronized (self) {
+        _displayUnits = [displayUnits copy];
+    }
 }
 
 - (void)reset {
-    _displayUnits = nil;
+    @synchronized (self) {
+        _displayUnits = nil;
+    }
 }
 
 - (NSArray *)displayUnits {
