@@ -78,6 +78,7 @@ static NSArray *sslCertNames;
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
+#import "CleverTapDisplayUnitCache.h"
 #endif
 
 #import "CTBatchSentDelegate.h"
@@ -171,8 +172,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @end
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-@interface CleverTap () <CTDisplayUnitDelegate> {}
-@property (nonatomic, strong) CTDisplayUnitController *displayUnitController;
+@interface CleverTap () {}
+@property (nonatomic, strong) id<CleverTapDisplayUnitCache> displayUnitCache;
 @property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
 @end
 #endif
@@ -2447,23 +2448,17 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
-    if (displayUnitJSON) {
+    if ([displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0) {
         if (self.isUserSwitching) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
             return;
         }
-        
-        NSMutableArray *displayUnitNotifs;
-        @try {
-            displayUnitNotifs = [[NSMutableArray alloc] initWithArray:displayUnitJSON];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Display Unit JSON: %@", self, e.debugDescription);
-        }
-        if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
+        NSArray<CleverTapDisplayUnit *> *displayUnits = [self _parseDisplayUnitsFromJSONArray:displayUnitJSON];
+        if (displayUnits.count > 0) {
             [self initializeDisplayUnitWithCallback:^(BOOL success) {
                 if (success) {
-                    NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
-                    [self.displayUnitController updateDisplayUnits:displayUnits];
+                    [self.displayUnitCache updateDisplayUnits:displayUnits];
+                    [self _notifyDisplayUnitsUpdated];
                 }
             }];
         }
@@ -4200,26 +4195,42 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)initializeDisplayUnitWithCallback:(CleverTapDisplayUnitSuccessBlock)callback {
     [self.dispatchQueueManager runSerialAsync:^{
-        if (self.displayUnitController) {
+        id<CleverTapDisplayUnitCache> cache = self.displayUnitCache;
+        if (cache) {
             [CTUtils runSyncMainQueue: ^{
-                callback(self.displayUnitController.isInitialized);
+                callback(YES);
             }];
             return;
         }
         if (self.deviceInfo.deviceId) {
-            self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-            self.displayUnitController.delegate = self;
+            self.displayUnitCache = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
             [CTUtils runSyncMainQueue: ^{
-                callback(self.displayUnitController.isInitialized);
+                callback(YES);
             }];
         }
     }];
 }
 
 - (void)_resetDisplayUnit {
-    if (self.displayUnitController && self.displayUnitController.isInitialized && self.deviceInfo.deviceId) {
-        self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-        self.displayUnitController.delegate = self;
+    [self.displayUnitCache reset];
+}
+
+- (NSArray<CleverTapDisplayUnit *> *)_parseDisplayUnitsFromJSONArray:(NSArray *)jsonArray {
+    NSMutableArray<CleverTapDisplayUnit *> *units = [NSMutableArray new];
+    for (id obj in jsonArray) {
+        if (![obj isKindOfClass:[NSDictionary class]]) continue;
+        CleverTapDisplayUnit *unit = [[CleverTapDisplayUnit alloc] initWithJSON:(NSDictionary *)obj];
+        if (unit) {
+            [units addObject:unit];
+        }
+    }
+    return units;
+}
+
+- (void)_notifyDisplayUnitsUpdated {
+    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
+        // delegate signature is _Nonnull; coalesce a nullable cache result to an empty array.
+        [self.displayUnitDelegate displayUnitsUpdated:[self.displayUnitCache getAllDisplayUnits] ?: @[]];
     }
 }
 
@@ -4239,12 +4250,6 @@ static BOOL sharedInstanceErrorLogged;
     return _displayUnitDelegate;
 }
 
-- (void)displayUnitsDidUpdate {
-    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
-        [self.displayUnitDelegate displayUnitsUpdated:self.displayUnitController.displayUnits];
-    }
-}
-
 - (BOOL)didHandleDisplayUnitTestFromPushNotificaton:(NSDictionary*)notification {
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
     if ([CTUIUtils runningInsideAppExtension]) {
@@ -4257,21 +4262,23 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Received display unit from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_adunit"];
-        
+
         NSDictionary *displayUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
                                                                         options:0
                                                                           error:nil];
-        
-        NSMutableArray<NSDictionary*> *displayUnits = [NSMutableArray new];
-        [displayUnits addObject:displayUnitDict];
-        
-        if (displayUnits && displayUnits.count > 0) {
+
+        NSArray<CleverTapDisplayUnit *> *displayUnits = displayUnitDict
+            ? [self _parseDisplayUnitsFromJSONArray:@[displayUnitDict]]
+            : @[];
+
+        if (displayUnits.count > 0) {
             float delay = self.isAppForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 @try {
                     [self initializeDisplayUnitWithCallback:^(BOOL success) {
                         if (success) {
-                            [self.displayUnitController updateDisplayUnits:displayUnits];
+                            [self.displayUnitCache updateDisplayUnits:displayUnits];
+                            [self _notifyDisplayUnitsUpdated];
                         }
                     }];
                 } @catch (NSException *e) {
@@ -4296,24 +4303,19 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark Display Unit Public
 
 - (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
-    return self.displayUnitController.displayUnits;
+    if (!self.displayUnitCache) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: DisplayUnit: Failed to get all Display Units", self);
+        return nil;
+    }
+    return [self.displayUnitCache getAllDisplayUnits];
 }
 
 - (CleverTapDisplayUnit *_Nullable)getDisplayUnitForID:(NSString *)unitID {
-    for (CleverTapDisplayUnit *displayUnit in self.displayUnitController.displayUnits) {
-        if ([displayUnit.unitID isEqualToString:unitID]) {
-            @try {
-                return displayUnit;
-            } @catch (NSException *e) {
-                CleverTapLogDebug(_config.logLevel, @"Error getting display unit: %@", e.debugDescription);
-            }
-        }
-    };
-    return nil;
+    return [self.displayUnitCache getDisplayUnitForID:unitID];
 }
 
 - (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
-    // get the display unit data
+    // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
 #if !defined(CLEVERTAP_TVOS)
     [self.dispatchQueueManager runSerialAsync:^{
@@ -4346,6 +4348,72 @@ static BOOL sharedInstanceErrorLogged;
         }];
     }];
 #endif
+}
+
+- (void)recordDisplayUnitElementClickedEventForID:(NSString *)unitID
+                                        elementID:(NSString *)elementID
+                             additionalProperties:(NSDictionary *)additionalProperties {
+    CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    if (elementID.length > 0) {
+        params[@"wzrk_element_id"] = elementID;
+    }
+    NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
+    if (sanitized) {
+        [params addEntriesFromDictionary:sanitized];
+    }
+#if !defined(CLEVERTAP_TVOS)
+    [self.dispatchQueueManager runSerialAsync:^{
+        [CTEventBuilder buildDisplayViewStateEvent:YES
+                                   forDisplayUnit:displayUnit
+                               andQueryParameters:params
+                                completionHandler:^(NSDictionary *event,
+                                                    NSArray<CTValidationResult*> *errors) {
+            if (event) {
+                self.wzrkParams = [self ct_filteredWzrkFields:event[CLTAP_EVENT_DATA]];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            }
+            if (errors) {
+                [self.validationResultStack pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
+/// Strip @c wzrk_-prefixed keys, @c NSNull, and unsupported types from a
+/// caller-supplied dict. The @c wzrk_ namespace is reserved for server-
+/// controlled attribution fields; this keeps it one-way (server → client).
+- (nullable NSDictionary *)ct_sanitizedDisplayUnitProperties:(nullable NSDictionary *)props {
+    if (props.count == 0) return nil;
+    NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:props.count];
+    for (NSString *key in props) {
+        if (![key isKindOfClass:[NSString class]] || key.length == 0) continue;
+        if ([CTUtils doesString:key startWith:CLTAP_WZRK_PREFIX]) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Dropping reserved wzrk_* key from additionalProperties: %@",
+                self, key);
+            continue;
+        }
+        id value = props[key];
+        if (value == nil || value == [NSNull null]) continue;
+        out[key] = value;
+    }
+    return out.count > 0 ? [out copy] : nil;
+}
+
+/// Project only @c wzrk_* fields back out of the merged event data — so the
+/// existing @c wzrkParams contract (used for batch-header attachment as
+/// @c wzrk_ref) is unchanged; caller-supplied non-wzrk extras must not ride
+/// on subsequent batch headers.
+- (NSDictionary *)ct_filteredWzrkFields:(NSDictionary *)merged {
+    NSMutableDictionary *out = [NSMutableDictionary dictionary];
+    for (NSString *k in merged) {
+        if ([CTUtils doesString:k startWith:CLTAP_WZRK_PREFIX]) {
+            out[k] = merged[k];
+        }
+    }
+    return [out copy];
 }
 
 #endif
