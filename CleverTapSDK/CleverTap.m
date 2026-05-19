@@ -3888,7 +3888,8 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)_notifyDisplayUnitsUpdated {
     if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
-        [self.displayUnitDelegate displayUnitsUpdated:[self.displayUnitCache getAllDisplayUnits]];
+        // delegate signature is _Nonnull; coalesce a nullable cache result to an empty array.
+        [self.displayUnitDelegate displayUnitsUpdated:[self.displayUnitCache getAllDisplayUnits] ?: @[]];
     }
 }
 

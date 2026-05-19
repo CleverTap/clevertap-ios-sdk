@@ -24,8 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol CleverTapDisplayUnitCache <NSObject>
 @required
 
-/*! @return all units currently held; empty array if none. */
-- (NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits;
+/*! @return all units currently held; {@code nil} if none. */
+- (nullable NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits;
 
 /*! @return the unit with the given unitID, or nil if absent. */
 - (nullable CleverTapDisplayUnit *)getDisplayUnitForID:(NSString *)unitID;
