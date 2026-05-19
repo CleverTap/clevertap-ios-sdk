@@ -2437,7 +2437,9 @@ static BOOL sharedInstanceErrorLogged;
                 [_eventsQueue removeObjectsInArray:batch];
             }
 
+#if !CLEVERTAP_NO_INBOX_SUPPORT
             [self _removePendingInboxReadsForSentBatch:batch];
+#endif
 
             [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
@@ -4594,6 +4596,7 @@ static BOOL sharedInstanceErrorLogged;
     [CTPreferences putObject:updated forKey:key];
 }
 
+#if !CLEVERTAP_NO_INBOX_SUPPORT
 - (void)_removePendingInboxReadsForSentBatch:(NSArray *)batch {
     for (NSDictionary *event in batch) {
         if (![event[CLTAP_EVENT_NAME] isEqualToString:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME]) continue;
@@ -4603,6 +4606,7 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 }
+#endif
 
 // MARK: Confirmed deletes (got 200 from backend; filter until TTL passes)
 
