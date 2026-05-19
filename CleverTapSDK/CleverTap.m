@@ -3962,6 +3962,10 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark Display Unit Public
 
 - (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
+    if (!self.displayUnitCache) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: DisplayUnit: Failed to get all Display Units", self);
+        return nil;
+    }
     return [self.displayUnitCache getAllDisplayUnits];
 }
 

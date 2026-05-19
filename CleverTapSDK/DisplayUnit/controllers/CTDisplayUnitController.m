@@ -1,4 +1,5 @@
 #import "CTDisplayUnitController.h"
+#import "CTConstants.h"
 #import "CTPreferences.h"
 
 @interface CTDisplayUnitController() {
@@ -29,7 +30,11 @@
 - (NSArray<CleverTapDisplayUnit *> *)getAllDisplayUnits {
     @synchronized (self) {
         NSArray *units = self.displayUnits;
-        return units.count > 0 ? units : nil;
+        if (units.count == 0) {
+            CleverTapLogStaticDebug(@"DisplayUnit: Failed to return Display Units, nothing found in the cache");
+            return nil;
+        }
+        return units;
     }
 }
 
