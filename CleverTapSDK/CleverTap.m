@@ -4149,6 +4149,7 @@ static BOOL sharedInstanceErrorLogged;
     if (_config.analyticsOnly) return;
     if (sizeof(void*) == 4) return;
 
+    self.isInboxV2Enabled = YES;
     [self.dispatchQueueManager runSerialAsync:^{
         if (!self.deviceInfo.deviceId) return;
         [self _purgeExpiredConfirmedDeletes];
@@ -4270,7 +4271,8 @@ static BOOL sharedInstanceErrorLogged;
                           forMessage:(CleverTapInboxMessage *)message andQueryParameters:(NSDictionary *)params {
     
     [self.dispatchQueueManager runSerialAsync:^{
-        [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+        BOOL isV2Message = [self.inboxController isV2MessageId:message.messageId];
+        [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message isV2Message:isV2Message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 if (clicked) {
                     self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
@@ -4392,15 +4394,12 @@ static BOOL sharedInstanceErrorLogged;
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
             statusCode = ((NSHTTPURLResponse *)response).statusCode;
         }
+        strongSelf.isInboxV2Enabled = (statusCode == 200);
         if (statusCode == 403) {
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
-            strongSelf.isInboxV2Enabled = NO;
             if (completion) completion(NO);
             return;
-        }
-        if (statusCode == 200) {
-            strongSelf.isInboxV2Enabled = YES;
         }
         if (shouldThrottle) {
             strongSelf.lastInboxRefreshTimestamp = [[NSDate date] timeIntervalSince1970];
@@ -4432,9 +4431,6 @@ static BOOL sharedInstanceErrorLogged;
     [request onError:^(NSError * _Nullable error) {
         typeof(self) strongSelf = weakSelf;
         if (!strongSelf) return;
-        if (shouldThrottle) {
-            strongSelf.lastInboxRefreshTimestamp = [[NSDate date] timeIntervalSince1970];
-        }
         CleverTapLogDebug(strongSelf.config.logLevel,
             @"%@: InboxV2 fetch failed — error: %@", strongSelf, error.localizedDescription);
         if (completion) completion(NO);
@@ -4529,8 +4525,8 @@ static BOOL sharedInstanceErrorLogged;
         if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
             statusCode = ((NSHTTPURLResponse *)response).statusCode;
         }
+        strongSelf.isInboxV2Enabled = (statusCode == 200);
         if (statusCode == 403) {
-            strongSelf.isInboxV2Enabled = NO;
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
             return;
@@ -4718,8 +4714,8 @@ static BOOL sharedInstanceErrorLogged;
         if (!strongSelf) return;
         NSInteger statusCode = [response isKindOfClass:[NSHTTPURLResponse class]]
             ? ((NSHTTPURLResponse *)response).statusCode : 0;
+        strongSelf.isInboxV2Enabled = (statusCode == 200);
         if (statusCode == 403) {
-            strongSelf.isInboxV2Enabled = NO;
             CleverTapLogDebug(strongSelf.config.logLevel,
                 @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
             return;
