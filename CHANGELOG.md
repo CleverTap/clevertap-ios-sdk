@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.7.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.0) (May 18, 2026)
+### [Version 7.7.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.0) (May 19, 2026)
 #### New Features
 * **App Inbox Cross-Device Sync:** App Inbox messages now sync across a user's devices. If a user deletes or reads a message on one device, it is automatically reflected on their other devices.
   * **New Inbox Fetch API:** The SDK already fetches inbox messages automatically on app launch and user login. Two new public methods have been added to this with on-demand refresh support:
@@ -9,8 +9,12 @@ All notable changes to this project will be documented in this file.
     * `fetchInbox(callback:)` — same as above, but invokes the callback with a success/failure result when the fetch completes.
     * **Note:** Both methods are throttled to once every 5 minutes between consecutive calls. This throttle is shared with the built-in pull-to-refresh gesture.
   * **Pull-to-Refresh in Built-in Inbox:** The built-in App Inbox now includes a pull-to-refresh gesture. Manual inbox fetches — including those triggered by `fetchInbox()` — are throttled to once every 5 minutes between consecutive calls.
-  * **Inbox Viewed and Clicked Event Deduplication:** Rapid duplicate `Notification Viewed` and `Notification Clicked` events for the same inbox message are now automatically suppressed to prevent analytics inflation. Additionally, a `Notification Viewed` event is not raised for messages that have already been read.
+  * **Inbox Viewed and Clicked Event Deduplication:** Rapid duplicate `Notification Viewed` and `Notification Clicked` events for the same inbox message are now automatically suppressed to prevent analytics inflation. Additionally, a `Notification Viewed` event is not raised for messages that have already been read on another device.
     * **Note:** For custom inbox implementations, ensure `recordInboxNotificationViewedEvent(messageId)` is called when a message becomes visible to the user, before calling `markReadInboxMessage(messageId)` — calling them in reverse order will silently drop the Viewed event.
+    * **Note:** The already read suppression applies only to accounts enabled for App Inbox Cross-Device Sync. For accounts not using this feature, `Notification Viewed` continues to be raised regardless of read state, preserving existing behaviour.
+
+#### Fixed
+- Fixes a crash in `CTInAppEvaluationManager` corrupting NSUserDefaults.
 
 ### [Version 7.6.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.6.0) (April 17, 2026)
 #### Added
