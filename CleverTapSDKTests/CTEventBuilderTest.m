@@ -11,6 +11,8 @@
 #import "CTValidationConfig.h"
 #import "CTEventNameValidator.h"
 #import "CTInAppNotification.h"
+#import "CleverTap+DisplayUnit.h"
+#import "CTConstants.h"
 
 @interface CTEventBuilderTest : XCTestCase
 @end
@@ -328,8 +330,7 @@
 - (void)test_buildInboxMessageStateEvent_withClickedTrueAndInvalidKey {
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
-    
-    [CTEventBuilder buildInboxMessageStateEvent:true forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+    [CTEventBuilder buildInboxMessageStateEvent:true forMessage:inboxMsg isV2Message:false andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Clicked");
         XCTAssertEqual([event[@"evtData"] count], 1);
@@ -340,8 +341,8 @@
 - (void)test_buildInboxMessageStateEvent_withClickedFalseAndInvalidKey {
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
-
-    [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+    
+    [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg isV2Message:false andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Viewed");
         XCTAssertEqual([event[@"evtData"] count], 1);
@@ -448,6 +449,74 @@
         }
         XCTAssertTrue(found524);
     }];
+}
+
+#pragma mark - Display Unit element-click params merging
+
+/// Verifies the bug fix in `buildDisplayViewStateEvent:`: the `params` argument
+/// is now merged into `notif` alongside the wzrk_* fields extracted from the
+/// cached unit JSON. Required for `-recordDisplayUnitElementClickedEventForID:`
+/// to deliver `wzrk_element_id` and `additionalProperties` to the event.
+- (void)testBuildDisplayViewStateEvent_mergesParamsAlongsideWzrkFields {
+    NSDictionary *unitJson = @{
+        @"wzrk_id": @"1234",
+        @"wzrk_pivot": @"wzrk_default"
+    };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+    NSDictionary *params = @{
+        @"wzrk_element_id": @"button-1",
+        @"action_type": @"open_url",
+        @"action_url": @"https://example.com"
+    };
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:YES
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:params
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+
+    XCTAssertEqualObjects(captured[CLTAP_EVENT_NAME], CLTAP_NOTIFICATION_CLICKED_EVENT_NAME);
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    // wzrk_* extraction from cached unit JSON preserved.
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"1234");
+    XCTAssertEqualObjects(evtData[@"wzrk_pivot"], @"wzrk_default");
+    // params merged in (the bug fix).
+    XCTAssertEqualObjects(evtData[@"wzrk_element_id"], @"button-1");
+    XCTAssertEqualObjects(evtData[@"action_type"], @"open_url");
+    XCTAssertEqualObjects(evtData[@"action_url"], @"https://example.com");
+    // Timestamp tag still set.
+    XCTAssertNotNil(evtData[CLTAP_NOTIFICATION_CLICKED_TAG]);
+}
+
+/// Regression guard: the existing single-arg
+/// `-recordDisplayUnitClickedEventForID:` passes `nil` for `params`.
+/// The bug fix must not regress that path — only wzrk_* fields appear on the
+/// event, no spurious entries leak from the new merge step.
+- (void)testBuildDisplayViewStateEvent_nilParamsBehavesAsBefore {
+    NSDictionary *unitJson = @{ @"wzrk_id": @"x" };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:YES
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:nil
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"x");
+    XCTAssertNil(evtData[@"wzrk_element_id"]);
 }
 
 @end
