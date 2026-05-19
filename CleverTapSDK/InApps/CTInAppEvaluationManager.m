@@ -540,10 +540,7 @@
 }
 
 - (void)saveEvaluatedServerSideInAppIds {
-    NSString *storageKey = [self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY];
-    NSMutableArray *existingInApps = [[CTPreferences getObjectForKey:storageKey] mutableCopy];
-    [existingInApps addObjectsFromArray: self.evaluatedServerSideInAppIds];
-    [CTPreferences putObject: existingInApps forKey:storageKey];
+    [CTPreferences putObject:self.evaluatedServerSideInAppIds forKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
 }
 
 - (void)saveSuppressedClientSideInApps {
