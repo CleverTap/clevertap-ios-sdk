@@ -230,6 +230,7 @@ static CTDataValidator *_eventDataValidator;
  */
 + (void)buildInboxMessageStateEvent:(BOOL)clicked
                          forMessage:(CleverTapInboxMessage *)message
+                        isV2Message:(BOOL)isV2Message
                  andQueryParameters:(NSDictionary *)params
                   completionHandler:(void(^)(NSDictionary* event, NSArray<CTValidationResult*> *errors))completion {
     NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
@@ -241,6 +242,9 @@ static CTDataValidator *_eventDataValidator;
                 continue;
             id value = data[x];
             notif[x] = value;
+        }
+        if (isV2Message && message.messageId) {
+            notif[@"wzrk_mid"] = message.messageId;
         }
         if (params) {
             [notif addEntriesFromDictionary:params];

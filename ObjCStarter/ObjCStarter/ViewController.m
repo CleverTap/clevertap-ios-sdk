@@ -47,7 +47,8 @@
                       @"Prompt for Push Notification",
                       @"Local Half Interstitial Push Primer",
                       @"Local Alert Push Primer",
-                      @"InApp Campaign Push Primer", nil];
+                      @"InApp Campaign Push Primer",
+                      @"Fetch Inbox", nil];
     [self. tblEvent reloadData];
 }
     
@@ -126,6 +127,9 @@
             break;
         case 14:
             [self createInAppCampaignPushPrimer];
+            break;
+        case 15:
+            [self fetchInbox];
             break;
         default:
             break;
@@ -307,6 +311,12 @@
 
 - (void)createInAppCampaignPushPrimer {
     [[CleverTap sharedInstance] recordEvent:@"InAppCampaignPushPrimer"];
+}
+
+- (void)fetchInbox {
+    [[CleverTap sharedInstance] fetchInboxWithCallback:^(BOOL success) {
+        NSLog(@"Fetch Inbox: %d", success);
+    }];
 }
 
 #pragma mark - CleverTapPushPermissionDelegate

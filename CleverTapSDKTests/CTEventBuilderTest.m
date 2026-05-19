@@ -330,8 +330,7 @@
 - (void)test_buildInboxMessageStateEvent_withClickedTrueAndInvalidKey {
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
-    
-    [CTEventBuilder buildInboxMessageStateEvent:true forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+    [CTEventBuilder buildInboxMessageStateEvent:true forMessage:inboxMsg isV2Message:false andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Clicked");
         XCTAssertEqual([event[@"evtData"] count], 1);
@@ -342,8 +341,8 @@
 - (void)test_buildInboxMessageStateEvent_withClickedFalseAndInvalidKey {
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
-
-    [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+    
+    [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg isV2Message:false andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Viewed");
         XCTAssertEqual([event[@"evtData"] count], 1);

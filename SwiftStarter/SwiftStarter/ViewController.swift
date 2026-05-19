@@ -61,6 +61,7 @@ extension ViewController {
         eventList.append("Native Display")
         eventList.append("Variables")
         eventList.append("Sync Custom Templates")
+        eventList.append("Fetch Inbox")
         self.tblEvent.reloadData()
     }
     
@@ -156,6 +157,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 20: navigateToVariables()
             break;
         case 21: CleverTap.sharedInstance()?.syncCustomTemplates()
+            break;
+        case 22:
+            fetchInbox()
             break;
         default:
             break;
@@ -346,6 +350,12 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
     
     func createInAppCampaignPushPrimer() {
         CleverTap.sharedInstance()?.recordEvent("InAppCampaignPushPrimer")
+    }
+
+    func fetchInbox() {
+        CleverTap.sharedInstance()?.fetchInbox(callback: { success in
+            print("Fetch Inbox: \(success)")
+        })
     }
     
     // MARK: CleverTapPushPermissionDelegate
