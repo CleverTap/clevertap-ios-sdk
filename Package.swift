@@ -31,8 +31,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "CleverTapSDK",
-            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.6.0.xcframework.zip",
-            checksum: "b3e938fc3c4923bc48de9904f3b4d75c006a012a6195d9b898d1cd6cc481ca6d"
+            url: "https://d1new0xr8otir0.cloudfront.net/CleverTapSDK-7.7.0.xcframework.zip",
+            checksum: "9c0b04760f394416021a088043de39a589057f6b5c4742d45e11e88b475c63b4"
         ),
         .target(
             name: "CleverTapLocation",

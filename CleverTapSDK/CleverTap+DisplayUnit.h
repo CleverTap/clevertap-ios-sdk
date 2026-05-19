@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 @class CleverTapDisplayUnitContent;
+@protocol CleverTapDisplayUnitCache;
 
 /*!
  
@@ -107,11 +108,14 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
 
 /*!
  @method
- 
+
  @abstract
  This method returns all the display units.
+
+ @return all units currently held, or @c nil if no cache has been installed
+ yet or the cache holds no units. Matches the Android contract.
  */
-- (NSArray<CleverTapDisplayUnit *>*_Nonnull)getAllDisplayUnits;
+- (NSArray<CleverTapDisplayUnit *>*_Nullable)getAllDisplayUnits;
 
 /*!
  @method
@@ -147,12 +151,64 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
 
 /*!
  @method
- 
+
  @abstract
  Record Notification Clicked for display unit.
- 
+
  @param unitID       unique id of the display unit
  */
 - (void)recordDisplayUnitClickedEventForID:(NSString *_Nonnull)unitID;
+
+/*!
+ @method recordDisplayUnitElementClickedEventForID:elementID:additionalProperties:
+
+ @abstract Element-level click attribution for Native Display units.
+
+ Element-level analog of @c -recordDisplayUnitClickedEventForID: — for Native
+ Display units that host multiple interactive child elements (buttons,
+ images, etc.), this method records which child element was clicked
+ alongside the existing @c wzrk_* campaign attribution.
+
+ The resulting @c "Notification Clicked" event:
+ - Carries the campaign's @c wzrk_* fields from the cached unit JSON (same
+   enrichment as the unit-level method).
+ - Adds @c wzrk_element_id = elementID to the event's @c evtData.
+ - Merges @c additionalProperties into @c evtData after the @c wzrk_*
+   enrichment. Keys in @c additionalProperties starting with @c wzrk_ are
+   stripped defensively — that prefix is reserved for server-controlled
+   attribution fields.
+
+ @param unitID                  the unitID of the Display Unit.
+ @param elementID               identifier of the clicked child element
+                                (from the Native Display config; typically
+                                a button node id).
+ @param additionalProperties    optional per-click context (action url,
+                                custom KVs, …).
+ */
+- (void)recordDisplayUnitElementClickedEventForID:(NSString *_Nonnull)unitID
+                                        elementID:(NSString *_Nonnull)elementID
+                             additionalProperties:(nullable NSDictionary<NSString *, id> *)additionalProperties;
+
+/*!
+ @method
+
+ @abstract
+ Replaces the SDK's display-unit cache with the supplied implementation.
+ Pass `nil` to clear the reference (subsequent server responses will lazily
+ install a fresh default cache).
+
+ The new instance receives subsequent `updateDisplayUnits:` calls (e.g. from
+ server responses) and serves all lookup sites: `getAllDisplayUnits`,
+ `getDisplayUnitForID:`, `recordDisplayUnitViewedEventForID:`, and
+ `recordDisplayUnitClickedEventForID:`.
+
+ Implementations must be thread-safe. The display-unit delegate registered
+ via `-setDisplayUnitDelegate:` fires only for server-pipeline activity —
+ replacing the cache or mutating its contents from outside the SDK does not
+ synthesise a delegate fire.
+
+ @since 7.x.0
+ */
+- (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache;
 
 @end
