@@ -21,17 +21,25 @@
     return self;
 }
 
-- (CTValidationResult *)validateEventName:(NSString *)eventName {
+- (CTValidationResult *)validateEventName:(id)eventName {
+    if ([eventName isKindOfClass:[NSNumber class]]) {
+        eventName = [(NSNumber *)eventName stringValue];
+    }
+    if (eventName && ![eventName isKindOfClass:[NSString class]]) {
+        return [CTValidationResult dropWithCode:CTValidationErrorEventNameNull
+                                        message:@"Event name must be a String or numeric value"
+                                         reason:CTDropReasonNullEventName];
+    }
     //Check for null/empty
-    if (!eventName || eventName.length == 0) {
+    if (!eventName || [(NSString *)eventName length] == 0) {
         return [CTValidationResult dropWithCode:CTValidationErrorEventNameNull
                                         message:@"Event name is null or empty"
                                          reason:CTDropReasonNullEventName];
     }
     
     //Normalize the event name
-    NSString *originalName = eventName;
-    NSString *cleaned = [self normalizeEventName:eventName];
+    NSString *originalName = (NSString *)eventName;
+    NSString *cleaned = [self normalizeEventName:(NSString *)eventName];
     //Check if became empty after normalization
     if (!cleaned || cleaned.length == 0) {
         return [CTValidationResult dropWithCode:CTValidationErrorEventNameNull
