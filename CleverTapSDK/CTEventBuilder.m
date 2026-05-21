@@ -268,6 +268,16 @@ static CTDataValidator *_eventDataValidator;
     @try {
         NSMutableDictionary *event = [NSMutableDictionary new];
         NSMutableDictionary *notif = [NSMutableDictionary new];
+        // 1. Caller-supplied params first (`additionalProperties` + `wzrk_element_id`
+        //    from the element-aware click selector). Existing callers pass nil for
+        //    `params` so they are unaffected.
+        if (params) {
+            [notif addEntriesFromDictionary:params];
+        }
+        // 2. Cached unit `wzrk_*` fields layered on top — server-controlled
+        //    attribution always wins over same-named caller-supplied keys (e.g. a
+        //    client cannot spoof `wzrk_id`). Caller-supplied `wzrk_*` keys that
+        //    are NOT in the cached unit pass through unchanged.
         NSDictionary *data = displayUnit.json;
         for (NSString *x in [data allKeys]) {
             if (!([CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG] || [CTUtils doesString:x startWith:CLTAP_NOTIFICATION_TAG_SECONDARY]))
@@ -275,14 +285,6 @@ static CTDataValidator *_eventDataValidator;
             NSString *key = [x stringByReplacingOccurrencesOfString:CLTAP_NOTIFICATION_TAG withString:CLTAP_WZRK_PREFIX];
             id value = data[x];
             notif[key] = value;
-        }
-        // Merge caller-supplied params (e.g. `wzrk_element_id` and
-        // `additionalProperties` from the element-aware click selector).
-        // Mirrors the inbox-event path above (~line 361) which already did
-        // this; the display-unit path missed it. Existing callers pass nil
-        // for `params` so they are unaffected.
-        if (params) {
-            [notif addEntriesFromDictionary:params];
         }
         notif[CLTAP_NOTIFICATION_CLICKED_TAG] = @((long) [[NSDate date] timeIntervalSince1970]);
         event[CLTAP_EVENT_NAME] = clicked ? CLTAP_NOTIFICATION_CLICKED_EVENT_NAME : CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
