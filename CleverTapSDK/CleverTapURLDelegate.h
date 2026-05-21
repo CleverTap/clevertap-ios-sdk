@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "CleverTap.h"
 
 @protocol CleverTapURLDelegate <NSObject>
 
