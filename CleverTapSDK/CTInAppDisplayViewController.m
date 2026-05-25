@@ -384,6 +384,20 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)tappedDismiss {
     [self hide:YES];
+    [self triggerDismissButtonAction];
+}
+
+- (void)triggerDismissButtonAction {
+    CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
+    NSString *campaignId = self.notification.campaignId ?: @"";
+    NSMutableDictionary *extras = [NSMutableDictionary dictionaryWithDictionary:@{
+        CLTAP_NOTIFICATION_ID_TAG: campaignId,
+        CLTAP_PROP_WZRK_CTA: CLTAP_CTA_DISMISS_BUTTON,
+        CLTAP_PROP_WZRK_BUTTON_ID: CLTAP_DISMISS_BUTTON_ID
+    }];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
+    }
 }
 
 - (void)buttonTapped:(UIButton*)button {
@@ -470,7 +484,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }
     if (buttonId) {
-        extras[@"button_id"] = buttonId;
+        extras[CLTAP_PROP_WZRK_BUTTON_ID] = buttonId;
     }
     NSString *campaignId = self.notification.campaignId;
     if (campaignId == nil) {

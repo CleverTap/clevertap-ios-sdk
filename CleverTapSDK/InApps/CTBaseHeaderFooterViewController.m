@@ -354,6 +354,15 @@ typedef enum {
             }
                              completion:^(BOOL finished) {
                 [self hide:NO];
+                NSString *campaignId = self.notification.campaignId ?: @"";
+                NSMutableDictionary *extras = [NSMutableDictionary dictionaryWithDictionary:@{
+                    CLTAP_NOTIFICATION_ID_TAG: campaignId,
+                    CLTAP_PROP_WZRK_CTA: CLTAP_CTA_SWIPE_DISMISS
+                }];
+                if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+                    CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
+                    [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
+                }
             }];
         }];
     }];
@@ -421,5 +430,9 @@ typedef enum {
     [self hideFromWindow:animated];
 }
 
+- (void)viewWillPassThroughTouch {
+    [self hide:NO];
+    [self triggerDismissButtonAction];
+}
 
 @end

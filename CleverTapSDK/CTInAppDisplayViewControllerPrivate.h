@@ -26,6 +26,7 @@
 
 - (void)tappedDismiss;
 - (void)buttonTapped:(UIButton*)button;
+- (void)triggerDismissButtonAction;
 - (void)handleButtonClickFromIndex:(int)index;
 - (void)handleImageTapGesture;
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;

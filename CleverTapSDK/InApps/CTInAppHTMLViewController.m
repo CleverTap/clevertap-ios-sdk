@@ -125,6 +125,11 @@ typedef enum {
     return YES;
 }
 
+- (void)viewWillPassThroughTouch {
+    [self hide:NO];
+    [self triggerDismissButtonAction];
+}
+
 - (void)loadWebView {
     CleverTapLogStaticInternal(@"%@: Loading the web view", [self class]);
     
