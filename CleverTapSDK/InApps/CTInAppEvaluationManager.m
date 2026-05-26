@@ -68,7 +68,14 @@
         self.evaluatedServerSideInAppIds = [NSMutableArray new];
         NSArray *savedEvaluatedServerSideInAppIds = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_INAPP_SS_EVAL_STORAGE_KEY]];
         if (savedEvaluatedServerSideInAppIds) {
-            self.evaluatedServerSideInAppIds = [savedEvaluatedServerSideInAppIds mutableCopy];
+            if (savedEvaluatedServerSideInAppIds.count > CLTAP_INAPP_SS_EVAL_RECOVERY_THRESHOLD) {
+                // NSOrderedSet preserves first-seen order, matching the FIFO drain in onBatchSent.
+                NSArray *deduped = [[NSOrderedSet orderedSetWithArray:savedEvaluatedServerSideInAppIds] array];
+                self.evaluatedServerSideInAppIds = [deduped mutableCopy];
+                [self saveEvaluatedServerSideInAppIds];
+            } else {
+                self.evaluatedServerSideInAppIds = [savedEvaluatedServerSideInAppIds mutableCopy];
+            }
         }
         
         self.suppressedClientSideInApps = [NSMutableArray new];
