@@ -4314,6 +4314,10 @@ static BOOL sharedInstanceErrorLogged;
     return [self.displayUnitCache getDisplayUnitForID:unitID];
 }
 
+- (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache {
+    _displayUnitCache = cache;
+}
+
 - (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
     // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
