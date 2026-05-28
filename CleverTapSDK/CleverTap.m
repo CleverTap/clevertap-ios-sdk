@@ -4948,6 +4948,10 @@ static BOOL sharedInstanceErrorLogged;
     return [self.displayUnitCache getDisplayUnitForID:unitID];
 }
 
+- (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache {
+    _displayUnitCache = cache;
+}
+
 - (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
     // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
@@ -4988,13 +4992,17 @@ static BOOL sharedInstanceErrorLogged;
                                         elementID:(NSString *)elementID
                              additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    // Build params in the order CTEventBuilder will merge BEFORE layering cached
+    // unit wzrk_* on top: additionalProperties first, then wzrk_element_id.
+    // Cached wzrk_* fields layered by buildDisplayViewStateEvent: will overwrite
+    // any caller-supplied same-named keys (e.g. a spoofed wzrk_id).
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    if (elementID.length > 0) {
-        params[@"wzrk_element_id"] = elementID;
-    }
     NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
     if (sanitized) {
         [params addEntriesFromDictionary:sanitized];
+    }
+    if (elementID.length > 0) {
+        params[@"wzrk_element_id"] = elementID;
     }
 #if !defined(CLEVERTAP_TVOS)
     [self.dispatchQueueManager runSerialAsync:^{
@@ -5015,20 +5023,16 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 }
 
-/// Strip @c wzrk_-prefixed keys, @c NSNull, and unsupported types from a
-/// caller-supplied dict. The @c wzrk_ namespace is reserved for server-
-/// controlled attribution fields; this keeps it one-way (server → client).
+/// Drop entries with non-string keys, empty keys, @c nil values, and @c NSNull
+/// values from a caller-supplied dict. Caller-supplied @c wzrk_* keys are
+/// retained — server attribution wins at merge time (cached unit @c wzrk_*
+/// is layered on top by @c buildDisplayViewStateEvent:), so novel caller
+/// @c wzrk_* keys pass through while same-named ones get overwritten.
 - (nullable NSDictionary *)ct_sanitizedDisplayUnitProperties:(nullable NSDictionary *)props {
     if (props.count == 0) return nil;
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:props.count];
     for (NSString *key in props) {
         if (![key isKindOfClass:[NSString class]] || key.length == 0) continue;
-        if ([CTUtils doesString:key startWith:CLTAP_WZRK_PREFIX]) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Dropping reserved wzrk_* key from additionalProperties: %@",
-                self, key);
-            continue;
-        }
         id value = props[key];
         if (value == nil || value == [NSNull null]) continue;
         out[key] = value;

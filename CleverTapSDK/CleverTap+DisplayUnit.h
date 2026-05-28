@@ -169,14 +169,13 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  images, etc.), this method records which child element was clicked
  alongside the existing @c wzrk_* campaign attribution.
 
- The resulting @c "Notification Clicked" event:
- - Carries the campaign's @c wzrk_* fields from the cached unit JSON (same
-   enrichment as the unit-level method).
- - Adds @c wzrk_element_id = elementID to the event's @c evtData.
- - Merges @c additionalProperties into @c evtData after the @c wzrk_*
-   enrichment. Keys in @c additionalProperties starting with @c wzrk_ are
-   stripped defensively — that prefix is reserved for server-controlled
-   attribution fields.
+ @c evtData is assembled in three layers (later layers win on key collision):
+ 1. Caller's @c additionalProperties, merged verbatim.
+ 2. @c wzrk_element_id = elementID from the dedicated argument.
+ 3. Cached unit's @c wzrk_* fields layered on top — so server-controlled
+    attribution always wins over same-named caller-supplied keys (e.g. a
+    client cannot spoof @c wzrk_id). Caller-supplied @c wzrk_* keys that
+    are NOT in the cached unit pass through unchanged.
 
  @param unitID                  the unitID of the Display Unit.
  @param elementID               identifier of the clicked child element
