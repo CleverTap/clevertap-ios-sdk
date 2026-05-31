@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <UserNotifications/UserNotifications.h>
 
 #if !TARGET_OS_TV
 #import <WatchConnectivity/WatchConnectivity.h>
@@ -1220,7 +1221,30 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 /*!
  @method
- 
+
+ @abstract
+ Handle a UNNotification in the foreground to support silent-in-foreground behaviour.
+
+ @discussion
+ Call this from your UNUserNotificationCenterDelegate willPresent implementation when using
+ manual SDK integration (i.e. without autoIntegrate). If the notification payload contains
+ wzrk_sif=1, the completionHandler is called with empty presentation options (no banner/sound/badge).
+ Otherwise it is called with the provided defaultOptions.
+ Non-CleverTap notifications are passed through unchanged using defaultOptions.
+ This method also records the Notification Viewed event for CleverTap notifications.
+
+ @param notification      The UNNotification received in willPresent
+ @param defaultOptions    Presentation options to use when wzrk_sif is not set
+ @param completionHandler The completion handler from willPresent
+ */
++ (void)handleWillPresentNotification:(UNNotification *_Nonnull)notification
+                   withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                    completionHandler:(void (^_Nonnull)(UNNotificationPresentationOptions))completionHandler
+    API_AVAILABLE(ios(10.0));
+
+/*!
+ @method
+
  @abstract
  Determine whether a notification originated from CleverTap
  

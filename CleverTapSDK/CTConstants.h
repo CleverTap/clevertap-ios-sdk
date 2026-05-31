@@ -153,6 +153,7 @@ static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_WZRK_PREFIX @"wzrk_"
 #define CLTAP_NOTIFICATION_TAG_SECONDARY @"wzrk_"
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
+#define CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND @"wzrk_sif"
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 #define CLTAP_DATE_PREFIX @"$D_"

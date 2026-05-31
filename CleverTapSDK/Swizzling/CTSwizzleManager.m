@@ -69,16 +69,19 @@
             Class ncdCls = [[UNUserNotificationCenter currentNotificationCenter].delegate class];
             if ([UNUserNotificationCenter class] && !ncdCls) {
                 [[UNUserNotificationCenter currentNotificationCenter] addObserver:[CleverTap sharedInstance] forKeyPath:@"delegate" options:0 context:nil];
-            } else if (class_getInstanceMethod(ncdCls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
-                sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
-                __block NSInvocation *invocation = nil;
-                invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
-                    [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
-                    [invocation setArgument:&center atIndex:2];
-                    [invocation setArgument:&response atIndex:3];
-                    [invocation setArgument:&completion atIndex:4];
-                    [invocation invokeWithTarget:obj];
-                } error:nil];
+            } else {
+                if (class_getInstanceMethod(ncdCls, NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:"))) {
+                    sel = NSSelectorFromString(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
+                    __block NSInvocation *invocation = nil;
+                    invocation = [ncdCls ct_swizzleMethod:sel withBlock:^(id obj, UNUserNotificationCenter *center, UNNotificationResponse *response, void (^completion)(void) ) {
+                        [CleverTap handlePushNotification:response.notification.request.content.userInfo openDeepLinksInForeground:YES];
+                        [invocation setArgument:&center atIndex:2];
+                        [invocation setArgument:&response atIndex:3];
+                        [invocation setArgument:&completion atIndex:4];
+                        [invocation invokeWithTarget:obj];
+                    } error:nil];
+                }
+                [CTSwizzleManager swizzleWillPresentOnClass:ncdCls];
             }
         }
         if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:"))) {
@@ -195,6 +198,41 @@
 }
 + (void)ct_application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     [CleverTap handlePushNotification:userInfo openDeepLinksInForeground:NO];
+}
+
++ (void)swizzleWillPresentOnClass:(Class)cls {
+    if (!cls) return;
+#if !defined(CLEVERTAP_TVOS)
+    if (@available(iOS 10.0, *)) {
+        SEL willPresentSel = NSSelectorFromString(@"userNotificationCenter:willPresentNotification:withCompletionHandler:");
+        if (!class_getInstanceMethod(cls, willPresentSel)) return;
+
+        __block NSInvocation *willPresentInvocation = nil;
+        willPresentInvocation = [cls ct_swizzleMethod:willPresentSel
+                                           withBlock:^(id obj,
+                                                       UNUserNotificationCenter *center,
+                                                       UNNotification *notification,
+                                                       void (^completion)(UNNotificationPresentationOptions)) {
+            NSDictionary *userInfo = notification.request.content.userInfo;
+            BOOL isCTPush = [[CleverTap sharedInstance] isCleverTapNotification:userInfo];
+            BOOL silentInForeground = isCTPush && [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
+
+            if (silentInForeground) {
+                void (^wrappedCompletion)(UNNotificationPresentationOptions) = ^(UNNotificationPresentationOptions options) {
+                    completion(UNNotificationPresentationOptionNone);
+                };
+                [willPresentInvocation setArgument:&center atIndex:2];
+                [willPresentInvocation setArgument:&notification atIndex:3];
+                [willPresentInvocation setArgument:&wrappedCompletion atIndex:4];
+            } else {
+                [willPresentInvocation setArgument:&center atIndex:2];
+                [willPresentInvocation setArgument:&notification atIndex:3];
+                [willPresentInvocation setArgument:&completion atIndex:4];
+            }
+            [willPresentInvocation invokeWithTarget:obj];
+        } error:nil];
+    }
+#endif
 }
 
 #pragma clang diagnostic pop
