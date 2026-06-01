@@ -205,36 +205,43 @@
 #if !defined(CLEVERTAP_TVOS)
     if (@available(iOS 10.0, *)) {
         SEL willPresentSel = NSSelectorFromString(@"userNotificationCenter:willPresentNotification:withCompletionHandler:");
-        if (!class_getInstanceMethod(cls, willPresentSel)) return;
+        Method willPresentMethod = class_getInstanceMethod(cls, willPresentSel);
+        if (!willPresentMethod) return;
 
-        __block NSInvocation *willPresentInvocation = nil;
-        willPresentInvocation = [cls ct_swizzleMethod:willPresentSel
-                                           withBlock:^(id obj,
-                                                       UNUserNotificationCenter *center,
-                                                       UNNotification *notification,
-                                                       void (^completion)(UNNotificationPresentationOptions)) {
+        // Capture the original IMP as a typed C function pointer to avoid
+        // passing blocks through NSInvocation (which bypasses ARC and can
+        // cause crashes with stack-allocated completion handler wrappers).
+        IMP originalIMP = method_getImplementation(willPresentMethod);
+        typedef void (*WillPresentIMP)(id, SEL, UNUserNotificationCenter *, UNNotification *, void (^)(UNNotificationPresentationOptions));
+
+        IMP newIMP = imp_implementationWithBlock(^(id obj,
+                                                    UNUserNotificationCenter *center,
+                                                    UNNotification *notification,
+                                                    void (^completion)(UNNotificationPresentationOptions)) {
             NSDictionary *userInfo = notification.request.content.userInfo;
             BOOL isCTPush = [[CleverTap sharedInstance] isCleverTapNotification:userInfo];
             BOOL silentInForeground = isCTPush && [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
 
             if (silentInForeground) {
                 void (^wrappedCompletion)(UNNotificationPresentationOptions) = ^(UNNotificationPresentationOptions options) {
-                    completion(UNNotificationPresentationOptionNone);
+                    if (@available(iOS 14.0, *)) {
+                        completion(UNNotificationPresentationOptionList);
+                    } else {
+                        completion(UNNotificationPresentationOptionNone);
+                    }
                 };
-                [willPresentInvocation setArgument:&center atIndex:2];
-                [willPresentInvocation setArgument:&notification atIndex:3];
-                [willPresentInvocation setArgument:&wrappedCompletion atIndex:4];
+                ((WillPresentIMP)originalIMP)(obj, willPresentSel, center, notification, wrappedCompletion);
             } else {
-                [willPresentInvocation setArgument:&center atIndex:2];
-                [willPresentInvocation setArgument:&notification atIndex:3];
-                [willPresentInvocation setArgument:&completion atIndex:4];
+                ((WillPresentIMP)originalIMP)(obj, willPresentSel, center, notification, completion);
             }
-            [willPresentInvocation invokeWithTarget:obj];
-        } error:nil];
+        });
+
+        const char *typeEncoding = method_getTypeEncoding(willPresentMethod);
+        if (!class_addMethod(cls, willPresentSel, newIMP, typeEncoding)) {
+            method_setImplementation(willPresentMethod, newIMP);
+        }
     }
 #endif
 }
-
-#pragma clang diagnostic pop
 
 @end

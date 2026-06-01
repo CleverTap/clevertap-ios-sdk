@@ -2978,7 +2978,15 @@ static BOOL sharedInstanceErrorLogged;
         }
         [self recordNotificationViewedEventWithData:userInfo];
         BOOL silentInForeground = [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
-        completionHandler(silentInForeground ? UNNotificationPresentationOptionNone : defaultOptions);
+        if (silentInForeground) {
+            if (@available(iOS 14.0, *)) {
+                completionHandler(UNNotificationPresentationOptionList);
+            } else {
+                completionHandler(UNNotificationPresentationOptionNone);
+            }
+        } else {
+            completionHandler(defaultOptions);
+        }
     } else {
         completionHandler(defaultOptions);
     }
