@@ -4355,20 +4355,16 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)recordDisplayUnitElementClickedEventForID:(NSString *)unitID
-                                        elementID:(NSString *)elementID
                              additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
-    // Build params in the order CTEventBuilder will merge BEFORE layering cached
-    // unit wzrk_* on top: additionalProperties first, then wzrk_element_id.
-    // Cached wzrk_* fields layered by buildDisplayViewStateEvent: will overwrite
-    // any caller-supplied same-named keys (e.g. a spoofed wzrk_id).
+    // Build params: additionalProperties first (which should carry wzrk_element_id
+    // and other wzrk_* attribution fields from BE-injected action metadata).
+    // buildDisplayViewStateEvent: then layers the cached unit wzrk_* on top so
+    // server-controlled attribution wins over any same-named caller key.
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
     if (sanitized) {
         [params addEntriesFromDictionary:sanitized];
-    }
-    if (elementID.length > 0) {
-        params[@"wzrk_element_id"] = elementID;
     }
 #if !defined(CLEVERTAP_TVOS)
     [self.dispatchQueueManager runSerialAsync:^{

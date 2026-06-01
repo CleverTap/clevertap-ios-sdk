@@ -508,7 +508,7 @@
     NSDictionary *params = @{
         @"wzrk_id": @"spoofed",          // collides with cached — cached must win
         @"wzrk_extra": @"kept-through",  // novel wzrk_ key, not in cached unit
-        @"wzrk_element_id": @"btn-1",    // novel wzrk_ key from element-aware path
+        @"wzrk_element_id": @"btn-1",    // novel wzrk_ key from additionalProperties
         @"ok_key": @"kept"
     };
 
