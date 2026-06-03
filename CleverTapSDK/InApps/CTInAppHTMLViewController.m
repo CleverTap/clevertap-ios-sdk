@@ -321,11 +321,15 @@ typedef enum {
 }
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    [self hide:NO];
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    [self hide:NO];
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {
