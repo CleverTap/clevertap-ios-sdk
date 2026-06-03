@@ -2976,7 +2976,6 @@ static BOOL sharedInstanceErrorLogged;
             completionHandler(defaultOptions);
             return;
         }
-        [self recordNotificationViewedEventWithData:userInfo];
         BOOL silentInForeground = [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
         if (silentInForeground) {
             if (@available(iOS 14.0, *)) {
@@ -3002,17 +3001,23 @@ static BOOL sharedInstanceErrorLogged;
         }
         NSDictionary *userInfo = notification.request.content.userInfo;
         NSString *accountId = (NSString *)userInfo[@"wzrk_acct_id"];
+
+        CleverTap *targetInstance = nil;
         if (!_instances || [_instances count] <= 0 || !accountId) {
-            [[self sharedInstance] _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
-            return;
-        }
-        for (CleverTap *instance in [_instances allValues]) {
-            if ([accountId isEqualToString:instance.config.accountId]) {
-                [instance _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
-                return;
+            targetInstance = [self sharedInstance];
+        } else {
+            for (CleverTap *instance in [_instances allValues]) {
+                if ([accountId isEqualToString:instance.config.accountId]) {
+                    targetInstance = instance;
+                    break;
+                }
             }
         }
-        [[self sharedInstance] _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
+        if (!targetInstance) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        [targetInstance _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
     } else {
         completionHandler(defaultOptions);
     }

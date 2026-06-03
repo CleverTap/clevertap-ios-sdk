@@ -1228,10 +1228,11 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
  @discussion
  Call this from your UNUserNotificationCenterDelegate willPresent implementation when using
  manual SDK integration (i.e. without autoIntegrate). If the notification payload contains
- wzrk_sif=1, the completionHandler is called with empty presentation options (no banner/sound/badge).
- Otherwise it is called with the provided defaultOptions.
+ wzrk_sif=1, the banner, sound, and badge are suppressed. On iOS 14 and later the notification
+ is still delivered to Notification Center only (UNNotificationPresentationOptionList); on
+ earlier versions it is suppressed entirely (UNNotificationPresentationOptionNone).
+ Otherwise the completionHandler is called with the provided defaultOptions.
  Non-CleverTap notifications are passed through unchanged using defaultOptions.
- This method also records the Notification Viewed event for CleverTap notifications.
 
  @param notification      The UNNotification received in willPresent
  @param defaultOptions    Presentation options to use when wzrk_sif is not set
