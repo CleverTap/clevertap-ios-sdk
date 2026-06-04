@@ -32,9 +32,8 @@
 }
 
 - (void)registerPush {
-   
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    
+    center.delegate = self;
     [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error){
         if( !error ){
             dispatch_async(dispatch_get_main_queue(), ^(void) {
@@ -43,6 +42,18 @@
         }
     }];
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    NSLog(@"will present notification: %@", notification.request.content.userInfo);
+    [CleverTap handleWillPresentNotification:notification
+                          withDefaultOptions:(UNNotificationPresentationOptionSound | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionBadge)
+                           completionHandler:completionHandler];
+}
+#pragma clang diagnostic pop
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

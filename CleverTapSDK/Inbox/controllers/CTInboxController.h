@@ -35,6 +35,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds;
 - (void)markReadMessageWithId:(NSString *)messageId;
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds;
+- (void)performExpiryPurge;
+
+- (BOOL)isV2MessageId:(NSString *)messageId;
+- (void)addV2MessageIds:(NSArray<NSString *> *)messageIds;
+- (void)removeV2MessageId:(NSString *)messageId;
+- (void)deleteAbsentPersistentV2MessagesFromResponseIds:(NSSet<NSString *> *)responseIds;
 
 @end
 
