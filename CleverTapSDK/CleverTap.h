@@ -1241,7 +1241,7 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 + (void)handleWillPresentNotification:(UNNotification *_Nonnull)notification
                    withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
                     completionHandler:(void (^_Nonnull)(UNNotificationPresentationOptions))completionHandler
-    API_AVAILABLE(ios(10.0));
+    API_AVAILABLE(ios(10.0)) API_UNAVAILABLE(tvos);
 
 /*!
  @method

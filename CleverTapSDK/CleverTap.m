@@ -2967,6 +2967,7 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
+#if !defined(CLEVERTAP_TVOS)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 - (void)_handleWillPresentNotification:(UNNotification *)notification
@@ -3030,6 +3031,7 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 #pragma clang diagnostic pop
+#endif
 
 + (void)handleOpenURL:(NSURL*)url {
     if ([CTUIUtils runningInsideAppExtension]){
