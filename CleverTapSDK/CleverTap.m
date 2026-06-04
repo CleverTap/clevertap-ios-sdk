@@ -5353,8 +5353,7 @@ static BOOL sharedInstanceErrorLogged;
     if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0]) return;
 
     // CTPreferences has no key-enumeration API, so read the raw defaults snapshot once
-    // to find candidate keys. Scope it so the full dictionaryRepresentation (which
-    // materializes EVERY value, including any stale 25M arrays) is freed before the loop.
+    // to find candidate keys. Scope it so the full dictionaryRepresentation (which materializes EVERY value) is freed before the loop.
     NSArray<NSString *> *allKeys;
     @autoreleasepool {
         allKeys = [[[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys] copy];
