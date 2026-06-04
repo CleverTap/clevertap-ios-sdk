@@ -238,7 +238,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY @"istc_inapp"
 #define CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY @"istmcd_inapp"
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
-#define CLTAP_INAPP_EVAL_GLOBAL_CLEANUP_FLAG @"ss_eval_id_deduped"
+#define CLTAP_INAPP_EVAL_DEDUPED_FLAG @"ss_evals_deduped"
 
 #define CLTAP_PREFS_PREFIX @"WizRocket"
 

@@ -5350,7 +5350,7 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)dedupeSSEvaluationIds {
-    if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_GLOBAL_CLEANUP_FLAG withResetValue:0]) return;
+    if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0]) return;
 
     NSTimeInterval t0 = [NSDate timeIntervalSinceReferenceDate];
 
@@ -5380,12 +5380,12 @@ static BOOL sharedInstanceErrorLogged;
             NSArray *deduped = [[NSOrderedSet orderedSetWithArray:value] array];
             if (deduped.count == count) continue;
             [CTPreferences putObject:deduped forKey:key];
-            CleverTapLogStaticDebug(@"inapps_eval dedupe: key %@ compacted %lu -> %lu",
-                                    fullKey, (unsigned long)count, (unsigned long)deduped.count);
+            CleverTapLogStaticDebug(@"inapps_eval dedupe: key %@ compacted to %lu",
+                                    fullKey, (unsigned long)deduped.count);
         }
     }
 
-    [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_GLOBAL_CLEANUP_FLAG];
+    [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG];
     CleverTapLogStaticDebug(@"ss_eval dedupe finished in %.2fs", [NSDate timeIntervalSinceReferenceDate] - t0);
 }
 
