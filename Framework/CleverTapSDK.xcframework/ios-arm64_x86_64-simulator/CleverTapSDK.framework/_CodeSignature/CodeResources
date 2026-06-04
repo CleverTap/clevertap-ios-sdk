@@ -250,7 +250,7 @@
 		</data>
 		<key>Headers/CleverTap+DisplayUnit.h</key>
 		<data>
-		+vPaZrOfjdz7vF/WRVFq+6Z1Lc0=
+		abYNnEdJS/AULSt/yr8BqkYkUmw=
 		</data>
 		<key>Headers/CleverTap+FeatureFlags.h</key>
 		<data>
@@ -262,7 +262,7 @@
 		</data>
 		<key>Headers/CleverTap+Inbox.h</key>
 		<data>
-		TWDpWDzi8KAo7/B6oyBJE7msxcI=
+		mLn9ur11n4E9tjWgLS9Ag2bGcp8=
 		</data>
 		<key>Headers/CleverTap+ProductConfig.h</key>
 		<data>
@@ -282,11 +282,15 @@
 		</data>
 		<key>Headers/CleverTap.h</key>
 		<data>
-		Q+ovWf41WbNslRgHpYS3Ao/ZLOI=
+		lZJ46P042sdUuIkng6vpkx9exZw=
 		</data>
 		<key>Headers/CleverTapBuildInfo.h</key>
 		<data>
-		JqKtJ+luJ5a7AWoU49u6jn0Ls3w=
+		6Fw6pBKzq223PrNLPEBLnak/HpM=
+		</data>
+		<key>Headers/CleverTapDisplayUnitCache.h</key>
+		<data>
+		yDLPWu3UP25Xbs+oLzVLFI12r/w=
 		</data>
 		<key>Headers/CleverTapEventDetail.h</key>
 		<data>
@@ -362,7 +366,7 @@
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		Hsgq9w47cb9IILIYh/QlzvFsMgw=
+		Hx1mDh/IYZ+yP5kCk1nh/ncSiX0=
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -382,11 +386,11 @@
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		kdnKn1QJHEl6u+SCVg32glevxEc=
+		XAIhuQ822mkeGzgGE0x1r638UPs=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
-		bzBphUFEaklLq3q5mLqywIIvZKo=
+		GTqOcep6WrEV+jNFlXWFmdcvefo=
 		</data>
 		<key>PrivacyInfo.xcprivacy</key>
 		<data>
@@ -426,7 +430,7 @@
 		</data>
 		<key>PrivateHeaders/CTConstants.h</key>
 		<data>
-		1XWfmMyFXr//nBOFWw1jlefD/LY=
+		HiLU4XQ2nNPybh+Vat2qNBlj09A=
 		</data>
 		<key>PrivateHeaders/CTCoverImageViewController.h</key>
 		<data>
@@ -446,7 +450,7 @@
 		</data>
 		<key>PrivateHeaders/CTEventBuilder.h</key>
 		<data>
-		3M5Xa73djB3HLInpB24aYfWuG9g=
+		Z/vNLItXf7DMvryvi8raXcX+fpk=
 		</data>
 		<key>PrivateHeaders/CTFeatureFlagsController.h</key>
 		<data>
@@ -502,7 +506,7 @@
 		</data>
 		<key>PrivateHeaders/CTInboxController.h</key>
 		<data>
-		iAoE+4HJI14nagkfOQkSmhFUUyU=
+		M1DbP1z/0A8HacSi6TtkXjuylrg=
 		</data>
 		<key>PrivateHeaders/CTInboxIconMessageCell.h</key>
 		<data>
@@ -566,7 +570,7 @@
 		</data>
 		<key>PrivateHeaders/CTRequestFactory.h</key>
 		<data>
-		SFr7W57MNTf7FDdZVHKtwfnjaBI=
+		W4SMfIHaTGvAnOIGCeIK6bszdNU=
 		</data>
 		<key>PrivateHeaders/CTSwipeView.h</key>
 		<data>
@@ -626,7 +630,7 @@
 		</data>
 		<key>PrivateHeaders/CleverTapInboxViewControllerPrivate.h</key>
 		<data>
-		a06HKPCa/ubhp17wtoBQaKOQz7I=
+		IKGsLt1QRwbwC74BREDtU9I8/xI=
 		</data>
 		<key>PrivateHeaders/CleverTapInstanceConfigPrivate.h</key>
 		<data>
@@ -1442,11 +1446,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			+vPaZrOfjdz7vF/WRVFq+6Z1Lc0=
+			abYNnEdJS/AULSt/yr8BqkYkUmw=
 			</data>
 			<key>hash2</key>
 			<data>
-			cfOP4+n6n8aT7I4Dydfw8tx7ZXdZ5T5CSzzRHSTUgoU=
+			cJyxRhFl7gzwivCSYPIfB5Ksj8J1AL4zdMqKbZy8r2s=
 			</data>
 		</dict>
 		<key>Headers/CleverTap+FeatureFlags.h</key>
@@ -1475,11 +1479,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			TWDpWDzi8KAo7/B6oyBJE7msxcI=
+			mLn9ur11n4E9tjWgLS9Ag2bGcp8=
 			</data>
 			<key>hash2</key>
 			<data>
-			8J1o6ylNQ8OuAxWksX8aTF6+D8Dc8N1wAASfEyybnRU=
+			fURewAX5aEn9NV3mcK6X4/4/KA+hp4scxkQLTk93zng=
 			</data>
 		</dict>
 		<key>Headers/CleverTap+ProductConfig.h</key>
@@ -1530,22 +1534,33 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Q+ovWf41WbNslRgHpYS3Ao/ZLOI=
+			lZJ46P042sdUuIkng6vpkx9exZw=
 			</data>
 			<key>hash2</key>
 			<data>
-			42jWuOLGV8P8UhI2TIQT3n9fN3vuYvbxy7fjdpRDELo=
+			7Qed8uBwxviTntND/kCkMlzqV375yJeEaMqx4gcUta4=
 			</data>
 		</dict>
 		<key>Headers/CleverTapBuildInfo.h</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			JqKtJ+luJ5a7AWoU49u6jn0Ls3w=
+			6Fw6pBKzq223PrNLPEBLnak/HpM=
 			</data>
 			<key>hash2</key>
 			<data>
-			ol3AKde4erXJrGTj93p7Taa4QJ9uj/LEO5lriXWlZN8=
+			dE0JqNndlBuDWIOdr1JVt4bVYY7kuw8xh6eGLMXMojk=
+			</data>
+		</dict>
+		<key>Headers/CleverTapDisplayUnitCache.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			yDLPWu3UP25Xbs+oLzVLFI12r/w=
+			</data>
+			<key>hash2</key>
+			<data>
+			HpZaQgz9V+3zut7QHFmL/EmjqnjkLynhndoq+Yn40+M=
 			</data>
 		</dict>
 		<key>Headers/CleverTapEventDetail.h</key>
@@ -1739,11 +1754,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Hsgq9w47cb9IILIYh/QlzvFsMgw=
+			Hx1mDh/IYZ+yP5kCk1nh/ncSiX0=
 			</data>
 			<key>hash2</key>
 			<data>
-			UiztKUoeGavZXVKzfIL2KRQ5uK3+LCjI3m0FN3FEQi8=
+			nZx5SOTt9Z9zpezPJC/hjOit8vQodPLAFNGLulAHWW8=
 			</data>
 		</dict>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -1794,22 +1809,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			kdnKn1QJHEl6u+SCVg32glevxEc=
+			XAIhuQ822mkeGzgGE0x1r638UPs=
 			</data>
 			<key>hash2</key>
 			<data>
-			ua9WHlQ6Ec508A0jIlGJHkej8EslWoowtsSFF5D+thE=
+			JyOEFCBVv3IXKDqskcBVprZ+AmnAlrEX2nTGFKvSgwI=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			bzBphUFEaklLq3q5mLqywIIvZKo=
+			GTqOcep6WrEV+jNFlXWFmdcvefo=
 			</data>
 			<key>hash2</key>
 			<data>
-			vIBFuPgwWmiqDOCJs8WpSdxIlcgbwzA7zauqPw275w4=
+			Ye2l9SLsVv0peLP3KouI2okIGdWWnS+RKwn0AVxJh3g=
 			</data>
 		</dict>
 		<key>PrivacyInfo.xcprivacy</key>
@@ -1915,11 +1930,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			1XWfmMyFXr//nBOFWw1jlefD/LY=
+			HiLU4XQ2nNPybh+Vat2qNBlj09A=
 			</data>
 			<key>hash2</key>
 			<data>
-			/7J68dKourbwJ4Z4f/ZxWpGtSJlHcjS7FzjwbPmRw0M=
+			Ei8SHY/hurzo6uPfhr7oyTkkWvRs0D5ZwssFp3Rru0U=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTCoverImageViewController.h</key>
@@ -1970,11 +1985,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			3M5Xa73djB3HLInpB24aYfWuG9g=
+			Z/vNLItXf7DMvryvi8raXcX+fpk=
 			</data>
 			<key>hash2</key>
 			<data>
-			qDImJLnAJEbZp4lWz9a54RHe9B01byHcxMKSGPJCwkA=
+			czAzkhwnEPrM/VqI90VhqGtbykeHae5JOXxLuwgUUuo=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTFeatureFlagsController.h</key>
@@ -2124,11 +2139,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			iAoE+4HJI14nagkfOQkSmhFUUyU=
+			M1DbP1z/0A8HacSi6TtkXjuylrg=
 			</data>
 			<key>hash2</key>
 			<data>
-			Z8+Wji58jkjh0QMrHMRZ5slS8KNz03gsHFodDKTq5pg=
+			Xc3U7E6hWnCMq+11EBAf+D2mqrheBSHzZ2WsH671ndI=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTInboxIconMessageCell.h</key>
@@ -2300,11 +2315,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			SFr7W57MNTf7FDdZVHKtwfnjaBI=
+			W4SMfIHaTGvAnOIGCeIK6bszdNU=
 			</data>
 			<key>hash2</key>
 			<data>
-			tJVmCkQriTqPKzy8og3H/YOVPcl01jjeKjbmMAy2uJo=
+			lHEqgElDdhMApzitlQHhCX5GWoQmuMkRMxjfgCwSswM=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTSwipeView.h</key>
@@ -2465,11 +2480,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			a06HKPCa/ubhp17wtoBQaKOQz7I=
+			IKGsLt1QRwbwC74BREDtU9I8/xI=
 			</data>
 			<key>hash2</key>
 			<data>
-			gNaSZiM82yRpx7+30iaoVwA7ByNO30JjjFoO4FlxGVk=
+			r9hARhmh8LX7yqIzZNbsP4DDxqREFZNIpPGjvjhrIP8=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CleverTapInstanceConfigPrivate.h</key>

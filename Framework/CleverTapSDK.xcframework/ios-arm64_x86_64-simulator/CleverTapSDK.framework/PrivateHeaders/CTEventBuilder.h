@@ -29,6 +29,7 @@
 
 + (void)buildInboxMessageStateEvent:(BOOL)clicked
                          forMessage:(CleverTapInboxMessage * _Nonnull)message
+                        isV2Message:(BOOL)isV2Message
                  andQueryParameters:(NSDictionary * _Nullable)params
                   completionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable event, NSArray<CTValidationResult*> * _Nullable errors))completion;
 

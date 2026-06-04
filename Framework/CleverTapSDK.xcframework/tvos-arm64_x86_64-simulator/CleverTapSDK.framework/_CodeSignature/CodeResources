@@ -34,11 +34,11 @@
 		</data>
 		<key>Headers/CleverTap.h</key>
 		<data>
-		Q+ovWf41WbNslRgHpYS3Ao/ZLOI=
+		lZJ46P042sdUuIkng6vpkx9exZw=
 		</data>
 		<key>Headers/CleverTapBuildInfo.h</key>
 		<data>
-		JqKtJ+luJ5a7AWoU49u6jn0Ls3w=
+		6Fw6pBKzq223PrNLPEBLnak/HpM=
 		</data>
 		<key>Headers/CleverTapEventDetail.h</key>
 		<data>
@@ -90,7 +90,7 @@
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/arm64-apple-tvos-simulator.swiftmodule</key>
 		<data>
-		ACQRMMlFi095C8nucN6X0o1Qv5M=
+		Z+AdI2wiMYHLymUY0Gpn8/mg/Cg=
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-tvos-simulator.abi.json</key>
 		<data>
@@ -110,7 +110,7 @@
 		</data>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-tvos-simulator.swiftmodule</key>
 		<data>
-		ZdmHPkshBunZQ2jL6lgjHGTIY9k=
+		8Rc+C7a3KoLNgR8ft6ybuDm0IK0=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -122,7 +122,7 @@
 		</data>
 		<key>PrivateHeaders/CTConstants.h</key>
 		<data>
-		1XWfmMyFXr//nBOFWw1jlefD/LY=
+		HiLU4XQ2nNPybh+Vat2qNBlj09A=
 		</data>
 		<key>PrivateHeaders/CTDeviceInfo.h</key>
 		<data>
@@ -130,7 +130,7 @@
 		</data>
 		<key>PrivateHeaders/CTEventBuilder.h</key>
 		<data>
-		3M5Xa73djB3HLInpB24aYfWuG9g=
+		Z/vNLItXf7DMvryvi8raXcX+fpk=
 		</data>
 		<key>PrivateHeaders/CTFeatureFlagsController.h</key>
 		<data>
@@ -186,7 +186,7 @@
 		</data>
 		<key>PrivateHeaders/CTRequestFactory.h</key>
 		<data>
-		SFr7W57MNTf7FDdZVHKtwfnjaBI=
+		W4SMfIHaTGvAnOIGCeIK6bszdNU=
 		</data>
 		<key>PrivateHeaders/CTSwizzle.h</key>
 		<data>
@@ -328,22 +328,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Q+ovWf41WbNslRgHpYS3Ao/ZLOI=
+			lZJ46P042sdUuIkng6vpkx9exZw=
 			</data>
 			<key>hash2</key>
 			<data>
-			42jWuOLGV8P8UhI2TIQT3n9fN3vuYvbxy7fjdpRDELo=
+			7Qed8uBwxviTntND/kCkMlzqV375yJeEaMqx4gcUta4=
 			</data>
 		</dict>
 		<key>Headers/CleverTapBuildInfo.h</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			JqKtJ+luJ5a7AWoU49u6jn0Ls3w=
+			6Fw6pBKzq223PrNLPEBLnak/HpM=
 			</data>
 			<key>hash2</key>
 			<data>
-			ol3AKde4erXJrGTj93p7Taa4QJ9uj/LEO5lriXWlZN8=
+			dE0JqNndlBuDWIOdr1JVt4bVYY7kuw8xh6eGLMXMojk=
 			</data>
 		</dict>
 		<key>Headers/CleverTapEventDetail.h</key>
@@ -471,11 +471,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			ACQRMMlFi095C8nucN6X0o1Qv5M=
+			Z+AdI2wiMYHLymUY0Gpn8/mg/Cg=
 			</data>
 			<key>hash2</key>
 			<data>
-			IZBfy/hFuBEOfJABCTHFFE20Oa2KRU8HUyxzSPRGnxo=
+			+rwyGY08RKKywNP74DX42yPCL+zzEMSWHBOhaIcYbVk=
 			</data>
 		</dict>
 		<key>Modules/CleverTapSDK.swiftmodule/x86_64-apple-tvos-simulator.abi.json</key>
@@ -526,11 +526,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			ZdmHPkshBunZQ2jL6lgjHGTIY9k=
+			8Rc+C7a3KoLNgR8ft6ybuDm0IK0=
 			</data>
 			<key>hash2</key>
 			<data>
-			KAdX7fE0V+nV/dqUQpMW8HyduUp0+XXxO5odUXs52ho=
+			lAnDhWsVfXTUXw2ErSuXRZ28AzT92E8eADH/mg9UgBw=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
@@ -559,11 +559,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			1XWfmMyFXr//nBOFWw1jlefD/LY=
+			HiLU4XQ2nNPybh+Vat2qNBlj09A=
 			</data>
 			<key>hash2</key>
 			<data>
-			/7J68dKourbwJ4Z4f/ZxWpGtSJlHcjS7FzjwbPmRw0M=
+			Ei8SHY/hurzo6uPfhr7oyTkkWvRs0D5ZwssFp3Rru0U=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTDeviceInfo.h</key>
@@ -581,11 +581,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			3M5Xa73djB3HLInpB24aYfWuG9g=
+			Z/vNLItXf7DMvryvi8raXcX+fpk=
 			</data>
 			<key>hash2</key>
 			<data>
-			qDImJLnAJEbZp4lWz9a54RHe9B01byHcxMKSGPJCwkA=
+			czAzkhwnEPrM/VqI90VhqGtbykeHae5JOXxLuwgUUuo=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTFeatureFlagsController.h</key>
@@ -735,11 +735,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			SFr7W57MNTf7FDdZVHKtwfnjaBI=
+			W4SMfIHaTGvAnOIGCeIK6bszdNU=
 			</data>
 			<key>hash2</key>
 			<data>
-			tJVmCkQriTqPKzy8og3H/YOVPcl01jjeKjbmMAy2uJo=
+			lHEqgElDdhMApzitlQHhCX5GWoQmuMkRMxjfgCwSswM=
 			</data>
 		</dict>
 		<key>PrivateHeaders/CTSwizzle.h</key>
