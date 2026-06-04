@@ -231,7 +231,6 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY @"inapps_suppressed"
 #define CLTAP_INAPP_SS_EVAL_STORAGE_KEY_PROFILE @"inapps_eval_profile"
 #define CLTAP_INAPP_SUPPRESSED_STORAGE_KEY_PROFILE @"inapps_suppressed_profile"
-#define CLTAP_INAPP_SS_EVAL_RECOVERY_THRESHOLD 1000
 
 #define CLTAP_PREFS_INAPP_SESSION_MAX_KEY @"imc_max"
 #define CLTAP_PREFS_INAPP_LAST_DATE_KEY @"ict_date"
@@ -239,6 +238,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY @"istc_inapp"
 #define CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY @"istmcd_inapp"
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
+#define CLTAP_INAPP_EVAL_GLOBAL_CLEANUP_FLAG @"ss_eval_id_deduped"
+
+#define CLTAP_PREFS_PREFIX @"WizRocket"
 
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"

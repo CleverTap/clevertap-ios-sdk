@@ -497,7 +497,13 @@ static BOOL sharedInstanceErrorLogged;
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
         _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo:_deviceInfo];
-        
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (![CTUIUtils runningInsideAppExtension]) {
+            [self dedupeSSEvaluationIds];
+        }
+#endif
+
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo:_deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
@@ -5341,6 +5347,46 @@ static BOOL sharedInstanceErrorLogged;
 
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
     return [CTUtils isValidCleverTapId:cleverTapID];
+}
+
+- (void)dedupeSSEvaluationIds {
+    if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_GLOBAL_CLEANUP_FLAG withResetValue:0]) return;
+
+    NSTimeInterval t0 = [NSDate timeIntervalSinceReferenceDate];
+
+    // CTPreferences has no key-enumeration API, so read the raw defaults snapshot once
+    // to find candidate keys. Scope it so the full dictionaryRepresentation (which
+    // materializes EVERY value, including any stale 25M arrays) is freed before the loop.
+    NSArray<NSString *> *allKeys;
+    @autoreleasepool {
+        allKeys = [[[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys] copy];
+    }
+
+    for (NSString *fullKey in allKeys) {
+        if (![fullKey hasPrefix:CLTAP_PREFS_PREFIX]) continue;
+        if ([fullKey rangeOfString:@":inapps_eval"].location == NSNotFound) continue;
+
+        @autoreleasepool {
+            // CTPreferences re-applies CLTAP_PREFS_PREFIX, so strip it before passing in.
+            NSString *key = [fullKey substringFromIndex:CLTAP_PREFS_PREFIX.length];
+            id value = [CTPreferences getObjectForKey:key];
+            if (![value isKindOfClass:[NSArray class]]) continue;
+            NSUInteger count = [(NSArray *)value count];
+
+            // NSOrderedSet preserves first-seen order, matching the FIFO drain
+            // (removeObjectsInRange) in CTInAppEvaluationManager onBatchSent.
+            // Dedupe is lossless since the server parses inapps_eval into a HashSet, so
+            // duplicate ids carry no signal (no extra in-app, no extra impression).
+            NSArray *deduped = [[NSOrderedSet orderedSetWithArray:value] array];
+            if (deduped.count == count) continue;
+            [CTPreferences putObject:deduped forKey:key];
+            CleverTapLogStaticDebug(@"inapps_eval dedupe: key %@ compacted %lu -> %lu",
+                                    fullKey, (unsigned long)count, (unsigned long)deduped.count);
+        }
+    }
+
+    [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_GLOBAL_CLEANUP_FLAG];
+    CleverTapLogStaticDebug(@"ss_eval dedupe finished in %.2fs", [NSDate timeIntervalSinceReferenceDate] - t0);
 }
 
 #pragma mark - Sync PE and Custom Templates
