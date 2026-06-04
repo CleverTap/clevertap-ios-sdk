@@ -3000,7 +3000,8 @@ static BOOL sharedInstanceErrorLogged;
             return;
         }
         NSDictionary *userInfo = notification.request.content.userInfo;
-        NSString *accountId = (NSString *)userInfo[@"wzrk_acct_id"];
+        id rawAccountId = userInfo[@"wzrk_acct_id"];
+        NSString *accountId = [rawAccountId isKindOfClass:[NSString class]] ? rawAccountId : nil;
 
         CleverTap *targetInstance = nil;
         if (!_instances || [_instances count] <= 0 || !accountId) {
