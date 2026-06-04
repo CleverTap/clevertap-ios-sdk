@@ -5352,8 +5352,6 @@ static BOOL sharedInstanceErrorLogged;
 - (void)dedupeSSEvaluationIds {
     if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0]) return;
 
-    NSTimeInterval t0 = [NSDate timeIntervalSinceReferenceDate];
-
     // CTPreferences has no key-enumeration API, so read the raw defaults snapshot once
     // to find candidate keys. Scope it so the full dictionaryRepresentation (which
     // materializes EVERY value, including any stale 25M arrays) is freed before the loop.
@@ -5386,7 +5384,6 @@ static BOOL sharedInstanceErrorLogged;
     }
 
     [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG];
-    CleverTapLogStaticDebug(@"ss_eval dedupe finished in %.2fs", [NSDate timeIntervalSinceReferenceDate] - t0);
 }
 
 #pragma mark - Sync PE and Custom Templates
