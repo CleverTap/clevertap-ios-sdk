@@ -101,10 +101,16 @@
         self.imageView.image = [UIImage imageWithData:self.preloadedImageData];
         return;
     }
+    __weak typeof(self) weakSelf = self;
     [self.imageView ct_setImageWithURL:self.media.url
                       placeholderImage:nil
                                options:CTWebImageRetryFailed
-                               context:nil];
+                               context:nil
+                             completed:^(UIImage *image, NSError *error, CTImageCacheType cacheType, NSURL *imageURL) {
+        if (error) {
+            [weakSelf loadFallbackImage];
+        }
+    }];
 }
 
 - (void)loadGIF {
@@ -119,10 +125,16 @@
         self.imageView.image = fallback;
         return;
     }
+    __weak typeof(self) weakSelf = self;
     [self.imageView ct_setImageWithURL:self.media.url
                       placeholderImage:nil
                                options:CTWebImageRetryFailed
-                               context:nil];
+                               context:nil
+                             completed:^(UIImage *image, NSError *error, CTImageCacheType cacheType, NSURL *imageURL) {
+        if (error) {
+            [weakSelf loadFallbackImage];
+        }
+    }];
 }
 
 - (void)loadFallbackImage {

@@ -38,6 +38,7 @@
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
+#import "CTPiPWindowController.h"
 #endif
 
 #if !(TARGET_OS_TV)
@@ -377,8 +378,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
         __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
-        if (notification.error) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
+        if (notification.error || notification.errorLandscape) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error ?: notification.errorLandscape);
             return;
         }
 
@@ -391,7 +392,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
                 [self checkOrientationSupport:notification];
-                if (notification.error) {
+                if (notification.error || notification.errorLandscape) {
                     CleverTapLogInternal(self.config.logLevel, @"%@: Device orientation not supported for inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
                     return;
                 }
@@ -403,8 +404,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)checkOrientationSupport:(CTInAppNotification *)notification {
-    if (notification.inAppType == CTInAppTypeCustom) {
-        // The in-app orientation support depends on the custom in-app presenter.
+    if (notification.inAppType == CTInAppTypeCustom || notification.inAppType == CTInAppTypePiP) {
+        // Orientation support is handled internally by the custom/PiP presenter.
         return;
     }
     
@@ -518,8 +519,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         }];
         return;
     }
-    if (notification.error) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: unable to process inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
+    if (notification.error || notification.errorLandscape) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: unable to process inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error ?: notification.errorLandscape);
         return;
     }
 
@@ -641,6 +642,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             break;
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
+            break;
+        case CTInAppTypePiP:
+            controller = [[CTPiPWindowController alloc] initWithNotification:notification];
             break;
         case CTInAppTypeCustom:
             currentlyDisplayingNotification = notification;

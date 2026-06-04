@@ -343,7 +343,13 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
             [activeImageView ct_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
                               placeholderImage:[self getVideoPlaceHolderImage]
                                        options:self.ctWebImageOptions
-                                       context:self.ctWebImageContext];
+                                       context:self.ctWebImageContext
+                                     completed:^(UIImage * _Nullable image, NSError * _Nullable error, CTImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                if ([self shouldUseDefaultMediaLayout]) {
+                    [self configureDefaultMediaLayoutWithFallbackRatio:kDefaultFallbackAspectRatio];
+                    [self updateDefaultMediaLayoutForImage:image fallbackRatio:kDefaultFallbackAspectRatio];
+                }
+            }];
         } else {
             activeImageView.image = [self getVideoPlaceHolderImage];
             if (!self.thumbnailGenerator) {

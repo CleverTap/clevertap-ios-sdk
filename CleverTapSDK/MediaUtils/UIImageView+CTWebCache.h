@@ -15,6 +15,20 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ * Completion handler for an image load. Mirrors SDWebImage's SDExternalCompletionBlock.
+ * Called on the main thread after the load finishes (success or failure).
+ *
+ * @param image     The loaded image, or nil if the load failed.
+ * @param error     The error if the load failed, otherwise nil.
+ * @param cacheType Where the image came from (memory cache vs. network).
+ * @param imageURL  The URL that was loaded.
+ */
+typedef void(^CTWebImageCompletionBlock)(UIImage * _Nullable image,
+                                         NSError * _Nullable error,
+                                         CTImageCacheType cacheType,
+                                         NSURL * _Nullable imageURL);
+
+/**
  * UIImageView category for async URL image loading.
  *
  * Mirrors UIImageView+WebCache from SDWebImage. Uses CTWebImageCache for memory
@@ -48,6 +62,26 @@ NS_ASSUME_NONNULL_BEGIN
           placeholderImage:(nullable UIImage *)placeholder
                    options:(CTWebImageOptions)options
                    context:(nullable CTWebImageContext *)context;
+
+/**
+ * Full-featured image loading with a completion handler.
+ * Mirrors -[UIImageView sd_setImageWithURL:placeholderImage:options:completed:].
+ *
+ * The completion block is called on the main thread once the load finishes. On
+ * failure, image is nil and error is non-nil, so callers can show a fallback.
+ *
+ * @param url         The remote image URL. If nil, the placeholder is shown and
+ *                    the completion is called with an error.
+ * @param placeholder Shown immediately while the image downloads. May be nil.
+ * @param options     CTWebImageOptions bitmask (e.g. CTWebImageRetryFailed).
+ * @param context     CTWebImageContext dictionary (e.g. CTWebImageContextStoreCacheType).
+ * @param completedBlock Called on the main thread when the load finishes. May be nil.
+ */
+- (void)ct_setImageWithURL:(nullable NSURL *)url
+          placeholderImage:(nullable UIImage *)placeholder
+                   options:(CTWebImageOptions)options
+                   context:(nullable CTWebImageContext *)context
+                 completed:(nullable CTWebImageCompletionBlock)completedBlock;
 
 /**
  * Cancels the current image-load operation for this image view.

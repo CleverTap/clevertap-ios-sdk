@@ -91,17 +91,19 @@
     if (content.mediaUrl.length > 0 && !content.mediaIsVideo && !content.mediaIsAudio) {
         activeImageView.hidden = NO;
         activeImageView.alpha = 1.0;
-        if (useDefaultLayout) {
-            [self configureDefaultMediaLayoutWithFallbackRatio:0.5625f];
-        }
         UIImage *placeholder = useDefaultLayout
             ? [self getLandscapePlaceHolderImage]
             : ([self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]);
         [activeImageView ct_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                            placeholderImage:placeholder
                                     options:self.ctWebImageOptions
-                                    context:self.ctWebImageContext];
-        activeImageView.accessibilityLabel = content.mediaDescription ?: @"Message Image";
+                                    context:self.ctWebImageContext
+                                  completed:^(UIImage * _Nullable image, NSError * _Nullable error, CTImageCacheType cacheType, NSURL * _Nullable imageURL) {
+            if (useDefaultLayout) {
+                [self updateDefaultMediaLayoutForImage:image fallbackRatio:0.5625f];
+            }
+        }];
+        activeImageView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Image";
     } else if (content.mediaIsVideo || content.mediaIsAudio) {
         if (content.mediaUrl.length == 0) {
             return;

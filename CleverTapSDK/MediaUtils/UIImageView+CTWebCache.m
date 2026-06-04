@@ -42,6 +42,18 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
     return (bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x38);
 }
 
+// ---------------------------------------------------------------------------
+// Error domain for load failures surfaced through the completion handler.
+// Mirrors the role of SDWebImageErrorDomain (callers only check for non-nil error).
+// ---------------------------------------------------------------------------
+static NSString * const kCTWebImageErrorDomain = @"com.clevertap.CTWebImage";
+
+static NSError *CTWebImageError(NSInteger code, NSString *message) {
+    return [NSError errorWithDomain:kCTWebImageErrorDomain
+                               code:code
+                           userInfo:message ? @{NSLocalizedDescriptionKey: message} : nil];
+}
+
 @implementation UIImageView (CTWebCache)
 
 // ---------------------------------------------------------------------------
@@ -75,7 +87,20 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
     [self ct_internalSetImageWithURL:url
                     placeholderImage:placeholder
                              options:options
-                             context:context];
+                             context:context
+                           completed:nil];
+}
+
+- (void)ct_setImageWithURL:(nullable NSURL *)url
+          placeholderImage:(nullable UIImage *)placeholder
+                   options:(CTWebImageOptions)options
+                   context:(nullable CTWebImageContext *)context
+                 completed:(nullable CTWebImageCompletionBlock)completedBlock {
+    [self ct_internalSetImageWithURL:url
+                    placeholderImage:placeholder
+                             options:options
+                             context:context
+                           completed:completedBlock];
 }
 
 // ---------------------------------------------------------------------------
@@ -94,7 +119,22 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
 - (void)ct_internalSetImageWithURL:(nullable NSURL *)url
                   placeholderImage:(nullable UIImage *)placeholder
                            options:(CTWebImageOptions)options
-                           context:(nullable CTWebImageContext *)context {
+                           context:(nullable CTWebImageContext *)context
+                         completed:(nullable CTWebImageCompletionBlock)completedBlock {
+
+    // Helper: always deliver the completion on the main thread (mirrors SDWebImage,
+    // which calls the external completion block on the main queue).
+    void (^callCompletion)(UIImage *, NSError *, CTImageCacheType, NSURL *) =
+    ^(UIImage *image, NSError *error, CTImageCacheType cacheType, NSURL *imageURL) {
+        if (!completedBlock) return;
+        if ([NSThread isMainThread]) {
+            completedBlock(image, error, cacheType, imageURL);
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completedBlock(image, error, cacheType, imageURL);
+            });
+        }
+    };
 
     // URL type safety — mirrors SDWebImageManager.loadImageWithURL: (SDWebImageManager.m:199–206).
     // Very common mistake is to pass an NSString instead of NSURL; Xcode won't warn for this mismatch.
@@ -121,6 +161,7 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
     }
 
     if (!url) {
+        callCompletion(nil, CTWebImageError(-1, @"Image URL is nil or invalid"), CTImageCacheTypeNone, url);
         return;
     }
 
@@ -133,6 +174,7 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
     }
     if (isFailedURL && !(options & CTWebImageRetryFailed)) {
         // URL previously failed, and caller didn't ask to retry — skip
+        callCompletion(nil, CTWebImageError(-2, @"Image URL previously failed and is blacklisted"), CTImageCacheTypeNone, url);
         return;
     }
 
@@ -144,6 +186,7 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.image = cachedImage;
         });
+        callCompletion(cachedImage, nil, CTImageCacheTypeMemory, url);
         return;
     }
 
@@ -195,6 +238,7 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
                     strongSelf.image = placeholder;
                 }
             });
+            callCompletion(nil, error, CTImageCacheTypeNone, url);
             return;
         }
 
@@ -230,6 +274,15 @@ static inline BOOL CTImageDataIsGIF(NSData *data) {
                 strongSelf.image = image ?: placeholder;
             }
         });
+
+        // 5d. Deliver completion. If the data came back but could not be decoded,
+        // report it as an error so callers can show a fallback (mirrors SDWebImage,
+        // which calls completed with a decode error in this case).
+        if (image) {
+            callCompletion(image, nil, CTImageCacheTypeNone, url);
+        } else {
+            callCompletion(nil, CTWebImageError(-3, @"Downloaded data could not be decoded into an image"), CTImageCacheTypeNone, url);
+        }
     }];
 
     // Store the task in the operation so it can be cancelled
