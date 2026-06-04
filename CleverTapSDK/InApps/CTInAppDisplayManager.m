@@ -469,7 +469,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
     // 1. SDWebImage-compatible disk cache (Library/Caches/com.hackemist.SDImageCache/default/).
     //    Populated by prefetchInAppImages: on CS in-app receipt, or write-through below.
-    //    Same path as old SDK → downgrade transparent (old SDK's SDWebImage finds these files).
+    //    Stored as raw image bytes under SDWebImage's filename scheme (MD5 of the URL), so the
+    //    format is never version-specific: an upgrade or downgrade can only ever miss and
+    //    re-download, never crash or read corrupt data. Note this is NOT downgrade-transparent
+    //    for in-apps - older SDKs load in-app images from Documents/CleverTap_Files/ via
+    //    CTFileDownloadManager, not from this path, so a downgrade re-downloads rather than
+    //    reusing these files.
     NSData *cachedData = [self.fileDownloader loadInAppImageDataFromDisk:url];
     if (cachedData) {
         result.imageData = cachedData;

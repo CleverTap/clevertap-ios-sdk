@@ -597,7 +597,6 @@
 		6BFC61C92DE8534500022EFF /* CTContentFetchManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BFC61C82DE8534500022EFF /* CTContentFetchManagerTests.m */; };
 		6CA8C6B2712DE77E59FB0BD0 /* CTUIUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */; };
 		6D34D0EBE51B1130B219BED3 /* CTDisplayLink.m in Sources */ = {isa = PBXBuildFile; fileRef = F5B7200E472E87322980326A /* CTDisplayLink.m */; };
-		704414D11825B95105FEBAF6 /* CTImageFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = 9F5A96F9C8A763699FC984F8 /* CTImageFrame.h */; };
 		737A2C01FAC27C20D9012552 /* CTEventNameValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EAE785650386875EC8E9091 /* CTEventNameValidatorTest.m */; };
 		74B70669F879FEC1CBE1A1C7 /* CTImageFramePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C3373D2C5E7454539454F56 /* CTImageFramePool.m */; };
 		76B45B38A5B1283E8D7BFDBF /* CleverTapFeatureFlagsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EB6D79842FF5DDE75C6D08 /* CleverTapFeatureFlagsTest.m */; };
@@ -744,7 +743,6 @@
 		D62F418A6B9C2F48A9F3145F /* CTAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = C5C55AA71522E96B569CB34E /* CTAnimatedImage.m */; };
 		DA8C6EA860BC6CA53FDB4D08 /* CTProfileChangeTrackerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F97F9D45A580F979772C056 /* CTProfileChangeTrackerTest.m */; };
 		DC653C430A8402BC49CF8FF6 /* CTKnownProfileFieldsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 90EA8490BDF49C5E1A996A34 /* CTKnownProfileFieldsTest.m */; };
-		DD12D405243245815EEDDF56 /* CTImageFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 492617D0430EA6DEC564185E /* CTImageFrame.m */; };
 		E1A2B3C4D5E6F7A8B9C0D1E3 /* InAppDataExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A8B9C0D1E2 /* InAppDataExtractorTests.swift */; };
 		E53B931DE8C9B218F12C5889 /* UIView+CTWebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 27FED8F514D7EAB4883D79E5 /* UIView+CTWebCacheOperation.m */; };
 		EA12196A266AB201761B9196 /* CTOpenUrlSystemAppFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4829D979A1725EB6A183B1B9 /* CTOpenUrlSystemAppFunctionTest.m */; };
@@ -1038,7 +1036,6 @@
 		48FA82C72DAD63A900AB8651 /* CTPushPrimerManagerMock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPushPrimerManagerMock.m; sourceTree = "<group>"; };
 		48FA82C92DAE4DA100AB8651 /* CTSystemTemplateActionHandlerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTSystemTemplateActionHandlerTest.m; sourceTree = "<group>"; };
 		48FC50F02D2FB0E100E57914 /* CTEventDatabase+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTEventDatabase+Tests.h"; sourceTree = "<group>"; };
-		492617D0430EA6DEC564185E /* CTImageFrame.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTImageFrame.m; sourceTree = "<group>"; };
 		4987C663251B5E79003E6BE8 /* CTImageInAppViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImageInAppViewController.h; sourceTree = "<group>"; };
 		4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTImageInAppViewController.m; sourceTree = "<group>"; };
 		4987C667251B5F9E003E6BE8 /* CTImageInAppViewControllerPrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTImageInAppViewControllerPrivate.h; sourceTree = "<group>"; };
@@ -1338,7 +1335,6 @@
 		945E9EAFBE7C9B739AD5ED83 /* CTWebImageOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = CTWebImageOperation.h; sourceTree = "<group>"; };
 		997881C7B7B5276373B4FD43 /* CTLegacyIdentityRepoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLegacyIdentityRepoTest.m; sourceTree = "<group>"; };
 		9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTNestedJsonBuilderTest.m; sourceTree = "<group>"; };
-		9F5A96F9C8A763699FC984F8 /* CTImageFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = CTImageFrame.h; sourceTree = "<group>"; };
 		A17C1360ECB81CD13FBA0F1F /* CleverTapInboxStyleConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxStyleConfigTest.m; sourceTree = "<group>"; };
 		A358DAEFE421FAF0F204FB73 /* CTPlistInfoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPlistInfoTest.m; sourceTree = "<group>"; };
 		A415F802C7FFE6DD7712EE2C /* CTAppRatingSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTAppRatingSystemAppFunctionTest.m; sourceTree = "<group>"; };
@@ -2515,8 +2511,6 @@
 			children = (
 				916D9798404AC109F4C69E98 /* CTGIFDecoder.h */,
 				ED5653B256FC14A14E87483B /* CTGIFDecoder.m */,
-				9F5A96F9C8A763699FC984F8 /* CTImageFrame.h */,
-				492617D0430EA6DEC564185E /* CTImageFrame.m */,
 				14320CEFAFF7A431AC1BED7C /* CTImageFramePool.h */,
 				1C3373D2C5E7454539454F56 /* CTImageFramePool.m */,
 				0E71452DC6942A41E7C0C18E /* CTAnimatedImage.h */,
@@ -2822,7 +2816,6 @@
 				0796FB6321AE5B2900FC380D /* CTCarouselMessageCell.h in Headers */,
 				6A3EBD322AA0703A00CE97D4 /* CTEventAdapter.h in Headers */,
 				8A80C167F3C0F554FFFDD778 /* CTGIFDecoder.h in Headers */,
-				704414D11825B95105FEBAF6 /* CTImageFrame.h in Headers */,
 				1B00BABD27D74C796E00B07B /* CTImageFramePool.h in Headers */,
 				455DB712EF6C5E793F5C8801 /* CTAnimatedImage.h in Headers */,
 				A2471D9492D48B4D76A91C0B /* CTAnimatedImagePlayer.h in Headers */,
@@ -3566,7 +3559,6 @@
 				48F9FD1D2C3D30BF00617770 /* CTFileDownloadManager.m in Sources */,
 				D0CACF9920B8A78600A02327 /* CTConstants.m in Sources */,
 				94A9B2A54576904AAB3E715F /* CTGIFDecoder.m in Sources */,
-				DD12D405243245815EEDDF56 /* CTImageFrame.m in Sources */,
 				74B70669F879FEC1CBE1A1C7 /* CTImageFramePool.m in Sources */,
 				D62F418A6B9C2F48A9F3145F /* CTAnimatedImage.m in Sources */,
 				9E07DEF99769DF9038AC3C46 /* CTAnimatedImagePlayer.m in Sources */,
