@@ -160,7 +160,7 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
 - (void)recordDisplayUnitClickedEventForID:(NSString *_Nonnull)unitID;
 
 /*!
- @method recordDisplayUnitElementClickedEventForID:elementID:additionalProperties:
+ @method recordDisplayUnitElementClickedEventForID:additionalProperties:
 
  @abstract Element-level click attribution for Native Display units.
 
@@ -169,24 +169,18 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  images, etc.), this method records which child element was clicked
  alongside the existing @c wzrk_* campaign attribution.
 
- The resulting @c "Notification Clicked" event:
- - Carries the campaign's @c wzrk_* fields from the cached unit JSON (same
-   enrichment as the unit-level method).
- - Adds @c wzrk_element_id = elementID to the event's @c evtData.
- - Merges @c additionalProperties into @c evtData after the @c wzrk_*
-   enrichment. Keys in @c additionalProperties starting with @c wzrk_ are
-   stripped defensively — that prefix is reserved for server-controlled
-   attribution fields.
+ @c evtData is assembled in two layers (later layers win on key collision):
+ 1. Caller's @c additionalProperties, merged verbatim — should include
+    @c wzrk_element_id and other @c wzrk_* attribution fields injected by
+    the BE into the action's @c metadata object.
+ 2. Cached unit's @c wzrk_* fields layered on top — so server-controlled
+    attribution always wins over same-named caller-supplied keys.
 
  @param unitID                  the unitID of the Display Unit.
- @param elementID               identifier of the clicked child element
-                                (from the Native Display config; typically
-                                a button node id).
  @param additionalProperties    optional per-click context (action url,
                                 custom KVs, …).
  */
 - (void)recordDisplayUnitElementClickedEventForID:(NSString *_Nonnull)unitID
-                                        elementID:(NSString *_Nonnull)elementID
                              additionalProperties:(nullable NSDictionary<NSString *, id> *)additionalProperties;
 
 /*!

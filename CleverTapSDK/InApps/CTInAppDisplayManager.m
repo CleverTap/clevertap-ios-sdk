@@ -651,6 +651,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         currentlyDisplayingNotification = notification;
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
+        if (notification.inAppType == CTInAppTypeHTML) {
+            [controller loadViewIfNeeded];
+        }
         [[self class] displayInAppDisplayController:controller];
 
         // Update local in-app count only if it is from local push primer.

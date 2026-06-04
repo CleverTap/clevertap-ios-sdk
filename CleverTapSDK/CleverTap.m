@@ -389,6 +389,7 @@ static BOOL sharedInstanceErrorLogged;
                     } error:nil];
                 }
             }
+            [CTSwizzleManager swizzleWillPresentOnClass:cls];
         }
     }
 #endif
@@ -497,7 +498,13 @@ static BOOL sharedInstanceErrorLogged;
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
         _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo:_deviceInfo];
-        
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (![CTUIUtils runningInsideAppExtension]) {
+            [self dedupeSSEvaluationIds];
+        }
+#endif
+
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo:_deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
@@ -2960,6 +2967,72 @@ static BOOL sharedInstanceErrorLogged;
     }
 }
 
+#if !defined(CLEVERTAP_TVOS)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+- (void)_handleWillPresentNotification:(UNNotification *)notification
+                    withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                     completionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    if (@available(iOS 10.0, *)) {
+        if ([CTUIUtils runningInsideAppExtension]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        NSDictionary *userInfo = notification.request.content.userInfo;
+        if (![self _isCTPushNotification:userInfo]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        BOOL silentInForeground = [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
+        if (silentInForeground) {
+            if (@available(iOS 14.0, *)) {
+                completionHandler(UNNotificationPresentationOptionList);
+            } else {
+                completionHandler(UNNotificationPresentationOptionNone);
+            }
+        } else {
+            completionHandler(defaultOptions);
+        }
+    } else {
+        completionHandler(defaultOptions);
+    }
+}
+
++ (void)handleWillPresentNotification:(UNNotification *)notification
+                   withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                    completionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    if (@available(iOS 10.0, *)) {
+        if ([CTUIUtils runningInsideAppExtension]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        NSDictionary *userInfo = notification.request.content.userInfo;
+        id rawAccountId = userInfo[@"wzrk_acct_id"];
+        NSString *accountId = [rawAccountId isKindOfClass:[NSString class]] ? rawAccountId : nil;
+
+        CleverTap *targetInstance = nil;
+        if (!_instances || [_instances count] <= 0 || !accountId) {
+            targetInstance = [self sharedInstance];
+        } else {
+            for (CleverTap *instance in [_instances allValues]) {
+                if ([accountId isEqualToString:instance.config.accountId]) {
+                    targetInstance = instance;
+                    break;
+                }
+            }
+        }
+        if (!targetInstance) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        [targetInstance _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
+    } else {
+        completionHandler(defaultOptions);
+    }
+}
+#pragma clang diagnostic pop
+#endif
+
 + (void)handleOpenURL:(NSURL*)url {
     if ([CTUIUtils runningInsideAppExtension]){
         CleverTapLogStaticDebug(@"handleOpenUrl is a no-op in an app extension.");
@@ -4948,6 +5021,10 @@ static BOOL sharedInstanceErrorLogged;
     return [self.displayUnitCache getDisplayUnitForID:unitID];
 }
 
+- (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache {
+    _displayUnitCache = cache;
+}
+
 - (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
     // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
@@ -4985,13 +5062,13 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)recordDisplayUnitElementClickedEventForID:(NSString *)unitID
-                                        elementID:(NSString *)elementID
                              additionalProperties:(NSDictionary *)additionalProperties {
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    // Build params: additionalProperties first (which should carry wzrk_element_id
+    // and other wzrk_* attribution fields from BE-injected action metadata).
+    // buildDisplayViewStateEvent: then layers the cached unit wzrk_* on top so
+    // server-controlled attribution wins over any same-named caller key.
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    if (elementID.length > 0) {
-        params[@"wzrk_element_id"] = elementID;
-    }
     NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
     if (sanitized) {
         [params addEntriesFromDictionary:sanitized];
@@ -5015,20 +5092,16 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 }
 
-/// Strip @c wzrk_-prefixed keys, @c NSNull, and unsupported types from a
-/// caller-supplied dict. The @c wzrk_ namespace is reserved for server-
-/// controlled attribution fields; this keeps it one-way (server → client).
+/// Drop entries with non-string keys, empty keys, @c nil values, and @c NSNull
+/// values from a caller-supplied dict. Caller-supplied @c wzrk_* keys are
+/// retained — server attribution wins at merge time (cached unit @c wzrk_*
+/// is layered on top by @c buildDisplayViewStateEvent:), so novel caller
+/// @c wzrk_* keys pass through while same-named ones get overwritten.
 - (nullable NSDictionary *)ct_sanitizedDisplayUnitProperties:(nullable NSDictionary *)props {
     if (props.count == 0) return nil;
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:props.count];
     for (NSString *key in props) {
         if (![key isKindOfClass:[NSString class]] || key.length == 0) continue;
-        if ([CTUtils doesString:key startWith:CLTAP_WZRK_PREFIX]) {
-            CleverTapLogDebug(self.config.logLevel,
-                @"%@: Dropping reserved wzrk_* key from additionalProperties: %@",
-                self, key);
-            continue;
-        }
         id value = props[key];
         if (value == nil || value == [NSNull null]) continue;
         out[key] = value;
@@ -5341,6 +5414,44 @@ static BOOL sharedInstanceErrorLogged;
 
 + (BOOL)isValidCleverTapId:(NSString *_Nullable)cleverTapID {
     return [CTUtils isValidCleverTapId:cleverTapID];
+}
+
+- (void)dedupeSSEvaluationIds {
+    if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0]) return;
+
+    // CTPreferences has no key-enumeration API, so read the raw defaults snapshot once
+    // to find candidate keys. Scope it so the full dictionaryRepresentation (which materializes EVERY value) is freed before the loop.
+    NSArray<NSString *> *allKeys;
+    @autoreleasepool {
+        allKeys = [[[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys] copy];
+    }
+
+    // Storage keys are "<accountId>:<suffix>:<deviceId>", so match the colon-delimited
+    NSString *evalKeySegment = [NSString stringWithFormat:@":%@:", CLTAP_INAPP_SS_EVAL_STORAGE_KEY];
+    for (NSString *fullKey in allKeys) {
+        if (![fullKey hasPrefix:CLTAP_PREFS_PREFIX]) continue;
+        if ([fullKey rangeOfString:evalKeySegment].location == NSNotFound) continue;
+
+        @autoreleasepool {
+            // CTPreferences re-applies CLTAP_PREFS_PREFIX, so strip it before passing in.
+            NSString *key = [fullKey substringFromIndex:CLTAP_PREFS_PREFIX.length];
+            id value = [CTPreferences getObjectForKey:key];
+            if (![value isKindOfClass:[NSArray class]]) continue;
+            NSUInteger count = [(NSArray *)value count];
+
+            // NSOrderedSet preserves first-seen order, matching the FIFO drain
+            // (removeObjectsInRange) in CTInAppEvaluationManager onBatchSent.
+            // Dedupe is lossless since the server parses inapps_eval into a HashSet, so
+            // duplicate ids carry no signal (no extra in-app, no extra impression).
+            NSArray *deduped = [[NSOrderedSet orderedSetWithArray:value] array];
+            if (deduped.count == count) continue;
+            [CTPreferences putObject:deduped forKey:key];
+            CleverTapLogStaticDebug(@"inapps_eval dedupe: key %@ compacted to %lu",
+                                    fullKey, (unsigned long)deduped.count);
+        }
+    }
+
+    [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG];
 }
 
 #pragma mark - Sync PE and Custom Templates
