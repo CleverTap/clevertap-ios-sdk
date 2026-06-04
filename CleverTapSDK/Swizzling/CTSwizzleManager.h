@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CTSwizzleManager : NSObject
 + (void)swizzleAppDelegate;
++ (void)swizzleWillPresentOnClass:(Class)cls;
 @end
 
 NS_ASSUME_NONNULL_END
