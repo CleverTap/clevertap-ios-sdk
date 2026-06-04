@@ -5359,9 +5359,11 @@ static BOOL sharedInstanceErrorLogged;
         allKeys = [[[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys] copy];
     }
 
+    // Storage keys are "<accountId>:<suffix>:<deviceId>", so match the colon-delimited
+    NSString *evalKeySegment = [NSString stringWithFormat:@":%@:", CLTAP_INAPP_SS_EVAL_STORAGE_KEY];
     for (NSString *fullKey in allKeys) {
         if (![fullKey hasPrefix:CLTAP_PREFS_PREFIX]) continue;
-        if ([fullKey rangeOfString:@":inapps_eval"].location == NSNotFound) continue;
+        if ([fullKey rangeOfString:evalKeySegment].location == NSNotFound) continue;
 
         @autoreleasepool {
             // CTPreferences re-applies CLTAP_PREFS_PREFIX, so strip it before passing in.
