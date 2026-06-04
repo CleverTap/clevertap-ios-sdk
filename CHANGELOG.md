@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.7.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.1) (June 04, 2026)
+#### Added
+- **Silent-in-foreground push notification**: Push notifications can now be suppressed when your app is in the foreground via the `wzrk_sif:true` key-value pair in the push payload.
+  - The notification will be delivered silently to the tray instead of appearing as a heads-up notification. This will only work if the method `willPresent` of `UNUserNotificationCenterDelegate` is implemented.
+  - Adds a new method `handleWillPresentNotification:` which handles a UNNotification in the foreground to support silent-in-foreground behaviour when using manual SDK integration (i.e. without `autoIntegrate`). This should be called from your method `willPresent` of `UNUserNotificationCenterDelegate` and is not required when using `autoIntegrate`.
+- Adds a new method `recordDisplayUnitElementClickedEventForID:` which records a `Notification Clicked` event for a specific element within a Display Unit.
+- Adds a new public method `setDisplayUnitCache` which lets external SDKs (e.g. the CleverTap Native Display SDK) inject a custom Display Unit store.
+#### Fixed
+- Fixes a bug where server-side in-aapp evaluation IDs were being duplicated in UserDefaults.
+- Fixes a bug where apps were freezing when in-apps were being shown in low network conditions.
+
 ### [Version 7.7.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.0) (May 19, 2026)
 #### New Features
 * **App Inbox Cross-Device Sync:** App Inbox messages now sync across a user's devices. If a user deletes or reads a message on one device, it is automatically reflected on their other devices.
