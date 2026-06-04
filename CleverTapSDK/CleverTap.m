@@ -389,6 +389,7 @@ static BOOL sharedInstanceErrorLogged;
                     } error:nil];
                 }
             }
+            [CTSwizzleManager swizzleWillPresentOnClass:cls];
         }
     }
 #endif
@@ -2959,6 +2960,70 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+- (void)_handleWillPresentNotification:(UNNotification *)notification
+                    withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                     completionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    if (@available(iOS 10.0, *)) {
+        if ([CTUIUtils runningInsideAppExtension]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        NSDictionary *userInfo = notification.request.content.userInfo;
+        if (![self _isCTPushNotification:userInfo]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        BOOL silentInForeground = [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
+        if (silentInForeground) {
+            if (@available(iOS 14.0, *)) {
+                completionHandler(UNNotificationPresentationOptionList);
+            } else {
+                completionHandler(UNNotificationPresentationOptionNone);
+            }
+        } else {
+            completionHandler(defaultOptions);
+        }
+    } else {
+        completionHandler(defaultOptions);
+    }
+}
+
++ (void)handleWillPresentNotification:(UNNotification *)notification
+                   withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                    completionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    if (@available(iOS 10.0, *)) {
+        if ([CTUIUtils runningInsideAppExtension]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        NSDictionary *userInfo = notification.request.content.userInfo;
+        id rawAccountId = userInfo[@"wzrk_acct_id"];
+        NSString *accountId = [rawAccountId isKindOfClass:[NSString class]] ? rawAccountId : nil;
+
+        CleverTap *targetInstance = nil;
+        if (!_instances || [_instances count] <= 0 || !accountId) {
+            targetInstance = [self sharedInstance];
+        } else {
+            for (CleverTap *instance in [_instances allValues]) {
+                if ([accountId isEqualToString:instance.config.accountId]) {
+                    targetInstance = instance;
+                    break;
+                }
+            }
+        }
+        if (!targetInstance) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        [targetInstance _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
+    } else {
+        completionHandler(defaultOptions);
+    }
+}
+#pragma clang diagnostic pop
 
 + (void)handleOpenURL:(NSURL*)url {
     if ([CTUIUtils runningInsideAppExtension]){
