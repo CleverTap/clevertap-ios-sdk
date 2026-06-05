@@ -140,8 +140,10 @@
 
 - (void)downloadMediaURLs:(NSArray *)inApps {
     NSArray<NSString *> *imageURLs = [self imageURLs:inApps];
-    // Store at the SDWebImage-compatible path so old SDK can find files on downgrade.
-    [self.fileDownloader prefetchInAppImages:imageURLs];
+    // Store in CleverTap's managed, private file cache (Documents/CleverTap_Files/), same as master:
+    // owned-only expiry cleanup via urlsExpiry; never touches the host app's shared SDWebImage folder.
+    // An older SDK reads in-app images from this same managed cache, so a downgrade reuses these files.
+    [self.fileDownloader downloadFiles:imageURLs withCompletionBlock:nil];
 }
 
 - (void)downloadCustomTemplatesFileURLs:(NSArray *)inApps {

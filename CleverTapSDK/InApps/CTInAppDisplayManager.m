@@ -467,14 +467,10 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (ImageLoadingResult *)loadImageWithURL:(NSURL *)url contentType:(NSString *)contentType {
     ImageLoadingResult *result = [[ImageLoadingResult alloc] init];
 
-    // 1. SDWebImage-compatible disk cache (Library/Caches/com.hackemist.SDImageCache/default/).
-    //    Populated by prefetchInAppImages: on CS in-app receipt, or write-through below.
-    //    Stored as raw image bytes under SDWebImage's filename scheme (MD5 of the URL), so the
-    //    format is never version-specific: an upgrade or downgrade can only ever miss and
-    //    re-download, never crash or read corrupt data. Note this is NOT downgrade-transparent
-    //    for in-apps - older SDKs load in-app images from Documents/CleverTap_Files/ via
-    //    CTFileDownloadManager, not from this path, so a downgrade re-downloads rather than
-    //    reusing these files.
+    // 1. CleverTap's managed, private disk cache (Documents/CleverTap_Files/) - the same cache
+    //    master uses. Populated by downloadMediaURLs: -> downloadFiles: on CS in-app receipt.
+    //    We read the raw bytes (not a UIImage) so a GIF keeps its animation when decoded below.
+    //    Downgrade-safe: an older SDK reads in-app images from this same managed cache.
     NSData *cachedData = [self.fileDownloader loadInAppImageDataFromDisk:url];
     if (cachedData) {
         result.imageData = cachedData;
@@ -486,7 +482,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return result;
     }
 
-    // 2. Cache miss — download synchronously (called on background thread by prepareNotification:).
+    // 2. Cache miss - download synchronously (called on background thread by prepareNotification:).
     NSError *loadError = nil;
     NSData *imageData = [NSData dataWithContentsOfURL:url
                                               options:NSDataReadingMappedIfSafe
@@ -496,10 +492,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return result;
     }
 
-    // 3. Write-through: persist for future offline triggers.
-    [self.fileDownloader storeInAppImageData:imageData forURL:url];
-
-    // 4. Validate GIF decodability; downstream rendering uses imageData to create CTAnimatedImage.
+    // 3. Validate GIF decodability; downstream rendering uses imageData to create CTAnimatedImage.
     if ([contentType isEqualToString:@"image/gif"]) {
         CTAnimatedImage *gif = [CTAnimatedImage imageWithData:imageData];
         if (gif == nil) {
@@ -508,13 +501,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
     result.imageData = imageData;
     return result;
-}
-
-- (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
-    NSString *imageURLString = [imageURL absoluteString];
-    UIImage *image = [self.fileDownloader loadImageFromDisk:imageURLString];
-    if (image) return image;
-    return nil;
 }
 
 - (void)notificationReady:(CTInAppNotification*)notification {

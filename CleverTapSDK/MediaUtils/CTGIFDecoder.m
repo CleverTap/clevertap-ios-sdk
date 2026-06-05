@@ -38,6 +38,11 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
 
 @interface CTGIFDecoder () {
     CGImageSourceRef _imageSource;
+    // Serializes all access to _imageSource. CGImageSource is not thread-safe:
+    // frameAtIndex: decodes on a background queue (CTImageFramePool.fetchQueue) while
+    // didReceiveMemoryWarning: purges ImageIO's cache on the main thread. Mirrors
+    // SDImageIOAnimatedCoder which guards _imageSource with SD_LOCK(_lock) (a dispatch_semaphore).
+    dispatch_semaphore_t _lock;
     NSData *_imageData;
     // Scale factor applied to each decoded UIImage frame.
     // Mirrors SDImageIOAnimatedCoder which passes scale to UIImage initWithCGImage:scale:orientation:.
@@ -75,6 +80,7 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
     self = [super init];
     if (self) {
         _scale = MAX(scale, 1);
+        _lock = dispatch_semaphore_create(1);
         CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
         if (!source) return nil;
 
@@ -100,11 +106,14 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
 // Calls CGImageSourceRemoveCacheAtIndex for every frame so ImageIO releases its internal
 // per-frame CGImage decode cache, reducing memory pressure during low-memory conditions.
 - (void)didReceiveMemoryWarning:(NSNotification *)notification {
+    // Mirrors SDImageIOAnimatedCoder.didReceiveMemoryWarning:, which wraps this in SD_LOCK(_lock).
+    dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
     if (_imageSource) {
         for (size_t i = 0; i < _frameCount; i++) {
             CGImageSourceRemoveCacheAtIndex(_imageSource, i);
         }
     }
+    dispatch_semaphore_signal(_lock);
 }
 
 // Mirrors SDImageIOAnimatedCoder.scanAndCheckFramesValidWithImageSource: (line 1068).
@@ -174,12 +183,20 @@ static CGImageRef CTCGImageCreateStrippedCopy(CGImageRef image) CF_RETURNS_RETAI
 
 // Mirrors SDImageIOAnimatedCoder.safeAnimatedImageFrameAtIndex: and createFrameAtIndex:... (line 1148, 448).
 - (nullable UIImage *)frameAtIndex:(NSUInteger)index {
-    if (index >= _frameCount || !_imageSource) return nil;
+    if (index >= _frameCount) return nil;
 
     NSDictionary *options = @{
         (__bridge NSString *)kCGImageSourceShouldCacheImmediately : @YES,
     };
-    CGImageRef cgImage = CGImageSourceCreateImageAtIndex(_imageSource, index, (__bridge CFDictionaryRef)options);
+    // Guard the CGImageSource access — mirrors SDImageIOAnimatedCoder.animatedImageFrameAtIndex:
+    // which wraps safeAnimatedImageFrameAtIndex: in SD_LOCK(_lock). The decode below contends
+    // with didReceiveMemoryWarning:'s CGImageSourceRemoveCacheAtIndex on the same source.
+    dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+    CGImageRef cgImage = NULL;
+    if (_imageSource) {
+        cgImage = CGImageSourceCreateImageAtIndex(_imageSource, index, (__bridge CFDictionaryRef)options);
+    }
+    dispatch_semaphore_signal(_lock);
     if (!cgImage) return nil;
 
     // iOS 15+: CGImageRef retains the CGImageSourceRef internally, causing thread-safety issues.

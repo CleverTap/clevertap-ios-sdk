@@ -106,108 +106,12 @@
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
 - (nullable NSData *)loadInAppImageDataFromDisk:(NSURL *)imageURL {
-    NSString *path = CTSDWebImageCachePath(imageURL.absoluteString);
-    NSData *data = [NSData dataWithContentsOfFile:path];
-    if (data) {
-        // Refresh the access date so frequently-used images survive the age-based sweep (mirrors SDWebImage).
-        [[NSURL fileURLWithPath:path] setResourceValue:[NSDate date] forKey:NSURLContentAccessDateKey error:nil];
-    }
-    return data;
-}
-
-- (void)storeInAppImageData:(NSData *)data forURL:(NSURL *)url {
-    if (!data || !url) return;
-    NSString *path = CTSDWebImageCachePath(url.absoluteString);
-    NSString *dir = [path stringByDeletingLastPathComponent];
-    [[NSFileManager defaultManager] createDirectoryAtPath:dir
-                                withIntermediateDirectories:YES
-                                               attributes:nil
-                                                    error:nil];
-    [data writeToFile:path atomically:YES];
-}
-
-- (void)prefetchInAppImages:(NSArray<NSString *> *)imageURLs {
-    if (!imageURLs.count) return;
-    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    for (NSString *urlString in imageURLs) {
-        dispatch_async(queue, ^{
-            NSURL *url = [NSURL URLWithString:urlString];
-            if (!url) return;
-            if ([self loadInAppImageDataFromDisk:url]) return; // already cached
-            NSData *data = [NSData dataWithContentsOfURL:url];
-            if (data) {
-                [self storeInAppImageData:data forURL:url];
-            }
-        });
-    }
-}
-
-// Evicts stale in-app images from the SDWebImage-compatible cache. Faithful port of
-// SDDiskCache's removeExpiredData: pass 1 deletes files older than kCTInAppImageCacheMaxDiskAge
-// (by access date); pass 2 — only when a size cap is set — deletes oldest-first down to half the cap.
-// Replaces the auto-eviction SDWebImage gave us for free, so the cache can't grow unbounded.
-- (void)removeExpiredInAppImages {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *cacheDir = CTSDWebImageCacheDirectory();
-    if (![fileManager fileExistsAtPath:cacheDir]) {
-        return;
-    }
-    NSURL *diskCacheURL = [NSURL fileURLWithPath:cacheDir isDirectory:YES];
-    NSArray<NSURLResourceKey> *resourceKeys = @[NSURLIsDirectoryKey, NSURLContentAccessDateKey, NSURLTotalFileAllocatedSizeKey];
-    NSDirectoryEnumerator *fileEnumerator = [fileManager enumeratorAtURL:diskCacheURL
-                                             includingPropertiesForKeys:resourceKeys
-                                                                options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                           errorHandler:NULL];
-    if (!fileEnumerator) {
-        return;
-    }
-
-    // Pass 1: drop everything older than the max disk age (keyed on access date, like SDWebImage).
-    NSDate *expirationDate = (kCTInAppImageCacheMaxDiskAge < 0) ? nil : [NSDate dateWithTimeIntervalSinceNow:-kCTInAppImageCacheMaxDiskAge];
-    NSMutableDictionary<NSURL *, NSDictionary<NSURLResourceKey, id> *> *cacheFiles = [NSMutableDictionary dictionary];
-    NSMutableArray<NSURL *> *urlsToDelete = [NSMutableArray array];
-    NSUInteger currentCacheSize = 0;
-
-    for (NSURL *fileURL in fileEnumerator) {
-        NSDictionary<NSURLResourceKey, id> *resourceValues = [fileURL resourceValuesForKeys:resourceKeys error:NULL];
-        if (!resourceValues || [resourceValues[NSURLIsDirectoryKey] boolValue]) {
-            continue;
-        }
-        NSDate *accessDate = resourceValues[NSURLContentAccessDateKey];
-        if (expirationDate && accessDate && [[accessDate laterDate:expirationDate] isEqualToDate:expirationDate]) {
-            [urlsToDelete addObject:fileURL];
-            continue;
-        }
-        currentCacheSize += [resourceValues[NSURLTotalFileAllocatedSizeKey] unsignedIntegerValue];
-        cacheFiles[fileURL] = resourceValues;
-    }
-
-    for (NSURL *fileURL in urlsToDelete) {
-        [fileManager removeItemAtURL:fileURL error:NULL];
-    }
-
-    // Pass 2: if still over the size cap, delete oldest-first down to half the cap (like SDWebImage).
-    if (kCTInAppImageCacheMaxDiskSize > 0 && currentCacheSize > kCTInAppImageCacheMaxDiskSize) {
-        const NSUInteger desiredCacheSize = kCTInAppImageCacheMaxDiskSize / 2;
-        NSArray<NSURL *> *sortedFiles = [cacheFiles keysSortedByValueWithOptions:NSSortConcurrent
-                                                                 usingComparator:^NSComparisonResult(NSDictionary *obj1, NSDictionary *obj2) {
-            return [obj1[NSURLContentAccessDateKey] compare:obj2[NSURLContentAccessDateKey]];
-        }];
-        for (NSURL *fileURL in sortedFiles) {
-            if ([fileManager removeItemAtURL:fileURL error:NULL]) {
-                currentCacheSize -= [cacheFiles[fileURL][NSURLTotalFileAllocatedSizeKey] unsignedIntegerValue];
-                if (currentCacheSize < desiredCacheSize) {
-                    break;
-                }
-            }
-        }
-    }
-}
-
-- (void)applicationDidEnterBackground:(NSNotification *)notification {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self removeExpiredInAppImages];
-    });
+    // Read raw bytes from CleverTap's managed, private file cache (Documents/CleverTap_Files/),
+    // the same cache master uses. Returning data (not a UIImage) lets the caller decode a GIF
+    // into an animated CTAnimatedImage instead of a single static frame.
+    NSString *path = [self.fileDownloadManager filePath:imageURL];
+    if (!path) return nil;
+    return [NSData dataWithContentsOfFile:path];
 }
 #endif
 
@@ -218,16 +122,11 @@
     self.fileExpiryTime = CLTAP_FILE_EXPIRY_OFFSET;
     
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+    // One-time cleanup of in-app images that an older SDK cached via SDWebImage. In-app images are
+    // now stored in CleverTap's managed cache (Documents/CleverTap_Files/) like master, which is
+    // pruned by the owned-only expiry sweep (removeInactiveExpiredAssets:), so there is no per-instance
+    // directory sweep of any shared folder.
     [self removeLegacyAssets:nil];
-    // Sweep the SDWebImage-compatible in-app image cache at launch and on entering background,
-    // mirroring SDWebImage's own eviction triggers (which we lost when removing the dependency).
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self removeExpiredInAppImages];
-    });
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationDidEnterBackground:)
-                                                 name:UIApplicationDidEnterBackgroundNotification
-                                               object:nil];
 #endif
 
     @synchronized (self) {
@@ -353,13 +252,8 @@
 // older SDK versions cached via SDWebImage, so they don't accumulate on device.
 // ---------------------------------------------------------------------------
 #if !CLEVERTAP_NO_INAPP_SUPPORT
-// Eviction defaults — faithful mirror of SDWebImage's SDImageCacheConfig:
-//   maxDiskAge → kDefaultCacheMaxDiskAge (1 week), expiry keyed on access date.
-//   maxDiskSize → 0 (no size cap by default); when > 0 the sweep trims oldest-first to half the cap.
-static const NSTimeInterval kCTInAppImageCacheMaxDiskAge = 60 * 60 * 24 * 7; // 1 week
-static const NSUInteger kCTInAppImageCacheMaxDiskSize = 0; // 0 == unlimited
-
-// Directory: SDImageCache.defaultDiskCacheDirectory + namespace "default"
+// Directory: SDImageCache.defaultDiskCacheDirectory + namespace "default".
+// Used only by removeLegacyAssets: to locate and delete files an older SDWebImage-based SDK cached.
 static NSString *CTSDWebImageCacheDirectory(void) {
     return [[[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)
               firstObject]
