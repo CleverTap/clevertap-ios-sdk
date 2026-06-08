@@ -193,10 +193,10 @@ static NSString *kDeviceID = @"Test Device";
     XCTestExpectation *expectation = [self expectationWithDescription:@"Delete all rows"];
     [self.eventDatabase deleteAllRowsWithCompletion:^(BOOL success) {
         XCTAssertTrue(success);
+        NSInteger eventCountAfterDelete = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
+        XCTAssertEqual(eventCountAfterDelete, 0);
         [expectation fulfill];
     }];
-    NSInteger eventCountAfterDelete = [self.eventDatabase getEventCount:self.normalizedEventName deviceID:kDeviceID];
-    XCTAssertEqual(eventCountAfterDelete, 0);
     [self waitForExpectations:@[expectation] timeout:2.0];
 }
 

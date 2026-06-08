@@ -159,10 +159,26 @@
     
     // handle video or audio
     if (self.notification.mediaUrl) {
-        self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification];
         self.imageView.hidden = YES;
         self.avPlayerContainerView.hidden = NO;
-        [self configureAvPlayerController];
+        if (self.playerController) {
+            // Player already exists (rotation reloaded the XIB) - re-embed its view into
+            // the refreshed avPlayerContainerView without recreating the player or changing the URL.
+            [self embedAvPlayerView];
+        } else {
+            // First render: create player with orientation-appropriate URL.
+            BOOL shouldMute = self.notification.mediaIsVideo;
+            BOOL shouldAutoplay = self.notification.mediaIsVideo;
+            self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
+                                                                                      muted:shouldMute
+                                                                                   autoplay:shouldAutoplay];
+            __weak typeof(self) weakSelf = self;
+            self.playerController.videoDidFailHandler = ^{
+                CleverTapLogStaticDebug(@"InApp: dismissing due to video load failure.");
+                [weakSelf hide:YES];
+            };
+            [self configureAvPlayerController];
+        }
     }
     
     if (self.notification.title) {
@@ -205,11 +221,9 @@
     }
 }
 
-- (void)configureAvPlayerController {
-    [self addChildViewController:self.playerController];
-    
+- (void)embedAvPlayerView {
     [self.avPlayerContainerView addSubview:self.playerController.view];
-    
+
     [[NSLayoutConstraint constraintWithItem:self.playerController.view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
                                      toItem:self.avPlayerContainerView attribute:NSLayoutAttributeWidth
                                  multiplier:1 constant:0] setActive:YES];
@@ -225,9 +239,12 @@
     [[NSLayoutConstraint constraintWithItem:self.playerController.view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual
                                      toItem:self.avPlayerContainerView attribute:NSLayoutAttributeCenterY
                                  multiplier:1 constant:0] setActive:YES];
-    
+}
+
+- (void)configureAvPlayerController {
+    [self addChildViewController:self.playerController];
+    [self embedAvPlayerView];
     [self.playerController didMoveToParentViewController:self];
-    
 }
 
 

@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTPreferences.h"
+#import "CleverTapInstanceConfig.h"
 #import "XCTestCase+XCTestCase_Tests.h"
 
 @interface CTPreferencesTest : XCTestCase
@@ -116,9 +117,62 @@
     [defaults setObject:@"objectValueForTesting" forKey:@"WizRocketobjectValueForTesting"];
 
     [CTPreferences removeObjectForKey:@"objectValueForTesting"];
-    
-    id checkValue = [CTPreferences getObjectForKey:@"WizRocketobjectValueForTesting"];
-    
+
+    id checkValue = [CTPreferences getObjectForKey:@"objectValueForTesting"];
+
     XCTAssertNil(checkValue);
 }
+
+#pragma mark - storageKeyWithSuffix:config:
+
+- (void)test_storageKeyWithSuffix_formatsAsAccountIdColonSuffix {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+                                       initWithAccountId:@"ACC123"
+                                       accountToken:@"TOKEN"];
+    NSString *key = [CTPreferences storageKeyWithSuffix:@"my_suffix" config:config];
+    XCTAssertEqualObjects(key, @"ACC123:my_suffix");
+}
+
+- (void)test_storageKeyWithSuffix_differentAccountIds_produceDifferentKeys {
+    CleverTapInstanceConfig *config1 = [[CleverTapInstanceConfig alloc]
+                                        initWithAccountId:@"ACC_A"
+                                        accountToken:@"TOKEN"];
+    CleverTapInstanceConfig *config2 = [[CleverTapInstanceConfig alloc]
+                                        initWithAccountId:@"ACC_B"
+                                        accountToken:@"TOKEN"];
+    NSString *key1 = [CTPreferences storageKeyWithSuffix:@"suffix" config:config1];
+    NSString *key2 = [CTPreferences storageKeyWithSuffix:@"suffix" config:config2];
+    XCTAssertNotEqualObjects(key1, key2);
+}
+
+- (void)test_storageKeyWithSuffix_sameSuffix_differentAccounts_noCollision {
+    CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc]
+                                       initWithAccountId:@"ACCT"
+                                       accountToken:@"TOKEN"];
+    NSString *keyA = [CTPreferences storageKeyWithSuffix:@"keyA" config:config];
+    NSString *keyB = [CTPreferences storageKeyWithSuffix:@"keyB" config:config];
+    XCTAssertNotEqualObjects(keyA, keyB);
+}
+
+#pragma mark - filePathfromFileName:
+
+- (void)test_filePathfromFileName_returnsNonEmptyPath {
+    NSString *path = [CTPreferences filePathfromFileName:@"testfile.dat"];
+    XCTAssertNotNil(path);
+    XCTAssertGreaterThan(path.length, 0u);
+}
+
+- (void)test_filePathfromFileName_endsWithFilename {
+    NSString *filename = @"testarchive.dat";
+    NSString *path = [CTPreferences filePathfromFileName:filename];
+    XCTAssertTrue([path hasSuffix:filename],
+                  @"Expected path '%@' to end with '%@'", path, filename);
+}
+
+- (void)test_filePathfromFileName_differentNames_produceDifferentPaths {
+    NSString *path1 = [CTPreferences filePathfromFileName:@"file1.dat"];
+    NSString *path2 = [CTPreferences filePathfromFileName:@"file2.dat"];
+    XCTAssertNotEqualObjects(path1, path2);
+}
+
 @end

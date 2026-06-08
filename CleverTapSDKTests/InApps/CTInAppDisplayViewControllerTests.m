@@ -44,7 +44,8 @@
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"param1": @"value1",
-        @"param2": @"value2"
+        @"param2": @"value2",
+        @"wzrk_dl": @"https://clevertap.com?param1=value1&param2=value2"
     };
     
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:url];
@@ -70,7 +71,8 @@
         @"wzrk_c2a": callToAction,
         @"button_id": buttonId,
         @"param1": @"value1",
-        @"param2": @"value2"
+        @"param2": @"value2",
+        @"wzrk_dl": @"https://clevertap.com?param1=value1&param2=value2"
     };
     
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:url];
@@ -95,7 +97,8 @@
         @"wzrk_id": @"",
         @"wzrk_c2a": @"c2aParam",
         @"button_id": buttonId,
-        @"asd": @"value"
+        @"asd": @"value",
+        @"wzrk_dl": @"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
     
@@ -104,7 +107,7 @@
     CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTAssertEqualObjects(expectedURL, action.actionURL);
-        XCTAssertEqualObjects(expectedExtras, extras);
+        XCTAssertTrue([expectedExtras isEqualToDictionary:extras]);
     }];
     self.viewController.delegate = delegate;
     // Trigger the action
@@ -121,7 +124,8 @@
         @"wzrk_id": @"",
         @"wzrk_c2a": callToAction,
         @"button_id": buttonId,
-        @"asd": @"value"
+        @"asd": @"value",
+        @"wzrk_dl": @"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
     

@@ -451,21 +451,19 @@
                                 delegate:self.testDelegate];
     
     OCMStub([mockRequestSender send:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
-        [invocation retainArguments];
-
-        CTRequest *request;
+        __unsafe_unretained CTRequest *request;
         [invocation getArgument:&request atIndex:2];
-        
+
         // Create a non-HTTP response (NSURLResponse instead of NSHTTPURLResponse)
         NSURL *url = [NSURL URLWithString:@"https://test.example.com/content"];
         NSURLResponse *nonHTTPResponse = [[NSURLResponse alloc] initWithURL:url
                                                                    MIMEType:@"application/json"
                                                       expectedContentLength:100
                                                            textEncodingName:@"UTF-8"];
-        
         NSData *responseData = [@"{\"test\":\"data\"}" dataUsingEncoding:NSUTF8StringEncoding];
-        if (request.responseBlock) {
-            request.responseBlock(responseData, nonHTTPResponse);
+        void (^responseBlock)(NSData *, NSURLResponse *) = request.responseBlock;
+        if (responseBlock) {
+            responseBlock(responseData, nonHTTPResponse);
         }
     });
     

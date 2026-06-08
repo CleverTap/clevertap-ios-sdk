@@ -13,7 +13,8 @@ typedef NS_ENUM(NSUInteger, CTInAppType){
     CTInAppTypeInterstitialImage,
     CTInAppTypeHalfInterstitialImage,
     CTInAppTypeCoverImage,
-    CTInAppTypeCustom
+    CTInAppTypeCustom,
+    CTInAppTypePiP
 };
 
 typedef NS_ENUM(NSUInteger, CTInAppActionType){

@@ -4,6 +4,8 @@
 #import "CTImageInAppViewControllerPrivate.h"
 #import "CTDismissButton.h"
 #import "CTUIUtils.h"
+#import "CTAVPlayerViewController.h"
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 
 static const CGFloat kTabletSpacingConstant = 40.f;
 static const CGFloat kSpacingConstant = 160.f;
@@ -12,8 +14,10 @@ static const CGFloat kSpacingConstant = 160.f;
 
 @property (nonatomic, assign) CGFloat aspectMultiplier;
 @property (nonatomic, strong) IBOutlet UIView *containerView;
-@property (nonatomic, strong) IBOutlet UIImageView *imageView;
+@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet CTDismissButton *closeButton;
+@property (nonatomic, strong) CTAVPlayerViewController *playerController;
+@property (nonatomic, strong) UIImage *initialImage;
 
 @end
 
@@ -109,29 +113,119 @@ static const CGFloat kSpacingConstant = 160.f;
                                  multiplier:multiplier constant:constant] setActive:YES];
 }
 
+- (void)embedPlayerInContainer {
+    // Insert video player below close button and pin it to all edges via Auto Layout.
+    // translatesAutoresizingMaskIntoConstraints is NO on the player's view, so constraints
+    // are required - a frame + autoresizingMask approach would be ignored.
+    // Cross-view constraints are owned by containerView, so they're automatically released
+    // when the XIB reloads and creates a fresh containerView on rotation.
+    UIView *playerView = self.playerController.view;
+    [self.containerView insertSubview:playerView belowSubview:self.closeButton];
+    [NSLayoutConstraint activateConstraints:@[
+        [playerView.leadingAnchor constraintEqualToAnchor:self.containerView.leadingAnchor],
+        [playerView.trailingAnchor constraintEqualToAnchor:self.containerView.trailingAnchor],
+        [playerView.topAnchor constraintEqualToAnchor:self.containerView.topAnchor],
+        [playerView.bottomAnchor constraintEqualToAnchor:self.containerView.bottomAnchor],
+    ]];
+}
+
 - (void)setUpImage {
-    // set image
+    // Phase A: video player already created - re-embed into refreshed containerView, keep URL.
+    if (self.playerController) {
+        self.imageView.hidden = YES;
+        [self embedPlayerInContainer];
+        return;
+    }
+
+    // Phase B: image already chosen at first render - re-show it without switching.
+    if (self.initialImage) {
+        self.imageView.clipsToBounds = YES;
+        self.imageView.userInteractionEnabled = YES;
+        // Use ScaleAspectFit so a landscape image shown in a portrait container (or vice versa)
+        // is not cropped/zoomed. ScaleAspectFill would be correct only when image and container
+        // share the same orientation, which is not guaranteed after rotation.
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        self.imageView.image = self.initialImage;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
+        [self.imageView addGestureRecognizer:tap];
+        return;
+    }
+
+    // Phase C: first render - decide what to show based on current orientation.
+    BOOL isLandscape = [self deviceOrientationIsLandscape];
+    BOOL hasPortraitVideo = self.notification.mediaIsVideo && self.notification.mediaUrl.length > 0;
+    BOOL hasLandscapeVideo = self.notification.mediaUrlLandscape.length > 0;
+    BOOL shouldShowVideo = isLandscape ? hasLandscapeVideo : hasPortraitVideo;
+
+    if (shouldShowVideo) {
+        self.playerController = [[CTAVPlayerViewController alloc] initWithNotification:self.notification
+                                                                                  muted:YES
+                                                                               autoplay:YES];
+        __weak typeof(self) weakSelf = self;
+        self.playerController.videoDidFailHandler = ^{
+            CleverTapLogStaticDebug(@"InApp: dismissing due to video load failure.");
+            [weakSelf hide:YES];
+        };
+        if (self.notification.buttons.count > 0) {
+            self.playerController.ctaTapHandler = ^{
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                [strongSelf handleButtonClickFromIndex:0];
+                [strongSelf hide:YES];
+            };
+        }
+        self.imageView.hidden = YES;
+        [self addChildViewController:self.playerController];
+        [self embedPlayerInContainer];
+        [self.playerController didMoveToParentViewController:self];
+        return;
+    }
+
+    // Image/GIF: pick by orientation, fall back to portrait if no landscape image exists.
     self.imageView.clipsToBounds = YES;
     self.imageView.userInteractionEnabled = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleImageTapGesture:)];
     [self.imageView addGestureRecognizer:imageTapGesture];
-    
-    if (![self deviceOrientationIsLandscape]) {
+
+    if (!isLandscape) {
         if (self.notification.inAppImage) {
             self.imageView.image = self.notification.inAppImage;
         } else if (self.notification.imageData) {
-            self.imageView.image  = [UIImage imageWithData:self.notification.imageData];
+            if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+                self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageData];
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
+            self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
         } else if (self.notification.imageLandscapeData) {
-            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
+                self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            }
+            self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
+        } else {
+            // No landscape image (landscape media may be a video or absent) - fall back to portrait.
+            if (self.notification.inAppImage) {
+                self.imageView.image = self.notification.inAppImage;
+            } else if (self.notification.imageData) {
+                if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+                    self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageData];
+                } else {
+                    self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+                }
+            }
+            self.imageView.accessibilityLabel = self.notification.contentDescription;
         }
-        self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }
+
+    // Lock in the chosen image so rotation re-renders show the same one.
+    self.initialImage = self.imageView.image;
 }
 
 

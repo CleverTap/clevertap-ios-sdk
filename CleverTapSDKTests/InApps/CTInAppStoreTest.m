@@ -406,4 +406,79 @@
     XCTAssertNil(inAppsFromStorageUsingOldKey);
 }
 
+#pragma mark - Delayed Client-Side In-Apps
+
+- (void)testStoreDelayedClientSideInApps {
+    XCTAssertEqualObjects([self.store delayedClientSideInApps], @[]);
+
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    XCTAssertEqualObjects([self.store delayedClientSideInApps], self.inApps);
+}
+
+- (void)testStoreDelayedClientSideInApps_overwritesPrevious {
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    NSArray *newInApps = @[@{@"ti": @9999}];
+    [self.store storeDelayedClientSideInApps:newInApps];
+    XCTAssertEqualObjects([self.store delayedClientSideInApps], newInApps);
+}
+
+- (void)testStoreDelayedClientSideInApps_emptyArrayClearsExisting {
+    [self.store storeDelayedClientSideInApps:self.inApps];
+    [self.store storeDelayedClientSideInApps:@[]];
+    XCTAssertEqualObjects([self.store delayedClientSideInApps], @[]);
+}
+
+#pragma mark - Server-Side InAction Metadata
+
+- (void)testStoreServerSideInActionMetaData {
+    XCTAssertEqualObjects([self.store serverSideInActionMetaData], @[]);
+
+    [self.store storeServerSideInActionMetaData:self.inApps];
+    XCTAssertEqualObjects([self.store serverSideInActionMetaData], self.inApps);
+}
+
+- (void)testStoreServerSideInActionMetaData_overwritesPrevious {
+    [self.store storeServerSideInActionMetaData:self.inApps];
+    NSArray *newInApps = @[@{@"ti": @8888}];
+    [self.store storeServerSideInActionMetaData:newInApps];
+    XCTAssertEqualObjects([self.store serverSideInActionMetaData], newInApps);
+}
+
+#pragma mark - updateTTL
+
+- (void)testUpdateTTL_withOffset_setsCorrectTTL {
+    NSUInteger offset = 24 * 60 * 60; // 1 day
+    NSMutableDictionary *inApp = [@{@"wzrk_ttl_offset": @(offset)} mutableCopy];
+
+    NSInteger beforeCall = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    [self.store updateTTL:inApp];
+    NSInteger afterCall = (NSInteger)[[NSDate date] timeIntervalSince1970];
+
+    NSNumber *resultTTL = inApp[@"wzrk_ttl"];
+    XCTAssertNotNil(resultTTL, @"wzrk_ttl should be set when wzrk_ttl_offset is present");
+    XCTAssertGreaterThanOrEqual([resultTTL longValue], beforeCall + (NSInteger)offset);
+    XCTAssertLessThanOrEqual([resultTTL longValue], afterCall + (NSInteger)offset);
+}
+
+- (void)testUpdateTTL_withoutOffset_removesTTL {
+    NSMutableDictionary *inApp = [@{@"wzrk_ttl": @1700000000} mutableCopy];
+
+    [self.store updateTTL:inApp];
+
+    XCTAssertNil(inApp[@"wzrk_ttl"], @"wzrk_ttl should be removed when wzrk_ttl_offset is absent");
+}
+
+- (void)testUpdateTTL_zeroOffset_setsTTLToCurrentTime {
+    NSMutableDictionary *inApp = [@{@"wzrk_ttl_offset": @0} mutableCopy];
+
+    NSInteger beforeCall = (NSInteger)[[NSDate date] timeIntervalSince1970];
+    [self.store updateTTL:inApp];
+    NSInteger afterCall = (NSInteger)[[NSDate date] timeIntervalSince1970];
+
+    NSNumber *resultTTL = inApp[@"wzrk_ttl"];
+    XCTAssertNotNil(resultTTL);
+    XCTAssertGreaterThanOrEqual([resultTTL longValue], beforeCall);
+    XCTAssertLessThanOrEqual([resultTTL longValue], afterCall);
+}
+
 @end

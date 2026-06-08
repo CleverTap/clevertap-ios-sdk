@@ -28,6 +28,9 @@ typedef enum {
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
     CleverTapJSInterface *_jsInterface;
+    BOOL _webViewLoaded;
+    BOOL _showRequested;
+    BOOL _showAnimated;
 }
 
 @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
@@ -283,6 +286,26 @@ typedef enum {
     }
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    _webViewLoaded = YES;
+    if (_showRequested) {
+        _showRequested = NO;
+        [self showFromWindow:_showAnimated];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {
@@ -557,7 +580,16 @@ typedef enum {
 
 - (void)show:(BOOL)animated {
     if (!self.notification.html) return;
-    [self showFromWindow:animated];
+    if (!self.notification.url) {
+        _showRequested = YES;
+        _showAnimated = animated;
+        if (_webViewLoaded) {
+            _showRequested = NO;
+            [self showFromWindow:animated];
+        }
+    } else {
+        [self showFromWindow:animated];
+    }
 }
 
 - (void)hide:(BOOL)animated {

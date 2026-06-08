@@ -66,14 +66,21 @@
 
 #if !(TARGET_OS_TV)
 + (BOOL)isDeviceOrientationLandscape {
-    UIInterfaceOrientation orientation;
-    if (@available(iOS 15.0, *)) {
-        orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
-    } else {
-        orientation = [CTUIUtils getSharedApplication].windows.firstObject.windowScene.interfaceOrientation;
+    if (@available(iOS 13.0, *)) {
+        UIInterfaceOrientation orientation = UIInterfaceOrientationPortrait;
+        NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
+        for (UIScene *scene in connectedScenes) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                orientation = ((UIWindowScene *)scene).interfaceOrientation;
+                break;
+            }
+        }
+        return UIInterfaceOrientationIsLandscape(orientation);
     }
-    BOOL landscape = UIInterfaceOrientationIsLandscape(orientation);
-    return landscape;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return UIInterfaceOrientationIsLandscape([[CTUIUtils getSharedApplication] statusBarOrientation]);
+#pragma clang diagnostic pop
 }
 #endif
 

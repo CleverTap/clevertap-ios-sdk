@@ -2083,18 +2083,87 @@
                 }]
         }
     ];
-    
+
     // Distance ~1.1km
     CLLocationCoordinate2D location1km = CLLocationCoordinate2DMake(19.08609, 72.877426);
-    
+
     CTEventAdapter *event = [[CTEventAdapter alloc] initWithEventName:@"event1" eventProperties:@{} andLocation:location1km];
-    
+
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
     id mockIsEventLoggedFirstTime = OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(YES);
-    
+
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers event:event];
     XCTAssertTrue(match);
+}
+
+- (void)testMatchEvent_withFirstTimeOnly_notFirstTime {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"firstTimeOnly": @YES
+        }
+    ];
+
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
+    CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
+    OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(NO);
+
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{}];
+
+    XCTAssertFalse(match, @"Event should not match when firstTimeOnly is YES but event is not first-time");
+}
+
+- (void)testMatchChargedEvent_withFirstTimeOnly_notFirstTime {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"Charged",
+            @"firstTimeOnly": @YES
+        }
+    ];
+
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
+    CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
+    OCMStub([dataStoreMock isEventLoggedFirstTime:@"Charged"]).andReturn(NO);
+
+    BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{} items:@[]];
+
+    XCTAssertFalse(match, @"Charged event should not match when firstTimeOnly is YES but event is not first-time");
+}
+
+- (void)testMatchEvent_withoutFirstTimeOnly_doesNotCallDataStore {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1"
+        }
+    ];
+
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
+    id dataStoreMock = OCMPartialMock(self.dataStore);
+    OCMReject([dataStoreMock isEventLoggedFirstTime:[OCMArg any]]);
+
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{}];
+
+    XCTAssertTrue(match, @"Event without firstTimeOnly should match without consulting the data store");
+    OCMVerifyAll(dataStoreMock);
+}
+
+- (void)testMatchEvent_withFirstTimeOnly_eventNameMismatch_doesNotCallDataStore {
+    NSArray *whenTriggers = @[
+        @{
+            @"eventName": @"event1",
+            @"firstTimeOnly": @YES
+        }
+    ];
+
+    CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
+    id dataStoreMock = OCMPartialMock(self.dataStore);
+    OCMReject([dataStoreMock isEventLoggedFirstTime:[OCMArg any]]);
+
+    BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event2" eventProperties:@{}];
+
+    XCTAssertFalse(match, @"Event name mismatch should fail before checking firstTimeOnly");
+    OCMVerifyAll(dataStoreMock);
 }
 
 @end

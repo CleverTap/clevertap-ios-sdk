@@ -3,6 +3,7 @@
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CTUIUtils.h"
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 
 typedef enum {
     kWRSlideStatusNormal = 0,
@@ -30,7 +31,7 @@ typedef enum {
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
 @property (nonatomic, strong) IBOutlet UILabel *bodyLabel;
-@property (nonatomic, strong) IBOutlet UIImageView *imageView;
+@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
 @property (nonatomic, strong) IBOutlet UIButton *firstButton;
@@ -90,7 +91,15 @@ typedef enum {
     if (self.notification.inAppImage) {
         self.inAppImage = self.notification.inAppImage;
     } else if (self.notification.imageData) {
-        self.inAppImage = [UIImage imageWithData:self.notification.imageData];
+        // Support for GIFs
+        if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+            SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+            if (gif) {
+                self.inAppImage = gif;
+            }
+        } else {
+            self.inAppImage = [UIImage imageWithData:self.notification.imageData];
+        }
     }
     if (self.inAppImage) {
         self.imageView.clipsToBounds = YES;

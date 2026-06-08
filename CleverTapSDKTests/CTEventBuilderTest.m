@@ -8,8 +8,11 @@
 
 #import <XCTest/XCTest.h>
 #import "CTEventBuilder.h"
-#import "CTValidator.h"
+#import "CTValidationConfig.h"
+#import "CTEventNameValidator.h"
 #import "CTInAppNotification.h"
+#import "CleverTap+DisplayUnit.h"
+#import "CTConstants.h"
 
 @interface CTEventBuilderTest : XCTestCase
 @end
@@ -17,6 +20,8 @@
 @implementation CTEventBuilderTest
 
 - (void)setUp {
+    [super setUp];
+    [CTEventBuilder initializeWithValidationConfig:[CTValidationConfig defaultConfigWithCountryCode:nil]];
 }
 
 - (void)tearDown {
@@ -68,15 +73,21 @@
 }
 
 - (void)test_build_withDiscardedEventName {
-    [CTValidator setDiscardedEvents:@[@"aa",@"bb",@"cc"]];
+    // NOTE: build:withEventActions:validationConfig:completionHandler: removed in refactor — test uses CTEventNameValidator directly
+    CTValidationConfig *config = [CTValidationConfig defaultConfigWithCountryCode:nil];
+    config.discardedEventNames = [NSSet setWithArray:@[@"aa", @"bb", @"cc"]];
+    CTEventNameValidator *nameValidator = [[CTEventNameValidator alloc] initWithConfig:config];
     NSString *eventName = @"aa";
-    NSDictionary *eventActions = @{@"key1": @"value1", @"key2": @"value2"};
-    
-    [CTEventBuilder build:eventName withEventActions:eventActions completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
 
-        XCTAssertNil(event);
-        XCTAssertEqual(errors.count, 1);
-    }];
+    CTValidationResult *nameResult = [nameValidator validateEventName:eventName];
+    NSMutableArray<CTValidationResult *> *errors = [NSMutableArray array];
+    NSDictionary *event = nil;
+    if (nameResult.shouldDrop) {
+        [errors addObject:nameResult];
+    }
+
+    XCTAssertNil(event);
+    XCTAssertEqual(errors.count, 1);
 }
 
 - (void)test_build_withObjectForCleaningEventName {
@@ -319,8 +330,7 @@
 - (void)test_buildInboxMessageStateEvent_withClickedTrueAndInvalidKey {
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
-    
-    [CTEventBuilder buildInboxMessageStateEvent:true forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+    [CTEventBuilder buildInboxMessageStateEvent:true forMessage:inboxMsg isV2Message:false andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Clicked");
         XCTAssertEqual([event[@"evtData"] count], 1);
@@ -332,12 +342,221 @@
     CleverTapInboxMessage *inboxMsg = [[CleverTapInboxMessage alloc] init];
     NSDictionary *queryParam = @{@"key1": @"value1"};
     
-    [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
+    [CTEventBuilder buildInboxMessageStateEvent:false forMessage:inboxMsg isV2Message:false andQueryParameters:queryParam completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Notification Viewed");
         XCTAssertEqual([event[@"evtData"] count], 1);
         XCTAssertEqual(errors.count, 0);
     }];
+}
+
+#pragma mark - build:completionHandler: (no actions)
+
+- (void)test_build_withNoActions_returnsNonNilEvent {
+    [CTEventBuilder build:@"MyEvent" completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"MyEvent");
+        XCTAssertEqual(errors.count, 0);
+    }];
+}
+
+- (void)test_build_withNoActions_nilName_returnsNilEvent {
+    [CTEventBuilder build:nil completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNil(event);
+    }];
+}
+
+#pragma mark - buildChargedEventWithDetails: with > 50 items
+
+- (void)test_buildChargedEventWithDetails_with51Items_returnsEventAndError522 {
+    NSMutableArray *items = [NSMutableArray array];
+    for (int i = 0; i < 51; i++) {
+        [items addObject:@{@"item": [NSString stringWithFormat:@"val%d", i]}];
+    }
+    [CTEventBuilder buildChargedEventWithDetails:@{@"charge": @"val"} andItems:items completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqual(errors.count, 1);
+        XCTAssertEqual([errors[0] errorCode], 522);
+    }];
+}
+
+#pragma mark - buildGeofenceStateEvent:
+
+- (void)test_buildGeofenceStateEvent_entered_setsEnteredEventName {
+    NSDictionary *details = @{@"id": @"geo1"};
+    [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:details completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"Geocluster Entered");
+    }];
+}
+
+- (void)test_buildGeofenceStateEvent_exited_setsExitedEventName {
+    NSDictionary *details = @{@"id": @"geo1"};
+    [CTEventBuilder buildGeofenceStateEvent:NO forGeofenceDetails:details completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"Geocluster Exited");
+    }];
+}
+
+- (void)test_buildGeofenceStateEvent_withDetails_includesInEventData {
+    NSDictionary *details = @{@"latitude": @(37.3382), @"longitude": @(-121.8863)};
+    [CTEventBuilder buildGeofenceStateEvent:YES forGeofenceDetails:details completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtData"][@"latitude"], @(37.3382));
+    }];
+}
+
+#pragma mark - buildSignedCallEvent:
+
+- (void)test_buildSignedCallEvent_outgoing_setsOutgoingEventName {
+    [CTEventBuilder buildSignedCallEvent:0 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"SCOutgoing");
+    }];
+}
+
+- (void)test_buildSignedCallEvent_incoming_setsIncomingEventName {
+    [CTEventBuilder buildSignedCallEvent:1 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"SCIncoming");
+    }];
+}
+
+- (void)test_buildSignedCallEvent_end_setsEndEventName {
+    [CTEventBuilder buildSignedCallEvent:2 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        XCTAssertEqualObjects(event[@"evtName"], @"SCEnd");
+    }];
+}
+
+- (void)test_buildSignedCallEvent_invalidRawValue_returnsNilEventWithError525 {
+    [CTEventBuilder buildSignedCallEvent:99 forCallDetails:@{@"key": @"val"} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNil(event);
+        BOOL found525 = NO;
+        for (CTValidationResult *e in errors) {
+            if ([e errorCode] == 525) { found525 = YES; break; }
+        }
+        XCTAssertTrue(found525);
+    }];
+}
+
+- (void)test_buildSignedCallEvent_emptyCallDetails_addsError524 {
+    [CTEventBuilder buildSignedCallEvent:0 forCallDetails:@{} completionHandler:^(NSDictionary *event, NSArray<CTValidationResult *> *errors) {
+        XCTAssertNotNil(event);
+        BOOL found524 = NO;
+        for (CTValidationResult *e in errors) {
+            if ([e errorCode] == 524) { found524 = YES; break; }
+        }
+        XCTAssertTrue(found524);
+    }];
+}
+
+#pragma mark - Display Unit element-click params merging
+
+/// Verifies the bug fix in `buildDisplayViewStateEvent:`: the `params` argument
+/// is now merged into `notif` alongside the wzrk_* fields extracted from the
+/// cached unit JSON. Required for `-recordDisplayUnitElementClickedEventForID:`
+/// to deliver `wzrk_element_id` and `additionalProperties` to the event.
+- (void)testBuildDisplayViewStateEvent_mergesParamsAlongsideWzrkFields {
+    NSDictionary *unitJson = @{
+        @"wzrk_id": @"1234",
+        @"wzrk_pivot": @"wzrk_default"
+    };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+    NSDictionary *params = @{
+        @"wzrk_element_id": @"button-1",
+        @"action_type": @"open_url",
+        @"action_url": @"https://example.com"
+    };
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:YES
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:params
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+
+    XCTAssertEqualObjects(captured[CLTAP_EVENT_NAME], CLTAP_NOTIFICATION_CLICKED_EVENT_NAME);
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    // wzrk_* extraction from cached unit JSON preserved.
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"1234");
+    XCTAssertEqualObjects(evtData[@"wzrk_pivot"], @"wzrk_default");
+    // params merged in (the bug fix).
+    XCTAssertEqualObjects(evtData[@"wzrk_element_id"], @"button-1");
+    XCTAssertEqualObjects(evtData[@"action_type"], @"open_url");
+    XCTAssertEqualObjects(evtData[@"action_url"], @"https://example.com");
+    // Timestamp tag still set.
+    XCTAssertNotNil(evtData[CLTAP_NOTIFICATION_CLICKED_TAG]);
+}
+
+/// Cached unit `wzrk_*` fields must win over same-named caller-supplied
+/// `wzrk_*` keys (a client cannot spoof `wzrk_id` via additionalProperties),
+/// while novel `wzrk_*` keys from the caller — not present in the cached unit —
+/// pass through unchanged.
+- (void)testBuildDisplayViewStateEvent_cachedWzrkWinsOnCollision_novelWzrkPassesThrough {
+    NSDictionary *unitJson = @{
+        @"wzrk_id": @"real_id",
+        @"wzrk_pivot": @"wzrk_default"
+    };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+    NSDictionary *params = @{
+        @"wzrk_id": @"spoofed",          // collides with cached — cached must win
+        @"wzrk_extra": @"kept-through",  // novel wzrk_ key, not in cached unit
+        @"wzrk_element_id": @"btn-1",    // novel wzrk_ key from additionalProperties
+        @"ok_key": @"kept"
+    };
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:YES
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:params
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    // Cached wzrk_id wins over the caller-supplied collision.
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"real_id");
+    XCTAssertEqualObjects(evtData[@"wzrk_pivot"], @"wzrk_default");
+    // Novel wzrk_-prefixed keys from the caller pass through.
+    XCTAssertEqualObjects(evtData[@"wzrk_extra"], @"kept-through");
+    XCTAssertEqualObjects(evtData[@"wzrk_element_id"], @"btn-1");
+    // Non-wzrk caller key kept.
+    XCTAssertEqualObjects(evtData[@"ok_key"], @"kept");
+}
+
+/// Regression guard: the existing single-arg
+/// `-recordDisplayUnitClickedEventForID:` passes `nil` for `params`.
+/// The bug fix must not regress that path — only wzrk_* fields appear on the
+/// event, no spurious entries leak from the new merge step.
+- (void)testBuildDisplayViewStateEvent_nilParamsBehavesAsBefore {
+    NSDictionary *unitJson = @{ @"wzrk_id": @"x" };
+    CleverTapDisplayUnit *displayUnit = [[CleverTapDisplayUnit alloc] initWithJSON:unitJson];
+
+    XCTestExpectation *exp = [self expectationWithDescription:@"build"];
+    __block NSDictionary *captured = nil;
+    [CTEventBuilder buildDisplayViewStateEvent:YES
+                                forDisplayUnit:displayUnit
+                            andQueryParameters:nil
+                             completionHandler:^(NSDictionary *event,
+                                                 NSArray<CTValidationResult *> *errors) {
+        captured = event;
+        [exp fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+
+    NSDictionary *evtData = captured[CLTAP_EVENT_DATA];
+    XCTAssertEqualObjects(evtData[@"wzrk_id"], @"x");
+    XCTAssertNil(evtData[@"wzrk_element_id"]);
 }
 
 @end

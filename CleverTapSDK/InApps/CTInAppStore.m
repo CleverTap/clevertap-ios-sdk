@@ -7,6 +7,7 @@
 //
 
 #import "CTInAppStore.h"
+#import "CTSwitchUserDelegate.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
 #import "CTEncryptionManager.h"
@@ -17,7 +18,7 @@
 NSString* const kCLIENT_SIDE_MODE = @"CS";
 NSString* const kSERVER_SIDE_MODE = @"SS";
 
-@interface CTInAppStore()
+@interface CTInAppStore() <CTSwitchUserDelegate>
 
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) NSString *accountId;

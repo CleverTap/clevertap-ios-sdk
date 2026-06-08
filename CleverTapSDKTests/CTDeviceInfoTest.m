@@ -24,13 +24,6 @@
     // Put teardown code here. This method is called after the invocation of each test method in the class.
 }
 
-- (void)test_initialize {
-//    [CTDeviceInfo initialize];
-    
-//    XCTAssertNotNil([_classObject _idfv]);
-
-}
-
 - (void)test_initWithConfig{
     CleverTapInstanceConfig *config = [[CleverTapInstanceConfig alloc] initWithAccountId:@"testAccount" accountToken:@"testToken"];
     _classObject = [_classObject initWithConfig:config andCleverTapID:@"testAccount"];
@@ -49,7 +42,7 @@
     [_classObject forceNewDeviceID];
     
     XCTAssertNotNil([_classObject deviceId]);
-    XCTAssertEqual([[[_classObject deviceId] componentsSeparatedByString:@"-"] count]-1, 1);
+    XCTAssertEqual([[[_classObject deviceId] componentsSeparatedByString:@"-"] count], 2);
     XCTAssertTrue([[_classObject deviceId] hasPrefix:@"-"]);
 }
 

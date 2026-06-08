@@ -1,6 +1,39 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.7.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.1) (June 04, 2026)
+#### Added
+- **Silent-in-foreground push notification**: Push notifications can now be suppressed when your app is in the foreground via the `wzrk_sif:true` key-value pair in the push payload.
+  - The notification will be delivered silently to the tray instead of appearing as a heads-up notification. This will only work if the method `willPresent` of `UNUserNotificationCenterDelegate` is implemented.
+  - Adds a new method `handleWillPresentNotification:` which handles a UNNotification in the foreground to support silent-in-foreground behaviour when using manual SDK integration (i.e. without `autoIntegrate`). This should be called from your method `willPresent` of `UNUserNotificationCenterDelegate` and is not required when using `autoIntegrate`.
+- Adds a new method `recordDisplayUnitElementClickedEventForID:` which records a `Notification Clicked` event for a specific element within a Display Unit.
+- Adds a new public method `setDisplayUnitCache:` which lets external SDKs (e.g. the CleverTap Native Display SDK) inject a custom Display Unit store.
+#### Fixed
+- Fixes a bug where server-side InApps evaluation IDs were being duplicated in UserDefaults.
+- Fixes a bug where apps were freezing when InApps were being shown in low network conditions.
+
+### [Version 7.7.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.0) (May 19, 2026)
+#### New Features
+* **App Inbox Cross-Device Sync:** App Inbox messages now sync across a user's devices. If a user deletes or reads a message on one device, it is automatically reflected on their other devices.
+  * **New Inbox Fetch API:** The SDK already fetches inbox messages automatically on app launch and user login. Two new public methods have been added to this with on-demand refresh support:
+    * `fetchInbox()` — triggers an inbox refresh from the server (fire-and-forget).
+    * `fetchInbox(callback:)` — same as above, but invokes the callback with a success/failure result when the fetch completes.
+    * **Note:** Both methods are throttled to once every 5 minutes between consecutive calls. This throttle is shared with the built-in pull-to-refresh gesture.
+  * **Pull-to-Refresh in Built-in Inbox:** The built-in App Inbox now includes a pull-to-refresh gesture. Manual inbox fetches — including those triggered by `fetchInbox()` — are throttled to once every 5 minutes between consecutive calls.
+  * **Inbox Viewed and Clicked Event Deduplication:** Rapid duplicate `Notification Viewed` and `Notification Clicked` events for the same inbox message are now automatically suppressed to prevent analytics inflation. Additionally, a `Notification Viewed` event is not raised for messages that have already been read on another device.
+    * **Note:** For custom inbox implementations, ensure `recordInboxNotificationViewedEvent(messageId)` is called when a message becomes visible to the user, before calling `markReadInboxMessage(messageId)` — calling them in reverse order will silently drop the Viewed event.
+    * **Note:** The already read suppression applies only to accounts enabled for App Inbox Cross-Device Sync. For accounts not using this feature, `Notification Viewed` continues to be raised regardless of read state, preserving existing behaviour.
+
+#### Fixed
+- Fixes a crash in `CTInAppEvaluationManager` corrupting NSUserDefaults.
+
+### [Version 7.6.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.6.0) (April 17, 2026)
+#### Added
+- **Picture-in-Picture (PiP) In-App Notifications:** Introduces Picture-in-Picture in-app notifications — a compact, draggable floating overlay that persists over app content. Supports image, GIF, and video media with configurable controls.
+- **InApp Media Support:** Adds GIF and video playback support across all in-app notification templates, enabling richer media experiences within the app.
+- **App Inbox Default Media View:** Introduces a fallback media view for App Inbox entries that lack a specified media orientation, rendering images, GIFs, video posters, and audio thumbnails at their natural aspect ratio.
+- Adds support for backend-driven mute durations via the `X-WZRK-MUTE-DURATION` response header for more precise, server-controlled mute windows.
+
 ### [Version 7.5.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.5.1) (March 4, 2026)
 #### Added
 - Adds deep link URL capture in InApp notification click events, providing consistent attribution with Push notifications. Supports button-level deep links for CTA clicks and template-level deep links for image-only and HTML templates.

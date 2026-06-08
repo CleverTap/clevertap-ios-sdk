@@ -45,6 +45,18 @@
     return [self _createGetRequestWithConfig:config url:url];
 }
 
++ (CTRequest * _Nonnull)inboxV2FetchRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                               params:(id _Nullable)params
+                                                  url:(NSString * _Nonnull)url {
+    return [self _createPostRequestWithConfig:config params:params url:url];
+}
+
++ (CTRequest * _Nonnull)inboxV2DeleteMessagesRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config
+                                                        params:(id _Nullable)params
+                                                           url:(NSString * _Nonnull)url {
+    return [self _createPostRequestWithConfig:config params:params url:url];
+}
+
 + (CTRequest * _Nonnull)_createPostRequestWithConfig:(CleverTapInstanceConfig * _Nonnull)config params:(id _Nullable)params url:(NSString * _Nonnull)url {
     return [self _createPostRequestWithConfig:config params:params url:url additionalHeaders:nil];
 }
