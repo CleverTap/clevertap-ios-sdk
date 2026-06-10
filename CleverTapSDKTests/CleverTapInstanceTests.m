@@ -8,6 +8,8 @@
 
 #import <XCTest/XCTest.h>
 #import "BaseTestCase.h"
+#import <OHHTTPStubs/HTTPStubs.h>
+#import <OHHTTPStubs/HTTPStubsResponse+JSON.h>
 #import "CTPlistInfo.h"
 #import "CTPreferences.h"
 #import "CleverTap+Tests.h"
@@ -1711,6 +1713,11 @@
 }
 
 - (void)test_fetchVariables_queuesEvent {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
+        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
+                requestTime:0 responseTime:100.0];
+    }];
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchVariables:nil];
@@ -2224,6 +2231,11 @@
 }
 
 - (void)test_fetchInApps_queuesEvent {
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
+        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
+                requestTime:0 responseTime:100.0];
+    }];
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchInApps:nil];
@@ -2294,6 +2306,13 @@
 }
 
 - (void)test_fetchProductConfig_queuesEvent {
+    // Stub with a long delay so the flush network request can't complete and drain
+    // the queue before we assert on eventsQueue.count.
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
+        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
+                requestTime:0 responseTime:100.0];
+    }];
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchProductConfig];

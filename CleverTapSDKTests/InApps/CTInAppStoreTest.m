@@ -87,6 +87,8 @@
     [super tearDown];
     [self.store removeClientSideInApps];
     [self.store removeServerSideInApps];
+    NSString *delayedKey = [self.store storageKeyWithSuffix:CLTAP_PREFS_DELAYED_INAPP_KEY_CS];
+    [CTPreferences removeObjectForKey:delayedKey];
     [self.store clearInApps];
 }
 
