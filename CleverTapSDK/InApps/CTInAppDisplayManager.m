@@ -6,6 +6,7 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 #import "CleverTapInternal.h"
+#import "CTImpressionManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"

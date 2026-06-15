@@ -28,7 +28,7 @@
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
-#import "CTSessionManager.h"
+#import "CTImpressionManager.h"
 #import "CTFileDownloader.h"
 #import "CTCryptMigrator.h"
 

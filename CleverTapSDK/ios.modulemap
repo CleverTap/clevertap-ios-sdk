@@ -37,5 +37,17 @@ framework module CleverTapSDK {
     header "CTInActionResult.h"
     header "CTTimerResult.h"
     header "CTInAppStore.h"
+    header "CTPreferences.h"
+    header "CTUIUtils.h"
+    header "CTValidationConfig.h"
+    header "CleverTapInstanceConfigPrivate.h"
+    header "CTConstants.h"
+    header "CTQueueType.h"
+    header "CTSwitchUserDelegate.h"
+    header "CTClock.h"
+    header "CTAttachToBatchHeaderDelegate.h"
+    header "CTBatchSentDelegate.h"
+    header "CTMultiDelegateManager.h"
+    header "CTImpressionManager.h"
     export *
 }

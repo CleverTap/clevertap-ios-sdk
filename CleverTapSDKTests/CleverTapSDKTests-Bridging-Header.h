@@ -1,8 +1,7 @@
 //
 //  Use this file to import your target's public headers that you would like to expose to Swift.
 //
-#import "CTSessionManager.h"
+// CleverTapInternal.h provides access to the sessionManager property and other
+// internal CleverTap additions used by the test suite.
 #import "CleverTapInternal.h"
-#import "CTPreferences.h"
 #import "CTConstants.h"
-#import "CTValidationConfig.h"

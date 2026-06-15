@@ -16,6 +16,7 @@
 //   cause the XCTest push-permission tests to time out.
 
 import Testing
+@testable import CleverTapSDK
 
 @Suite("CTSessionManager", .serialized)
 struct CTSessionManagerSwiftTests {
@@ -195,7 +196,7 @@ struct CTSessionManagerSwiftTests {
 
     @Test("minSessionSeconds defaults to CLTAP_SESSION_LENGTH_MINS × 60")
     func minSessionSecondsHasCorrectDefault() {
-        #expect(sessionManager.minSessionSeconds == Int(CLTAP_SESSION_LENGTH_MINS) * 60)
+        #expect(sessionManager.minSessionSeconds == 20 * 60) // CLTAP_SESSION_LENGTH_MINS * 60
     }
 
     // MARK: - updateSessionStateOnLaunch

@@ -1,6 +1,6 @@
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
-#else
+#elif __has_include("CleverTapSDK-Swift.h")
 #import "CleverTapSDK-Swift.h"
 #endif
 

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CTInAppDisplayManager.h"
 #import <XCTest/XCTest.h>
 #import "CTTemplatePresenterMock.h"
 #import "CTInAppEvaluationManager.h"
