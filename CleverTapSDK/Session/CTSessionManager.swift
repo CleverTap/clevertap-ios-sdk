@@ -8,7 +8,7 @@
 import Foundation
 
 @objcMembers
-final class CTSessionManager: NSObject {
+public final class CTSessionManager: NSObject {
 
     // MARK: - Private stored state
 
@@ -31,14 +31,16 @@ final class CTSessionManager: NSObject {
     private var _wzrkParams: [AnyHashable: Any]?
     private var _firstRequestInSession: Bool = false
 
-    // MARK: - Public properties
+    // MARK: - Internal properties (no ObjC callers — accessible via @testable import in Swift tests)
 
     /// Minimum number of seconds before a session is considered expired.
     var minSessionSeconds: Int = Int(CLTAP_SESSION_LENGTH_MINS) * 60
 
+    // MARK: - Public properties
+
     /// Current session identifier (Unix timestamp of session start).
     /// Writing persists the value to CTPreferences.
-    var sessionId: Int {
+    public var sessionId: Int {
         get {
             lock.lock(); defer { lock.unlock() }
             return _sessionId
@@ -52,14 +54,14 @@ final class CTSessionManager: NSObject {
         }
     }
 
-    var screenCount: Int32 = 0
-    var firstSession: Bool = false
-    var lastSessionLengthSeconds: Int32 = 0
-    var appLaunchProcessed: Bool = false
-    var encryptionInTransitFailed: Bool = false
+    public var screenCount: Int32 = 0
+    public var firstSession: Bool = false
+    public var lastSessionLengthSeconds: Int32 = 0
+    public var appLaunchProcessed: Bool = false
+    public var encryptionInTransitFailed: Bool = false
 
     /// Set-once per session — subsequent writes are silently ignored.
-    var source: String? {
+    public var source: String? {
         get { lock.lock(); defer { lock.unlock() }; return _source }
         set {
             lock.lock()
@@ -69,7 +71,7 @@ final class CTSessionManager: NSObject {
     }
 
     /// Set-once per session — subsequent writes are silently ignored.
-    var medium: String? {
+    public var medium: String? {
         get { lock.lock(); defer { lock.unlock() }; return _medium }
         set {
             lock.lock()
@@ -79,7 +81,7 @@ final class CTSessionManager: NSObject {
     }
 
     /// Set-once per session — subsequent writes are silently ignored.
-    var campaign: String? {
+    public var campaign: String? {
         get { lock.lock(); defer { lock.unlock() }; return _campaign }
         set {
             lock.lock()
@@ -89,7 +91,7 @@ final class CTSessionManager: NSObject {
     }
 
     /// Set-once per session — subsequent writes are silently ignored.
-    var wzrkParams: [AnyHashable: Any]? {
+    public var wzrkParams: [AnyHashable: Any]? {
         get { lock.lock(); defer { lock.unlock() }; return _wzrkParams }
         set {
             lock.lock()
@@ -98,7 +100,7 @@ final class CTSessionManager: NSObject {
         }
     }
 
-    var firstRequestInSession: Bool {
+    public var firstRequestInSession: Bool {
         get { lock.lock(); defer { lock.unlock() }; return _firstRequestInSession }
         set { lock.lock(); _firstRequestInSession = newValue; lock.unlock() }
     }
@@ -107,7 +109,7 @@ final class CTSessionManager: NSObject {
 
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     @objc(initWithConfig:impressionManager:inAppStore:validationConfig:)
-    init(config: CleverTapInstanceConfig,
+    public init(config: CleverTapInstanceConfig,
          impressionManager: CTImpressionManager,
          inAppStore: CTInAppStore,
          validationConfig: CTValidationConfig) {
@@ -121,7 +123,7 @@ final class CTSessionManager: NSObject {
 #endif
 
     @objc(initWithConfig:validationConfig:)
-    init(config: CleverTapInstanceConfig, validationConfig: CTValidationConfig) {
+    public init(config: CleverTapInstanceConfig, validationConfig: CTValidationConfig) {
         self.config = config
         self.validationConfig = validationConfig
         super.init()
@@ -130,13 +132,13 @@ final class CTSessionManager: NSObject {
 
     // MARK: - Public API
 
-    func createSessionIfNeeded() {
+    public func createSessionIfNeeded() {
         guard !CTUIUtils.runningInsideAppExtension(), !inCurrentSession() else { return }
         resetSession()
         createSession()
     }
 
-    func updateSessionStateOnLaunch() {
+    public func updateSessionStateOnLaunch() {
         guard inCurrentSession() else {
             resetSession()
             createSession()
@@ -157,7 +159,7 @@ final class CTSessionManager: NSObject {
         createSession()
     }
 
-    func updateSessionTime(_ ts: Int) {
+    public func updateSessionTime(_ ts: Int) {
         guard inCurrentSession() else { return }
         CTLogger.logWithLevel(Int32(config.logLevel.rawValue),
                               type: CTLogType.debug.rawValue,
@@ -166,7 +168,7 @@ final class CTSessionManager: NSObject {
                              forKey: CTPreferences.storageKey(withSuffix: kLastSessionTime, config: config))
     }
 
-    func resetSession() {
+    public func resetSession() {
         guard !CTUIUtils.runningInsideAppExtension() else { return }
         appLaunchProcessed = false
         encryptionInTransitFailed = false

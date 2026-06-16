@@ -4,4 +4,3 @@
 // CleverTapInternal.h provides access to the sessionManager property and other
 // internal CleverTap additions used by the test suite.
 #import "CleverTapInternal.h"
-#import "CTConstants.h"
