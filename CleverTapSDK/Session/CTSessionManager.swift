@@ -7,6 +7,11 @@
 
 import Foundation
 
+// Import internal ObjC types via the private module map (module.private.modulemap).
+// @_implementationOnly prevents these types from leaking into the public
+// .swiftinterface — external consumers of CleverTapSDK cannot see them.
+@_implementationOnly import CleverTapSDK.Private
+
 @objcMembers
 public final class CTSessionManager: NSObject {
 
@@ -196,8 +201,8 @@ public final class CTSessionManager: NSObject {
             ? Int32(lastSessionEnd - lastSessionID)
             : 0
 
-        sessionId = 0
-        updateSessionTime(0)
+        updateSessionTime(0)   // clear kLastSessionTime while inCurrentSession() is still true
+        sessionId = 0          // clears kSessionId and makes inCurrentSession() false
         CTPreferences.removeObject(forKey: kSessionId)
         CTPreferences.removeObject(forKey: CTPreferences.storageKey(withSuffix: kSessionId, config: config))
         screenCount = 1

@@ -80,6 +80,7 @@
 }
 
 - (void)tearDown {
+    [HTTPStubs removeAllStubs];
     [super tearDown];
 }
 
