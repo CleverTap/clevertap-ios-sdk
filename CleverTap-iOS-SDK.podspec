@@ -35,7 +35,17 @@ s.ios.pod_target_xcconfig  = {
     'MODULEMAP_PRIVATE_FILE' => '${PODS_TARGET_SRCROOT}/CleverTapSDK/module.private.modulemap'
 }
 s.tvos.deployment_target    = '9.0'
-s.tvos.source_files         = 'CleverTapSDK/*.{h,m,swift}', 'CleverTapSDK/Encryption/*.{h,m,swift}', 'CleverTapSDK/FileDownload/*.{h,m}', 'CleverTapSDK/ProductConfig/**/*.{h,m}', 'CleverTapSDK/FeatureFlags/**/*.{h,m}', 'CleverTapSDK/ProductExperiences/*.{h,m}', 'CleverTapSDK/Swizzling/*.{h,m}', 'CleverTapSDK/Session/*.{h,m}', 'CleverTapSDK/EventDatabase/*.{h,m}', 'CleverTapSDK/Validation/*.{h,m,swift}', 'CleverTapSDK/Validation/Core/*.{h,m,swift}', 'CleverTapSDK/Validation/Validators/*.{h,m,swift}', 'CleverTapSDK/Profile/*.{h,m,swift}'
+s.tvos.source_files         = 'CleverTapSDK/*.{h,m,swift}', 'CleverTapSDK/Encryption/*.{h,m,swift}', 'CleverTapSDK/FileDownload/*.{h,m}', 'CleverTapSDK/ProductConfig/**/*.{h,m}', 'CleverTapSDK/FeatureFlags/**/*.{h,m}', 'CleverTapSDK/ProductExperiences/*.{h,m}', 'CleverTapSDK/Swizzling/*.{h,m}', 'CleverTapSDK/Session/*.{h,m,swift}', 'CleverTapSDK/EventDatabase/*.{h,m}', 'CleverTapSDK/Validation/*.{h,m,swift}', 'CleverTapSDK/Validation/Core/*.{h,m,swift}', 'CleverTapSDK/Validation/Validators/*.{h,m,swift}', 'CleverTapSDK/Profile/*.{h,m,swift}'
 s.tvos.exclude_files        = 'CleverTapSDK/include/**/*.h', 'CleverTapSDK/CleverTapJSInterface.{h,m}', 'CleverTapSDK/CTInAppNotification.{h,m}', 'CleverTapSDK/CTNotificationButton.{h,m}', 'CleverTapSDK/CTNotificationAction.{h,m}', 'CleverTapSDK/CTPushPrimerManager.{h,m}', 'CleverTapSDK/InApps/*.{h,m}', 'CleverTapSDK/InApps/**/*.{h,m}', 'CleverTapSDK/CTInAppFCManager.{h,m}', 'CleverTapSDK/CTInAppDisplayViewController.{h,m}', 'CleverTapSDK/CTContentFetchManager.{h,m}'
 s.tvos.public_header_files  = 'CleverTapSDK/CleverTap.h', 'CleverTapSDK/CleverTap+SSLPinning.h', 'CleverTapSDK/CleverTapInstanceConfig.h', 'CleverTapSDK/CleverTapBuildInfo.h', 'CleverTapSDK/CleverTapEventDetail.h', 'CleverTapSDK/CleverTapSyncDelegate.h', 'CleverTapSDK/CleverTapTrackedViewController.h', 'CleverTapSDK/CleverTapUTMDetail.h', 'CleverTapSDK/CleverTap+FeatureFlags.h', 'CleverTapSDK/CleverTap+ProductConfig.h', 'CleverTapSDK/CleverTap+CTVar.h', 'CleverTapSDK/ProductExperiences/CTVar.h'
+s.tvos.private_header_files = 'CleverTapSDK/CTPreferences.h',
+    'CleverTapSDK/CTUIUtils.h',
+    'CleverTapSDK/Validation/Core/CTValidationConfig.h',
+    'CleverTapSDK/CleverTapInstanceConfigPrivate.h',
+    'CleverTapSDK/CTConstants.h'
+s.tvos.pod_target_xcconfig  = {
+    'MODULEMAP_PRIVATE_FILE'              => '${PODS_TARGET_SRCROOT}/CleverTapSDK/module.tvos.private.modulemap',
+    'GCC_PREPROCESSOR_DEFINITIONS'       => '$(inherited) CLEVERTAP_NO_INAPP_SUPPORT=1',
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) CLEVERTAP_NO_INAPP_SUPPORT'
+}
 end

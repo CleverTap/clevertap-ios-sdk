@@ -1,0 +1,15 @@
+// module.tvos.private.modulemap
+// tvOS private module — InApp types excluded (tvOS has no InApp support).
+// CTImpressionManager.h and its dependency chain are omitted because the
+// tvOS build excludes CleverTapSDK/InApps/. CLEVERTAP_NO_INAPP_SUPPORT is
+// defined for tvOS so CTSessionManager.swift's #if !CLEVERTAP_NO_INAPP_SUPPORT
+// blocks are compiled out, removing the dependency entirely.
+
+explicit module CleverTapSDK.Private {
+    header "CTPreferences.h"
+    header "CTUIUtils.h"
+    header "CTValidationConfig.h"
+    header "CleverTapInstanceConfigPrivate.h"
+    header "CTConstants.h"
+    export *
+}
