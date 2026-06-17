@@ -242,6 +242,29 @@ static NSError *CTWebImageError(NSInteger code, NSString *message) {
             return;
         }
 
+        // NSURLSession only reports a non-nil error for transport-layer failures
+        // (no connection, timeout, TLS). An HTTP 4xx/5xx arrives with error == nil and
+        // the error-page body in `data`, so without this check it would fall through to
+        // decode and be mis-reported as a decode failure, and never get blacklisted.
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
+            if (statusCode >= 400) {
+                // Blacklist permanent client errors (4xx); leave 5xx retryable.
+                if (url && statusCode < 500) {
+                    [_failedURLsLock lock];
+                    [_failedURLs addObject:url];
+                    [_failedURLsLock unlock];
+                }
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (!operation.isCancelled) {
+                        strongSelf.image = placeholder;
+                    }
+                });
+                callCompletion(nil, CTWebImageError(statusCode, [NSString stringWithFormat:@"HTTP request failed with status code %ld", (long)statusCode]), CTImageCacheTypeNone, url);
+                return;
+            }
+        }
+
         // Download succeeded — remove from failed-URL set
         if (url) {
             [_failedURLsLock lock];

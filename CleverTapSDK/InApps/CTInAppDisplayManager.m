@@ -475,7 +475,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     if (cachedData) {
         result.imageData = cachedData;
         if ([contentType isEqualToString:@"image/gif"]) {
-            result.image = [CTAnimatedImage imageWithData:cachedData];
+            CTAnimatedImage *gif = [CTAnimatedImage imageWithData:cachedData];
+            if (gif == nil) {
+                result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
+            }
+            result.image = gif;
         } else {
             result.image = [UIImage imageWithData:cachedData];
         }
