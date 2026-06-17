@@ -10,7 +10,11 @@
  */
 
 #import "CTAnimatedImage.h"
-#import "CTGIFDecoder.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @interface CTAnimatedImage ()
 

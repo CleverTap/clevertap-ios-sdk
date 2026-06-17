@@ -15,10 +15,12 @@
 //
 
 #import "UIImageView+CTWebCache.h"
-#import "UIView+CTWebCacheOperation.h"
-#import "CTWebImageCache.h"
-#import "CTWebImageOperation.h"
 #import "CTAnimatedImage.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 // Operation key — mirrors SDWebImage using NSStringFromClass as the operation key
 // so that each UIImageView tracks exactly one image-load operation at a time.
