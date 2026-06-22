@@ -111,8 +111,9 @@
     // 1.1 caused a ~3 pt frame overlap that confused the spatial focus search engine,
     // making it impossible to navigate LEFT from secondButton back to firstButton.
     [coordinator addCoordinatedAnimations:^{
-        if (context.nextFocusedView) {
-            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        UIView *next = context.nextFocusedView;
+        if (next && next != self.firstButton && next != self.secondButton) {
+            next.transform = CGAffineTransformMakeScale(1.05, 1.05);
         }
         if (context.previouslyFocusedView) {
             context.previouslyFocusedView.transform = CGAffineTransformIdentity;

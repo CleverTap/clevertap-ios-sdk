@@ -410,8 +410,11 @@ typedef enum {
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
       withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
     [coordinator addCoordinatedAnimations:^{
-        if (context.nextFocusedView) {
-            context.nextFocusedView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        UIView *next = context.nextFocusedView;
+        if (next == self.firstButton || next == self.secondButton) {
+            // CTInAppActionButton handles focus styling via its own didUpdateFocus override.
+        } else if (next) {
+            next.transform = CGAffineTransformMakeScale(1.05, 1.05);
         }
     } completion:nil];
     [coordinator addCoordinatedAnimations:^{

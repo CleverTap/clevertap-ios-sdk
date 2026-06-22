@@ -54,7 +54,7 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j0u-Ro-rdY">
                             <rect key="frame" x="80" y="954" width="1760" height="66"/>
                             <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GB4-Xh-Cug">
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="custom" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GB4-Xh-Cug" customClass="CTInAppActionButton">
                                     <rect key="frame" x="0.0" y="0.0" width="855" height="66"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="66" id="cvr-btn1-h"/>
@@ -65,7 +65,7 @@
                                 <view contentMode="scaleToFill" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="NVa-kE-vtY">
                                     <rect key="frame" x="855" y="0.0" width="905" height="66"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1kf-eD-I1f">
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="custom" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1kf-eD-I1f" customClass="CTInAppActionButton">
                                             <rect key="frame" x="40" y="0.0" width="865" height="66"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="28"/>
                                             <state key="normal" title="Button"/>
