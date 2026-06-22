@@ -1392,7 +1392,6 @@
 		DF7EABBC67ABB936E7104DDE /* CleverTapInstanceConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInstanceConfigTest.m; sourceTree = "<group>"; };
 		E06B27A37880EEEC453EAC38 /* CTInboxUtilsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInboxUtilsTest.m; sourceTree = "<group>"; };
 		E7A8F7CE1749EBE904E5BECA /* CTBatchSentDelegateHelperTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTBatchSentDelegateHelperTest.m; sourceTree = "<group>"; };
-		EE944D8BDEE6132239D20216 /* module.private.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = module.private.modulemap; sourceTree = "<group>"; };
 		F1A2B3C4D5E6F7A8B9C0D1E2 /* InAppDataExtractorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InAppDataExtractorTests.swift; sourceTree = "<group>"; };
 		F281C3FD89B293DF67D40928 /* CTDataValidatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTDataValidatorTest.m; sourceTree = "<group>"; };
 		F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTUIUtilsTest.m; sourceTree = "<group>"; };
@@ -2423,7 +2422,6 @@
 				6BFC61AA2DDB6A5A00022EFF /* CTContentFetchManager.m */,
 				6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */,
 				4ECB11CA2F1FE18D00399A2F /* CTLogger.swift */,
-				EE944D8BDEE6132239D20216 /* module.private.modulemap */,
 			);
 			path = CleverTapSDK;
 			sourceTree = "<group>";
@@ -3617,7 +3615,6 @@
 					"@loader_path/Frameworks",
 				);
 				MODULEMAP_FILE = CleverTapSDK/tvos.modulemap;
-				MODULEMAP_PRIVATE_FILE = CleverTapSDK/module.private.modulemap;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.clevertap.CleverTapSDK-TVOS";
 				PRODUCT_MODULE_NAME = CleverTapSDK;
@@ -3659,7 +3656,6 @@
 					"@loader_path/Frameworks",
 				);
 				MODULEMAP_FILE = CleverTapSDK/tvos.modulemap;
-				MODULEMAP_PRIVATE_FILE = CleverTapSDK/module.private.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.clevertap.CleverTapSDK-TVOS";
 				PRODUCT_MODULE_NAME = CleverTapSDK;
 				PRODUCT_NAME = CleverTapSDK;
@@ -3959,7 +3955,6 @@
 					"@loader_path/Frameworks",
 				);
 				MODULEMAP_FILE = CleverTapSDK/ios.modulemap;
-				MODULEMAP_PRIVATE_FILE = CleverTapSDK/module.private.modulemap;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapSDK;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -4001,7 +3996,6 @@
 					"@loader_path/Frameworks",
 				);
 				MODULEMAP_FILE = CleverTapSDK/ios.modulemap;
-				MODULEMAP_PRIVATE_FILE = CleverTapSDK/module.private.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clevertap.CleverTapSDK;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
