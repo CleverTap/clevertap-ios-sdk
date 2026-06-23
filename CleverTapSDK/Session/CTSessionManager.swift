@@ -7,20 +7,16 @@
 
 import Foundation
 
-// Import internal ObjC types via the private module map (module.private.modulemap).
-//
-// #if canImport makes this zero-configuration for all integration paths:
-//  - Framework builds (CocoaPods, Xcode target): MODULEMAP_PRIVATE_FILE is set,
-//    CleverTapSDK.Private exists → import fires, ObjC types visible to Swift.
-//  - Manual source linking (files dragged into an app target): no module map is
-//    configured → canImport is false → import is skipped. Swift automatically
-//    sees all ObjC types from the same app-target without any import, so no
-//    client build-setting changes are required.
-//
-// @_implementationOnly prevents private types from leaking into the public
-// .swiftinterface so SDK consumers cannot call internal ObjC APIs from Swift.
+// Import internal ObjC types via explicit header imports.
+// This works for both static library and framework builds:
+// - Framework builds: Uses the MODULEMAP_FILE (ios.modulemap)
+// - Static builds: Uses direct header imports (same compilation unit)
 #if canImport(CleverTapSDK.Private)
 @_implementationOnly import CleverTapSDK.Private
+#else
+// For static builds without the private submodule, import headers directly
+// These are in the same pod and compilation unit, so they're accessible
+@_implementationOnly import CleverTapSDK
 #endif
 
 @objcMembers
