@@ -39,7 +39,9 @@
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
+#if !(TARGET_OS_TV)
 #import "CTPiPWindowController.h"
+#endif
 #endif
 
 #if !(TARGET_OS_TV)
@@ -639,9 +641,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
+#if !(TARGET_OS_TV)
         case CTInAppTypePiP:
             controller = [[CTPiPWindowController alloc] initWithNotification:notification];
             break;
+#endif
 #if !(TARGET_OS_TV)
         case CTInAppTypeCustom:
             currentlyDisplayingNotification = notification;

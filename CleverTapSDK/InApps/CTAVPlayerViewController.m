@@ -24,9 +24,13 @@
         _muted = muted;
         _autoplay = autoplay;
         _loopVideo = YES; // Default to looping
+#if TARGET_OS_TV
+        NSString *videoUrlString = self.notification.mediaUrl;
+#else
         NSString *videoUrlString = ([CTUIUtils isDeviceOrientationLandscape] && self.notification.mediaUrlLandscape)
             ? self.notification.mediaUrlLandscape
             : self.notification.mediaUrl;
+#endif
         AVPlayerItem *avPlayerItem = [AVPlayerItem playerItemWithURL:[NSURL URLWithString:videoUrlString]];
         self.playerItem = avPlayerItem;
         self.player = [AVPlayer playerWithPlayerItem:avPlayerItem];
@@ -165,11 +169,15 @@
 - (void)setupCTAButton {
     // Frosted-glass container matching system button style
     UIBlurEffect *blur;
+#if TARGET_OS_TV
+    blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+#else
     if (@available(iOS 14, *)) {
         blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark];
     } else {
         blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
     }
+#endif
     self.ctaContainerView = [[UIVisualEffectView alloc] initWithEffect:blur];
     self.ctaContainerView.translatesAutoresizingMaskIntoConstraints = NO;
     self.ctaContainerView.layer.cornerRadius = 14;
