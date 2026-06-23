@@ -23,7 +23,7 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nQY-F6-LpS">
                     <rect key="frame" x="288" y="160" width="1344" height="760"/>
                     <subviews>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BGP-VZ-XNs">
+                        <imageView customClass="SDAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BGP-VZ-XNs">
                             <rect key="frame" x="0.0" y="0.0" width="1344" height="760"/>
                             <accessibility key="accessibilityConfiguration" label="InApp Image">
                                 <bool key="isElement" value="YES"/>

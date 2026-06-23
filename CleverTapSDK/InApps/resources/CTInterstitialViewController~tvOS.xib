@@ -43,7 +43,7 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </view>
                                 <!-- verticalCompressionResistancePriority="249" lets the chain compress this view to fit the container -->
-                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="6vX-2h-v4H">
+                                <imageView customClass="SDAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="6vX-2h-v4H">
                                     <rect key="frame" x="0.0" y="0.0" width="1184" height="666"/>
                                     <accessibility key="accessibilityConfiguration" label="InApp Image">
                                         <bool key="isElement" value="YES"/>

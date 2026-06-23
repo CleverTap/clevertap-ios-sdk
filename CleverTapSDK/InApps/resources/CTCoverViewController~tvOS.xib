@@ -30,7 +30,7 @@
                     <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
                     <subviews>
                         <!-- imageView: fills entire containerView background -->
-                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Fk0-A3-ZZm">
+                        <imageView customClass="SDAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Fk0-A3-ZZm">
                             <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
                             <accessibility key="accessibilityConfiguration" label="InApp Image">
                                 <bool key="isElement" value="YES"/>
