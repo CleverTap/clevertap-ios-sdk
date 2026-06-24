@@ -7,16 +7,20 @@
 
 import Foundation
 
-// Import internal ObjC types via explicit header imports.
-// This works for both static library and framework builds:
-// - Framework builds: Uses the MODULEMAP_FILE (ios.modulemap)
-// - Static builds: Uses direct header imports (same compilation unit)
+// Internal ObjC types (CTPreferences, CTUIUtils, CTValidationConfig,
+// CTImpressionManager, CTConstants, etc.) are exposed via the SDK's public
+// header umbrella (see CleverTap-iOS-SDK.podspec). The pod ships no custom
+// module map — CocoaPods rejects those for Swift static libraries — so the
+// umbrella is how this file sees those types, identically across CocoaPods
+// static (Flutter/RN), CocoaPods dynamic, SPM (binary xcframework) and manual
+// integration. Swift inside the module sees umbrella ObjC types automatically;
+// no explicit import is required.
+//
+// The canImport guard remains only for the direct Xcode framework target,
+// which still uses CleverTapSDK/ios.modulemap with its `explicit module Private`
+// submodule.
 #if canImport(CleverTapSDK.Private)
 @_implementationOnly import CleverTapSDK.Private
-#else
-// For static builds without the private submodule, import headers directly
-// These are in the same pod and compilation unit, so they're accessible
-@_implementationOnly import CleverTapSDK
 #endif
 
 @objcMembers
