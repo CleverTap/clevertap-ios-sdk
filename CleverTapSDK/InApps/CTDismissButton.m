@@ -28,6 +28,12 @@ static UIImage *dismissButtonImage;
     return self;
 }
 
+#if TARGET_OS_TV
+- (BOOL)canBecomeFocused {
+    return YES;
+}
+#endif
+
 - (void)commonInit {
     if (dismissButtonImage != nil) {
         [self setImage:dismissButtonImage forState:UIControlStateNormal];

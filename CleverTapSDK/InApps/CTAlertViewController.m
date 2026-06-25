@@ -94,9 +94,12 @@
 }
 
 - (void)showFromWindow:(BOOL)animated {
-    
+
     if (!self.notification) return;
-    
+
+#if TARGET_OS_TV
+    [self showAlertFromTopViewController];
+#else
     if (@available(iOS 13, *)) {
         NSSet *connectedScenes = [CTUIUtils getSharedApplication].connectedScenes;
         for (UIScene *scene in connectedScenes) {
@@ -116,16 +119,89 @@
     self.window.rootViewController = self;
     [self.window makeKeyAndVisible];
     [self.window setHidden:NO];
-    
+
     void (^completionBlock)(void) = ^ {
         if (self.delegate) {
             [self.delegate notificationDidShow:self.notification];
         }
     };
-    
+
     self.window.alpha = 1.0;
     completionBlock();
+#endif
 }
+
+#if TARGET_OS_TV
+- (void)showAlertFromTopViewController {
+
+    UIViewController *topVC = [self topViewController];
+    if (!topVC) {
+        [self hide:NO];
+        return;
+    }
+
+    UIAlertController *dialogBox = [UIAlertController
+                                    alertControllerWithTitle:self.notification.title
+                                    message:self.notification.message
+                                    preferredStyle:UIAlertControllerStyleAlert];
+
+    if (self.notification.buttons && self.notification.buttons.count > 0) {
+        for (NSUInteger i = 0; i < self.notification.buttons.count && i < 3; i++) {
+            NSUInteger index = i;
+            UIAlertAction *button = [UIAlertAction
+                                     actionWithTitle:self.notification.buttons[i].text
+                                     style:UIAlertActionStyleDefault
+                                     handler:^(UIAlertAction * action) {
+                [self handleAlertButtonClickFromIndex:(int)index];
+            }];
+            [dialogBox addAction:button];
+        }
+    }
+
+    [topVC presentViewController:dialogBox animated:YES completion:^{
+        if (self.delegate) {
+            [self.delegate notificationDidShow:self.notification];
+        }
+    }];
+}
+
+- (UIViewController *)topViewController {
+    UIWindow *keyWindow = nil;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    keyWindow = [CTUIUtils getSharedApplication].keyWindow;
+#pragma clang diagnostic pop
+
+    if (!keyWindow) {
+        if (@available(tvOS 13.0, *)) {
+            NSSet *scenes = [CTUIUtils getSharedApplication].connectedScenes;
+            for (UIScene *scene in scenes) {
+                if ([scene isKindOfClass:[UIWindowScene class]]) {
+                    UIWindowScene *windowScene = (UIWindowScene *)scene;
+                    for (UIWindow *window in windowScene.windows) {
+                        if (window.isKeyWindow) {
+                            keyWindow = window;
+                            break;
+                        }
+                    }
+                    if (keyWindow) break;
+                }
+            }
+        }
+    }
+
+    if (!keyWindow) {
+        return nil;
+    }
+
+    UIViewController *topVC = keyWindow.rootViewController;
+    while (topVC.presentedViewController) {
+        topVC = topVC.presentedViewController;
+    }
+    return topVC;
+}
+#endif
 
 
 #pragma mark - Public

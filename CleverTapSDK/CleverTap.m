@@ -40,8 +40,11 @@
 #import "CTInAppFCManager.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
+#if !(TARGET_OS_TV)
 #import "CleverTapJSInterface.h"
 #import "CTInAppHTMLViewController.h"
+#import "CleverTapJSInterfacePrivate.h"
+#endif
 #import "CTInterstitialViewController.h"
 #import "CTHalfInterstitialViewController.h"
 #import "CTCoverViewController.h"
@@ -54,7 +57,6 @@
 #import "CleverTap+InAppNotifications.h"
 #import "CTLocalInApp.h"
 #import "CleverTap+PushPermission.h"
-#import "CleverTapJSInterfacePrivate.h"
 #import "CTPushPrimerManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CleverTap+InAppsResponseHandler.h"

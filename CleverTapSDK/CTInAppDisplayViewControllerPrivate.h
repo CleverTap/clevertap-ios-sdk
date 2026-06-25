@@ -19,6 +19,11 @@
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong, readwrite) CTInAppNotification *notification;
 @property (nonatomic, assign) BOOL shouldPassThroughTouches;
+#if TARGET_OS_TV
+/// The key window that was active before this in-app's window was made key.
+/// Restored in hideFromWindow: so the app's original window regains key status.
+@property (nonatomic, weak) UIWindow *previousKeyWindow;
+#endif
 
 - (void)showFromWindow:(BOOL)animated;
 - (void)hideFromWindow:(BOOL)animated;

@@ -440,6 +440,37 @@
 		57CDEE412F163C4E001161F5 /* InAppDurationPartitioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */; };
 		57D2E1C82684B1630068E45A /* CleverTap.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C7BBC8207D8837001345EF /* CleverTap.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		57EDC7A12683845B001DD157 /* CleverTap+InAppNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		584260F92F9F7BD900D810B7 /* CTCustomTemplatesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BB727322B8F787D009CE7D0 /* CTCustomTemplatesManager.m */; };
+		584260FA2F9F7C0A00D810B7 /* CTImpressionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A11D8392A8FC71F007F5D21 /* CTImpressionManager.m */; };
+		584260FB2F9F7C2700D810B7 /* CTInAppDisplayManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BF5A5902ACC854800CDED20 /* CTInAppDisplayManager.m */; };
+		584260FC2F9F7C3700D810B7 /* CTInAppEvaluationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A3EBD2C2AA06EB300CE97D4 /* CTInAppEvaluationManager.m */; };
+		584260FD2F9F7C4600D810B7 /* CTInAppFCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B7217F6427008F0FAB /* CTInAppFCManager.m */; };
+		584260FE2F9F7C5600D810B7 /* CTInAppStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427D72ABCE5EB0098866F /* CTInAppStore.m */; };
+		584260FF2F9F7C6900D810B7 /* CTInAppTriggerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A4427C72AB05CF00098866F /* CTInAppTriggerManager.m */; };
+		584261002F9F7C7A00D810B7 /* CTPushPrimerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81772AD2CB4E00714BB4 /* CTPushPrimerManager.m */; };
+		584261012F9F7C8D00D810B7 /* CTSystemAppFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = 487C71882D8AD18B0052986F /* CTSystemAppFunctions.m */; };
+		585327532F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327512F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib */; };
+		585327582F8CC40000F0C75C /* CTFooterViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327542F8CC40000F0C75C /* CTFooterViewController~tvOS.xib */; };
+		585327592F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327552F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib */; };
+		5853275C2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */; };
+		5853275E2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */; };
+		585327632F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */; };
+		585327642F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */; };
+		585327652F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */; };
+		5853AB012F8E000000000001 /* CTDismissButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB478217F6427008F0FAB /* CTDismissButton.m */; };
+		5853AB022F8E000000000002 /* CTHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB479217F6427008F0FAB /* CTHeaderViewController.m */; };
+		5853AB032F8E000000000003 /* CTHalfInterstitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB47C217F6427008F0FAB /* CTHalfInterstitialViewController.m */; };
+		5853AB042F8E000000000004 /* CTNotificationButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB481217F6427008F0FAB /* CTNotificationButton.m */; };
+		5853AB052F8E000000000005 /* CTInterstitialImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB482217F6427008F0FAB /* CTInterstitialImageViewController.m */; };
+		5853AB062F8E000000000006 /* CTBaseHeaderFooterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB484217F6427008F0FAB /* CTBaseHeaderFooterViewController.m */; };
+		5853AB072F8E000000000007 /* CTHalfInterstitialImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB488217F6427008F0FAB /* CTHalfInterstitialImageViewController.m */; };
+		5853AB082F8E000000000008 /* CTCoverImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB49C217F6427008F0FAB /* CTCoverImageViewController.m */; };
+		5853AB092F8E000000000009 /* CTInterstitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4A0217F6427008F0FAB /* CTInterstitialViewController.m */; };
+		5853AB0A2F8E00000000000A /* CTFooterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B2217F6427008F0FAB /* CTFooterViewController.m */; };
+		5853AB0B2F8E00000000000B /* CTCoverViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 071EB4B6217F6427008F0FAB /* CTCoverViewController.m */; };
+		5853AB0C2F8E00000000000C /* CTImageInAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4987C664251B5E79003E6BE8 /* CTImageInAppViewController.m */; };
+		5853ABBB2F9100000000BB01 /* CTInAppActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5853ABBB2F9100000000BB00 /* CTInAppActionButton.swift */; };
+		5853ABBB2F9100000000BB02 /* CTInAppActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5853ABBB2F9100000000BB00 /* CTInAppActionButton.swift */; };
 		5DCE8FADF7136FB54F52E985 /* CTInAppNotificationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = BA302D038C45C5590835082F /* CTInAppNotificationTest.m */; };
 		6000BB9914565AB7E0BADE91 /* CTProfileBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 86B31B1A29258B885EAFFB8C /* CTProfileBuilderTest.m */; };
 		616E08502C60FEB9CEE271EA /* CTInAppTimerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EB3252FE1750DCBAEC87778 /* CTInAppTimerTest.m */; };
@@ -1132,6 +1163,15 @@
 		57CDEE1D2F13D1B5001161F5 /* CTPropertyKeyValidator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPropertyKeyValidator.m; sourceTree = "<group>"; };
 		57CDEE402F163C4E001161F5 /* InAppDurationPartitioner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppDurationPartitioner.swift; sourceTree = "<group>"; };
 		57EDC7A02683845B001DD157 /* CleverTap+InAppNotifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CleverTap+InAppNotifications.h"; sourceTree = "<group>"; };
+		585327512F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327542F8CC40000F0C75C /* CTFooterViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTFooterViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327552F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHeaderViewController~tvOS.xib"; sourceTree = "<group>"; };
+		5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialViewController~tvOS.xib"; sourceTree = "<group>"; };
+		5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTCoverImageViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTHalfInterstitialImageViewController~tvOS.xib"; sourceTree = "<group>"; };
+		585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "CTInterstitialImageViewController~tvOS.xib"; sourceTree = "<group>"; };
+		5853ABBB2F9100000000BB00 /* CTInAppActionButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CTInAppActionButton.swift; sourceTree = "<group>"; };
 		58E6C9F7C391AC2F28D91FA6 /* CTPropertyKeyValidatorTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPropertyKeyValidatorTest.m; sourceTree = "<group>"; };
 		5BAE71D9266FA7F7817B7D15 /* Pods_shared_CleverTapSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shared_CleverTapSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTPushPermissionSystemAppFunctionTest.m; sourceTree = "<group>"; };
@@ -1494,6 +1534,7 @@
 				49F9E6BA2552E97000EF2E5C /* resources */,
 				071EB4AF217F6427008F0FAB /* CTDismissButton.h */,
 				071EB478217F6427008F0FAB /* CTDismissButton.m */,
+				5853ABBB2F9100000000BB00 /* CTInAppActionButton.swift */,
 				071EB4B0217F6427008F0FAB /* CTHeaderViewController.h */,
 				071EB479217F6427008F0FAB /* CTHeaderViewController.m */,
 				071EB4AD217F6427008F0FAB /* CTHalfInterstitialViewController.h */,
@@ -1767,6 +1808,13 @@
 			isa = PBXGroup;
 			children = (
 				4ECD84072F62A39D00CE5B45 /* inapp_cta.png */,
+				585327602F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib */,
+				585327612F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib */,
+				585327622F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib */,
+				5853275D2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib */,
+				5853275A2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib */,
+				585327542F8CC40000F0C75C /* CTFooterViewController~tvOS.xib */,
+				585327552F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib */,
 				071EB4B5217F6427008F0FAB /* CTInterstitialViewController~iphoneport.xib */,
 				07238E3A221D638D0012DFAE /* CTInterstitialViewController~iphoneland.xib */,
 				071EB480217F6427008F0FAB /* CTInterstitialViewController~ipad.xib */,
@@ -1800,6 +1848,7 @@
 				071EB4A8217F6427008F0FAB /* CTHeaderViewController~iphoneport.xib */,
 				07D0D0902223F44E000D5686 /* CTHeaderViewController~iphoneland.xib */,
 				6B0063BA2B18EC9E0063BF79 /* image_interstitial.html */,
+				585327512F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib */,
 			);
 			path = resources;
 			sourceTree = "<group>";
@@ -2925,8 +2974,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				585327582F8CC40000F0C75C /* CTFooterViewController~tvOS.xib in Resources */,
+				585327632F8D043800F0C75C /* CTCoverImageViewController~tvOS.xib in Resources */,
+				585327642F8D043800F0C75C /* CTInterstitialImageViewController~tvOS.xib in Resources */,
+				585327652F8D043800F0C75C /* CTHalfInterstitialImageViewController~tvOS.xib in Resources */,
+				585327592F8CC40000F0C75C /* CTHeaderViewController~tvOS.xib in Resources */,
+				5853275E2F8CF70A00F0C75C /* CTCoverViewController~tvOS.xib in Resources */,
+				585327532F88BD8B00F0C75C /* CTInterstitialViewController~tvOS.xib in Resources */,
 				6B0063BC2B18EC9E0063BF79 /* image_interstitial.html in Resources */,
 				4E64855C287440BA00C2F409 /* AmazonRootCA1.cer in Resources */,
+				5853275C2F8CF3EE00F0C75C /* CTHalfInterstitialViewController~tvOS.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3105,12 +3162,15 @@
 				48DC69B92D3FDF55000E7BE4 /* CTCustomTemplateInAppData.m in Sources */,
 				6BD334ED2AF2A41F0099E33E /* CTBatchSentDelegateHelper.m in Sources */,
 				D014B8F120E2FAB9001E0780 /* CTPlistInfo.m in Sources */,
+				584260FB2F9F7C2700D810B7 /* CTInAppDisplayManager.m in Sources */,
 				4E25E3D12788889F0008C888 /* CTLoginInfoProvider.m in Sources */,
 				D014B8F320E2FAC2001E0780 /* CTDeviceInfo.m in Sources */,
 				D014B8F920E2FAE4001E0780 /* CTUtils.m in Sources */,
 				07BF4661217F80C1002E166D /* CTUIUtils.m in Sources */,
+				584261002F9F7C7A00D810B7 /* CTPushPrimerManager.m in Sources */,
 				07BF465C217F7C4B002E166D /* CTInAppDisplayViewController.m in Sources */,
 				6A775C3629BE78C7007790E0 /* CTVariables.m in Sources */,
+				584260FD2F9F7C4600D810B7 /* CTInAppFCManager.m in Sources */,
 				4E838C43299F419900ED0875 /* ContentMerger.m in Sources */,
 				4E7929FC29799E8F00B81F3C /* CTDomainFactory.m in Sources */,
 				D014B90B20E2FB7A001E0780 /* CTProfileBuilder.m in Sources */,
@@ -3124,6 +3184,7 @@
 				57B7E7E82F31D67900CF22E1 /* CTProfileChangeTracker.m in Sources */,
 				49C189A0243B08860003E4D4 /* CTProductConfigController.m in Sources */,
 				4EFC9E472DF9690D00104D52 /* CTEncryptionManager.m in Sources */,
+				584260FE2F9F7C5600D810B7 /* CTInAppStore.m in Sources */,
 				4EFC9E482DF9690D00104D52 /* CTAESGCMCrypt.swift in Sources */,
 				4EFC9E492DF9690D00104D52 /* CTCryptMigrator.m in Sources */,
 				4EFC9E4A2DF9690D00104D52 /* NetworkEncryptionManager.swift in Sources */,
@@ -3132,6 +3193,7 @@
 				57B7E7C72F31B21200CF22E1 /* CTNestedJsonBuilder.m in Sources */,
 				D014B90720E2FB67001E0780 /* CTKnownProfileFields.m in Sources */,
 				D014B8E020E2F9E6001E0780 /* CleverTap.m in Sources */,
+				584260FA2F9F7C0A00D810B7 /* CTImpressionManager.m in Sources */,
 				D014B8E720E2FA6A001E0780 /* CleverTapInstanceConfig.m in Sources */,
 				D014B8F520E2FAD0001E0780 /* CTSwizzle.m in Sources */,
 				6AA1357C2A2E467800EFF2C1 /* NSDictionary+Extensions.m in Sources */,
@@ -3152,8 +3214,10 @@
 				D014B8FB20E2FB0E001E0780 /* CTUriHelper.m in Sources */,
 				4EA64A29296C115E001D9B22 /* CTRequestFactory.m in Sources */,
 				6B535FB92AD56C60002A2663 /* CTMultiDelegateManager.m in Sources */,
+				584261012F9F7C8D00D810B7 /* CTSystemAppFunctions.m in Sources */,
 				6BD334F62AF7FC660099E33E /* CTTriggerRadius.m in Sources */,
 				48DC69B52D3FDF23000E7BE4 /* CTEventDatabase.m in Sources */,
+				584260F92F9F7BD900D810B7 /* CTCustomTemplatesManager.m in Sources */,
 				48DC69B72D3FDF39000E7BE4 /* CTNotificationAction.m in Sources */,
 				D014B8FD20E2FB18001E0780 /* CTPreferences.m in Sources */,
 				4E49AE56275D24570074A774 /* CTValidationResultStack.m in Sources */,
@@ -3161,6 +3225,21 @@
 				6BAFFEAA2C45244100654CAF /* CTFileDownloader.m in Sources */,
 				07BF4663217F838D002E166D /* CTInAppUtils.m in Sources */,
 				49C18999242CF6730003E4D4 /* CleverTapConfigValue.m in Sources */,
+				584260FC2F9F7C3700D810B7 /* CTInAppEvaluationManager.m in Sources */,
+				5853AB012F8E000000000001 /* CTDismissButton.m in Sources */,
+				5853AB022F8E000000000002 /* CTHeaderViewController.m in Sources */,
+				5853AB032F8E000000000003 /* CTHalfInterstitialViewController.m in Sources */,
+				5853AB042F8E000000000004 /* CTNotificationButton.m in Sources */,
+				5853AB052F8E000000000005 /* CTInterstitialImageViewController.m in Sources */,
+				5853AB062F8E000000000006 /* CTBaseHeaderFooterViewController.m in Sources */,
+				5853AB072F8E000000000007 /* CTHalfInterstitialImageViewController.m in Sources */,
+				5853AB082F8E000000000008 /* CTCoverImageViewController.m in Sources */,
+				5853AB092F8E000000000009 /* CTInterstitialViewController.m in Sources */,
+				5853AB0A2F8E00000000000A /* CTFooterViewController.m in Sources */,
+				584260FF2F9F7C6900D810B7 /* CTInAppTriggerManager.m in Sources */,
+				5853AB0B2F8E00000000000B /* CTCoverViewController.m in Sources */,
+				5853AB0C2F8E00000000000C /* CTImageInAppViewController.m in Sources */,
+				5853ABBB2F9100000000BB01 /* CTInAppActionButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3464,6 +3543,7 @@
 				4E49AE55275D24570074A774 /* CTValidationResultStack.m in Sources */,
 				D01A0895207EC2D400423D6F /* CleverTapInstanceConfig.m in Sources */,
 				071EB4C8217F6427008F0FAB /* CTDismissButton.m in Sources */,
+				5853ABBB2F9100000000BB02 /* CTInAppActionButton.swift in Sources */,
 				6BB778C82BECEC2700A41628 /* CTCustomTemplateInAppData.m in Sources */,
 				487C71952D8BFF0C0052986F /* CTSystemAppFunctionPresenter.m in Sources */,
 				4EF0D5472AD84BCA0044C48F /* CTSessionManager.m in Sources */,

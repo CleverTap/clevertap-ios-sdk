@@ -1,3 +1,5 @@
+#include <TargetConditionals.h>
+#if !(TARGET_OS_TV)
 #import <WebKit/WebKit.h>
 #import "CTInAppHTMLViewController.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
@@ -622,3 +624,4 @@ typedef enum {
 }
 
 @end
+#endif // !(TARGET_OS_TV)
