@@ -20,10 +20,10 @@ import ImageIO
 
 @objc(CTGIFDecoder)
 @objcMembers
-final class CTGIFDecoder: NSObject {
+public final class CTGIFDecoder: NSObject {
 
-    private(set) var frameCount: Int = 0
-    private(set) var loopCount: Int = 0
+    public private(set) var frameCount: Int = 0
+    public private(set) var loopCount: Int = 0
 
     private var imageSource: CGImageSource?
     // Serializes all access to imageSource. CGImageSource is not thread-safe:
@@ -55,7 +55,7 @@ final class CTGIFDecoder: NSObject {
     // Mirrors SDImageIOAnimatedCoder.initWithAnimatedImageData:options: (line 994).
     // The scale is stored and applied per-frame in frameAtIndex: so UIImage reports the correct
     // logical size (matching SDImageIOAnimatedCoder.createFrameAtIndex:…:scale: line 576).
-    init?(data: Data, scale: CGFloat) {
+    public init?(data: Data, scale: CGFloat) {
         super.init()
         if data.isEmpty { return nil }
         self.scale = max(scale, 1)
@@ -153,14 +153,14 @@ final class CTGIFDecoder: NSObject {
     }
 
     @objc(durationAtIndex:)
-    func duration(at index: Int) -> TimeInterval {
+    public func duration(at index: Int) -> TimeInterval {
         if index >= frameDurations.count { return 0 }
         return frameDurations[index]
     }
 
     // Mirrors SDImageIOAnimatedCoder.safeAnimatedImageFrameAtIndex: and createFrameAtIndex:... (line 1148, 448).
     @objc(frameAtIndex:)
-    func frame(at index: Int) -> UIImage? {
+    public func frame(at index: Int) -> UIImage? {
         if index >= frameCount { return nil }
 
         let options: [CFString: Any] = [

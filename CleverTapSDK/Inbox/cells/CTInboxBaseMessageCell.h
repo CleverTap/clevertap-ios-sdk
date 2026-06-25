@@ -1,8 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
-#import "CTAnimatedImageView.h"
-#import "UIImageView+CTWebCache.h"
 #import "CTWebImageDefines.h"
 #import "CleverTap+Inbox.h"
 #import "CTInboxMessageActionView.h"

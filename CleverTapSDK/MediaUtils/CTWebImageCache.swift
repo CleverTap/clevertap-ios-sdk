@@ -21,7 +21,7 @@ import UIKit
 /// so disk persistence is intentionally not implemented.
 @objc(CTWebImageCache)
 @objcMembers
-final class CTWebImageCache: NSObject {
+public final class CTWebImageCache: NSObject {
 
     private let memCache = NSCache<NSString, UIImage>()
 
@@ -32,7 +32,7 @@ final class CTWebImageCache: NSObject {
     private static let sharedInstance = CTWebImageCache()
 
     /// Shared singleton. Mirrors [SDImageCache sharedImageCache].
-    class func sharedImageCache() -> CTWebImageCache {
+    public class func sharedImageCache() -> CTWebImageCache {
         return sharedInstance
     }
 
@@ -65,7 +65,7 @@ final class CTWebImageCache: NSObject {
     // SDImageCacheTypeMemory, which is what the Inbox always uses)
     // ---------------------------------------------------------------------------
 
-    func imageFromCache(forKey key: String?) -> UIImage? {
+    public func imageFromCache(forKey key: String?) -> UIImage? {
         return imageFromMemoryCache(forKey: key)
     }
 
@@ -74,7 +74,7 @@ final class CTWebImageCache: NSObject {
     // (only the memory store path; disk path is a no-op for Inbox usage)
     // ---------------------------------------------------------------------------
 
-    func storeImage(_ image: UIImage?,
+    public func storeImage(_ image: UIImage?,
                     forKey key: String?,
                     toDisk: Bool,
                     completion completionBlock: (() -> Void)?) {

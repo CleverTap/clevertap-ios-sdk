@@ -1,6 +1,11 @@
 
 #import "CTCarouselMessageCell.h"
 #import "CTCarouselImageView.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CTCarouselMessageCell
 

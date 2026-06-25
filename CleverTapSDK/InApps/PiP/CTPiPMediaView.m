@@ -1,9 +1,13 @@
 #import "CTPiPMediaView.h"
 #import "CTConstants.h"
 #import <AVFoundation/AVFoundation.h>
-#import "CTAnimatedImageView.h"
-#import "UIImageView+CTWebCache.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTAnimatedImage.h"
+#import "CTWebImageDefines.h"
 
 @interface CTPiPMediaView ()
 @property (nonatomic, strong) CTPiPMediaModel *media;

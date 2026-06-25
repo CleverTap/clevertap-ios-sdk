@@ -37,5 +37,8 @@ framework module CleverTapSDK {
     header "CTInActionResult.h"
     header "CTTimerResult.h"
     header "CTInAppStore.h"
+    header "CTAnimatedImage.h"
+    header "CTWeakProxy.h"
+    header "CTWebImageDefines.h"
     export *
 }
