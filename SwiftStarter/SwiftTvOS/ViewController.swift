@@ -26,7 +26,12 @@ final class ViewController: UIViewController {
             CardItem(title: "Show Inbox",   action: #selector(showInbox)),
         ]),
         Section(title: "In-App Notifications", items: [
-            CardItem(title: "Trigger In-App", action: #selector(triggerAlertInApp))
+            CardItem(title: "Cover",            action: #selector(triggerCoverInApp)),
+            CardItem(title: "Interstitial",     action: #selector(triggerInterstitialInApp)),
+            CardItem(title: "Half-Interstitial",action: #selector(triggerHalfInterstitialInApp)),
+            CardItem(title: "Header",           action: #selector(triggerHeaderInApp)),
+            CardItem(title: "Footer",           action: #selector(triggerFooterInApp)),
+            CardItem(title: "Image",            action: #selector(triggerImageInApp))
         ])
     ]
     private var collectionView: UICollectionView!
@@ -192,9 +197,29 @@ final class ViewController: UIViewController {
 
         CleverTap.sharedInstance()?.recordEvent("Custom Event", withProps: props)
     }
+    
+    @objc private func triggerCoverInApp() {
+        CleverTap.sharedInstance()?.recordEvent("boo")
+    }
 
-    @objc private func triggerAlertInApp() {
-        CleverTap.sharedInstance()?.recordEvent("tesr")
+    @objc private func triggerInterstitialInApp() {
+        CleverTap.sharedInstance()?.recordEvent("wewe")
+    }
+
+    @objc private func triggerHalfInterstitialInApp() {
+        CleverTap.sharedInstance()?.recordEvent("test1")
+    }
+
+    @objc private func triggerHeaderInApp() {
+        CleverTap.sharedInstance()?.recordEvent("foo")
+    }
+
+    @objc private func triggerFooterInApp() {
+        CleverTap.sharedInstance()?.recordEvent("master1")
+    }
+
+    @objc private func triggerImageInApp() {
+        CleverTap.sharedInstance()?.recordEvent("inapp1")
     }
 
     @objc private func showInbox() {
