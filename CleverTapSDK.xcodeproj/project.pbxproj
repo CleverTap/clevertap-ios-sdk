@@ -165,7 +165,6 @@
 		1F19A11DA23B857DFFE5AD7F /* CTRequestSenderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */; };
 		2073438E646D2A21DA4FD4F9 /* CTSwitchUserDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF5A59A2AD0318A00CDED20 /* CTSwitchUserDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		20F1E0217AB1BC5AA304A861 /* CTPreferences.h in Headers */ = {isa = PBXBuildFile; fileRef = D0A84AD6209135D400191B1F /* CTPreferences.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		2340298D08E15BE1679366F2 /* CTInActionResultTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DBD5E0D8AC568761F545800 /* CTInActionResultTest.m */; };
 		2442D1D1E7FE285425A7E8DD /* CTFeatureFlagsControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8151DB170479BCCFE1871E36 /* CTFeatureFlagsControllerTest.m */; };
 		282AE5F702CAC07D04153E0A /* CTValidationResultTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 76EC66D158F4EC2EB93792E5 /* CTValidationResultTest.m */; };
 		2924CC8D8B6E5A4602521C58 /* CTBatchSentDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A4427CA2AB100ED0098866F /* CTBatchSentDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -576,6 +575,7 @@
 		6CA8C6B2712DE77E59FB0BD0 /* CTUIUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */; };
 		6EA5BC49872C7EC709B7BFA7 /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		737A2C01FAC27C20D9012552 /* CTEventNameValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EAE785650386875EC8E9091 /* CTEventNameValidatorTest.m */; };
+		7632C18E471A1CDF4E16CC49 /* CTInActionResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DF7B086F8FC5305D81405B0 /* CTInActionResultTests.swift */; };
 		76B45B38A5B1283E8D7BFDBF /* CleverTapFeatureFlagsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EB6D79842FF5DDE75C6D08 /* CleverTapFeatureFlagsTest.m */; };
 		784FEA3C94ECE9143D761BCB /* InAppSelectionStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE6298F5BDD0BCAE1740F0D /* InAppSelectionStrategyTests.swift */; };
 		7ACDCC2E32FD54E579929F45 /* CTMultiDelegateManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A5858A0E994EC529904E271C /* CTMultiDelegateManagerTest.m */; };
@@ -1276,7 +1276,6 @@
 		6BFC61AF2DDF3F2800022EFF /* CTContentFetchManagerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTContentFetchManagerDelegate.h; sourceTree = "<group>"; };
 		6BFC61C82DE8534500022EFF /* CTContentFetchManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTContentFetchManagerTests.m; sourceTree = "<group>"; };
 		6CCFFCC2ACB74DAA6882AA51 /* CTLocalInAppTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLocalInAppTest.m; sourceTree = "<group>"; };
-		6DBD5E0D8AC568761F545800 /* CTInActionResultTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInActionResultTest.m; sourceTree = "<group>"; };
 		6EB3252FE1750DCBAEC87778 /* CTInAppTimerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppTimerTest.m; sourceTree = "<group>"; };
 		763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTRequestSenderTest.m; sourceTree = "<group>"; };
 		76EC66D158F4EC2EB93792E5 /* CTValidationResultTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultTest.m; sourceTree = "<group>"; };
@@ -1288,6 +1287,7 @@
 		8524F613D3C5CBEBAEAB9BC3 /* DurationPartitionedInAppsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DurationPartitionedInAppsTests.swift; sourceTree = "<group>"; };
 		86B31B1A29258B885EAFFB8C /* CTProfileBuilderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTProfileBuilderTest.m; sourceTree = "<group>"; };
 		8CA2AD4E8B23AC03B702C341 /* CTInAppFCManagerLegacyTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppFCManagerLegacyTest.m; sourceTree = "<group>"; };
+		8DF7B086F8FC5305D81405B0 /* CTInActionResultTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTInActionResultTests.swift; sourceTree = "<group>"; };
 		90EA8490BDF49C5E1A996A34 /* CTKnownProfileFieldsTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTKnownProfileFieldsTest.m; sourceTree = "<group>"; };
 		919D12C82BD89CE13EDE525C /* CTLoginInfoProviderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLoginInfoProviderTest.m; sourceTree = "<group>"; };
 		997881C7B7B5276373B4FD43 /* CTLegacyIdentityRepoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLegacyIdentityRepoTest.m; sourceTree = "<group>"; };
@@ -2172,7 +2172,6 @@
 				997881C7B7B5276373B4FD43 /* CTLegacyIdentityRepoTest.m */,
 				9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */,
 				D6A3D0872E2A7B36E54D23E7 /* CTDelayedInAppResultTest.m */,
-				6DBD5E0D8AC568761F545800 /* CTInActionResultTest.m */,
 				68D4127C4CE0437B085909D7 /* CTDataFlattenerTest.m */,
 				E7A8F7CE1749EBE904E5BECA /* CTBatchSentDelegateHelperTest.m */,
 				4032D1E7BFC02C3560EA977D /* CTTriggerValueTest.m */,
@@ -2215,6 +2214,7 @@
 				AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */,
 				99B1AC49C04A49DBF60E12E7 /* CTSessionManagerTests.swift */,
 				270613EECA7FEC509EE823C6 /* CTTimerResultTests.swift */,
+				8DF7B086F8FC5305D81405B0 /* CTInActionResultTests.swift */,
 			);
 			path = CleverTapSDKTests;
 			sourceTree = "<group>";
@@ -3239,7 +3239,6 @@
 				83999BF9B2CD23F1A6141576 /* CTLegacyIdentityRepoTest.m in Sources */,
 				996618D659D00AAE332278DF /* CTNestedJsonBuilderTest.m in Sources */,
 				4EA499E7C8E49BB4373B092A /* CTDelayedInAppResultTest.m in Sources */,
-				2340298D08E15BE1679366F2 /* CTInActionResultTest.m in Sources */,
 				0730DCB3C47285DC1939B9C2 /* CTDataFlattenerTest.m in Sources */,
 				F521F765FEC8B69C7976B9C2 /* CTBatchSentDelegateHelperTest.m in Sources */,
 				4971C0F04427B38373FBCCA2 /* CTTriggerValueTest.m in Sources */,
@@ -3286,6 +3285,7 @@
 				1F19A11DA23B857DFFE5AD7F /* CTRequestSenderTest.m in Sources */,
 				D3012BAA22BDF04D1A7D67EB /* CTSessionManagerTests.swift in Sources */,
 				BFDB7C436DB0189EA739D469 /* CTTimerResultTests.swift in Sources */,
+				7632C18E471A1CDF4E16CC49 /* CTInActionResultTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
