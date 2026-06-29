@@ -352,6 +352,10 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index {
     [buttonView setTag: index];
     buttonView.titleLabel.adjustsFontSizeToFitWidth = YES;
+    if (@available(iOS 11.0, *)) {
+        buttonView.titleLabel.font = [[UIFontMetrics defaultMetrics] scaledFontForFont:buttonView.titleLabel.font];
+        buttonView.titleLabel.adjustsFontForContentSizeCategory = YES;
+    }
     buttonView.hidden = NO;
     if (_notification.inAppType != CTInAppTypeHeader && _notification.inAppType != CTInAppTypeFooter) {
         buttonView.layer.borderWidth = 1.0f;

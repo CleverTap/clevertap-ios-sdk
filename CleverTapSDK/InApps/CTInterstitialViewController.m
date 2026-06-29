@@ -186,6 +186,10 @@
         self.titleLabel.backgroundColor = [UIColor clearColor];
         self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
+        if (@available(iOS 11.0, *)) {
+            self.titleLabel.font = [[UIFontMetrics metricsForTextStyle:UIFontTextStyleHeadline] scaledFontForFont:self.titleLabel.font];
+            self.titleLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
     
     if (self.notification.message) {
@@ -193,6 +197,10 @@
         self.bodyLabel.backgroundColor = [UIColor clearColor];
         self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.text = self.notification.message;
+        if (@available(iOS 11.0, *)) {
+            self.bodyLabel.font = [[UIFontMetrics defaultMetrics] scaledFontForFont:self.bodyLabel.font];
+            self.bodyLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
     
     self.firstButton.hidden = YES;
