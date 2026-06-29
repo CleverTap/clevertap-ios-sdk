@@ -116,6 +116,7 @@ static const int kMaxTags = 3;
     if ([self.analyticsDelegate respondsToSelector:@selector(inboxViewControllerIsInboxV2Enabled)]) {
         inboxV2Enabled = [self.analyticsDelegate inboxViewControllerIsInboxV2Enabled];
     }
+#if !TARGET_OS_TV
     if (inboxV2Enabled) {
         UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
         [refreshControl addTarget:self
@@ -123,8 +124,10 @@ static const int kMaxTags = 3;
                  forControlEvents:UIControlEventValueChanged];
         self.refreshControl = refreshControl;
     }
+#endif
 }
 
+#if !TARGET_OS_TV
 - (void)_handlePullToRefresh:(UIRefreshControl *)sender {
     if (![self.analyticsDelegate respondsToSelector:
             @selector(inboxViewControllerDidRequestRefreshWithCallback:)]) {
@@ -157,6 +160,7 @@ static const int kMaxTags = 3;
         });
     }];
 }
+#endif
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
