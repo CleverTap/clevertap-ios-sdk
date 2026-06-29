@@ -36,7 +36,11 @@
     buttonView.tag = index;
     buttonView.titleLabel.adjustsFontSizeToFitWidth = NO;
     buttonView.hidden = NO;
+    #if TARGET_OS_TV
+    [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventPrimaryActionTriggered];
+    #else
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    #endif
     [buttonView setTitle:messageButton[@"text"] forState:UIControlStateNormal];
     buttonView.backgroundColor = [CTUIUtils ct_colorWithHexString:messageButton[@"bg"]];
     [buttonView setTitleColor:[CTUIUtils ct_colorWithHexString:messageButton[@"color"]] forState:UIControlStateNormal];
