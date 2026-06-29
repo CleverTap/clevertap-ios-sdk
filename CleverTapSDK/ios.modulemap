@@ -34,7 +34,6 @@ framework module CleverTapSDK {
     header "CleverTap+PushPermission.h"
     header "CTJsonTemplateProducer.h"
     header "CTDelayedInAppResult.h"
-    header "CTInActionResult.h"
     header "CTInAppStore.h"
 
     // Internal headers required by CTSessionManager.swift.
