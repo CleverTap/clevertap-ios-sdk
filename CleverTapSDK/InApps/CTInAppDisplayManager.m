@@ -51,7 +51,6 @@
 #else
 #import "CleverTapSDK-Swift.h"
 #endif
-#import "CTTimerResult.h"
 #import "CTDelayedInAppResult.h"
 #import "CTInActionResult.h"
 
