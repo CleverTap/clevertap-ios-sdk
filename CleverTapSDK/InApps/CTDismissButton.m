@@ -37,6 +37,13 @@ static UIImage *dismissButtonImage;
             dismissButtonImage = [self dismissButtonImage];
         });
     }
+    self.accessibilityLabel = @"Close";
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    CGFloat expansion = MAX(0.0, (44.0 - self.bounds.size.width) / 2.0);
+    CGRect expandedBounds = CGRectInset(self.bounds, -expansion, -expansion);
+    return CGRectContainsPoint(expandedBounds, point);
 }
 
 - (UIImage *)dismissButtonImage {
