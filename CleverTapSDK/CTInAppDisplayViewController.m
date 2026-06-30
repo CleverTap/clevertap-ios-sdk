@@ -287,6 +287,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         if (self.delegate) {
             [self.delegate notificationDidShow:self.notification];
         }
+        UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, @"inapp message shown");
     };
     
     if (animated) {

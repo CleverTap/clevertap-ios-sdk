@@ -405,6 +405,7 @@ typedef enum {
         if (self.delegate) {
             [self.delegate notificationDidShow:self.notification];
         }
+        UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, @"inapp message shown");
     };
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
