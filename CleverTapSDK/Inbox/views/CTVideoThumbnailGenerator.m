@@ -2,7 +2,11 @@
 #import "CTVideoThumbnailGenerator.h"
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
-#import <SDWebImage/SDImageCache.h>
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @interface CTVideoThumbnailGenerator ()
 
@@ -36,7 +40,7 @@
 - (void)generateImageFromUrl:(NSString *)videoURL withCompletionBlock:(void (^)(UIImage *image, NSString *sourceUrl))completion {
     self.sourceUrl = videoURL;
     NSURL *url = [NSURL URLWithString:videoURL];
-    SDImageCache *cache = [SDImageCache sharedImageCache];
+    CTWebImageCache *cache = [CTWebImageCache sharedImageCache];
     // ok to load sync as it just in mem
     UIImage *image = [cache imageFromCacheForKey:videoURL];
     if (image) {

@@ -28,6 +28,11 @@
 - (void)updateFilesExpiry:(NSDictionary<NSString *, NSNumber *> *)status;
 - (void)removeAllAssetsWithCompletion:(void(^)(NSDictionary<NSString *,NSNumber *> *status))completion;
 
+/// Returns the disk-cache path that SDWebImage (5.x) would have used for the given URL string.
+/// Mirrors SDDiskCacheFileNameForKey + SDImageCache.defaultDiskCacheDirectory.
+/// Used by testRemoveLegacyAssets to set up and verify legacy-cache cleanup.
++ (NSString *)legacyCachePathForURL:(NSString *)urlString;
+
 @end
 
 #endif /* CTFileDownloader_Tests_h */

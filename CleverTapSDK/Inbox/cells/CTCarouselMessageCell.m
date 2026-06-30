@@ -1,6 +1,11 @@
 
 #import "CTCarouselMessageCell.h"
 #import "CTCarouselImageView.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 @implementation CTCarouselMessageCell
 
@@ -49,9 +54,9 @@ static const float kPageControlViewHeight = 30.f;
             carouselItemView.backgroundColor = [UIColor clearColor];
             BOOL useDefaultLayout = [self shouldUseDefaultMediaLayout];
             if (content.mediaUrl.length > 0) {
-                [carouselItemView.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
+                [carouselItemView.cellImageView ct_setImageWithURL:[NSURL URLWithString:content.mediaUrl]
                                                   placeholderImage:useDefaultLayout ? [self getLandscapePlaceHolderImage] : ([self orientationIsPortrait] ? [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage])
-                                                           options:self.sdWebImageOptions context:self.sdWebImageContext];
+                                                           options:self.ctWebImageOptions context:self.ctWebImageContext];
             }
             carouselItemView.cellImageView.contentMode = useDefaultLayout ? UIViewContentModeScaleAspectFit : UIViewContentModeScaleAspectFill;
             carouselItemView.imageViewLandRatioConstraint.priority = useDefaultLayout ? 250 : ([self orientationIsPortrait] ? 750 : 999);
@@ -108,7 +113,7 @@ static const float kPageControlViewHeight = 30.f;
                                               orientationPortrait:[self orientationIsPortrait]
                                                  imageDescription:imageDescription];
         }
-        
+
         UITapGestureRecognizer *itemViewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleItemViewTapGesture:)];
         itemView.userInteractionEnabled = YES;
         itemView.tag = originalIndex;

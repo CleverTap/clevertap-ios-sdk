@@ -15,6 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSString *)fileDownloadPath:(NSString *)url;
 - (nullable UIImage *)loadImageFromDisk:(NSString *)imageURL;
 
+/// Reads raw in-app image data from CleverTap's managed, private file cache
+/// (Documents/CleverTap_Files/), the same cache master uses. Populate it via downloadFiles:.
+/// Returns nil if not present. Caller decodes with content-type awareness (GIF -> CTAnimatedImage).
+- (nullable NSData *)loadInAppImageDataFromDisk:(NSURL *)imageURL;
+
 @end
 
 NS_ASSUME_NONNULL_END

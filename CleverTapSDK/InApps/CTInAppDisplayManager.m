@@ -42,8 +42,7 @@
 #endif
 
 #if !(TARGET_OS_TV)
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/SDAnimatedImageView.h>
+#import "CTAnimatedImage.h"
 #endif
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
@@ -421,7 +420,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 }
 
-
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
     return nil;
@@ -468,35 +466,45 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (ImageLoadingResult *)loadImageWithURL:(NSURL *)url contentType:(NSString *)contentType {
     ImageLoadingResult *result = [[ImageLoadingResult alloc] init];
-    
-    UIImage *loadedImage = [self loadImageIfPresentInDiskCache:url];
-    if (loadedImage) {
-        result.image = loadedImage;
-    } else {
-        NSError *loadError = nil;
-        NSData *imageData = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&loadError];
-        UIImage *resultImage = [UIImage imageWithData:imageData];
-        if (loadError || !resultImage) {
-            result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
-        } else {
-            if ([contentType isEqualToString:@"image/gif"]) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:imageData];
-                if (gif == nil) {
-                    result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
-                }
+
+    // 1. CleverTap's managed, private disk cache (Documents/CleverTap_Files/) - the same cache
+    //    master uses. Populated by downloadMediaURLs: -> downloadFiles: on CS in-app receipt.
+    //    We read the raw bytes (not a UIImage) so a GIF keeps its animation when decoded below.
+    //    Downgrade-safe: an older SDK reads in-app images from this same managed cache.
+    NSData *cachedData = [self.fileDownloader loadInAppImageDataFromDisk:url];
+    if (cachedData) {
+        result.imageData = cachedData;
+        if ([contentType isEqualToString:@"image/gif"]) {
+            CTAnimatedImage *gif = [CTAnimatedImage imageWithData:cachedData];
+            if (gif == nil) {
+                result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
             }
-            result.imageData = imageData;
+            result.image = gif;
+        } else {
+            result.image = [UIImage imageWithData:cachedData];
+        }
+        return result;
+    }
+
+    // 2. Cache miss - download synchronously (called on background thread by prepareNotification:).
+    NSError *loadError = nil;
+    NSData *imageData = [NSData dataWithContentsOfURL:url
+                                              options:NSDataReadingMappedIfSafe
+                                               error:&loadError];
+    if (loadError || !imageData) {
+        result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
+        return result;
+    }
+
+    // 3. Validate GIF decodability; downstream rendering uses imageData to create CTAnimatedImage.
+    if ([contentType isEqualToString:@"image/gif"]) {
+        CTAnimatedImage *gif = [CTAnimatedImage imageWithData:imageData];
+        if (gif == nil) {
+            result.error = [NSString stringWithFormat:@"unable to decode gif for URL: %@", url];
         }
     }
-    
+    result.imageData = imageData;
     return result;
-}
-
-- (UIImage *)loadImageIfPresentInDiskCache:(NSURL *)imageURL {
-    NSString *imageURLString = [imageURL absoluteString];
-    UIImage *image = [self.fileDownloader loadImageFromDisk:imageURLString];
-    if (image) return image;
-    return nil;
 }
 
 - (void)notificationReady:(CTInAppNotification*)notification {
@@ -773,7 +781,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
     // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
-
+    
     // add the action extras so they can be passed to the dismissedWithExtras delegate
     if (extras) {
         notification.actionExtras = extras;

@@ -1,5 +1,10 @@
 
 #import "CTInboxBaseMessageCell.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 
 static UIImage *volumeOffImage;
 static UIImage *volumeOnImage;
@@ -45,8 +50,8 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 }
 
 - (void)_sharedInit {
-    self.sdWebImageOptions = (SDWebImageRetryFailed);
-    self.sdWebImageContext = @{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)};
+    self.ctWebImageOptions = CTWebImageRetryFailed;
+    self.ctWebImageContext = @{CTWebImageContextStoreCacheType : @(CTImageCacheTypeMemory)};
 }
 
 - (void)dealloc {
@@ -269,8 +274,8 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         return;
     }
     [self configureDefaultMediaViewIfNeeded];
-    SDAnimatedImageView *activeImageView = [self activeMediaImageView];
-    
+    CTAnimatedImageView *activeImageView = [self activeMediaImageView];
+
     self.hasVideoPoster = NO;
     self.controllersTimeoutPeriod = 1.0;
     self.avPlayerContainerView.backgroundColor = [UIColor clearColor];
@@ -340,12 +345,11 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         activeImageView.alpha = 1.0;
         self.hasVideoPoster = YES;
         if (content.videoPosterUrl != nil && content.videoPosterUrl.length > 0) {
-            [activeImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
-                               placeholderImage:[self getVideoPlaceHolderImage]
-                                        options:self.sdWebImageOptions
-                                        context:self.sdWebImageContext
-                                       progress:nil
-                                      completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+            [activeImageView ct_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
+                              placeholderImage:[self getVideoPlaceHolderImage]
+                                       options:self.ctWebImageOptions
+                                       context:self.ctWebImageContext
+                                     completed:^(UIImage * _Nullable image, NSError * _Nullable error, CTImageCacheType cacheType, NSURL * _Nullable imageURL) {
                 if ([self shouldUseDefaultMediaLayout]) {
                     [self configureDefaultMediaLayoutWithFallbackRatio:kDefaultFallbackAspectRatio];
                     [self updateDefaultMediaLayoutForImage:image fallbackRatio:kDefaultFallbackAspectRatio];
@@ -523,7 +527,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"readyForDisplay"]) {
-        SDAnimatedImageView *activeImageView = [self activeMediaImageView];
+        CTAnimatedImageView *activeImageView = [self activeMediaImageView];
         if ([self hasVideo] && !activeImageView.isHidden) {
             [UIView animateWithDuration:0.5f animations:^{
                 activeImageView.alpha = 0.0;
@@ -603,7 +607,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     return [[self.message.orientation stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] uppercaseString];
 }
 
-- (SDAnimatedImageView *)activeMediaImageView {
+- (CTAnimatedImageView *)activeMediaImageView {
     return [self shouldUseDefaultMediaLayout] ? self.defaultCellImageView : self.cellImageView;
 }
 
@@ -611,7 +615,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     if (!self.mediaContainerView || self.defaultCellImageView) {
         return;
     }
-    SDAnimatedImageView *defaultImageView = [[SDAnimatedImageView alloc] initWithFrame:CGRectZero];
+    CTAnimatedImageView *defaultImageView = [[CTAnimatedImageView alloc] initWithFrame:CGRectZero];
     defaultImageView.translatesAutoresizingMaskIntoConstraints = NO;
     defaultImageView.contentMode = UIViewContentModeScaleAspectFit;
     defaultImageView.clipsToBounds = YES;
@@ -631,7 +635,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 }
 
 - (void)resetDefaultMediaView {
-    [self.defaultCellImageView sd_cancelCurrentImageLoad];
+    [self.defaultCellImageView ct_cancelCurrentImageLoad];
     self.defaultCellImageView.image = nil;
     self.defaultCellImageView.hidden = YES;
     if (self.defaultMediaHeightConstraint) {

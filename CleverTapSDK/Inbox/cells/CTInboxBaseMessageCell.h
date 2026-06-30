@@ -1,9 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/UIView+WebCache.h>
-#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#import "CTWebImageDefines.h"
 #import "CleverTap+Inbox.h"
 #import "CTInboxMessageActionView.h"
 #import "CTConstants.h"
@@ -11,7 +9,7 @@
 #import "CTUIUtils.h"
 #import "CTVideoThumbnailGenerator.h"
 
-@class SDAnimatedImageView;
+@class CTAnimatedImageView;
 
 typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
     CTMediaPlayerCellTypeNone,
@@ -29,7 +27,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @interface CTInboxBaseMessageCell : UITableViewCell <CTInboxActionViewDelegate>
 
 @property (strong, nonatomic) IBOutlet UIView *containerView;
-@property (strong, nonatomic) IBOutlet SDAnimatedImageView *cellImageView;
+@property (strong, nonatomic) IBOutlet CTAnimatedImageView *cellImageView;
 @property (strong, nonatomic) IBOutlet UILabel *titleLabel;
 @property (strong, nonatomic) IBOutlet UILabel *bodyLabel;
 @property (strong, nonatomic) IBOutlet UILabel *dateLabel;
@@ -63,15 +61,15 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 @property (atomic, assign) CTMediaPlayerCellType mediaPlayerCellType;
 @property (atomic, assign) CTInboxMessageType messageType;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
-@property (nonatomic, strong) SDAnimatedImageView *defaultCellImageView;
+@property (nonatomic, strong) CTAnimatedImageView *defaultCellImageView;
 @property (nonatomic, strong) NSLayoutConstraint *defaultMediaHeightConstraint;
 @property (nonatomic, assign) CGFloat originalImageViewHeightConstant;
 @property (nonatomic, assign) UILayoutPriority originalImageViewHeightPriority;
 @property (nonatomic, assign) BOOL didCaptureImageViewHeightDefaults;
 
 
-@property (nonatomic, assign) SDWebImageOptions sdWebImageOptions;
-@property (nonatomic, strong) SDWebImageContext *sdWebImageContext;
+@property (nonatomic, assign) CTWebImageOptions ctWebImageOptions;
+@property (nonatomic, strong) CTWebImageContext *ctWebImageContext;
 
 - (void)volumeButtonTapped:(UIButton *)sender;
 
@@ -83,7 +81,7 @@ typedef NS_OPTIONS(NSUInteger , CTMediaPlayerCellType) {
 - (BOOL)deviceOrientationIsLandscape;
 - (UIImage *)getPortraitPlaceHolderImage;
 - (UIImage *)getLandscapePlaceHolderImage;
-- (SDAnimatedImageView *)activeMediaImageView;
+- (CTAnimatedImageView *)activeMediaImageView;
 - (void)configureDefaultMediaViewIfNeeded;
 - (void)resetDefaultMediaView;
 - (void)configureDefaultMediaLayoutWithFallbackRatio:(CGFloat)fallbackRatio;

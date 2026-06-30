@@ -1,10 +1,6 @@
 #import "CTInAppNotification.h"
 #import "CTConstants.h"
 #import "CTUIUtils.h"
-#if !(TARGET_OS_TV)
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/SDAnimatedImageView.h>
-#endif
 
 @interface CTInAppNotification() {
     

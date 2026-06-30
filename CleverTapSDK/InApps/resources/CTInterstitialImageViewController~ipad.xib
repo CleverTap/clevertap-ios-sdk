@@ -26,7 +26,7 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yID-mn-hWs">
                             <rect key="frame" x="0.0" y="0.0" width="448" height="797"/>
                             <subviews>
-                                <imageView customClass="SDAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="vbL-sf-D3V">
+                                <imageView customClass="CTAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="vbL-sf-D3V">
                                     <rect key="frame" x="0.0" y="0.0" width="448" height="797"/>
                                     <accessibility key="accessibilityConfiguration" label="InApp Image">
                                         <bool key="isElement" value="YES"/>

@@ -3,7 +3,12 @@
 #import "CTBaseHeaderFooterViewControllerPrivate.h"
 #import "CTInAppDisplayViewControllerPrivate.h"
 #import "CTUIUtils.h"
-#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
+#import "CTAnimatedImage.h"
 
 typedef enum {
     kWRSlideStatusNormal = 0,
@@ -31,7 +36,7 @@ typedef enum {
 @property (nonatomic, strong) IBOutlet UIView *containerView;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
 @property (nonatomic, strong) IBOutlet UILabel *bodyLabel;
-@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
+@property (nonatomic, strong) IBOutlet CTAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
 @property (nonatomic, strong) IBOutlet UIButton *firstButton;
@@ -93,7 +98,7 @@ typedef enum {
     } else if (self.notification.imageData) {
         // Support for GIFs
         if ([self.notification.contentType isEqualToString:@"image/gif"]) {
-            SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+            CTAnimatedImage *gif = [CTAnimatedImage imageWithData:self.notification.imageData];
             if (gif) {
                 self.inAppImage = gif;
             }

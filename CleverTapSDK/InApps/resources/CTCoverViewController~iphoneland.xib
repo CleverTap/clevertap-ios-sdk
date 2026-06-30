@@ -32,7 +32,7 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UJw-2C-M6u">
                             <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
                             <subviews>
-                                <imageView customClass="SDAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="cWz-jV-RQY">
+                                <imageView customClass="CTAnimatedImageView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="cWz-jV-RQY">
                                     <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
                                     <accessibility key="accessibilityConfiguration" label="InApp Image">
                                         <bool key="isElement" value="YES"/>

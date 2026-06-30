@@ -3,12 +3,17 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTUIUtils.h"
-#import <SDWebImage/SDAnimatedImageView+WebCache.h>
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
+#import "CTAnimatedImage.h"
 
 @interface CTHalfInterstitialViewController ()
 
 @property (nonatomic, strong) IBOutlet UIView *containerView;
-@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
+@property (nonatomic, strong) IBOutlet CTAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
@@ -122,7 +127,7 @@
         } else if (self.notification.imageData) {
             // Support for GIFs
             if ([self.notification.contentType isEqualToString:@"image/gif"]) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+                CTAnimatedImage *gif = [CTAnimatedImage imageWithData:self.notification.imageData];
                 self.imageView.image = gif;
             } else {
                 self.imageView.image = [UIImage imageWithData:self.notification.imageData];
@@ -135,7 +140,7 @@
         } else if (self.notification.imageLandscapeData) {
             // Support for GIFs in landscape
             if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
-                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
+                CTAnimatedImage *gif = [CTAnimatedImage imageWithData:self.notification.imageLandscapeData];
                 self.imageView.image = gif;
             } else {
                 self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];

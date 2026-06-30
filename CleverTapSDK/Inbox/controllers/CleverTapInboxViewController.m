@@ -12,10 +12,6 @@
 #import "CTInboxUtils.h"
 #import "UIView+CTToast.h"
 
-#import <SDWebImage/UIImage+GIF.h>
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <SDWebImage/UIImageView+WebCache.h>
-
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
 
