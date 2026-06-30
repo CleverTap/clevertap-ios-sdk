@@ -107,6 +107,7 @@ typedef enum {
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.image = self.inAppImage;
         self.imageView.accessibilityLabel = self.notification.contentDescription;
+        self.imageView.isAccessibilityElement = self.notification.contentDescription.length > 0;
     } else {
         self.imageView.hidden = YES;
     }

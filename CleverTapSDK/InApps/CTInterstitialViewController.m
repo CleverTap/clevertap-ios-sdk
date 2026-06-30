@@ -146,6 +146,7 @@
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         self.imageView.image = self.notification.inAppImage;
         self.imageView.accessibilityLabel = self.notification.contentDescription;
+        self.imageView.isAccessibilityElement = self.notification.contentDescription.length > 0;
     } else if (self.notification.imageData) {
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         if ([self.notification.contentType isEqualToString:@"image/gif"] ) {
@@ -155,6 +156,7 @@
             self.imageView.image = [UIImage imageWithData:self.notification.imageData];
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
+        self.imageView.isAccessibilityElement = self.notification.contentDescription.length > 0;
     }
     
     // handle video or audio

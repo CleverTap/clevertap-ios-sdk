@@ -198,10 +198,12 @@ static const CGFloat kSpacingConstant = 160.f;
             }
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
+        self.imageView.isAccessibilityElement = self.notification.contentDescription.length > 0;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
             self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
+            self.imageView.isAccessibilityElement = self.notification.landscapeContentDescription.length > 0;
         } else if (self.notification.imageLandscapeData) {
             if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
                 self.imageView.image = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
@@ -209,6 +211,7 @@ static const CGFloat kSpacingConstant = 160.f;
                 self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
             }
             self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
+            self.imageView.isAccessibilityElement = self.notification.landscapeContentDescription.length > 0;
         } else {
             // No landscape image (landscape media may be a video or absent) - fall back to portrait.
             if (self.notification.inAppImage) {
@@ -221,6 +224,7 @@ static const CGFloat kSpacingConstant = 160.f;
                 }
             }
             self.imageView.accessibilityLabel = self.notification.contentDescription;
+        self.imageView.isAccessibilityElement = self.notification.contentDescription.length > 0;
         }
     }
 

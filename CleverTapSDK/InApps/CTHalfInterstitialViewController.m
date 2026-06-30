@@ -129,6 +129,7 @@
             }
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
+        self.imageView.isAccessibilityElement = self.notification.contentDescription.length > 0;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
@@ -142,6 +143,7 @@
             }
         }
         self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
+        self.imageView.isAccessibilityElement = self.notification.landscapeContentDescription.length > 0;
     }
     
     self.closeButton.hidden = !self.notification.showCloseButton;
