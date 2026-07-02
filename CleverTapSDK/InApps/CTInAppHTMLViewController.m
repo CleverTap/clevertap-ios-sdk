@@ -109,7 +109,7 @@ typedef enum {
     [self.view addSubview:webView];
     
     [self loadWebView];
-    if (!self.notification.showClose) {
+    if (!self.notification.showClose && self.notification.swipeToDismiss) {
         _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureHandle:)];
         _panGesture.delegate = self;
         [webView addGestureRecognizer:_panGesture];
@@ -123,11 +123,6 @@ typedef enum {
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithCloseAction];
     [self triggerInAppAction:action callToAction: CLTAP_CTA_SWIPE_DISMISS buttonId:nil];
     return YES;
-}
-
-- (void)viewWillPassThroughTouch {
-    [self hide:NO];
-    [self triggerDismissButtonAction];
 }
 
 - (void)loadWebView {
@@ -306,10 +301,12 @@ typedef enum {
         dl = mutableParams[@"deeplink"];
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
-        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams[@"params"]];
-    }
+    CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
+    id params = mutableParams[@"params"];
+    NSMutableDictionary *extras = [params isKindOfClass:[NSDictionary class]]
+        ? [params mutableCopy]
+        : [NSMutableDictionary new];
+    [self notifyDelegateActionTriggered:action withExtras:extras];
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
 }

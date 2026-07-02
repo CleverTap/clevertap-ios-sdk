@@ -17,6 +17,8 @@
 @property (nonatomic, readonly) BOOL excludeFromCaps;
 @property (nonatomic, readonly) BOOL showClose;
 @property (nonatomic, readonly) BOOL darkenScreen;
+@property (nonatomic, readonly) BOOL tapOutsideDismiss;
+@property (nonatomic, readonly) BOOL swipeToDismiss;
 @property (nonatomic, readonly) int maxPerSession;
 @property (nonatomic, readonly) int totalLifetimeCount;
 @property (nonatomic, readonly) int totalDailyCount;

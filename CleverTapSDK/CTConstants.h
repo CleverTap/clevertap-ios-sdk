@@ -249,8 +249,17 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_WZRK_BUTTON_ID @"button_id"
 #define CLTAP_PROP_WZRK_DL @"wzrk_dl"
 #define CLTAP_CTA_SWIPE_DISMISS @"swipe-dismiss"
+#define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"tap-outside-dismiss"
 #define CLTAP_CTA_DISMISS_BUTTON @"Dismiss Button"
-#define CLTAP_DISMISS_BUTTON_ID @"dismissButton"
+
+// Split of Clicks: per-element identity and action descriptors added to the
+// Notification Clicked event for basic (native) and custom HTML in-apps.
+#define CLTAP_PROP_WZRK_ELEMENT_ID @"wzrk_element_id"
+#define CLTAP_PROP_WZRK_ACT @"wzrk_act"
+#define CLTAP_PROP_WZRK_DATA @"wzrk_data"
+#define CLTAP_INAPP_ELEMENT_CLOSE_BUTTON @"closeButton"
+#define CLTAP_INAPP_ELEMENT_IMAGE @"image-1"
+#define CLTAP_INAPP_DATA_CLOSE @"close"
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"
@@ -267,6 +276,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_MEDIA_CONTENT_TYPE @"content_type"
 #define CLTAP_INAPP_MEDIA_URL @"url"
 #define CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION @"alt_text"
+#define CLTAP_INAPP_TAP_OUTSIDE_DISMISS @"tap_outside_dismiss"
+#define CLTAP_INAPP_SWIPE_TO_DISMISS @"swipe_to_dismiss"
 
 #define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
 #define CLTAP_TRIGGER_BOOL_STRING_NO @"false"
