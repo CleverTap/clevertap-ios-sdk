@@ -388,10 +388,6 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 
 - (void)tappedDismiss {
     [self hide:YES];
-    [self triggerDismissButtonAction];
-}
-
-- (void)triggerDismissButtonAction {
     [self triggerCloseActionWithCallToAction:CLTAP_CTA_DISMISS_BUTTON
                                    elementId:CLTAP_INAPP_ELEMENT_CLOSE_BUTTON];
 }
@@ -430,7 +426,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 // Adds the Split of Clicks action descriptors to the clicked-event extras:
-//   wzrk_act  — the action type string (url / kv / close / custom-code)
+//   wzrk_action  — the action type string (url / kv / close / custom-code)
 //   wzrk_data — the action payload: the URL for an open-url action, the
 //               key-values dictionary for a kv action, the function name for a
 //               custom-code action, and "close" for a close action.
@@ -440,7 +436,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     }
     NSString *actType = [CTInAppUtils inAppActionTypeString:action.type];
     if (actType) {
-        extras[CLTAP_PROP_WZRK_ACT] = actType;
+        extras[CLTAP_PROP_WZRK_ACTION] = actType;
     }
     switch (action.type) {
         case CTInAppActionTypeOpenURL: {
@@ -556,8 +552,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }
     if (buttonId) {
-        extras[CLTAP_PROP_WZRK_BUTTON_ID] = buttonId;
         // For HTML in-apps the FE-supplied buttonId is the element identity.
+        // Reported only as wzrk_element_id; button_id is not part of the backend contract.
         extras[CLTAP_PROP_WZRK_ELEMENT_ID] = buttonId;
     }
     NSString *campaignId = self.notification.campaignId;

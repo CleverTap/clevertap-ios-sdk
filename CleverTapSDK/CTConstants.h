@@ -246,7 +246,6 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_VARIANT @"Variant"
 #define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
 #define CLTAP_PROP_WZRK_CTA @"wzrk_c2a"
-#define CLTAP_PROP_WZRK_BUTTON_ID @"button_id"
 #define CLTAP_PROP_WZRK_DL @"wzrk_dl"
 #define CLTAP_CTA_SWIPE_DISMISS @"swipe-dismiss"
 #define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"tap-outside-dismiss"
@@ -255,11 +254,21 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 // Split of Clicks: per-element identity and action descriptors added to the
 // Notification Clicked event for basic (native) and custom HTML in-apps.
 #define CLTAP_PROP_WZRK_ELEMENT_ID @"wzrk_element_id"
-#define CLTAP_PROP_WZRK_ACT @"wzrk_act"
+#define CLTAP_PROP_WZRK_ACTION @"wzrk_action"
 #define CLTAP_PROP_WZRK_DATA @"wzrk_data"
 #define CLTAP_INAPP_ELEMENT_CLOSE_BUTTON @"closeButton"
 #define CLTAP_INAPP_ELEMENT_IMAGE @"image-1"
 #define CLTAP_INAPP_DATA_CLOSE @"close"
+
+// Advanced-builder media preload failures. The HTML template (image_interstitial.html)
+// signals these as a synthetic close with wzrk_c2a set to the reason string. The SDK
+// reports them as a structured wzrk_error (no click event is raised); the error rides
+// along on the next queued event.
+#define CLTAP_INAPP_ERROR_IMAGE_DISMISS @"image-error-dismiss"
+#define CLTAP_INAPP_ERROR_VIDEO_DISMISS @"video-error-dismiss"
+// wzrk_error codes — MUST stay aligned with Android and the backend decoder.
+#define CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD 591
+#define CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD 592
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"

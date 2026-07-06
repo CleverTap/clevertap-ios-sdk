@@ -30,12 +30,11 @@
 
 - (void)tappedDismiss;
 - (void)buttonTapped:(UIButton*)button;
-- (void)triggerDismissButtonAction;
 - (void)triggerCloseActionWithCallToAction:(NSString *)callToAction elementId:(NSString *)elementId;
 - (void)handleButtonClickFromIndex:(int)index;
 - (void)handleImageTapGesture;
 // Raises the Notification Clicked event for the given action, enriching the
-// extras with the Split of Clicks descriptors (wzrk_act / wzrk_data) and
+// extras with the Split of Clicks descriptors (wzrk_action / wzrk_data) and
 // deduping repeated triggers. Returns NO if an action was already triggered.
 - (BOOL)notifyDelegateActionTriggered:(CTNotificationAction *)action withExtras:(NSMutableDictionary *)extras;
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;

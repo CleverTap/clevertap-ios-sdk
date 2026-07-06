@@ -15,6 +15,7 @@
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CTEventBuilder.h"
+#import "CTValidationResult.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
 #import "CleverTapURLDelegate.h"
@@ -768,6 +769,17 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
+
+    // Advanced-builder media preload failures arrive from image_interstitial.html as a
+    // synthetic close with wzrk_c2a = image/video-error-dismiss. Report them as a
+    // structured wzrk_error (no click event is raised). The in-app is already being
+    // dismissed by the controller.
+    CTValidationResult *mediaError = [self mediaLoadErrorForReason:extras[CLTAP_PROP_WZRK_CTA]];
+    if (mediaError) {
+        [self.instance recordInAppNotificationMediaError:mediaError forNotification:notification];
+        return;
+    }
+
     // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
 
@@ -802,6 +814,20 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             // Handled in CTInAppDisplayViewController handleButtonClickFromIndex:
             break;
     }
+}
+
+// Maps an advanced-builder media preload failure reason (carried in wzrk_c2a) to a
+// CTValidationResult so it can be reported via wzrk_error. Returns nil for normal CTAs.
+- (CTValidationResult *)mediaLoadErrorForReason:(NSString *)reason {
+    if ([reason isEqualToString:CLTAP_INAPP_ERROR_IMAGE_DISMISS]) {
+        return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD
+                                            andMessage:@"InApp image failed to load"];
+    }
+    if ([reason isEqualToString:CLTAP_INAPP_ERROR_VIDEO_DISMISS]) {
+        return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD
+                                            andMessage:@"InApp video failed to load"];
+    }
+    return nil;
 }
 
 - (void)handleCTAOpenURL:(NSURL *)ctaURL {

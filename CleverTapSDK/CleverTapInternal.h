@@ -10,6 +10,7 @@
 
 @class CTInAppDisplayManager;
 @class CTFileDownloader;
+@class CTValidationResult;
 
 @interface CleverTap (Internal)
 
@@ -45,6 +46,14 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 
 - (void)recordInAppNotificationStateEvent:(BOOL)clicked
                           forNotification:(CTInAppNotification * _Nonnull)notification andQueryParameters:(NSDictionary * _Nullable)params;
+
+/**
+ Reports an in-app media preload failure (image/video) as a structured wzrk_error.
+ Does NOT raise a Notification Viewed/Clicked event — the error is queued and rides
+ along on the next event, the same way device/validation errors are reported.
+ */
+- (void)recordInAppNotificationMediaError:(CTValidationResult * _Nonnull)error
+                          forNotification:(CTInAppNotification * _Nonnull)notification;
 
 - (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion;
 
