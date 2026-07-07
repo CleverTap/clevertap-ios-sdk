@@ -39,6 +39,7 @@ typedef enum {
 @property (nonatomic, strong) IBOutlet UIView *imageContainer;
 
 @property(nonatomic, retain) UIPanGestureRecognizer *panGesture;
+@property(nonatomic, retain) UITapGestureRecognizer *tapGesture;
 @property(nonatomic, assign) CGFloat initialHorizontalCenter;
 @property(nonatomic, assign) CGFloat initialTouchPositionX;
 
@@ -154,7 +155,13 @@ typedef enum {
         _panGesture.delegate = self;
         [self.containerView addGestureRecognizer:_panGesture];
     }
-    
+
+    _tapGesture = [[UITapGestureRecognizer alloc]
+                   initWithTarget:self
+                   action:@selector(tappedDismiss)];
+    _tapGesture.delegate = self;
+    [self.containerView addGestureRecognizer:_tapGesture];
+
     self.firstButton.hidden = YES;
     self.secondButton.hidden = YES;
     
@@ -173,6 +180,13 @@ typedef enum {
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return YES;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    if (gestureRecognizer == _tapGesture) {
+        return ![touch.view isDescendantOfView:self.buttonsContainer];
+    }
     return YES;
 }
 
