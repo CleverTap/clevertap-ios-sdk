@@ -25,6 +25,7 @@
 @property (nonatomic, assign) BOOL actionTriggered;
 
 - (void)showFromWindow:(BOOL)animated;
+- (void)handleNotificationDidShow;
 - (void)hideFromWindow:(BOOL)animated;
 - (void)hideFromWindow:(BOOL)animated withCompletion:(void (^)(void))completion;
 

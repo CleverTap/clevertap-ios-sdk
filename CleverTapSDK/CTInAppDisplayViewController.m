@@ -270,6 +270,16 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     }
 }
 
+// Single "did show" hook for every in-app type. Resets the clicked-event dedup so each
+// presentation (including a reused controller) can raise its clicked event again, then
+// forwards to the delegate. All showFromWindow: implementations route through this.
+- (void)handleNotificationDidShow {
+    self.actionTriggered = NO;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidShow:)]) {
+        [self.delegate notificationDidShow:self.notification];
+    }
+}
+
 - (void)showFromWindow:(BOOL)animated {
     if (!self.notification) return;
     
@@ -284,9 +294,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
     };
     
     if (animated) {

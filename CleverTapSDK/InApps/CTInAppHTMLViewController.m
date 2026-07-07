@@ -563,9 +563,7 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
     };
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
