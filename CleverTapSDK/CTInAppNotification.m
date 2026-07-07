@@ -100,8 +100,12 @@
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
             // Per-campaign dismiss gesture configuration. Default to YES to preserve the
             // existing behaviour for campaigns that do not send these keys.
-            self.tapOutsideDismiss = jsonObject[CLTAP_INAPP_TAP_OUTSIDE_DISMISS] != nil ? [jsonObject[CLTAP_INAPP_TAP_OUTSIDE_DISMISS] boolValue] : YES;
-            self.swipeToDismiss = jsonObject[CLTAP_INAPP_SWIPE_TO_DISMISS] != nil ? [jsonObject[CLTAP_INAPP_SWIPE_TO_DISMISS] boolValue] : YES;
+            // Guard against NSNull (explicit JSON null) — only a real NSNumber may
+            // receive boolValue. Missing/null defaults to YES to preserve behaviour.
+            id tapOutside = jsonObject[CLTAP_INAPP_TAP_OUTSIDE_DISMISS];
+            self.tapOutsideDismiss = [tapOutside isKindOfClass:[NSNumber class]] ? [tapOutside boolValue] : YES;
+            id swipeDismiss = jsonObject[CLTAP_INAPP_SWIPE_TO_DISMISS];
+            self.swipeToDismiss = [swipeDismiss isKindOfClass:[NSNumber class]] ? [swipeDismiss boolValue] : YES;
             NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
             if (inAppId) {
                 self.Id = inAppId;

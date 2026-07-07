@@ -770,14 +770,18 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
 
-    // Advanced-builder media preload failures arrive from image_interstitial.html as a
-    // synthetic close with wzrk_c2a = image/video-error-dismiss. Report them as a
-    // structured wzrk_error (no click event is raised). The in-app is already being
-    // dismissed by the controller.
-    CTValidationResult *mediaError = [self mediaLoadErrorForReason:extras[CLTAP_PROP_WZRK_CTA]];
-    if (mediaError) {
-        [self.instance recordInAppNotificationMediaError:mediaError forNotification:notification];
-        return;
+    // Advanced-builder media preload failures arrive from the SDK-bundled
+    // image_interstitial.html as a synthetic close with wzrk_c2a = image/video-error-dismiss.
+    // Only trust these reason strings for advanced-builder in-apps (aspectRatio > 0), whose
+    // template is SDK-controlled — otherwise a user/FE-authored wzrk_c2a on any other in-app
+    // could suppress its own click. Report as a structured wzrk_error (no click event is
+    // raised); the in-app is already being dismissed by the controller.
+    if (notification.aspectRatio > 0) {
+        CTValidationResult *mediaError = [self mediaLoadErrorForReason:extras[CLTAP_PROP_WZRK_CTA]];
+        if (mediaError) {
+            [self.instance recordInAppNotificationMediaError:mediaError forNotification:notification];
+            return;
+        }
     }
 
     // record the notification clicked event
