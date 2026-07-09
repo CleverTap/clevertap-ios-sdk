@@ -353,8 +353,10 @@ typedef enum {
                 self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
             }
                              completion:^(BOOL finished) {
-                [self hide:NO];
+                // Trigger before hide: hide:NO dismisses inline and fires the dismiss
+                // delegate before actionExtras is stored (matches triggerInAppAction:).
                 [self triggerCloseActionWithCallToAction:CLTAP_CTA_SWIPE_DISMISS elementId:nil];
+                [self hide:NO];
             }];
         }];
     }];

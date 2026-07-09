@@ -269,6 +269,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 // wzrk_error codes — MUST stay aligned with Android and the backend decoder.
 #define CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD 591
 #define CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD 592
+#define CLTAP_ERROR_MSG_INAPP_IMAGE_LOAD @"InApp image failed to load"
+#define CLTAP_ERROR_MSG_INAPP_VIDEO_LOAD @"InApp video failed to load"
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"

@@ -187,6 +187,20 @@
     XCTAssertTrue(n.swipeToDismiss);
 }
 
+- (void)test_initWithJSON_tapOutsideDismiss_null_defaultsToYesWithoutCrash {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_TAP_OUTSIDE_DISMISS] = [NSNull null];
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertTrue(n.tapOutsideDismiss);
+}
+
+- (void)test_initWithJSON_swipeToDismiss_null_defaultsToYesWithoutCrash {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_SWIPE_TO_DISMISS] = [NSNull null];
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertTrue(n.swipeToDismiss);
+}
+
 #pragma mark - configureFromJSON — basic fields
 
 - (void)test_initWithJSON_setsInAppType {

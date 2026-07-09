@@ -354,8 +354,12 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (!self.notification.tapOutsideDismiss) {
         return;
     }
-    [self hide:NO];
+    // Trigger before hide: hideFromWindow: dismisses inline when animated == NO, which
+    // fires notificationDidDismiss: before handleNotificationAction: stores actionExtras.
+    // Triggering first keeps the tap-outside extras on dismissedWithExtras (matches
+    // triggerInAppAction: ordering).
     [self triggerCloseActionWithCallToAction:CLTAP_CTA_TAP_OUTSIDE_DISMISS elementId:nil];
+    [self hide:NO];
 }
 
 
@@ -395,9 +399,11 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 #pragma mark - Actions
 
 - (void)tappedDismiss {
-    [self hide:YES];
+    // Trigger before hide so actionExtras is stored before the dismiss delegate fires
+    // (matches triggerInAppAction: ordering).
     [self triggerCloseActionWithCallToAction:CLTAP_CTA_DISMISS_BUTTON
                                    elementId:CLTAP_INAPP_ELEMENT_CLOSE_BUTTON];
+    [self hide:YES];
 }
 
 // Raises a Notification Clicked event for a close-type dismissal (close button,

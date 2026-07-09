@@ -827,11 +827,11 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 - (CTValidationResult *)mediaLoadErrorForReason:(NSString *)reason {
     if ([reason isEqualToString:CLTAP_INAPP_ERROR_IMAGE_DISMISS]) {
         return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD
-                                            andMessage:@"InApp image failed to load"];
+                                            andMessage:CLTAP_ERROR_MSG_INAPP_IMAGE_LOAD];
     }
     if ([reason isEqualToString:CLTAP_INAPP_ERROR_VIDEO_DISMISS]) {
         return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD
-                                            andMessage:@"InApp video failed to load"];
+                                            andMessage:CLTAP_ERROR_MSG_INAPP_VIDEO_LOAD];
     }
     return nil;
 }
