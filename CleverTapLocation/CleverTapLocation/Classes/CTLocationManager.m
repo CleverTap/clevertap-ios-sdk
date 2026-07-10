@@ -33,58 +33,79 @@ static NSObject *requestsLockObject;
  */
 
 + (void)getLocationWithSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error {
-    if (![CLLocationManager locationServicesEnabled]) {
-        if (error) {
-            error(kLocationServicesNotEnabled);
-        };
-        return;
+    // locationServicesEnabled can block the main thread; check it off-main then resume on main.
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        BOOL servicesEnabled = [CLLocationManager locationServicesEnabled];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (!servicesEnabled) {
+                if (error) {
+                    error(kLocationServicesNotEnabled);
+                }
+                return;
+            }
+            [self requestLocationForSuccess:success andError:error];
+        });
+    });
+}
+
++ (void)requestLocationForSuccess:(void (^)(CLLocationCoordinate2D location))success andError:(void (^)(NSString *reason))error {
+    if (!locationManager) {
+        locationManager = [CLLocationManager new];
+        locationManager.desiredAccuracy = DEFAULT_LOCATION_ACCURACY;
     }
-    
-    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
-    
+
+    CLAuthorizationStatus status = [self currentAuthorizationStatus];
+
     if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted) {
         if (error) {
             error(kLocationPermissionDenied);
         }
         return;
     }
-    
-    if (!locationManager) {
-        locationManager = [CLLocationManager new];
-        locationManager.desiredAccuracy = DEFAULT_LOCATION_ACCURACY;
-    }
-    
+
     // request the user location permission (iOS8+)
     if (status == kCLAuthorizationStatusNotDetermined) {
         if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
             [locationManager requestWhenInUseAuthorization];
         }
     }
-    
+
     if (!requestsLockObject) {
         requestsLockObject = [NSObject new];
     }
-    
+
     // keep an array of requests made while we are waiting for the location manager
     if (!pendingRequests) {
         pendingRequests = [NSMutableArray new];
     }
-    
+
     // construct and add a new request
     CleverTapLocationRequest *request = [CleverTapLocationRequest new];
     request.successBlock = success;
     request.errorBlock = error;
-    
+
     @synchronized (requestsLockObject) {
         [pendingRequests addObject:request];
     }
-    
+
     locationManager.delegate = (id<CLLocationManagerDelegate>)self;
     if (locationManager && [locationManager respondsToSelector:@selector(startUpdatingLocation)]) {
         [locationManager performSelector:@selector(startUpdatingLocation)];
         [self scheduleLocationTimeout];
     } else if(locationManager && [locationManager respondsToSelector:@selector(requestLocation)]) {
         [locationManager performSelector:@selector(requestLocation)];
+    }
+}
+
+// Use the non-blocking instance property where available.
++ (CLAuthorizationStatus)currentAuthorizationStatus {
+    if (@available(iOS 14.0, *)) {
+        return locationManager.authorizationStatus;
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        return [CLLocationManager authorizationStatus];
+#pragma clang diagnostic pop
     }
 }
 
