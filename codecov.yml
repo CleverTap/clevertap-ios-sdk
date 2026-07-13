@@ -1,0 +1,21 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto      # compare against base branch coverage
+        threshold: 1%     # allow up to 1% drop without failing
+    patch:
+      default:
+        target: 50%       # changed lines must have at least 50% coverage
+        threshold: 5%
+
+ignore:
+  - "CleverTapSDK/InApps/CT*ViewController*"
+  - "CleverTapSDK/Inbox/**"
+  - "CleverTapSDK/Swizzling/**"
+  - "CleverTapSDK/CTSwizzle.*"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
