@@ -41,8 +41,9 @@ static UIImage *dismissButtonImage;
 }
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-    CGFloat expansion = MAX(0.0, (44.0 - self.bounds.size.width) / 2.0);
-    CGRect expandedBounds = CGRectInset(self.bounds, -expansion, -expansion);
+    CGFloat xExpansion = MAX(0.0, (44.0 - self.bounds.size.width) / 2.0);
+    CGFloat yExpansion = MAX(0.0, (44.0 - self.bounds.size.height) / 2.0);
+    CGRect expandedBounds = CGRectInset(self.bounds, -xExpansion, -yExpansion);
     return CGRectContainsPoint(expandedBounds, point);
 }
 
