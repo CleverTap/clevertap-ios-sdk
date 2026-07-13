@@ -91,23 +91,28 @@
     }
 
     // CS in-apps (inapp_notifs_cs)
-    ImmediateAndDelayed *partitionedClientSideInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]];
+    // Only process when the key is present in the response. When present (even as an
+    // empty array), always store so that stopped campaigns are cleared from preferences.
+    if (jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]) {
+        ImmediateAndDelayed *partitionedClientSideInApps = [InAppDurationPartitioner partitionImmediateDelayedInApps:jsonResp[CLTAP_INAPP_CS_JSON_RESPONSE_KEY]];
 
-    if ([partitionedClientSideInApps hasImmediateInApps]) {
         NSArray *immediateInApps = partitionedClientSideInApps.immediateInApps;
         [self.inAppStore storeClientSideInApps:immediateInApps];
-        // Preload CS in-app images to disk cache
-        [self downloadMediaURLs:immediateInApps];
-        // Preload CS custom template in-app files to disk cache
-        [self downloadCustomTemplatesFileURLs:immediateInApps];
-    }
-    if ([partitionedClientSideInApps hasDelayedInApps]) {
+        if ([partitionedClientSideInApps hasImmediateInApps]) {
+            // Preload CS in-app images to disk cache
+            [self downloadMediaURLs:immediateInApps];
+            // Preload CS custom template in-app files to disk cache
+            [self downloadCustomTemplatesFileURLs:immediateInApps];
+        }
+
         NSArray *delayedInApps = partitionedClientSideInApps.delayedInApps;
         [self.inAppStore storeDelayedClientSideInApps:delayedInApps];
-        // Preload CS in-app images to disk cache
-        [self downloadMediaURLs:delayedInApps];
-        // Preload CS custom template in-app files to disk cache
-        [self downloadCustomTemplatesFileURLs:delayedInApps];
+        if ([partitionedClientSideInApps hasDelayedInApps]) {
+            // Preload CS in-app images to disk cache
+            [self downloadMediaURLs:delayedInApps];
+            // Preload CS custom template in-app files to disk cache
+            [self downloadCustomTemplatesFileURLs:delayedInApps];
+        }
     }
     
     // Parse in-app Mode
