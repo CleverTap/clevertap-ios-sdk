@@ -65,6 +65,11 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 - (void)awakeFromNib {
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
+    self.containerView.isAccessibilityElement = NO;
+    for (UILabel *label in @[self.titleLabel, self.bodyLabel, self.dateLabel]) {
+        label.font = [UIFontMetrics.defaultMetrics scaledFontForFont:label.font];
+        label.adjustsFontForContentSizeCategory = YES;
+    }
 }
 
 - (void)layoutSubviews {
@@ -258,12 +263,17 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 - (void)setupMediaPlayer  {
     if (!self.message || !self.message.content || self.message.content.count <= 0) return;
     
+    self.avPlayerContainerView.isAccessibilityElement = NO;
+    self.avPlayerControlsView.isAccessibilityElement = NO;
+
     if (!self.volumeButton) {
-        self.volumeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 30.f, 30.f)];
+        self.volumeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 44.f, 44.f)];
+        self.volumeButton.accessibilityHint = @"Toggles audio";
+        self.volumeButton.accessibilityTraits = UIAccessibilityTraitButton;
         [self.volumeButton addTarget:self action:@selector(volumeButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self.avPlayerControlsView addSubview:self.volumeButton];
     }
-    
+
     CleverTapInboxMessageContent *content = self.message.content[0];
     if (content.mediaUrl == nil || content.mediaUrl.length == 0) {
         return;
@@ -290,7 +300,14 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     [self.playButton setImage:[self getPlayImage] forState:UIControlStateNormal];
     [self.playButton setImage:[self getPauseImage] forState:UIControlStateSelected];
     [self.playButton addTarget:self action:@selector(togglePlay) forControlEvents:UIControlEventTouchUpInside];
-    
+    self.playButton.isAccessibilityElement = YES;
+    self.playButton.accessibilityLabel = @"Play";
+    self.playButton.accessibilityHint = @"Plays the video";
+    self.playButton.accessibilityTraits = UIAccessibilityTraitButton;
+    self.volumeButton.isAccessibilityElement = YES;
+    self.volumeButton.accessibilityLabel = content.mediaIsVideo ? @"Unmute" : @"Mute";
+    self.avPlayerControlsView.accessibilityElements = @[self.playButton, self.volumeButton];
+
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:content.mediaUrl]];
     self.avPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
@@ -403,6 +420,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         self.isAVMuted = YES;
         [self.volumeButton setImage:[self getVolumeOffImage] forState:UIControlStateNormal];
     }
+    self.volumeButton.accessibilityLabel = self.isAVMuted ? @"Unmute" : @"Mute";
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:self userInfo:@{@"muted":@(self.isAVMuted)}];
 }
 
@@ -411,7 +429,8 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     [self.avPlayer setMuted:mute];
     self.isAVMuted = mute;
     UIImage *image = mute ? [self getVolumeOffImage] : [self getVolumeOnImage];
-    [self.volumeButton setImage: image forState:UIControlStateNormal];
+    [self.volumeButton setImage:image forState:UIControlStateNormal];
+    self.volumeButton.accessibilityLabel = mute ? @"Unmute" : @"Mute";
 }
 
 - (BOOL)isMuted {
@@ -438,6 +457,9 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
         [self.avPlayer play];
         [self hideControls:NO];
         [self.playButton setSelected:YES];
+        self.playButton.accessibilityLabel = @"Pause";
+        self.playButton.accessibilityHint = @"Pauses the video";
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, @"Playing");
         [self startAVIdleCountdown];
         [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:self userInfo:nil];
     }
@@ -454,6 +476,9 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
         [self.playButton setSelected:NO];
+        self.playButton.accessibilityLabel = @"Play";
+        self.playButton.accessibilityHint = @"Plays the video";
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, @"Paused");
         [self showControls:YES];
         [self stopAVIdleCountdown];
     }
@@ -547,7 +572,7 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
             if (CGRectIsEmpty(videoRect)) {
                 videoRect = self.avPlayerContainerView.bounds;
             }
-            self.volumeButton.frame = CGRectMake(videoRect.origin.x+30.f,(videoRect.origin.y+videoRect.size.height)-60.f, 30.f, 30.f);
+            self.volumeButton.frame = CGRectMake(videoRect.origin.x + 30.f, (videoRect.origin.y + videoRect.size.height) - 60.f, 44.f, 44.f);
             self.volumeButton.hidden = NO;
         }
     }

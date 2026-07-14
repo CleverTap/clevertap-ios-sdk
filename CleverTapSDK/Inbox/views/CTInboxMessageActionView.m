@@ -34,7 +34,8 @@
 
 - (UIButton*)setupViewForButton:(UIButton *)buttonView forText:(NSDictionary *)messageButton withIndex:(int)index; {
     buttonView.tag = index;
-    buttonView.titleLabel.adjustsFontSizeToFitWidth = NO;
+    buttonView.titleLabel.adjustsFontForContentSizeCategory = YES;
+    buttonView.accessibilityTraits = UIAccessibilityTraitButton;
     buttonView.hidden = NO;
     [buttonView addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [buttonView setTitle:messageButton[@"text"] forState:UIControlStateNormal];
