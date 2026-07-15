@@ -34,6 +34,7 @@ NS_SWIFT_NAME(VarCache)
 - (void)loadVariants;
 - (void)applyVariableDiffs:(nullable NSDictionary<NSString *, id> *)diffs_;
 - (void)handleVariantsData:(NSArray<NSDictionary<NSString *, id> *> *)variantsData;
+- (NSArray<NSDictionary<NSString *, id> *> *)variantsCopy;
 
 - (void)registerVariable:(CTVar *)var;
 - (nullable CTVar *)getVariable:(NSString *)name;

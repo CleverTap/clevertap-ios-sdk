@@ -376,6 +376,14 @@
     }
 }
 
+// Returns an immutable copy of the variants under the same lock the writers use,
+// so a caller on another thread can never copy the array while it is being replaced.
+- (NSArray<NSDictionary<NSString *, id> *> *)variantsCopy {
+    @synchronized (self) {
+        return [self.variants copy];
+    }
+}
+
 - (void)clearUserContent {
     // Disable callbacks and wait until fetch is finished
     [self setHasVarsRequestCompleted:NO];

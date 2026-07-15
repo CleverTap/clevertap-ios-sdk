@@ -5564,9 +5564,9 @@ static BOOL sharedInstanceErrorLogged;
 - (NSArray<NSDictionary<NSString *, id> *> *)variants
 {
     CT_TRY
-    NSArray *variants = [self.variables.varCache variants];
+    NSArray *variants = [self.variables.varCache variantsCopy];
     if (variants) {
-        return [variants copy];
+        return variants;
     }
     CT_END_TRY
     return [NSArray array];
