@@ -34,6 +34,7 @@
 
 - (UIButton*)setupViewForButton:(UIButton *)buttonView forText:(NSDictionary *)messageButton withIndex:(int)index; {
     buttonView.tag = index;
+    buttonView.titleLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:buttonView.titleLabel.font];
     buttonView.titleLabel.adjustsFontForContentSizeCategory = YES;
     buttonView.accessibilityTraits = UIAccessibilityTraitButton;
     buttonView.hidden = NO;
