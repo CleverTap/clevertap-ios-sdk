@@ -247,8 +247,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
 #define CLTAP_PROP_WZRK_CTA @"wzrk_c2a"
 #define CLTAP_PROP_WZRK_DL @"wzrk_dl"
-#define CLTAP_CTA_SWIPE_DISMISS @"swipe-dismiss"
-#define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"tap-outside-dismiss"
+#define CLTAP_CTA_SWIPE_DISMISS @"Swipe to Dismiss"
+#define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"Tap Outside to Dismiss"
 #define CLTAP_CTA_DISMISS_BUTTON @"Dismiss Button"
 
 // Split of Clicks: per-element identity and action descriptors added to the

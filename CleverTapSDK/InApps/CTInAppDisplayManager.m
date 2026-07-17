@@ -816,9 +816,6 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppActionTypeCustom:
             [self triggerCustomTemplateAction:action.customTemplateInAppData forNotification:notification];
             break;
-        case CTInAppActionTypeRequestForPermission:
-            // Handled in CTInAppDisplayViewController handleButtonClickFromIndex:
-            break;
     }
 }
 

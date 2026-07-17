@@ -19,10 +19,6 @@
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong, readwrite) CTInAppNotification *notification;
 @property (nonatomic, assign) BOOL shouldPassThroughTouches;
-// Guards against raising more than one Notification Clicked event for a single
-// in-app display (e.g. repeated tap-outside/swipe gestures while the in-app is
-// still animating out).
-@property (nonatomic, assign) BOOL actionTriggered;
 
 - (void)showFromWindow:(BOOL)animated;
 - (void)handleNotificationDidShow;

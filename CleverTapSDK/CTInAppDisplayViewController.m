@@ -270,11 +270,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     }
 }
 
-// Single "did show" hook for every in-app type. Resets the clicked-event dedup so each
-// presentation (including a reused controller) can raise its clicked event again, then
-// forwards to the delegate. All showFromWindow: implementations route through this.
+// Single "did show" hook for every in-app type
 - (void)handleNotificationDidShow {
-    self.actionTriggered = NO;
     if (self.delegate && [self.delegate respondsToSelector:@selector(notificationDidShow:)]) {
         [self.delegate notificationDidShow:self.notification];
     }
@@ -426,11 +423,6 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 // element. Enriches the extras with the Split of Clicks action descriptors and
 // guards against raising more than one clicked event per in-app display.
 - (BOOL)notifyDelegateActionTriggered:(CTNotificationAction *)action withExtras:(NSMutableDictionary *)extras {
-    if (self.actionTriggered) {
-        return NO;
-    }
-    self.actionTriggered = YES;
-
     [self addActionDescriptorsToExtras:extras forAction:action];
 
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
