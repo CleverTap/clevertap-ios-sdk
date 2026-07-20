@@ -358,6 +358,7 @@
     if (self.delegate) {
         [self.delegate notificationDidShow:self.notification];
     }
+    [self announceInAppShown];
     [self observeAppLifecycle];
 
     // Image/GIF: show controls immediately then auto-hide after 3 sec.
@@ -365,6 +366,14 @@
     if (self.pipPayload.media.contentType != CTPiPContentTypeVideo) {
         [self.containerView showControlsAndScheduleAutoHide];
     }
+}
+
+#pragma mark - Accessibility
+
+// PiP is a persistent, non-modal floating widget (see viewWillPassThroughTouch above),
+// so focus should land on the widget itself rather than the full-screen passthrough view.
+- (UIView *)accessibilityFocusTarget {
+    return self.containerView;
 }
 
 - (void)hide:(BOOL)animated {

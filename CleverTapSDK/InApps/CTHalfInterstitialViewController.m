@@ -191,6 +191,8 @@
             [self.secondButton setHidden:YES];
         }
     }
+
+    self.view.accessibilityViewIsModal = YES;
 }
 
 

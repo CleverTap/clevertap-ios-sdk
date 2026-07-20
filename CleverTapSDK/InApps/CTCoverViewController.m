@@ -146,6 +146,8 @@
             }
         }
     }
+
+    self.view.accessibilityViewIsModal = YES;
 }
 
 

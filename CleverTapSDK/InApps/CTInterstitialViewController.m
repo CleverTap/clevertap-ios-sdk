@@ -223,10 +223,12 @@
                                               attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
                                                  toItem:nil attribute:NSLayoutAttributeNotAnAttribute
                                              multiplier:1 constant:0] setActive:YES];
-                
+
             }
         }
     }
+
+    self.view.accessibilityViewIsModal = YES;
 }
 
 - (void)embedAvPlayerView {

@@ -287,7 +287,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         if (self.delegate) {
             [self.delegate notificationDidShow:self.notification];
         }
-        UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, @"inapp message shown");
+        [self announceInAppShown];
     };
     
     if (animated) {
@@ -529,6 +529,25 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 - (void)dealloc {
     if (@available(iOS 13.0, tvOS 13.0, *)) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+}
+
+#pragma mark - Accessibility
+
+- (UIView *)accessibilityFocusTarget {
+    return self.view;
+}
+
+- (void)announceInAppShown {
+    NSString *announcementText = @"Popup shown";
+
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
+        NSAttributedString *announcement = [[NSAttributedString alloc] initWithString:announcementText attributes:@{
+            UIAccessibilitySpeechAttributeQueueAnnouncement: @NO
+        }];
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, announcement);
+    } else {
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, announcementText);
     }
 }
 
