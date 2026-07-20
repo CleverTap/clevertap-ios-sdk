@@ -539,16 +539,8 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 }
 
 - (void)announceInAppShown {
-    NSString *announcementText = @"Popup shown";
-
-    if (@available(iOS 11.0, tvOS 11.0, *)) {
-        NSAttributedString *announcement = [[NSAttributedString alloc] initWithString:announcementText attributes:@{
-            UIAccessibilitySpeechAttributeQueueAnnouncement: @NO
-        }];
-        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, announcement);
-    } else {
-        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, announcementText);
-    }
+    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, [self accessibilityFocusTarget]);
+    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, @"Popup shown");
 }
 
 @end
