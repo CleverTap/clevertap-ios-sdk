@@ -200,7 +200,22 @@ typedef enum {
         fixedHeight = true;
     } else {
         float percent = self.notification.heightPercent;
-        size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        if (percent == 100.0) {
+            // Get the safe area insets
+            UIEdgeInsets safeInsets = UIEdgeInsetsZero;
+            if (@available(iOS 11.0, *)) {
+                safeInsets = [CTUIUtils getSharedApplication].keyWindow.safeAreaInsets;
+            }
+
+            // Calculate safe area height
+            CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
+
+            // Calculate percentage-based height
+            size.height = (CGFloat) ceil(safeAreaHeight * (percent / 100.0f));
+        }
+        else {
+            size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        }
     }
     
     // prevent webview content insets for Cover
