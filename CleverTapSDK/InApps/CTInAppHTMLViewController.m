@@ -211,7 +211,7 @@ typedef enum {
             CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
 
             // Calculate percentage-based height
-            size.height = (CGFloat) ceil(safeAreaHeight * (percent / 100.0f));
+            size.height = (CGFloat) ceil(safeAreaHeight);
         }
         else {
             size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
