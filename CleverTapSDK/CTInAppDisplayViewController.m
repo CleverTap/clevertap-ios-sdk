@@ -287,6 +287,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         if (self.delegate) {
             [self.delegate notificationDidShow:self.notification];
         }
+        [self announceInAppShown];
     };
     
     if (animated) {
@@ -352,6 +353,10 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index {
     [buttonView setTag: index];
     buttonView.titleLabel.adjustsFontSizeToFitWidth = YES;
+    if (@available(iOS 11.0, *)) {
+        buttonView.titleLabel.font = [[UIFontMetrics defaultMetrics] scaledFontForFont:buttonView.titleLabel.font];
+        buttonView.titleLabel.adjustsFontForContentSizeCategory = YES;
+    }
     buttonView.hidden = NO;
     if (_notification.inAppType != CTInAppTypeHeader && _notification.inAppType != CTInAppTypeFooter) {
         buttonView.layer.borderWidth = 1.0f;
@@ -525,6 +530,17 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (@available(iOS 13.0, tvOS 13.0, *)) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
+}
+
+#pragma mark - Accessibility
+
+- (UIView *)accessibilityFocusTarget {
+    return self.view;
+}
+
+- (void)announceInAppShown {
+    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, [self accessibilityFocusTarget]);
+    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, @"Popup shown");
 }
 
 @end

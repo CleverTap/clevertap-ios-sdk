@@ -58,6 +58,8 @@ static const CGFloat kSpacingConstant = 160.f;
     }
     
     [self setUpImage];
+
+    self.view.accessibilityViewIsModal = YES;
 }
 
 - (void)handleLayoutForIdiomPad {
