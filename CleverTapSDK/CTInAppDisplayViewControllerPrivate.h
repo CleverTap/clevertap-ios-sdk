@@ -30,7 +30,6 @@
 - (void)handleImageTapGesture;
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;
 
-- (UIView *)accessibilityFocusTarget;
 - (void)announceInAppShown;
 
 @end
