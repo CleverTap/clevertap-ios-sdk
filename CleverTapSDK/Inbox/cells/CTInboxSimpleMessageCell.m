@@ -109,8 +109,8 @@
             return;
         }
         [self setupMediaPlayer];
+        [self activeMediaImageView].isAccessibilityElement = YES;
         [self activeMediaImageView].accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
-        self.avPlayerContainerView.accessibilityLabel = content.mediaDescription ? content.mediaDescription : @"Message Media";
     }
 }
 
