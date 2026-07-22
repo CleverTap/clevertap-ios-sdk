@@ -67,3 +67,24 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Notify the Bearded Robot test app (CleverTap/CT-Apps) that a new core
+      # SDK version has been cut, so it can open a version-bump PR.
+      # NOTE: this fires when the draft release / tag is created. If the pod is
+      # only resolvable from CleverTap/podspecs at a later publish step, move
+      # this step (or add a `release: [published]` trigger) to that point so the
+      # CT-Apps `pod update` can find the version. Until then the CT-Apps side
+      # can be re-run manually via workflow_dispatch.
+      - name: Dispatch core-sdk-released to CT-Apps
+        env:
+          GH_TOKEN: ${{ secrets.CT_APPS_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::CT_APPS_DISPATCH_TOKEN is not set. Add a PAT with 'repo' scope on CleverTap/CT-Apps as a repo secret."
+            exit 1
+          fi
+          VERSION=$(cat sdk-version.txt)
+          echo "📣 Notifying CT-Apps: ios core $VERSION released"
+          PAYLOAD=$(printf '{"event_type":"core-sdk-released","client_payload":{"platform":"ios","version":"%s"}}' "$VERSION")
+          echo "$PAYLOAD" | gh api repos/CleverTap/CT-Apps/dispatches --method POST --input -
+          echo "✅ Dispatch sent to CleverTap/CT-Apps."
