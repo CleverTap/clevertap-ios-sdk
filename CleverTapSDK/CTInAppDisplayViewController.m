@@ -423,7 +423,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 // element. Enriches the extras with the Split of Clicks action descriptors and
 // guards against raising more than one clicked event per in-app display.
 - (BOOL)notifyDelegateActionTriggered:(CTNotificationAction *)action withExtras:(NSMutableDictionary *)extras {
-    [self addActionDescriptorsToExtras:extras forAction:action];
+    [self addActionDescriptorsForAction:action toExtras:extras];
 
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
@@ -436,7 +436,7 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 //   wzrk_data — the action payload: the URL for an open-url action, the
 //               key-values dictionary for a kv action, the function name for a
 //               custom-code action, and "close" for a close action.
-- (void)addActionDescriptorsToExtras:(NSMutableDictionary *)extras forAction:(CTNotificationAction *)action {
+- (void)addActionDescriptorsForAction:(CTNotificationAction *)action toExtras:(NSMutableDictionary *)extras {
     if (!action) {
         return;
     }
