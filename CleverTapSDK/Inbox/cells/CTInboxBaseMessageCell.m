@@ -66,7 +66,11 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
     self.containerView.isAccessibilityElement = NO;
-    for (UILabel *label in @[self.titleLabel, self.bodyLabel, self.dateLabel]) {
+    NSMutableArray<UILabel *> *labels = [NSMutableArray arrayWithCapacity:3];
+    if (self.titleLabel) [labels addObject:self.titleLabel];
+    if (self.bodyLabel) [labels addObject:self.bodyLabel];
+    if (self.dateLabel) [labels addObject:self.dateLabel];
+    for (UILabel *label in labels) {
         label.font = [UIFontMetrics.defaultMetrics scaledFontForFont:label.font];
         label.adjustsFontForContentSizeCategory = YES;
     }
