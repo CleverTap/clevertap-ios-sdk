@@ -206,6 +206,12 @@ typedef enum {
             if (@available(iOS 11.0, *)) {
                 safeInsets = [CTUIUtils getSharedApplication].keyWindow.safeAreaInsets;
             }
+            else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                safeInsets.top = [CTUIUtils getSharedApplication].statusBarFrame.size.height;
+#pragma clang diagnostic pop
+            }
 
             // Calculate safe area height
             CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
