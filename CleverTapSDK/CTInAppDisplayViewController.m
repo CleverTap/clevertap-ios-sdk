@@ -562,6 +562,12 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
     if (callToAction) {
         extras[CLTAP_PROP_WZRK_CTA] = callToAction;
     }
+    // If no call-to-action resolved, default wzrk_c2a to "Undefined" instead of empty/missing.
+    NSString *c2aValue = extras[CLTAP_PROP_WZRK_CTA];
+    if (c2aValue == nil || c2aValue.length == 0) {
+        extras[CLTAP_PROP_WZRK_CTA] = CLTAP_INAPP_C2A_UNDEFINED;
+    }
+
     if (buttonId) {
         // For HTML in-apps the FE-supplied buttonId is the element identity.
         // Reported only as wzrk_element_id; button_id is not part of the backend contract.

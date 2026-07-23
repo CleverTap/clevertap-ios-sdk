@@ -250,6 +250,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_CTA_SWIPE_DISMISS @"Swipe to Dismiss"
 #define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"Tap Outside to Dismiss"
 #define CLTAP_CTA_DISMISS_BUTTON @"Dismiss Button"
+// Fallback wzrk_c2a value so the clicked event always carries a c2a.
+#define CLTAP_INAPP_C2A_UNDEFINED @"Undefined"
 
 // Split of Clicks: per-element identity and action descriptors added to the
 // Notification Clicked event for basic (native) and custom HTML in-apps.
