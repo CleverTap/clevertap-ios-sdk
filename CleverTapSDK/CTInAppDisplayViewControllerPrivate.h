@@ -30,4 +30,6 @@
 - (void)handleImageTapGesture;
 - (UIButton*)setupViewForButton:(UIButton *)buttonView withData:(CTNotificationButton *)button withIndex:(NSInteger)index;
 
+- (void)announceInAppShown;
+
 @end
