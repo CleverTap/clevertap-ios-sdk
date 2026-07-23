@@ -28,6 +28,9 @@ typedef enum {
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
     CleverTapJSInterface *_jsInterface;
+    BOOL _webViewLoaded;
+    BOOL _showRequested;
+    BOOL _showAnimated;
 }
 
 @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
@@ -197,7 +200,28 @@ typedef enum {
         fixedHeight = true;
     } else {
         float percent = self.notification.heightPercent;
-        size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        if (percent == 100.0) {
+            // Get the safe area insets
+            UIEdgeInsets safeInsets = UIEdgeInsetsZero;
+            if (@available(iOS 11.0, *)) {
+                safeInsets = [CTUIUtils getSharedApplication].keyWindow.safeAreaInsets;
+            }
+            else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                safeInsets.top = [CTUIUtils getSharedApplication].statusBarFrame.size.height;
+#pragma clang diagnostic pop
+            }
+
+            // Calculate safe area height
+            CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
+
+            // Calculate percentage-based height
+            size.height = (CGFloat) ceil(safeAreaHeight);
+        }
+        else {
+            size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        }
     }
     
     // prevent webview content insets for Cover
@@ -315,6 +339,26 @@ typedef enum {
     [self notifyDelegateActionTriggered:action withExtras:extras];
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    _webViewLoaded = YES;
+    if (_showRequested) {
+        _showRequested = NO;
+        [self showFromWindow:_showAnimated];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {
@@ -587,7 +631,16 @@ typedef enum {
 
 - (void)show:(BOOL)animated {
     if (!self.notification.html) return;
-    [self showFromWindow:animated];
+    if (!self.notification.url) {
+        _showRequested = YES;
+        _showAnimated = animated;
+        if (_webViewLoaded) {
+            _showRequested = NO;
+            [self showFromWindow:animated];
+        }
+    } else {
+        [self showFromWindow:animated];
+    }
 }
 
 - (void)hide:(BOOL)animated {

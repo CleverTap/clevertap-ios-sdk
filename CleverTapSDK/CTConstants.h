@@ -1,6 +1,6 @@
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
-#else
+#elif __has_include("CleverTapSDK-Swift.h")
 #import "CleverTapSDK-Swift.h"
 #endif
 
@@ -129,6 +129,15 @@ extern NSString *const kSessionId;
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
+#define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"
+#define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"
+#define CLTAP_INBOX_PENDING_READS_KEY_PREFIX @"CLTAP_inbox_pending_reads_"
+#define CLTAP_INBOX_V2_IDS_KEY_PREFIX @"CLTAP_inbox_v2_ids_"
+#define CLTAP_INBOX_CONFIRMED_DELETES_KEY_PREFIX @"CLTAP_inbox_confirmed_deletes_"
+#define CLTAP_INBOX_RETRY_DELETES_KEY_PREFIX @"CLTAP_inbox_retry_deletes_"
+static const NSTimeInterval kCTInboxConfirmedDeleteFallbackTTL = 86400.0; // 24 hours
+static const NSInteger kCTInboxFetchTypeInboxV2 = 7;
+static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
@@ -144,6 +153,7 @@ extern NSString *const kSessionId;
 #define CLTAP_WZRK_PREFIX @"wzrk_"
 #define CLTAP_NOTIFICATION_TAG_SECONDARY @"wzrk_"
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
+#define CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND @"wzrk_sif"
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 #define CLTAP_DATE_PREFIX @"$D_"
@@ -229,6 +239,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY @"istc_inapp"
 #define CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY @"istmcd_inapp"
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
+#define CLTAP_INAPP_EVAL_DEDUPED_FLAG @"ss_evals_deduped"
+
+#define CLTAP_PREFS_PREFIX @"WizRocket"
 
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"

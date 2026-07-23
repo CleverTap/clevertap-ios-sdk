@@ -42,12 +42,7 @@ public class CTLogger: NSObject {
         let fullMessage = "[CleverTap]: \(message)"
         
         if #available(iOS 10.0, tvOS 10.0, *) {
-            switch logType {
-            case .info:
-                os_log("%{public}@", log: osLog, type: .info, fullMessage)
-            case .debug:
-                os_log("%{public}@", log: osLog, type: .debug, fullMessage)
-            }
+            os_log("%{public}@", log: osLog, type: .default, fullMessage)
         } else {
             NSLog("%@", fullMessage)
         }

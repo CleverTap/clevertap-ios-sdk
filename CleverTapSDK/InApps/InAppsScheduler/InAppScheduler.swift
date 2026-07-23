@@ -106,11 +106,7 @@ import Foundation
             case .completed:
                 // Timer completed, retrieve and process
                 let result: Any
-                guard let resultId = timerResult.resultId else {
-                    result = self.dataExtractor?.createErrorResult(id: id, message: "Data not found")
-                    onComplete(result)
-                    return
-                }
+                let resultId = timerResult.resultId
                 let data = self.storageStrategy?.retrieveAfterTimer(id: resultId)
                 
                 if let data = data {

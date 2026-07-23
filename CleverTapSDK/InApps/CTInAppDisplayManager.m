@@ -6,6 +6,7 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 #import "CleverTapInternal.h"
+#import "CTImpressionManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
@@ -51,9 +52,7 @@
 #else
 #import "CleverTapSDK-Swift.h"
 #endif
-#import "CTTimerResult.h"
 #import "CTDelayedInAppResult.h"
-#import "CTInActionResult.h"
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static const NSString *kInAppNotificationKey = @"inAppNotification";
@@ -652,6 +651,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         currentlyDisplayingNotification = notification;
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
+        if (notification.inAppType == CTInAppTypeHTML) {
+            [controller loadViewIfNeeded];
+        }
         [[self class] displayInAppDisplayController:controller];
 
         // Update local in-app count only if it is from local push primer.

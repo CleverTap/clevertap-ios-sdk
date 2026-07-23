@@ -125,6 +125,10 @@ typedef enum {
         self.titleLabel.backgroundColor = [UIColor clearColor];
         self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
+        if (@available(iOS 11.0, *)) {
+            self.titleLabel.font = [[UIFontMetrics metricsForTextStyle:UIFontTextStyleHeadline] scaledFontForFont:self.titleLabel.font];
+            self.titleLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
     
     if (self.notification.message) {
@@ -133,6 +137,10 @@ typedef enum {
         self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
+        if (@available(iOS 11.0, *)) {
+            self.bodyLabel.font = [[UIFontMetrics defaultMetrics] scaledFontForFont:self.bodyLabel.font];
+            self.bodyLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
 }
 
@@ -397,7 +405,10 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        [self handleNotificationDidShow];
+        if (self.delegate) {
+            [self.delegate notificationDidShow:self.notification];
+        }
+        [self announceInAppShown];
     };
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{

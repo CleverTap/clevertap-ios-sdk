@@ -1,9 +1,10 @@
-framework module CleverTapSDK {    
+framework module CleverTapSDK {
     header "CleverTap.h"
     header "CleverTap+Inbox.h"
     header "CleverTap+FeatureFlags.h"
     header "CleverTap+ProductConfig.h"
     header "CleverTap+DisplayUnit.h"
+    header "CleverTapDisplayUnitCache.h"
     header "CleverTap+SSLPinning.h"
     header "CleverTapBuildInfo.h"
     header "CleverTapEventDetail.h"
@@ -33,8 +34,30 @@ framework module CleverTapSDK {
     header "CleverTap+PushPermission.h"
     header "CTJsonTemplateProducer.h"
     header "CTDelayedInAppResult.h"
-    header "CTInActionResult.h"
-    header "CTTimerResult.h"
     header "CTInAppStore.h"
+
+    // Internal headers required by CTSessionManager.swift.
+    // Grouped as an explicit submodule so they are NOT auto-imported when a
+    // client writes `import CleverTapSDK` — they must opt-in explicitly.
+    // Using a single module map (rather than a separate module.private.modulemap
+    // + MODULEMAP_PRIVATE_FILE) makes this work for both dynamic frameworks and
+    // static library CocoaPods builds (e.g. Flutter / React Native without
+    // use_frameworks!).
+    explicit module Private {
+        header "CTPreferences.h"
+        header "CTUIUtils.h"
+        header "CTValidationConfig.h"
+        header "CleverTapInstanceConfigPrivate.h"
+        header "CTConstants.h"
+        header "CTQueueType.h"
+        header "CTSwitchUserDelegate.h"
+        header "CTClock.h"
+        header "CTAttachToBatchHeaderDelegate.h"
+        header "CTBatchSentDelegate.h"
+        header "CTMultiDelegateManager.h"
+        header "CTImpressionManager.h"
+        export *
+    }
+
     export *
 }
