@@ -45,6 +45,8 @@
         @"wzrk_id": @"",
         @"param1": @"value1",
         @"param2": @"value2",
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://clevertap.com?param1=value1&param2=value2",
         @"wzrk_dl": @"https://clevertap.com?param1=value1&param2=value2"
     };
     
@@ -69,9 +71,11 @@
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": callToAction,
-        @"button_id": buttonId,
+        @"wzrk_element_id": buttonId,
         @"param1": @"value1",
         @"param2": @"value2",
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://clevertap.com?param1=value1&param2=value2",
         @"wzrk_dl": @"https://clevertap.com?param1=value1&param2=value2"
     };
     
@@ -97,18 +101,20 @@
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": @"c2aParam",
-        @"button_id": buttonId,
+        @"wzrk_element_id": buttonId,
         @"asd": @"value",
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://deeplink.com?param1=asd&param2=value2",
         @"wzrk_dl": @"https://deeplink.com?param1=asd&param2=value2"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
-    
+
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:url];
-    
+
     CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTAssertEqualObjects(expectedURL, action.actionURL);
-        XCTAssertTrue([expectedExtras isEqualToDictionary:extras]);
+        XCTAssertEqualObjects(expectedExtras, extras);
     }];
     self.viewController.delegate = delegate;
     // Trigger the action
@@ -125,8 +131,10 @@
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": callToAction,
-        @"button_id": buttonId,
+        @"wzrk_element_id": buttonId,
         @"asd": @"value",
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://deeplink.com?param1=asd&param2=value2",
         @"wzrk_dl": @"https://deeplink.com?param1=asd&param2=value2"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];

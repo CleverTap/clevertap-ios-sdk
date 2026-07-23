@@ -37,7 +37,7 @@ typedef NS_ENUM(int, CTValidationErrorCode) {
     CTValidationErrorValueTooLong = 521,
     CTValidationErrorInvalidValue = 521,
     
-    // Multi-value key Errors (521)
+    // Multi-value key Errors (523)
     CTValidationErrorRestrictedKey = 523,
     
     // Depth & Structure Errors (540-544)

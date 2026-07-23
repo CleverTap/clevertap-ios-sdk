@@ -1660,6 +1660,17 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
+- (void)recordInAppNotificationMediaError:(CTValidationResult *)error
+                          forNotification:(CTInAppNotification *)notification {
+    // A media (image/video) load failure must NOT raise a Notification Viewed/Clicked
+    // event. Push the error so it is reported as wzrk_error on the next event that is
+    // queued, matching how device/validation errors are already surfaced.
+    [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapLogInternal(self.config.logLevel, @"%@: InApp media load error for campaign %@ queued as wzrk_error (code %d)", self, notification.campaignId, error.errorCode);
+        [self.validationResultStack pushValidationResult:error];
+    }];
+}
+
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
     UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
     if (sharedApplication == nil) {

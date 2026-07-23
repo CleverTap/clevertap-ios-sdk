@@ -112,7 +112,7 @@ typedef enum {
     [self.view addSubview:webView];
     
     [self loadWebView];
-    if (!self.notification.showClose) {
+    if (!self.notification.showClose && self.notification.swipeToDismiss) {
         _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureHandle:)];
         _panGesture.delegate = self;
         [webView addGestureRecognizer:_panGesture];
@@ -325,10 +325,18 @@ typedef enum {
         dl = mutableParams[@"deeplink"];
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
-        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams[@"params"]];
+    CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
+    id params = mutableParams[@"params"];
+    NSMutableDictionary *extras = [params isKindOfClass:[NSDictionary class]]
+        ? [params mutableCopy]
+        : [NSMutableDictionary new];
+    extras[CLTAP_NOTIFICATION_ID_TAG] = self.notification.campaignId ?: @"";
+    extras[CLTAP_PROP_WZRK_CTA] = extras[CLTAP_PROP_WZRK_CTA] ?: CLTAP_INAPP_C2A_UNDEFINED;
+    NSString *deepLink = dl.absoluteString;
+    if (deepLink.length > 0) {
+        extras[CLTAP_PROP_WZRK_DL] = deepLink;
     }
+    [self notifyDelegateActionTriggered:action withExtras:extras];
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
 }
@@ -605,9 +613,7 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
     };
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{

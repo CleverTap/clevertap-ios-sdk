@@ -16,6 +16,7 @@
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CTEventBuilder.h"
+#import "CTValidationResult.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
 #import "CleverTapURLDelegate.h"
@@ -769,7 +770,20 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
+    // When an image/video fails to load, the SDK's HTML media template auto-dismisses
+    // with wzrk_c2a = image/video-error-dismiss. That's a load failure, not a user click:
+    // report a structured wzrk_error and skip the clicked event. Only HTML in-apps can
+    // send these reason strings, so this never misfires on a native in-app's wzrk_c2a.
+    if (notification.inAppType == CTInAppTypeHTML) {
+        CTValidationResult *mediaError = [self mediaLoadErrorForReason:extras[CLTAP_PROP_WZRK_CTA]];
+        if (mediaError) {
+            [self.instance recordInAppNotificationMediaError:mediaError forNotification:notification];
+            return;
+        }
+    }
+    
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
+
     // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
 
@@ -800,10 +814,21 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppActionTypeCustom:
             [self triggerCustomTemplateAction:action.customTemplateInAppData forNotification:notification];
             break;
-        case CTInAppActionTypeRequestForPermission:
-            // Handled in CTInAppDisplayViewController handleButtonClickFromIndex:
-            break;
     }
+}
+
+// Maps an advanced-builder media preload failure reason (carried in wzrk_c2a) to a
+// CTValidationResult so it can be reported via wzrk_error. Returns nil for normal CTAs.
+- (CTValidationResult *)mediaLoadErrorForReason:(NSString *)reason {
+    if ([reason isEqualToString:CLTAP_INAPP_ERROR_IMAGE_DISMISS]) {
+        return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD
+                                            andMessage:CLTAP_ERROR_MSG_INAPP_IMAGE_LOAD];
+    }
+    if ([reason isEqualToString:CLTAP_INAPP_ERROR_VIDEO_DISMISS]) {
+        return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD
+                                            andMessage:CLTAP_ERROR_MSG_INAPP_VIDEO_LOAD];
+    }
+    return nil;
 }
 
 - (void)handleCTAOpenURL:(NSURL *)ctaURL {

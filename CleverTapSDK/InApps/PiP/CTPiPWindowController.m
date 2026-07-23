@@ -482,6 +482,8 @@
 // MARK: - CTPiPContainerViewDelegate
 
 - (void)pipContainerDidTapClose {
+    [self triggerCloseActionWithCallToAction:CLTAP_CTA_DISMISS_BUTTON
+                                   elementId:CLTAP_INAPP_ELEMENT_CLOSE_BUTTON];
     [self hide:YES];
 }
 
@@ -527,20 +529,19 @@
 // MARK: - CTA Execution
 
 - (void)executeCTAWithOnClick:(CTPiPOnClickModel *)onClick {
-    // Record clicked event via delegate
+    // Record clicked event via the shared choke point so the Split of Clicks
     CTNotificationAction *action = [self actionForOnClick:onClick];
-    if (action && self.delegate &&
-        [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
+    if (action) {
         NSMutableDictionary *extras = [NSMutableDictionary new];
-        NSString *campaignId = self.notification.campaignId ?: @"";
-        extras[CLTAP_NOTIFICATION_ID_TAG] = campaignId;
+        extras[CLTAP_NOTIFICATION_ID_TAG] = self.notification.campaignId ?: @"";
+        extras[CLTAP_PROP_WZRK_ELEMENT_ID] = @"button-cta";
         if (action.actionURL) {
             extras[CLTAP_PROP_WZRK_DL] = action.actionURL.absoluteString;
         }
         if (onClick.c2a) {
             extras[CLTAP_PROP_WZRK_CTA] = onClick.c2a;
         }
-        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
+        [self notifyDelegateActionTriggered:action withExtras:extras];
     }
 
     // Always close PiP after any CTA tap — do not rely on the close flag in the payload.

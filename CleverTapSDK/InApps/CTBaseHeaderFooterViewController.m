@@ -146,7 +146,7 @@ typedef enum {
 
 - (void)setUpButtons {
     
-    if (!self.notification.showClose) {
+    if (!self.notification.showClose && self.notification.swipeToDismiss) {
         _panGesture = [[UIPanGestureRecognizer alloc]
                        initWithTarget:self
                        action:@selector(panGestureHandle:)];
@@ -361,6 +361,9 @@ typedef enum {
                 self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
             }
                              completion:^(BOOL finished) {
+                // Trigger before hide: hide:NO dismisses inline and fires the dismiss
+                // delegate before actionExtras is stored (matches triggerInAppAction:).
+                [self triggerCloseActionWithCallToAction:CLTAP_CTA_SWIPE_DISMISS elementId:nil];
                 [self hide:NO];
             }];
         }];
@@ -429,6 +432,5 @@ typedef enum {
 - (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
-
 
 @end
