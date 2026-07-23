@@ -28,7 +28,9 @@
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
-#import "CTSessionManager.h"
+#if __has_include("CTImpressionManager.h")
+#import "CTImpressionManager.h"
+#endif
 #import "CTFileDownloader.h"
 #import "CTCryptMigrator.h"
 

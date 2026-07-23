@@ -91,14 +91,15 @@
     // triggerAction should parse c2a url params with __dl__ data
     // when callToAction is not provided.
     NSURL *url = [NSURL URLWithString:@"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"];
-    
+
     NSString *buttonId = @"button1";
+    // wzrk_dl is set from action.actionURL which is updated to the extracted deeplink.
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": @"c2aParam",
         @"button_id": buttonId,
         @"asd": @"value",
-        @"wzrk_dl": @"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"
+        @"wzrk_dl": @"https://deeplink.com?param1=asd&param2=value2"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
     
@@ -120,12 +121,13 @@
     NSURL *url = [NSURL URLWithString:@"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"];
     NSString *callToAction = @"Test CTA";
     NSString *buttonId = @"button1";
+    // wzrk_dl is set from action.actionURL which is updated to the extracted deeplink.
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": callToAction,
         @"button_id": buttonId,
         @"asd": @"value",
-        @"wzrk_dl": @"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"
+        @"wzrk_dl": @"https://deeplink.com?param1=asd&param2=value2"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
     

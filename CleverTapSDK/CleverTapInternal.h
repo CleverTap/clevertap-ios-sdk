@@ -1,15 +1,16 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CTInAppDisplayManager.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppStore.h"
 #endif
-#import "CTSessionManager.h"
 #import "CTCryptMigrator.h"
 
 @class CTInAppDisplayManager;
 @class CTFileDownloader;
+@class CTSessionManager;
 
 @interface CleverTap (Internal)
 

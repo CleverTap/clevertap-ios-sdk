@@ -309,30 +309,35 @@
 
 - (void)testFetchContentAtIndex_WithAlreadyHandledRequest_SkipsRequest {
     [self stubRequestsSuccess];
-    
+
+    // Wait for the first request to complete so contentFetchQueue[0] is marked NSNull
+    // by markCompletedAtIndex before we issue the second fetch call.
+    XCTestExpectation *firstDone = [self expectationWithDescription:@"First request completes"];
+    self.contentFetchManager.onAllRequestsCompleted = ^{
+        [firstDone fulfill];
+    };
+
     [self.contentFetchManager handleContentFetch:@{
         CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY: @[@{@"test": @"data"}]
     }];
-    
-    XCTAssertEqual(self.contentFetchManager.contentFetchQueue.count, 1);
-    XCTAssertEqual(self.contentFetchManager.inFlightRequestIndices.count, 1);
-    
-    // Manually mark the item as already handled
-    [self.contentFetchManager.queueLock lock];
-    self.contentFetchManager.contentFetchQueue[0] = [NSNull null];
-    [self.contentFetchManager.queueLock unlock];
-    
-    XCTestExpectation *waitExpectation = [self expectationWithDescription:@"Wait for potential request"];
 
-    // Try to fetch content at the same index again
+    [self waitForExpectations:@[firstDone] timeout:5.0];
+
+    // At this point contentFetchQueue[0] == NSNull (set by markCompletedAtIndex)
+    // and index 0 has been removed from inFlightRequestIndices.
+    XCTAssertEqual(self.contentFetchManager.inFlightRequestIndices.count, 0);
+    NSUInteger responseCountBefore = self.testDelegate.receivedResponses.count;
+
+    // Calling fetchContentAtIndex:0 again should be skipped — the item is NSNull.
     [self.contentFetchManager fetchContentAtIndex:0];
-    
-    // Assert on the concurrentQueue to ensure the fetchContentAtIndex: was called
-    dispatch_async(self.contentFetchManager.concurrentQueue, ^{
+
+    XCTestExpectation *drainExpectation = [self expectationWithDescription:@"Queue drained after second call"];
+    dispatch_barrier_async(self.contentFetchManager.concurrentQueue, ^{
         XCTAssertEqual(self.contentFetchManager.inFlightRequestIndices.count, 0);
-        XCTAssertEqual(self.testDelegate.receivedResponses.count, 0);
+        // No additional response should have been received beyond what the first request produced.
+        XCTAssertEqual(self.testDelegate.receivedResponses.count, responseCountBefore);
         XCTAssertEqual(self.testDelegate.receivedErrors.count, 0);
-        [waitExpectation fulfill];
+        [drainExpectation fulfill];
     });
     [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
