@@ -768,16 +768,10 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
-    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
-
-    // Media preload failures arrive from the SDK-bundled advanced-builder template
-    // (delivered as an HTML in-app) as a synthetic close with wzrk_c2a =
-    // image/video-error-dismiss. Only trust these reason strings for HTML in-apps — the
-    // only type whose media template can emit them — so a wzrk_c2a on a native in-app is
-    // never misread as an error. Report as a structured wzrk_error (no click event is
-    // raised); the in-app is already being dismissed by the controller.
-    // (Gating on inAppType, not aspectRatio: the template is delivered via notification.html
-    // regardless of aspect ratio, so aspectRatio is an unreliable signal.)
+    // When an image/video fails to load, the SDK's HTML media template auto-dismisses
+    // with wzrk_c2a = image/video-error-dismiss. That's a load failure, not a user click:
+    // report a structured wzrk_error and skip the clicked event. Only HTML in-apps can
+    // send these reason strings, so this never misfires on a native in-app's wzrk_c2a.
     if (notification.inAppType == CTInAppTypeHTML) {
         CTValidationResult *mediaError = [self mediaLoadErrorForReason:extras[CLTAP_PROP_WZRK_CTA]];
         if (mediaError) {
@@ -785,6 +779,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
             return;
         }
     }
+    
+    CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
 
     // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];

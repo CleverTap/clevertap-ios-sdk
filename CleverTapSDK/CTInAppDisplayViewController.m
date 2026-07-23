@@ -542,13 +542,18 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
         NSString *urlString = [action.actionURL absoluteString];
         NSMutableDictionary *mutableParams = [CTInAppUtils getParametersFromURL:urlString];
 
-        if (mutableParams[@"params"]) {
+        if ([mutableParams[@"params"] isKindOfClass:[NSDictionary class]]) {
             extras = [mutableParams[@"params"] mutableCopy];
-
-            // Use the url from the deeplink to update the action if such is set
-            if (mutableParams[@"deeplink"]) {
-                action = [[CTNotificationAction alloc] initWithOpenURL:mutableParams[@"deeplink"]];
-            }
+        }
+        NSString *callToActionUrlParam = extras[CLTAP_PROP_WZRK_CTA];
+        // getParametersFromURL already resolved the __dl__ convention: the deeplink (if present)
+        // becomes the action URL and callToActionUrlParam holds the decoded label.
+        if (mutableParams[@"deeplink"]) {
+            action = [[CTNotificationAction alloc] initWithOpenURL:mutableParams[@"deeplink"]];
+        }
+        // Use the URL's c2a value only if no explicit callToAction was passed.
+        if (callToAction == nil) {
+            callToAction = callToActionUrlParam;
         }
     }
 
