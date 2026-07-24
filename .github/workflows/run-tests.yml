@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - develop
+      - coverage-codecov-slather
   workflow_dispatch:
 
 jobs:
