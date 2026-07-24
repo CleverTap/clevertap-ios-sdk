@@ -16,6 +16,14 @@ ignore:
   - "CleverTapSDK/CTSwizzle.*"
 
 comment:
-  layout: "reach,diff,flags,tree"
+  layout: "header, diff, components, files"  # total+delta, patch coverage, module split, per-changed-file
   behavior: default
-  require_changes: false
+  require_changes: false   # always comment, even with no coverage change
+  require_base: false      # comment even before a BASE report exists
+
+component_management:
+  individual_components:
+    - component_id: core
+      paths: ["CleverTapSDK/**"]
+    - component_id: inapps
+      paths: ["CleverTapSDK/InApps/**"]
