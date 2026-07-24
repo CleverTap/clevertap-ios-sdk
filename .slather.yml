@@ -1,5 +1,5 @@
 coverage_service: cobertura_xml
-scheme: CleverTapSDK
+scheme: CleverTapSDKTests
 workspace: CleverTapSDK.xcworkspace
 xcodeproj: CleverTapSDK.xcodeproj
 output_directory: coverage
