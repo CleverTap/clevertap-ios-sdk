@@ -405,9 +405,7 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
         [self announceInAppShown];
     };
     if (animated) {

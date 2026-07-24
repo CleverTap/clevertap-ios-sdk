@@ -71,8 +71,10 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
     if (self.bodyLabel) [labels addObject:self.bodyLabel];
     if (self.dateLabel) [labels addObject:self.dateLabel];
     for (UILabel *label in labels) {
-        label.font = [UIFontMetrics.defaultMetrics scaledFontForFont:label.font];
-        label.adjustsFontForContentSizeCategory = YES;
+        if (@available(iOS 11.0, *)) {
+            label.font = [UIFontMetrics.defaultMetrics scaledFontForFont:label.font];
+            label.adjustsFontForContentSizeCategory = YES;
+        }
     }
 }
 
@@ -272,11 +274,11 @@ static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
 
     if (!self.volumeButton) {
         self.volumeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 44.f, 44.f)];
-        self.volumeButton.accessibilityHint = @"Toggles audio";
-        self.volumeButton.accessibilityTraits = UIAccessibilityTraitButton;
         [self.volumeButton addTarget:self action:@selector(volumeButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self.avPlayerControlsView addSubview:self.volumeButton];
     }
+    self.volumeButton.accessibilityHint = @"Toggles audio";
+    self.volumeButton.accessibilityTraits = UIAccessibilityTraitButton;
 
     CleverTapInboxMessageContent *content = self.message.content[0];
     if (content.mediaUrl == nil || content.mediaUrl.length == 0) {
