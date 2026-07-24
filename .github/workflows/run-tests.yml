@@ -53,10 +53,10 @@ jobs:
           echo "Using simulator UDID: $UDID"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
-      - name: Run Tests
+      - name: Build for testing
         run: |
           set -o pipefail
-          xcodebuild test \
+          xcodebuild build-for-testing \
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
             -configuration Debug \
@@ -64,6 +64,31 @@ jobs:
             -enableCodeCoverage YES \
             -derivedDataPath build \
             FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)' \
+            | xcpretty --color
+
+      - name: Patch embedded SDWebImage with simulator slice
+        run: |
+          SIM_FW="Vendors/simulator/SDWebImage.framework/SDWebImage"
+          if [ -f "$SIM_FW" ]; then
+            find build/Build/Products -type d -name "SDWebImage.framework" | while read -r fw; do
+              echo "Patching embedded framework: $fw"
+              cp "$SIM_FW" "$fw/SDWebImage"
+              codesign --force --sign - "$fw"
+            done
+          else
+            echo "$SIM_FW not found; skipping patch"
+          fi
+
+      - name: Run Tests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -workspace CleverTapSDK.xcworkspace \
+            -scheme CleverTapSDKTests \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -enableCodeCoverage YES \
+            -derivedDataPath build \
             | xcpretty --color
 
       - name: Generate Coverage Report with Slather
