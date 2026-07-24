@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - develop
+      - code-coverage-plugins   # temporary: remove after verifying the workflow run
   workflow_dispatch:
 
 jobs:
