@@ -331,7 +331,7 @@ typedef enum {
         ? [params mutableCopy]
         : [NSMutableDictionary new];
     extras[CLTAP_NOTIFICATION_ID_TAG] = self.notification.campaignId ?: @"";
-    extras[CLTAP_PROP_WZRK_CTA] = extras[CLTAP_PROP_WZRK_CTA] ?: CLTAP_INAPP_C2A_UNDEFINED;
+    extras[CLTAP_PROP_WZRK_CTA] = extras[CLTAP_PROP_WZRK_CTA] ?: @"";
     NSString *deepLink = dl.absoluteString;
     if (deepLink.length > 0) {
         extras[CLTAP_PROP_WZRK_DL] = deepLink;
