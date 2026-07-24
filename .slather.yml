@@ -4,6 +4,8 @@ workspace: CleverTapSDK.xcworkspace
 xcodeproj: CleverTapSDK.xcodeproj
 output_directory: coverage
 build_directory: build
+binary_basename:
+  - CleverTapSDK
 ignore:
   - CleverTapSDK/InApps/CTAlertViewController.*
   - CleverTapSDK/InApps/CTHeaderViewController.*
