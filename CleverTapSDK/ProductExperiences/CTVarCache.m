@@ -559,7 +559,7 @@
             if (migratedDiffs[@"_ct_encrypted_vars"]) {
                 NSDictionary *decryptedDiffs = [self decryptDiffsIfNeeded:migratedDiffs];
                 if (decryptedDiffs && decryptedDiffs != migratedDiffs) {
-                    self.diffs = decryptedDiffs;
+                    self.diffs = [decryptedDiffs copy];
                     CleverTapLogStaticInternal(@"Decrypted variables for level change");
                 }
             }

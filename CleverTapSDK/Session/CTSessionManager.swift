@@ -46,6 +46,13 @@ public final class CTSessionManager: NSObject {
     private var _campaign: String?
     private var _wzrkParams: [AnyHashable: Any]?
     private var _firstRequestInSession: Bool = false
+    // Backing variables for the formerly-`atomic` ObjC properties. Lock-protected
+    // to preserve the torn-read/write safety those atomic accessors provided.
+    private var _screenCount: Int32 = 0
+    private var _firstSession: Bool = false
+    private var _lastSessionLengthSeconds: Int32 = 0
+    private var _appLaunchProcessed: Bool = false
+    private var _encryptionInTransitFailed: Bool = false
 
     // MARK: - Internal properties (no ObjC callers — accessible via @testable import in Swift tests)
 
@@ -70,11 +77,30 @@ public final class CTSessionManager: NSObject {
         }
     }
 
-    public var screenCount: Int32 = 0
-    public var firstSession: Bool = false
-    public var lastSessionLengthSeconds: Int32 = 0
-    public var appLaunchProcessed: Bool = false
-    public var encryptionInTransitFailed: Bool = false
+    public var screenCount: Int32 {
+        get { lock.lock(); defer { lock.unlock() }; return _screenCount }
+        set { lock.lock(); _screenCount = newValue; lock.unlock() }
+    }
+
+    public var firstSession: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _firstSession }
+        set { lock.lock(); _firstSession = newValue; lock.unlock() }
+    }
+
+    public var lastSessionLengthSeconds: Int32 {
+        get { lock.lock(); defer { lock.unlock() }; return _lastSessionLengthSeconds }
+        set { lock.lock(); _lastSessionLengthSeconds = newValue; lock.unlock() }
+    }
+
+    public var appLaunchProcessed: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _appLaunchProcessed }
+        set { lock.lock(); _appLaunchProcessed = newValue; lock.unlock() }
+    }
+
+    public var encryptionInTransitFailed: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _encryptionInTransitFailed }
+        set { lock.lock(); _encryptionInTransitFailed = newValue; lock.unlock() }
+    }
 
     /// Set-once per session — subsequent writes are silently ignored.
     public var source: String? {

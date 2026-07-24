@@ -1714,7 +1714,7 @@
 }
 
 - (void)test_fetchVariables_queuesEvent {
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
                      withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
         return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
                 requestTime:0 responseTime:100.0];
@@ -1724,6 +1724,7 @@
     [self.cleverTapInstance fetchVariables:nil];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchVariables: should queue a wzrk_fetch event into eventsQueue");
+    [HTTPStubs removeStub:stub];
     [mockDispatch stopMocking];
 }
 
@@ -2232,7 +2233,7 @@
 }
 
 - (void)test_fetchInApps_queuesEvent {
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
                      withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
         return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
                 requestTime:0 responseTime:100.0];
@@ -2242,6 +2243,7 @@
     [self.cleverTapInstance fetchInApps:nil];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchInApps: should queue a wzrk_fetch event into eventsQueue");
+    [HTTPStubs removeStub:stub];
     [mockDispatch stopMocking];
 }
 
@@ -2309,7 +2311,7 @@
 - (void)test_fetchProductConfig_queuesEvent {
     // Stub with a long delay so the flush network request can't complete and drain
     // the queue before we assert on eventsQueue.count.
-    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
+    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
                      withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
         return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
                 requestTime:0 responseTime:100.0];
@@ -2319,6 +2321,7 @@
     [self.cleverTapInstance fetchProductConfig];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchProductConfig should queue a wzrk_fetch event into eventsQueue");
+    [HTTPStubs removeStub:stub];
     [mockDispatch stopMocking];
 }
 

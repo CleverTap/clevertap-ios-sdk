@@ -172,8 +172,12 @@ struct CTSessionManagerSwiftTests {
     func updateSessionTimeNoOpOutsideSession() {
         sessionManager.resetSession()
         #expect(sessionManager.sessionId == 0)
+        // resetSession clears kLastSessionTime to 0; an out-of-session update must not write it.
+        let lastSessionTimeKey = CTPreferences.storageKey(withSuffix: kLastSessionTime, config: config)
         sessionManager.updateSessionTime(12345)
         #expect(sessionManager.sessionId == 0)
+        #expect(CTPreferences.getIntForKey(lastSessionTimeKey, withResetValue: -1) == 0,
+                "updateSessionTime must not persist a timestamp while outside a session")
     }
 
     // MARK: - firstSession flag
@@ -189,6 +193,15 @@ struct CTSessionManagerSwiftTests {
 
     @Test("lastSessionLengthSeconds is zero when there is no prior session")
     func lastSessionLengthSecondsZeroWithNoPriorSession() {
+        // Shared preferences may still hold a completed session from an earlier test,
+        // which resetSession() would otherwise turn into a non-zero length. Clear the
+        // persisted session id/time (both suffixed and default-instance fallback keys)
+        // so the "no prior session" condition is deterministic.
+        CTPreferences.removeObject(forKey: CTPreferences.storageKey(withSuffix: kSessionId, config: config))
+        CTPreferences.removeObject(forKey: CTPreferences.storageKey(withSuffix: kLastSessionTime, config: config))
+        CTPreferences.removeObject(forKey: kSessionId)
+        CTPreferences.removeObject(forKey: kLastSessionPing)
+        sessionManager.resetSession()
         #expect(sessionManager.lastSessionLengthSeconds == 0)
     }
 
@@ -196,7 +209,14 @@ struct CTSessionManagerSwiftTests {
 
     @Test("minSessionSeconds defaults to CLTAP_SESSION_LENGTH_MINS × 60")
     func minSessionSecondsHasCorrectDefault() {
-        #expect(sessionManager.minSessionSeconds == 20 * 60) // CLTAP_SESSION_LENGTH_MINS * 60
+        // Use a fresh manager so the default set by the initializer is verified,
+        // not the value the fixture's init() reassigns onto the shared instance.
+        let freshConfig = CleverTapInstanceConfig(accountId: "testFreshSM", accountToken: "testFreshSM")
+        let freshManager = CTSessionManager(
+            config: freshConfig,
+            validationConfig: CTValidationConfig.defaultConfig(withCountryCode: nil)
+        )
+        #expect(freshManager.minSessionSeconds == 20 * 60) // CLTAP_SESSION_LENGTH_MINS * 60
     }
 
     // MARK: - updateSessionStateOnLaunch

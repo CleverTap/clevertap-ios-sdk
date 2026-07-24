@@ -8,3 +8,4 @@
 // test files can access internal types without importing the private module.
 #import "CleverTapInternal.h"
 #import "CTConstants.h"
+#import "CTValidationConfig.h"
