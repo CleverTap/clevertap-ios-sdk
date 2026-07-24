@@ -38,6 +38,20 @@ jobs:
       - name: Install xcpretty and slather
         run: gem install xcpretty slather --no-document
 
+      - name: Select iOS Simulator
+        id: simulator
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; sims=[s for rt,ss in d.items() if 'iOS' in rt for s in ss if s.get('isAvailable')]; print(next((s['udid'] for s in sims if 'iPhone' in s['name']), sims[0]['udid'] if sims else ''))")
+          if [ -z "$UDID" ]; then
+            echo "No available iOS Simulator found" >&2
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator UDID: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
       - name: Run Tests
         run: |
           set -o pipefail
@@ -45,7 +59,7 @@ jobs:
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
             -enableCodeCoverage YES \
             -derivedDataPath build \
             | xcpretty --color
