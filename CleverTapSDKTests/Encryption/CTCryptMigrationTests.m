@@ -1,5 +1,5 @@
 #import <XCTest/XCTest.h>
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 #import "CTEncryptionManager.h"
 #import "CTEncryptionManager+Tests.h"
 #import "CTCryptMigrator.h"

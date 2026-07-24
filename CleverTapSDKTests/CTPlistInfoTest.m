@@ -7,7 +7,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTPlistInfo.h"
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 
 // Expose private method for testing
 @interface CTPlistInfo (Test)

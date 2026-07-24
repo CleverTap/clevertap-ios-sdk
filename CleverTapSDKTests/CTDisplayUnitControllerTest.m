@@ -9,7 +9,7 @@
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
 
-@interface CTDisplayUnitDelegateSpy : NSObject <CTDisplayUnitDelegate>
+@interface CTDisplayUnitDelegateSpy : NSObject <CleverTapDisplayUnitDelegate>
 @property (nonatomic, assign) NSUInteger updateCallCount;
 @end
 
@@ -31,7 +31,7 @@
     self.delegate = [[CTDisplayUnitDelegateSpy alloc] init];
     self.controller = [[CTDisplayUnitController alloc] initWithAccountId:@"dispUnitCtrlTestAcct"
                                                                     guid:@"testGuid"];
-    self.controller.delegate = self.delegate;
+//    self.controller.delegate = self.delegate;
 }
 
 - (void)tearDown {

@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CTEncryptionManager+Tests.h"
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 #import "CTEncryptionManager.h"
 #import "CTConstants.h"
 #import "CTPreferences.h"

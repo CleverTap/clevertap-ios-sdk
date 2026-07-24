@@ -4,7 +4,7 @@
 #import <OHHTTPStubs/HTTPStubsResponse+JSON.h>
 #import <OHHTTPStubs/NSURLRequest+HTTPBodyTesting.h>
 #import "BaseTestCase.h"
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 #import "CleverTap+Tests.h"
 
 @interface CleverTapSDKTests : BaseTestCase
