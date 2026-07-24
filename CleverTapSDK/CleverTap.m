@@ -1183,6 +1183,8 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (isActuallyInForeground && !_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
+        // Show inapps that werent shown cuz of the app being in the background
+        [self.inAppDisplayManager _showInAppNotificationIfAny];
     }
 #endif
 }
