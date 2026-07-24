@@ -62,6 +62,7 @@ jobs:
             -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
             -enableCodeCoverage YES \
             -derivedDataPath build \
+            FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)' \
             | xcpretty --color
 
       - name: Generate Coverage Report with Slather
