@@ -46,8 +46,9 @@ public final class CTSessionManager: NSObject {
     private var _campaign: String?
     private var _wzrkParams: [AnyHashable: Any]?
     private var _firstRequestInSession: Bool = false
-    // Backing variables for the formerly-`atomic` ObjC properties. Lock-protected
-    // to preserve the torn-read/write safety those atomic accessors provided.
+
+    // These variables are used for previously ObjC atomic properties, where
+    // read, write are protected using locks
     private var _screenCount: Int32 = 0
     private var _firstSession: Bool = false
     private var _lastSessionLengthSeconds: Int32 = 0
