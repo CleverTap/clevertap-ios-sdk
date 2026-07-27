@@ -1660,6 +1660,7 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
+#if !CLEVERTAP_NO_INAPP_SUPPORT
 - (void)recordInAppNotificationMediaError:(CTValidationResult *)error
                           forNotification:(CTInAppNotification *)notification {
     // A media (image/video) load failure must NOT raise a Notification Viewed/Clicked
@@ -1670,6 +1671,7 @@ static BOOL sharedInstanceErrorLogged;
         [self.validationResultStack pushValidationResult:error];
     }];
 }
+#endif
 
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
     UIApplication *sharedApplication = [CTUIUtils getSharedApplication];

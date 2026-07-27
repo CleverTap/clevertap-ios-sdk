@@ -429,13 +429,12 @@ API_AVAILABLE(ios(13.0), tvos(13.0)) {
 // Single choke point for raising the Notification Clicked event from any in-app
 // element. Enriches the extras with the Split of Clicks action descriptors and
 // guards against raising more than one clicked event per in-app display.
-- (BOOL)notifyDelegateActionTriggered:(CTNotificationAction *)action withExtras:(NSMutableDictionary *)extras {
+- (void)notifyDelegateActionTriggered:(CTNotificationAction *)action withExtras:(NSMutableDictionary *)extras {
     [self addActionDescriptorsForAction:action toExtras:extras];
 
     if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
         [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:extras];
     }
-    return YES;
 }
 
 // Adds the Split of Clicks action descriptors to the clicked-event extras:
