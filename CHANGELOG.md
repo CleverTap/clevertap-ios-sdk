@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ### [Version 7.8.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.0) (July 27, 2026)
 #### Added
-- **Split of Clicks:** Adds per-element click attribution to In-App `Notification Clicked` events for native and HTML in-apps, plus configurable tap-outside and swipe-to-dismiss gestures. 
+- **Split of Clicks:** Adds per-element click attribution to In-Apps `Notification Clicked` event across all in-app templates. Also adds configurable tap-outside and swipe-to-dismiss gestures for In-Apps, and tracks these dismissals as Notification Clicked events.
 - **Accessibility Improvements:** Enhances accessibility support across In-App notifications and App Inbox, including VoiceOver labels, a larger dismiss-button tap area, and better handling of image content descriptions, to help apps meet accessibility standards.
 #### Fixed
 - Fixes a bug where CS InApps were not persisted when empty array was received.
