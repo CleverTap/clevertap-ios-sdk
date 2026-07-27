@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-### [Version 7.8.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.0) (July 27, 2026)
+### [Version 7.8.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.0) (July 28, 2026)
 #### Added
 - **Split of Clicks:** Adds per-element click attribution to In-Apps `Notification Clicked` event across all in-app templates. Also adds configurable tap-outside and swipe-to-dismiss gestures for In-Apps, and tracks these dismissals as Notification Clicked events.
 - **Accessibility Improvements:** Enhances accessibility support across In-App notifications and App Inbox, including VoiceOver labels, a larger dismiss-button tap area, and better handling of image content descriptions, to help apps meet accessibility standards.
@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Fixes a potential crash at `NSKeyedArchiver replaceObject:` that could occur while saving variable diffs.
 - Fixes a potential concurrency related crash during simultaneous `variants` updates.
 - Fixes a bug where the `Notification Clicked` event was not including deeplink properties for HTML In-Apps.
+- Fixes a bug where InApps that were missed while the app was in the background were not shown when the app returned to the foreground.
 
 ### [Version 7.7.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.7.1) (June 04, 2026)
 #### Added
