@@ -4360,11 +4360,21 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark Inbox V2 private
 
 - (void)handleAppInboxV2Response:(NSDictionary *)jsonResp isCompleteResponse:(BOOL)isCompleteResponse {
+    [self handleAppInboxV2Response:jsonResp isCompleteResponse:isCompleteResponse completion:nil];
+}
+
+- (void)handleAppInboxV2Response:(NSDictionary *)jsonResp
+              isCompleteResponse:(BOOL)isCompleteResponse
+                      completion:(void (^ _Nullable)(void))completion {
     NSArray *inboxV2JSON = jsonResp[CLTAP_INBOX_V2_RESPONSE_KEY];
-    if (!inboxV2JSON) return;
+    if (!inboxV2JSON) {
+        if (completion) completion();
+        return;
+    }
     if (self.isUserSwitching) {
         CleverTapLogDebug(self.config.logLevel,
             @"%@: InboxV2 response skipped — user switching in progress", self);
+        if (completion) completion();
         return;
     }
 
@@ -4411,7 +4421,10 @@ static BOOL sharedInstanceErrorLogged;
     NSArray *capturedFiltered = [filtered copy];
 
     [self initializeInboxWithCallback:^(BOOL success) {
-        if (!success) return;
+        if (!success) {
+            if (completion) completion();
+            return;
+        }
         [self.dispatchQueueManager runSerialAsync:^{
             [self.inboxController performExpiryPurge];
             [self.inboxController addV2MessageIds:[capturedResponseIds allObjects]];
@@ -4419,7 +4432,11 @@ static BOOL sharedInstanceErrorLogged;
                 [self.inboxController deleteAbsentPersistentV2MessagesFromResponseIds:capturedResponseIds];
             }
             if (capturedFiltered.count > 0) {
-                [self.inboxController updateMessages:capturedFiltered];
+                [self.inboxController updateMessages:capturedFiltered completion:^{
+                    if (completion) completion();
+                }];
+            } else {
+                if (completion) completion();
             }
         }];
     }];
@@ -4480,12 +4497,15 @@ static BOOL sharedInstanceErrorLogged;
                 CleverTapLogDebug(strongSelf.config.logLevel,
                     @"%@: InboxV2 fetch response received — response: %@", strongSelf, jsonResp);
                 [strongSelf.dispatchQueueManager runSerialAsync:^{
-                    [strongSelf handleAppInboxV2Response:jsonResp isCompleteResponse:YES];
-                    if (completion) {
-                        [CTUtils runSyncMainQueue:^{
-                            completion(YES);
-                        }];
-                    }
+                    // Fire completion only after the messages are updated, so the pull to refresh
+                    // callback reloads the table with the updated messages.
+                    [strongSelf handleAppInboxV2Response:jsonResp isCompleteResponse:YES completion:^{
+                        if (completion) {
+                            [CTUtils runSyncMainQueue:^{
+                                completion(YES);
+                            }];
+                        }
+                    }];
                 }];
             } else {
                 CleverTapLogDebug(strongSelf.config.logLevel,
