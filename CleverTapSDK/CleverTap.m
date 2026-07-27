@@ -1318,6 +1318,39 @@ static BOOL sharedInstanceErrorLogged;
     [self queueEvent:event withType:CleverTapEventTypeData];
 }
 
+- (void)pushLiveActivityEventNamed:(NSString *)eventName data:(NSDictionary *)data {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    if (eventName.length == 0) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[CLTAP_EVENT_NAME] = eventName;
+    event[CLTAP_EVENT_DATA] = data ?: @{};
+    [self queueEvent:event withType:CleverTapEventTypeNotificationViewed];
+}
+
+// Live Activity impression — identical shape/queue to a push "Notification Viewed" event.
+- (void)pushLiveActivityViewedEventWithData:(NSDictionary *)wzrk {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_VIEWED_EVENT_NAME;
+    event[CLTAP_EVENT_DATA] = wzrk ?: @{};
+    [self queueEvent:event withType:CleverTapEventTypeNotificationViewed];
+}
+
+// Live Activity click — identical shape/queue to a push "Notification Clicked" event.
+- (void)pushLiveActivityClickedEventWithData:(NSDictionary *)wzrk {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    NSMutableDictionary *event = [[NSMutableDictionary alloc] init];
+    event[CLTAP_EVENT_NAME] = CLTAP_NOTIFICATION_CLICKED_EVENT_NAME;
+    event[CLTAP_EVENT_DATA] = wzrk ?: @{};
+    self.wzrkParams = [wzrk copy];
+    [self queueEvent:event withType:CleverTapEventTypeRaised];
+}
+
+- (void)addLiveActivitySwitchUserDelegate:(id<CTSwitchUserDelegate>)delegate {
+    if (!delegate) return;
+    [self.delegateManager addSwitchUserDelegate:delegate];
+}
+
 - (void)_handlePushNotification:(id)object {
     [self _handlePushNotification:object openDeepLinksInForeground:NO];
 }

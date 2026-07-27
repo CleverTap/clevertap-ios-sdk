@@ -35,20 +35,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // watchOS session
         checkSession()
 
-        // ── CleverTap Live Activities Setup ───────────────────────────────────
+        // ── CleverTap Live Activities Setup (Push-to-Start, iOS 17.2+) ─────────
         //
-        // LOCAL FLOW (iOS 16.2+):
-        // Re-attaches SDK token monitoring to any Live Activities that were running
-        // when the app was previously terminated.
-        //
-        if #available(iOS 16.2, *) {
-            CleverTap.sharedInstance()?.resumeActivities(Activity<FoodOrderActivityAttributes>.self)
-        }
-
-        // PUSH-TO-START / REMOTE FLOW (iOS 17.2+):
-        // Register PTS capability early so iOS delivers the push-to-start token to
-        // the SDK. Must be called as early as possible — iOS only generates PTS tokens
-        // on the first launch after a device restart.
+        // Activities are started by the CleverTap backend only. Register the PTS
+        // capability early so iOS delivers the push-to-start token to the SDK, and
+        // so the SDK re-attaches to any running activities and reconciles dismissals.
+        // Must be called as early as possible — iOS only generates PTS tokens on the
+        // first launch after a device restart.
         //
         if #available(iOS 17.2, *) {
             CleverTap.sharedInstance()?.registerPushToStart(
@@ -130,15 +123,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
 
-        // Automatically record a "Live Activity Clicked" event when the user taps the
-        // Food Order Live Activity on the lock screen or Dynamic Island.
-        // The widget sets widgetURL to swiftstarter://liveactivity?tag=<tag>&type=<type>
+        // Record a "Live Activity Clicked" event when the user taps the Food Order Live
+        // Activity on the lock screen or Dynamic Island. Click (and impression) are opt-in
+        // client-side APIs — the app calls them when appropriate.
+        // The widget sets widgetURL to swiftstarter://liveactivity?tag=<activityId>&type=<type>
         if url.scheme == "swiftstarter", url.host == "liveactivity",
            let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
-            let tag = components.queryItems?.first(where: { $0.name == "tag" })?.value ?? ""
-            let type = components.queryItems?.first(where: { $0.name == "type" })?.value ?? ""
-            if !tag.isEmpty {
-                CleverTap.sharedInstance()?.recordLiveActivityClicked(withTag: tag, activityType: type)
+            let activityId = components.queryItems?.first(where: { $0.name == "tag" })?.value ?? ""
+            if !activityId.isEmpty {
+                // Behaves like a push "Notification Clicked" — data is the activity's wzrk dict.
+                // In production the full wzrk object comes from the activity payload; here we
+                // reconstruct a representative one from the deep-link.
+                let wzrk: [AnyHashable: Any] = [
+                    "activityId": activityId,
+                    "activityType": 0,
+                    "milestoneId": "orderPacked",
+                    "campaignId": 12345
+                ]
+                CleverTap.sharedInstance()?.recordLiveActivityClicked(wzrk: wzrk)
             }
         }
 

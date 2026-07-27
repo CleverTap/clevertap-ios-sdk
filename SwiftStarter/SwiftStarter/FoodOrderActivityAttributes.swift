@@ -28,5 +28,12 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
     var orderSummary: String
     /// Order identifier shown to the user.
     var orderId: String
+
+    /// CleverTap activity identifier injected by the backend into the push-to-start payload.
+    /// Required by the Push-to-Start flow so the SDK can map this activity's update token to
+    /// the correct CT campaign. Conformance to `CleverTapLiveActivityAttributes` is declared in
+    /// the app target (see `LiveActivitiesViewController.swift`) so this shared file stays free
+    /// of a CleverTapSDK import (the widget extension compiles it too).
+    var cleverTapActivityId: String?
 }
 #endif

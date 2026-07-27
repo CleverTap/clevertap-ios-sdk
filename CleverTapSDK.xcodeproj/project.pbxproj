@@ -284,14 +284,12 @@
 		A1B2C3D4E5F60001000000B3 /* CleverTap+LiveActivities.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A3 /* CleverTap+LiveActivities.swift */; };
 		A1B2C3D4E5F60001000000B4 /* CleverTapLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A4 /* CleverTapLiveActivityAttributes.swift */; };
 		A1B2C3D4E5F60001000000B5 /* CTLiveActivityDataQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A5 /* CTLiveActivityDataQueue.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		A1B2C3D4E5F60001000000B6 /* CTLiveActivityDataQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A6 /* CTLiveActivityDataQueue.swift */; };
 		A1B2C3D4E5F60001000000B7 /* CTLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A7 /* CTLiveActivityManager.swift */; };
 		A1B2C3D4E5F60001000000C1 /* CleverTap+LiveActivities.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A1 /* CleverTap+LiveActivities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A1B2C3D4E5F60001000000C2 /* CleverTap+LiveActivities.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A2 /* CleverTap+LiveActivities.m */; };
 		A1B2C3D4E5F60001000000C3 /* CleverTap+LiveActivities.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A3 /* CleverTap+LiveActivities.swift */; };
 		A1B2C3D4E5F60001000000C4 /* CleverTapLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A4 /* CleverTapLiveActivityAttributes.swift */; };
 		A1B2C3D4E5F60001000000C5 /* CTLiveActivityDataQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A5 /* CTLiveActivityDataQueue.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		A1B2C3D4E5F60001000000C6 /* CTLiveActivityDataQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A6 /* CTLiveActivityDataQueue.swift */; };
 		A1B2C3D4E5F60001000000C7 /* CTLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A7 /* CTLiveActivityManager.swift */; };
 		4E8B81682AD2ADAE00714BB4 /* CTSwizzleManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E8B81652AD2ADAE00714BB4 /* CTSwizzleManager.h */; };
 		4E8B81692AD2ADAE00714BB4 /* CTSwizzleManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4E8B81652AD2ADAE00714BB4 /* CTSwizzleManager.h */; };
@@ -942,7 +940,6 @@
 		A1B2C3D4E5F60001000000A3 /* CleverTap+LiveActivities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CleverTap+LiveActivities.swift"; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001000000A4 /* CleverTapLiveActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleverTapLiveActivityAttributes.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001000000A5 /* CTLiveActivityDataQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTLiveActivityDataQueue.h; sourceTree = "<group>"; };
-		A1B2C3D4E5F60001000000A6 /* CTLiveActivityDataQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTLiveActivityDataQueue.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001000000A7 /* CTLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTLiveActivityManager.swift; sourceTree = "<group>"; };
 		4E8B816A2AD2B2FD00714BB4 /* CleverTapInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CleverTapInternal.h; sourceTree = "<group>"; };
 		4E8B816D2AD2BB8A00714BB4 /* CTDispatchQueueManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTDispatchQueueManager.h; sourceTree = "<group>"; };
@@ -1637,7 +1634,6 @@
 				A1B2C3D4E5F60001000000A3 /* CleverTap+LiveActivities.swift */,
 				A1B2C3D4E5F60001000000A4 /* CleverTapLiveActivityAttributes.swift */,
 				A1B2C3D4E5F60001000000A5 /* CTLiveActivityDataQueue.h */,
-				A1B2C3D4E5F60001000000A6 /* CTLiveActivityDataQueue.swift */,
 				A1B2C3D4E5F60001000000A7 /* CTLiveActivityManager.swift */,
 			);
 			path = LiveActivities;
@@ -2838,7 +2834,6 @@
 				A1B2C3D4E5F60001000000C2 /* CleverTap+LiveActivities.m in Sources */,
 				A1B2C3D4E5F60001000000C3 /* CleverTap+LiveActivities.swift in Sources */,
 				A1B2C3D4E5F60001000000C4 /* CleverTapLiveActivityAttributes.swift in Sources */,
-				A1B2C3D4E5F60001000000C6 /* CTLiveActivityDataQueue.swift in Sources */,
 				A1B2C3D4E5F60001000000C7 /* CTLiveActivityManager.swift in Sources */,
 				4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
 				4E25E3CE278887A80008C888 /* CTIdentityRepoFactory.m in Sources */,
@@ -3130,7 +3125,6 @@
 				A1B2C3D4E5F60001000000B2 /* CleverTap+LiveActivities.m in Sources */,
 				A1B2C3D4E5F60001000000B3 /* CleverTap+LiveActivities.swift in Sources */,
 				A1B2C3D4E5F60001000000B4 /* CleverTapLiveActivityAttributes.swift in Sources */,
-				A1B2C3D4E5F60001000000B6 /* CTLiveActivityDataQueue.swift in Sources */,
 				A1B2C3D4E5F60001000000B7 /* CTLiveActivityManager.swift in Sources */,
 				4E8B81662AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */,
 				071EB4EF217F6427008F0FAB /* CTInterstitialViewController.m in Sources */,

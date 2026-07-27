@@ -4,16 +4,17 @@ import ActivityKit
 import UIKit
 import CleverTapSDK
 
+// Declared in the app target (which links CleverTapSDK) so the shared
+// FoodOrderActivityAttributes.swift — also compiled into the widget extension — does not
+// need to import CleverTapSDK. Required for the Push-to-Start flow.
+@available(iOS 16.2, *)
+extension FoodOrderActivityAttributes: CleverTapLiveActivityAttributes {}
+
 /// Demonstrates the full CleverTap Live Activities SDK integration using a
 /// food-order tracking scenario. Tapping each row calls the real SDK API and
 /// shows the result in the log view below the table.
 @available(iOS 13.0, *)
 class LiveActivitiesViewController: UIViewController {
-
-    // MARK: - Active activity tracking
-
-    /// ID of the currently running food-order Live Activity (if any).
-    private var currentActivityID: String?
 
     // MARK: - UI
 
@@ -88,31 +89,9 @@ class LiveActivitiesViewController: UIViewController {
     // MARK: - Section building
 
     private func buildSections() {
-        // ── 1. Local flow: start ──────────────────────────────────────────────────
-        let localSection = Section(
-            header: "Local Flow — Start & Manage Activity",
-            footer: "Starts a food-order Live Activity, registers the push token with CleverTap, then lets you simulate order progression.",
-            rows: [
-                Row("🚀 Start Food Order Activity",
-                    subtitle: "Activity.request + CT launchActivity") { [weak self] in
-                    self?.startFoodOrderActivity()
-                },
-                Row("🔥 Update: Preparing",
-                    subtitle: "Activity.update → step 1") { [weak self] in
-                    self?.updateActivity(step: 1, status: "Chef is preparing your order 🍕")
-                },
-                Row("🚴 Update: Out for Delivery",
-                    subtitle: "Activity.update → step 2") { [weak self] in
-                    self?.updateActivity(step: 2, status: "Your order is on its way! 🛵")
-                },
-                Row("🏠 End: Delivered",
-                    subtitle: "Activity.end → CT signals backend") { [weak self] in
-                    self?.endActivity()
-                }
-            ]
-        )
-
-        // ── 2. Push-to-Start token ────────────────────────────────────────────────
+        // ── 1. Push-to-Start token ────────────────────────────────────────────────
+        // Activities are started by the CleverTap backend (Push-to-Start); the app does not
+        // start them locally. registerPushToStart is called in AppDelegate at launch.
         let ptsSection = Section(
             header: "Push-to-Start Token (iOS 17.2+)",
             footer: "iOS generates a push-to-start token that lets the server launch a Live Activity without the app being open. registerPushToStart is called in AppDelegate at launch.",
@@ -124,129 +103,51 @@ class LiveActivitiesViewController: UIViewController {
             ]
         )
 
-        sections = [localSection, ptsSection]
+        // ── 2. Client-side event APIs (impression & click) ────────────────────────
+        let eventsSection = Section(
+            header: "Client-side Events (impression / click)",
+            footer: "Impression and click are opt-in APIs the app calls when appropriate — e.g. impression when the activity is shown, click from the widget deep-link handler in AppDelegate.",
+            rows: [
+                Row("👁️ Record Impression",
+                    subtitle: "recordLiveActivityImpression(wzrk:) → Notification Viewed") { [weak self] in
+                    self?.recordImpression()
+                },
+                Row("👆 Record Click",
+                    subtitle: "recordLiveActivityClicked(wzrk:) → Notification Clicked") { [weak self] in
+                    self?.recordClick()
+                }
+            ]
+        )
+
+        sections = [ptsSection, eventsSection]
         tableView.reloadData()
     }
 
-    // MARK: - Local Flow: start
+    // MARK: - Client-side event APIs
 
-    private func startFoodOrderActivity() {
-        if #available(iOS 16.2, *) {
-            let orderId = "ORD-\(Int.random(in: 10000...99999))"
-            let attributes = FoodOrderActivityAttributes(
-                restaurantName: "Pizza Palace",
-                orderSummary: "2× Margherita, 1× Garlic Bread",
-                orderId: orderId
-            )
-            let initialState = FoodOrderActivityAttributes.ContentState(
-                status: "Order confirmed! Getting things ready… ✅",
-                estimatedDelivery: Date().addingTimeInterval(30 * 60),
-                progressStep: 0
-            )
-
-            Task {
-                do {
-                    let content = ActivityContent(state: initialState, staleDate: nil)
-                    let activity = try Activity<FoodOrderActivityAttributes>.request(
-                        attributes: attributes,
-                        content: content,
-                        pushType: .token
-                    )
-
-                    // Store the activity ID so we can update / end it later
-                    await MainActor.run { self.currentActivityID = activity.id }
-
-                    // ── CleverTap: register token with backend ────────────────────
-                    let tag = "food-order-\(orderId)"
-                    await MainActor.run {
-                        CleverTap.sharedInstance()?.launchActivity(tag, activity: activity)
-                    }
-
-                    log("""
-                        ✅ Food Order Live Activity started
-                           Activity ID : \(activity.id)
-                           CT Tag      : \(tag)
-                           Restaurant  : \(attributes.restaurantName)
-                           Order       : \(attributes.orderSummary)
-                        → CT SDK is now monitoring pushTokenUpdates and activityStateUpdates.
-                        """)
-                } catch {
-                    log("❌ Failed to start activity: \(error.localizedDescription)")
-                }
-            }
-        } else {
-            log("⚠️ Live Activities require iOS 16.2+.")
-        }
+    private func recordImpression() {
+        let wzrk = demoWzrk()
+        CleverTap.sharedInstance()?.recordLiveActivityImpression(wzrk: wzrk)
+        log("👁️ Recorded impression (Notification Viewed) with wzrk: \(wzrk)")
     }
 
-    // MARK: - Local Flow: update
-
-    private func updateActivity(step: Int, status: String) {
-        if #available(iOS 16.2, *) {
-            guard let id = currentActivityID else {
-                log("⚠️ No active activity. Tap 'Start Food Order Activity' first.")
-                return
-            }
-            guard let activity = Activity<FoodOrderActivityAttributes>.activities.first(where: { $0.id == id }) else {
-                log("⚠️ Activity \(id) is no longer running.")
-                currentActivityID = nil
-                return
-            }
-
-            let newState = FoodOrderActivityAttributes.ContentState(
-                status: status,
-                estimatedDelivery: Date().addingTimeInterval(Double(max(0, 3 - step)) * 10 * 60),
-                progressStep: step
-            )
-
-            Task {
-                await activity.update(ActivityContent(state: newState, staleDate: nil))
-                log("""
-                    ✅ Activity updated
-                       Status : \(status)
-                       Step   : \(step)/3
-                    """)
-            }
-        } else {
-            log("⚠️ Live Activities require iOS 16.2+.")
-        }
+    private func recordClick() {
+        let wzrk = demoWzrk()
+        CleverTap.sharedInstance()?.recordLiveActivityClicked(wzrk: wzrk)
+        log("👆 Recorded click (Notification Clicked) with wzrk: \(wzrk)")
     }
 
-    // MARK: - Local Flow: end
-
-    private func endActivity() {
-        if #available(iOS 16.2, *) {
-            guard let id = currentActivityID else {
-                log("⚠️ No active activity to end.")
-                return
-            }
-            guard let activity = Activity<FoodOrderActivityAttributes>.activities.first(where: { $0.id == id }) else {
-                log("⚠️ Activity \(id) is no longer running.")
-                currentActivityID = nil
-                return
-            }
-
-            let finalState = FoodOrderActivityAttributes.ContentState(
-                status: "Order delivered! Enjoy your meal 🎉",
-                estimatedDelivery: Date(),
-                progressStep: 3
-            )
-
-            Task {
-                await activity.end(
-                    ActivityContent(state: finalState, staleDate: nil),
-                    dismissalPolicy: .after(Date().addingTimeInterval(5))
-                )
-                await MainActor.run { self.currentActivityID = nil }
-                log("""
-                    ✅ Activity ended
-                    → CT SDK detected .ended state and sent:
-                       { action: "remove", push_token_tag: "<tag>", type: "live_activity" }
-                    """)
-            }
-        } else {
-            log("⚠️ Live Activities require iOS 16.2+.")
-        }
+    /// In production the `wzrk` dictionary comes from the `wzrk` object in the activity payload
+    /// injected by the CleverTap backend, e.g.:
+    /// `{ "activityId": "<id>", "activityType": 0, "milestoneId": "<id>", "campaignId": 12345 }`
+    /// Here we build a representative one for the local demo.
+    private func demoWzrk() -> [AnyHashable: Any] {
+        return [
+            "activityId": "demo-activity",
+            "activityType": 0,
+            "milestoneId": "orderPacked",
+            "campaignId": 12345
+        ]
     }
 
     // MARK: - Push-to-Start token

@@ -14,4 +14,20 @@
     [self pushLiveActivityData:data];
 }
 
+- (void)recordLiveActivityEventNamed:(NSString *)eventName data:(NSDictionary *)data {
+    [self pushLiveActivityEventNamed:eventName data:data];
+}
+
+- (void)recordLiveActivityViewedEventWithData:(NSDictionary *)wzrk {
+    [self pushLiveActivityViewedEventWithData:wzrk];
+}
+
+- (void)recordLiveActivityClickedEventWithData:(NSDictionary *)wzrk {
+    [self pushLiveActivityClickedEventWithData:wzrk];
+}
+
+- (void)registerLiveActivitySwitchUserDelegate:(id)delegate {
+    [self addLiveActivitySwitchUserDelegate:delegate];
+}
+
 @end

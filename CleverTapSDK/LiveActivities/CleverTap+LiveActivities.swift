@@ -26,70 +26,6 @@ public extension CleverTap {
         return manager
     }
 
-    // MARK: - Local Flow
-
-    /// Registers a locally-started Live Activity with CleverTap and begins automatic
-    /// token monitoring.
-    ///
-    /// Call this immediately after requesting an activity with `Activity<T>.request(...)`.
-    /// The SDK will:
-    /// - Send the current push token to the CT backend.
-    /// - Observe `activity.pushTokenUpdates` and forward every new/rotated token automatically.
-    /// - Observe `activity.activityStateUpdates` and signal the backend when the activity ends.
-    ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// if #available(iOS 16.2, *) {
-    ///     let activity = try Activity<OrderAttributes>.request(
-    ///         attributes: attributes,
-    ///         content: .init(state: initialState, staleDate: nil),
-    ///         pushType: .token
-    ///     )
-    ///     CleverTap.sharedInstance()?.launchActivity("order-\(orderId)", activity: activity)
-    /// }
-    /// ```
-    ///
-    /// - Parameters:
-    ///   - pushTokenTag: A developer-supplied string that uniquely identifies this activity
-    ///     on the CT backend (e.g. `"order-tracking-12345"`). Used by the server when calling
-    ///     the CT Update/End Activity API.
-    ///   - activity: The `Activity<Attributes>` object returned by `Activity.request(...)`.
-    /// - Returns: The same `activity` object passed in, for optional chaining convenience.
-    @available(iOS 16.2, *)
-    @discardableResult
-    func launchActivity<Attributes: ActivityAttributes>(
-        _ pushTokenTag: String,
-        activity: Activity<Attributes>
-    ) -> Activity<Attributes>? {
-        guard !pushTokenTag.isEmpty else {
-            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CleverTap.launchActivity: pushTokenTag must not be empty.")
-            return nil
-        }
-        liveActivityManager.launchActivity(pushTokenTag: pushTokenTag, activity: activity)
-        return activity
-    }
-
-    /// Re-attaches token monitoring to all currently running activities of a given type.
-    ///
-    /// Call this in `application(_:didFinishLaunchingWithOptions:)` so the SDK resumes
-    /// observing activities that were active when the app was previously terminated.
-    ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// if #available(iOS 16.2, *) {
-    ///     CleverTap.sharedInstance()?.resumeActivities(Activity<OrderAttributes>.self)
-    /// }
-    /// ```
-    ///
-    /// - Parameter activityType: The `Activity<Attributes>.Type` whose running instances
-    ///   should be resumed (e.g. `Activity<OrderAttributes>.self`).
-    @available(iOS 16.2, *)
-    func resumeActivities<Attributes: ActivityAttributes>(_ activityType: Activity<Attributes>.Type) {
-        liveActivityManager.resumeActivities(activityType: activityType)
-    }
-
     // MARK: - Push-to-Start (Remote) Flow
 
     /// Registers a Push-to-Start capability with CleverTap.
@@ -133,30 +69,43 @@ public extension CleverTap {
         liveActivityManager.registerPushToStart(activityType: activityType, name: name)
     }
 
-    // MARK: - Click Tracking
+    // MARK: - Client-side event APIs (impression & click)
+    //
+    // Push impression and notification-click are front-end events the customer raises when
+    // appropriate (e.g. from the Live Activity's deep-link handler / widget interaction).
+    // They are opt-in: if the app does not call them, the events are not raised.
 
-    /// Records a `"Live Activity Clicked"` event and sends it to the CleverTap backend.
+    /// Records a Live Activity push impression. Behaves exactly like a push "Notification
+    /// Viewed" event — the `wzrk` dictionary from the activity payload becomes the event data.
     ///
-    /// This is the Swift implementation backing the ObjC declaration in
-    /// `CleverTap+LiveActivities.h`. Keeping the implementation in Swift avoids
-    /// importing the Swift-generated bridging header from the `.m` file.
-    ///
-    /// - Parameters:
-    ///   - pushTokenTag: The same tag passed to `launchActivity(_:activity:)`.
-    ///   - activityType: A string identifying the activity type (e.g. `"OrderAttributes"`).
-    @objc func recordLiveActivityClicked(withTag pushTokenTag: String, activityType: String) {
-        guard !pushTokenTag.isEmpty else {
+    /// - Parameter wzrk: The `wzrk` campaign dictionary present in the activity payload
+    ///   (e.g. `activityId`, `activityType`, `campaignId`, `milestoneId`).
+    @objc func recordLiveActivityImpression(wzrk: [AnyHashable: Any]) {
+        guard !wzrk.isEmpty else {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
-                                  message: "CleverTap.recordLiveActivityClicked: pushTokenTag must not be empty.")
-            return
-        }
-        guard !activityType.isEmpty else {
-            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
-                                  message: "CleverTap.recordLiveActivityClicked: activityType must not be empty.")
+                                  message: "CleverTap.recordLiveActivityImpression: wzrk must not be empty.")
             return
         }
         if #available(iOS 16.2, *) {
-            liveActivityManager.recordLiveActivityClicked(pushTokenTag: pushTokenTag, activityType: activityType)
+            liveActivityManager.recordLiveActivityImpression(wzrk: wzrk)
+        } else {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
+                                  message: "CleverTap.recordLiveActivityImpression: Live Activities require iOS 16.2+.")
+        }
+    }
+
+    /// Records a Live Activity click. Behaves exactly like a push "Notification Clicked" event —
+    /// the `wzrk` dictionary from the activity payload becomes the event data.
+    ///
+    /// - Parameter wzrk: The `wzrk` campaign dictionary present in the activity payload.
+    @objc func recordLiveActivityClicked(wzrk: [AnyHashable: Any]) {
+        guard !wzrk.isEmpty else {
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
+                                  message: "CleverTap.recordLiveActivityClicked: wzrk must not be empty.")
+            return
+        }
+        if #available(iOS 16.2, *) {
+            liveActivityManager.recordLiveActivityClicked(wzrk: wzrk)
         } else {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
                                   message: "CleverTap.recordLiveActivityClicked: Live Activities require iOS 16.2+.")

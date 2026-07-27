@@ -27,9 +27,8 @@
 /// }
 /// ```
 ///
-/// - Note: This protocol is required only for the Push-to-Start flow
-///   (`registerPushToStart(_:name:)`). It is **not** required for the Local
-///   flow (`launchActivity(_:activity:)`).
+/// - Note: The app's `ActivityAttributes` should conform to this protocol so the SDK can read
+///   the backend-injected identifiers for the Push-to-Start flow (`registerPushToStart(_:name:)`).
 public protocol CleverTapLiveActivityAttributes {
     /// The CleverTap activity identifier injected by the backend into the
     /// push-to-start APNs payload. The SDK reads this value from running
@@ -39,4 +38,22 @@ public protocol CleverTapLiveActivityAttributes {
     /// - Important: Do **not** rename this property. The SDK accesses it by
     ///   its exact name via the protocol.
     var cleverTapActivityId: String? { get set }
+
+    /// The numeric activity-type code from the backend `wzrk` payload (`wzrk.activityType`). Optional.
+    var cleverTapActivityType: Int? { get }
+
+    /// The CleverTap milestone identifier from the backend `wzrk` payload (`wzrk.milestoneId`). Optional.
+    var cleverTapMilestoneId: String? { get }
+
+    /// The CleverTap campaign identifier from the backend `wzrk` payload (`wzrk.campaignId`). Optional.
+    var cleverTapCampaignId: Int? { get }
+}
+
+public extension CleverTapLiveActivityAttributes {
+    // Defaults so existing conformers (and the Local testing flow) don't have to
+    // declare these; the Push-to-Start payload populates them when present. The SDK
+    // assembles these into the `wzrk` dictionary it sends on every Live Activity event.
+    var cleverTapActivityType: Int? { nil }
+    var cleverTapMilestoneId: String? { nil }
+    var cleverTapCampaignId: Int? { nil }
 }
