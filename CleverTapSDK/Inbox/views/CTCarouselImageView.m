@@ -121,8 +121,12 @@ static float captionHeight = 0.f;
     self.captionLabel = [[UILabel alloc]initWithFrame:CGRectMake(kCaptionLeftPadding, kCaptionTopPadding + imageViewSize.height, viewWidth - kCaptionLeftPadding * 2, kCaptionHeight)];
     self.captionLabel.textAlignment = NSTextAlignmentLeft;
     self.captionLabel.adjustsFontSizeToFitWidth = NO;
-    self.captionLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:[UIFont boldSystemFontOfSize:15.f]];
-    self.captionLabel.adjustsFontForContentSizeCategory = YES;
+    if (@available(iOS 11.0, *)) {
+        self.captionLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:[UIFont boldSystemFontOfSize:15.f]];
+        self.captionLabel.adjustsFontForContentSizeCategory = YES;
+    } else {
+        self.captionLabel.font = [UIFont boldSystemFontOfSize:15.f];
+    }
     self.captionLabel.textColor = [CTUIUtils ct_colorWithHexString:self.captionColor];
     self.captionLabel.text = self.caption;
     [self addSubview:self.captionLabel];
@@ -131,8 +135,12 @@ static float captionHeight = 0.f;
     self.subcaptionLabel.numberOfLines = 0;
     self.subcaptionLabel.textAlignment = NSTextAlignmentLeft;
     self.subcaptionLabel.adjustsFontSizeToFitWidth = NO;
-    self.subcaptionLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:[UIFont systemFontOfSize:13.f]];
-    self.subcaptionLabel.adjustsFontForContentSizeCategory = YES;
+    if (@available(iOS 11.0, *)) {
+        self.subcaptionLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:[UIFont systemFontOfSize:13.f]];
+        self.subcaptionLabel.adjustsFontForContentSizeCategory = YES;
+    } else {
+        self.subcaptionLabel.font = [UIFont systemFontOfSize:13.f];
+    }
     self.subcaptionLabel.textColor = [CTUIUtils ct_colorWithHexString:self.subcaptionColor];
     self.subcaptionLabel.text = self.subcaption;
     [self addSubview:self.subcaptionLabel];
