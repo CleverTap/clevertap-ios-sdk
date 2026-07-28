@@ -2022,12 +2022,12 @@
     
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
-    id mockIsEventLoggedFirstTime = OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(YES);
-    
+    OCMStub([dataStoreMock isEventLoggedFirstTime:@"event1"]).andReturn(YES);
+
     BOOL match = [triggerMatcher matchEventWhenTriggers:whenTriggers eventName:@"event1" eventProperties:@{}];
-    
+
     XCTAssertTrue(match);
-    OCMVerify(mockIsEventLoggedFirstTime);
+    OCMVerify([dataStoreMock isEventLoggedFirstTime:@"event1"]);
 }
 
 - (void)testMatchChargedEventWithFirstTimeOnly {
@@ -2053,7 +2053,7 @@
     CTTriggersMatcher *triggerMatcher = [[CTTriggersMatcher alloc] initWithDataStore:self.dataStore];
     
     CTLocalDataStore *dataStoreMock = OCMPartialMock(self.dataStore);
-    id mockIsEventLoggedFirstTime = OCMStub([dataStoreMock isEventLoggedFirstTime:@"Charged"]).andReturn(YES);
+    OCMStub([dataStoreMock isEventLoggedFirstTime:@"Charged"]).andReturn(YES);
     BOOL match = [triggerMatcher matchChargedEventWhenTriggers:whenTriggers details:@{
         @"prop1": @150,
     } items:@[
@@ -2067,7 +2067,7 @@
         }
     ]];
     XCTAssertTrue(match);
-    OCMVerify(mockIsEventLoggedFirstTime);
+    OCMVerify([dataStoreMock isEventLoggedFirstTime:@"Charged"]);
 }
 
 - (void)testMatchEventFirstTimeOnlyWithGeoRadius {

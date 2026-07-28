@@ -28,7 +28,9 @@
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
-#import "CTSessionManager.h"
+#if __has_include("CTImpressionManager.h")
+#import "CTImpressionManager.h"
+#endif
 #import "CTFileDownloader.h"
 #import "CTCryptMigrator.h"
 
@@ -1183,6 +1185,8 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (isActuallyInForeground && !_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
+        // Show inapps that were not shown because of the app being in the background
+        [self.inAppDisplayManager _showInAppNotificationIfAny];
     }
 #endif
 }
@@ -1657,6 +1661,19 @@ static BOOL sharedInstanceErrorLogged;
         }];
     }];
 }
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (void)recordInAppNotificationMediaError:(CTValidationResult *)error
+                          forNotification:(CTInAppNotification *)notification {
+    // A media (image/video) load failure must NOT raise a Notification Viewed/Clicked
+    // event. Push the error so it is reported as wzrk_error on the next event that is
+    // queued, matching how device/validation errors are already surfaced.
+    [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapLogInternal(self.config.logLevel, @"%@: InApp media load error for campaign %@ queued as wzrk_error (code %d)", self, notification.campaignId, error.errorCode);
+        [self.validationResultStack pushValidationResult:error];
+    }];
+}
+#endif
 
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
     UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
@@ -5564,9 +5581,9 @@ static BOOL sharedInstanceErrorLogged;
 - (NSArray<NSDictionary<NSString *, id> *> *)variants
 {
     CT_TRY
-    NSArray *variants = [self.variables.varCache variants];
+    NSArray *variants = [self.variables.varCache variantsCopy];
     if (variants) {
-        return [variants copy];
+        return variants;
     }
     CT_END_TRY
     return [NSArray array];
