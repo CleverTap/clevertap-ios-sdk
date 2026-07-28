@@ -9,14 +9,15 @@ import Foundation
 @available(iOS 16.2, *)
 struct FoodOrderActivityAttributes: ActivityAttributes {
 
-    // MARK: - ContentState (dynamic — updated via Activity.update)
+    // MARK: - ContentState (dynamic — updated via push "update")
 
     struct ContentState: Codable, Hashable {
         /// Human-readable status message shown on the lock screen.
         var status: String
-        /// Estimated delivery time displayed as a live countdown timer.
-        var estimatedDelivery: Date
-        /// Progress step index: 0 = Placed, 1 = Preparing, 2 = Picked Up, 3 = Delivered.
+        /// Estimated delivery time remaining, in **minutes** (plain Int — avoids the
+        /// Date/epoch encoding gotcha in push payloads).
+        var estimatedDelivery: Int
+        /// Progress step index: 0 = Placed, 1 = Preparing, 2 = En Route, 3 = Delivered.
         var progressStep: Int
     }
 
