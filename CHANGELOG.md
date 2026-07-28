@@ -7,9 +7,9 @@ All notable changes to this project will be documented in this file.
 - **Accessibility Improvements:** Enhances accessibility support across In-App notifications and App Inbox, including VoiceOver labels, a larger dismiss-button tap area, and better handling of image content descriptions, to help apps meet accessibility standards.
 #### Fixed
 - Fixes a bug where CS InApps were not persisted when empty array was received.
-- Fixes a bug where the AIB inapp would not respect safe area for full screen cover inapps.
+- Fixes a bug where the AIB in-app would not respect safe area for full-screen cover inapps.
 - Fixes a potential crash at `NSKeyedArchiver replaceObject:` that could occur while saving variable diffs.
-- Fixes a potential concurrency related crash during simultaneous `variants` updates.
+- Fixes a potential concurrency-related crash during simultaneous `variants` updates.
 - Fixes a bug where the `Notification Clicked` event was not including deeplink properties for HTML In-Apps.
 - Fixes a bug where InApps that were missed while the app was in the background were not shown when the app returned to the foreground.
 
