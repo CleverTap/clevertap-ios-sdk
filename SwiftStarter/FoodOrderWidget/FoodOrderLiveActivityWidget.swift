@@ -58,7 +58,7 @@ struct FoodOrderLiveActivityWidget: Widget {
                 Image(systemName: "fork.knife.circle.fill")
                     .foregroundColor(.orange)
             }
-            .widgetURL(URL(string: "swiftstarter://liveactivity?tag=\(context.attributes.cleverTapActivityId ?? "food-order-\(context.attributes.orderId)")&type=FoodOrderActivityAttributes"))
+            .widgetURL(URL(string: "swiftstarter://liveactivity?tag=\(context.attributes.wzrk?.wzrk_activityId ?? "food-order-\(context.attributes.orderId)")&type=FoodOrderActivityAttributes"))
             .keylineTint(.orange)
         }
     }

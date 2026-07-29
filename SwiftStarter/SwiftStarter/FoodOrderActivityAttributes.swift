@@ -14,11 +14,24 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         /// Human-readable status message shown on the lock screen.
         var status: String
-        /// Estimated delivery time remaining, in **minutes** (plain Int — avoids the
-        /// Date/epoch encoding gotcha in push payloads).
+        /// Estimated delivery time remaining, in **minutes**.
         var estimatedDelivery: Int
         /// Progress step index: 0 = Placed, 1 = Preparing, 2 = En Route, 3 = Delivered.
         var progressStep: Int
+    }
+
+    // MARK: - CleverTap wzrk (nested inside aps.attributes)
+    //
+    // The backend injects this `wzrk` object into `aps.attributes` (the only part of a
+    // push-to-start payload the app can read). The SDK reads these — via the
+    // `CleverTapLiveActivityAttributes` conformance declared in the app target — to build the
+    // `wzrk` sent on every Live Activity event. `wzrk_id` is the CAMPAIGN id.
+
+    struct Wzrk: Codable, Hashable {
+        var wzrk_activityId: String?
+        var wzrk_activityType: Int?
+        var wzrk_milestoneId: String?
+        var wzrk_id: Int?   // campaign id
     }
 
     // MARK: - Static attributes
@@ -29,12 +42,7 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
     var orderSummary: String
     /// Order identifier shown to the user.
     var orderId: String
-
-    /// CleverTap activity identifier injected by the backend into the push-to-start payload.
-    /// Required by the Push-to-Start flow so the SDK can map this activity's update token to
-    /// the correct CT campaign. Conformance to `CleverTapLiveActivityAttributes` is declared in
-    /// the app target (see `LiveActivitiesViewController.swift`) so this shared file stays free
-    /// of a CleverTapSDK import (the widget extension compiles it too).
-    var cleverTapActivityId: String?
+    /// CleverTap campaign attribution, injected by the backend into `aps.attributes`.
+    var wzrk: Wzrk?
 }
 #endif

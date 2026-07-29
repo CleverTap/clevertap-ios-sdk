@@ -49,6 +49,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 name: "FoodOrderActivityAttributes"
             )
         }
+
+        // IMPRESSION: start the observer that fires the impression API automatically when an
+        // activity is shown (see LiveActivityImpressionObserver).
+        if #available(iOS 16.2, *) {
+            LiveActivityImpressionObserver.shared.start()
+        }
         // ─────────────────────────────────────────────────────────────────────
 
         return true
@@ -135,10 +141,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 // In production the full wzrk object comes from the activity payload; here we
                 // reconstruct a representative one from the deep-link.
                 let wzrk: [AnyHashable: Any] = [
-                    "activityId": activityId,
-                    "activityType": 0,
-                    "milestoneId": "orderPacked",
-                    "campaignId": 12345
+                    "wzrk_activityId": activityId,
+                    "wzrk_activityType": 0,
+                    "wzrk_milestoneId": "orderPacked",
+                    "wzrk_id": 12345
                 ]
                 CleverTap.sharedInstance()?.recordLiveActivityClicked(wzrk: wzrk)
             }

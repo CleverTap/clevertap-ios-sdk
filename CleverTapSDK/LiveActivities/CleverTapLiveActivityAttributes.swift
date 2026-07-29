@@ -36,8 +36,9 @@ public protocol CleverTapLiveActivityAttributes {
     /// campaign ID.
     ///
     /// - Important: Do **not** rename this property. The SDK accesses it by
-    ///   its exact name via the protocol.
-    var cleverTapActivityId: String? { get set }
+    ///   its exact name via the protocol. The conforming type may back it with a
+    ///   stored property or a computed one (e.g. mapped from a nested `wzrk` object).
+    var cleverTapActivityId: String? { get }
 
     /// The numeric activity-type code from the backend `wzrk` payload (`wzrk.activityType`). Optional.
     var cleverTapActivityType: Int? { get }

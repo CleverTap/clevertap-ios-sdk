@@ -30,6 +30,7 @@
 		079F551920F34BB700343925 /* SwiftTvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079F551820F34BB700343925 /* SwiftTvOSUITests.swift */; };
 		07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C50073228D57AE003E1404 /* CTWebviewVC.swift */; };
 		CC001ABE00010000000A0002 /* LiveActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */; };
+		CC002ABE00010000000A0002 /* LiveActivityImpressionObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */; };
 		07C50076228D5A45003E1404 /* sampleHTMLCode.html in Resources */ = {isa = PBXBuildFile; fileRef = 07C50075228D5A45003E1404 /* sampleHTMLCode.html */; };
 		12DD4895418CD56E4F49BCB7 /* Pods_SwiftTvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C0DC3D543456DAC8D1B3223 /* Pods_SwiftTvOS.framework */; };
 		403F924D1CCFCC03A6805FF4 /* Pods_SwiftStarterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B81B510EDD3350F43A8655B6 /* Pods_SwiftStarterTests.framework */; };
@@ -208,6 +209,7 @@
 		07B9702520C7D45E009D0D6C /* SwiftStarter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftStarter.entitlements; sourceTree = "<group>"; };
 		07C50073228D57AE003E1404 /* CTWebviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CTWebviewVC.swift; sourceTree = "<group>"; };
 		CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivitiesViewController.swift; sourceTree = "<group>"; };
+		CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityImpressionObserver.swift; sourceTree = "<group>"; };
 		07C50075228D5A45003E1404 /* sampleHTMLCode.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = sampleHTMLCode.html; sourceTree = "<group>"; };
 		090810E065851ED45B5D5004 /* Pods_SwiftStarterUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarterUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0E8061C2A25A8A648173F9CC /* Pods_SwiftStarter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftStarter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -391,6 +393,7 @@
 				0740612A20C1509E00D8F4C9 /* ViewController.swift */,
 				07C50073228D57AE003E1404 /* CTWebviewVC.swift */,
 				CC001ABE00010000000A0001 /* LiveActivitiesViewController.swift */,
+				CC002ABE00010000000A0001 /* LiveActivityImpressionObserver.swift */,
 				AA001000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift */,
 				577917AB27034C9B00C676F4 /* CustomDomainViewController.swift */,
 				57FB79F82DF81FED0097FB65 /* CustomAppInboxScreen.swift */,
@@ -1119,6 +1122,7 @@
 				0740612B20C1509E00D8F4C9 /* ViewController.swift in Sources */,
 				07C50074228D57AE003E1404 /* CTWebviewVC.swift in Sources */,
 				CC001ABE00010000000A0002 /* LiveActivitiesViewController.swift in Sources */,
+				CC002ABE00010000000A0002 /* LiveActivityImpressionObserver.swift in Sources */,
 				AA014000BB00001234CAFE01 /* FoodOrderActivityAttributes.swift in Sources */,
 				57FB79FD2DF825680097FB65 /* AppInboxTableViewCell.swift in Sources */,
 				577917AC27034C9C00C676F4 /* CustomDomainViewController.swift in Sources */,

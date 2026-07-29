@@ -6,9 +6,14 @@ import CleverTapSDK
 
 // Declared in the app target (which links CleverTapSDK) so the shared
 // FoodOrderActivityAttributes.swift — also compiled into the widget extension — does not
-// need to import CleverTapSDK. Required for the Push-to-Start flow.
+// need to import CleverTapSDK. Maps the nested `wzrk` object to the protocol fields the SDK reads.
 @available(iOS 16.2, *)
-extension FoodOrderActivityAttributes: CleverTapLiveActivityAttributes {}
+extension FoodOrderActivityAttributes: CleverTapLiveActivityAttributes {
+    var cleverTapActivityId: String? { wzrk?.wzrk_activityId }
+    var cleverTapActivityType: Int? { wzrk?.wzrk_activityType }
+    var cleverTapMilestoneId: String? { wzrk?.wzrk_milestoneId }
+    var cleverTapCampaignId: Int? { wzrk?.wzrk_id }
+}
 
 /// Demonstrates the full CleverTap Live Activities SDK integration using a
 /// food-order tracking scenario. Tapping each row calls the real SDK API and
@@ -103,15 +108,14 @@ class LiveActivitiesViewController: UIViewController {
             ]
         )
 
-        // ── 2. Client-side event APIs (impression & click) ────────────────────────
+        // ── 2. Client-side event APIs (click) ─────────────────────────────────────
+        // Impression is fired automatically when an activity is shown — see
+        // AppDelegate.observeLiveActivitiesForImpressions(). Click fires from the widget
+        // deep-link handler in AppDelegate; the row below is a manual trigger for convenience.
         let eventsSection = Section(
-            header: "Client-side Events (impression / click)",
-            footer: "Impression and click are opt-in APIs the app calls when appropriate — e.g. impression when the activity is shown, click from the widget deep-link handler in AppDelegate.",
+            header: "Client-side Events (click)",
+            footer: "Impression fires automatically when a Live Activity is shown (AppDelegate observer → recordLiveActivityImpression). Click fires from the widget deep-link; the button below simulates it.",
             rows: [
-                Row("👁️ Record Impression",
-                    subtitle: "recordLiveActivityImpression(wzrk:) → Notification Viewed") { [weak self] in
-                    self?.recordImpression()
-                },
                 Row("👆 Record Click",
                     subtitle: "recordLiveActivityClicked(wzrk:) → Notification Clicked") { [weak self] in
                     self?.recordClick()
@@ -125,12 +129,6 @@ class LiveActivitiesViewController: UIViewController {
 
     // MARK: - Client-side event APIs
 
-    private func recordImpression() {
-        let wzrk = demoWzrk()
-        CleverTap.sharedInstance()?.recordLiveActivityImpression(wzrk: wzrk)
-        log("👁️ Recorded impression (Notification Viewed) with wzrk: \(wzrk)")
-    }
-
     private func recordClick() {
         let wzrk = demoWzrk()
         CleverTap.sharedInstance()?.recordLiveActivityClicked(wzrk: wzrk)
@@ -139,14 +137,14 @@ class LiveActivitiesViewController: UIViewController {
 
     /// In production the `wzrk` dictionary comes from the `wzrk` object in the activity payload
     /// injected by the CleverTap backend, e.g.:
-    /// `{ "activityId": "<id>", "activityType": 0, "milestoneId": "<id>", "campaignId": 12345 }`
-    /// Here we build a representative one for the local demo.
+    /// `{ "wzrk_activityId": "<id>", "wzrk_activityType": 0, "wzrk_milestoneId": "<id>", "wzrk_id": 12345 }`
+    /// (`wzrk_id` is the campaign id.) Here we build a representative one for the local demo.
     private func demoWzrk() -> [AnyHashable: Any] {
         return [
-            "activityId": "demo-activity",
-            "activityType": 0,
-            "milestoneId": "orderPacked",
-            "campaignId": 12345
+            "wzrk_activityId": "demo-activity",
+            "wzrk_activityType": 0,
+            "wzrk_milestoneId": "orderPacked",
+            "wzrk_id": 12345
         ]
     }
 

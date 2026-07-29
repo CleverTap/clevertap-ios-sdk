@@ -124,7 +124,7 @@ final class CTLiveActivityManager: NSObject {
             if !runningIDs.contains(activityID) {
                 let ctId = info[kCTLAStoreCleverTapActivityId] ?? activityID
                 var wzrk = Self.wzrkFromJSON(info[kCTLAStoreWzrk])
-                if wzrk.isEmpty { wzrk = ["activityId": ctId] }
+                if wzrk.isEmpty { wzrk = ["wzrk_activityId": ctId] }
                 CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: activity '\(activityID)' vanished while terminated; reporting dismissal on relaunch.")
                 sendActivityDismissed(cleverTapActivityId: ctId, activityName: name, wzrk: wzrk)
                 removePersistedActivity(activityID: activityID)
@@ -181,9 +181,19 @@ final class CTLiveActivityManager: NSObject {
                 }
 
                 // Content updates → "Live Activity" event with state "Updated".
+                // `contentUpdates` emits the CURRENT content when observation begins (right after
+                // the activity starts). That initial content is already represented by "Started",
+                // so we baseline on it and only emit "Updated" when the state actually changes.
                 group.addTask { [weak self] in
-                    for await _ in activity.contentUpdates {
+                    var lastState = activity.content.state
+                    for await content in activity.contentUpdates {
                         guard let self = self, !Task.isCancelled else { break }
+                        guard content.state != lastState else { continue }
+                        lastState = content.state
+                        // An `end` push carries a final content-state, which arrives here as a
+                        // content change. Skip it — the activity is no longer `.active`, and the
+                        // terminal "Ended"/"Dismissed" event already covers that transition.
+                        guard activity.activityState == .active else { continue }
                         self.recordLifecycleEvent(state: kCTLAStateUpdated, wzrk: wzrk)
                     }
                 }
@@ -270,7 +280,7 @@ final class CTLiveActivityManager: NSObject {
         props["state"] = state
         // Sent through the Notification Viewed pipeline, not the public recordEvent: API.
         dataQueue?.recordLiveActivityEventNamed(kCTLAEventName, data: props)
-        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: recorded 'Live Activity' (\(state)) for id '\(wzrk["activityId"] ?? "?")'")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: recorded 'Live Activity' (\(state)) for id '\(wzrk["wzrk_activityId"] ?? "?")'")
     }
 
     private func sendActivityDismissed(cleverTapActivityId: String, activityName: String, wzrk: [String: Any]) {
@@ -330,10 +340,10 @@ final class CTLiveActivityManager: NSObject {
 
     /// Assembles the `wzrk` dictionary the backend expects on every Live Activity event.
     private static func buildWzrk(activityId: String, attrs: CleverTapLiveActivityAttributes?) -> [String: Any] {
-        var wzrk: [String: Any] = ["activityId": activityId]
-        if let type = attrs?.cleverTapActivityType { wzrk["activityType"] = type }
-        if let milestoneId = attrs?.cleverTapMilestoneId { wzrk["milestoneId"] = milestoneId }
-        if let campaignId = attrs?.cleverTapCampaignId { wzrk["campaignId"] = campaignId }
+        var wzrk: [String: Any] = ["wzrk_activityId": activityId]
+        if let type = attrs?.cleverTapActivityType { wzrk["wzrk_activityType"] = type }
+        if let milestoneId = attrs?.cleverTapMilestoneId { wzrk["wzrk_milestoneId"] = milestoneId }
+        if let campaignId = attrs?.cleverTapCampaignId { wzrk["wzrk_id"] = campaignId }  // wzrk_id = campaign id
         return wzrk
     }
 
