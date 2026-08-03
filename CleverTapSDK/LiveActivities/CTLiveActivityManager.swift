@@ -298,8 +298,7 @@ final class CTLiveActivityManager: NSObject {
             "id": tokenHex,
             "type": "la",
             "action": "register",
-            "activityId": cleverTapActivityId,
-            "activityName": activityName
+            "activityId": cleverTapActivityId
         ])
         // The "Started" state also fires on token receipt.
         reportActivityStartedIfNeeded(activityID: activityID, wzrk: wzrk)
@@ -310,8 +309,7 @@ final class CTLiveActivityManager: NSObject {
         dataQueue?.enqueueLiveActivityData([
             "type": "la",
             "action": "unregister",
-            "activityId": cleverTapActivityId,
-            "activityName": activityName
+            "activityId": cleverTapActivityId
         ])
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent token-deactivation for id '\(cleverTapActivityId)'")
     }
@@ -327,8 +325,7 @@ final class CTLiveActivityManager: NSObject {
         dataQueue?.enqueueLiveActivityData([
             "id": tokenHex,
             "type": "pts",
-            "action": "register",
-            "activityName": activityType
+            "action": "register"
         ])
     }
 
