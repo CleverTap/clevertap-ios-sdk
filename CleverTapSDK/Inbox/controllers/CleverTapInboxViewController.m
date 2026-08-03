@@ -93,6 +93,8 @@ static const int kMaxTags = 3;
                                     style:UIBarButtonItemStylePlain
                                     target:self
                                     action:@selector(dismissTapped)];
+    closeButton.accessibilityLabel = @"Close";
+    closeButton.accessibilityHint = @"Dismisses the inbox";
     self.navigationItem.rightBarButtonItem = closeButton;
     self.navigationItem.title = [self getTitle];
     self.navigationController.navigationBar.translucent = false;

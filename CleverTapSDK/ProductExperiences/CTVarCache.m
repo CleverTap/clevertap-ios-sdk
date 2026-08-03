@@ -9,6 +9,7 @@
 @property (strong, nonatomic) NSMutableDictionary<NSString *, id> *valuesFromClient;
 @property (strong, nonatomic) id merged;
 @property (strong, nonatomic) NSDictionary<NSString *, id> *diffs;
+@property (strong, nonatomic) NSObject *diffsLock;   // dedicated monitor for all diffs access
 
 @property (strong, nonatomic) CacheUpdateBlock updateBlock;
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
@@ -36,8 +37,9 @@
 }
 
 - (void)initialize {
+    self.diffsLock = [NSObject new];
     self.vars = [NSMutableDictionary dictionary];
-    self.diffs = [NSMutableDictionary dictionary];
+    self.diffs = @{};
     self.valuesFromClient = [NSMutableDictionary dictionary];
     self.hasVarsRequestCompleted = NO;
     self.hasPendingDownloads = NO;
@@ -217,28 +219,34 @@
     
     // Stores the variables on the device in case we don't have a connection.
     // Restores next time when the app is opened.
-    // Diffs need to be locked incase other thread changes the diffs
-    @synchronized (self.diffs) {
-        // Encrypt diffs if needed before saving
-        NSDictionary *diffsToSave = [self encryptDiffsIfNeeded:self.diffs];
-        
-        NSMutableData *diffsData = [[NSMutableData alloc] init];
+    // Take a private snapshot under the lock so the archiver never encodes the
+    // live diffs container while another thread reassigns/releases it. The values
+    // are plist types built once by unflatten and never mutated in place, so a
+    // one-level copyItems snapshot is sufficient to make encoding race-free.
+    NSDictionary *diffsCopy;
+    @synchronized (self.diffsLock) {
+        diffsCopy = [[NSDictionary alloc] initWithDictionary:(self.diffs ?: @{}) copyItems:YES];
+    }
+
+    // Encrypt diffs if needed before saving
+    NSDictionary *diffsToSave = [self encryptDiffsIfNeeded:diffsCopy];
+
+    NSMutableData *diffsData = [[NSMutableData alloc] init];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:diffsData];
+    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:diffsData];
 #pragma clang diagnostic pop
-        [archiver encodeObject:diffsToSave forKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
-        [archiver finishEncoding];
-        
-        NSError *writeError = nil;
-        NSString *fileName = [self dataArchiveFileName];
-        NSString *filePath = [CTPreferences filePathfromFileName:fileName];
-        NSDataWritingOptions fileProtectionOption = _config.enableFileProtection ?
-        NSDataWritingFileProtectionComplete : NSDataWritingAtomic;
-        [diffsData writeToFile:filePath options:fileProtectionOption error:&writeError];
-        if (writeError) {
-            CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
-        }
+    [archiver encodeObject:diffsToSave forKey:CLEVERTAP_DEFAULTS_VARIABLES_KEY];
+    [archiver finishEncoding];
+
+    NSError *writeError = nil;
+    NSString *fileName = [self dataArchiveFileName];
+    NSString *filePath = [CTPreferences filePathfromFileName:fileName];
+    NSDataWritingOptions fileProtectionOption = _config.enableFileProtection ?
+    NSDataWritingFileProtectionComplete : NSDataWritingAtomic;
+    [diffsData writeToFile:filePath options:fileProtectionOption error:&writeError];
+    if (writeError) {
+        CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
     }
 }
 
@@ -305,10 +313,10 @@
         // Prevent overriding variables if API returns null
         // If no variables are defined, API returns {}
         if (diffs_ != nil && ![diffs_ isEqual:[NSNull null]]) {
-            self.diffs = diffs_;
-            
             // We need to lock it in case multiple threads will be accessing this.
-            @synchronized (self.diffs) {
+            // Store an immutable copy so the ivar never aliases a caller-held mutable dictionary.
+            @synchronized (self.diffsLock) {
+                self.diffs = [diffs_ copy];
                 self.merged = [ContentMerger mergeWithVars:self.valuesFromClient diff:self.diffs];
             }
             
@@ -365,6 +373,14 @@
     [diffsData writeToFile:filePath options:fileProtectionOption error:&writeError];
     if (writeError) {
         CleverTapLogStaticInternal(@"%@ failed to write data at %@: %@", self, filePath, writeError);
+    }
+}
+
+// Returns an immutable copy of the variants under the same lock the writers use,
+// so a caller on another thread can never copy the array while it is being replaced.
+- (NSArray<NSDictionary<NSString *, id> *> *)variantsCopy {
+    @synchronized (self) {
+        return [self.variants copy];
     }
 }
 
@@ -514,36 +530,38 @@
 }
 
 - (void)migrateVariablesEncryption {
-    if (!self.diffs || [self.diffs count] == 0) {
-        return;
-    }
-    
-    CleverTapLogStaticInternal(@"Migrating variables encryption from level %d to %d",
-                              (int)self.previousEncryptionLevel, (int)self.encryptionLevel);
-    
-    // Create mutable copy for migration
-    NSMutableDictionary *migratedDiffs = [self.diffs mutableCopy];
-    
-    // Scenario 1: None/Medium → High (encrypt)
-    if ((self.previousEncryptionLevel == CleverTapEncryptionNone ||
-         self.previousEncryptionLevel == CleverTapEncryptionMedium) &&
-        self.encryptionLevel == CleverTapEncryptionHigh) {
-        
-        // If diffs are not encrypted, they will be encrypted in saveDiffs
-        CleverTapLogStaticInternal(@"Variables will be encrypted on next save");
-    }
-    
-    // Scenario 2: High → None/Medium (decrypt)
-    else if (self.previousEncryptionLevel == CleverTapEncryptionHigh &&
-             (self.encryptionLevel == CleverTapEncryptionNone ||
-              self.encryptionLevel == CleverTapEncryptionMedium)) {
-        
-        // If diffs are encrypted, decrypt them
-        if (migratedDiffs[@"_ct_encrypted_vars"]) {
-            NSDictionary *decryptedDiffs = [self decryptDiffsIfNeeded:migratedDiffs];
-            if (decryptedDiffs && decryptedDiffs != migratedDiffs) {
-                self.diffs = decryptedDiffs;
-                CleverTapLogStaticInternal(@"Decrypted variables for level change");
+    @synchronized (self.diffsLock) {
+        if (!self.diffs || [self.diffs count] == 0) {
+            return;
+        }
+
+        CleverTapLogStaticInternal(@"Migrating variables encryption from level %d to %d",
+                                  (int)self.previousEncryptionLevel, (int)self.encryptionLevel);
+
+        // Create mutable copy for migration
+        NSMutableDictionary *migratedDiffs = [self.diffs mutableCopy];
+
+        // Scenario 1: None/Medium → High (encrypt)
+        if ((self.previousEncryptionLevel == CleverTapEncryptionNone ||
+             self.previousEncryptionLevel == CleverTapEncryptionMedium) &&
+            self.encryptionLevel == CleverTapEncryptionHigh) {
+
+            // If diffs are not encrypted, they will be encrypted in saveDiffs
+            CleverTapLogStaticInternal(@"Variables will be encrypted on next save");
+        }
+
+        // Scenario 2: High → None/Medium (decrypt)
+        else if (self.previousEncryptionLevel == CleverTapEncryptionHigh &&
+                 (self.encryptionLevel == CleverTapEncryptionNone ||
+                  self.encryptionLevel == CleverTapEncryptionMedium)) {
+
+            // If diffs are encrypted, decrypt them
+            if (migratedDiffs[@"_ct_encrypted_vars"]) {
+                NSDictionary *decryptedDiffs = [self decryptDiffsIfNeeded:migratedDiffs];
+                if (decryptedDiffs && decryptedDiffs != migratedDiffs) {
+                    self.diffs = [decryptedDiffs copy];
+                    CleverTapLogStaticInternal(@"Decrypted variables for level change");
+                }
             }
         }
     }

@@ -45,6 +45,8 @@
         @"wzrk_id": @"",
         @"param1": @"value1",
         @"param2": @"value2",
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://clevertap.com?param1=value1&param2=value2",
         @"wzrk_dl": @"https://clevertap.com?param1=value1&param2=value2"
     };
     
@@ -69,9 +71,11 @@
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": callToAction,
-        @"button_id": buttonId,
+        @"wzrk_element_id": buttonId,
         @"param1": @"value1",
         @"param2": @"value2",
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://clevertap.com?param1=value1&param2=value2",
         @"wzrk_dl": @"https://clevertap.com?param1=value1&param2=value2"
     };
     
@@ -91,23 +95,26 @@
     // triggerAction should parse c2a url params with __dl__ data
     // when callToAction is not provided.
     NSURL *url = [NSURL URLWithString:@"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"];
-    
+
     NSString *buttonId = @"button1";
+    // wzrk_dl is set from action.actionURL which is updated to the extracted deeplink.
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": @"c2aParam",
-        @"button_id": buttonId,
+        @"wzrk_element_id": buttonId,
         @"asd": @"value",
-        @"wzrk_dl": @"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://deeplink.com?param1=asd&param2=value2",
+        @"wzrk_dl": @"https://deeplink.com?param1=asd&param2=value2"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
-    
+
     CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:url];
-    
+
     CTInAppNotificationDisplayDelegateMock *delegate = [[CTInAppNotificationDisplayDelegateMock alloc] init];
     [delegate setHandleNotificationAction:^(CTNotificationAction *action, CTInAppNotification *notification, NSDictionary *extras) {
         XCTAssertEqualObjects(expectedURL, action.actionURL);
-        XCTAssertTrue([expectedExtras isEqualToDictionary:extras]);
+        XCTAssertEqualObjects(expectedExtras, extras);
     }];
     self.viewController.delegate = delegate;
     // Trigger the action
@@ -120,12 +127,15 @@
     NSURL *url = [NSURL URLWithString:@"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"];
     NSString *callToAction = @"Test CTA";
     NSString *buttonId = @"button1";
+    // wzrk_dl is set from action.actionURL which is updated to the extracted deeplink.
     NSDictionary *expectedExtras = @{
         @"wzrk_id": @"",
         @"wzrk_c2a": callToAction,
-        @"button_id": buttonId,
+        @"wzrk_element_id": buttonId,
         @"asd": @"value",
-        @"wzrk_dl": @"https://clevertap.com?wzrk_c2a=c2aParam__dl__https%3A%2F%2Fdeeplink.com%3Fparam1%3Dasd%26param2%3Dvalue2&asd=value"
+        @"wzrk_action": @"url",
+        @"wzrk_data": @"https://deeplink.com?param1=asd&param2=value2",
+        @"wzrk_dl": @"https://deeplink.com?param1=asd&param2=value2"
     };
     NSURL *expectedURL = [NSURL URLWithString:@"https://deeplink.com?param1=asd&param2=value2"];
     

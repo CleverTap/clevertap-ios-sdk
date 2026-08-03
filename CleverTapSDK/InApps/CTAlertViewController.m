@@ -118,9 +118,7 @@
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
     };
     
     self.window.alpha = 1.0;

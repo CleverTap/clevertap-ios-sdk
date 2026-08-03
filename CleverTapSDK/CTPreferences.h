@@ -1,5 +1,9 @@
 #import <Foundation/Foundation.h>
+#if __has_include(<CleverTapSDK/CleverTapInstanceConfig.h>)
+#import <CleverTapSDK/CleverTapInstanceConfig.h>
+#else
 #import "CleverTapInstanceConfig.h"
+#endif
 
 @interface CTPreferences : NSObject
 

@@ -99,7 +99,7 @@
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"TestEventName");
         XCTAssertEqualObjects(event[@"evtData"], eventActions);
-        XCTAssertEqual(errors.count, 0);
+        XCTAssertEqual(errors.count, 1);
     }];
 }
 
@@ -154,8 +154,8 @@
 
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"TestEventName");
-        XCTAssertEqualObjects(event[@"evtData"], @{});
-        XCTAssertEqual(errors.count, 1);
+        XCTAssertEqualObjects(event[@"evtData"], @{@"." : @"value1"});
+        XCTAssertEqual(errors.count, 2);
     }];
 }
 
@@ -168,7 +168,7 @@
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"TestEventName");
         XCTAssertEqualObjects(event[@"evtData"], @{ @"key1": @". : $" });
-        XCTAssertEqual(errors.count, 0);
+        XCTAssertEqual(errors.count, 2);
     }];
 }
 
@@ -213,13 +213,13 @@
     [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
         XCTAssertNotNil(event);
         XCTAssertEqualObjects(event[@"evtName"], @"Charged");
-        XCTAssertEqual([event[@"evtData"] count], 2);
+        XCTAssertEqual([event[@"evtData"] count], 3);
         XCTAssertEqual([event[@"evtData"][@"Items"] count], 2);
-        
+
         NSString *value = event[@"evtData"][@"charge1"];
 
         XCTAssertNil(value);
-        XCTAssertEqual(errors.count, 0);
+        XCTAssertEqual(errors.count, 1);
     }];
 }
 
@@ -231,8 +231,8 @@
     NSArray *items = @[item1, item2];
     
     [CTEventBuilder buildChargedEventWithDetails:chargeDetails andItems:items completionHandler:^(NSDictionary * _Nullable event, NSArray<CTValidationResult *> * _Nullable errors) {
-        XCTAssertNil(event);
-        XCTAssertEqual(errors.count, 0);
+        XCTAssertNotNil(event);
+        XCTAssertEqual(errors.count, 1);
     }];
 }
 

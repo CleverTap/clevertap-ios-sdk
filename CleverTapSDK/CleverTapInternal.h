@@ -1,15 +1,17 @@
 #import <Foundation/Foundation.h>
 #import "CleverTap.h"
 #if !CLEVERTAP_NO_INAPP_SUPPORT
+#import "CTInAppDisplayManager.h"
 #import "CTInAppEvaluationManager.h"
 #import "CTInAppFCManager.h"
 #import "CTInAppStore.h"
 #endif
-#import "CTSessionManager.h"
 #import "CTCryptMigrator.h"
 
 @class CTInAppDisplayManager;
 @class CTFileDownloader;
+@class CTValidationResult;
+@class CTSessionManager;
 
 @interface CleverTap (Internal)
 
@@ -45,6 +47,11 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
 
 - (void)recordInAppNotificationStateEvent:(BOOL)clicked
                           forNotification:(CTInAppNotification * _Nonnull)notification andQueryParameters:(NSDictionary * _Nullable)params;
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (void)recordInAppNotificationMediaError:(CTValidationResult * _Nonnull)error
+                          forNotification:(CTInAppNotification * _Nonnull)notification;
+#endif
 
 - (void)fetchInAppPreviewContent:(NSString* _Nullable)url onSuccess:(void(^ _Nonnull)(NSDictionary* _Nullable inappJSON))completion;
 
