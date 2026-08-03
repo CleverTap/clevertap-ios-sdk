@@ -4,13 +4,13 @@ import ActivityKit
 import Foundation
 
 // MARK: - UserDefaults key for persisting tracked activities across launches
-// Stores [activityID: { cleverTapActivityId, activityName, wzrk(JSON), started }] so that, on
-// the next launch, activities that vanished while the app was terminated (dismissed / ended /
-// expired) can be reported, and so the "Started" state is not re-raised for an already-reported one.
+// Keyed by `liveActivityId` (the ActivityKit `activity.id`); stores
+// { activityName, wzrk(JSON), started } so that, on the next launch, activities that vanished
+// while the app was terminated (dismissed / ended / expired) can be reported, and so the
+// "Started" state is not re-raised for an already-reported one.
 private let kCTLAActivityStoreKey = "CLTAP_LA_ACTIVITY_STORE"
 
 // Keys used inside each persisted activity record.
-private let kCTLAStoreCleverTapActivityId = "cleverTapActivityId"
 private let kCTLAStoreActivityName = "activityName"
 private let kCTLAStoreWzrk = "wzrk"
 private let kCTLAStoreStarted = "started"
@@ -52,7 +52,6 @@ final class CTLiveActivityManager: NSObject {
 
     /// Latest per-activity update token + attribution, keyed by `activity.id`.
     private struct ActivityTokenEntry {
-        let cleverTapActivityId: String
         let activityName: String
         let wzrk: [String: Any]
         var tokenHex: String?
@@ -122,11 +121,9 @@ final class CTLiveActivityManager: NSObject {
         for (activityID, info) in persistedActivities() {
             guard info[kCTLAStoreActivityName] == name else { continue }
             if !runningIDs.contains(activityID) {
-                let ctId = info[kCTLAStoreCleverTapActivityId] ?? activityID
-                var wzrk = Self.wzrkFromJSON(info[kCTLAStoreWzrk])
-                if wzrk.isEmpty { wzrk = ["wzrk_activityId": ctId] }
+                let wzrk = Self.wzrkFromJSON(info[kCTLAStoreWzrk])
                 CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: activity '\(activityID)' vanished while terminated; reporting dismissal on relaunch.")
-                sendActivityDismissed(cleverTapActivityId: ctId, activityName: name, wzrk: wzrk)
+                sendActivityDismissed(liveActivityId: activityID, wzrk: wzrk)
                 removePersistedActivity(activityID: activityID)
             }
         }
@@ -139,8 +136,8 @@ final class CTLiveActivityManager: NSObject {
         activityName: String
     ) {
         let attrs = activity.attributes as? CleverTapLiveActivityAttributes
-        let ctActivityId = attrs?.cleverTapActivityId ?? activity.id
-        let wzrk = Self.buildWzrk(activityId: ctActivityId, attrs: attrs)
+        let liveActivityId = activity.id   // ActivityKit per-activity id
+        let wzrk = Self.buildWzrk(attrs: attrs)
 
         let key = "act_\(activity.id)"
 
@@ -149,9 +146,8 @@ final class CTLiveActivityManager: NSObject {
         lock.unlock()
 
         setActivityEntry(activityID: activity.id, entry: ActivityTokenEntry(
-            cleverTapActivityId: ctActivityId, activityName: activityName, wzrk: wzrk, tokenHex: nil))
-        persistTrackedActivity(activityID: activity.id, cleverTapActivityId: ctActivityId,
-                               activityName: activityName, wzrk: wzrk)
+            activityName: activityName, wzrk: wzrk, tokenHex: nil))
+        persistTrackedActivity(activityID: activity.id, activityName: activityName, wzrk: wzrk)
 
         // Capture an end handler so a later user switch can dismiss this activity.
         setEndHandler(activityID: activity.id) {
@@ -165,8 +161,7 @@ final class CTLiveActivityManager: NSObject {
 
         // Send the initial token if iOS already has one and we haven't sent it before.
         if !alreadyHadToken, let token = activity.pushToken {
-            sendActivityToken(token, activityID: activity.id, cleverTapActivityId: ctActivityId,
-                              activityName: activityName, wzrk: wzrk)
+            sendActivityToken(token, liveActivityId: liveActivityId, wzrk: wzrk)
         }
 
         let task = Task { [weak self] in
@@ -175,8 +170,7 @@ final class CTLiveActivityManager: NSObject {
                 group.addTask { [weak self] in
                     for await token in activity.pushTokenUpdates {
                         guard let self = self, !Task.isCancelled else { break }
-                        self.sendActivityToken(token, activityID: activity.id, cleverTapActivityId: ctActivityId,
-                                               activityName: activityName, wzrk: wzrk)
+                        self.sendActivityToken(token, liveActivityId: liveActivityId, wzrk: wzrk)
                     }
                 }
 
@@ -204,10 +198,10 @@ final class CTLiveActivityManager: NSObject {
                         guard let self = self, !Task.isCancelled else { break }
                         if state == .ended {
                             self.recordLifecycleEvent(state: kCTLAStateEnded, wzrk: wzrk)
-                            self.sendActivityDeactivate(cleverTapActivityId: ctActivityId, activityName: activityName)
+                            self.sendActivityDeactivate(liveActivityId: liveActivityId)
                             self.removePersistedActivity(activityID: activity.id)
                         } else if state == .dismissed {
-                            self.sendActivityDismissed(cleverTapActivityId: ctActivityId, activityName: activityName, wzrk: wzrk)
+                            self.sendActivityDismissed(liveActivityId: liveActivityId, wzrk: wzrk)
                             self.cancelTask(for: key)
                             self.removeActivityEntry(activityID: activity.id)
                             self.removeEndHandler(activityID: activity.id)
@@ -250,7 +244,7 @@ final class CTLiveActivityManager: NSObject {
 
         for (activityID, entry) in entries {
             recordLifecycleEvent(state: kCTLAStateEnded, wzrk: entry.wzrk)
-            sendActivityDeactivate(cleverTapActivityId: entry.cleverTapActivityId, activityName: entry.activityName)
+            sendActivityDeactivate(liveActivityId: activityID)
             cancelTask(for: "act_\(activityID)")
             handlers[activityID]?()             // end the visible activity
             removeActivityEntry(activityID: activityID)
@@ -283,35 +277,34 @@ final class CTLiveActivityManager: NSObject {
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: recorded 'Live Activity' (\(state)) for id '\(wzrk["wzrk_activityId"] ?? "?")'")
     }
 
-    private func sendActivityDismissed(cleverTapActivityId: String, activityName: String, wzrk: [String: Any]) {
+    private func sendActivityDismissed(liveActivityId: String, wzrk: [String: Any]) {
         recordLifecycleEvent(state: kCTLAStateDismissed, wzrk: wzrk)
-        sendActivityDeactivate(cleverTapActivityId: cleverTapActivityId, activityName: activityName)
+        sendActivityDeactivate(liveActivityId: liveActivityId)
     }
 
     // MARK: - Private: backend communication (data channel — token BE contract)
 
-    private func sendActivityToken(_ tokenData: Data, activityID: String, cleverTapActivityId: String,
-                                   activityName: String, wzrk: [String: Any]) {
+    private func sendActivityToken(_ tokenData: Data, liveActivityId: String, wzrk: [String: Any]) {
         let tokenHex = Self.hex(from: tokenData)
-        updateActivityToken(activityID: activityID, tokenHex: tokenHex)
+        updateActivityToken(activityID: liveActivityId, tokenHex: tokenHex)
         dataQueue?.enqueueLiveActivityData([
             "id": tokenHex,
             "type": "la",
             "action": "register",
-            "activityId": cleverTapActivityId
+            "liveActivityId": liveActivityId
         ])
         // The "Started" state also fires on token receipt.
-        reportActivityStartedIfNeeded(activityID: activityID, wzrk: wzrk)
-        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent activity token for id '\(cleverTapActivityId)'")
+        reportActivityStartedIfNeeded(activityID: liveActivityId, wzrk: wzrk)
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent activity token for liveActivityId '\(liveActivityId)'")
     }
 
-    private func sendActivityDeactivate(cleverTapActivityId: String, activityName: String) {
+    private func sendActivityDeactivate(liveActivityId: String) {
         dataQueue?.enqueueLiveActivityData([
             "type": "la",
             "action": "unregister",
-            "activityId": cleverTapActivityId
+            "liveActivityId": liveActivityId
         ])
-        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent token-deactivation for id '\(cleverTapActivityId)'")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent token-deactivation for liveActivityId '\(liveActivityId)'")
     }
 
     private func sendPushToStartToken(_ tokenData: Data, activityType: String) {
@@ -336,8 +329,13 @@ final class CTLiveActivityManager: NSObject {
     }
 
     /// Assembles the `wzrk` dictionary the backend expects on every Live Activity event.
-    private static func buildWzrk(activityId: String, attrs: CleverTapLiveActivityAttributes?) -> [String: Any] {
-        var wzrk: [String: Any] = ["wzrk_activityId": activityId]
+    /// `wzrk_activityId` is the value the client's backend supplied in the activity payload —
+    /// it is used as-is (NOT the ActivityKit `activity.id`), and omitted if the backend
+    /// didn't send it. The ActivityKit per-activity id travels separately as `liveActivityId`
+    /// on the token payloads.
+    private static func buildWzrk(attrs: CleverTapLiveActivityAttributes?) -> [String: Any] {
+        var wzrk: [String: Any] = [:]
+        if let activityId = attrs?.cleverTapActivityId { wzrk["wzrk_activityId"] = activityId }
         if let type = attrs?.cleverTapActivityType { wzrk["wzrk_activityType"] = type }
         if let milestoneId = attrs?.cleverTapMilestoneId { wzrk["wzrk_milestoneId"] = milestoneId }
         if let campaignId = attrs?.cleverTapCampaignId { wzrk["wzrk_id"] = campaignId }  // wzrk_id = campaign id
@@ -399,12 +397,10 @@ final class CTLiveActivityManager: NSObject {
 
     // MARK: - Private: persisted activity store
 
-    private func persistTrackedActivity(activityID: String, cleverTapActivityId: String,
-                                        activityName: String, wzrk: [String: Any]) {
+    private func persistTrackedActivity(activityID: String, activityName: String, wzrk: [String: Any]) {
         lock.lock()
         var store = storedActivityMap()
         var record = store[activityID] ?? [:]
-        record[kCTLAStoreCleverTapActivityId] = cleverTapActivityId
         record[kCTLAStoreActivityName] = activityName
         if let wzrkJSON = Self.wzrkJSON(wzrk) { record[kCTLAStoreWzrk] = wzrkJSON }
         store[activityID] = record
