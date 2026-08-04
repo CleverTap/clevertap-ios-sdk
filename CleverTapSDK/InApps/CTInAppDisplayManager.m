@@ -338,6 +338,26 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 }
 
+- (void)_dismissPipInApp {
+    if ([CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: dismissPipInApp is a no-op in an app extension.", self);
+        return;
+    }
+
+    if (currentlyDisplayingNotification == nil || currentDisplayController == nil) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: No PiP InApp is currently displayed, nothing to dismiss.", self);
+        return;
+    }
+
+    if (currentlyDisplayingNotification.inAppType != CTInAppTypePiP) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: Currently displaying InApp %@ is not a PiP InApp, nothing to dismiss.", self, currentlyDisplayingNotification.campaignId);
+        return;
+    }
+
+    CleverTapLogDebug(self.config.logLevel, @"%@: Dismissing currently displaying PiP InApp: %@", self, currentlyDisplayingNotification.campaignId);
+    [[self class] hideCurrentInAppDisplayController];
+}
+
 - (void)_resumeInAppNotifications {
     if ([CTUIUtils runningInsideAppExtension]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);

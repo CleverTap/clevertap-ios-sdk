@@ -50,6 +50,7 @@ typedef NS_ENUM(NSInteger, CleverTapInAppRenderingStatus) {
 - (void)_showNotificationIfAvailable;
 - (void)_suspendInAppNotifications;
 - (void)_discardInAppNotifications:(BOOL)dismissInAppIfVisible;
+- (void)_dismissPipInApp;
 - (void)_resumeInAppNotifications;
 - (void)_showInAppNotificationIfAny;
 
