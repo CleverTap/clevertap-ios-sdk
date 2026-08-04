@@ -4518,7 +4518,7 @@ static BOOL sharedInstanceErrorLogged;
                     // callback reloads the table with the updated messages.
                     [strongSelf handleAppInboxV2Response:jsonResp isCompleteResponse:YES completion:^{
                         if (completion) {
-                            [CTUtils runSyncMainQueue:^{
+                            [CTUtils runAsyncMainQueue:^{
                                 completion(YES);
                             }];
                         }
