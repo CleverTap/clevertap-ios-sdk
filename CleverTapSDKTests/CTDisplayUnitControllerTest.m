@@ -21,22 +21,18 @@
 
 @interface CTDisplayUnitControllerTest : XCTestCase
 @property (nonatomic, strong) CTDisplayUnitController *controller;
-@property (nonatomic, strong) CTDisplayUnitDelegateSpy *delegate;
 @end
 
 @implementation CTDisplayUnitControllerTest
 
 - (void)setUp {
     [super setUp];
-    self.delegate = [[CTDisplayUnitDelegateSpy alloc] init];
     self.controller = [[CTDisplayUnitController alloc] initWithAccountId:@"dispUnitCtrlTestAcct"
                                                                     guid:@"testGuid"];
-//    self.controller.delegate = self.delegate;
 }
 
 - (void)tearDown {
     self.controller = nil;
-    self.delegate = nil;
     [super tearDown];
 }
 
@@ -56,11 +52,10 @@
 
 #pragma mark - updateDisplayUnits:
 
-- (void)test_updateDisplayUnits_withTwoDicts_countIsTwo {
-    NSDictionary *unit1 = @{@"wzrk_id": @"u1", @"type": @"banner"};
-    NSDictionary *unit2 = @{@"wzrk_id": @"u2", @"type": @"banner"};
-    NSArray *units = @[unit1, unit2];
-    [self.controller updateDisplayUnits:units];
+- (void)test_updateDisplayUnits_withTwoUnits_countIsTwo {
+    CleverTapDisplayUnit *unit1 = [[CleverTapDisplayUnit alloc] initWithJSON:@{@"wzrk_id": @"u1", @"type": @"banner"}];
+    CleverTapDisplayUnit *unit2 = [[CleverTapDisplayUnit alloc] initWithJSON:@{@"wzrk_id": @"u2", @"type": @"banner"}];
+    [self.controller updateDisplayUnits:@[unit1, unit2]];
     XCTAssertEqual(self.controller.displayUnits.count, 2u);
 }
 
@@ -69,24 +64,23 @@
     XCTAssertEqual(self.controller.displayUnits.count, 0u);
 }
 
-- (void)test_updateDisplayUnits_setsDisplayUnitId {
-    NSDictionary *unitDict = @{@"wzrk_id": @"abc123", @"type": @"banner"};
-    [self.controller updateDisplayUnits:@[unitDict]];
-    CleverTapDisplayUnit *unit = self.controller.displayUnits.firstObject;
-    XCTAssertEqualObjects(unit.unitID, @"abc123");
+- (void)test_updateDisplayUnits_nilArray_displayUnitsIsNil {
+    [self.controller updateDisplayUnits:nil];
+    XCTAssertNil(self.controller.displayUnits);
 }
 
-- (void)test_updateDisplayUnits_notifiesDelegate {
-    [self.controller updateDisplayUnits:@[@{@"wzrk_id": @"u1"}]];
-    XCTAssertGreaterThan(self.delegate.updateCallCount, 0u);
+- (void)test_updateDisplayUnits_setsDisplayUnitId {
+    CleverTapDisplayUnit *unit = [[CleverTapDisplayUnit alloc] initWithJSON:@{@"wzrk_id": @"abc123", @"type": @"banner"}];
+    [self.controller updateDisplayUnits:@[unit]];
+    XCTAssertEqualObjects(self.controller.displayUnits.firstObject.unitID, @"abc123");
 }
 
 - (void)test_updateDisplayUnits_replacesPreviousUnits {
-    [self.controller updateDisplayUnits:@[@{@"wzrk_id": @"u1"}]];
-    NSDictionary *u2 = @{@"wzrk_id": @"u2"};
-    NSDictionary *u3 = @{@"wzrk_id": @"u3"};
-    NSArray *secondBatch = @[u2, u3];
-    [self.controller updateDisplayUnits:secondBatch];
+    CleverTapDisplayUnit *u1 = [[CleverTapDisplayUnit alloc] initWithJSON:@{@"wzrk_id": @"u1"}];
+    [self.controller updateDisplayUnits:@[u1]];
+    CleverTapDisplayUnit *u2 = [[CleverTapDisplayUnit alloc] initWithJSON:@{@"wzrk_id": @"u2"}];
+    CleverTapDisplayUnit *u3 = [[CleverTapDisplayUnit alloc] initWithJSON:@{@"wzrk_id": @"u3"}];
+    [self.controller updateDisplayUnits:@[u2, u3]];
     XCTAssertEqual(self.controller.displayUnits.count, 2u);
 }
 

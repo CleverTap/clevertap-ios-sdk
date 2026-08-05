@@ -147,6 +147,60 @@
     XCTAssertTrue(n.fallBackToNotificationSettings);
 }
 
+#pragma mark - dismiss gesture configuration
+
+- (void)test_initWithJSON_tapOutsideDismiss_absent_defaultsToYes {
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:[self coverJSON]];
+    XCTAssertTrue(n.tapOutsideDismiss);
+}
+
+- (void)test_initWithJSON_swipeToDismiss_absent_defaultsToYes {
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:[self coverJSON]];
+    XCTAssertTrue(n.swipeToDismiss);
+}
+
+- (void)test_initWithJSON_tapOutsideDismiss_false {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_TAP_OUTSIDE_DISMISS] = @NO;
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertFalse(n.tapOutsideDismiss);
+}
+
+- (void)test_initWithJSON_swipeToDismiss_false {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_SWIPE_TO_DISMISS] = @NO;
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertFalse(n.swipeToDismiss);
+}
+
+- (void)test_initWithJSON_tapOutsideDismiss_true {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_TAP_OUTSIDE_DISMISS] = @YES;
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertTrue(n.tapOutsideDismiss);
+}
+
+- (void)test_initWithJSON_swipeToDismiss_true {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_SWIPE_TO_DISMISS] = @YES;
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertTrue(n.swipeToDismiss);
+}
+
+- (void)test_initWithJSON_tapOutsideDismiss_null_defaultsToYesWithoutCrash {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_TAP_OUTSIDE_DISMISS] = [NSNull null];
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertTrue(n.tapOutsideDismiss);
+}
+
+- (void)test_initWithJSON_swipeToDismiss_null_defaultsToYesWithoutCrash {
+    NSMutableDictionary *json = [[self coverJSON] mutableCopy];
+    json[CLTAP_INAPP_SWIPE_TO_DISMISS] = [NSNull null];
+    CTInAppNotification *n = [[CTInAppNotification alloc] initWithJSON:json];
+    XCTAssertTrue(n.swipeToDismiss);
+}
+
 #pragma mark - configureFromJSON — basic fields
 
 - (void)test_initWithJSON_setsInAppType {

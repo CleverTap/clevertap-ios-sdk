@@ -125,6 +125,10 @@ typedef enum {
         self.titleLabel.backgroundColor = [UIColor clearColor];
         self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
+        if (@available(iOS 11.0, *)) {
+            self.titleLabel.font = [[UIFontMetrics metricsForTextStyle:UIFontTextStyleHeadline] scaledFontForFont:self.titleLabel.font];
+            self.titleLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
     
     if (self.notification.message) {
@@ -133,12 +137,16 @@ typedef enum {
         self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
+        if (@available(iOS 11.0, *)) {
+            self.bodyLabel.font = [[UIFontMetrics defaultMetrics] scaledFontForFont:self.bodyLabel.font];
+            self.bodyLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
 }
 
 - (void)setUpButtons {
     
-    if (!self.notification.showClose) {
+    if (!self.notification.showClose && self.notification.swipeToDismiss) {
         _panGesture = [[UIPanGestureRecognizer alloc]
                        initWithTarget:self
                        action:@selector(panGestureHandle:)];
@@ -353,6 +361,9 @@ typedef enum {
                 self->_containerView.frame = CGRectOffset(self->_containerView.frame, bounceDistance, 0);
             }
                              completion:^(BOOL finished) {
+                // Trigger before hide: hide:NO dismisses inline and fires the dismiss
+                // delegate before actionExtras is stored (matches triggerInAppAction:).
+                [self triggerCloseActionWithCallToAction:CLTAP_CTA_SWIPE_DISMISS elementId:nil];
                 [self hide:NO];
             }];
         }];
@@ -394,9 +405,8 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
+        [self announceInAppShown];
     };
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
@@ -420,6 +430,5 @@ typedef enum {
 - (void)hide:(BOOL)animated {
     [self hideFromWindow:animated];
 }
-
 
 @end
