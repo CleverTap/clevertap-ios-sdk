@@ -160,7 +160,6 @@
 		0D4CEABE7531E4DE87CF23A9 /* CTIdentityRepoFactoryTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FA88FE3C12519A1823AF5285 /* CTIdentityRepoFactoryTest.m */; };
 		10147FD40479E958BC4F769A /* CTMultiDelegateManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B535FB42AD56C60002A2663 /* CTMultiDelegateManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		133A19A9ED98EF4200FB0E6B /* CleverTapInstanceConfigPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = D01DBF25207FCEFB00E8F1B0 /* CleverTapInstanceConfigPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		1575C4AB40B59C398B075DC0 /* CTValidationResult+Tests.h in Headers */ = {isa = PBXBuildFile; fileRef = AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */; };
 		19DB8405F88B0C57F8435D1D /* CTSystemAppFunctionPresenterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C5C8A9A90E47228E000DE2AE /* CTSystemAppFunctionPresenterTest.m */; };
 		1F19A11DA23B857DFFE5AD7F /* CTRequestSenderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */; };
 		2073438E646D2A21DA4FD4F9 /* CTSwitchUserDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF5A59A2AD0318A00CDED20 /* CTSwitchUserDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -1296,7 +1295,6 @@
 		A415F802C7FFE6DD7712EE2C /* CTAppRatingSystemAppFunctionTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTAppRatingSystemAppFunctionTest.m; sourceTree = "<group>"; };
 		A5858A0E994EC529904E271C /* CTMultiDelegateManagerTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTMultiDelegateManagerTest.m; sourceTree = "<group>"; };
 		A707C7242FCD743740402E63 /* CleverTapInboxMessageTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxMessageTest.m; sourceTree = "<group>"; };
-		AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "CTValidationResult+Tests.h"; path = "CleverTapSDKTests/CTValidationResult+Tests.h"; sourceTree = "<group>"; };
 		BA302D038C45C5590835082F /* CTInAppNotificationTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTInAppNotificationTest.m; sourceTree = "<group>"; };
 		C0A8EB982691084E65068439 /* Pods-shared-CleverTapSDKTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shared-CleverTapSDKTests.debug.xcconfig"; path = "Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests.debug.xcconfig"; sourceTree = "<group>"; };
 		C13218D1018B2B052E92F7C1 /* CTSwizzleTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTSwizzleTest.m; sourceTree = "<group>"; };
@@ -2208,7 +2206,6 @@
 				C13218D1018B2B052E92F7C1 /* CTSwizzleTest.m */,
 				F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */,
 				763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */,
-				AB285353D8665F77B387E649 /* CTValidationResult+Tests.h */,
 				99B1AC49C04A49DBF60E12E7 /* CTSessionManagerTests.swift */,
 				270613EECA7FEC509EE823C6 /* CTTimerResultTests.swift */,
 				8DF7B086F8FC5305D81405B0 /* CTInActionResultTests.swift */,
@@ -2738,7 +2735,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1575C4AB40B59C398B075DC0 /* CTValidationResult+Tests.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3029,9 +3025,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
