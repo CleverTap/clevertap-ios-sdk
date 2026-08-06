@@ -1770,13 +1770,11 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     
-    NSSet *discardedEvents = [NSSet setWithArray:arp[CLTAP_DISCARDED_EVENT_JSON_KEY]];
-    if (discardedEvents && discardedEvents.count > 0) {
-        @try {
-            [self.validationConfig setDiscardedEventNames:discardedEvents];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
-        }
+    @try {
+        NSSet *discardedEvents = [NSSet setWithArray:arp[CLTAP_DISCARDED_EVENT_JSON_KEY]];
+        [self.validationConfig setDiscardedEventNames:discardedEvents];
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
     }
 }
 
@@ -1806,6 +1804,9 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 - (void)updateARP:(NSDictionary *)arp {
+    // keep discarded events in memory for the current session
+    [self processDiscardedEventsRequest:arp];
+
     NSMutableDictionary *update;
     NSDictionary *staleARP = [self getARP];
     if (staleARP) {
@@ -1814,7 +1815,9 @@ static BOOL sharedInstanceErrorLogged;
         update = [[NSMutableDictionary alloc] init];
     }
     [update addEntriesFromDictionary:arp];
-    
+    // removing discarded events so they dont get cached to UserDefaults
+    [update removeObjectForKey:CLTAP_DISCARDED_EVENT_JSON_KEY];
+
     // Remove any keys that have the value -1
     NSArray *keys = [update allKeys];
     for (NSUInteger i = 0; i < [keys count]; i++) {
@@ -1825,7 +1828,6 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
     [self saveARP:update];
-    [self processDiscardedEventsRequest:update];
     [self.productConfig updateProductConfigWithOptions:[self _setProductConfig:arp]];
 }
 
