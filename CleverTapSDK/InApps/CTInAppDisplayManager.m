@@ -345,19 +345,24 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
 
-    if (currentlyDisplayingNotification == nil || currentDisplayController == nil) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: No PiP InApp is currently displayed, nothing to dismiss.", self);
-        return;
-    }
-
-    if (currentlyDisplayingNotification.inAppType != CTInAppTypePiP) {
-        CleverTapLogDebug(self.config.logLevel, @"%@: Currently displaying InApp %@ is not a PiP InApp, nothing to dismiss.", self, currentlyDisplayingNotification.campaignId);
-        return;
-    }
-
-    CleverTapLogDebug(self.config.logLevel, @"%@: Dismissing currently displaying PiP InApp: %@", self, currentlyDisplayingNotification.campaignId);
-    CTInAppDisplayViewController *controller = currentDisplayController;
     [CTUtils runSyncMainQueue:^{
+        if (currentlyDisplayingNotification == nil || currentDisplayController == nil) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: No PiP InApp is currently displayed, nothing to dismiss.", self);
+            return;
+        }
+
+        if (currentlyDisplayingNotification.inAppType != CTInAppTypePiP) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Currently displaying InApp %@ is not a PiP InApp, nothing to dismiss.", self, currentlyDisplayingNotification.campaignId);
+            return;
+        }
+
+        if (currentDisplayController.delegate != self) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Currently displaying PiP InApp %@ belongs to another CleverTap instance, not dismissing.", self, currentlyDisplayingNotification.campaignId);
+            return;
+        }
+
+        CleverTapLogDebug(self.config.logLevel, @"%@: Dismissing currently displaying PiP InApp: %@", self, currentlyDisplayingNotification.campaignId);
+        CTInAppDisplayViewController *controller = currentDisplayController;
         [controller triggerCloseActionWithCallToAction:CLTAP_CTA_DISMISS_PIP_API
                                              elementId:CLTAP_INAPP_ELEMENT_DISMISS_API];
         [controller hide:YES];
