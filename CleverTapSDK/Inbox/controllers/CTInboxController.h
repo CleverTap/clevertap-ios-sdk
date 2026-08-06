@@ -30,6 +30,8 @@ NS_ASSUME_NONNULL_BEGIN
                           encryptionManager:(CTEncryptionManager*)encryptionManager;
 
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages;
+- (void)updateMessages:(NSArray<NSDictionary*> *)messages
+            completion:(void (^ _Nullable)(void))completion;
 - (NSDictionary * _Nullable )messageForId:(NSString *)messageId;
 - (void)deleteMessageWithId:(NSString *)messageId;
 - (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds;
