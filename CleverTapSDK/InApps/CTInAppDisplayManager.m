@@ -12,6 +12,7 @@
 #import "CTConstants.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
+#import "CTInAppDisplayViewControllerPrivate.h"
 #import "CleverTapJSInterface.h"
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
@@ -355,7 +356,12 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 
     CleverTapLogDebug(self.config.logLevel, @"%@: Dismissing currently displaying PiP InApp: %@", self, currentlyDisplayingNotification.campaignId);
-    [[self class] hideCurrentInAppDisplayController];
+    CTInAppDisplayViewController *controller = currentDisplayController;
+    [CTUtils runSyncMainQueue:^{
+        [controller triggerCloseActionWithCallToAction:CLTAP_CTA_DISMISS_PIP_API
+                                             elementId:CLTAP_INAPP_ELEMENT_DISMISS_API];
+        [controller hide:YES];
+    }];
 }
 
 - (void)_resumeInAppNotifications {
