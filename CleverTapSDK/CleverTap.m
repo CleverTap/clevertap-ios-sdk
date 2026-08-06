@@ -1771,7 +1771,19 @@ static BOOL sharedInstanceErrorLogged;
     }
     
     @try {
-        NSSet *discardedEvents = [NSSet setWithArray:arp[CLTAP_DISCARDED_EVENT_JSON_KEY]];
+        // make sure event names are strings
+        NSArray *rawDiscardedEvents = arp[CLTAP_DISCARDED_EVENT_JSON_KEY];
+        NSMutableSet<NSString *> *discardedEvents = [NSMutableSet set];
+        for (id event in rawDiscardedEvents) {
+            if ([event isKindOfClass:[NSString class]]) {
+                [discardedEvents addObject:event];
+            } else if ([event isKindOfClass:[NSNumber class]]) {
+                [discardedEvents addObject:[(NSNumber *)event stringValue]];
+            } else {
+                CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, rawDiscardedEvents);
+                return;
+            }
+        }
         [self.validationConfig setDiscardedEventNames:discardedEvents];
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing discarded events list: %@", self, e.debugDescription);
