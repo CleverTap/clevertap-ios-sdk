@@ -1633,6 +1633,10 @@ static BOOL sharedInstanceErrorLogged;
     [self.inAppDisplayManager _discardInAppNotifications:dismissInAppIfVisible];
 }
 
+- (void)dismissPipInApp {
+    [self.inAppDisplayManager _dismissPipInApp];
+}
+
 + (void)registerCustomInAppTemplates:(id<CTTemplateProducer> _Nonnull)producer {
     [CTCustomTemplatesManager registerTemplateProducer:producer];
 }
