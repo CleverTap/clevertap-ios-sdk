@@ -9,16 +9,6 @@
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
 
-@interface CTDisplayUnitDelegateSpy : NSObject <CleverTapDisplayUnitDelegate>
-@property (nonatomic, assign) NSUInteger updateCallCount;
-@end
-
-@implementation CTDisplayUnitDelegateSpy
-- (void)displayUnitsDidUpdate {
-    self.updateCallCount++;
-}
-@end
-
 @interface CTDisplayUnitControllerTest : XCTestCase
 @property (nonatomic, strong) CTDisplayUnitController *controller;
 @end

@@ -174,6 +174,10 @@
 		32394C1F29FA251E00956058 /* CTEventBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C1E29FA251E00956058 /* CTEventBuilderTest.m */; };
 		32394C2129FA264B00956058 /* CTPreferencesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2029FA264B00956058 /* CTPreferencesTest.m */; };
 		32394C2529FA272600956058 /* CTValidatorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2429FA272600956058 /* CTValidatorTest.m */; };
+		AA11FE00000000000000B001 /* CTCryptMigrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AA11FE00000000000000F001 /* CTCryptMigrationTests.m */; };
+		AA11FE00000000000000B002 /* CTEncryptionManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AA11FE00000000000000F002 /* CTEncryptionManagerTests.m */; };
+		AA11FE00000000000000B003 /* CTInAppDeepLinkAttributionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AA11FE00000000000000F003 /* CTInAppDeepLinkAttributionTests.m */; };
+		AA11FE00000000000000B004 /* CTValidationResultStackTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2229FA26DE00956058 /* CTValidationResultStackTest.m */; };
 		32394C2729FA278C00956058 /* CTUriHelperTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32394C2629FA278C00956058 /* CTUriHelperTest.m */; };
 		3242D7DB2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */; };
 		32790957299CC099001FE140 /* CTUtilsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 32790956299CC099001FE140 /* CTUtilsTest.m */; };
@@ -928,6 +932,9 @@
 		32394C1E29FA251E00956058 /* CTEventBuilderTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEventBuilderTest.m; sourceTree = "<group>"; };
 		32394C2029FA264B00956058 /* CTPreferencesTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTPreferencesTest.m; sourceTree = "<group>"; };
 		32394C2229FA26DE00956058 /* CTValidationResultStackTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidationResultStackTest.m; sourceTree = "<group>"; };
+		AA11FE00000000000000F001 /* CTCryptMigrationTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTCryptMigrationTests.m; sourceTree = "<group>"; };
+		AA11FE00000000000000F002 /* CTEncryptionManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTEncryptionManagerTests.m; sourceTree = "<group>"; };
+		AA11FE00000000000000F003 /* CTInAppDeepLinkAttributionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTInAppDeepLinkAttributionTests.m; sourceTree = "<group>"; };
 		32394C2429FA272600956058 /* CTValidatorTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTValidatorTest.m; sourceTree = "<group>"; };
 		32394C2629FA278C00956058 /* CTUriHelperTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTUriHelperTest.m; sourceTree = "<group>"; };
 		3242D7DA2B1DDA2E00A5E37A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -1982,6 +1989,7 @@
 				6B453EF72CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.h */,
 				6B453EF82CF621E3003C7A89 /* CTInAppDisplayViewControllerMock.m */,
 				8CA2AD4E8B23AC03B702C341 /* CTInAppFCManagerLegacyTest.m */,
+				AA11FE00000000000000F003 /* CTInAppDeepLinkAttributionTests.m */,
 			);
 			path = InApps;
 			sourceTree = "<group>";
@@ -2037,6 +2045,15 @@
 				6B68DA272DE8B11F00761CFE /* CTContentFetchManagerDelegateMock.m */,
 			);
 			path = ContentFetch;
+			sourceTree = "<group>";
+		};
+		AA11FE0000000000000000E1 /* Encryption */ = {
+			isa = PBXGroup;
+			children = (
+				AA11FE00000000000000F001 /* CTCryptMigrationTests.m */,
+				AA11FE00000000000000F002 /* CTEncryptionManagerTests.m */,
+			);
+			path = Encryption;
 			sourceTree = "<group>";
 		};
 		6B9E95AD2C285F2F0002D557 /* FileDownload */ = {
@@ -2107,6 +2124,7 @@
 			isa = PBXGroup;
 			children = (
 				6B68DA2D2DEA1D3700761CFE /* ContentFetch */,
+				AA11FE0000000000000000E1 /* Encryption */,
 				4847D1702CDA1788008DC327 /* EventDatabase */,
 				6B9E95AD2C285F2F0002D557 /* FileDownload */,
 				6A4427C32AA6513C0098866F /* InApps */,
@@ -3025,13 +3043,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-shared-CleverTapSDKTests/Pods-shared-CleverTapSDKTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -3152,6 +3166,10 @@
 			files = (
 				6BA3B2E12B05411C004E834B /* InAppHelper.m in Sources */,
 				32394C2529FA272600956058 /* CTValidatorTest.m in Sources */,
+				AA11FE00000000000000B001 /* CTCryptMigrationTests.m in Sources */,
+				AA11FE00000000000000B002 /* CTEncryptionManagerTests.m in Sources */,
+				AA11FE00000000000000B003 /* CTInAppDeepLinkAttributionTests.m in Sources */,
+				AA11FE00000000000000B004 /* CTValidationResultStackTest.m in Sources */,
 				4847D1722CDA17C2008DC327 /* CTEventDatabaseTests.m in Sources */,
 				6BB778CE2BEE48C300A41628 /* CTCustomTemplateInAppDataTest.m in Sources */,
 				6BA3B2E82B07E207004E834B /* CTTriggersMatcher+Tests.m in Sources */,

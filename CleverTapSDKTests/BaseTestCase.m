@@ -34,27 +34,33 @@
 
 - (void)setUp {
     [CleverTap setDebugLevel:3];
-    BOOL cleverTapInitialized = [[CleverTap sharedInstance] profileGetCleverTapID] != nil;
-    
-    if (!cleverTapInitialized) {
-        [CleverTap setCredentialsWithAccountID:@"test" token:@"test" region:@"eu1"];
-    }
-   
+
     self.eventDetails = [NSMutableArray array];
-    self.cleverTapInstance = [CleverTap sharedInstance];
-    
-    CleverTapInstanceConfig *addtionalConfig = [[CleverTapInstanceConfig alloc]initWithAccountId:@"testAddtional" accountToken:@"testAddtional" accountRegion: @"eu1"];
-    addtionalConfig.identityKeys = @[@"Email"];
-    self.additionalInstance = [CleverTap instanceWithConfig:addtionalConfig];
     self.responseJson = @{ @"key1": @"value1", @"key2": @[@"value2A", @"value2B"] }; // TODO
     self.responseHeaders = @{@"Content-Type":@"application/json"};
-    
+
     __weak typeof(self) weakSelf = self;
     [HTTPStubs onStubActivation:^(NSURLRequest * _Nonnull request, id<HTTPStubsDescriptor>  _Nonnull stub, HTTPStubsResponse * _Nonnull responseStub) {
         if (weakSelf) {
             [weakSelf onStubActivation:request stub:stub];
         }
     }];
+
+    // Safety net so no test ever reaches a live CleverTap server (see -installDefaultStub).
+    [self installDefaultStub];
+
+    BOOL cleverTapInitialized = [[CleverTap sharedInstance] profileGetCleverTapID] != nil;
+
+    if (!cleverTapInitialized) {
+        [CleverTap setCredentialsWithAccountID:@"test" token:@"test" region:@"eu1"];
+    }
+
+    self.cleverTapInstance = [CleverTap sharedInstance];
+
+    CleverTapInstanceConfig *addtionalConfig = [[CleverTapInstanceConfig alloc]initWithAccountId:@"testAddtional" accountToken:@"testAddtional" accountRegion: @"eu1"];
+    addtionalConfig.identityKeys = @[@"Email"];
+    self.additionalInstance = [CleverTap instanceWithConfig:addtionalConfig];
+
     if (!cleverTapInitialized) {
         [CleverTap notfityTestAppLaunch];
         XCTestExpectation *expectation = [self expectationWithDescription:@"Wait For App Launch"];
@@ -68,6 +74,19 @@
     }
 }
 
+// Catch-all fake response for any CleverTap request, so tests never hit a real server.
+// A test can add its own stub, which wins because OHHTTPStubs uses the newest one first.
+- (void)installDefaultStub {
+    __weak typeof(self) weakSelf = self;
+    [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return [request.URL.host containsString:@"clevertap"];
+    } withStubResponse:^HTTPStubsResponse*(NSURLRequest *request) {
+        return [HTTPStubsResponse responseWithJSONObject:weakSelf.responseJson ?: @{}
+                                              statusCode:200
+                                                 headers:weakSelf.responseHeaders ?: @{@"Content-Type":@"application/json"}];
+    }].name = @"BaseTestCaseDefaultStub";
+}
+
 - (void)tearDown {
     [HTTPStubs removeAllStubs];
     self.lastBatchHeader = nil;
@@ -77,6 +96,8 @@
     self.responseFilePath = nil;
     self.cleverTapInstance = nil;
     self.additionalInstance = nil;
+    // Re-arm the safety net so requests landing between tests are still stubbed.
+    [self installDefaultStub];
     [super tearDown];
 }
 

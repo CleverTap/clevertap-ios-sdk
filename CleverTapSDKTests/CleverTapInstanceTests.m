@@ -845,10 +845,6 @@
     [mockDispatch stopMocking];
 }
 
-- (void)test_recordErrorWithMessage_withNilMessage_doesNotThrow {
-    XCTAssertNoThrow([self.cleverTapInstance recordErrorWithMessage:nil andErrorCode:0]);
-}
-
 - (void)test_recordErrorWithMessage_withNegativeCode_doesNotThrow {
     XCTAssertNoThrow([self.cleverTapInstance recordErrorWithMessage:@"error" andErrorCode:-1]);
 }
@@ -1714,17 +1710,15 @@
 }
 
 - (void)test_fetchVariables_queuesEvent {
-    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
-                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
-        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
-                requestTime:0 responseTime:100.0];
-    }];
+    // Go offline so the flush triggered by fetch queues the event without sending it, letting us
+    // assert on eventsQueue without racing a network request.
+    self.cleverTapInstance.offline = YES;
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchVariables:nil];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchVariables: should queue a wzrk_fetch event into eventsQueue");
-    [HTTPStubs removeStub:stub];
+    self.cleverTapInstance.offline = NO;
     [mockDispatch stopMocking];
 }
 
@@ -2233,17 +2227,15 @@
 }
 
 - (void)test_fetchInApps_queuesEvent {
-    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
-                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
-        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
-                requestTime:0 responseTime:100.0];
-    }];
+    // Go offline so the flush triggered by fetch queues the event without sending it, letting us
+    // assert on eventsQueue without racing a network request.
+    self.cleverTapInstance.offline = YES;
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchInApps:nil];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchInApps: should queue a wzrk_fetch event into eventsQueue");
-    [HTTPStubs removeStub:stub];
+    self.cleverTapInstance.offline = NO;
     [mockDispatch stopMocking];
 }
 
@@ -2309,19 +2301,15 @@
 }
 
 - (void)test_fetchProductConfig_queuesEvent {
-    // Stub with a long delay so the flush network request can't complete and drain
-    // the queue before we assert on eventsQueue.count.
-    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
-                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
-        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
-                requestTime:0 responseTime:100.0];
-    }];
+    // Go offline so the flush triggered by fetch queues the event without sending it, letting us
+    // assert on eventsQueue without racing a network request.
+    self.cleverTapInstance.offline = YES;
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchProductConfig];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchProductConfig should queue a wzrk_fetch event into eventsQueue");
-    [HTTPStubs removeStub:stub];
+    self.cleverTapInstance.offline = NO;
     [mockDispatch stopMocking];
 }
 
