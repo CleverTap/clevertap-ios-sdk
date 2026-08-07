@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+### [Version 7.8.1](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.1) (August 7, 2026)
+#### Added
+- **Spin-the-Wheel and Scratch Card Templates:** Adds Spin-the-Wheel and Scratch Card gamified template support to Advanced InApp Builder in-app notifications.
+- **Dismiss PIP In-App API:** New `dismissPipInApp()` method on `CleverTapAPI` dismisses the currently visible Picture-in-Picture (PIP) In-App notification.
+    * **Note:** Dismissing frees the in-app display slot, so the next queued in-app (if any) may show immediately. To keep a screen free of all in-apps, pair this with
+      `suspendInAppNotifications()` on screen entry and `resumeInAppNotifications()` on exit.
+#### Fixed
+- **App Inbox Pull-to-Refresh:** Fixes an issue where the built-in App Inbox did not repaint the message list after a pull-to-refresh.
+
 ### [Version 7.8.0](https://github.com/CleverTap/clevertap-ios-sdk/releases/tag/7.8.0) (July 28, 2026)
 #### Added
 - **Split of Clicks:** Adds per-element click attribution to In-Apps `Notification Clicked` event across all in-app templates. Also adds configurable tap-outside and swipe-to-dismiss gestures for In-Apps, and tracks these dismissals as Notification Clicked events.
