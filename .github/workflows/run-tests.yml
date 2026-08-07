@@ -22,7 +22,7 @@ jobs:
 
       - name: Select Xcode and show Swift version
         run: |
-          sudo xcode-select --switch /Applications/Xcode_16.4.app
+          sudo xcode-select --switch /Applications/Xcode_26.0.app
           swift --version
 
       - name: Cache CocoaPods
