@@ -149,13 +149,24 @@ static dispatch_once_t coordinatorOnceToken;
 #pragma mark - Public Methods
 
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages {
-    if (!self.isInitialized) return;
-    
+    [self updateMessages:messages completion:nil];
+}
+
+- (void)updateMessages:(NSArray<NSDictionary*> *)messages
+            completion:(void (^ _Nullable)(void))completion {
+    if (!self.isInitialized) {
+        if (completion) completion();
+        return;
+    }
+
     __weak typeof(self) weakSelf = self;
     [self.context performBlock:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) return;
-        
+        if (!strongSelf) {
+            if (completion) completion();
+            return;
+        }
+
         CleverTapLogStaticInternal(@"%@: updating messages: %@", strongSelf.user, messages);
         
         // Pre-process messages for encryption if needed
@@ -168,6 +179,9 @@ static dispatch_once_t coordinatorOnceToken;
             [strongSelf _save];
             [strongSelf _notifyUpdate];
         }
+        // Fire the completion after messages are updated, so the callback will get
+        // updated messages.
+        if (completion) completion();
     }];
 }
 

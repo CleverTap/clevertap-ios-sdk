@@ -263,6 +263,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_CTA_SWIPE_DISMISS @"Swipe to Dismiss"
 #define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"Tap Outside to Dismiss"
 #define CLTAP_CTA_DISMISS_BUTTON @"Dismiss Button"
+#define CLTAP_CTA_DISMISS_PIP_API @"Dismiss PiP API"
 
 // Split of Clicks: per-element identity and action descriptors added to the
 // Notification Clicked event for basic (native) and custom HTML in-apps.
@@ -271,6 +272,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_WZRK_DATA @"wzrk_data"
 #define CLTAP_INAPP_ELEMENT_CLOSE_BUTTON @"closeButton"
 #define CLTAP_INAPP_ELEMENT_IMAGE @"image-1"
+#define CLTAP_INAPP_ELEMENT_DISMISS_API @"dismissApi"
 #define CLTAP_INAPP_DATA_CLOSE @"close"
 
 // Advanced-builder media preload failures. The HTML template (image_interstitial.html)
