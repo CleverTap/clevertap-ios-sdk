@@ -33,12 +33,6 @@ jobs:
           fi
           echo "✅ sdk-version.txt has changed. Continuing..."
 
-      - name: Install dependencies
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_16.4.app
-          swift --version
-          echo "✅ Dependencies installed successfully"
-
       - name: Create or Update Draft Release
         run: |
           VERSION=$(cat sdk-version.txt)  # Read the version from sdk-version.txt
