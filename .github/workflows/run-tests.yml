@@ -55,6 +55,8 @@ jobs:
       - name: Build for testing
         run: |
           set -o pipefail
+          # Raw output (no xcpretty) so Clang's "previous definition is here"
+          # notes are not swallowed, exposing conflicting header paths.
           xcodebuild build-for-testing \
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
@@ -62,8 +64,7 @@ jobs:
             -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
             -enableCodeCoverage YES \
             -derivedDataPath build \
-            FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)' \
-            | xcpretty --color
+            FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)'
 
       - name: Patch embedded SDWebImage with simulator slice
         run: |
