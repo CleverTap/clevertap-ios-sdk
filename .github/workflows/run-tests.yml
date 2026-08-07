@@ -55,8 +55,8 @@ jobs:
       - name: Build for testing
         run: |
           set -o pipefail
-          # Raw output (no xcpretty) so Clang's "previous definition is here"
-          # notes are not swallowed, exposing conflicting header paths.
+          # Keep xcpretty for readable output, but tee the full raw log to a file
+          # so the failure diagnostic step can grep the un-truncated clang errors.
           xcodebuild build-for-testing \
             -workspace CleverTapSDK.xcworkspace \
             -scheme CleverTapSDKTests \
@@ -64,7 +64,16 @@ jobs:
             -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
             -enableCodeCoverage YES \
             -derivedDataPath build \
-            FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)'
+            FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)' \
+            2>&1 | tee build_raw.log | xcpretty --color
+
+      - name: Show raw build errors on failure
+        if: failure()
+        run: |
+          echo "===== BUILD FAILED / following build commands failed ====="
+          grep -n -E "BUILD FAILED|The following build commands failed" build_raw.log || true
+          echo "===== clang errors with surrounding context ====="
+          grep -n -B3 -A15 -E "error:|duplicate interface definition|previous definition is here|redefinition of" build_raw.log | head -200 || true
 
       - name: Patch embedded SDWebImage with simulator slice
         run: |
