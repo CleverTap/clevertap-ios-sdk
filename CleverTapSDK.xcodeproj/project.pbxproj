@@ -3216,7 +3216,6 @@
 				6A59D20F2A3351A800531F9D /* LeanplumCTTest.m in Sources */,
 				32790957299CC099001FE140 /* CTUtilsTest.m in Sources */,
 				48C0FD6F2BCD522100E01EA9 /* CTFileDownloadManagerTests.m in Sources */,
-				6A2E4C18291E8A4A00385536 /* CleverTapInstanceConfigTests.m in Sources */,
 				6BEEC2D12AF1A3A900BD4EC5 /* CTClockMock.m in Sources */,
 				32790959299F4B29001FE140 /* CTDeviceInfoTest.m in Sources */,
 				48FA82C52DAD3D9100AB8651 /* CTPushPrimerManagerTests.m in Sources */,
