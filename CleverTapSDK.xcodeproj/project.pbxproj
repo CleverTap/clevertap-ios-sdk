@@ -711,6 +711,7 @@
 		D0D4C9F62414F3680029477E /* CleverTap+FeatureFlags.h in Headers */ = {isa = PBXBuildFile; fileRef = D0D4C9ED2414D8FD0029477E /* CleverTap+FeatureFlags.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D1E38C858AE9BB640747639E /* CTPushPermissionSystemAppFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 612170343C90FAB9717F48F5 /* CTPushPermissionSystemAppFunctionTest.m */; };
 		D3012BAA22BDF04D1A7D67EB /* CTSessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99B1AC49C04A49DBF60E12E7 /* CTSessionManagerTests.swift */; };
+		4F5D435F6ABB412A882CEB0B /* CleverTapDefineVarPrimitiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C72C1AD27B46FBB2A7DE7B /* CleverTapDefineVarPrimitiveTests.swift */; };
 		D32A10A5B51B17C08B5AB5AB /* CTLimitAdapterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D492CA816AAB83934731001D /* CTLimitAdapterTest.m */; };
 		D501AEF14AE5D4E4C79FBC5D /* CleverTapDisplayUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 6197020C8A776A8C08F7F832 /* CleverTapDisplayUnitTest.m */; };
 		DA8C6EA860BC6CA53FDB4D08 /* CTProfileChangeTrackerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F97F9D45A580F979772C056 /* CTProfileChangeTrackerTest.m */; };
@@ -1295,6 +1296,7 @@
 		919D12C82BD89CE13EDE525C /* CTLoginInfoProviderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLoginInfoProviderTest.m; sourceTree = "<group>"; };
 		997881C7B7B5276373B4FD43 /* CTLegacyIdentityRepoTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTLegacyIdentityRepoTest.m; sourceTree = "<group>"; };
 		99B1AC49C04A49DBF60E12E7 /* CTSessionManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTSessionManagerTests.swift; sourceTree = "<group>"; };
+		14C72C1AD27B46FBB2A7DE7B /* CleverTapDefineVarPrimitiveTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CleverTapDefineVarPrimitiveTests.swift; sourceTree = "<group>"; };
 		9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTNestedJsonBuilderTest.m; sourceTree = "<group>"; };
 		9BF1B39E266CE9BE9998587B /* CTSessionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTSessionManager.swift; sourceTree = "<group>"; };
 		A17C1360ECB81CD13FBA0F1F /* CleverTapInboxStyleConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CleverTapInboxStyleConfigTest.m; sourceTree = "<group>"; };
@@ -2225,6 +2227,7 @@
 				F75D3C9A0DC6C5DB148739B5 /* CTUIUtilsTest.m */,
 				763786ECB568A014D0214BE5 /* CTRequestSenderTest.m */,
 				99B1AC49C04A49DBF60E12E7 /* CTSessionManagerTests.swift */,
+				14C72C1AD27B46FBB2A7DE7B /* CleverTapDefineVarPrimitiveTests.swift */,
 				270613EECA7FEC509EE823C6 /* CTTimerResultTests.swift */,
 				8DF7B086F8FC5305D81405B0 /* CTInActionResultTests.swift */,
 			);
@@ -3297,6 +3300,7 @@
 				6CA8C6B2712DE77E59FB0BD0 /* CTUIUtilsTest.m in Sources */,
 				1F19A11DA23B857DFFE5AD7F /* CTRequestSenderTest.m in Sources */,
 				D3012BAA22BDF04D1A7D67EB /* CTSessionManagerTests.swift in Sources */,
+				4F5D435F6ABB412A882CEB0B /* CleverTapDefineVarPrimitiveTests.swift in Sources */,
 				BFDB7C436DB0189EA739D469 /* CTTimerResultTests.swift in Sources */,
 				7632C18E471A1CDF4E16CC49 /* CTInActionResultTests.swift in Sources */,
 			);
