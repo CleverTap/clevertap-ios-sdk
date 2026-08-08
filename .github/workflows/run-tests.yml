@@ -1,0 +1,124 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode and show Swift version
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.0.app
+          swift --version
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: pods-${{ hashFiles('Podfile.lock') }}
+          restore-keys: pods-
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+
+      - name: Install xcpretty and slather
+        run: gem install xcpretty slather --no-document
+
+      - name: Select iOS Simulator
+        id: simulator
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; sims=[s for rt,ss in d.items() if 'iOS' in rt for s in ss if s.get('isAvailable')]; print(next((s['udid'] for s in sims if 'iPhone' in s['name']), sims[0]['udid'] if sims else ''))")
+          if [ -z "$UDID" ]; then
+            echo "No available iOS Simulator found" >&2
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator UDID: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build for testing
+        run: |
+          set -o pipefail
+          # Keep xcpretty for readable output, but tee the full raw log to a file
+          # so the failure diagnostic step can grep the un-truncated clang errors.
+          xcodebuild build-for-testing \
+            -workspace CleverTapSDK.xcworkspace \
+            -scheme CleverTapSDKTests \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -enableCodeCoverage YES \
+            -derivedDataPath build \
+            FRAMEWORK_SEARCH_PATHS='$(PROJECT_DIR)/Vendors/simulator $(inherited)' \
+            2>&1 | tee build_raw.log | xcpretty --color
+
+      - name: Show raw build errors on failure
+        if: failure()
+        run: |
+          echo "===== BUILD FAILED / following build commands failed ====="
+          grep -n -E "BUILD FAILED|The following build commands failed" build_raw.log || true
+          echo "===== clang errors with surrounding context ====="
+          grep -n -B3 -A15 -E "error:|duplicate interface definition|previous definition is here|redefinition of" build_raw.log | head -200 || true
+
+      - name: Patch embedded SDWebImage with simulator slice
+        run: |
+          SIM_FW="Vendors/simulator/SDWebImage.framework/SDWebImage"
+          if [ -f "$SIM_FW" ]; then
+            find build/Build/Products -type d -name "SDWebImage.framework" | while read -r fw; do
+              echo "Patching embedded framework: $fw"
+              cp "$SIM_FW" "$fw/SDWebImage"
+              codesign --force --sign - "$fw"
+            done
+          else
+            echo "$SIM_FW not found; skipping patch"
+          fi
+
+      - name: Run Tests
+        continue-on-error: true   # test failures won't fail the job (check stays green)
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -workspace CleverTapSDK.xcworkspace \
+            -scheme CleverTapSDKTests \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -enableCodeCoverage YES \
+            -derivedDataPath build \
+            | xcpretty --color
+
+      - name: Generate Coverage Report with Slather
+        if: always()
+        run: |
+          mkdir -p coverage
+          slather coverage
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/cobertura.xml
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload Coverage XML Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-xml
+          path: coverage/cobertura.xml

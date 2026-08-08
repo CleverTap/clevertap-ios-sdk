@@ -10,7 +10,7 @@
 #import <XCTest/XCTest.h>
 #import <OCMock/OCMock.h>
 #import "LeanplumCT.h"
-#import "CleverTap.h"
+#import <CleverTapSDK/CleverTap.h>
 
 @interface LeanplumCTTest : XCTestCase
 @property (nonatomic, strong) id mockCleverTap;

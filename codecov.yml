@@ -1,0 +1,29 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto      # compare against base branch coverage
+        threshold: 1%     # allow up to 1% drop without failing
+    patch:
+      default:
+        target: 50%       # changed lines must have at least 50% coverage
+        threshold: 5%
+
+ignore:
+  - "CleverTapSDK/InApps/CT*ViewController*"
+  - "CleverTapSDK/Inbox/**"
+  - "CleverTapSDK/Swizzling/**"
+  - "CleverTapSDK/CTSwizzle.*"
+
+comment:
+  layout: "header, diff, components, files"  # total+delta, patch coverage, module split, per-changed-file
+  behavior: default
+  require_changes: false   # always comment, even with no coverage change
+  require_base: false      # comment even before a BASE report exists
+
+component_management:
+  individual_components:
+    - component_id: core
+      paths: ["CleverTapSDK/**"]
+    - component_id: inapps
+      paths: ["CleverTapSDK/InApps/**"]

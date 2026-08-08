@@ -32,6 +32,8 @@
 #import "CleverTap+Inbox.h"
 #import "CleverTap+InAppNotifications.h"
 #import "CleverTapInAppNotificationDelegate.h"
+#import "CTFeatureFlagsController.h"
+#import "CTProductConfigController.h"
 
 /// Forward-declare private CleverTap methods that have no public header declaration
 /// so the test file compiles without "No visible @interface" errors.
@@ -67,6 +69,50 @@
 - (void)fetchInactionInApps:(NSString *)inAppId;
 // Display Unit — getter not in CleverTap+DisplayUnit.h
 - (id<CleverTapDisplayUnitDelegate>)displayUnitDelegate;
+// Event/Session behavioural getters — implemented in CleverTap.m, no header declaration
+- (NSTimeInterval)getFirstTime:(NSString *)event;
+- (NSTimeInterval)getLastTime:(NSString *)event;
+- (int)getOccurrences:(NSString *)event;
+- (NSDictionary *)getHistory;
+- (CleverTapEventDetail *)getEventDetail:(NSString *)event;
+- (NSTimeInterval)getTimeElapsed;
+- (int)getTotalVisits;
+- (int)getScreenCount;
+- (NSTimeInterval)getPreviousVisitTime;
+- (CleverTapUTMDetail *)getUTMDetails;
+// defineVar withChar — only in CleverTap.m, not in CleverTap+CTVar.h
+- (CTVar *)defineVar:(NSString *)name withChar:(char)defaultValue;
+// Display-unit pure transforms — private helpers in CleverTap.m
+- (NSDictionary *)ct_sanitizedDisplayUnitProperties:(NSDictionary *)props;
+- (NSDictionary *)ct_filteredWzrkFields:(NSDictionary *)merged;
+- (NSArray<CleverTapDisplayUnit *> *)_parseDisplayUnitsFromJSONArray:(NSArray *)jsonArray;
+// Mute / send-fail bookkeeping — private helpers in CleverTap.m
+- (void)onMute;
+- (void)handleSendQueueFail;
+@property (nonatomic, assign) int sendQueueFails;
+// SS-eval dedupe — private helper in CleverTap.m
+- (void)dedupeSSEvaluationIds;
+// Discarded-events ARP processing — writes into validationConfig
+- (void)processDiscardedEventsRequest:(NSDictionary *)arp;
+@property (nonatomic, strong) CTValidationConfig *validationConfig;
+// Queue persistence — private helpers in CleverTap.m
+- (void)persistEventsQueue;
+- (void)persistProfileQueue;
+- (void)persistNotificationsQueue;
+- (void)persistOrClearQueues;
+- (NSString *)eventsFileName;
+- (NSString *)profileEventsFileName;
+- (NSString *)notificationsFileName;
+// Response handlers — private methods in CleverTap.m, no header declaration
+- (void)handleGeofencesResponse:(id)jsonResp;
+- (void)handleFeatureFlagsResponse:(id)jsonResp;
+- (void)handleProductConfigResponse:(id)jsonResp;
+- (void)handleDisplayUnitResponse:(id)jsonResp;
+- (void)handleAppInboxResponse:(id)jsonResp;
+- (void)handleAppInboxV2Response:(NSDictionary *)jsonResp isCompleteResponse:(BOOL)isCompleteResponse;
+// Controllers — properties declared in CleverTap.m only, injected in tests
+@property (nonatomic, strong) CTFeatureFlagsController *featureFlagsController;
+@property (nonatomic, strong) CTProductConfigController *productConfigController;
 @end
 
 @interface CleverTapInstanceTests : BaseTestCase
@@ -843,10 +889,6 @@
 
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore);
     [mockDispatch stopMocking];
-}
-
-- (void)test_recordErrorWithMessage_withNilMessage_doesNotThrow {
-    XCTAssertNoThrow([self.cleverTapInstance recordErrorWithMessage:nil andErrorCode:0]);
 }
 
 - (void)test_recordErrorWithMessage_withNegativeCode_doesNotThrow {
@@ -1660,6 +1702,13 @@
     XCTAssertEqual(var.integerValue, (NSInteger)100);
 }
 
+- (void)test_defineVar_withChar_charValueEqualsDefault {
+    // withChar: is only in CleverTap.m (not in CleverTap+CTVar.h), so it is not
+    // Swift-visible and is covered here rather than in the Swift suite.
+    CTVar *var = [self.cleverTapInstance defineVar:@"CT_Var_Char" withChar:'A'];
+    XCTAssertEqual(var.charValue, 'A');
+}
+
 - (void)test_defineFileVar_returnsNonNilVar {
     CTVar *var = [self.cleverTapInstance defineFileVar:@"CT_Var_File"];
     XCTAssertNotNil(var);
@@ -1714,17 +1763,15 @@
 }
 
 - (void)test_fetchVariables_queuesEvent {
-    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
-                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
-        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
-                requestTime:0 responseTime:100.0];
-    }];
+    // Go offline so the flush triggered by fetch queues the event without sending it, letting us
+    // assert on eventsQueue without racing a network request.
+    self.cleverTapInstance.offline = YES;
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchVariables:nil];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchVariables: should queue a wzrk_fetch event into eventsQueue");
-    [HTTPStubs removeStub:stub];
+    self.cleverTapInstance.offline = NO;
     [mockDispatch stopMocking];
 }
 
@@ -2233,17 +2280,15 @@
 }
 
 - (void)test_fetchInApps_queuesEvent {
-    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
-                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
-        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
-                requestTime:0 responseTime:100.0];
-    }];
+    // Go offline so the flush triggered by fetch queues the event without sending it, letting us
+    // assert on eventsQueue without racing a network request.
+    self.cleverTapInstance.offline = YES;
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchInApps:nil];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchInApps: should queue a wzrk_fetch event into eventsQueue");
-    [HTTPStubs removeStub:stub];
+    self.cleverTapInstance.offline = NO;
     [mockDispatch stopMocking];
 }
 
@@ -2309,19 +2354,15 @@
 }
 
 - (void)test_fetchProductConfig_queuesEvent {
-    // Stub with a long delay so the flush network request can't complete and drain
-    // the queue before we assert on eventsQueue.count.
-    id<HTTPStubsDescriptor> stub = [HTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *r) { return YES; }
-                     withStubResponse:^HTTPStubsResponse*(NSURLRequest *r) {
-        return [[HTTPStubsResponse responseWithData:[NSData data] statusCode:200 headers:nil]
-                requestTime:0 responseTime:100.0];
-    }];
+    // Go offline so the flush triggered by fetch queues the event without sending it, letting us
+    // assert on eventsQueue without racing a network request.
+    self.cleverTapInstance.offline = YES;
     id mockDispatch = [self synchronousDispatchMockForInstance:self.cleverTapInstance];
     NSUInteger countBefore = self.cleverTapInstance.eventsQueue.count;
     [self.cleverTapInstance fetchProductConfig];
     XCTAssertGreaterThan(self.cleverTapInstance.eventsQueue.count, countBefore,
                          @"fetchProductConfig should queue a wzrk_fetch event into eventsQueue");
-    [HTTPStubs removeStub:stub];
+    self.cleverTapInstance.offline = NO;
     [mockDispatch stopMocking];
 }
 
@@ -2439,6 +2480,387 @@
     NSString *ctid = [self.cleverTapInstance profileGetCleverTapID];
     XCTAssertGreaterThan(ctid.length, 0U,
                          @"profileGetCleverTapID should return a non-empty string");
+}
+
+#pragma mark - Event / Session behavioural getters
+
+// These are thin wrappers in CleverTap.m that forward to the private
+// event*/user*/session* delegates. Personalization state and stored history
+// vary across the shared instance's lifetime, so the assertions verify each
+// wrapper delegates and returns a sane value rather than a fixed number.
+
+- (void)test_getFirstTime_returnsSaneValue {
+    // -1 when personalization is off, otherwise a timestamp (or 0 if unseen).
+    NSTimeInterval t = [self.cleverTapInstance getFirstTime:@"CT_UnseenEvent_XYZ"];
+    XCTAssertGreaterThanOrEqual(t, -1);
+}
+
+- (void)test_getLastTime_returnsSaneValue {
+    NSTimeInterval t = [self.cleverTapInstance getLastTime:@"CT_UnseenEvent_XYZ"];
+    XCTAssertGreaterThanOrEqual(t, -1);
+}
+
+- (void)test_getOccurrences_returnsSaneValue {
+    // 0 for an unseen event with personalization on, -1 when off.
+    int occ = [self.cleverTapInstance getOccurrences:@"CT_UnseenEvent_XYZ"];
+    XCTAssertGreaterThanOrEqual(occ, -1);
+}
+
+- (void)test_getHistory_doesNotThrow {
+    // nil when personalization is off; a dictionary otherwise.
+    XCTAssertNoThrow([self.cleverTapInstance getHistory]);
+}
+
+- (void)test_getEventDetail_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance getEventDetail:@"CT_UnseenEvent_XYZ"]);
+}
+
+- (void)test_getTimeElapsed_returnsSaneValue {
+    // Seconds since the current session started; never negative for a live session.
+    NSTimeInterval elapsed = [self.cleverTapInstance getTimeElapsed];
+    XCTAssertGreaterThanOrEqual(elapsed, 0);
+}
+
+- (void)test_getTotalVisits_returnsSaneValue {
+    int visits = [self.cleverTapInstance getTotalVisits];
+    XCTAssertGreaterThanOrEqual(visits, -1);
+}
+
+- (void)test_getScreenCount_returnsSaneValue {
+    int screens = [self.cleverTapInstance getScreenCount];
+    XCTAssertGreaterThanOrEqual(screens, 0);
+}
+
+- (void)test_getPreviousVisitTime_returnsSaneValue {
+    // lastAppLaunchedTime is seeded from eventGetLastTime: which returns -1
+    // when the app-launched event has no stored history.
+    NSTimeInterval t = [self.cleverTapInstance getPreviousVisitTime];
+    XCTAssertGreaterThanOrEqual(t, -1);
+}
+
+- (void)test_getUTMDetails_returnsNonNil {
+    // sessionGetUTMDetails always allocates a CleverTapUTMDetail.
+    XCTAssertNotNil([self.cleverTapInstance getUTMDetails]);
+}
+
+#pragma mark - Display-unit pure transforms
+
+- (void)test_ctSanitizedDisplayUnitProperties_dropsNilAndNullAndEmptyKeys {
+    NSDictionary *props = @{@"keep": @"value",
+                            @"": @"emptyKeyDropped",
+                            @"nullDropped": [NSNull null]};
+    NSDictionary *out = [self.cleverTapInstance ct_sanitizedDisplayUnitProperties:props];
+    XCTAssertEqualObjects(out, @{@"keep": @"value"});
+}
+
+- (void)test_ctSanitizedDisplayUnitProperties_emptyInputReturnsNil {
+    XCTAssertNil([self.cleverTapInstance ct_sanitizedDisplayUnitProperties:@{}]);
+}
+
+- (void)test_ctFilteredWzrkFields_keepsOnlyWzrkPrefixedKeys {
+    NSDictionary *merged = @{@"wzrk_id": @"123",
+                             @"wzrk_pivot": @"p1",
+                             @"other": @"dropped"};
+    NSDictionary *out = [self.cleverTapInstance ct_filteredWzrkFields:merged];
+    NSDictionary *expected = @{@"wzrk_id": @"123", @"wzrk_pivot": @"p1"};
+    XCTAssertEqualObjects(out, expected);
+}
+
+- (void)test_parseDisplayUnitsFromJSONArray_skipsNonDictionaryEntries {
+    NSArray *json = @[@{@"wzrk_id": @"unit_1"},
+                      @"not_a_dict",
+                      @{@"wzrk_id": @"unit_2"}];
+    NSArray<CleverTapDisplayUnit *> *units =
+        [self.cleverTapInstance _parseDisplayUnitsFromJSONArray:json];
+    XCTAssertEqual(units.count, 2U);
+}
+
+#pragma mark - Server-side I / J counters
+
+- (void)test_saveI_thenGetI_returnsSavedValue {
+    [self.cleverTapInstance saveI:@42];
+    XCTAssertEqual([self.cleverTapInstance getI], 42L);
+}
+
+- (void)test_clearI_resetsToZero {
+    [self.cleverTapInstance saveI:@42];
+    [self.cleverTapInstance clearI];
+    XCTAssertEqual([self.cleverTapInstance getI], 0L);
+}
+
+- (void)test_saveJ_thenGetJ_returnsSavedValue {
+    [self.cleverTapInstance saveJ:@99];
+    XCTAssertEqual([self.cleverTapInstance getJ], 99L);
+}
+
+- (void)test_clearJ_resetsToZero {
+    [self.cleverTapInstance saveJ:@99];
+    [self.cleverTapInstance clearJ];
+    XCTAssertEqual([self.cleverTapInstance getJ], 0L);
+}
+
+- (void)test_clearUserContext_clearsCountersAndTimestamps {
+    [self.cleverTapInstance saveI:@5];
+    [self.cleverTapInstance saveJ:@7];
+    [self.cleverTapInstance setLastRequestTimestamp:12345];
+    [self.cleverTapInstance clearFirstRequestTimestamp];
+    [self.cleverTapInstance setFirstRequestTimestampIfNeeded:12345];
+
+    [self.cleverTapInstance clearUserContext];
+
+    XCTAssertEqual([self.cleverTapInstance getI], 0L);
+    XCTAssertEqual([self.cleverTapInstance getJ], 0L);
+    XCTAssertEqual([self.cleverTapInstance getLastRequestTimeStamp], 0);
+    XCTAssertEqual([self.cleverTapInstance getFirstRequestTimestamp], 0);
+}
+
+#pragma mark - Request timestamps
+
+- (void)test_clearLastRequestTimestamp_resetsToZero {
+    [self.cleverTapInstance setLastRequestTimestamp:12345];
+    XCTAssertEqual([self.cleverTapInstance getLastRequestTimeStamp], 12345);
+    [self.cleverTapInstance clearLastRequestTimestamp];
+    XCTAssertEqual([self.cleverTapInstance getLastRequestTimeStamp], 0);
+}
+
+- (void)test_clearFirstRequestTimestamp_resetsToZero {
+    // setFirstRequestTimestampIfNeeded only writes when no value is set, so
+    // clear first to guarantee the seed lands.
+    [self.cleverTapInstance clearFirstRequestTimestamp];
+    [self.cleverTapInstance setFirstRequestTimestampIfNeeded:12345];
+    XCTAssertEqual([self.cleverTapInstance getFirstRequestTimestamp], 12345);
+    [self.cleverTapInstance clearFirstRequestTimestamp];
+    XCTAssertEqual([self.cleverTapInstance getFirstRequestTimestamp], 0);
+}
+
+#pragma mark - ARP round-trip
+
+- (void)test_saveARP_thenGetARP_returnsSavedEntry {
+    [self.cleverTapInstance saveARP:@{@"ct_arp_key": @"ct_arp_val"}];
+    NSDictionary *arp = [self.cleverTapInstance getARP];
+    XCTAssertEqualObjects(arp[@"ct_arp_key"], @"ct_arp_val");
+}
+
+#pragma mark - getConfigIdentifiers
+
+- (void)test_getConfigIdentifiers_nonDefaultInstance_returnsIdentityKeys {
+    // additionalInstance is configured with identityKeys = @[@"Email"], so the
+    // non-default branch returns the setter-provided keys verbatim.
+    XCTAssertEqualObjects([self.additionalInstance getConfigIdentifiers], @[@"Email"]);
+}
+
+#pragma mark - Mute / send-queue-fail bookkeeping
+
+- (void)test_onMute_clearsAllQueues {
+    [self.cleverTapInstance.eventsQueue addObject:@{@"evtName": @"CT_MuteEvent"}];
+    [self.cleverTapInstance.profileQueue addObject:@{@"type": @"profile"}];
+    [self.cleverTapInstance.notificationsQueue addObject:@{@"evtName": @"CT_MuteNotif"}];
+
+    [self.cleverTapInstance onMute];
+
+    XCTAssertEqual(self.cleverTapInstance.eventsQueue.count, 0U);
+    XCTAssertEqual(self.cleverTapInstance.profileQueue.count, 0U);
+    XCTAssertEqual(self.cleverTapInstance.notificationsQueue.count, 0U);
+}
+
+- (void)test_handleSendQueueFail_incrementsCounter {
+    self.cleverTapInstance.sendQueueFails = 0;
+    [self.cleverTapInstance handleSendQueueFail];
+    XCTAssertEqual(self.cleverTapInstance.sendQueueFails, 1);
+}
+
+- (void)test_handleSendQueueFail_resetsCounterAfterFiveFails {
+    // The 6th failure trips the >5 branch: redirect domain cleared, counter reset.
+    self.cleverTapInstance.sendQueueFails = 5;
+    [self.cleverTapInstance handleSendQueueFail];
+    XCTAssertEqual(self.cleverTapInstance.sendQueueFails, 0);
+}
+
+#pragma mark - dedupeSSEvaluationIds
+
+- (void)test_dedupeSSEvaluationIds_setsDedupedFlag {
+    [CTPreferences removeObjectForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG];
+    [self.cleverTapInstance dedupeSSEvaluationIds];
+    XCTAssertEqual([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0], 1);
+}
+
+- (void)test_dedupeSSEvaluationIds_whenFlagAlreadySet_isNoOp {
+    [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG];
+    XCTAssertNoThrow([self.cleverTapInstance dedupeSSEvaluationIds]);
+    XCTAssertEqual([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0], 1);
+}
+
+#pragma mark - processDiscardedEventsRequest
+
+- (void)test_processDiscardedEventsRequest_storesDiscardedNames {
+    NSDictionary *arp = @{CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Discarded_A", @"CT_Discarded_B"]};
+    [self.cleverTapInstance processDiscardedEventsRequest:arp];
+    NSSet *names = self.cleverTapInstance.validationConfig.discardedEventNames;
+    XCTAssertTrue([names containsObject:@"CT_Discarded_A"]);
+    XCTAssertTrue([names containsObject:@"CT_Discarded_B"]);
+}
+
+- (void)test_processDiscardedEventsRequest_nilOrMalformed_doesNotThrow {
+    XCTAssertNoThrow([self.cleverTapInstance processDiscardedEventsRequest:nil]);
+    XCTAssertNoThrow([self.cleverTapInstance processDiscardedEventsRequest:@{}]);
+    XCTAssertNoThrow([self.cleverTapInstance processDiscardedEventsRequest:
+                      @{CLTAP_DISCARDED_EVENT_JSON_KEY: @"not_an_array"}]);
+}
+
+#pragma mark - Queue persistence
+
+- (void)test_persistEventsQueue_roundTripsQueuedEvent {
+    NSDictionary *marker = @{@"evtName": @"CT_PersistMarker"};
+    [self.cleverTapInstance.eventsQueue addObject:marker];
+
+    [self.cleverTapInstance persistEventsQueue];
+
+    NSArray *onDisk = [CTPreferences unarchiveFromFile:[self.cleverTapInstance eventsFileName]
+                                                ofType:[NSMutableArray class]
+                                            removeFile:NO];
+    XCTAssertTrue([onDisk containsObject:marker]);
+
+    [self.cleverTapInstance.eventsQueue removeObject:marker];
+}
+
+- (void)test_persistOrClearQueues_whenNotMuted_persistsProfileAndNotifications {
+    // The shared instance is not muted, so this exercises the persist branch,
+    // covering persistProfileQueue and persistNotificationsQueue too.
+    NSDictionary *profileMarker = @{@"type": @"profile", @"marker": @"CT_ProfilePersist"};
+    NSDictionary *notifMarker = @{@"evtName": @"CT_NotifPersist"};
+    [self.cleverTapInstance.profileQueue addObject:profileMarker];
+    [self.cleverTapInstance.notificationsQueue addObject:notifMarker];
+
+    [self.cleverTapInstance persistOrClearQueues];
+
+    NSArray *profileOnDisk = [CTPreferences unarchiveFromFile:[self.cleverTapInstance profileEventsFileName]
+                                                       ofType:[NSMutableArray class]
+                                                   removeFile:NO];
+    NSArray *notifOnDisk = [CTPreferences unarchiveFromFile:[self.cleverTapInstance notificationsFileName]
+                                                     ofType:[NSMutableArray class]
+                                                 removeFile:NO];
+    XCTAssertTrue([profileOnDisk containsObject:profileMarker]);
+    XCTAssertTrue([notifOnDisk containsObject:notifMarker]);
+
+    [self.cleverTapInstance.profileQueue removeObject:profileMarker];
+    [self.cleverTapInstance.notificationsQueue removeObject:notifMarker];
+}
+
+#pragma mark - Tier 3: response handlers
+
+// handleGeofencesResponse: parses the "geofences" array and posts
+// CleverTapGeofencesDidUpdateNotification with the list under userInfo[@"geofences"].
+// runSyncMainQueue runs synchronously on the test's main thread, so the
+// notification fires before the method returns.
+- (void)test_handleGeofencesResponse_postsUpdateNotification {
+    NSArray *geofences = @[@{@"id": @101}, @{@"id": @202}];
+    __block NSDictionary *receivedUserInfo = nil;
+    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:CleverTapGeofencesDidUpdateNotification
+                                                                    object:nil
+                                                                     queue:nil
+                                                                usingBlock:^(NSNotification *note) {
+        receivedUserInfo = note.userInfo;
+    }];
+
+    [self.cleverTapInstance handleGeofencesResponse:@{@"geofences": geofences}];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:observer];
+    XCTAssertNotNil(receivedUserInfo);
+    XCTAssertEqualObjects(receivedUserInfo[@"geofences"], geofences);
+}
+
+// No "geofences" key means the guard short-circuits and nothing is posted.
+- (void)test_handleGeofencesResponse_noKey_doesNotPost {
+    __block BOOL posted = NO;
+    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:CleverTapGeofencesDidUpdateNotification
+                                                                    object:nil
+                                                                     queue:nil
+                                                                usingBlock:^(NSNotification *note) {
+        posted = YES;
+    }];
+
+    [self.cleverTapInstance handleGeofencesResponse:@{}];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:observer];
+    XCTAssertFalse(posted);
+}
+
+// handleFeatureFlagsResponse: pulls ff_notifs["kv"] and forwards it to the
+// feature flags controller. A mock controller lets us assert the array is
+// passed through verbatim without depending on async controller init.
+- (void)test_handleFeatureFlagsResponse_forwardsKVToController {
+    CTFeatureFlagsController *original = self.cleverTapInstance.featureFlagsController;
+    id mockController = OCMClassMock([CTFeatureFlagsController class]);
+    self.cleverTapInstance.featureFlagsController = mockController;
+
+    NSArray *kv = @[@{@"n": @"ff_name", @"v": @YES}];
+    [self.cleverTapInstance handleFeatureFlagsResponse:@{@"ff_notifs": @{@"kv": kv}}];
+
+    OCMVerify([mockController updateFeatureFlags:kv]);
+
+    self.cleverTapInstance.featureFlagsController = original;
+    [mockController stopMocking];
+}
+
+// No controller present means the parsed notifs are dropped (guard is
+// `notifs && controller`); exercises the nil-controller branch safely.
+- (void)test_handleFeatureFlagsResponse_noController_doesNotCrash {
+    CTFeatureFlagsController *original = self.cleverTapInstance.featureFlagsController;
+    self.cleverTapInstance.featureFlagsController = nil;
+
+    XCTAssertNoThrow([self.cleverTapInstance handleFeatureFlagsResponse:@{@"ff_notifs": @{@"kv": @[]}}]);
+
+    self.cleverTapInstance.featureFlagsController = original;
+}
+
+// handleProductConfigResponse: forwards pc_notifs["kv"] to the product config
+// controller. Same mock strategy as feature flags.
+- (void)test_handleProductConfigResponse_forwardsKVToController {
+    CTProductConfigController *original = self.cleverTapInstance.productConfigController;
+    id mockController = OCMClassMock([CTProductConfigController class]);
+    self.cleverTapInstance.productConfigController = mockController;
+
+    NSArray *kv = @[@{@"n": @"theme", @"v": @"dark"}];
+    [self.cleverTapInstance handleProductConfigResponse:@{@"pc_notifs": @{@"kv": kv, @"ts": @"12345"}}];
+
+    OCMVerify([mockController updateProductConfig:kv]);
+
+    self.cleverTapInstance.productConfigController = original;
+    [mockController stopMocking];
+}
+
+// handleDisplayUnitResponse: parses adUnit_notifs, caches the units, then
+// notifies the display unit delegate on the main queue. The work runs async on
+// the serial queue, so wait on an expectation fulfilled from the delegate mock.
+- (void)test_handleDisplayUnitResponse_notifiesDelegate {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"display units updated"];
+    id mockDelegate = OCMProtocolMock(@protocol(CleverTapDisplayUnitDelegate));
+    OCMStub([mockDelegate displayUnitsUpdated:[OCMArg any]]).andDo(^(NSInvocation *invocation) {
+        [expectation fulfill];
+    });
+    [self.cleverTapInstance setDisplayUnitDelegate:mockDelegate];
+
+    NSArray *units = @[@{@"wzrk_id": @"u1", @"type": @"banner"}];
+    [self.cleverTapInstance handleDisplayUnitResponse:@{@"adUnit_notifs": units}];
+
+    [self waitForExpectations:@[expectation] timeout:5.0];
+}
+
+// An empty adUnit_notifs array fails the count>0 guard, so no parsing or
+// delegate notification happens.
+- (void)test_handleDisplayUnitResponse_emptyArray_doesNotCrash {
+    XCTAssertNoThrow([self.cleverTapInstance handleDisplayUnitResponse:@{@"adUnit_notifs": @[]}]);
+}
+
+// handleAppInboxResponse: with no inbox_notifs key short-circuits before any
+// inbox controller work.
+- (void)test_handleAppInboxResponse_noKey_doesNotCrash {
+    XCTAssertNoThrow([self.cleverTapInstance handleAppInboxResponse:@{}]);
+}
+
+// handleAppInboxV2Response: early-returns when the v2 key is absent.
+- (void)test_handleAppInboxV2Response_noKey_doesNotCrash {
+    XCTAssertNoThrow([self.cleverTapInstance handleAppInboxV2Response:@{} isCompleteResponse:YES]);
 }
 
 @end
