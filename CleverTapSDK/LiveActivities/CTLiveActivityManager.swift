@@ -53,7 +53,7 @@ final class CTLiveActivityManager: NSObject {
     /// Latest per-activity update token + attribution, keyed by `activity.id`.
     private struct ActivityTokenEntry {
         let activityName: String
-        let wzrk: [String: Any]
+        var wzrk: [String: Any]
         var tokenHex: String?
     }
     private var activityTokens: [String: ActivityTokenEntry] = [:]
@@ -135,9 +135,10 @@ final class CTLiveActivityManager: NSObject {
         to activity: Activity<Attributes>,
         activityName: String
     ) {
-        let attrs = activity.attributes as? CleverTapLiveActivityAttributes
         let liveActivityId = activity.id   // ActivityKit per-activity id
-        let wzrk = Self.buildWzrk(attrs: attrs)
+        // wzrk is rebuilt fresh at each event from the CURRENT content-state (so a changing
+        // milestone is always current); `startWzrk` is the value at attach/start.
+        let startWzrk = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
 
         let key = "act_\(activity.id)"
 
@@ -146,8 +147,8 @@ final class CTLiveActivityManager: NSObject {
         lock.unlock()
 
         setActivityEntry(activityID: activity.id, entry: ActivityTokenEntry(
-            activityName: activityName, wzrk: wzrk, tokenHex: nil))
-        persistTrackedActivity(activityID: activity.id, activityName: activityName, wzrk: wzrk)
+            activityName: activityName, wzrk: startWzrk, tokenHex: nil))
+        persistTrackedActivity(activityID: activity.id, activityName: activityName, wzrk: startWzrk)
 
         // Capture an end handler so a later user switch can dismiss this activity.
         setEndHandler(activityID: activity.id) {
@@ -156,12 +157,12 @@ final class CTLiveActivityManager: NSObject {
 
         // The "Started" state fires when the activity is displayed OR its token is received.
         if activity.activityState == .active {
-            reportActivityStartedIfNeeded(activityID: activity.id, wzrk: wzrk)
+            reportActivityStartedIfNeeded(activityID: activity.id, wzrk: startWzrk)
         }
 
         // Send the initial token if iOS already has one and we haven't sent it before.
         if !alreadyHadToken, let token = activity.pushToken {
-            sendActivityToken(token, liveActivityId: liveActivityId, wzrk: wzrk)
+            sendActivityToken(token, liveActivityId: liveActivityId, wzrk: startWzrk)
         }
 
         let task = Task { [weak self] in
@@ -170,7 +171,8 @@ final class CTLiveActivityManager: NSObject {
                 group.addTask { [weak self] in
                     for await token in activity.pushTokenUpdates {
                         guard let self = self, !Task.isCancelled else { break }
-                        self.sendActivityToken(token, liveActivityId: liveActivityId, wzrk: wzrk)
+                        let w = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
+                        self.sendActivityToken(token, liveActivityId: liveActivityId, wzrk: w)
                     }
                 }
 
@@ -188,7 +190,10 @@ final class CTLiveActivityManager: NSObject {
                         // content change. Skip it — the activity is no longer `.active`, and the
                         // terminal "Ended"/"Dismissed" event already covers that transition.
                         guard activity.activityState == .active else { continue }
-                        self.recordLifecycleEvent(state: kCTLAStateUpdated, wzrk: wzrk)
+                        // Rebuild wzrk from THIS update's content-state (milestone may have changed).
+                        let w = Self.buildWzrk(attributes: activity.attributes, contentState: content.state)
+                        self.updateTrackedWzrk(activityID: activity.id, wzrk: w)
+                        self.recordLifecycleEvent(state: kCTLAStateUpdated, wzrk: w)
                     }
                 }
 
@@ -196,12 +201,13 @@ final class CTLiveActivityManager: NSObject {
                 group.addTask { [weak self] in
                     for await state in activity.activityStateUpdates {
                         guard let self = self, !Task.isCancelled else { break }
+                        let w = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
                         if state == .ended {
-                            self.recordLifecycleEvent(state: kCTLAStateEnded, wzrk: wzrk)
+                            self.recordLifecycleEvent(state: kCTLAStateEnded, wzrk: w)
                             self.sendActivityDeactivate(liveActivityId: liveActivityId)
                             self.removePersistedActivity(activityID: activity.id)
                         } else if state == .dismissed {
-                            self.sendActivityDismissed(liveActivityId: liveActivityId, wzrk: wzrk)
+                            self.sendActivityDismissed(liveActivityId: liveActivityId, wzrk: w)
                             self.cancelTask(for: key)
                             self.removeActivityEntry(activityID: activity.id)
                             self.removeEndHandler(activityID: activity.id)
@@ -229,6 +235,16 @@ final class CTLiveActivityManager: NSObject {
     func recordLiveActivityClicked(wzrk: [AnyHashable: Any]) {
         dataQueue?.recordLiveActivityClickedEvent(withData: wzrk)
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: recorded Live Activity click (Notification Clicked).")
+    }
+
+    // Convenience: extract the `wzrk` dict from the activity (attributes + current content-state) —
+    // no manual dict-building.
+    func recordLiveActivityImpression<Attributes: ActivityAttributes>(activity: Activity<Attributes>) {
+        recordLiveActivityImpression(wzrk: Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state))
+    }
+
+    func recordLiveActivityClicked<Attributes: ActivityAttributes>(activity: Activity<Attributes>) {
+        recordLiveActivityClicked(wzrk: Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state))
     }
 
     // MARK: - Switch-user (CTSwitchUserDelegate)
@@ -328,17 +344,26 @@ final class CTLiveActivityManager: NSObject {
         return data.map { String(format: "%02x", $0) }.joined()
     }
 
-    /// Assembles the `wzrk` dictionary the backend expects on every Live Activity event.
-    /// `wzrk_activityId` is the value the client's backend supplied in the activity payload —
-    /// it is used as-is (NOT the ActivityKit `activity.id`), and omitted if the backend
-    /// didn't send it. The ActivityKit per-activity id travels separately as `liveActivityId`
-    /// on the token payloads.
-    private static func buildWzrk(attrs: CleverTapLiveActivityAttributes?) -> [String: Any] {
-        var wzrk: [String: Any] = [:]
-        if let activityId = attrs?.cleverTapActivityId { wzrk["wzrk_activityId"] = activityId }
-        if let type = attrs?.cleverTapActivityType { wzrk["wzrk_activityType"] = type }
-        if let milestoneId = attrs?.cleverTapMilestoneId { wzrk["wzrk_milestoneId"] = milestoneId }
-        if let campaignId = attrs?.cleverTapCampaignId { wzrk["wzrk_id"] = campaignId }  // wzrk_id = campaign id
+    /// Extracts wzrk key/values from any `Encodable` (the activity's attributes or its
+    /// content-state) via JSON re-encoding — no protocol conformance required. Reads a nested
+    /// `wzrk` object if present, else flat `wzrk_*` keys.
+    private static func extractWzrk<T: Encodable>(from value: T) -> [String: Any] {
+        guard let data = try? JSONEncoder().encode(value),
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
+        if let nested = dict["wzrk"] as? [String: Any] { return nested }
+        return dict.filter { $0.key.hasPrefix("wzrk_") }
+    }
+
+    /// Builds the wzrk dict for an event. Fixed fields come from the (immutable) START
+    /// `attributes`; per-state fields — e.g. a `wzrk_milestoneId` that changes across
+    /// start/update/end — come from the CURRENT `content-state` and override. This is required
+    /// because `attributes` are frozen at start, so a changing milestone can only travel in
+    /// `content-state` (the only field readable on update/end). Values are used as-is; the
+    /// ActivityKit per-activity id is never substituted here (it travels as `liveActivityId`).
+    static func buildWzrk<Attributes: ActivityAttributes>(attributes: Attributes,
+                                                          contentState: Attributes.ContentState) -> [String: Any] {
+        var wzrk = extractWzrk(from: attributes)
+        for (key, value) in extractWzrk(from: contentState) { wzrk[key] = value }  // content-state wins
         return wzrk
     }
 
@@ -381,6 +406,20 @@ final class CTLiveActivityManager: NSObject {
 
     private func updateActivityToken(activityID: String, tokenHex: String) {
         lock.lock(); activityTokens[activityID]?.tokenHex = tokenHex; lock.unlock()
+    }
+
+    /// Updates the latest wzrk (in-memory + persisted) so a later user switch / terminated-app
+    /// dismissal reports the most recent milestone rather than the start-time one.
+    private func updateTrackedWzrk(activityID: String, wzrk: [String: Any]) {
+        lock.lock(); activityTokens[activityID]?.wzrk = wzrk; lock.unlock()
+        lock.lock()
+        var store = storedActivityMap()
+        if var record = store[activityID] {
+            if let json = Self.wzrkJSON(wzrk) { record[kCTLAStoreWzrk] = json }
+            store[activityID] = record
+            UserDefaults.standard.set(store, forKey: kCTLAActivityStoreKey)
+        }
+        lock.unlock()
     }
 
     private func removeActivityEntry(activityID: String) {

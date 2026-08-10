@@ -37,9 +37,9 @@ public extension CleverTap {
     /// **Call as early as possible** in `application(_:didFinishLaunchingWithOptions:)` —
     /// iOS only generates PTS tokens on the first launch after a device restart.
     ///
-    /// The app's `ActivityAttributes` struct **must** conform to `CleverTapLiveActivityAttributes`
-    /// and include the `cleverTapActivityId: String?` property. After iOS creates the activity
-    /// remotely, the SDK reads this ID to map the update token back to the CT campaign.
+    /// The app's `ActivityAttributes` struct only needs to include a `wzrk` object (populated by
+    /// the backend in `aps.attributes`) — no CleverTap protocol conformance is required. The SDK
+    /// reads `wzrk` from the activity's attributes via `Codable` for event attribution.
     ///
     /// ## Example
     ///
@@ -110,5 +110,23 @@ public extension CleverTap {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
                                   message: "CleverTap.recordLiveActivityClicked: Live Activities require iOS 16.2+.")
         }
+    }
+
+    // MARK: - Convenience overloads (extract wzrk from the activity automatically)
+    //
+    // The SDK reads the `wzrk` object from the activity's attributes (via Codable) — the app's
+    // `ActivityAttributes` does NOT need to conform to any CleverTap protocol; it only needs a
+    // `wzrk` field the backend populates in `aps.attributes`.
+
+    /// Records a Live Activity push impression, reading the `wzrk` data from the activity itself.
+    @available(iOS 16.2, *)
+    func recordLiveActivityImpression<Attributes: ActivityAttributes>(_ activity: Activity<Attributes>) {
+        liveActivityManager.recordLiveActivityImpression(activity: activity)
+    }
+
+    /// Records a Live Activity click, reading the `wzrk` data from the activity itself.
+    @available(iOS 16.2, *)
+    func recordLiveActivityClicked<Attributes: ActivityAttributes>(_ activity: Activity<Attributes>) {
+        liveActivityManager.recordLiveActivityClicked(activity: activity)
     }
 }
