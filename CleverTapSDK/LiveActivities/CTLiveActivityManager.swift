@@ -204,7 +204,7 @@ final class CTLiveActivityManager: NSObject {
                         let w = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
                         if state == .ended {
                             self.recordLifecycleEvent(state: kCTLAStateEnded, wzrk: w)
-                            self.sendActivityDeactivate(liveActivityId: liveActivityId)
+                            self.sendActivityDeactivate(liveActivityId: liveActivityId, wzrk: w)
                             self.removePersistedActivity(activityID: activity.id)
                         } else if state == .dismissed {
                             self.sendActivityDismissed(liveActivityId: liveActivityId, wzrk: w)
@@ -260,7 +260,7 @@ final class CTLiveActivityManager: NSObject {
 
         for (activityID, entry) in entries {
             recordLifecycleEvent(state: kCTLAStateEnded, wzrk: entry.wzrk)
-            sendActivityDeactivate(liveActivityId: activityID)
+            sendActivityDeactivate(liveActivityId: activityID, wzrk: entry.wzrk)
             cancelTask(for: "act_\(activityID)")
             handlers[activityID]?()             // end the visible activity
             removeActivityEntry(activityID: activityID)
@@ -295,7 +295,7 @@ final class CTLiveActivityManager: NSObject {
 
     private func sendActivityDismissed(liveActivityId: String, wzrk: [String: Any]) {
         recordLifecycleEvent(state: kCTLAStateDismissed, wzrk: wzrk)
-        sendActivityDeactivate(liveActivityId: liveActivityId)
+        sendActivityDeactivate(liveActivityId: liveActivityId, wzrk: wzrk)
     }
 
     // MARK: - Private: backend communication (data channel — token BE contract)
@@ -303,23 +303,31 @@ final class CTLiveActivityManager: NSObject {
     private func sendActivityToken(_ tokenData: Data, liveActivityId: String, wzrk: [String: Any]) {
         let tokenHex = Self.hex(from: tokenData)
         updateActivityToken(activityID: liveActivityId, tokenHex: tokenHex)
-        dataQueue?.enqueueLiveActivityData([
+        var payload: [AnyHashable: Any] = [
             "id": tokenHex,
             "type": "la",
             "action": "register",
             "liveActivityId": liveActivityId
-        ])
+        ]
+        // `activityId`/`activityType` = the client-supplied wzrk_activityId / wzrk_activityType
+        // (from the start payload), added alongside the ActivityKit `liveActivityId`.
+        if let activityId = wzrk["wzrk_activityId"] { payload["activityId"] = activityId }
+        if let activityType = wzrk["wzrk_activityType"] { payload["activityType"] = activityType }
+        dataQueue?.enqueueLiveActivityData(payload)
         // The "Started" state also fires on token receipt.
         reportActivityStartedIfNeeded(activityID: liveActivityId, wzrk: wzrk)
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent activity token for liveActivityId '\(liveActivityId)'")
     }
 
-    private func sendActivityDeactivate(liveActivityId: String) {
-        dataQueue?.enqueueLiveActivityData([
+    private func sendActivityDeactivate(liveActivityId: String, wzrk: [String: Any]) {
+        var payload: [AnyHashable: Any] = [
             "type": "la",
             "action": "unregister",
             "liveActivityId": liveActivityId
-        ])
+        ]
+        if let activityId = wzrk["wzrk_activityId"] { payload["activityId"] = activityId }
+        if let activityType = wzrk["wzrk_activityType"] { payload["activityType"] = activityType }
+        dataQueue?.enqueueLiveActivityData(payload)
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: sent token-deactivation for liveActivityId '\(liveActivityId)'")
     }
 
