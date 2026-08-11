@@ -523,6 +523,49 @@
     XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
 }
 
+#pragma mark App Fields In Custom Event Evaluation
+
+// A custom event campaign can trigger on an app field (e.g. Version) merged
+// into the event props. Mirrors the user-attribute app-field coverage for the
+// custom-event path. The merge itself happens in CleverTap
+// evaluateOnEvent:withType:flattenedEventData: before this call, so here the
+// app field is supplied directly in props.
+- (void)testEvaluateEventIncludesAppFields {
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventName": @"AppFieldEvent",
+            @"eventProperties": @[@{
+                @"propertyName": CLTAP_APP_VERSION,
+                @"propertyValue": @"1.2.3",
+            }],
+        }]
+    }];
+
+    [self.evaluationManager evaluateOnEvent:@"AppFieldEvent" withProps:@{ CLTAP_APP_VERSION: @"1.2.3" }];
+    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIds);
+}
+
+// Control for the test above: with the app field absent from the props, the
+// same app-field trigger must not match.
+- (void)testEvaluateEventWithoutAppFieldDoesNotMatchAppFieldTrigger {
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventName": @"AppFieldEvent",
+            @"eventProperties": @[@{
+                @"propertyName": CLTAP_APP_VERSION,
+                @"propertyValue": @"1.2.3",
+            }],
+        }]
+    }];
+
+    [self.evaluationManager evaluateOnEvent:@"AppFieldEvent" withProps:@{}];
+    XCTAssertEqual(self.evaluationManager.evaluatedServerSideInAppIds.count, 0);
+}
+
 - (void)testEvaluateCharged {
     self.helper.inAppStore.serverSideInApps = @[
     @{

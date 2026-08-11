@@ -2472,6 +2472,38 @@
     [mockEvaluationManager stopMocking];
 }
 
+// When a custom event property has the same name as an app field, the event
+// property wins. The fix adds event properties after app fields, honouring the
+// "event properties last, so custom properties are not overriden" contract.
+- (void)test_customEvent_evaluation_customProperty_overrides_app_field {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSString *eventName = @"AppFieldSameNameEvent";
+    // SDK Version is always set by generateAppFields (as a number). Send an
+    // event property with the same key but a distinct sentinel value.
+    NSString *sentinel = @"custom-sdk-version-sentinel";
+    NSDictionary *props = @{ CLTAP_SDK_VERSION: sentinel, @"Prop1": @"Value1" };
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: eventName,
+        CLTAP_EVENT_DATA: props
+    };
+    CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:props];
+
+    OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *evaluatedProps) {
+        // When the names are the same, the custom value wins over the app field.
+        return [evaluatedProps[CLTAP_SDK_VERSION] isEqual:sentinel] && [evaluatedProps[@"Prop1"] isEqual:@"Value1"];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:flattened];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
 #pragma mark - Profile Evaluation Input Shape
 
 // Profile attribute changes must use only flattened profile changes.
