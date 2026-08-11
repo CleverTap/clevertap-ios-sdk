@@ -2099,8 +2099,8 @@ static BOOL sharedInstanceErrorLogged;
     // Add the system properties for evaluation
     NSMutableDictionary *eventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
     // Add the event properties last, so custom properties are not overriden
-    [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
     if (eventName && [eventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+        [eventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
         NSArray *items = eventData[CLTAP_CHARGED_EVENT_ITEMS];
         [self.inAppEvaluationManager evaluateOnChargedEvent:eventData andItems:items];
     } else if (eventType == CleverTapEventTypeProfile) {
@@ -2108,7 +2108,8 @@ static BOOL sharedInstanceErrorLogged;
         [self.inAppEvaluationManager evaluateOnUserAttributeChange:flattenedProfileChanges];
     } else if (eventName) {
         NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedEventChanges = flattenedEventData.eventProperties;
-        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:flattenedEventChanges];
+        [eventData addEntriesFromDictionary:flattenedEventChanges];
+        [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:eventData];
     }
 #endif
 }
