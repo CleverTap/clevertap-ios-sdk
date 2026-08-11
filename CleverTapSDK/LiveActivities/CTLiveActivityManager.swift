@@ -186,27 +186,36 @@ final class CTLiveActivityManager: NSObject {
                         guard let self = self, !Task.isCancelled else { break }
                         guard content.state != lastState else { continue }
                         lastState = content.state
-                        // An `end` push carries a final content-state, which arrives here as a
-                        // content change. Skip it — the activity is no longer `.active`, and the
-                        // terminal "Ended"/"Dismissed" event already covers that transition.
-                        guard activity.activityState == .active else { continue }
-                        // Rebuild wzrk from THIS update's content-state (milestone may have changed).
+                        // Rebuild wzrk from THIS content-state (milestone may have changed) and
+                        // ALWAYS track it as the latest — even the final content of an `end` push
+                        // arrives here, and the terminal "Ended"/"Dismissed" event must use that
+                        // (not the possibly-stale `activity.content.state` property).
                         let w = Self.buildWzrk(attributes: activity.attributes, contentState: content.state)
                         self.updateTrackedWzrk(activityID: activity.id, wzrk: w)
+                        // Only emit "Updated" while the activity is still live — the `end` push's
+                        // final content is represented by the terminal "Ended" event, not "Updated".
+                        guard activity.activityState == .active else { continue }
                         self.recordLifecycleEvent(state: kCTLAStateUpdated, wzrk: w)
                     }
                 }
 
-                // State updates → ended / dismissed.
+                // State updates → ended / dismissed. Use the latest tracked wzrk (fed by the
+                // contentUpdates stream above), which reflects the `end` push's final milestone —
+                // reading `activity.content.state` here can be stale when the state notification
+                // arrives before the content is surfaced on the property.
                 group.addTask { [weak self] in
                     for await state in activity.activityStateUpdates {
                         guard let self = self, !Task.isCancelled else { break }
-                        let w = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
                         if state == .ended {
+                            // The end push's final content-state can surface AFTER the .ended
+                            // notification, so wait briefly for it to settle before reading.
+                            let w = await self.settledWzrk(for: activity)
+                            self.updateTrackedWzrk(activityID: activity.id, wzrk: w)
                             self.recordLifecycleEvent(state: kCTLAStateEnded, wzrk: w)
                             self.sendActivityDeactivate(liveActivityId: liveActivityId, wzrk: w)
                             self.removePersistedActivity(activityID: activity.id)
                         } else if state == .dismissed {
+                            let w = await self.settledWzrk(for: activity)
                             self.sendActivityDismissed(liveActivityId: liveActivityId, wzrk: w)
                             self.cancelTask(for: key)
                             self.removeActivityEntry(activityID: activity.id)
@@ -414,6 +423,46 @@ final class CTLiveActivityManager: NSObject {
 
     private func updateActivityToken(activityID: String, tokenHex: String) {
         lock.lock(); activityTokens[activityID]?.tokenHex = tokenHex; lock.unlock()
+    }
+
+    /// Returns the latest tracked wzrk for an activity (falls back to empty if unknown).
+    private func trackedWzrk(activityID: String) -> [String: Any] {
+        lock.lock(); defer { lock.unlock() }
+        return activityTokens[activityID]?.wzrk ?? [:]
+    }
+
+    /// Reads the wzrk for a terminal (`.ended`/`.dismissed`) event.
+    ///
+    /// ActivityKit delivers the `.ended` state and the end push's final `content-state` on two
+    /// independent async streams; the state can arrive first, so `activity.content` may still hold
+    /// the previous milestone at that instant. There is no synchronous "content applied" signal,
+    /// so we wait for the content to arrive — but event-driven, not by polling:
+    /// - If the end content is already applied, return it immediately (the common, content-first case).
+    /// - Otherwise await the NEXT `contentUpdates` value (wakes exactly when it lands), with a single
+    ///   1s timeout as a safety net (an end push may carry no new content, so we must not wait forever).
+    private func settledWzrk<Attributes: ActivityAttributes>(for activity: Activity<Attributes>) async -> [String: Any] {
+        let previousMilestone = trackedWzrk(activityID: activity.id)["wzrk_milestoneId"] as? String
+        let immediate = Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
+        if (immediate["wzrk_milestoneId"] as? String) != previousMilestone {
+            return immediate   // end content already applied — no wait needed
+        }
+
+        let settled: [String: Any]? = await withTaskGroup(of: [String: Any]?.self) { group in
+            group.addTask {
+                for await content in activity.contentUpdates {
+                    return Self.buildWzrk(attributes: activity.attributes, contentState: content.state)
+                }
+                return nil
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)  // safety timeout
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        return settled ?? Self.buildWzrk(attributes: activity.attributes, contentState: activity.content.state)
     }
 
     /// Updates the latest wzrk (in-memory + persisted) so a later user switch / terminated-app
