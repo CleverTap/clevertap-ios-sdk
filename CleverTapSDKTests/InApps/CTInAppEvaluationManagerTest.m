@@ -425,6 +425,104 @@
     XCTAssertEqualObjects((@[@1, @1, @1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
 }
 
+#pragma mark App Fields In User Attribute Evaluation
+
+// App fields must be merged into the properties used to evaluate a profile
+// attribute change, so a campaign can trigger on an app field (e.g. Version)
+// alongside a profileAttrName.
+- (void)testEvaluateUserAttributeIncludesAppFields {
+    self.evaluationManager.appLaunchedProperties = @{ CLTAP_APP_VERSION: @"1.2.3" };
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": CLTAP_APP_VERSION,
+                @"propertyValue": @"1.2.3",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    }];
+
+    NSDictionary *profile = @{
+        @"Customer Type": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
+}
+
+// Control for the test above: with no app fields available, an app field
+// trigger must not match.
+- (void)testEvaluateUserAttributeWithoutAppFieldsDoesNotMatchAppFieldTrigger {
+    self.evaluationManager.appLaunchedProperties = @{};
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": CLTAP_APP_VERSION,
+                @"propertyValue": @"1.2.3",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    }];
+
+    NSDictionary *profile = @{
+        @"Customer Type": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqual(self.evaluationManager.evaluatedServerSideInAppIdsForProfile.count, 0);
+}
+
+// Conditions are AND-ed: app field and attribute newValue must match,
+// and attribute values must survive the merge.
+- (void)testEvaluateUserAttributeMatchesAppFieldAndAttributeValue {
+    self.evaluationManager.appLaunchedProperties = @{ CLTAP_APP_VERSION: @"1.2.3" };
+    self.helper.inAppStore.serverSideInApps = @[
+    @{
+        @"ti": @1,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": CLTAP_APP_VERSION,
+                @"propertyValue": @"1.2.3",
+            }, @{
+                @"propertyName": @"newValue",
+                @"propertyValue": @"Gold",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    },
+    @{
+        // Same app field, but the attribute value does not match.
+        @"ti": @2,
+        @"whenTriggers": @[@{
+            @"eventProperties": @[@{
+                @"propertyName": CLTAP_APP_VERSION,
+                @"propertyValue": @"1.2.3",
+            }, @{
+                @"propertyName": @"newValue",
+                @"propertyValue": @"Silver",
+            }],
+            @"profileAttrName": @"Customer Type",
+        }]
+    }];
+
+    NSDictionary *profile = @{
+        @"Customer Type": @{
+            @"newValue": @"Gold",
+            @"oldValue": @"Premium"
+        }
+    };
+    [self.evaluationManager evaluateOnUserAttributeChange:profile];
+    XCTAssertEqualObjects((@[@1]), self.evaluationManager.evaluatedServerSideInAppIdsForProfile);
+}
+
 - (void)testEvaluateCharged {
     self.helper.inAppStore.serverSideInApps = @[
     @{

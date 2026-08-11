@@ -15,6 +15,8 @@
 #import "CleverTap+Tests.h"
 #import <OCMock/OCMock.h>
 #import "CTConstants.h"
+#import "CTFlattenedEventData.h"
+#import "CTInAppEvaluationManager.h"
 #import "CTValidationConfig.h"
 #import "CleverTapUTMDetail.h"
 #import <CleverTapSDK/CleverTapSyncDelegate.h>
@@ -2439,6 +2441,105 @@
     NSString *ctid = [self.cleverTapInstance profileGetCleverTapID];
     XCTAssertGreaterThan(ctid.length, 0U,
                          @"profileGetCleverTapID should return a non-empty string");
+}
+
+#pragma mark - App Fields In Event Evaluation
+
+// A custom event must be evaluated against app fields merged with the event's
+// own properties, not the event properties alone.
+- (void)test_customEvent_evaluation_includes_app_fields {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSString *eventName = @"AppFieldsMergeEvent";
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: eventName,
+        CLTAP_EVENT_DATA: @{@"Prop1": @"Value1"}
+    };
+    CTFlattenedEventData *flattened = [CTFlattenedEventData eventProperties:@{@"Prop1": @"Value1"}];
+
+    OCMExpect([mockEvaluationManager evaluateOnEvent:eventName withProps:[OCMArg checkWithBlock:^BOOL(NSDictionary *props) {
+        // SDK Version is always populated by generateAppFields.
+        return props[CLTAP_SDK_VERSION] != nil && [props[@"Prop1"] isEqual:@"Value1"];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:flattened];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+#pragma mark - Profile Evaluation Input Shape
+
+// Profile attribute changes must use only flattened profile changes.
+// Merging app fields introduces bare values where {oldValue, newValue}
+// dictionaries are expected, causing toNestedMap: to subscript a string.
+- (void)test_profileEvent_evaluation_passes_flattened_profile_changes_only {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSDictionary *profileChanges = @{
+        @"Customer Type": @{@"oldValue": @"Premium", @"newValue": @"Gold"}
+    };
+    NSDictionary *event = @{@"profile": @{@"Customer Type": @"Gold"}};
+    CTFlattenedEventData *flattened = [CTFlattenedEventData profileChanges:profileChanges];
+
+    OCMExpect([mockEvaluationManager evaluateOnUserAttributeChange:[OCMArg checkWithBlock:^BOOL(NSDictionary *changes) {
+        // No app field may leak into the outer map.
+        if (changes[CLTAP_SDK_VERSION] != nil || changes[CLTAP_APP_VERSION] != nil) {
+            return NO;
+        }
+        // Every value must still be a change dictionary.
+        for (id value in [changes allValues]) {
+            if (![value isKindOfClass:[NSDictionary class]]) {
+                return NO;
+            }
+        }
+        return [changes isEqualToDictionary:profileChanges];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeProfile
+                         flattenedEventData:flattened];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
+}
+
+#pragma mark - Charged Event Evaluation Contract
+
+// Locks down the current contract: app fields + charge details form the
+// details map, while items are passed separately.
+- (void)test_chargedEvent_evaluation_includes_app_fields_and_charge_details {
+    CTInAppEvaluationManager *evaluationManager = self.cleverTapInstance.inAppEvaluationManager;
+    XCTAssertNotNil(evaluationManager);
+    id mockEvaluationManager = OCMPartialMock(evaluationManager);
+
+    NSArray *items = @[@{@"Category": @"Books"}];
+    NSDictionary *event = @{
+        CLTAP_EVENT_NAME: CLTAP_CHARGED_EVENT,
+        CLTAP_EVENT_DATA: @{
+            @"Amount": @50,
+            CLTAP_CHARGED_EVENT_ITEMS: items
+        }
+    };
+
+    OCMExpect([mockEvaluationManager evaluateOnChargedEvent:[OCMArg checkWithBlock:^BOOL(NSDictionary *details) {
+        return details[CLTAP_SDK_VERSION] != nil && [details[@"Amount"] isEqual:@50];
+    }] andItems:[OCMArg checkWithBlock:^BOOL(NSArray *actualItems) {
+        return [actualItems isEqualToArray:items];
+    }]]);
+
+    [self.cleverTapInstance evaluateOnEvent:event
+                                   withType:CleverTapEventTypeRaised
+                         flattenedEventData:[CTFlattenedEventData noData]];
+
+    OCMVerifyAll(mockEvaluationManager);
+    [mockEvaluationManager stopMocking];
 }
 
 @end
