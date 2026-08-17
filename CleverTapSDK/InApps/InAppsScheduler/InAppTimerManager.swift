@@ -22,7 +22,6 @@ private struct TimerData {
     
     // MARK: - Properties
     private let tagSuffix: String
-    private let queue = DispatchQueue(label: "com.clevertap.InAppTimerManager", attributes: .concurrent)
     private let workQueue = DispatchQueue(label: "com.clevertap.InAppTimerManager.work", attributes: .concurrent)
     
     private var activeJobs: [String: TimerData] = [:]
@@ -197,6 +196,7 @@ private struct TimerData {
         }
         // Now cancel all work items
         let jobsToCancel = activeJobs.values.map { $0.workItem }
+        activeJobs.removeAll()
         lock.unlock()
         for workItem in jobsToCancel {
             workItem.cancel()
@@ -233,10 +233,8 @@ private struct TimerData {
         lock.unlock()
         
         // Reschedule timers
-        var rescheduledCount = 0
         for data in toReschedule {
             scheduleTimer(id: data.id, delay: data.remainingTime, callback: data.callback)
-            rescheduledCount += 1
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(tag) Rescheduled \(data.id) with \(data.remainingTime)s remaining")
         }
         // Discard expired timers

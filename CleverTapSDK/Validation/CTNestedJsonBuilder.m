@@ -142,7 +142,6 @@ static NSRegularExpression *arrayIndexPattern;
             if (isLastSegment) {
                 dict[segment.key] = [self convertValue:value];
             } else {
-                CTPathSegment *nextSegment = segments[index + 1];
                 NSMutableDictionary *nested = dict[segment.key];
                 
                 if (![nested isKindOfClass:[NSMutableDictionary class]]) {
