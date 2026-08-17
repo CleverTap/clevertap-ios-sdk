@@ -48,26 +48,33 @@ import Foundation
                     newInApps.append(inApp)
                 }
             }
-            // Step 2: Prepare/store data using strategy
-            let prepared = self.storageStrategy?.prepareForScheduling(inApps: newInApps)
-            if !(prepared ?? false) {
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Failed to prepare in-apps for scheduling")
-                for inApp in newInApps {
-                    guard let id = inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] as? String else { continue }
-                    let result = self.dataExtractor?.createErrorResult(id: id, message: "Preparation failed")
-                    onComplete(result)
-                }
-                return
-            }
-            // Step 3: Schedule timers for each in-app
+            // Step 2: Keep only the in-apps that will actually get a timer.
+            var schedulable: [(id: String, inApp: [String: Any], delay: TimeInterval)] = []
             for inApp in newInApps {
                 let inAppId = "\(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")"
                 guard !inAppId.isEmpty else { continue }
                 let delay = self.dataExtractor?.extractDelay(inApp: inApp) ?? 0
-                
-                if delay > 0 {
-                    self.scheduleWithTimer(id: inAppId, delay: delay, onComplete: onComplete)
+                guard delay > 0 else {
+                    CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Skipping in-app with non-positive delay: \(inAppId)")
+                    continue
                 }
+                schedulable.append((id: inAppId, inApp: inApp, delay: delay))
+            }
+            guard !schedulable.isEmpty else { return }
+
+            // Step 3: Prepare/store data using strategy
+            let prepared = self.storageStrategy?.prepareForScheduling(inApps: schedulable.map { $0.inApp })
+            if !(prepared ?? false) {
+                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "\(self.tag) Failed to prepare in-apps for scheduling")
+                for entry in schedulable {
+                    let result = self.dataExtractor?.createErrorResult(id: entry.id, message: "Preparation failed")
+                    onComplete(result)
+                }
+                return
+            }
+            // Step 4: Schedule timers for each in-app
+            for entry in schedulable {
+                self.scheduleWithTimer(id: entry.id, delay: entry.delay, onComplete: onComplete)
             }
         }
     }
