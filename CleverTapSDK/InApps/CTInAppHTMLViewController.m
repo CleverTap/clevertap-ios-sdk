@@ -28,6 +28,9 @@ typedef enum {
     CTDismissButton *_closeButton;
     kWRSlideStatus _currentStatus;
     CleverTapJSInterface *_jsInterface;
+    BOOL _webViewLoaded;
+    BOOL _showRequested;
+    BOOL _showAnimated;
 }
 
 @property(nonatomic, strong, readwrite) NSMutableDictionary *notif;
@@ -109,7 +112,7 @@ typedef enum {
     [self.view addSubview:webView];
     
     [self loadWebView];
-    if (!self.notification.showClose) {
+    if (!self.notification.showClose && self.notification.swipeToDismiss) {
         _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureHandle:)];
         _panGesture.delegate = self;
         [webView addGestureRecognizer:_panGesture];
@@ -197,7 +200,28 @@ typedef enum {
         fixedHeight = true;
     } else {
         float percent = self.notification.heightPercent;
-        size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        if (percent == 100.0) {
+            // Get the safe area insets
+            UIEdgeInsets safeInsets = UIEdgeInsetsZero;
+            if (@available(iOS 11.0, *)) {
+                safeInsets = [CTUIUtils getSharedApplication].keyWindow.safeAreaInsets;
+            }
+            else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                safeInsets.top = [CTUIUtils getSharedApplication].statusBarFrame.size.height;
+#pragma clang diagnostic pop
+            }
+
+            // Calculate safe area height
+            CGFloat safeAreaHeight = [[UIScreen mainScreen] bounds].size.height - safeInsets.top - safeInsets.bottom;
+
+            // Calculate percentage-based height
+            size.height = (CGFloat) ceil(safeAreaHeight);
+        }
+        else {
+            size.height = (CGFloat) ceil([[UIScreen mainScreen] bounds].size.height * (percent / 100.0f));
+        }
     }
     
     // prevent webview content insets for Cover
@@ -301,12 +325,40 @@ typedef enum {
         dl = mutableParams[@"deeplink"];
     }
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(handleNotificationAction:forNotification:withExtras:)]) {
-        CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
-        [self.delegate handleNotificationAction:action forNotification:self.notification withExtras:mutableParams[@"params"]];
+    CTNotificationAction *action = [[CTNotificationAction alloc] initWithOpenURL:dl];
+    id params = mutableParams[@"params"];
+    NSMutableDictionary *extras = [params isKindOfClass:[NSDictionary class]]
+        ? [params mutableCopy]
+        : [NSMutableDictionary new];
+    extras[CLTAP_NOTIFICATION_ID_TAG] = self.notification.campaignId ?: @"";
+    extras[CLTAP_PROP_WZRK_CTA] = extras[CLTAP_PROP_WZRK_CTA] ?: @"";
+    NSString *deepLink = dl.absoluteString;
+    if (deepLink.length > 0) {
+        extras[CLTAP_PROP_WZRK_DL] = deepLink;
     }
+    [self notifyDelegateActionTriggered:action withExtras:extras];
     [self hide:YES];
     decisionHandler(WKNavigationActionPolicyCancel);
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    _webViewLoaded = YES;
+    if (_showRequested) {
+        _showRequested = NO;
+        [self showFromWindow:_showAnimated];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!_webViewLoaded) {
+        [self hide:NO];
+    }
 }
 
 - (BOOL)isInlineMedia:(NSURL *)url {
@@ -561,9 +613,7 @@ typedef enum {
     [self.window setHidden:NO];
     
     void (^completionBlock)(void) = ^ {
-        if (self.delegate) {
-            [self.delegate notificationDidShow:self.notification];
-        }
+        [self handleNotificationDidShow];
     };
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
@@ -581,7 +631,16 @@ typedef enum {
 
 - (void)show:(BOOL)animated {
     if (!self.notification.html) return;
-    [self showFromWindow:animated];
+    if (!self.notification.url) {
+        _showRequested = YES;
+        _showAnimated = animated;
+        if (_webViewLoaded) {
+            _showRequested = NO;
+            [self showFromWindow:animated];
+        }
+    } else {
+        [self showFromWindow:animated];
+    }
 }
 
 - (void)hide:(BOOL)animated {

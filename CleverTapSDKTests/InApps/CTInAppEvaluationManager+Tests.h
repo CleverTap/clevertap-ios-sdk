@@ -22,7 +22,6 @@
 - (BOOL)shouldSuppress:(NSDictionary *)inApp;
 - (void)suppress:(NSDictionary *)inApp;
 - (NSString *)generateWzrkId:(NSString *)ti;
-- (void)updateTTL:(NSMutableDictionary *)inApp;
 - (void)onAppLaunchedWithSuccess:(BOOL)success;
 - (void)saveEvaluatedServerSideInAppIds;
 - (void)saveSuppressedClientSideInApps;

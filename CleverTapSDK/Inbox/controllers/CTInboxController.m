@@ -5,6 +5,7 @@
 #import "CTUserMO.h"
 #import "CTMessageMO.h"
 #import "CTInboxUtils.h"
+#import "CTPreferences.h"
 
 
 // Keep the persistent store coordinator static since the inbox file location is shared
@@ -148,13 +149,24 @@ static dispatch_once_t coordinatorOnceToken;
 #pragma mark - Public Methods
 
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages {
-    if (!self.isInitialized) return;
-    
+    [self updateMessages:messages completion:nil];
+}
+
+- (void)updateMessages:(NSArray<NSDictionary*> *)messages
+            completion:(void (^ _Nullable)(void))completion {
+    if (!self.isInitialized) {
+        if (completion) completion();
+        return;
+    }
+
     __weak typeof(self) weakSelf = self;
     [self.context performBlock:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) return;
-        
+        if (!strongSelf) {
+            if (completion) completion();
+            return;
+        }
+
         CleverTapLogStaticInternal(@"%@: updating messages: %@", strongSelf.user, messages);
         
         // Pre-process messages for encryption if needed
@@ -167,6 +179,9 @@ static dispatch_once_t coordinatorOnceToken;
             [strongSelf _save];
             [strongSelf _notifyUpdate];
         }
+        // Fire the completion after messages are updated, so the callback will get
+        // updated messages.
+        if (completion) completion();
     }];
 }
 
@@ -368,11 +383,18 @@ static dispatch_once_t coordinatorOnceToken;
     if (!messages || messages.count == 0) return;
     
     for (CTMessageMO *msg in messages) {
+        [self removeV2MessageId:msg.id];
         [self.context deleteObject:msg];
     }
     
     [self _save];
     [self _notifyUpdate];
+}
+
+- (void)performExpiryPurge {
+    [self.context performBlock:^{
+        [self _messagesFilteredByPredicate:nil];
+    }];
 }
 
 // Always call from inside context performBlock/performBlockAndWait
@@ -486,6 +508,70 @@ static dispatch_once_t coordinatorOnceToken;
         return [self.encryptionManager isTextAESGCMEncrypted:jsonString];
     }
     return NO;
+}
+
+#pragma mark - V2 Message IDs
+
+- (NSString *)_v2MessageIdsKey {
+    return [NSString stringWithFormat:@"%@%@_%@",
+            CLTAP_INBOX_V2_IDS_KEY_PREFIX, self.accountId, self.guid];
+}
+
+- (BOOL)isV2MessageId:(NSString *)messageId {
+    if (!messageId) return NO;
+    NSArray *stored = [CTPreferences getObjectForKey:[self _v2MessageIdsKey]];
+    return stored ? [stored containsObject:messageId] : NO;
+}
+
+- (void)addV2MessageIds:(NSArray<NSString *> *)messageIds {
+    if (!messageIds.count) return;
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key] ?: @[];
+    NSMutableSet *merged = [NSMutableSet setWithArray:existing];
+    [merged addObjectsFromArray:messageIds];
+    [CTPreferences putObject:[merged allObjects] forKey:key];
+}
+
+- (void)removeV2MessageId:(NSString *)messageId {
+    if (!messageId) return;
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key];
+    if (!existing) return;
+    NSMutableArray *updated = [existing mutableCopy];
+    [updated removeObject:messageId];
+    [CTPreferences putObject:updated forKey:key];
+}
+
+- (void)deleteAbsentPersistentV2MessagesFromResponseIds:(NSSet<NSString *> *)responseIds {
+    NSString *key = [self _v2MessageIdsKey];
+    NSArray *storedIds = [CTPreferences getObjectForKey:key];
+    if (!storedIds || storedIds.count == 0) return;
+
+    NSMutableArray *idsToKeep = [NSMutableArray new];
+    __block NSMutableArray<CTMessageMO *> *msgsToDelete = [NSMutableArray new];
+
+    [self.context performBlockAndWait:^{
+        for (NSString *msgId in storedIds) {
+            if ([responseIds containsObject:msgId]) {
+                [idsToKeep addObject:msgId];
+                continue;
+            }
+            CTMessageMO *msg = [self _messageForId:msgId];
+            if (!msg) continue;
+            if (msg.expires == 0) {
+                // Non-persistent — keep in DB and preferences
+                [idsToKeep addObject:msgId];
+            } else {
+                // Persistent but absent from server — delete
+                [msgsToDelete addObject:msg];
+            }
+        }
+        if (msgsToDelete.count > 0) {
+            [self _deleteMessages:msgsToDelete];
+        }
+    }];
+
+    [CTPreferences putObject:idsToKeep forKey:key];
 }
 
 #pragma mark - Delegate Notification

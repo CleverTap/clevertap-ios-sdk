@@ -3,11 +3,12 @@
 #import "CTDismissButton.h"
 #import "CTInAppUtils.h"
 #import "CTUIUtils.h"
+#import <SDWebImage/SDAnimatedImageView+WebCache.h>
 
 @interface CTHalfInterstitialViewController ()
 
 @property (nonatomic, strong) IBOutlet UIView *containerView;
-@property (nonatomic, strong) IBOutlet UIImageView *imageView;
+@property (nonatomic, strong) IBOutlet SDAnimatedImageView *imageView;
 @property (nonatomic, strong) IBOutlet UIView *buttonsContainer;
 @property (nonatomic, strong) IBOutlet UIView *secondButtonContainer;
 @property (nonatomic, strong) IBOutlet UILabel *titleLabel;
@@ -114,19 +115,31 @@
     
     self.imageView.clipsToBounds = YES;
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-    
+
     if (![self deviceOrientationIsLandscape]) {
         if (self.notification.inAppImage) {
             self.imageView.image = self.notification.inAppImage;
         } else if (self.notification.imageData) {
-            self.imageView.image  = [UIImage imageWithData:self.notification.imageData];
+            // Support for GIFs
+            if ([self.notification.contentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageData];
+                self.imageView.image = gif;
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.contentDescription;
     } else {
         if (self.notification.inAppImageLandscape) {
             self.imageView.image = self.notification.inAppImageLandscape;
         } else if (self.notification.imageLandscapeData) {
-            self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            // Support for GIFs in landscape
+            if ([self.notification.landscapeContentType isEqualToString:@"image/gif"]) {
+                SDAnimatedImage *gif = [SDAnimatedImage imageWithData:self.notification.imageLandscapeData];
+                self.imageView.image = gif;
+            } else {
+                self.imageView.image = [UIImage imageWithData:self.notification.imageLandscapeData];
+            }
         }
         self.imageView.accessibilityLabel = self.notification.landscapeContentDescription;
     }
@@ -138,6 +151,10 @@
         self.titleLabel.backgroundColor = [UIColor clearColor];
         self.titleLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.titleColor];
         self.titleLabel.text = self.notification.title;
+        if (@available(iOS 11.0, *)) {
+            self.titleLabel.font = [[UIFontMetrics metricsForTextStyle:UIFontTextStyleHeadline] scaledFontForFont:self.titleLabel.font];
+            self.titleLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
     
     if (self.notification.message) {
@@ -146,6 +163,10 @@
         self.bodyLabel.textColor = [CTUIUtils ct_colorWithHexString:self.notification.messageColor];
         self.bodyLabel.numberOfLines = 0;
         self.bodyLabel.text = self.notification.message;
+        if (@available(iOS 11.0, *)) {
+            self.bodyLabel.font = [[UIFontMetrics defaultMetrics] scaledFontForFont:self.bodyLabel.font];
+            self.bodyLabel.adjustsFontForContentSizeCategory = YES;
+        }
     }
     
     self.firstButton.hidden = YES;
@@ -170,6 +191,8 @@
             [self.secondButton setHidden:YES];
         }
     }
+
+    self.view.accessibilityViewIsModal = YES;
 }
 
 

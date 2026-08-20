@@ -99,13 +99,47 @@
                                                         @"key2": [NSNull null],
                                                         @"key3": @"value3",
                                                         @"key4": [NSNull null]};
-    
+
     NSDictionary<NSString *, id> *expectedDictionary = @{@"key1": @"value1",
                                                          @"key3": @"value3"};
-    
+
     NSDictionary<NSString *, id> *transformedDictionary = [originalDictionary dictionaryRemovingNullValues];
-    
+
     XCTAssertEqualObjects(transformedDictionary, expectedDictionary, @"Transformed dictionary should match the expected dictionary.");
+}
+
+#pragma mark - toJsonString
+
+- (void)testToJsonString_simpleDict_returnsValidJson {
+    NSDictionary *dict = @{@"a": @1, @"b": @"hello"};
+    NSString *json = [dict toJsonString];
+    XCTAssertNotNil(json);
+    NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *roundTripped = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    XCTAssertEqualObjects(roundTripped[@"a"], @1);
+    XCTAssertEqualObjects(roundTripped[@"b"], @"hello");
+}
+
+- (void)testToJsonString_emptyDict_returnsEmptyJson {
+    NSString *json = [@{} toJsonString];
+    XCTAssertEqualObjects(json, @"{}");
+}
+
+- (void)testToJsonString_filtersOutNSDate {
+    NSDictionary *dict = @{@"date": [NSDate date], @"name": @"Alice"};
+    NSString *json = [dict toJsonString];
+    XCTAssertNotNil(json);
+    XCTAssertFalse([json containsString:@"\"date\""]);
+    XCTAssertTrue([json containsString:@"name"]);
+}
+
+- (void)testToJsonString_nestedDict_returnsValidJson {
+    NSDictionary *dict = @{@"outer": @{@"inner": @42}};
+    NSString *json = [dict toJsonString];
+    XCTAssertNotNil(json);
+    NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *roundTripped = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    XCTAssertEqualObjects(roundTripped[@"outer"][@"inner"], @42);
 }
 
 @end

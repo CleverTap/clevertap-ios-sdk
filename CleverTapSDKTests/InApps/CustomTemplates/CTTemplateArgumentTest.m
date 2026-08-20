@@ -48,10 +48,28 @@
 - (void)testDescription {
     CTTemplateArgument *argument = [[CTTemplateArgument alloc] initWithName:@"testName" type:CTTemplateArgumentTypeNumber defaultValue:@(42)];
     NSString *description = [argument description];
-    
+
     XCTAssertTrue([description containsString:@"testName"]);
     XCTAssertTrue([description containsString:@"number"]);
     XCTAssertTrue([description containsString:@"42"]);
+}
+
+- (void)testIsEqual_sameObject_returnsTrue {
+    CTTemplateArgument *arg = [[CTTemplateArgument alloc] initWithName:@"name" type:CTTemplateArgumentTypeString defaultValue:@"val"];
+    XCTAssertTrue([arg isEqual:arg]);
+}
+
+- (void)testIsEqual_nonTemplateArgument_returnsFalse {
+    CTTemplateArgument *arg = [[CTTemplateArgument alloc] initWithName:@"name" type:CTTemplateArgumentTypeString defaultValue:@"val"];
+    XCTAssertFalse([arg isEqual:@"notAnArgument"]);
+}
+
+- (void)testTemplateArgumentTypeToString_allTypes {
+    XCTAssertEqualObjects([CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeString], @"string");
+    XCTAssertEqualObjects([CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeBool], @"boolean");
+    XCTAssertEqualObjects([CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeFile], @"file");
+    XCTAssertEqualObjects([CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeAction], @"action");
+    XCTAssertEqualObjects([CTTemplateArgument templateArgumentTypeToString:CTTemplateArgumentTypeNumber], @"number");
 }
 
 @end

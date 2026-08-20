@@ -6,15 +6,18 @@
 //  Copyright © 2023 CleverTap. All rights reserved.
 //
 #import "CleverTapInternal.h"
+#import "CTImpressionManager.h"
 #import "CTInAppDisplayManager.h"
 #import "CTPreferences.h"
 #import "CTConstants.h"
 #import "CTInAppNotification.h"
 #import "CTInAppDisplayViewController.h"
+#import "CTInAppDisplayViewControllerPrivate.h"
 #import "CleverTapJSInterface.h"
 #import "CTInAppFCManager.h"
 #import "CTDeviceInfo.h"
 #import "CTEventBuilder.h"
+#import "CTValidationResult.h"
 #import "CTUtils.h"
 #import "CTUIUtils.h"
 #import "CleverTapURLDelegate.h"
@@ -38,6 +41,7 @@
 
 #import "CTCustomTemplatesManager-Internal.h"
 #import "CTCustomTemplateInAppData-Internal.h"
+#import "CTPiPWindowController.h"
 #endif
 
 #if !(TARGET_OS_TV)
@@ -49,9 +53,7 @@
 #else
 #import "CleverTapSDK-Swift.h"
 #endif
-#import "CTTimerResult.h"
 #import "CTDelayedInAppResult.h"
-#import "CTInActionResult.h"
 
 static const void *const kNotificationQueueKey = &kNotificationQueueKey;
 static const NSString *kInAppNotificationKey = @"inAppNotification";
@@ -337,6 +339,36 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     }
 }
 
+- (void)_dismissPipInApp {
+    if ([CTUIUtils runningInsideAppExtension]) {
+        CleverTapLogDebug(self.config.logLevel, @"%@: dismissPipInApp is a no-op in an app extension.", self);
+        return;
+    }
+
+    [CTUtils runSyncMainQueue:^{
+        if (currentlyDisplayingNotification == nil || currentDisplayController == nil) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: No PiP InApp is currently displayed, nothing to dismiss.", self);
+            return;
+        }
+
+        if (currentlyDisplayingNotification.inAppType != CTInAppTypePiP) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Currently displaying InApp %@ is not a PiP InApp, nothing to dismiss.", self, currentlyDisplayingNotification.campaignId);
+            return;
+        }
+
+        if (currentDisplayController.delegate != self) {
+            CleverTapLogDebug(self.config.logLevel, @"%@: Currently displaying PiP InApp %@ belongs to another CleverTap instance, not dismissing.", self, currentlyDisplayingNotification.campaignId);
+            return;
+        }
+
+        CleverTapLogDebug(self.config.logLevel, @"%@: Dismissing currently displaying PiP InApp: %@", self, currentlyDisplayingNotification.campaignId);
+        CTInAppDisplayViewController *controller = currentDisplayController;
+        [controller triggerCloseActionWithCallToAction:CLTAP_CTA_DISMISS_PIP_API
+                                             elementId:CLTAP_INAPP_ELEMENT_DISMISS_API];
+        [controller hide:YES];
+    }];
+}
+
 - (void)_resumeInAppNotifications {
     if ([CTUIUtils runningInsideAppExtension]) {
         CleverTapLogDebug(self.config.logLevel, @"%@: resumeInAppNotifications is a no-op in an app extension.", self);
@@ -378,8 +410,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     [self.dispatchQueueManager runOnNotificationQueue:^{
         CleverTapLogInternal(self.config.logLevel, @"%@: processing inapp notification: %@", self, jsonObj);
         __block CTInAppNotification *notification = [[CTInAppNotification alloc] initWithJSON:jsonObj];
-        if (notification.error) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error);
+        if (notification.error || notification.errorLandscape) {
+            CleverTapLogInternal(self.config.logLevel, @"%@: unable to parse inapp notification: %@ error: %@", self, jsonObj, notification.error ?: notification.errorLandscape);
             return;
         }
 
@@ -392,7 +424,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         [self prepareNotification:notification withCompletion:^{
             [CTUtils runSyncMainQueue:^{
                 [self checkOrientationSupport:notification];
-                if (notification.error) {
+                if (notification.error || notification.errorLandscape) {
                     CleverTapLogInternal(self.config.logLevel, @"%@: Device orientation not supported for inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
                     return;
                 }
@@ -404,8 +436,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)checkOrientationSupport:(CTInAppNotification *)notification {
-    if (notification.inAppType == CTInAppTypeCustom) {
-        // The in-app orientation support depends on the custom in-app presenter.
+    if (notification.inAppType == CTInAppTypeCustom || notification.inAppType == CTInAppTypePiP) {
+        // Orientation support is handled internally by the custom/PiP presenter.
         return;
     }
     
@@ -419,6 +451,7 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         return;
     }
 }
+
 
 - (BOOL)deviceOrientationIsLandscape {
 #if (TARGET_OS_TV)
@@ -473,7 +506,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
     } else {
         NSError *loadError = nil;
         NSData *imageData = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&loadError];
-        if (loadError || !imageData) {
+        UIImage *resultImage = [UIImage imageWithData:imageData];
+        if (loadError || !resultImage) {
             result.error = [NSString stringWithFormat:@"unable to load image from URL: %@", url];
         } else {
             if ([contentType isEqualToString:@"image/gif"]) {
@@ -503,8 +537,8 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         }];
         return;
     }
-    if (notification.error) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: unable to process inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error);
+    if (notification.error || notification.errorLandscape) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: unable to process inapp notification: %@, error: %@ ", self, notification.jsonDescription, notification.error ?: notification.errorLandscape);
         return;
     }
 
@@ -627,6 +661,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppTypeCoverImage:
             controller = [[CTCoverImageViewController alloc] initWithNotification:notification];
             break;
+        case CTInAppTypePiP:
+            controller = [[CTPiPWindowController alloc] initWithNotification:notification];
+            break;
         case CTInAppTypeCustom:
             currentlyDisplayingNotification = notification;
             if (![self.templatesManager presentNotification:notification
@@ -645,6 +682,9 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         currentlyDisplayingNotification = notification;
         CleverTapLogDebug(self.config.logLevel, @"%@: Will show new InApp: %@", self, notification.campaignId);
         controller.delegate = self;
+        if (notification.inAppType == CTInAppTypeHTML) {
+            [controller loadViewIfNeeded];
+        }
         [[self class] displayInAppDisplayController:controller];
 
         // Update local in-app count only if it is from local push primer.
@@ -761,7 +801,20 @@ static NSMutableArray<NSArray *> *pendingNotifications;
 }
 
 - (void)handleNotificationAction:(CTNotificationAction *)action forNotification:(CTInAppNotification *)notification withExtras:(NSDictionary *)extras {
+    // When an image/video fails to load, the SDK's HTML media template auto-dismisses
+    // with wzrk_c2a = image/video-error-dismiss. That's a load failure, not a user click:
+    // report a structured wzrk_error and skip the clicked event. Only HTML in-apps can
+    // send these reason strings, so this never misfires on a native in-app's wzrk_c2a.
+    if (notification.inAppType == CTInAppTypeHTML) {
+        CTValidationResult *mediaError = [self mediaLoadErrorForReason:extras[CLTAP_PROP_WZRK_CTA]];
+        if (mediaError) {
+            [self.instance recordInAppNotificationMediaError:mediaError forNotification:notification];
+            return;
+        }
+    }
+    
     CleverTapLogInternal(self.config.logLevel, @"%@: handle InApp action type:%@ with cta: %@ button custom extras: %@ with options:%@", self, [CTInAppUtils inAppActionTypeString:action.type], action.actionURL.absoluteString, action.keyValues, extras);
+
     // record the notification clicked event
     [self.instance recordInAppNotificationStateEvent:YES forNotification:notification andQueryParameters:extras];
 
@@ -792,10 +845,21 @@ static NSMutableArray<NSArray *> *pendingNotifications;
         case CTInAppActionTypeCustom:
             [self triggerCustomTemplateAction:action.customTemplateInAppData forNotification:notification];
             break;
-        case CTInAppActionTypeRequestForPermission:
-            // Handled in CTInAppDisplayViewController handleButtonClickFromIndex:
-            break;
     }
+}
+
+// Maps an advanced-builder media preload failure reason (carried in wzrk_c2a) to a
+// CTValidationResult so it can be reported via wzrk_error. Returns nil for normal CTAs.
+- (CTValidationResult *)mediaLoadErrorForReason:(NSString *)reason {
+    if ([reason isEqualToString:CLTAP_INAPP_ERROR_IMAGE_DISMISS]) {
+        return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD
+                                            andMessage:CLTAP_ERROR_MSG_INAPP_IMAGE_LOAD];
+    }
+    if ([reason isEqualToString:CLTAP_INAPP_ERROR_VIDEO_DISMISS]) {
+        return [CTValidationResult resultWithErrorCode:CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD
+                                            andMessage:CLTAP_ERROR_MSG_INAPP_VIDEO_LOAD];
+    }
+    return nil;
 }
 
 - (void)handleCTAOpenURL:(NSURL *)ctaURL {

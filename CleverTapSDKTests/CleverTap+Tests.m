@@ -1,14 +1,17 @@
 #import "CleverTap+Tests.h"
 #import "CTLoginInfoProvider.h"
 #import "CTDeviceInfo.h"
+#import "CTDomainFactory.h"
+#import "CTQueueType.h"
 
 @interface CleverTap (Tests)
 @property (nonatomic, strong) NSMutableArray *eventsQueue;
 @property (nonatomic, strong) NSMutableArray *profileQueue;
 @property (nonatomic, strong) NSMutableArray *notificationsQueue;
+@property (nonatomic, strong) CTDomainFactory *domainFactory;
 
 + (void)onDidFinishLaunchingNotification:(NSNotification *)notification;
-- (NSDictionary *)batchHeader;
+- (NSDictionary *)batchHeaderForQueue:(CTQueueType)queueType;
 
 @end
 
@@ -17,13 +20,14 @@
 @dynamic eventsQueue;
 @dynamic profileQueue;
 @dynamic notificationsQueue;
+@dynamic domainFactory;
 
 +(void)notfityTestAppLaunch {
     [CleverTap onDidFinishLaunchingNotification:nil];
 }
 
 -(NSDictionary*)getBatchHeader {
-    return [self batchHeader]; // just an example of exposing a private method for testing
+    return [self batchHeaderForQueue:CTQueueTypeUndefined];
 }
 
 - (NSDictionary *)getCachedGUIDs {

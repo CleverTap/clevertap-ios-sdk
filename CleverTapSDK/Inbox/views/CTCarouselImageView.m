@@ -23,6 +23,7 @@ static float captionHeight = 0.f;
 @property (nonatomic, strong) NSString *subcaptionColor;
 @property (nonatomic, strong) NSString *imageUrl;
 @property (nonatomic, assign) BOOL orientationPortrait;
+@property (nonatomic, assign) BOOL orientationKnown;
 
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *captionLabel;
@@ -47,6 +48,7 @@ static float captionHeight = 0.f;
                        subcaptionColor:(NSString * _Nullable)subcaptionColor
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
+                      orientationKnown:(BOOL)orientationKnown
                    orientationPortrait:(BOOL)orientationPortrait
                       imageDescription:(NSString * _Nonnull)imageDescription {
     
@@ -58,6 +60,7 @@ static float captionHeight = 0.f;
         self.captionColor = captionColor;
         self.subcaptionColor = subcaptionColor;
         self.actionUrl = actionUrl;
+        self.orientationKnown = orientationKnown;
         self.orientationPortrait = orientationPortrait;
         self.imageDescription = imageDescription;
         [self setup];
@@ -68,6 +71,7 @@ static float captionHeight = 0.f;
 - (instancetype _Nonnull)initWithFrame:(CGRect)frame
                               imageUrl:(NSString * _Nonnull)imageUrl
                              actionUrl:(NSString * _Nullable)actionUrl
+                      orientationKnown:(BOOL)orientationKnown
                    orientationPortrait:(BOOL)orientationPortrait
                       imageDescription:(NSString * _Nonnull)imageDescription {
     
@@ -75,6 +79,7 @@ static float captionHeight = 0.f;
     if (self) {
         self.imageUrl = imageUrl;
         self.actionUrl = actionUrl;
+        self.orientationKnown = orientationKnown;
         self.orientationPortrait = orientationPortrait;
         self.imageDescription = imageDescription;
         [self setupImageOnly];
@@ -90,7 +95,7 @@ static float captionHeight = 0.f;
     
     // gyrations to draw a corresponding gray border below the image
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.f-kImageBorderWidth, 0.f-kImageBorderWidth, imageViewSize.width + (kImageBorderWidth*2), imageViewSize.height)];
-    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.contentMode = self.orientationKnown ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
     self.imageView.layer.masksToBounds = YES;
@@ -106,7 +111,7 @@ static float captionHeight = 0.f;
     
     // gyrations to draw a corresponding gray border below the image
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.f-kImageBorderWidth, 0.f-kImageBorderWidth, imageViewSize.width + (kImageBorderWidth*2), imageViewSize.height)];
-    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.imageView.contentMode = self.orientationKnown ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
     self.imageView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.imageView.layer.borderWidth = kImageLayerBorderWidth;
     self.imageView.layer.masksToBounds = YES;
@@ -116,7 +121,12 @@ static float captionHeight = 0.f;
     self.captionLabel = [[UILabel alloc]initWithFrame:CGRectMake(kCaptionLeftPadding, kCaptionTopPadding + imageViewSize.height, viewWidth - kCaptionLeftPadding * 2, kCaptionHeight)];
     self.captionLabel.textAlignment = NSTextAlignmentLeft;
     self.captionLabel.adjustsFontSizeToFitWidth = NO;
-    self.captionLabel.font = [UIFont boldSystemFontOfSize:15.f];
+    if (@available(iOS 11.0, *)) {
+        self.captionLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:[UIFont boldSystemFontOfSize:15.f]];
+        self.captionLabel.adjustsFontForContentSizeCategory = YES;
+    } else {
+        self.captionLabel.font = [UIFont boldSystemFontOfSize:15.f];
+    }
     self.captionLabel.textColor = [CTUIUtils ct_colorWithHexString:self.captionColor];
     self.captionLabel.text = self.caption;
     [self addSubview:self.captionLabel];
@@ -125,7 +135,12 @@ static float captionHeight = 0.f;
     self.subcaptionLabel.numberOfLines = 0;
     self.subcaptionLabel.textAlignment = NSTextAlignmentLeft;
     self.subcaptionLabel.adjustsFontSizeToFitWidth = NO;
-    self.subcaptionLabel.font = [UIFont systemFontOfSize:13.f];
+    if (@available(iOS 11.0, *)) {
+        self.subcaptionLabel.font = [UIFontMetrics.defaultMetrics scaledFontForFont:[UIFont systemFontOfSize:13.f]];
+        self.subcaptionLabel.adjustsFontForContentSizeCategory = YES;
+    } else {
+        self.subcaptionLabel.font = [UIFont systemFontOfSize:13.f];
+    }
     self.subcaptionLabel.textColor = [CTUIUtils ct_colorWithHexString:self.subcaptionColor];
     self.subcaptionLabel.text = self.subcaption;
     [self addSubview:self.subcaptionLabel];
@@ -141,6 +156,10 @@ static float captionHeight = 0.f;
 
 - (void)loadImage {
     if (!self.imageUrl) return;
+    if (!self.orientationKnown) {
+        self.imageViewLandRatioConstraint.priority = 250;
+        self.imageViewPortRatioConstraint.priority = 250;
+    }
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:self.imageUrl]
                       placeholderImage: self.orientationPortrait ?  [self getPortraitPlaceHolderImage] : [self getLandscapePlaceHolderImage]
                                options:(SDWebImageRetryFailed) context:@{SDWebImageContextStoreCacheType : @(SDImageCacheTypeMemory)}];

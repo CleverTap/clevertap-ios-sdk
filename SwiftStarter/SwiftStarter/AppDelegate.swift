@@ -106,10 +106,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        
         NSLog("%@: will present notification: %@", self.description, notification.request.content.userInfo)
-        CleverTap.sharedInstance()?.recordNotificationViewedEvent(withData: notification.request.content.userInfo)
-        completionHandler([.badge, .sound, .alert])
+        CleverTap.handleWillPresent(notification, withDefaultOptions: [.badge, .sound, .alert], completionHandler: completionHandler)
     }
     
     func application(_ application: UIApplication,

@@ -30,11 +30,19 @@ NS_ASSUME_NONNULL_BEGIN
                           encryptionManager:(CTEncryptionManager*)encryptionManager;
 
 - (void)updateMessages:(NSArray<NSDictionary*> *)messages;
+- (void)updateMessages:(NSArray<NSDictionary*> *)messages
+            completion:(void (^ _Nullable)(void))completion;
 - (NSDictionary * _Nullable )messageForId:(NSString *)messageId;
 - (void)deleteMessageWithId:(NSString *)messageId;
 - (void)deleteMessagesWithId:(NSArray *_Nonnull)messageIds;
 - (void)markReadMessageWithId:(NSString *)messageId;
 - (void)markReadMessagesWithId:(NSArray *_Nonnull)messageIds;
+- (void)performExpiryPurge;
+
+- (BOOL)isV2MessageId:(NSString *)messageId;
+- (void)addV2MessageIds:(NSArray<NSString *> *)messageIds;
+- (void)removeV2MessageId:(NSString *)messageId;
+- (void)deleteAbsentPersistentV2MessagesFromResponseIds:(NSSet<NSString *> *)responseIds;
 
 @end
 

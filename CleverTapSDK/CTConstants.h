@@ -1,6 +1,6 @@
 #if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
 #import <CleverTapSDK/CleverTapSDK-Swift.h>
-#else
+#elif __has_include("CleverTapSDK-Swift.h")
 #import "CleverTapSDK-Swift.h"
 #endif
 
@@ -129,6 +129,15 @@ extern NSString *const kSessionId;
 #define CLTAP_LOCATION_PING_INTERVAL_SECONDS 10
 #define CLTAP_CONTENT_FETCH_JSON_RESPONSE_KEY @"content_fetch"
 #define CLTAP_INBOX_MSG_JSON_RESPONSE_KEY @"inbox_notifs"
+#define CLTAP_INBOX_V2_RESPONSE_KEY @"inbox_notifs_v2"
+#define CLTAP_NOTIFICATION_DELETED_EVENT_NAME @"Notification Deleted"
+#define CLTAP_INBOX_PENDING_READS_KEY_PREFIX @"CLTAP_inbox_pending_reads_"
+#define CLTAP_INBOX_V2_IDS_KEY_PREFIX @"CLTAP_inbox_v2_ids_"
+#define CLTAP_INBOX_CONFIRMED_DELETES_KEY_PREFIX @"CLTAP_inbox_confirmed_deletes_"
+#define CLTAP_INBOX_RETRY_DELETES_KEY_PREFIX @"CLTAP_inbox_retry_deletes_"
+static const NSTimeInterval kCTInboxConfirmedDeleteFallbackTTL = 86400.0; // 24 hours
+static const NSInteger kCTInboxFetchTypeInboxV2 = 7;
+static const NSTimeInterval kCTInboxRefreshMinInterval = 300.0;
 #define CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY @"adUnit_notifs"
 #define CLTAP_FEATURE_FLAGS_JSON_RESPONSE_KEY @"ff_notifs"
 #define CLTAP_PRODUCT_CONFIG_JSON_RESPONSE_KEY @"pc_notifs"
@@ -144,6 +153,7 @@ extern NSString *const kSessionId;
 #define CLTAP_WZRK_PREFIX @"wzrk_"
 #define CLTAP_NOTIFICATION_TAG_SECONDARY @"wzrk_"
 #define CLTAP_NOTIFICATION_CLICKED_TAG @"wzrk_cts"
+#define CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND @"wzrk_sif"
 #define CLTAP_NOTIFICATION_TAG @"W$"
 #define CLTAP_DATE_FORMAT @"yyyyMMdd"
 #define CLTAP_DATE_PREFIX @"$D_"
@@ -229,6 +239,9 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_COUNTS_SHOWN_TODAY_KEY @"istc_inapp"
 #define CLTAP_PREFS_INAPP_MAX_PER_DAY_KEY @"istmcd_inapp"
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
+#define CLTAP_INAPP_EVAL_DEDUPED_FLAG @"ss_evals_deduped"
+
+#define CLTAP_PREFS_PREFIX @"WizRocket"
 
 #define CLTAP_PREFS_INAPP_KEY @"inapp_notifs"
 #define CLTAP_PREFS_INAPP_KEY_CS @"inapp_notifs_cs"
@@ -247,7 +260,32 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PROP_WZRK_PIVOT @"wzrk_pivot"
 #define CLTAP_PROP_WZRK_CTA @"wzrk_c2a"
 #define CLTAP_PROP_WZRK_DL @"wzrk_dl"
-#define CLTAP_CTA_SWIPE_DISMISS @"swipe-dismiss"
+#define CLTAP_CTA_SWIPE_DISMISS @"Swipe to Dismiss"
+#define CLTAP_CTA_TAP_OUTSIDE_DISMISS @"Tap Outside to Dismiss"
+#define CLTAP_CTA_DISMISS_BUTTON @"Dismiss Button"
+#define CLTAP_CTA_DISMISS_PIP_API @"Dismiss PiP API"
+
+// Split of Clicks: per-element identity and action descriptors added to the
+// Notification Clicked event for basic (native) and custom HTML in-apps.
+#define CLTAP_PROP_WZRK_ELEMENT_ID @"wzrk_element_id"
+#define CLTAP_PROP_WZRK_ACTION @"wzrk_action"
+#define CLTAP_PROP_WZRK_DATA @"wzrk_data"
+#define CLTAP_INAPP_ELEMENT_CLOSE_BUTTON @"closeButton"
+#define CLTAP_INAPP_ELEMENT_IMAGE @"image-1"
+#define CLTAP_INAPP_ELEMENT_DISMISS_API @"dismissApi"
+#define CLTAP_INAPP_DATA_CLOSE @"close"
+
+// Advanced-builder media preload failures. The HTML template (image_interstitial.html)
+// signals these as a synthetic close with wzrk_c2a set to the reason string. The SDK
+// reports them as a structured wzrk_error (no click event is raised); the error rides
+// along on the next queued event.
+#define CLTAP_INAPP_ERROR_IMAGE_DISMISS @"image-error-dismiss"
+#define CLTAP_INAPP_ERROR_VIDEO_DISMISS @"video-error-dismiss"
+// wzrk_error codes — MUST stay aligned with Android and the backend decoder.
+#define CLTAP_ERROR_CODE_INAPP_IMAGE_LOAD 591
+#define CLTAP_ERROR_CODE_INAPP_VIDEO_LOAD 592
+#define CLTAP_ERROR_MSG_INAPP_IMAGE_LOAD @"InApp image failed to load"
+#define CLTAP_ERROR_MSG_INAPP_VIDEO_LOAD @"InApp video failed to load"
 
 #define CLTAP_INAPP_ID @"ti"
 #define CLTAP_INAPP_TTL @"wzrk_ttl"
@@ -264,6 +302,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_INAPP_MEDIA_CONTENT_TYPE @"content_type"
 #define CLTAP_INAPP_MEDIA_URL @"url"
 #define CLTAP_INAPP_MEDIA_CONTENT_DESCRIPTION @"alt_text"
+#define CLTAP_INAPP_TAP_OUTSIDE_DISMISS @"tap_outside_dismiss"
+#define CLTAP_INAPP_SWIPE_TO_DISMISS @"swipe_to_dismiss"
 
 #define CLTAP_TRIGGER_BOOL_STRING_YES @"true"
 #define CLTAP_TRIGGER_BOOL_STRING_NO @"false"

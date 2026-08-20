@@ -24,6 +24,7 @@
 @property (nonatomic, copy, readwrite) NSString *contentType;
 @property (nonatomic, copy, readwrite) NSString *landscapeContentType;
 @property (nonatomic, copy, readwrite) NSString *mediaUrl;
+@property (nonatomic, copy, readwrite) NSString *mediaUrlLandscape;
 @property (nonatomic, copy, readwrite) NSString *contentDescription;
 @property (nonatomic, copy, readwrite) NSString *landscapeContentDescription;
 
@@ -44,6 +45,8 @@
 @property (nonatomic, copy, readwrite) NSString *url;
 @property (nonatomic, readwrite) BOOL showClose;
 @property (nonatomic, readwrite) BOOL darkenScreen;
+@property (nonatomic, readwrite) BOOL tapOutsideDismiss;
+@property (nonatomic, readwrite) BOOL swipeToDismiss;
 @property (nonatomic, readwrite) BOOL excludeFromCaps;
 @property (nonatomic, readwrite) int maxPerSession;
 @property (nonatomic, readwrite) int totalLifetimeCount;
@@ -95,6 +98,14 @@
             self.isLocalInApp = jsonObject[@"isLocalInApp"] ? [jsonObject[@"isLocalInApp"] boolValue] : NO;
             self.isPushSettingsSoftAlert = jsonObject[@"isPushSettingsSoftAlert"] ? [jsonObject[@"isPushSettingsSoftAlert"] boolValue] : NO;
             self.fallBackToNotificationSettings = jsonObject[@"fallbackToNotificationSettings"] ? [jsonObject[@"fallbackToNotificationSettings"] boolValue] : NO;
+            // Per-campaign dismiss gesture configuration. Default to YES to preserve the
+            // existing behaviour for campaigns that do not send these keys.
+            // Guard against NSNull (explicit JSON null) — only a real NSNumber may
+            // receive boolValue. Missing/null defaults to YES to preserve behaviour.
+            id tapOutside = jsonObject[CLTAP_INAPP_TAP_OUTSIDE_DISMISS];
+            self.tapOutsideDismiss = [tapOutside isKindOfClass:[NSNumber class]] ? [tapOutside boolValue] : YES;
+            id swipeDismiss = jsonObject[CLTAP_INAPP_SWIPE_TO_DISMISS];
+            self.swipeToDismiss = [swipeDismiss isKindOfClass:[NSNumber class]] ? [swipeDismiss boolValue] : YES;
             NSString *inAppId = [CTInAppNotification inAppId:jsonObject];
             if (inAppId) {
                 self.Id = inAppId;
@@ -172,6 +183,8 @@
                 if (![self.landscapeContentType isEqualToString:@"image/gif"] ) {
                     _mediaIsImage = YES;
                 }
+            } else if ([self.landscapeContentType hasPrefix:@"video"]) {
+                self.mediaUrlLandscape = _mediaUrlLandscape;
             }
         }
     }
@@ -203,7 +216,8 @@
     switch (self.inAppType) {
         case CTInAppTypeHeader:
         case CTInAppTypeFooter:
-            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
+            // GIF support added, video and audio not supported
+            if  (_mediaIsAudio || _mediaIsVideo){
                 self.imageURL = nil;
                 CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
             }
@@ -211,13 +225,15 @@
         case CTInAppTypeCoverImage:
         case CTInAppTypeInterstitialImage:
         case CTInAppTypeHalfInterstitialImage:
-            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo || !_mediaIsImage){
+            // GIF and Video support added for image-only templates
+            if  (_mediaIsAudio){
                 self.error = [NSString stringWithFormat:@"wrong media type for template"];
             }
             break;
         case CTInAppTypeCover:
         case CTInAppTypeHalfInterstitial:
-            if  (_mediaIsGif || _mediaIsAudio || _mediaIsVideo){
+            // GIF support added, video and audio not supported
+            if  (_mediaIsAudio || _mediaIsVideo){
                 self.imageURL = nil;
                 CleverTapLogStaticDebug(@"unable to download media, wrong media type for template");
             }
@@ -293,7 +309,7 @@
 
 - (void)setPreparedInAppImageLandscape:(UIImage *)inAppImageLandscape
                inAppImageLandscapeData:(NSData *)inAppImageLandscapeData error:(NSString *)error {
-    self.error = error;
+    self.errorLandscape = error;
     self.inAppImageLandscape = inAppImageLandscape;
     self.imageLandscapeData = inAppImageLandscapeData;
 }

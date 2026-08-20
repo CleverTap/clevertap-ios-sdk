@@ -62,6 +62,7 @@ extension ViewController {
         eventList.append("Variables")
         eventList.append("Sync Custom Templates")
         eventList.append("Live Activities")
+        eventList.append("Fetch Inbox")
         self.tblEvent.reloadData()
     }
     
@@ -159,6 +160,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         case 21: CleverTap.sharedInstance()?.syncCustomTemplates()
             break;
         case 22: navigateToLiveActivities()
+            break;
+        case 23:
+            fetchInbox()
             break;
         default:
             break;
@@ -351,11 +355,18 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate{
         CleverTap.sharedInstance()?.recordEvent("InAppCampaignPushPrimer")
     }
 
+
     func navigateToLiveActivities() {
         if #available(iOS 13.0, *) {
             let liveActivitiesVC = LiveActivitiesViewController()
             self.navigationController?.pushViewController(liveActivitiesVC, animated: true)
         }
+    }
+
+    func fetchInbox() {
+        CleverTap.sharedInstance()?.fetchInbox(callback: { success in
+            print("Fetch Inbox: \(success)")
+        })
     }
     
     // MARK: CleverTapPushPermissionDelegate

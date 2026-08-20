@@ -28,7 +28,9 @@
 #import "CTLoginInfoProvider.h"
 #import "CTDispatchQueueManager.h"
 #import "CTMultiDelegateManager.h"
-#import "CTSessionManager.h"
+#if __has_include("CTImpressionManager.h")
+#import "CTImpressionManager.h"
+#endif
 #import "CTFileDownloader.h"
 #import "CTCryptMigrator.h"
 
@@ -78,6 +80,7 @@ static NSArray *sslCertNames;
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
+#import "CleverTapDisplayUnitCache.h"
 #endif
 
 #import "CTBatchSentDelegate.h"
@@ -161,6 +164,11 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @interface CleverTap () <CTInboxDelegate, CleverTapInboxViewControllerAnalyticsDelegate> {}
 @property(atomic, strong) CTInboxController *inboxController;
 @property(nonatomic, strong) NSMutableArray<CleverTapInboxUpdatedBlock> *inboxUpdateBlocks;
+@property(atomic, assign) NSTimeInterval lastInboxRefreshTimestamp;
+@property(atomic, assign) BOOL isInboxV2Enabled;
+@property(nonatomic, assign) BOOL needsInboxFetchAfterProfileSend;
+@property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxViewedDebounceMap;
+@property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *inboxClickedDebounceMap;
 @end
 #endif
 
@@ -171,8 +179,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @end
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-@interface CleverTap () <CTDisplayUnitDelegate> {}
-@property (nonatomic, strong) CTDisplayUnitController *displayUnitController;
+@interface CleverTap () {}
+@property (nonatomic, strong) id<CleverTapDisplayUnitCache> displayUnitCache;
 @property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
 @end
 #endif
@@ -383,6 +391,7 @@ static BOOL sharedInstanceErrorLogged;
                     } error:nil];
                 }
             }
+            [CTSwizzleManager swizzleWillPresentOnClass:cls];
         }
     }
 #endif
@@ -491,7 +500,13 @@ static BOOL sharedInstanceErrorLogged;
         self.delegateManager = [[CTMultiDelegateManager alloc] init];
         
         _cryptMigrator = [[CTCryptMigrator alloc] initWithConfig:_config andDeviceInfo:_deviceInfo];
-        
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+        if (![CTUIUtils runningInsideAppExtension]) {
+            [self dedupeSSEvaluationIds];
+        }
+#endif
+
         _localDataStore = [[CTLocalDataStore alloc] initWithConfig:_config profileValues:initialProfileValues andDeviceInfo:_deviceInfo dispatchQueueManager:_dispatchQueueManager];
         
         _lastAppLaunchedTime = [self eventGetLastTime:CLTAP_APP_LAUNCHED_EVENT];
@@ -550,6 +565,9 @@ static BOOL sharedInstanceErrorLogged;
         
         [self _initFeatureFlags];
         [self _initProductConfig];
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+        [self _initInbox];
+#endif
         [self notifyUserProfileInitialized];
     }
     
@@ -1058,6 +1076,11 @@ static BOOL sharedInstanceErrorLogged;
     return [self.domainFactory isMuted];
 }
 
+- (void)unmute {
+    CleverTapLogDebug(self.config.logLevel, @"%@: unmute called, clearing mute state", self);
+    [self.domainFactory unmute];
+}
+
 
 #pragma mark - Lifecycle Handling
 
@@ -1155,13 +1178,15 @@ static BOOL sharedInstanceErrorLogged;
         [self scheduleQueueFlush];
         CleverTapLogInternal(self.config.logLevel, @"%@: app is in foreground", self);
     }
-    
+
     // Set flag based on actual state
     self.isAppForeground = isActuallyInForeground;
-    
+
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     if (isActuallyInForeground && !_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
         [self.inAppFCManager checkUpdateDailyLimits];
+        // Show inapps that were not shown because of the app being in the background
+        [self.inAppDisplayManager _showInAppNotificationIfAny];
     }
 #endif
 }
@@ -1671,6 +1696,10 @@ static BOOL sharedInstanceErrorLogged;
     [self.inAppDisplayManager _discardInAppNotifications:dismissInAppIfVisible];
 }
 
+- (void)dismissPipInApp {
+    [self.inAppDisplayManager _dismissPipInApp];
+}
+
 + (void)registerCustomInAppTemplates:(id<CTTemplateProducer> _Nonnull)producer {
     [CTCustomTemplatesManager registerTemplateProducer:producer];
 }
@@ -1699,6 +1728,19 @@ static BOOL sharedInstanceErrorLogged;
         }];
     }];
 }
+
+#if !CLEVERTAP_NO_INAPP_SUPPORT
+- (void)recordInAppNotificationMediaError:(CTValidationResult *)error
+                          forNotification:(CTInAppNotification *)notification {
+    // A media (image/video) load failure must NOT raise a Notification Viewed/Clicked
+    // event. Push the error so it is reported as wzrk_error on the next event that is
+    // queued, matching how device/validation errors are already surfaced.
+    [self.dispatchQueueManager runSerialAsync:^{
+        CleverTapLogInternal(self.config.logLevel, @"%@: InApp media load error for campaign %@ queued as wzrk_error (code %d)", self, notification.campaignId, error.errorCode);
+        [self.validationResultStack pushValidationResult:error];
+    }];
+}
+#endif
 
 - (void)openURL:(NSURL *)ctaURL forModule:(NSString *)module {
     UIApplication *sharedApplication = [CTUIUtils getSharedApplication];
@@ -2486,7 +2528,11 @@ static BOOL sharedInstanceErrorLogged;
             if ([_eventsQueue count] > 0) {
                 [_eventsQueue removeObjectsInArray:batch];
             }
-            
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+            [self _removePendingInboxReadsForSentBatch:batch];
+#endif
+
             [self parseResponse:responseData responseEncrypted:responseEncrypted];
             
             [self.delegateManager notifyDelegatesBatchDidSend:batchWithHeader withSuccess:YES withQueueType:queueType];
@@ -2505,23 +2551,17 @@ static BOOL sharedInstanceErrorLogged;
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
     NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
-    if (displayUnitJSON) {
+    if ([displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0) {
         if (self.isUserSwitching) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
             return;
         }
-        
-        NSMutableArray *displayUnitNotifs;
-        @try {
-            displayUnitNotifs = [[NSMutableArray alloc] initWithArray:displayUnitJSON];
-        } @catch (NSException *e) {
-            CleverTapLogInternal(self.config.logLevel, @"%@: Error parsing Display Unit JSON: %@", self, e.debugDescription);
-        }
-        if (displayUnitNotifs && [displayUnitNotifs count] > 0) {
+        NSArray<CleverTapDisplayUnit *> *displayUnits = [self _parseDisplayUnitsFromJSONArray:displayUnitJSON];
+        if (displayUnits.count > 0) {
             [self initializeDisplayUnitWithCallback:^(BOOL success) {
                 if (success) {
-                    NSArray <NSDictionary*> *displayUnits = [displayUnitNotifs mutableCopy];
-                    [self.displayUnitController updateDisplayUnits:displayUnits];
+                    [self.displayUnitCache updateDisplayUnits:displayUnits];
+                    [self _notifyDisplayUnitsUpdated];
                 }
             }];
         }
@@ -2652,7 +2692,12 @@ static BOOL sharedInstanceErrorLogged;
 #endif
                 
 #if !CLEVERTAP_NO_INBOX_SUPPORT
-                [self handleAppInboxResponse:jsonResp];
+                if (jsonResp[CLTAP_INBOX_V2_RESPONSE_KEY]) {
+                    [self handleAppInboxV2Response:jsonResp isCompleteResponse:NO];
+                }
+                if (jsonResp[CLTAP_INBOX_MSG_JSON_RESPONSE_KEY]) {
+                    [self handleAppInboxResponse:jsonResp];
+                }
 #endif
                 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
@@ -2723,6 +2768,13 @@ static BOOL sharedInstanceErrorLogged;
                 } @catch (NSException *ex) {
                     CleverTapLogInternal(self.config.logLevel, @"%@: Failed to handle ARP update: %@", self, ex.debugDescription);
                 }
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+                if (self.needsInboxFetchAfterProfileSend) {
+                    self.needsInboxFetchAfterProfileSend = NO;
+                    [self _fetchInboxV2WithThrottle:NO completion:nil];
+                }
+#endif
                 
                 // Handle dbg_lvl
                 @try {
@@ -2998,6 +3050,72 @@ static BOOL sharedInstanceErrorLogged;
         }
     }
 }
+
+#if !defined(CLEVERTAP_TVOS)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+- (void)_handleWillPresentNotification:(UNNotification *)notification
+                    withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                     completionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    if (@available(iOS 10.0, *)) {
+        if ([CTUIUtils runningInsideAppExtension]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        NSDictionary *userInfo = notification.request.content.userInfo;
+        if (![self _isCTPushNotification:userInfo]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        BOOL silentInForeground = [userInfo[CLTAP_NOTIFICATION_SILENT_IN_FOREGROUND] boolValue];
+        if (silentInForeground) {
+            if (@available(iOS 14.0, *)) {
+                completionHandler(UNNotificationPresentationOptionList);
+            } else {
+                completionHandler(UNNotificationPresentationOptionNone);
+            }
+        } else {
+            completionHandler(defaultOptions);
+        }
+    } else {
+        completionHandler(defaultOptions);
+    }
+}
+
++ (void)handleWillPresentNotification:(UNNotification *)notification
+                   withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                    completionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    if (@available(iOS 10.0, *)) {
+        if ([CTUIUtils runningInsideAppExtension]) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        NSDictionary *userInfo = notification.request.content.userInfo;
+        id rawAccountId = userInfo[@"wzrk_acct_id"];
+        NSString *accountId = [rawAccountId isKindOfClass:[NSString class]] ? rawAccountId : nil;
+
+        CleverTap *targetInstance = nil;
+        if (!_instances || [_instances count] <= 0 || !accountId) {
+            targetInstance = [self sharedInstance];
+        } else {
+            for (CleverTap *instance in [_instances allValues]) {
+                if ([accountId isEqualToString:instance.config.accountId]) {
+                    targetInstance = instance;
+                    break;
+                }
+            }
+        }
+        if (!targetInstance) {
+            completionHandler(defaultOptions);
+            return;
+        }
+        [targetInstance _handleWillPresentNotification:notification withDefaultOptions:defaultOptions completionHandler:completionHandler];
+    } else {
+        completionHandler(defaultOptions);
+    }
+}
+#pragma clang diagnostic pop
+#endif
 
 + (void)handleOpenURL:(NSURL*)url {
     if ([CTUIUtils runningInsideAppExtension]){
@@ -3914,6 +4032,12 @@ static BOOL sharedInstanceErrorLogged;
         if (self.deviceInfo.deviceId) {
             self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
             self.inboxController.delegate = self;
+            if (!self.inboxViewedDebounceMap) {
+                self.inboxViewedDebounceMap = [NSMutableDictionary new];
+            }
+            if (!self.inboxClickedDebounceMap) {
+                self.inboxClickedDebounceMap = [NSMutableDictionary new];
+            }
             [CTUtils runSyncMainQueue: ^{
                 callback(self.inboxController.isInitialized);
             }];
@@ -3921,18 +4045,26 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
+- (NSSet<NSString *> *)_locallyDeletedV2MessageIds {
+    NSArray *retryIds = [[self _retryDeleteEntries] valueForKey:@"wzrk_mid"];
+    NSSet *confirmed = [self _confirmedDeleteMessageIds];
+    NSMutableSet *deleted = [NSMutableSet setWithArray:retryIds];
+    [deleted unionSet:confirmed];
+    return deleted;
+}
+
 - (NSInteger)getInboxMessageCount {
     if (![self _isInboxInitialized]) {
         return -1;
     }
-    return self.inboxController.count;
+    return (NSInteger)[self getAllInboxMessages].count;
 }
 
 - (NSInteger)getInboxMessageUnreadCount {
     if (![self _isInboxInitialized]) {
         return -1;
     }
-    return self.inboxController.unreadCount;
+    return (NSInteger)[self getUnreadInboxMessages].count;
 }
 
 - (NSArray<CleverTapInboxMessage *> * _Nonnull )getAllInboxMessages {
@@ -3940,14 +4072,16 @@ static BOOL sharedInstanceErrorLogged;
     if (![self _isInboxInitialized]) {
         return all;
     }
+    NSSet *deleted = [self _locallyDeletedV2MessageIds];
     for (NSDictionary *m in self.inboxController.messages) {
         @try {
-            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+            NSString *msgId = m[@"_id"];
+            if (msgId && [deleted containsObject:msgId]) continue;
+            [all addObject:[[CleverTapInboxMessage alloc] initWithJSON:m]];
         } @catch (NSException *e) {
             CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
         }
-    };
-    
+    }
     return all;
 }
 
@@ -3956,18 +4090,24 @@ static BOOL sharedInstanceErrorLogged;
     if (![self _isInboxInitialized]) {
         return all;
     }
+    NSSet *deleted = [self _locallyDeletedV2MessageIds];
     for (NSDictionary *m in self.inboxController.unreadMessages) {
         @try {
-            [all addObject: [[CleverTapInboxMessage alloc] initWithJSON:m]];
+            NSString *msgId = m[@"_id"];
+            if (msgId && [deleted containsObject:msgId]) continue;
+            [all addObject:[[CleverTapInboxMessage alloc] initWithJSON:m]];
         } @catch (NSException *e) {
             CleverTapLogDebug(_config.logLevel, @"Error getting inbox message: %@", e.debugDescription);
         }
-    };
+    }
     return all;
 }
 
-- (CleverTapInboxMessage * _Nullable )getInboxMessageForId:(NSString * _Nonnull)messageId {
+- (CleverTapInboxMessage * _Nullable)getInboxMessageForId:(NSString * _Nonnull)messageId {
     if (![self _isInboxInitialized]) {
+        return nil;
+    }
+    if ([[self _locallyDeletedV2MessageIds] containsObject:messageId]) {
         return nil;
     }
     NSDictionary *m = [self.inboxController messageForId:messageId];
@@ -3978,44 +4118,134 @@ static BOOL sharedInstanceErrorLogged;
     if (![self _isInboxInitialized]) {
         return;
     }
-    [self.inboxController deleteMessageWithId:message.messageId];
+    NSDictionary *msgJSON = [self.inboxController messageForId:message.messageId];
+    if (msgJSON && [self.inboxController isV2MessageId:message.messageId]) {
+        [self _sendInboxDeleteForMessage:message];
+    } else {
+        [self.inboxController deleteMessageWithId:message.messageId];
+    }
 }
 
 - (void)markReadInboxMessage:(CleverTapInboxMessage * _Nonnull) message {
     if (![self _isInboxInitialized]) {
         return;
     }
+    [self _addPendingReadForMessageId:message.messageId];
     [self.inboxController markReadMessageWithId:message.messageId];
 }
 
 - (void)recordInboxNotificationViewedEventForID:(NSString * _Nonnull)messageId {
-    CleverTapInboxMessage *message = [self getInboxMessageForId:messageId];
-    [self recordInboxMessageStateEvent:NO forMessage:message andQueryParameters:nil];
+    CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
+    if (!msg) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Viewed — message %@ not found or expired", self, messageId);
+        return;
+    }
+    if ([self.inboxController isV2MessageId:messageId] && msg.isRead) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox V2: skipping Viewed — message %@ already read", self, messageId);
+        return;
+    }
+    if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME forMessageId:messageId]) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Viewed — duplicate within debounce window for %@", self, messageId);
+        return;
+    }
+    [self recordInboxMessageStateEvent:NO forMessage:msg andQueryParameters:nil];
 }
 
 - (void)recordInboxNotificationClickedEventForID:(NSString * _Nonnull)messageId {
-    CleverTapInboxMessage *message = [self getInboxMessageForId:messageId];
-    [self recordInboxMessageStateEvent:YES forMessage:message andQueryParameters:nil];
+    CleverTapInboxMessage *msg = [self getInboxMessageForId:messageId];
+    if (!msg) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Clicked — message %@ not found or expired", self, messageId);
+        return;
+    }
+    if ([self _isDuplicateInboxEvent:CLTAP_NOTIFICATION_CLICKED_EVENT_NAME forMessageId:messageId]) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: skipping Clicked — duplicate within debounce window for %@", self, messageId);
+        return;
+    }
+    [self recordInboxMessageStateEvent:YES forMessage:msg andQueryParameters:nil];
+}
+
+
+- (void)fetchInboxWithCallback:(CleverTapInboxSuccessBlock)callback {
+    if (!self.inboxController || !self.inboxController.isInitialized) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox refresh skipped — inbox not initialised", self);
+        if (callback) callback(NO);
+        return;
+    }
+    if (!self.isInboxV2Enabled) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 fetch skipped — API not enabled for this account", self);
+        if (callback) callback(NO);
+        return;
+    }
+    if (!self.domainFactory.redirectDomain) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 fetch skipped — redirect domain not available", self);
+        if (callback) callback(NO);
+        return;
+    }
+
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    if (self.lastInboxRefreshTimestamp > 0 &&
+        (now - self.lastInboxRefreshTimestamp) < kCTInboxRefreshMinInterval) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox refresh throttled — %.0f s remaining",
+            self, kCTInboxRefreshMinInterval - (now - self.lastInboxRefreshTimestamp));
+        if (callback) callback(NO);
+        return;
+    }
+
+    [self _fetchInboxV2WithThrottle:YES completion:^(BOOL success) {
+        if (callback) callback(success);
+    }];
 }
 
 - (void)deleteInboxMessageForID:(NSString *)messageId {
     if (![self _isInboxInitialized]) {
         return;
     }
-    [self.inboxController deleteMessageWithId:messageId];
+    NSDictionary *msgJSON = [self.inboxController messageForId:messageId];
+    if (msgJSON && [self.inboxController isV2MessageId:messageId]) {
+        CleverTapInboxMessage *message = [[CleverTapInboxMessage alloc] initWithJSON:msgJSON];
+        if (message) [self _sendInboxDeleteForMessage:message];
+    } else {
+        [self.inboxController deleteMessageWithId:messageId];
+    }
 }
 
 - (void)deleteInboxMessagesForIDs:(NSArray<NSString *> *_Nonnull)messageIds {
     if (![self _isInboxInitialized]) {
         return;
     }
-    [self.inboxController deleteMessagesWithId:messageIds];
+    NSMutableArray<CleverTapInboxMessage *> *v2Messages = [NSMutableArray new];
+    NSMutableArray<NSString *> *legacyIds = [NSMutableArray new];
+    for (NSString *msgId in messageIds) {
+        NSDictionary *msgJSON = [self.inboxController messageForId:msgId];
+        if (msgJSON && [self.inboxController isV2MessageId:msgId]) {
+            CleverTapInboxMessage *message = [[CleverTapInboxMessage alloc] initWithJSON:msgJSON];
+            if (message) [v2Messages addObject:message];
+        } else {
+            [legacyIds addObject:msgId];
+        }
+    }
+    if (v2Messages.count > 0) {
+        [self _sendInboxDeleteForMessages:v2Messages];
+    }
+    if (legacyIds.count > 0) {
+        [self.inboxController deleteMessagesWithId:legacyIds];
+    }
 }
 
 - (void)markReadInboxMessageForID:(NSString *)messageId{
     if (![self _isInboxInitialized]) {
         return;
     }
+    [self _addPendingReadForMessageId:messageId];
     [self.inboxController markReadMessageWithId:messageId];
 }
 
@@ -4024,6 +4254,9 @@ static BOOL sharedInstanceErrorLogged;
         return;
     }
     if (messageIds != nil && [messageIds count] > 0) {
+        for (NSString *msgId in messageIds) {
+            [self _addPendingReadForMessageId:msgId];
+        }
         [self.inboxController markReadMessagesWithId:messageIds];
     }
     else {
@@ -4065,10 +4298,31 @@ static BOOL sharedInstanceErrorLogged;
 
 #pragma mark Private
 
+- (void)_initInbox {
+    if ([CTUIUtils runningInsideAppExtension]) return;
+    if (_config.analyticsOnly) return;
+    if (sizeof(void*) == 4) return;
+
+    self.isInboxV2Enabled = YES;
+    [self.dispatchQueueManager runSerialAsync:^{
+        if (!self.deviceInfo.deviceId) return;
+        [self _purgeExpiredConfirmedDeletes];
+        [self _flushPendingRetryDeletes];
+        [self _fetchInboxV2WithThrottle:NO completion:nil];
+    }];
+}
+
 - (void)_resetInbox {
     if (self.inboxController && self.inboxController.isInitialized && self.deviceInfo.deviceId) {
         self.inboxController = [[CTInboxController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy] encryptionLevel:self.config.encryptionLevel previousEncryptionLevel:self.config.cryptManager.previousEncryptionLevel encryptionManager:self.config.cryptManager];
         self.inboxController.delegate = self;
+        self.lastInboxRefreshTimestamp = 0;
+        if (!self.isInboxV2Enabled) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: InboxV2 fetch on user login skipped — API not enabled for this account", self);
+        } else {
+            self.needsInboxFetchAfterProfileSend = YES;
+        }
     }
 }
 
@@ -4155,11 +4409,24 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 }
 
+- (void)inboxViewControllerDidRequestRefreshWithCallback:(CleverTapInboxSuccessBlock)callback {
+    [self fetchInboxWithCallback:callback];
+}
+
+- (BOOL)inboxViewControllerIsInboxV2Enabled {
+    return self.isInboxV2Enabled;
+}
+
+- (NSArray<CleverTapInboxMessage *> *)inboxViewControllerGetMessages {
+    return [self getAllInboxMessages];
+}
+
 - (void)recordInboxMessageStateEvent:(BOOL)clicked
                           forMessage:(CleverTapInboxMessage *)message andQueryParameters:(NSDictionary *)params {
     
     [self.dispatchQueueManager runSerialAsync:^{
-        [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
+        BOOL isV2Message = [self.inboxController isV2MessageId:message.messageId];
+        [CTEventBuilder buildInboxMessageStateEvent:clicked forMessage:message isV2Message:isV2Message andQueryParameters:params completionHandler:^(NSDictionary *event, NSArray<CTValidationResult*>*errors) {
             if (event) {
                 if (clicked) {
                     self.wzrkParams = [event[CLTAP_EVENT_DATA] copy];
@@ -4173,6 +4440,487 @@ static BOOL sharedInstanceErrorLogged;
     }];
 }
 
+
+#pragma mark Inbox V2 private
+
+- (void)handleAppInboxV2Response:(NSDictionary *)jsonResp isCompleteResponse:(BOOL)isCompleteResponse {
+    [self handleAppInboxV2Response:jsonResp isCompleteResponse:isCompleteResponse completion:nil];
+}
+
+- (void)handleAppInboxV2Response:(NSDictionary *)jsonResp
+              isCompleteResponse:(BOOL)isCompleteResponse
+                      completion:(void (^ _Nullable)(void))completion {
+    NSArray *inboxV2JSON = jsonResp[CLTAP_INBOX_V2_RESPONSE_KEY];
+    if (!inboxV2JSON) {
+        if (completion) completion();
+        return;
+    }
+    if (self.isUserSwitching) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 response skipped — user switching in progress", self);
+        if (completion) completion();
+        return;
+    }
+
+    [self _purgeExpiredConfirmedDeletes];
+
+    NSSet *retryDeleteIds   = [NSSet setWithArray:[[self _retryDeleteEntries] valueForKey:@"wzrk_mid"]];
+    NSSet *confirmedDeletes = [self _confirmedDeleteMessageIds];
+    NSSet *pendingReads     = [self _pendingReadMessageIds];
+
+    NSMutableSet *responseIds = [NSMutableSet setWithCapacity:inboxV2JSON.count];
+    NSMutableArray *filtered = [NSMutableArray arrayWithCapacity:inboxV2JSON.count];
+    for (NSDictionary *msg in inboxV2JSON) {
+        NSString *msgId = msg[@"_id"];
+        if (msgId) [responseIds addObject:msgId];
+
+        if ([retryDeleteIds containsObject:msgId]) continue;
+        if ([confirmedDeletes containsObject:msgId]) continue;
+
+        if ([pendingReads containsObject:msgId]) {
+            NSMutableDictionary *m = [msg mutableCopy];
+            m[@"isRead"] = @YES;
+            [filtered addObject:m];
+        } else {
+            [filtered addObject:msg];
+        }
+    }
+
+    // Cleanup retry deletes whose messages are now absent from server response.
+    for (NSString *deletedId in retryDeleteIds) {
+        if (![responseIds containsObject:deletedId]) {
+            [self _removeRetryDeleteForMessageId:deletedId];
+        }
+    }
+
+    // Cleanup pending reads confirmed by server (server returned isRead=true).
+    for (NSDictionary *msg in inboxV2JSON) {
+        NSString *msgId = msg[@"_id"];
+        if (msgId && [pendingReads containsObject:msgId] && [msg[@"isRead"] boolValue]) {
+            [self _removePendingReadForMessageId:msgId];
+        }
+    }
+
+    NSSet *capturedResponseIds = [responseIds copy];
+    NSArray *capturedFiltered = [filtered copy];
+
+    [self initializeInboxWithCallback:^(BOOL success) {
+        if (!success) {
+            if (completion) completion();
+            return;
+        }
+        [self.dispatchQueueManager runSerialAsync:^{
+            [self.inboxController performExpiryPurge];
+            [self.inboxController addV2MessageIds:[capturedResponseIds allObjects]];
+            if (isCompleteResponse) {
+                [self.inboxController deleteAbsentPersistentV2MessagesFromResponseIds:capturedResponseIds];
+            }
+            if (capturedFiltered.count > 0) {
+                [self.inboxController updateMessages:capturedFiltered completion:^{
+                    if (completion) completion();
+                }];
+            } else {
+                if (completion) completion();
+            }
+        }];
+    }];
+}
+
+- (void)_fetchInboxV2WithThrottle:(BOOL)shouldThrottle completion:(CleverTapInboxSuccessBlock)completion {
+    if (_config.analyticsOnly) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@ is configured as analytics only, InboxV2 fetch skipped", self);
+        if (completion) completion(NO);
+        return;
+    }
+    if (!self.domainFactory.redirectDomain) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: InboxV2 fetch skipped — redirect domain not available", self);
+        if (completion) completion(NO);
+        return;
+    }
+
+    NSString *domain = self.domainFactory.redirectDomain;
+
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+    NSDictionary *fetchEvent = @{
+        @"type": @"event",
+        @"evtName": CLTAP_WZRK_FETCH_EVENT,
+        @"evtData": @{@"t": @(kCTInboxFetchTypeInboxV2)}
+    };
+    NSArray *params = @[meta, fetchEvent];
+
+    NSString *fetchEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/getMessages?os=iOS&t=%@&z=%@",
+                               domain, self.deviceInfo.sdkVersion, self.config.accountId];
+    fetchEndpoint = [fetchEndpoint stringByAppendingFormat:@"&ts=%d", (int)[[[NSDate alloc] init] timeIntervalSince1970]];
+
+    CTRequest *request = [CTRequestFactory inboxV2FetchRequestWithConfig:self.config
+                                                                  params:params
+                                                                     url:fetchEndpoint];
+    __weak typeof(self) weakSelf = self;
+    [request onResponse:^(NSData * _Nullable data, NSURLResponse * _Nullable response) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSInteger statusCode = 0;
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            statusCode = ((NSHTTPURLResponse *)response).statusCode;
+        }
+        strongSelf.isInboxV2Enabled = (statusCode == 200);
+        if (statusCode == 403) {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
+            if (completion) completion(NO);
+            return;
+        }
+        if (shouldThrottle) {
+            strongSelf.lastInboxRefreshTimestamp = [[NSDate date] timeIntervalSince1970];
+        }
+        if (data) {
+            id jsonResp = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+            if (jsonResp && [jsonResp isKindOfClass:[NSDictionary class]]) {
+                CleverTapLogDebug(strongSelf.config.logLevel,
+                    @"%@: InboxV2 fetch response received — response: %@", strongSelf, jsonResp);
+                [strongSelf.dispatchQueueManager runSerialAsync:^{
+                    // Fire completion only after the messages are updated, so the pull to refresh
+                    // callback reloads the table with the updated messages.
+                    [strongSelf handleAppInboxV2Response:jsonResp isCompleteResponse:YES completion:^{
+                        if (completion) {
+                            [CTUtils runAsyncMainQueue:^{
+                                completion(YES);
+                            }];
+                        }
+                    }];
+                }];
+            } else {
+                CleverTapLogDebug(strongSelf.config.logLevel,
+                    @"%@: InboxV2 fetch failed — could not parse response, status: %ld", strongSelf, (long)statusCode);
+                if (completion) completion(NO);
+            }
+        } else {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: InboxV2 fetch failed — no data, status: %ld", strongSelf, (long)statusCode);
+            if (completion) completion(NO);
+        }
+    }];
+    [request onError:^(NSError * _Nullable error) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        CleverTapLogDebug(strongSelf.config.logLevel,
+            @"%@: InboxV2 fetch failed — error: %@", strongSelf, error.localizedDescription);
+        if (completion) completion(NO);
+    }];
+    NSString *fetchJsonBody = [CTUtils jsonObjectToString:params];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, fetchJsonBody, fetchEndpoint);
+    [self.requestSender send:request];
+}
+
+- (BOOL)_isDuplicateInboxEvent:(NSString *)eventName forMessageId:(NSString *)messageId {
+    if (!messageId || !eventName) return NO;
+
+    NSTimeInterval nowMs = [[NSDate date] timeIntervalSince1970] * 1000.0;
+    BOOL isViewed = [eventName isEqualToString:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME];
+    NSTimeInterval intervalMs = isViewed ? 2000.0 : 5000.0;
+
+    @synchronized(self) {
+        NSMutableDictionary *map = isViewed ? self.inboxViewedDebounceMap : self.inboxClickedDebounceMap;
+        if (!map) return NO;
+
+        NSNumber *lastFired = map[messageId];
+        if (lastFired && (nowMs - lastFired.doubleValue) < intervalMs) {
+            return YES;
+        }
+        map[messageId] = @(nowMs);
+    }
+    return NO;
+}
+
+- (void)_sendInboxDeleteForMessage:(CleverTapInboxMessage *)message {
+    [self _sendInboxDeleteForMessages:@[message]];
+}
+
+- (void)_sendInboxDeleteForMessages:(NSArray<CleverTapInboxMessage *> *)messages {
+    if (!self.isInboxV2Enabled) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: deleteMessages skipped — InboxV2 API not enabled for this account", self);
+        return;
+    }
+    if (!self.domainFactory.redirectDomain) {
+        CleverTapLogDebug(self.config.logLevel,
+            @"%@: Inbox: deleteMessages skipped — redirect domain not available", self);
+        return;
+    }
+
+    NSString *domain = self.domainFactory.redirectDomain;
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+
+    NSMutableArray *messageEntries = [NSMutableArray arrayWithCapacity:messages.count];
+    NSMutableArray *retryEntries = [NSMutableArray arrayWithCapacity:messages.count];
+
+    for (CleverTapInboxMessage *message in messages) {
+        if (!message.messageId || !message.campaignId) {
+            CleverTapLogDebug(self.config.logLevel,
+                @"%@: Inbox: skipping message in batch — missing messageId or campaignId", self);
+            continue;
+        }
+        NSString *pivot = message.json[CLTAP_NOTIFICATION_PIVOT] ?: CLTAP_NOTIFICATION_PIVOT_DEFAULT;
+        NSTimeInterval ttl = (NSTimeInterval)message.expires;
+
+        [messageEntries addObject:@{
+            @"wzrk_mid": message.messageId,
+            @"wzrk_id": message.campaignId,
+            CLTAP_NOTIFICATION_PIVOT: pivot
+        }];
+        NSDictionary *retryEntry = @{
+            @"wzrk_mid": message.messageId,
+            @"wzrk_id": message.campaignId,
+            CLTAP_NOTIFICATION_PIVOT: pivot,
+            @"ttl": @(ttl)
+        };
+        [retryEntries addObject:retryEntry];
+        [self _addRetryDeleteEntry:retryEntry];
+    }
+
+    if (messageEntries.count == 0) return;
+
+    NSArray *params = @[meta, @{@"type": @"deleteMessages", @"messages": messageEntries}];
+
+    NSString *deleteEndpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/deleteMessages?os=iOS&t=%@&z=%@",
+                                domain, self.deviceInfo.sdkVersion, self.config.accountId];
+    deleteEndpoint = [deleteEndpoint stringByAppendingFormat:@"&ts=%d", (int)[[[NSDate alloc] init] timeIntervalSince1970]];
+
+    CTRequest *request = [CTRequestFactory inboxV2DeleteMessagesRequestWithConfig:self.config
+                                                                           params:params
+                                                                              url:deleteEndpoint];
+    __weak typeof(self) weakSelf = self;
+    [request onResponse:^(NSData *data, NSURLResponse *response) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSInteger statusCode = 0;
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            statusCode = ((NSHTTPURLResponse *)response).statusCode;
+        }
+        strongSelf.isInboxV2Enabled = (statusCode == 200);
+        if (statusCode == 403) {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
+            return;
+        }
+        if (statusCode == 200) {
+            for (NSDictionary *entry in retryEntries) {
+                NSString *messageId = entry[@"wzrk_mid"];
+                NSTimeInterval entryTtl = [entry[@"ttl"] doubleValue];
+                [strongSelf _removeRetryDeleteForMessageId:messageId];
+                [strongSelf _addConfirmedDeleteForMessageId:messageId ttl:entryTtl];
+                [strongSelf.inboxController removeV2MessageId:messageId];
+            }
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: Inbox: deleteMessages confirmed — %lu message(s)", strongSelf, (unsigned long)retryEntries.count);
+        } else {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: Inbox: deleteMessages not confirmed — status: %ld, will retry on next launch",
+                strongSelf, (long)statusCode);
+        }
+    }];
+    [request onError:^(NSError *error) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        CleverTapLogDebug(strongSelf.config.logLevel,
+            @"%@: Inbox: deleteMessages failed — error: %@, will retry on next launch",
+            strongSelf, error.localizedDescription);
+    }];
+    NSString *deleteJsonBody = [CTUtils jsonObjectToString:params];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, deleteJsonBody, deleteEndpoint);
+    [self.requestSender send:request];
+}
+
+#pragma mark Inbox Pending Actions (R-15)
+
+- (NSString *)_pendingReadsKey {
+    return [NSString stringWithFormat:@"%@%@_%@",
+            CLTAP_INBOX_PENDING_READS_KEY_PREFIX,
+            self.config.accountId,
+            self.deviceInfo.deviceId ?: @""];
+}
+
+- (NSSet<NSString *> *)_pendingReadMessageIds {
+    NSArray *stored = [CTPreferences getObjectForKey:[self _pendingReadsKey]];
+    return stored ? [NSSet setWithArray:stored] : [NSSet set];
+}
+
+- (void)_addPendingReadForMessageId:(NSString *)messageId {
+    if (!messageId) return;
+    NSString *key = [self _pendingReadsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key] ?: @[];
+    NSMutableArray *updated = [existing mutableCopy];
+    if (![updated containsObject:messageId]) {
+        [updated addObject:messageId];
+        [CTPreferences putObject:updated forKey:key];
+    }
+}
+
+- (void)_removePendingReadForMessageId:(NSString *)messageId {
+    if (!messageId) return;
+    NSString *key = [self _pendingReadsKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key];
+    if (!existing) return;
+    NSMutableArray *updated = [existing mutableCopy];
+    [updated removeObject:messageId];
+    [CTPreferences putObject:updated forKey:key];
+}
+
+#if !CLEVERTAP_NO_INBOX_SUPPORT
+- (void)_removePendingInboxReadsForSentBatch:(NSArray *)batch {
+    for (NSDictionary *event in batch) {
+        if (![event[CLTAP_EVENT_NAME] isEqualToString:CLTAP_NOTIFICATION_VIEWED_EVENT_NAME]) continue;
+        NSString *msgId = event[CLTAP_EVENT_DATA][@"wzrk_mid"];
+        if (msgId) {
+            [self _removePendingReadForMessageId:msgId];
+        }
+    }
+}
+#endif
+
+// MARK: Confirmed deletes (got 200 from backend; filter until TTL passes)
+
+- (NSString *)_confirmedDeletesKey {
+    return [NSString stringWithFormat:@"%@%@_%@",
+            CLTAP_INBOX_CONFIRMED_DELETES_KEY_PREFIX,
+            self.config.accountId,
+            self.deviceInfo.deviceId ?: @""];
+}
+
+- (NSSet<NSString *> *)_confirmedDeleteMessageIds {
+    NSDictionary *stored = [CTPreferences getObjectForKey:[self _confirmedDeletesKey]];
+    return stored ? [NSSet setWithArray:stored.allKeys] : [NSSet set];
+}
+
+- (void)_addConfirmedDeleteForMessageId:(NSString *)messageId ttl:(NSTimeInterval)ttl {
+    if (!messageId) return;
+    NSString *key = [self _confirmedDeletesKey];
+    NSMutableDictionary *existing = [[CTPreferences getObjectForKey:key] mutableCopy] ?: [NSMutableDictionary new];
+    NSTimeInterval expiresAt = ttl > 0 ? ttl : ([[NSDate date] timeIntervalSince1970] + kCTInboxConfirmedDeleteFallbackTTL);
+    existing[messageId] = @(expiresAt);
+    [CTPreferences putObject:existing forKey:key];
+}
+
+- (void)_purgeExpiredConfirmedDeletes {
+    NSString *key = [self _confirmedDeletesKey];
+    NSDictionary *stored = [CTPreferences getObjectForKey:key];
+    if (!stored) return;
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    NSMutableDictionary *pruned = [stored mutableCopy];
+    for (NSString *messageId in stored) {
+        NSTimeInterval expiresAt = [stored[messageId] doubleValue];
+        if (expiresAt > 0 && now >= expiresAt) {
+            [pruned removeObjectForKey:messageId];
+        }
+    }
+    [CTPreferences putObject:pruned forKey:key];
+}
+
+// MARK: Retry deletes (no 200 yet; retried on next app launch)
+
+- (NSString *)_retryDeletesKey {
+    return [NSString stringWithFormat:@"%@%@_%@",
+            CLTAP_INBOX_RETRY_DELETES_KEY_PREFIX,
+            self.config.accountId,
+            self.deviceInfo.deviceId ?: @""];
+}
+
+- (NSArray<NSDictionary *> *)_retryDeleteEntries {
+    return [CTPreferences getObjectForKey:[self _retryDeletesKey]] ?: @[];
+}
+
+- (void)_addRetryDeleteEntry:(NSDictionary *)entry {
+    if (!entry[@"wzrk_mid"]) return;
+    NSString *key = [self _retryDeletesKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key] ?: @[];
+    for (NSDictionary *e in existing) {
+        if ([e[@"wzrk_mid"] isEqualToString:entry[@"wzrk_mid"]]) return;
+    }
+    [CTPreferences putObject:[existing arrayByAddingObject:entry] forKey:key];
+}
+
+- (void)_removeRetryDeleteForMessageId:(NSString *)messageId {
+    if (!messageId) return;
+    NSString *key = [self _retryDeletesKey];
+    NSArray *existing = [CTPreferences getObjectForKey:key];
+    if (!existing) return;
+    NSArray *updated = [existing filteredArrayUsingPredicate:
+        [NSPredicate predicateWithBlock:^BOOL(NSDictionary *e, NSDictionary *_) {
+            return ![e[@"wzrk_mid"] isEqualToString:messageId];
+        }]];
+    [CTPreferences putObject:updated forKey:key];
+}
+
+- (void)_flushPendingRetryDeletes {
+    if (!self.isInboxV2Enabled) return;
+    if (!self.domainFactory.redirectDomain) return;
+
+    NSArray<NSDictionary *> *entries = [self _retryDeleteEntries];
+    if (entries.count == 0) return;
+
+    CleverTapLogDebug(self.config.logLevel,
+        @"%@: Inbox: retrying %lu pending delete(s) in single request", self, (unsigned long)entries.count);
+
+    NSString *domain = self.domainFactory.redirectDomain;
+    NSDictionary *meta = [self batchHeaderForQueue:CTQueueTypeUndefined];
+
+    NSMutableArray *messageEntries = [NSMutableArray arrayWithCapacity:entries.count];
+    for (NSDictionary *entry in entries) {
+        [messageEntries addObject:@{
+            @"wzrk_mid": entry[@"wzrk_mid"],
+            @"wzrk_id": entry[@"wzrk_id"],
+            CLTAP_NOTIFICATION_PIVOT: entry[CLTAP_NOTIFICATION_PIVOT] ?: CLTAP_NOTIFICATION_PIVOT_DEFAULT
+        }];
+    }
+
+    NSArray *params = @[meta, @{@"type": @"deleteMessages", @"messages": messageEntries}];
+
+    NSString *endpoint = [NSString stringWithFormat:@"https://%@/inbox/v2/deleteMessages?os=iOS&t=%@&z=%@",
+                          domain, self.deviceInfo.sdkVersion, self.config.accountId];
+    endpoint = [endpoint stringByAppendingFormat:@"&ts=%d", (int)[[[NSDate alloc] init] timeIntervalSince1970]];
+
+    CTRequest *request = [CTRequestFactory inboxV2DeleteMessagesRequestWithConfig:self.config
+                                                                           params:params
+                                                                              url:endpoint];
+    __weak typeof(self) weakSelf = self;
+    [request onResponse:^(NSData *data, NSURLResponse *response) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSInteger statusCode = [response isKindOfClass:[NSHTTPURLResponse class]]
+            ? ((NSHTTPURLResponse *)response).statusCode : 0;
+        strongSelf.isInboxV2Enabled = (statusCode == 200);
+        if (statusCode == 403) {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: InboxV2 API not enabled for this account (403) — disabling for this session", strongSelf);
+            return;
+        }
+        if (statusCode == 200) {
+            for (NSDictionary *entry in entries) {
+                NSString *messageId = entry[@"wzrk_mid"];
+                NSTimeInterval entryTtl = [entry[@"ttl"] doubleValue];
+                [strongSelf _removeRetryDeleteForMessageId:messageId];
+                [strongSelf _addConfirmedDeleteForMessageId:messageId ttl:entryTtl];
+                [strongSelf.inboxController removeV2MessageId:messageId];
+            }
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: Inbox: retry deleteMessages confirmed — %lu message(s)", strongSelf, (unsigned long)entries.count);
+        } else {
+            CleverTapLogDebug(strongSelf.config.logLevel,
+                @"%@: Inbox: retry deleteMessages not confirmed — status: %ld", strongSelf, (long)statusCode);
+        }
+    }];
+    [request onError:^(NSError *error) {
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        CleverTapLogDebug(strongSelf.config.logLevel,
+            @"%@: Inbox: retry deleteMessages failed — error: %@", strongSelf, error.localizedDescription);
+    }];
+    NSString *retryJsonBody = [CTUtils jsonObjectToString:params];
+    CleverTapLogDebug(self.config.logLevel, @"%@: Sending %@ to servers at %@", self, retryJsonBody, endpoint);
+    [self.requestSender send:request];
+}
 
 #pragma mark Inbox Message private
 
@@ -4258,26 +5006,42 @@ static BOOL sharedInstanceErrorLogged;
 
 - (void)initializeDisplayUnitWithCallback:(CleverTapDisplayUnitSuccessBlock)callback {
     [self.dispatchQueueManager runSerialAsync:^{
-        if (self.displayUnitController) {
+        id<CleverTapDisplayUnitCache> cache = self.displayUnitCache;
+        if (cache) {
             [CTUtils runSyncMainQueue: ^{
-                callback(self.displayUnitController.isInitialized);
+                callback(YES);
             }];
             return;
         }
         if (self.deviceInfo.deviceId) {
-            self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-            self.displayUnitController.delegate = self;
+            self.displayUnitCache = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
             [CTUtils runSyncMainQueue: ^{
-                callback(self.displayUnitController.isInitialized);
+                callback(YES);
             }];
         }
     }];
 }
 
 - (void)_resetDisplayUnit {
-    if (self.displayUnitController && self.displayUnitController.isInitialized && self.deviceInfo.deviceId) {
-        self.displayUnitController = [[CTDisplayUnitController alloc] initWithAccountId: [self.config.accountId copy] guid: [self.deviceInfo.deviceId copy]];
-        self.displayUnitController.delegate = self;
+    [self.displayUnitCache reset];
+}
+
+- (NSArray<CleverTapDisplayUnit *> *)_parseDisplayUnitsFromJSONArray:(NSArray *)jsonArray {
+    NSMutableArray<CleverTapDisplayUnit *> *units = [NSMutableArray new];
+    for (id obj in jsonArray) {
+        if (![obj isKindOfClass:[NSDictionary class]]) continue;
+        CleverTapDisplayUnit *unit = [[CleverTapDisplayUnit alloc] initWithJSON:(NSDictionary *)obj];
+        if (unit) {
+            [units addObject:unit];
+        }
+    }
+    return units;
+}
+
+- (void)_notifyDisplayUnitsUpdated {
+    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
+        // delegate signature is _Nonnull; coalesce a nullable cache result to an empty array.
+        [self.displayUnitDelegate displayUnitsUpdated:[self.displayUnitCache getAllDisplayUnits] ?: @[]];
     }
 }
 
@@ -4297,12 +5061,6 @@ static BOOL sharedInstanceErrorLogged;
     return _displayUnitDelegate;
 }
 
-- (void)displayUnitsDidUpdate {
-    if (self.displayUnitDelegate && [self.displayUnitDelegate respondsToSelector:@selector(displayUnitsUpdated:)]) {
-        [self.displayUnitDelegate displayUnitsUpdated:self.displayUnitController.displayUnits];
-    }
-}
-
 - (BOOL)didHandleDisplayUnitTestFromPushNotificaton:(NSDictionary*)notification {
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
     if ([CTUIUtils runningInsideAppExtension]) {
@@ -4315,21 +5073,23 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Received display unit from push payload: %@", self, notification);
         
         NSString *jsonString = notification[@"wzrk_adunit"];
-        
+
         NSDictionary *displayUnitDict = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
                                                                         options:0
                                                                           error:nil];
-        
-        NSMutableArray<NSDictionary*> *displayUnits = [NSMutableArray new];
-        [displayUnits addObject:displayUnitDict];
-        
-        if (displayUnits && displayUnits.count > 0) {
+
+        NSArray<CleverTapDisplayUnit *> *displayUnits = displayUnitDict
+            ? [self _parseDisplayUnitsFromJSONArray:@[displayUnitDict]]
+            : @[];
+
+        if (displayUnits.count > 0) {
             float delay = self.isAppForeground ? 0.5 : 2.0;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 @try {
                     [self initializeDisplayUnitWithCallback:^(BOOL success) {
                         if (success) {
-                            [self.displayUnitController updateDisplayUnits:displayUnits];
+                            [self.displayUnitCache updateDisplayUnits:displayUnits];
+                            [self _notifyDisplayUnitsUpdated];
                         }
                     }];
                 } @catch (NSException *e) {
@@ -4354,24 +5114,23 @@ static BOOL sharedInstanceErrorLogged;
 #pragma mark Display Unit Public
 
 - (NSArray<CleverTapDisplayUnit *>*)getAllDisplayUnits {
-    return self.displayUnitController.displayUnits;
+    if (!self.displayUnitCache) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: DisplayUnit: Failed to get all Display Units", self);
+        return nil;
+    }
+    return [self.displayUnitCache getAllDisplayUnits];
 }
 
 - (CleverTapDisplayUnit *_Nullable)getDisplayUnitForID:(NSString *)unitID {
-    for (CleverTapDisplayUnit *displayUnit in self.displayUnitController.displayUnits) {
-        if ([displayUnit.unitID isEqualToString:unitID]) {
-            @try {
-                return displayUnit;
-            } @catch (NSException *e) {
-                CleverTapLogDebug(_config.logLevel, @"Error getting display unit: %@", e.debugDescription);
-            }
-        }
-    };
-    return nil;
+    return [self.displayUnitCache getDisplayUnitForID:unitID];
+}
+
+- (void)setDisplayUnitCache:(nullable id<CleverTapDisplayUnitCache>)cache {
+    _displayUnitCache = cache;
 }
 
 - (void)recordDisplayUnitViewedEventForID:(NSString *)unitID {
-    // get the display unit data
+    // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
 #if !defined(CLEVERTAP_TVOS)
     [self.dispatchQueueManager runSerialAsync:^{
@@ -4404,6 +5163,68 @@ static BOOL sharedInstanceErrorLogged;
         }];
     }];
 #endif
+}
+
+- (void)recordDisplayUnitElementClickedEventForID:(NSString *)unitID
+                             additionalProperties:(NSDictionary *)additionalProperties {
+    CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
+    // Build params: additionalProperties first (which should carry wzrk_element_id
+    // and other wzrk_* attribution fields from BE-injected action metadata).
+    // buildDisplayViewStateEvent: then layers the cached unit wzrk_* on top so
+    // server-controlled attribution wins over any same-named caller key.
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSDictionary *sanitized = [self ct_sanitizedDisplayUnitProperties:additionalProperties];
+    if (sanitized) {
+        [params addEntriesFromDictionary:sanitized];
+    }
+#if !defined(CLEVERTAP_TVOS)
+    [self.dispatchQueueManager runSerialAsync:^{
+        [CTEventBuilder buildDisplayViewStateEvent:YES
+                                   forDisplayUnit:displayUnit
+                               andQueryParameters:params
+                                completionHandler:^(NSDictionary *event,
+                                                    NSArray<CTValidationResult*> *errors) {
+            if (event) {
+                self.wzrkParams = [self ct_filteredWzrkFields:event[CLTAP_EVENT_DATA]];
+                [self queueEvent:event withType:CleverTapEventTypeRaised];
+            }
+            if (errors) {
+                [self.validationResultStack pushValidationResults:errors];
+            }
+        }];
+    }];
+#endif
+}
+
+/// Drop entries with non-string keys, empty keys, @c nil values, and @c NSNull
+/// values from a caller-supplied dict. Caller-supplied @c wzrk_* keys are
+/// retained — server attribution wins at merge time (cached unit @c wzrk_*
+/// is layered on top by @c buildDisplayViewStateEvent:), so novel caller
+/// @c wzrk_* keys pass through while same-named ones get overwritten.
+- (nullable NSDictionary *)ct_sanitizedDisplayUnitProperties:(nullable NSDictionary *)props {
+    if (props.count == 0) return nil;
+    NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:props.count];
+    for (NSString *key in props) {
+        if (![key isKindOfClass:[NSString class]] || key.length == 0) continue;
+        id value = props[key];
+        if (value == nil || value == [NSNull null]) continue;
+        out[key] = value;
+    }
+    return out.count > 0 ? [out copy] : nil;
+}
+
+/// Project only @c wzrk_* fields back out of the merged event data — so the
+/// existing @c wzrkParams contract (used for batch-header attachment as
+/// @c wzrk_ref) is unchanged; caller-supplied non-wzrk extras must not ride
+/// on subsequent batch headers.
+- (NSDictionary *)ct_filteredWzrkFields:(NSDictionary *)merged {
+    NSMutableDictionary *out = [NSMutableDictionary dictionary];
+    for (NSString *k in merged) {
+        if ([CTUtils doesString:k startWith:CLTAP_WZRK_PREFIX]) {
+            out[k] = merged[k];
+        }
+    }
+    return [out copy];
 }
 
 #endif
@@ -4699,6 +5520,44 @@ static BOOL sharedInstanceErrorLogged;
     return [CTUtils isValidCleverTapId:cleverTapID];
 }
 
+- (void)dedupeSSEvaluationIds {
+    if ([CTPreferences getIntForKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG withResetValue:0]) return;
+
+    // CTPreferences has no key-enumeration API, so read the raw defaults snapshot once
+    // to find candidate keys. Scope it so the full dictionaryRepresentation (which materializes EVERY value) is freed before the loop.
+    NSArray<NSString *> *allKeys;
+    @autoreleasepool {
+        allKeys = [[[[NSUserDefaults standardUserDefaults] dictionaryRepresentation] allKeys] copy];
+    }
+
+    // Storage keys are "<accountId>:<suffix>:<deviceId>", so match the colon-delimited
+    NSString *evalKeySegment = [NSString stringWithFormat:@":%@:", CLTAP_INAPP_SS_EVAL_STORAGE_KEY];
+    for (NSString *fullKey in allKeys) {
+        if (![fullKey hasPrefix:CLTAP_PREFS_PREFIX]) continue;
+        if ([fullKey rangeOfString:evalKeySegment].location == NSNotFound) continue;
+
+        @autoreleasepool {
+            // CTPreferences re-applies CLTAP_PREFS_PREFIX, so strip it before passing in.
+            NSString *key = [fullKey substringFromIndex:CLTAP_PREFS_PREFIX.length];
+            id value = [CTPreferences getObjectForKey:key];
+            if (![value isKindOfClass:[NSArray class]]) continue;
+            NSUInteger count = [(NSArray *)value count];
+
+            // NSOrderedSet preserves first-seen order, matching the FIFO drain
+            // (removeObjectsInRange) in CTInAppEvaluationManager onBatchSent.
+            // Dedupe is lossless since the server parses inapps_eval into a HashSet, so
+            // duplicate ids carry no signal (no extra in-app, no extra impression).
+            NSArray *deduped = [[NSOrderedSet orderedSetWithArray:value] array];
+            if (deduped.count == count) continue;
+            [CTPreferences putObject:deduped forKey:key];
+            CleverTapLogStaticDebug(@"inapps_eval dedupe: key %@ compacted to %lu",
+                                    fullKey, (unsigned long)deduped.count);
+        }
+    }
+
+    [CTPreferences putInt:1 forKey:CLTAP_INAPP_EVAL_DEDUPED_FLAG];
+}
+
 #pragma mark - Sync PE and Custom Templates
 
 - (void)syncVariables {
@@ -4809,9 +5668,9 @@ static BOOL sharedInstanceErrorLogged;
 - (NSArray<NSDictionary<NSString *, id> *> *)variants
 {
     CT_TRY
-    NSArray *variants = [self.variables.varCache variants];
+    NSArray *variants = [self.variables.varCache variantsCopy];
     if (variants) {
-        return [variants copy];
+        return variants;
     }
     CT_END_TRY
     return [NSArray array];

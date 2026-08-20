@@ -10,6 +10,13 @@ static UIImage *videoPlaceholderImage;
 static UIImage *portraitPlaceholderImage;
 static UIImage *landscapePlaceholderImage;
 static NSString * const kOrientationPortrait = @"p";
+static NSString * const kOrientationLandscape = @"l";
+static const CGFloat kDefaultFallbackAspectRatio = 0.5625f; // 16:9
+
+@interface CTInboxBaseMessageCell ()
+- (NSString *)normalizedOrientation;
+- (BOOL)orientationIsLandscape;
+@end
 
 @implementation CTInboxBaseMessageCell
 
@@ -58,11 +65,23 @@ static NSString * const kOrientationPortrait = @"p";
 - (void)awakeFromNib {
     [super awakeFromNib];
     self.selectionStyle = UITableViewCellSelectionStyleNone;
+    self.containerView.isAccessibilityElement = NO;
+    NSMutableArray<UILabel *> *labels = [NSMutableArray arrayWithCapacity:3];
+    if (self.titleLabel) [labels addObject:self.titleLabel];
+    if (self.bodyLabel) [labels addObject:self.bodyLabel];
+    if (self.dateLabel) [labels addObject:self.dateLabel];
+    for (UILabel *label in labels) {
+        if (@available(iOS 11.0, *)) {
+            label.font = [UIFontMetrics.defaultMetrics scaledFontForFont:label.font];
+            label.adjustsFontForContentSizeCategory = YES;
+        }
+    }
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
     self.cellImageView.backgroundColor = [UIColor clearColor];
+    self.defaultCellImageView.backgroundColor = [UIColor clearColor];
     if (self.avPlayerContainerView) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.avPlayerLayer.frame = self.avPlayerContainerView.bounds;
@@ -82,6 +101,7 @@ static NSString * const kOrientationPortrait = @"p";
         [self.avPlayerLayer removeObserver:self forKeyPath:@"readyForDisplay"];
         self.avPlayerLayer = nil;
     }
+    [self resetDefaultMediaView];
 }
 
 - (void)setup {
@@ -94,6 +114,7 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (void)configureForMessage:(CleverTapInboxMessage *)message {
     self.message = message;
+    [self resetDefaultMediaView];
     if (message.backgroundColor && ![message.backgroundColor isEqual:@""]) {
         self.containerView.backgroundColor = [CTUIUtils ct_colorWithHexString:message.backgroundColor];
     } else {
@@ -102,10 +123,15 @@ static NSString * const kOrientationPortrait = @"p";
     
     self.messageType = [CTInboxUtils inboxMessageTypeFromString:message.type];
     if ([self hasAudio] || [self hasVideo]) {
-        Boolean isPortrait = [message.orientation.uppercaseString isEqualToString:@"P"];
+        BOOL isPortrait = [self orientationIsPortrait];
+        BOOL useDefaultMediaLayout = [self shouldUseDefaultMediaLayout];
         switch (self.messageType) {
             case CTInboxMessageTypeSimple:
-                self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeTopPortrait : CTMediaPlayerCellTypeTopLandscape;
+                if (useDefaultMediaLayout) {
+                    self.mediaPlayerCellType = CTMediaPlayerCellTypeTopDefault;
+                } else {
+                    self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeTopPortrait : CTMediaPlayerCellTypeTopLandscape;
+                }
                 break;
             case CTInboxMessageTypeCarousel:
                 self.mediaPlayerCellType = CTMediaPlayerCellTypeNone;
@@ -115,9 +141,17 @@ static NSString * const kOrientationPortrait = @"p";
                 break;
             case CTInboxMessageTypeMessageIcon:
                 if (message.content[0].actionHasLinks) {
-                    self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeMiddlePortrait : CTMediaPlayerCellTypeMiddleLandscape;
+                    if (useDefaultMediaLayout) {
+                        self.mediaPlayerCellType = CTMediaPlayerCellTypeMiddleDefault;
+                    } else {
+                        self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeMiddlePortrait : CTMediaPlayerCellTypeMiddleLandscape;
+                    }
                 } else {
-                    self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeBottomPortrait : CTMediaPlayerCellTypeBottomLandscape;
+                    if (useDefaultMediaLayout) {
+                        self.mediaPlayerCellType = CTMediaPlayerCellTypeBottomDefault;
+                    } else {
+                        self.mediaPlayerCellType = isPortrait ? CTMediaPlayerCellTypeBottomPortrait : CTMediaPlayerCellTypeBottomLandscape;
+                    }
                 }
                 break;
             default:
@@ -162,12 +196,25 @@ static NSString * const kOrientationPortrait = @"p";
 }
 
 - (BOOL)orientationIsPortrait {
-    return [self.message.orientation.uppercaseString isEqualToString:kOrientationPortrait.uppercaseString];
+    NSString *orientation = [self normalizedOrientation];
+    return [orientation isEqualToString:kOrientationPortrait.uppercaseString];
+}
+
+- (BOOL)orientationIsLandscape {
+    NSString *orientation = [self normalizedOrientation];
+    return [orientation isEqualToString:kOrientationLandscape.uppercaseString];
+}
+
+- (BOOL)shouldUseDefaultMediaLayout {
+    if (!self.message) {
+        return YES;
+    }
+    return ![self orientationIsPortrait] && ![self orientationIsLandscape];
 }
 
 - (BOOL)mediaIsEmpty {
     CleverTapInboxMessageContent *content = [self.message.content firstObject];
-    return (content.mediaUrl == nil || [content.mediaUrl isEqual: @""]);
+    return (content.mediaUrl == nil || content.mediaUrl.length == 0);
 }
 
 - (BOOL)deviceOrientationIsLandscape {
@@ -222,13 +269,24 @@ static NSString * const kOrientationPortrait = @"p";
 - (void)setupMediaPlayer  {
     if (!self.message || !self.message.content || self.message.content.count <= 0) return;
     
+    self.avPlayerContainerView.isAccessibilityElement = NO;
+    self.avPlayerControlsView.isAccessibilityElement = NO;
+
     if (!self.volumeButton) {
-        self.volumeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 30.f, 30.f)];
+        self.volumeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 44.f, 44.f)];
+        self.volumeButton.accessibilityHint = @"Toggles audio";
+        self.volumeButton.accessibilityTraits = UIAccessibilityTraitButton;
         [self.volumeButton addTarget:self action:@selector(volumeButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self.avPlayerControlsView addSubview:self.volumeButton];
     }
-    
+
+
     CleverTapInboxMessageContent *content = self.message.content[0];
+    if (content.mediaUrl == nil || content.mediaUrl.length == 0) {
+        return;
+    }
+    [self configureDefaultMediaViewIfNeeded];
+    SDAnimatedImageView *activeImageView = [self activeMediaImageView];
     
     self.hasVideoPoster = NO;
     self.controllersTimeoutPeriod = 1.0;
@@ -237,7 +295,9 @@ static NSString * const kOrientationPortrait = @"p";
     self.avPlayerControlsView.alpha = 1.0;
     self.activityIndicator.hidden = NO;
     self.cellImageView.hidden = YES;
-    self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.defaultCellImageView.hidden = YES;
+    activeImageView.hidden = YES;
+    activeImageView.contentMode = UIViewContentModeScaleAspectFit;
     self.volumeButton.hidden = YES;
     self.playButton.hidden = NO;
     self.isAVMuted = content.mediaIsVideo;
@@ -247,7 +307,14 @@ static NSString * const kOrientationPortrait = @"p";
     [self.playButton setImage:[self getPlayImage] forState:UIControlStateNormal];
     [self.playButton setImage:[self getPauseImage] forState:UIControlStateSelected];
     [self.playButton addTarget:self action:@selector(togglePlay) forControlEvents:UIControlEventTouchUpInside];
-    
+    self.playButton.isAccessibilityElement = YES;
+    self.playButton.accessibilityLabel = @"Play";
+    self.playButton.accessibilityHint = @"Plays the video";
+    self.playButton.accessibilityTraits = UIAccessibilityTraitButton;
+    self.volumeButton.isAccessibilityElement = YES;
+    self.volumeButton.accessibilityLabel = content.mediaIsVideo ? @"Unmute" : @"Mute";
+    self.avPlayerControlsView.accessibilityElements = @[self.playButton, self.volumeButton];
+
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     self.avPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:content.mediaUrl]];
     self.avPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:self.avPlayer];
@@ -280,24 +347,36 @@ static NSString * const kOrientationPortrait = @"p";
     }
     
     if (content.mediaIsAudio) {
-        self.cellImageView.contentMode = UIViewContentModeScaleAspectFit;
-        self.cellImageView.image = [self getAudioPlaceholderImage];
-        self.cellImageView.hidden = NO;
-        self.cellImageView.alpha = 1.0;
+        activeImageView.contentMode = UIViewContentModeScaleAspectFit;
+        activeImageView.image = [self getAudioPlaceholderImage];
+        activeImageView.hidden = NO;
+        activeImageView.alpha = 1.0;
         self.volumeButton.hidden = YES;
         [self.activityIndicator startAnimating];
+        if ([self shouldUseDefaultMediaLayout]) {
+            [self configureDefaultMediaLayoutWithFallbackRatio:kDefaultFallbackAspectRatio];
+            [self updateDefaultMediaLayoutForImage:activeImageView.image fallbackRatio:kDefaultFallbackAspectRatio];
+        }
     }
     
     if (content.mediaIsVideo) {
-        self.cellImageView.hidden = NO;
-        self.cellImageView.alpha = 1.0;
+        activeImageView.hidden = NO;
+        activeImageView.alpha = 1.0;
         self.hasVideoPoster = YES;
         if (content.videoPosterUrl != nil && content.videoPosterUrl.length > 0) {
-            [self.cellImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
-                                  placeholderImage: [self getVideoPlaceHolderImage]
-                                           options:self.sdWebImageOptions context:self.sdWebImageContext];
+            [activeImageView sd_setImageWithURL:[NSURL URLWithString:content.videoPosterUrl]
+                               placeholderImage:[self getVideoPlaceHolderImage]
+                                        options:self.sdWebImageOptions
+                                        context:self.sdWebImageContext
+                                       progress:nil
+                                      completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                if ([self shouldUseDefaultMediaLayout]) {
+                    [self configureDefaultMediaLayoutWithFallbackRatio:kDefaultFallbackAspectRatio];
+                    [self updateDefaultMediaLayoutForImage:image fallbackRatio:kDefaultFallbackAspectRatio];
+                }
+            }];
         } else {
-            self.cellImageView.image = [self getVideoPlaceHolderImage];
+            activeImageView.image = [self getVideoPlaceHolderImage];
             if (!self.thumbnailGenerator) {
                 self.thumbnailGenerator = [[CTVideoThumbnailGenerator alloc] init];
             }
@@ -305,7 +384,11 @@ static NSString * const kOrientationPortrait = @"p";
                 dispatch_async(dispatch_get_main_queue(), ^ {
                     CleverTapInboxMessageContent *content = self.message.content[0];
                     if (image && [sourceUrl isEqualToString:content.mediaUrl]) {
-                        self.cellImageView.image = image;
+                        activeImageView.image = image;
+                        if ([self shouldUseDefaultMediaLayout]) {
+                            [self configureDefaultMediaLayoutWithFallbackRatio:kDefaultFallbackAspectRatio];
+                            [self updateDefaultMediaLayoutForImage:image fallbackRatio:kDefaultFallbackAspectRatio];
+                        }
                     }
                 });
             }];
@@ -344,6 +427,7 @@ static NSString * const kOrientationPortrait = @"p";
         self.isAVMuted = YES;
         [self.volumeButton setImage:[self getVolumeOffImage] forState:UIControlStateNormal];
     }
+    self.volumeButton.accessibilityLabel = self.isAVMuted ? @"Unmute" : @"Mute";
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_MUTED_NOTIFICATION object:self userInfo:@{@"muted":@(self.isAVMuted)}];
 }
 
@@ -352,7 +436,8 @@ static NSString * const kOrientationPortrait = @"p";
     [self.avPlayer setMuted:mute];
     self.isAVMuted = mute;
     UIImage *image = mute ? [self getVolumeOffImage] : [self getVolumeOnImage];
-    [self.volumeButton setImage: image forState:UIControlStateNormal];
+    [self.volumeButton setImage:image forState:UIControlStateNormal];
+    self.volumeButton.accessibilityLabel = mute ? @"Unmute" : @"Mute";
 }
 
 - (BOOL)isMuted {
@@ -379,6 +464,9 @@ static NSString * const kOrientationPortrait = @"p";
         [self.avPlayer play];
         [self hideControls:NO];
         [self.playButton setSelected:YES];
+        self.playButton.accessibilityLabel = @"Pause";
+        self.playButton.accessibilityHint = @"Pauses the video";
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, @"Playing");
         [self startAVIdleCountdown];
         [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_MEDIA_PLAYING_NOTIFICATION object:self userInfo:nil];
     }
@@ -395,6 +483,9 @@ static NSString * const kOrientationPortrait = @"p";
     if (self.avPlayer != nil) {
         [self.avPlayer pause];
         [self.playButton setSelected:NO];
+        self.playButton.accessibilityLabel = @"Play";
+        self.playButton.accessibilityHint = @"Plays the video";
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, @"Paused");
         [self showControls:YES];
         [self stopAVIdleCountdown];
     }
@@ -464,12 +555,13 @@ static NSString * const kOrientationPortrait = @"p";
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"readyForDisplay"]) {
-        if ([self hasVideo] && !self.cellImageView.isHidden) {
+        SDAnimatedImageView *activeImageView = [self activeMediaImageView];
+        if ([self hasVideo] && !activeImageView.isHidden) {
             [UIView animateWithDuration:0.5f animations:^{
-                self ->_cellImageView.alpha = 0.0;
+                activeImageView.alpha = 0.0;
             } completion:^(BOOL finished) {
-                self->_cellImageView.hidden = YES;
-                self->_cellImageView.alpha = 1.0;
+                activeImageView.hidden = YES;
+                activeImageView.alpha = 1.0;
             }];
         }
     }
@@ -484,7 +576,10 @@ static NSString * const kOrientationPortrait = @"p";
         }
         if (self.volumeButton.isHidden && [self hasVideo]) {
             CGRect videoRect = [self videoRect];
-            self.volumeButton.frame = CGRectMake(videoRect.origin.x+30.f,(videoRect.origin.y+videoRect.size.height)-60.f, 30.f, 30.f);
+            if (CGRectIsEmpty(videoRect)) {
+                videoRect = self.avPlayerContainerView.bounds;
+            }
+            self.volumeButton.frame = CGRectMake(videoRect.origin.x + 30.f, (videoRect.origin.y + videoRect.size.height) - 60.f, 44.f, 44.f);
             self.volumeButton.hidden = NO;
         }
     }
@@ -531,6 +626,119 @@ static NSString * const kOrientationPortrait = @"p";
     [userInfo setObject:[NSNumber numberWithInt:0] forKey:@"index"];
     [userInfo setObject:[NSNumber numberWithInt:-1] forKey:@"buttonIndex"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CLTAP_INBOX_MESSAGE_TAPPED_NOTIFICATION object:self.message userInfo:userInfo];
+}
+
+- (NSString *)normalizedOrientation {
+    if (!self.message.orientation || ![self.message.orientation isKindOfClass:[NSString class]]) {
+        return @"";
+    }
+    return [[self.message.orientation stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] uppercaseString];
+}
+
+- (SDAnimatedImageView *)activeMediaImageView {
+    return [self shouldUseDefaultMediaLayout] ? self.defaultCellImageView : self.cellImageView;
+}
+
+- (void)configureDefaultMediaViewIfNeeded {
+    if (!self.mediaContainerView || self.defaultCellImageView) {
+        return;
+    }
+    SDAnimatedImageView *defaultImageView = [[SDAnimatedImageView alloc] initWithFrame:CGRectZero];
+    defaultImageView.translatesAutoresizingMaskIntoConstraints = NO;
+    defaultImageView.contentMode = UIViewContentModeScaleAspectFit;
+    defaultImageView.clipsToBounds = YES;
+    defaultImageView.hidden = YES;
+    if ([defaultImageView respondsToSelector:@selector(setAdjustsImageSizeForAccessibilityContentSizeCategory:)]) {
+        defaultImageView.adjustsImageSizeForAccessibilityContentSizeCategory = YES;
+    }
+    [self.mediaContainerView addSubview:defaultImageView];
+    [self.mediaContainerView bringSubviewToFront:defaultImageView];
+    [NSLayoutConstraint activateConstraints:@[
+        [defaultImageView.topAnchor constraintEqualToAnchor:self.mediaContainerView.topAnchor],
+        [defaultImageView.leadingAnchor constraintEqualToAnchor:self.mediaContainerView.leadingAnchor],
+        [defaultImageView.trailingAnchor constraintEqualToAnchor:self.mediaContainerView.trailingAnchor],
+        [defaultImageView.bottomAnchor constraintEqualToAnchor:self.mediaContainerView.bottomAnchor]
+    ]];
+    self.defaultCellImageView = defaultImageView;
+}
+
+- (void)resetDefaultMediaView {
+    [self.defaultCellImageView sd_cancelCurrentImageLoad];
+    self.defaultCellImageView.image = nil;
+    self.defaultCellImageView.hidden = YES;
+    if (self.defaultMediaHeightConstraint) {
+        self.defaultMediaHeightConstraint.active = NO;
+        self.defaultMediaHeightConstraint = nil;
+    }
+    if (self.imageViewHeightConstraint && self.didCaptureImageViewHeightDefaults) {
+        self.imageViewHeightConstraint.constant = self.originalImageViewHeightConstant;
+        self.imageViewHeightConstraint.priority = self.originalImageViewHeightPriority;
+    }
+}
+
+- (void)configureDefaultMediaLayoutWithFallbackRatio:(CGFloat)fallbackRatio {
+    if (![self shouldUseDefaultMediaLayout]) {
+        return;
+    }
+    [self configureDefaultMediaViewIfNeeded];
+    if (self.imageViewLRatioConstraint) {
+        self.imageViewLRatioConstraint.priority = 250;
+    }
+    if (self.imageViewPRatioConstraint) {
+        self.imageViewPRatioConstraint.priority = 250;
+    }
+    if (self.imageViewHeightConstraint) {
+        if (!self.didCaptureImageViewHeightDefaults) {
+            self.originalImageViewHeightConstant = self.imageViewHeightConstraint.constant;
+            self.originalImageViewHeightPriority = self.imageViewHeightConstraint.priority;
+            self.didCaptureImageViewHeightDefaults = YES;
+        }
+        self.imageViewHeightConstraint.priority = 250;
+    }
+    [self updateDefaultMediaLayoutForImage:nil fallbackRatio:fallbackRatio];
+}
+
+- (UITableView *)containingTableView {
+    UIView *view = self.superview;
+    while (view && ![view isKindOfClass:[UITableView class]]) {
+        view = view.superview;
+    }
+    return (UITableView *)view;
+}
+
+- (void)updateDefaultMediaLayoutForImage:(UIImage *)image fallbackRatio:(CGFloat)fallbackRatio {
+    if (![self shouldUseDefaultMediaLayout] || !self.mediaContainerView) {
+        return;
+    }
+    CGFloat ratio = fallbackRatio > 0.0 ? fallbackRatio : kDefaultFallbackAspectRatio;
+    if (image && image.size.width > 0.0) {
+        ratio = image.size.height / image.size.width;
+    }
+    CGFloat previousMultiplier = self.defaultMediaHeightConstraint ? self.defaultMediaHeightConstraint.multiplier : 0;
+    if (self.defaultMediaHeightConstraint) {
+        self.defaultMediaHeightConstraint.active = NO;
+    }
+    self.defaultMediaHeightConstraint = [NSLayoutConstraint constraintWithItem:self.mediaContainerView
+                                                                      attribute:NSLayoutAttributeHeight
+                                                                      relatedBy:NSLayoutRelationEqual
+                                                                         toItem:self.mediaContainerView
+                                                                      attribute:NSLayoutAttributeWidth
+                                                                     multiplier:ratio
+                                                                       constant:0];
+    self.defaultMediaHeightConstraint.priority = 999;
+    self.defaultMediaHeightConstraint.active = YES;
+    if (image && fabs(ratio - previousMultiplier) > 0.01) {
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UITableView *tableView = [weakSelf containingTableView];
+            if (tableView) {
+                [UIView performWithoutAnimation:^{
+                    [tableView beginUpdates];
+                    [tableView endUpdates];
+                }];
+            }
+        });
+    }
 }
 
 @end

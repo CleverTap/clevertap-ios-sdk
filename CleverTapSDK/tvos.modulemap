@@ -14,5 +14,16 @@ framework module CleverTapSDK {
     header "CTVar.h"
     header "LeanplumCT.h"
     private header "CTLiveActivityDataQueue.h"
+
+    // tvOS private submodule — InApp types excluded (CLEVERTAP_NO_INAPP_SUPPORT=1).
+    explicit module Private {
+        header "CTPreferences.h"
+        header "CTUIUtils.h"
+        header "CTValidationConfig.h"
+        header "CleverTapInstanceConfigPrivate.h"
+        header "CTConstants.h"
+        export *
+    }
+
     export *
 }

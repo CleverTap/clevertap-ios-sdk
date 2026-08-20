@@ -55,6 +55,17 @@
  */
 - (void)discardInAppNotifications:(BOOL)dismissInAppIfVisible;
 
+/*!
+ @method
+
+ @abstract
+ Dismisses the currently displaying Picture-in-Picture (PiP) InApp notification, if one is showing.
+
+ If a PiP InApp is currently visible, it is dismissed immediately. If no InApp is showing, or the
+ currently showing InApp is not a PiP type, this method is a no-op.
+ */
+- (void)dismissPipInApp;
+
 #endif
 
 @end

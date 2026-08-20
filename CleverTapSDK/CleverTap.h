@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <UserNotifications/UserNotifications.h>
 
 #if !TARGET_OS_TV
 #import <WatchConnectivity/WatchConnectivity.h>
@@ -1220,7 +1221,31 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 /*!
  @method
- 
+
+ @abstract
+ Handle a UNNotification in the foreground to support silent-in-foreground behaviour.
+
+ @discussion
+ Call this from your UNUserNotificationCenterDelegate willPresent implementation when using
+ manual SDK integration (i.e. without autoIntegrate). If the notification payload contains
+ wzrk_sif=1, the banner, sound, and badge are suppressed. On iOS 14 and later the notification
+ is still delivered to Notification Center only (UNNotificationPresentationOptionList); on
+ earlier versions it is suppressed entirely (UNNotificationPresentationOptionNone).
+ Otherwise the completionHandler is called with the provided defaultOptions.
+ Non-CleverTap notifications are passed through unchanged using defaultOptions.
+
+ @param notification      The UNNotification received in willPresent
+ @param defaultOptions    Presentation options to use when wzrk_sif is not set
+ @param completionHandler The completion handler from willPresent
+ */
++ (void)handleWillPresentNotification:(UNNotification *_Nonnull)notification
+                   withDefaultOptions:(UNNotificationPresentationOptions)defaultOptions
+                    completionHandler:(void (^_Nonnull)(UNNotificationPresentationOptions))completionHandler
+    API_AVAILABLE(ios(10.0)) API_UNAVAILABLE(tvos);
+
+/*!
+ @method
+
  @abstract
  Determine whether a notification originated from CleverTap
  
@@ -1446,7 +1471,21 @@ extern NSString * _Nonnull const CleverTapProfileDidInitializeNotification;
 
 /*!
  @method
- 
+
+ @abstract
+ Clears any active mute state set by the backend, allowing the SDK to resume
+ normal event tracking and network operations immediately.
+
+ @discussion
+ The CleverTap backend can mute a client for a set duration (e.g., during a
+ detected abuse scenario). Call this method to override that mute and restore
+ normal SDK operation without waiting for the mute period to expire.
+ */
+- (void)unmute;
+
+/*!
+ @method
+
  @abstract
  Checks if a custom CleverTapID is valid
  */
