@@ -97,8 +97,8 @@ final class CTLiveActivityManager: NSObject {
         activityType: Activity<Attributes>.Type,
         name: String
     ) {
-        reconcileDismissedWhileTerminated(activityType: activityType, name: name)
-
+        // Attach to activities already running (re-attach on relaunch) and to any the backend
+        // starts while the app is alive. No dismissal reconciliation here.
         for activity in Activity<Attributes>.activities {
             attach(to: activity, activityName: name)
         }
@@ -111,21 +111,55 @@ final class CTLiveActivityManager: NSObject {
             }
         }
         setTask(task, for: key)
+
+        // Detect activities dismissed while the app was terminated and report them (Dismissed
+        // event + token unregister). Polls over a grace window first so ActivityKit's slow/empty
+        // cold-launch doesn't cause a misfire on a still-live activity.
+        let reconcileKey = "__reconcile__\(name)"
+        let reconcileTask = Task { [weak self] in
+            guard let self = self else { return }
+            await self.reportDismissedWhileTerminated(activityType: activityType, name: name)
+        }
+        setTask(reconcileTask, for: reconcileKey)
     }
 
-    private func reconcileDismissedWhileTerminated<Attributes: ActivityAttributes>(
+    /// Reports activities that vanished while the app was terminated as `Dismissed` (event +
+    /// token `unregister`, same as a live dismissal).
+    ///
+    /// Polls `Activity.activities` over a grace window and attaches to any restored activity that
+    /// appears (ActivityKit can be empty/slow at cold launch), so only activities that stay absent
+    /// the whole window are reported. This minimizes — but cannot fully eliminate — the chance of a
+    /// false positive (a live activity iOS never surfaces within the window), which would send a
+    /// spurious `unregister`.
+    private func reportDismissedWhileTerminated<Attributes: ActivityAttributes>(
         activityType: Activity<Attributes>.Type,
         name: String
-    ) {
-        let runningIDs = Set(Activity<Attributes>.activities.map { $0.id })
-        for (activityID, info) in persistedActivities() {
-            guard info[kCTLAStoreActivityName] == name else { continue }
-            if !runningIDs.contains(activityID) {
-                let wzrk = Self.wzrkFromJSON(info[kCTLAStoreWzrk])
-                CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: activity '\(activityID)' vanished while terminated; reporting dismissal on relaunch.")
-                sendActivityDismissed(liveActivityId: activityID, wzrk: wzrk)
-                removePersistedActivity(activityID: activityID)
+    ) async {
+        let persistedForType = persistedActivities().filter { $0.value[kCTLAStoreActivityName] == name }
+        guard !persistedForType.isEmpty else { return }
+
+        var seen = trackedActivityIDs()
+        let scans = 5
+        for attempt in 0..<scans {   // ~ up to 12s (5 scans, 3s apart)
+            let running = Activity<Attributes>.activities
+            for activity in running where !trackedActivityIDs().contains(activity.id) {
+                attach(to: activity, activityName: name)   // restored activity is alive — track it
             }
+            seen.formUnion(running.map { $0.id })
+            seen.formUnion(trackedActivityIDs())
+            if persistedForType.keys.allSatisfy({ seen.contains($0) }) { break }
+            if attempt < scans - 1 {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)  // 3s between scans
+            }
+        }
+
+        for (activityID, info) in persistedForType {
+            if seen.contains(activityID) { continue }
+            let wzrk = Self.wzrkFromJSON(info[kCTLAStoreWzrk])
+            CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "CTLiveActivityManager: activity '\(activityID)' absent across reconcile window; reporting Dismissed + unregister.")
+            // Raise the "Dismissed" event AND unregister the LA token (same as a live dismissal).
+            sendActivityDismissed(liveActivityId: activityID, wzrk: wzrk)
+            removePersistedActivity(activityID: activityID)
         }
     }
 
@@ -412,6 +446,13 @@ final class CTLiveActivityManager: NSObject {
     }
 
     // MARK: - Private: in-memory caches
+
+    /// IDs of activities attached this session (from `Activity.activities` or `activityUpdates`).
+    /// Used by terminated-dismissal reconcile as a signal that an activity is alive.
+    private func trackedActivityIDs() -> Set<String> {
+        lock.lock(); defer { lock.unlock() }
+        return Set(activityTokens.keys)
+    }
 
     private func setActivityEntry(activityID: String, entry: ActivityTokenEntry) {
         lock.lock()
