@@ -57,22 +57,9 @@ final class LiveActivityImpressionObserver {
         lock.unlock()
         guard !alreadyRecorded else { return }
 
-        // Build the wzrk dict from the actual fields the backend injected into the activity's
-        // attributes (NOT hardcoded). Whatever wzrk fields are present are forwarded as-is.
-        let wzrk = Self.wzrk(from: activity.attributes)
-        CleverTap.sharedInstance()?.recordLiveActivityImpression(wzrk: wzrk)
-        NSLog("LiveActivityImpressionObserver: recorded impression (shown) with wzrk %@", wzrk)
-    }
-
-    /// Assembles the `wzrk` dictionary from the activity's attributes, including only the fields
-    /// the backend actually provided.
-    private static func wzrk(from attributes: FoodOrderActivityAttributes) -> [AnyHashable: Any] {
-        guard let w = attributes.wzrk else { return [:] }
-        var wzrk: [AnyHashable: Any] = [:]
-        if let activityId = w.wzrk_activityId { wzrk["wzrk_activityId"] = activityId }
-        if let activityType = w.wzrk_activityType { wzrk["wzrk_activityType"] = activityType }
-        if let milestoneId = w.wzrk_milestoneId { wzrk["wzrk_milestoneId"] = milestoneId }
-        if let campaignId = w.wzrk_id { wzrk["wzrk_id"] = campaignId }  // wzrk_id = campaign id
-        return wzrk
+        // The SDK reads the `wzrk` from the activity itself (attributes + current content-state),
+        // so the app doesn't build the dict and doesn't conform to any CleverTap protocol.
+        CleverTap.sharedInstance()?.recordLiveActivityImpression(activity)
+        NSLog("LiveActivityImpressionObserver: recorded impression (shown) for %@", key)
     }
 }

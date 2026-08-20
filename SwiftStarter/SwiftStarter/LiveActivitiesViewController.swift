@@ -4,16 +4,9 @@ import ActivityKit
 import UIKit
 import CleverTapSDK
 
-// Declared in the app target (which links CleverTapSDK) so the shared
-// FoodOrderActivityAttributes.swift — also compiled into the widget extension — does not
-// need to import CleverTapSDK. Maps the nested `wzrk` object to the protocol fields the SDK reads.
-@available(iOS 16.2, *)
-extension FoodOrderActivityAttributes: CleverTapLiveActivityAttributes {
-    var cleverTapActivityId: String? { wzrk?.wzrk_activityId }
-    var cleverTapActivityType: Int? { wzrk?.wzrk_activityType }
-    var cleverTapMilestoneId: String? { wzrk?.wzrk_milestoneId }
-    var cleverTapCampaignId: Int? { wzrk?.wzrk_id }
-}
+// NOTE: No CleverTap protocol conformance is needed. The SDK reads the `wzrk` object from the
+// activity's attributes + content-state generically (via Codable), so the shared
+// FoodOrderActivityAttributes.swift stays free of any CleverTapSDK import (the widget compiles it too).
 
 /// Demonstrates the full CleverTap Live Activities SDK integration using a
 /// food-order tracking scenario. Tapping each row calls the real SDK API and

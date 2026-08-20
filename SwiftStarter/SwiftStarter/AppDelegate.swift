@@ -38,10 +38,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // ── CleverTap Live Activities Setup (Push-to-Start, iOS 17.2+) ─────────
         //
         // Activities are started by the CleverTap backend only. Register the PTS
-        // capability early so iOS delivers the push-to-start token to the SDK, and
-        // so the SDK re-attaches to any running activities and reconciles dismissals.
-        // Must be called as early as possible — iOS only generates PTS tokens on the
-        // first launch after a device restart.
+        // capability early so iOS delivers the push-to-start token to the SDK and the
+        // SDK re-attaches to any running activities. Must be called as early as possible —
+        // iOS only generates PTS tokens on the first launch after a device restart.
         //
         if #available(iOS 17.2, *) {
             CleverTap.sharedInstance()?.registerPushToStart(
@@ -59,7 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         return true
     }
-    
+
     func checkSession() {
         guard WCSession.isSupported() else {
             print("Session is not supported")
@@ -130,23 +129,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         NSLog("%@: open  url: %@ with options: %@", self.description, url.absoluteString, options)
 
         // Record a "Live Activity Clicked" event when the user taps the Food Order Live
-        // Activity on the lock screen or Dynamic Island. Click (and impression) are opt-in
-        // client-side APIs — the app calls them when appropriate.
-        // The widget sets widgetURL to swiftstarter://liveactivity?tag=<activityId>&type=<type>
+        // Activity on the lock screen or Dynamic Island. Click is an opt-in client-side API.
+        // The widget's widgetURL carries only the activity id (a URL can't carry the live,
+        // changing wzrk). So we look up the running Activity and let the SDK read the full wzrk
+        // (attributes + CURRENT content-state) — the same 4 fields, with the milestone current
+        // at click time — exactly like the impression.
+        // widgetURL: swiftstarter://liveactivity?tag=<wzrk_activityId>&type=<type>
         if url.scheme == "swiftstarter", url.host == "liveactivity",
            let components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
             let activityId = components.queryItems?.first(where: { $0.name == "tag" })?.value ?? ""
-            if !activityId.isEmpty {
-                // Behaves like a push "Notification Clicked" — data is the activity's wzrk dict.
-                // In production the full wzrk object comes from the activity payload; here we
-                // reconstruct a representative one from the deep-link.
-                let wzrk: [AnyHashable: Any] = [
-                    "wzrk_activityId": activityId,
-                    "wzrk_activityType": 0,
-                    "wzrk_milestoneId": "orderPacked",
-                    "wzrk_id": 12345
-                ]
-                CleverTap.sharedInstance()?.recordLiveActivityClicked(wzrk: wzrk)
+            if !activityId.isEmpty, #available(iOS 16.2, *) {
+                if let activity = Activity<FoodOrderActivityAttributes>.activities.first(where: {
+                    $0.attributes.wzrk?.wzrk_activityId == activityId
+                }) {
+                    CleverTap.sharedInstance()?.recordLiveActivityClicked(activity)
+                } else {
+                    // Activity no longer running — report with what the deep-link carried.
+                    CleverTap.sharedInstance()?.recordLiveActivityClicked(wzrk: ["wzrk_activityId": activityId])
+                }
             }
         }
 

@@ -18,19 +18,22 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
         var estimatedDelivery: Int
         /// Progress step index: 0 = Placed, 1 = Preparing, 2 = En Route, 3 = Delivered.
         var progressStep: Int
+        /// CleverTap milestone id — **changes across start/update/end**, so it rides in
+        /// `content-state` (the only field readable on update/end). The SDK reads it fresh on
+        /// each event and merges it over the fixed `wzrk` from `attributes`.
+        var wzrk_milestoneId: String?
     }
 
-    // MARK: - CleverTap wzrk (nested inside aps.attributes)
+    // MARK: - CleverTap wzrk (FIXED fields, nested inside aps.attributes at START)
     //
-    // The backend injects this `wzrk` object into `aps.attributes` (the only part of a
-    // push-to-start payload the app can read). The SDK reads these — via the
-    // `CleverTapLiveActivityAttributes` conformance declared in the app target — to build the
-    // `wzrk` sent on every Live Activity event. `wzrk_id` is the CAMPAIGN id.
+    // The backend injects this `wzrk` object into `aps.attributes` on `event=start` (the only
+    // part of a push-to-start payload the app can read, and immutable thereafter). It holds the
+    // fields that DON'T change for the activity. `wzrk_id` is the CAMPAIGN id. The changing
+    // milestone lives in `ContentState.wzrk_milestoneId` above. The SDK reads both generically.
 
     struct Wzrk: Codable, Hashable {
         var wzrk_activityId: String?
         var wzrk_activityType: Int?
-        var wzrk_milestoneId: String?
         var wzrk_id: Int?   // campaign id
     }
 
@@ -42,7 +45,7 @@ struct FoodOrderActivityAttributes: ActivityAttributes {
     var orderSummary: String
     /// Order identifier shown to the user.
     var orderId: String
-    /// CleverTap campaign attribution, injected by the backend into `aps.attributes`.
+    /// Fixed CleverTap campaign attribution, injected by the backend into `aps.attributes` at start.
     var wzrk: Wzrk?
 }
 #endif
