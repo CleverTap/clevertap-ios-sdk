@@ -1,3 +1,5 @@
+// Live Activities is an iOS-only (ActivityKit) feature — excluded from platforms without it (tvOS).
+#if canImport(ActivityKit)
 /// Protocol that an app's `ActivityAttributes` struct must conform to when using
 /// the **Push-to-Start (Remote)** Live Activities flow with CleverTap.
 ///
@@ -58,3 +60,5 @@ public extension CleverTapLiveActivityAttributes {
     var cleverTapMilestoneId: String? { nil }
     var cleverTapCampaignId: Int? { nil }
 }
+
+#endif

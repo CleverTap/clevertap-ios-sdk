@@ -1,3 +1,6 @@
+#import <TargetConditionals.h>
+// Live Activities is an iOS-only feature — this protocol is excluded from tvOS.
+#if !TARGET_OS_TV
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -37,3 +40,4 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+#endif // !TARGET_OS_TV — Live Activities

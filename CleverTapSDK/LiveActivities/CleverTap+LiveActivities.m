@@ -1,3 +1,6 @@
+#import <TargetConditionals.h>
+// Live Activities is an iOS-only feature — the whole implementation is excluded from tvOS.
+#if !TARGET_OS_TV
 #import "CleverTap+LiveActivities.h"
 #import "CleverTapInternal.h"
 
@@ -31,3 +34,5 @@
 }
 
 @end
+
+#endif // !TARGET_OS_TV — Live Activities

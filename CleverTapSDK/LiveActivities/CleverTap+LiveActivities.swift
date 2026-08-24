@@ -1,6 +1,7 @@
+// Live Activities is an iOS-only (ActivityKit) feature — the whole file compiles to nothing on
+// platforms without ActivityKit (e.g. tvOS).
 #if canImport(ActivityKit)
 import ActivityKit
-#endif
 import Foundation
 import ObjectiveC
 
@@ -137,3 +138,5 @@ public extension CleverTap {
         liveActivityManager.recordLiveActivityClicked(activity: activity)
     }
 }
+
+#endif

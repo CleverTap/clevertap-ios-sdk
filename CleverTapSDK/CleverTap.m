@@ -1335,6 +1335,8 @@ static BOOL sharedInstanceErrorLogged;
     }
     return deviceToken;
 }
+// MARK: - Live Activities (iOS only; excluded from tvOS)
+#if !TARGET_OS_TV
 - (void)pushLiveActivityData:(NSDictionary *)data {
     if ([CTUIUtils runningInsideAppExtension]) return;
     if (!data || data.count == 0) return;
@@ -1375,6 +1377,7 @@ static BOOL sharedInstanceErrorLogged;
     if (!delegate) return;
     [self.delegateManager addSwitchUserDelegate:delegate];
 }
+#endif // !TARGET_OS_TV — Live Activities
 
 - (void)_handlePushNotification:(id)object {
     [self _handlePushNotification:object openDeepLinksInForeground:NO];

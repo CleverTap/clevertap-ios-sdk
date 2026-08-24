@@ -1,6 +1,7 @@
+// Live Activities is an iOS-only (ActivityKit) feature. The whole file compiles to nothing on
+// platforms without ActivityKit (e.g. tvOS), so it never leaks into those builds.
 #if canImport(ActivityKit)
 import ActivityKit
-#endif
 import Foundation
 
 // MARK: - UserDefaults key for persisting tracked activities across launches
@@ -581,3 +582,5 @@ final class CTLiveActivityManager: NSObject {
         return UserDefaults.standard.dictionary(forKey: kCTLAActivityStoreKey) as? [String: [String: String]] ?? [:]
     }
 }
+
+#endif

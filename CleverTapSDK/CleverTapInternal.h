@@ -71,6 +71,8 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  */
 - (void)fetchInactionInApps:(NSString *_Nonnull)inAppId;
 
+// MARK: - Live Activities (iOS only; excluded from tvOS)
+#if !TARGET_OS_TV
 /*!
  @method
 
@@ -128,5 +130,6 @@ typedef NS_ENUM(NSInteger, CleverTapEventType) {
  @param delegate An object implementing `CTSwitchUserDelegate` (the Live Activity manager).
  */
 - (void)addLiveActivitySwitchUserDelegate:(id<CTSwitchUserDelegate> _Nonnull)delegate;
+#endif // !TARGET_OS_TV — Live Activities
 
 @end
