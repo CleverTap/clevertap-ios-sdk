@@ -1,5 +1,4 @@
 framework module CleverTapSDK {
-    header "CleverTapSDK.h"
     header "CleverTap.h"
     header "CleverTap+Inbox.h"
     header "CleverTap+FeatureFlags.h"

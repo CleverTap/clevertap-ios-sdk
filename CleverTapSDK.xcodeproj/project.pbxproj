@@ -335,8 +335,6 @@
 		4E87397B2C92223C00FDFDFD /* CTDomainFactoryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8739772C921D9000FDFDFD /* CTDomainFactoryTests.m */; };
 		4E8B81662AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81642AD2ADAE00714BB4 /* CTSwizzleManager.m */; };
 		4E8B81672AD2ADAE00714BB4 /* CTSwizzleManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B81642AD2ADAE00714BB4 /* CTSwizzleManager.m */; };
-		A1B2C3D4E5F60001000000D2 /* CleverTapSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000D1 /* CleverTapSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A1B2C3D4E5F60001000000D3 /* CleverTapSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000D1 /* CleverTapSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A1B2C3D4E5F60001000000B1 /* CleverTap+LiveActivities.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A1 /* CleverTap+LiveActivities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A1B2C3D4E5F60001000000B2 /* CleverTap+LiveActivities.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A2 /* CleverTap+LiveActivities.m */; };
 		A1B2C3D4E5F60001000000B3 /* CleverTap+LiveActivities.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001000000A3 /* CleverTap+LiveActivities.swift */; };
@@ -1066,7 +1064,6 @@
 		4E87397C2C9223B300FDFDFD /* CTDomainFactory+Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CTDomainFactory+Tests.h"; sourceTree = "<group>"; };
 		4E8B81642AD2ADAE00714BB4 /* CTSwizzleManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTSwizzleManager.m; sourceTree = "<group>"; };
 		4E8B81652AD2ADAE00714BB4 /* CTSwizzleManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTSwizzleManager.h; sourceTree = "<group>"; };
-		A1B2C3D4E5F60001000000D1 /* CleverTapSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CleverTapSDK.h; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001000000A1 /* CleverTap+LiveActivities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CleverTap+LiveActivities.h"; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001000000A2 /* CleverTap+LiveActivities.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CleverTap+LiveActivities.m"; sourceTree = "<group>"; };
 		A1B2C3D4E5F60001000000A3 /* CleverTap+LiveActivities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CleverTap+LiveActivities.swift"; sourceTree = "<group>"; };
@@ -2338,7 +2335,6 @@
 				071EB476217F6427008F0FAB /* InApps */,
 				4EFC9E442DF9690D00104D52 /* Encryption */,
 				D0C7BBC8207D8837001345EF /* CleverTap.h */,
-				A1B2C3D4E5F60001000000D1 /* CleverTapSDK.h */,
 				D0C7BBC9207D8837001345EF /* CleverTap.m */,
 				4E8B816A2AD2B2FD00714BB4 /* CleverTapInternal.h */,
 				4E8B81762AD2CB4E00714BB4 /* CTPushPrimerManager.h */,
@@ -2546,7 +2542,6 @@
 				A1B2C3D4E5F60001000000C1 /* CleverTap+LiveActivities.h in Headers */,
 				A1B2C3D4E5F60001000000C5 /* CTLiveActivityDataQueue.h in Headers */,
 				D014B8DF20E2F9DE001E0780 /* CleverTap.h in Headers */,
-				A1B2C3D4E5F60001000000D2 /* CleverTapSDK.h in Headers */,
 				D014B8FA20E2FB09001E0780 /* CTUriHelper.h in Headers */,
 				4E25E3C8278887A80008C888 /* CTIdentityRepo.h in Headers */,
 				4E25E3C9278887A80008C888 /* CTIdentityRepoFactory.h in Headers */,
@@ -2595,7 +2590,6 @@
 			files = (
 				4EA64A2C296C1190001D9B22 /* CTRequest.h in Headers */,
 				57D2E1C82684B1630068E45A /* CleverTap.h in Headers */,
-				A1B2C3D4E5F60001000000D3 /* CleverTapSDK.h in Headers */,
 				A1B2C3D4E5F60001000000B1 /* CleverTap+LiveActivities.h in Headers */,
 				A1B2C3D4E5F60001000000B5 /* CTLiveActivityDataQueue.h in Headers */,
 				D0CACF8B20B8923700A02327 /* CleverTap+SSLPinning.h in Headers */,

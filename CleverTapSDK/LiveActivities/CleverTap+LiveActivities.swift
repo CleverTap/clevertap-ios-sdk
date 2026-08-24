@@ -80,7 +80,12 @@ public extension CleverTap {
     ///
     /// - Parameter wzrk: The `wzrk` campaign dictionary present in the activity payload
     ///   (e.g. `activityId`, `activityType`, `campaignId`, `milestoneId`).
-    @objc func recordLiveActivityImpression(wzrk: [AnyHashable: Any]) {
+    ///
+    /// - Note: Not exposed to Objective-C. Live Activities is a Swift-only (ActivityKit) feature,
+    ///   and keeping this Swift-only avoids generating an ObjC category on `CleverTap` in the
+    ///   Swift compatibility header — which would force `#import <CleverTapSDK/CleverTapSDK.h>` and
+    ///   break static-library (Flutter/RN) integration.
+    func recordLiveActivityImpression(wzrk: [AnyHashable: Any]) {
         guard !wzrk.isEmpty else {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
                                   message: "CleverTap.recordLiveActivityImpression: wzrk must not be empty.")
@@ -98,7 +103,9 @@ public extension CleverTap {
     /// the `wzrk` dictionary from the activity payload becomes the event data.
     ///
     /// - Parameter wzrk: The `wzrk` campaign dictionary present in the activity payload.
-    @objc func recordLiveActivityClicked(wzrk: [AnyHashable: Any]) {
+    ///
+    /// - Note: Swift-only (see `recordLiveActivityImpression(wzrk:)` for why).
+    func recordLiveActivityClicked(wzrk: [AnyHashable: Any]) {
         guard !wzrk.isEmpty else {
             CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue,
                                   message: "CleverTap.recordLiveActivityClicked: wzrk must not be empty.")
