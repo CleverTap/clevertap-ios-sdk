@@ -9,4 +9,3 @@
 #import "CleverTapInternal.h"
 #import "CTConstants.h"
 #import "CTValidationConfig.h"
-#import "CTDelayedInAppResult.h"

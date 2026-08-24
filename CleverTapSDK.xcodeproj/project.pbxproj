@@ -366,7 +366,6 @@
 		4EEA76622ECF066C00E2CF1B /* CTInAppTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EEA76602ECF066C00E2CF1B /* CTInAppTimer.m */; };
 		4EEA76632ECF066C00E2CF1B /* CTInAppTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EEA765F2ECF066C00E2CF1B /* CTInAppTimer.h */; };
 		4EED219B29AF6368006CEA19 /* CTVarCacheTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED219A29AF6368006CEA19 /* CTVarCacheTest.m */; };
-		4EF390B62F33709D0097EE23 /* CTDelayedInAppResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E76E2F2B33C000CF22E1 /* CTDelayedInAppResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4EF390B82F3373010097EE23 /* InAppSelectionStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF390B72F3373010097EE23 /* InAppSelectionStrategy.swift */; };
 		4EF390BA2F3373340097EE23 /* DelayedInAppStorageStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF390B92F3373340097EE23 /* DelayedInAppStorageStrategy.swift */; };
 		4EF390BC2F33737C0097EE23 /* InactionInAppStorageStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF390BB2F33737C0097EE23 /* InactionInAppStorageStrategy.swift */; };
@@ -401,7 +400,6 @@
 		57B7E75C2F2222C800CF22E1 /* InAppScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E75B2F2222C800CF22E1 /* InAppScheduler.swift */; };
 		57B7E75E2F2222DC00CF22E1 /* InAppDataExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E75D2F2222DC00CF22E1 /* InAppDataExtractor.swift */; };
 		57B7E7602F2222FF00CF22E1 /* InAppSchedulingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E75F2F2222FF00CF22E1 /* InAppSchedulingStrategy.swift */; };
-		57B7E7762F2B33C000CF22E1 /* CTDelayedInAppResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E76F2F2B33C000CF22E1 /* CTDelayedInAppResult.m */; };
 		57B7E7BF2F31B20200CF22E1 /* CTDataValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7BE2F31B20200CF22E1 /* CTDataValidator.m */; };
 		57B7E7C02F31B20200CF22E1 /* CTDataValidator.h in Headers */ = {isa = PBXBuildFile; fileRef = 57B7E7BD2F31B20200CF22E1 /* CTDataValidator.h */; };
 		57B7E7C12F31B20200CF22E1 /* CTDataValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B7E7BE2F31B20200CF22E1 /* CTDataValidator.m */; };
@@ -583,6 +581,7 @@
 		858146CE681E075D7643AC50 /* CTTriggerAdapterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E0B3C6F086E8508C95EA002 /* CTTriggerAdapterTest.m */; };
 		85C53B3EE66A70D12CFCCD87 /* CTInAppFCManagerLegacyTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CA2AD4E8B23AC03B702C341 /* CTInAppFCManagerLegacyTest.m */; };
 		8FE6339D575F3B6002B7B9CB /* CleverTapConfigValueTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C01EA2F0707085512F68B1F /* CleverTapConfigValueTest.m */; };
+		90BC515B64B69AA11285056B /* CTDelayedInAppResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C75565A979A0F671F0A3641 /* CTDelayedInAppResult.swift */; };
 		928FFF7FA70F331B2ACA1C1D /* CTSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1B39E266CE9BE9998587B /* CTSessionManager.swift */; };
 		996618D659D00AAE332278DF /* CTNestedJsonBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B983A84382C8A34E2292BA7 /* CTNestedJsonBuilderTest.m */; };
 		A26852306058A41BBC48790F /* CleverTapEventDetailTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C332A38933BEF47388B4D45B /* CleverTapEventDetailTest.m */; };
@@ -936,6 +935,7 @@
 		32790958299F4B29001FE140 /* CTDeviceInfoTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDeviceInfoTest.m; sourceTree = "<group>"; };
 		32A61E6CAE1EC35B9C7315F2 /* CTTimerResult.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTTimerResult.swift; sourceTree = "<group>"; };
 		39C16E1FBDB18DC1C7AA2479 /* InAppDurationPartitionerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InAppDurationPartitionerTests.swift; sourceTree = "<group>"; };
+		3C75565A979A0F671F0A3641 /* CTDelayedInAppResult.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CTDelayedInAppResult.swift; sourceTree = "<group>"; };
 		3CE6298F5BDD0BCAE1740F0D /* InAppSelectionStrategyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InAppSelectionStrategyTests.swift; sourceTree = "<group>"; };
 		4032D1E7BFC02C3560EA977D /* CTTriggerValueTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTTriggerValueTest.m; sourceTree = "<group>"; };
 		439EFEFCFEE3AC26B3EECFF3 /* CTValidationConfigTest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CTValidationConfigTest.m; sourceTree = "<group>"; };
@@ -1101,8 +1101,6 @@
 		57B7E75B2F2222C800CF22E1 /* InAppScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppScheduler.swift; sourceTree = "<group>"; };
 		57B7E75D2F2222DC00CF22E1 /* InAppDataExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppDataExtractor.swift; sourceTree = "<group>"; };
 		57B7E75F2F2222FF00CF22E1 /* InAppSchedulingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppSchedulingStrategy.swift; sourceTree = "<group>"; };
-		57B7E76E2F2B33C000CF22E1 /* CTDelayedInAppResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDelayedInAppResult.h; sourceTree = "<group>"; };
-		57B7E76F2F2B33C000CF22E1 /* CTDelayedInAppResult.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDelayedInAppResult.m; sourceTree = "<group>"; };
 		57B7E7BD2F31B20200CF22E1 /* CTDataValidator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTDataValidator.h; sourceTree = "<group>"; };
 		57B7E7BE2F31B20200CF22E1 /* CTDataValidator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTDataValidator.m; sourceTree = "<group>"; };
 		57B7E7C32F31B21200CF22E1 /* CTNestedJsonBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTNestedJsonBuilder.h; sourceTree = "<group>"; };
@@ -1872,8 +1870,6 @@
 		57B7E7542F220A9300CF22E1 /* InAppsScheduler */ = {
 			isa = PBXGroup;
 			children = (
-				57B7E76E2F2B33C000CF22E1 /* CTDelayedInAppResult.h */,
-				57B7E76F2F2B33C000CF22E1 /* CTDelayedInAppResult.m */,
 				4EF390BB2F33737C0097EE23 /* InactionInAppStorageStrategy.swift */,
 				57B7E75D2F2222DC00CF22E1 /* InAppDataExtractor.swift */,
 				57B7E75B2F2222C800CF22E1 /* InAppScheduler.swift */,
@@ -1883,6 +1879,7 @@
 				57B7E75F2F2222FF00CF22E1 /* InAppSchedulingStrategy.swift */,
 				32A61E6CAE1EC35B9C7315F2 /* CTTimerResult.swift */,
 				E3FA4F6F385C317399E8262A /* CTInActionResult.swift */,
+				3C75565A979A0F671F0A3641 /* CTDelayedInAppResult.swift */,
 			);
 			path = InAppsScheduler;
 			sourceTree = "<group>";
@@ -2712,7 +2709,6 @@
 				6BF5A5912ACC854800CDED20 /* CTInAppDisplayManager.h in Headers */,
 				6B32A0A12B99033F009ADC57 /* CTCustomTemplateBuilder-Internal.h in Headers */,
 				07B94547219EA34300D4C542 /* CTMessageMO.h in Headers */,
-				4EF390B62F33709D0097EE23 /* CTDelayedInAppResult.h in Headers */,
 				6B9157BB2C11D07200B1C907 /* CTCustomTemplateInAppData-Internal.h in Headers */,
 				4E25E3C2278887A70008C888 /* CTIdentityRepoFactory.h in Headers */,
 				071EB4FF217F6427008F0FAB /* CTHeaderViewController.h in Headers */,
@@ -3334,7 +3330,6 @@
 				487C71AB2D96CC310052986F /* CTAppRatingSystemAppFunction.m in Sources */,
 				4E41FD94294F46510001FBED /* CTVar.m in Sources */,
 				071EB505217F6427008F0FAB /* CTCoverViewController.m in Sources */,
-				57B7E7762F2B33C000CF22E1 /* CTDelayedInAppResult.m in Sources */,
 				071EB4CD217F6427008F0FAB /* CTInAppUtils.m in Sources */,
 				D0CACF9120B8A44C00A02327 /* CTCertificatePinning.m in Sources */,
 				4EA64A28296C115E001D9B22 /* CTRequestFactory.m in Sources */,
@@ -3460,6 +3455,7 @@
 				928FFF7FA70F331B2ACA1C1D /* CTSessionManager.swift in Sources */,
 				DD1D2513A41EFEBE863EE386 /* CTTimerResult.swift in Sources */,
 				EA62172D8D6613CEF688ACCB /* CTInActionResult.swift in Sources */,
+				90BC515B64B69AA11285056B /* CTDelayedInAppResult.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
