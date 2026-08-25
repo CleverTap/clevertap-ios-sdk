@@ -14,6 +14,9 @@ struct FoodOrderLiveActivityWidget: Widget {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .activityBackgroundTint(Color(.systemBackground))
+                // Tapping the Lock Screen / banner must carry the same deep link as the
+                // Dynamic Island — widgetURL has to be set on BOTH surfaces, it is not shared.
+                .widgetURL(Self.clickURL(for: context.attributes))
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -58,9 +61,18 @@ struct FoodOrderLiveActivityWidget: Widget {
                 Image(systemName: "fork.knife.circle.fill")
                     .foregroundColor(.orange)
             }
-            .widgetURL(URL(string: "swiftstarter://liveactivity?tag=\(context.attributes.wzrk?.wzrk_activityId ?? "food-order-\(context.attributes.orderId)")&type=FoodOrderActivityAttributes"))
+            .widgetURL(Self.clickURL(for: context.attributes))
             .keylineTint(.orange)
         }
+    }
+
+    /// Deep link used by both the Lock Screen banner and the Dynamic Island so a tap on
+    /// either surface routes to `application(_:open:options:)` and records the click.
+    /// Carries `wzrk_activityId` (falls back to the order id) so the app can look up the
+    /// running Activity and read the current wzrk.
+    static func clickURL(for attributes: FoodOrderActivityAttributes) -> URL? {
+        let tag = attributes.wzrk?.wzrk_activityId ?? "food-order-\(attributes.orderId)"
+        return URL(string: "swiftstarter://liveactivity?tag=\(tag)&type=FoodOrderActivityAttributes")
     }
 
     private func progressIcon(_ step: Int) -> String {
