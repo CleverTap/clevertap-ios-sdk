@@ -1804,6 +1804,14 @@ static BOOL sharedInstanceErrorLogged;
     NSString *key = [self arpKey];
     if (!key) return nil;
     NSDictionary *arp = [CTPreferences getObjectForKey:key];
+    // older SDK versions cached discarded events here, drop them once so they
+    // are never sent back to the server
+    if (arp[CLTAP_DISCARDED_EVENT_JSON_KEY]) {
+        NSMutableDictionary *cleaned = [arp mutableCopy];
+        [cleaned removeObjectForKey:CLTAP_DISCARDED_EVENT_JSON_KEY];
+        arp = cleaned;
+        [self saveARP:arp];
+    }
     CleverTapLogInternal(self.config.logLevel, @"%@: Getting ARP: %@ for key: %@", self, arp, key);
     return arp;
 }

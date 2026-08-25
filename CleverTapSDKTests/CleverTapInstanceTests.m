@@ -2550,4 +2550,26 @@
     self.cleverTapInstance.validationConfig.discardedEventNames = original;
 }
 
+// Installs upgrading from an older SDK may have d_e cached in the stored ARP.
+// getARP strips it and rewrites storage, so it is never attached to a request.
+- (void)test_getARP_stripsLegacyCachedDiscardedEvents {
+    [self.cleverTapInstance saveARP:@{
+        CLTAP_DISCARDED_EVENT_JSON_KEY: @[@"CT_Legacy"],
+        @"ct_test_arp_key": @"ct_test_arp_val"
+    }];
+
+    NSDictionary *arp = [self.cleverTapInstance getARP];
+    XCTAssertNil(arp[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+    XCTAssertEqualObjects(arp[@"ct_test_arp_key"], @"ct_test_arp_val");
+
+    // Read storage directly to prove the purge was written, not just filtered
+    // out on the way past.
+    NSString *arpKey = [NSString stringWithFormat:@"arp:%@:%@",
+                        self.cleverTapInstance.config.accountId,
+                        [self.cleverTapInstance profileGetCleverTapID]];
+    NSDictionary *stored = [CTPreferences getObjectForKey:arpKey];
+    XCTAssertNil(stored[CLTAP_DISCARDED_EVENT_JSON_KEY]);
+    XCTAssertEqualObjects(stored[@"ct_test_arp_key"], @"ct_test_arp_val");
+}
+
 @end
