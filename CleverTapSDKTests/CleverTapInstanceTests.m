@@ -17,6 +17,14 @@
 #import "CTConstants.h"
 #import "CTFlattenedEventData.h"
 #import "CTInAppEvaluationManager.h"
+#import "CTInAppDisplayManager.h"
+#import "CleverTapInternal.h"
+#import "CTMultiDelegateManager.h"
+#if __has_include(<CleverTapSDK/CleverTapSDK-Swift.h>)
+#import <CleverTapSDK/CleverTapSDK-Swift.h>
+#else
+#import "CleverTapSDK-Swift.h"
+#endif
 #import "CTValidationConfig.h"
 #import "CleverTapUTMDetail.h"
 #import <CleverTapSDK/CleverTapSyncDelegate.h>
@@ -2502,6 +2510,36 @@
 
     OCMVerifyAll(mockEvaluationManager);
     [mockEvaluationManager stopMocking];
+}
+
+#pragma mark - Switch User In-App Scheduler Cancellation
+
+// A delayed or inaction in-app scheduled for one user must not fire for the
+// next. On a user switch the display manager, registered as a switch-user
+// delegate, cancels both schedulers before the device id changes.
+- (void)test_deviceIdWillChange_cancels_delayed_and_inaction_schedulers {
+    CTInAppDisplayManager *displayManager = self.cleverTapInstance.inAppDisplayManager;
+    XCTAssertNotNil(displayManager);
+
+    id delayScheduler = [displayManager valueForKey:@"inAppDelayManager"];
+    id inActionScheduler = [displayManager valueForKey:@"inAppInActionManager"];
+    XCTAssertNotNil(delayScheduler);
+    XCTAssertNotNil(inActionScheduler);
+
+    id mockDelay = OCMPartialMock(delayScheduler);
+    id mockInAction = OCMPartialMock(inActionScheduler);
+    OCMExpect([mockDelay cancelAllSchedulingWithCompletion:[OCMArg any]]);
+    OCMExpect([mockInAction cancelAllSchedulingWithCompletion:[OCMArg any]]);
+
+    // Broadcasting through the real delegate manager also proves the display
+    // manager is registered as a switch-user delegate.
+    CTMultiDelegateManager *delegateManager = [self.cleverTapInstance valueForKey:@"delegateManager"];
+    [delegateManager notifyDelegatesDeviceIdWillChange];
+
+    OCMVerifyAll(mockDelay);
+    OCMVerifyAll(mockInAction);
+    [mockDelay stopMocking];
+    [mockInAction stopMocking];
 }
 
 #pragma mark - Profile Evaluation Input Shape

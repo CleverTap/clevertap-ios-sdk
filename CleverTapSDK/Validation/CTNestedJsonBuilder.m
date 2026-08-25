@@ -198,9 +198,6 @@ static NSRegularExpression *arrayIndexPattern;
     if (value == nil) {
         return [NSNull null];
     }
-    if ([value isKindOfClass:[NSDictionary class]] || [value isKindOfClass:[NSArray class]]) {
-        return value;
-    }
     if ([value isKindOfClass:[NSDictionary class]]) {
         NSDictionary *dict = (NSDictionary *)value;
         NSMutableDictionary *result = [NSMutableDictionary dictionary];
@@ -209,7 +206,7 @@ static NSRegularExpression *arrayIndexPattern;
         }
         return result;
     }
-        if ([value isKindOfClass:[NSArray class]]) {
+    if ([value isKindOfClass:[NSArray class]]) {
         NSArray *array = (NSArray *)value;
         NSMutableArray *result = [NSMutableArray array];
         for (id item in array) {

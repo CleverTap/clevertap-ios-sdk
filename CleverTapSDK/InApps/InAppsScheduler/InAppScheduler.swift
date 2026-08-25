@@ -92,7 +92,7 @@ import Foundation
     }
     
     /// Cancel all scheduling
-    func cancelAllScheduling(completion: (() -> Void)? = nil) {
+    @objc public func cancelAllScheduling(completion: (() -> Void)? = nil) {
         queue.async { [weak self] in
             guard let self = self else {
                 completion?()

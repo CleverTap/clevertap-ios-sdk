@@ -147,6 +147,22 @@ class InAppSchedulerTests: XCTestCase {
 
     // MARK: - Timer completion
 
+    // MARK: - Cancel all scheduling
+
+    // On a user switch the schedulers are told to cancel everything, so a timer
+    // set up for the previous user can't fire for the next one.
+    func testCancelAllScheduling_cancelsActiveTimers() {
+        timerManager.scheduleTimer(id: "10", delay: 60) { _ in }
+        timerManager.scheduleTimer(id: "20", delay: 60) { _ in }
+        XCTAssertEqual(timerManager.getActiveTimerCount(), 2)
+
+        let cancelled = expectation(description: "cancelled")
+        scheduler.cancelAllScheduling { cancelled.fulfill() }
+        waitForExpectations(timeout: 2)
+
+        XCTAssertEqual(timerManager.getActiveTimerCount(), 0)
+    }
+
     func testSchedule_timerFires_invokesCallbackWithErrorWhenDataMissing() {
         // retrieveAfterTimer returns nil in the stub, so the success path reports
         // "Data not found" rather than silently dropping the callback.
