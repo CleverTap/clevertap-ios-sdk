@@ -16,13 +16,11 @@ public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
     
     @objc public func prepareForScheduling(inApps: [[String : Any]]) -> Bool {
         CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Preparing \(inApps.count) in-actions inapps for scheduling")
-        var cachedIds: [String] = []
         var newEntries: [String: [String: Any]] = [:]
         for inApp in inApps {
             let inAppId = "\(inApp[InAppDelayConstants.INAPP_ID_IN_PAYLOAD] ?? "")"
             if !inAppId.isEmpty {
                 newEntries[inAppId] = inApp
-                cachedIds.append(inAppId)
             }
         }
         cacheQueue.sync(flags: .barrier) {
@@ -30,7 +28,7 @@ public class InactionInAppStorageStrategy:NSObject, InAppSchedulingStrategy {
                 inActionCache[inAppId] = inApp
             }
         }
-        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Cached \(cachedIds.count) in-action inapps in memory")
+        CTLogger.logWithLevel(CTLogger.getDebugLevel(), type: CTLogType.debug.rawValue, message: "Cached \(newEntries.count) in-action inapps in memory")
         return true
     }
     
