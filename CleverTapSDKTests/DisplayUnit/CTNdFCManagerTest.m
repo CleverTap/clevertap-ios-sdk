@@ -429,6 +429,49 @@ static NSString *const kOtherCampaignId = @"70002";
                               totalLifetimeCount:1 totalDailyCount:-1 maxPerSession:-1]);
 }
 
+#pragma mark Only one helper builds the id
+
+// The evaluator used to have its own copy of campaignIdFrom:. The two agreed on a normal ti and
+// disagreed on everything else. Triggers and impressions are written under the id one of them
+// returns and read back under the id the other returns, so any disagreement would stop the caps
+// matching, with nothing logged and nothing failing. The two tests below cover the cases where the
+// old copy behaved differently.
+
+- (void)testARuleWithAnUnusableTiIsSkippedInsteadOfCountedUnderAJunkKey {
+    // The old copy built the id with stringWithFormat:, which turns anything into a string. A ti of
+    // an unexpected shape became a key like "{ ... }" and got a trigger saved under it.
+    // campaignIdFrom: checks the type instead, so the rule is skipped and nothing is written.
+    NSDictionary *rule = @{
+        CLTAP_INAPP_ID: @{ @"unexpected": @"shape" },
+        CLTAP_INAPP_TRIGGERS: @[@{ @"eventName": @"Product Viewed" }]
+    };
+    [self.helper.ndStore storeServerSideNativeDisplays:@[rule]];
+
+    [self.helper.evaluationManager evaluateOnEvent:@"Product Viewed" withProps:nil];
+
+    NSString *junkKey = [NSString stringWithFormat:@"%@", rule[CLTAP_INAPP_ID]];
+    XCTAssertEqual(0, [self.helper.triggerManager getTriggers:junkKey]);
+
+    NSDictionary *header = [self.helper.evaluationManager onBatchHeaderCreationForQueue:CTQueueTypeEvents];
+    XCTAssertNil(header[CLTAP_ND_SS_EVAL_META_KEY]);
+}
+
+- (void)testARuleWithNoTiSavesNoTriggerUnderAnEmptyKey {
+    // campaignIdFrom: returns an empty string where the old copy returned nil, so the evaluator has
+    // to test the length. A plain nil check would never fire and every rule with no ti would pile up
+    // on one shared empty key.
+    NSDictionary *rule = @{
+        CLTAP_NOTIFICATION_ID_TAG: kWzrkId,
+        CLTAP_INAPP_TRIGGERS: @[@{ @"eventName": @"Product Viewed" }]
+    };
+    [self.helper.ndStore storeServerSideNativeDisplays:@[rule]];
+
+    [self.helper.evaluationManager evaluateOnEvent:@"Product Viewed" withProps:nil];
+
+    XCTAssertEqual(0, [self.helper.triggerManager getTriggers:@""]);
+    XCTAssertEqual(0, [self.helper.triggerManager getTriggers:kWzrkId]);
+}
+
 #pragma mark Keeping Native Display and in-app apart
 
 - (void)testNativeDisplayCountsDoNotTouchTheInAppStores {

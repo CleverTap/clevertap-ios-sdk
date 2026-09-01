@@ -7,6 +7,7 @@
 
 #import "CTNdEvaluationManager.h"
 #import "CTNdStore.h"
+#import "CTNdFCManager.h"
 #import "CTConstants.h"
 #import "CTEventAdapter.h"
 #import "CTTriggersMatcher.h"
@@ -152,8 +153,10 @@
         for (NSDictionary *nativeDisplay in nativeDisplays) {
             if (![nativeDisplay isKindOfClass:[NSDictionary class]]) continue;
 
-            NSString *campaignId = [self campaignId:nativeDisplay];
-            if (!campaignId) continue;
+            // Same helper the cap manager uses. Triggers and impressions are written under one of
+            // these ids and read back under the other, so they have to come from the same place.
+            NSString *campaignId = [CTNdFCManager campaignIdFrom:nativeDisplay];
+            if (campaignId.length == 0) continue;
 
             NSArray *whenTriggers = nativeDisplay[CLTAP_INAPP_TRIGGERS];
             if (![self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event]) continue;
@@ -188,13 +191,6 @@
     if (updated) {
         [self saveEvaluatedServerSideNativeDisplayIds];
     }
-}
-
-- (NSString *)campaignId:(NSDictionary *)nativeDisplay {
-    id ti = nativeDisplay[CLTAP_INAPP_ID];
-    if (!ti) return nil;
-    NSString *campaignId = [NSString stringWithFormat:@"%@", ti];
-    return campaignId.length > 0 ? campaignId : nil;
 }
 
 #pragma mark Control Group Replies
