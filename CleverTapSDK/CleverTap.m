@@ -2743,8 +2743,10 @@ static BOOL sharedInstanceErrorLogged;
 /**
  The campaign id a Native Display unit's counts are kept under.
 
- Always @c ti, never @c wzrk_id. @c wzrk_id has the date on the end, so counts kept under it would
- start again from zero every day and no lifetime cap would ever be reached.
+ Always @c ti, never @c wzrk_id. @c ti names the campaign, which is the thing a cap is set on.
+ @c wzrk_id is @c ti plus a per-send suffix, so a campaign that runs more than once gets a different
+ @c wzrk_id each run. Counts kept under it would start again from zero on every run and a lifetime
+ cap would never be reached.
  */
 - (NSString *)nativeDisplayTargetIdFrom:(NSDictionary *)json {
     id targetId = json[CLTAP_INAPP_ID];

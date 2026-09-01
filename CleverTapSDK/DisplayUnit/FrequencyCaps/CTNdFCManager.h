@@ -65,7 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether this target can be shown right now, under all of the counting caps.
 
- @param targetId the @c ti. Never @c wzrk_id, which changes daily and would reset every count.
+ @param targetId the @c ti, which names the campaign. Never @c wzrk_id, which adds a per-send suffix
+        to the @c ti and so differs on every run of a repeating campaign, restarting the counts.
  @param excludeFromCaps @c efc, which skips all of these caps.
  @param excludeGlobalCaps @c excludeGlobalFCaps, which skips only the two account-wide caps, the
         daily @c ndmp and the session @c ndmc. The target's own @c tlc, @c tdc and @c mdc still
