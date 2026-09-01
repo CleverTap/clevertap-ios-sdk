@@ -36,6 +36,13 @@ public final class CTSessionManager: NSObject {
     private var inAppStore: CTInAppStore?
 #endif
 
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+    /// Native Display's own impression manager, reset alongside the in-app one so its session counts
+    /// start fresh too. Set after init rather than passed in, because display units are built after
+    /// the session manager. Nil when the instance is analytics only or in an app extension.
+    public var ndImpressionManager: CTImpressionManager?
+#endif
+
     // Lock used for properties that were `atomic` in ObjC or require set-once semantics.
     private let lock = NSLock()
 
@@ -252,6 +259,12 @@ public final class CTSessionManager: NSObject {
 #if !CLEVERTAP_NO_INAPP_SUPPORT
         if !CTUIUtils.runningInsideAppExtension() {
             impressionManager?.resetSession()
+        }
+#endif
+
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+        if !CTUIUtils.runningInsideAppExtension() {
+            ndImpressionManager?.resetSession()
         }
 #endif
     }

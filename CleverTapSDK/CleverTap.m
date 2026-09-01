@@ -81,6 +81,13 @@ static NSArray *sslCertNames;
 #import "CTDisplayUnitController.h"
 #import "CleverTap+DisplayUnit.h"
 #import "CleverTapDisplayUnitCache.h"
+#import "CTNdStore.h"
+#import "CTNdFCManager.h"
+#import "CTNdEvaluationManager.h"
+// Native Display reuses these two classes with its own namespace. They are imported here as well as
+// in the in-app block above, because display units are built even when in-app support is compiled out.
+#import "CTImpressionManager.h"
+#import "CTInAppTriggerManager.h"
 #endif
 
 #import "CTBatchSentDelegate.h"
@@ -182,6 +189,15 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @interface CleverTap () {}
 @property (nonatomic, strong) id<CleverTapDisplayUnitCache> displayUnitCache;
 @property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
+
+// Native Display frequency caps. Separate from the in-app ones on purpose: sharing them would let a
+// display unit count against an in-app's limits and the other way round. All five are nil when the
+// instance is analytics only or running in an app extension.
+@property (nonatomic, strong, readwrite) CTNdStore *ndStore;
+@property (nonatomic, strong, readwrite) CTNdFCManager *ndFCManager;
+@property (nonatomic, strong, readwrite) CTNdEvaluationManager *ndEvaluationManager;
+@property (nonatomic, strong, readwrite) CTImpressionManager *ndImpressionManager;
+@property (nonatomic, strong, readwrite) CTInAppTriggerManager *ndTriggerManager;
 @end
 #endif
 
@@ -554,6 +570,14 @@ static BOOL sharedInstanceErrorLogged;
             [self initializeInAppSupport];
         }
 #endif
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+        if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
+            // After in-app, because that is where the session manager is built and Native Display
+            // needs to hand it an impression manager to reset.
+            [self initializeNativeDisplaySupport];
+            self.sessionManager.ndImpressionManager = self.ndImpressionManager;
+        }
+#endif
 #if defined(CLEVERTAP_TVOS)
         self.sessionManager = [[CTSessionManager alloc] initWithConfig:self.config validationConfig:self.validationConfig];
 #endif
@@ -613,6 +637,41 @@ static BOOL sharedInstanceErrorLogged;
     self.pushPrimerManager = [[CTPushPrimerManager alloc] initWithConfig:_config inAppDisplayManager:self.inAppDisplayManager dispatchQueueManager:_dispatchQueueManager];
     [self.inAppDisplayManager setPushPrimerManager:self.pushPrimerManager];
     [self.systemTemplateActionHandler setPushPrimerManager:self.pushPrimerManager];
+}
+#endif
+
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+- (void)initializeNativeDisplaySupport {
+    // Native Display keeps its own impression and trigger counts, in their own preference namespace,
+    // so the two channels never see each other's numbers. Everything else about these two managers is
+    // the same as in-app's.
+    self.ndImpressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId
+                                                                     deviceId:self.deviceInfo.deviceId
+                                                              delegateManager:self.delegateManager
+                                                             storageNamespace:CLTAP_PREFS_ND_IMPRESSIONS_NAMESPACE];
+    self.ndTriggerManager = [[CTInAppTriggerManager alloc] initWithAccountId:self.config.accountId
+                                                                    deviceId:self.deviceInfo.deviceId
+                                                             delegateManager:self.delegateManager
+                                                            storageNamespace:CLTAP_PREFS_ND_TRIGGERS_NAMESPACE];
+
+    self.ndStore = [[CTNdStore alloc] initWithConfig:self.config
+                                     delegateManager:self.delegateManager
+                                            deviceId:self.deviceInfo.deviceId];
+
+    self.ndFCManager = [[CTNdFCManager alloc] initWithConfig:self.config
+                                             delegateManager:self.delegateManager
+                                                    deviceId:[self.deviceInfo.deviceId copy]
+                                           impressionManager:self.ndImpressionManager
+                                              triggerManager:self.ndTriggerManager];
+
+    self.ndEvaluationManager = [[CTNdEvaluationManager alloc] initWithAccountId:self.config.accountId
+                                                                       deviceId:self.deviceInfo.deviceId
+                                                                delegateManager:self.delegateManager
+                                                              impressionManager:self.ndImpressionManager
+                                                                 triggerManager:self.ndTriggerManager
+                                                                        ndStore:self.ndStore
+                                                                 localDataStore:self.localDataStore];
+    self.ndEvaluationManager.location = self.userSetLocation;
 }
 #endif
 
@@ -732,6 +791,9 @@ static BOOL sharedInstanceErrorLogged;
     _userSetLocation = location;
 #if !CLEVERTAP_NO_INAPP_SUPPORT
     [self.inAppEvaluationManager setLocation:location];
+#endif
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+    [self.ndEvaluationManager setLocation:location];
 #endif
     if (!self.isAppForeground) return;
     // if in foreground, queue the ping event to transmit location update to server
@@ -2109,6 +2171,26 @@ static BOOL sharedInstanceErrorLogged;
     } else if (eventName) {
         NSDictionary<NSString *, NSDictionary<NSString *, id> *> *flattenedEventChanges = flattenedEventData.eventProperties;
         [self.inAppEvaluationManager evaluateOnEvent:eventName withProps:flattenedEventChanges];
+    }
+#endif
+
+#if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
+    // Deliberately a separate block that reads the event again rather than sharing the in-app locals
+    // above. The two channels can be compiled out independently, and this way the in-app path is
+    // untouched. Wrapped in @try so a fault here cannot stop the event being queued and sent.
+    @try {
+        NSString *ndEventName = event[CLTAP_EVENT_NAME];
+        if (ndEventName && [ndEventName isEqualToString:CLTAP_CHARGED_EVENT]) {
+            NSMutableDictionary *ndEventData = [[NSMutableDictionary alloc] initWithDictionary:[self generateAppFields]];
+            [ndEventData addEntriesFromDictionary:event[CLTAP_EVENT_DATA]];
+            [self.ndEvaluationManager evaluateOnChargedEvent:ndEventData andItems:ndEventData[CLTAP_CHARGED_EVENT_ITEMS]];
+        } else if (eventType == CleverTapEventTypeProfile) {
+            [self.ndEvaluationManager evaluateOnUserAttributeChange:flattenedEventData.profileChanges];
+        } else if (ndEventName) {
+            [self.ndEvaluationManager evaluateOnEvent:ndEventName withProps:flattenedEventData.eventProperties];
+        }
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Native Display evaluation failed: %@", self, e.debugDescription);
     }
 #endif
 }
