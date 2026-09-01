@@ -88,6 +88,16 @@ static const int kCTNdSessionCapDefault = 1000;
         || unit[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil;
 }
 
++ (NSString *)targetIdFrom:(NSDictionary *)unit {
+    if (![unit isKindOfClass:[NSDictionary class]]) return @"";
+
+    id targetId = unit[CLTAP_INAPP_ID];
+    if ([targetId isKindOfClass:[NSString class]]) return targetId;
+    // The server sends ti as a number in the content payload and as a string in some others.
+    if ([targetId isKindOfClass:[NSNumber class]]) return [targetId stringValue];
+    return @"";
+}
+
 #pragma mark Session, Daily and Global limits
 
 - (void)checkUpdateDailyLimits {

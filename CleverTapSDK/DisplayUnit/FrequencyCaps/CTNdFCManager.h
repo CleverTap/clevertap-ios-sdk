@@ -57,6 +57,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (BOOL)isFcapManaged:(nullable NSDictionary *)unit;
 
+/**
+ The campaign id a unit's counts are kept under, or an empty string if it has none.
+
+ Always @c ti, which names the campaign. Never @c wzrk_id, which is the @c ti plus a per-send suffix
+ and so differs on every run of a repeating campaign, restarting the counts. The suffix is not always
+ a date either, so it cannot be parsed or reasoned about. Nothing here reads it.
+
+ Lives next to the caps rather than at the call site because every store keys off what this returns,
+ and they only line up as long as they all ask the same question.
+ */
++ (NSString *)targetIdFrom:(nullable NSDictionary *)unit;
+
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 
 /// Rolls the daily counters over if the date has changed. Lifetime counts are kept.

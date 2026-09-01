@@ -2694,7 +2694,7 @@ static BOOL sharedInstanceErrorLogged;
         }
         capManagedCount++;
 
-        NSString *targetId = [self nativeDisplayTargetIdFrom:json];
+        NSString *targetId = [CTNdFCManager targetIdFrom:json];
         if (targetId.length == 0) {
             // Nothing to key a count by, so there is no cap to check. Delivering it is the safer of
             // the two mistakes: holding it back would hide a campaign for a reason nobody can see.
@@ -2738,21 +2738,6 @@ static BOOL sharedInstanceErrorLogged;
         CleverTapLogDebug(self.config.logLevel, @"%@: Native Display units with frequency caps have been delivered more than once and none has been reported as viewed. The caps cannot work until the app calls recordDisplayUnitViewedEventForID: for every unit it shows.", self);
     }
     self.deliveredCapManagedNativeDisplays = YES;
-}
-
-/**
- The campaign id a Native Display unit's counts are kept under.
-
- Always @c ti, never @c wzrk_id. @c ti names the campaign, which is the thing a cap is set on.
- @c wzrk_id is @c ti plus a per-send suffix, so a campaign that runs more than once gets a different
- @c wzrk_id each run. Counts kept under it would start again from zero on every run and a lifetime
- cap would never be reached.
- */
-- (NSString *)nativeDisplayTargetIdFrom:(NSDictionary *)json {
-    id targetId = json[CLTAP_INAPP_ID];
-    if ([targetId isKindOfClass:[NSString class]]) return targetId;
-    if ([targetId isKindOfClass:[NSNumber class]]) return [targetId stringValue];
-    return @"";
 }
 
 /// The App Launched entries, or an empty array when the response has none.
@@ -5354,7 +5339,7 @@ static BOOL sharedInstanceErrorLogged;
     NSDictionary *json = displayUnit.json;
     if (![CTNdFCManager isFcapManaged:json]) return;
 
-    NSString *targetId = [self nativeDisplayTargetIdFrom:json];
+    NSString *targetId = [CTNdFCManager targetIdFrom:json];
     if (targetId.length == 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has caps but no ti, so it cannot be counted", self, displayUnit.unitID);
         return;
@@ -5388,7 +5373,7 @@ static BOOL sharedInstanceErrorLogged;
 - (BOOL)nativeDisplayTargetNeedsTimestamps:(NSString *)targetId {
     for (id rule in [self.ndStore serverSideNativeDisplays]) {
         if (![rule isKindOfClass:[NSDictionary class]]) continue;
-        if (![targetId isEqualToString:[self nativeDisplayTargetIdFrom:rule]]) continue;
+        if (![targetId isEqualToString:[CTNdFCManager targetIdFrom:rule]]) continue;
 
         NSArray *frequencyLimits = rule[CLTAP_INAPP_FC_LIMITS];
         NSArray *occurrenceLimits = rule[CLTAP_INAPP_OCCURRENCE_LIMITS];
