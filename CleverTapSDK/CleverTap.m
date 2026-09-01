@@ -201,8 +201,8 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 
 // Used only to warn when the app never reports a view. Without those reports nothing is counted, so
 // every Native Display cap stays open. Nothing looks wrong unless we say so.
-@property (atomic, assign) BOOL deliveredCapManagedNativeDisplays;
-@property (atomic, assign) BOOL countedANativeDisplayView;
+@property (atomic, assign) BOOL sentCappedNativeDisplaysToApp;
+@property (atomic, assign) BOOL appReportedANativeDisplayView;
 @end
 #endif
 
@@ -2579,7 +2579,7 @@ static BOOL sharedInstanceErrorLogged;
     // Caps and rules first, on every response, even one that arrives during a user switch. They
     // belong to the account and not to a user, so they should stay up to date either way. The
     // content step below also reads what this writes.
-    [self ingestNativeDisplayMeta:jsonResp];
+    [self saveNativeDisplayRulesAndCaps:jsonResp];
 
     // Only the content is held back during a user switch. The thing to avoid is showing the old
     // user's display units to the new one.
@@ -2594,7 +2594,7 @@ static BOOL sharedInstanceErrorLogged;
     [self deliverNativeDisplayContent:jsonResp];
 }
 
-- (void)ingestNativeDisplayMeta:(NSDictionary *)jsonResp {
+- (void)saveNativeDisplayRulesAndCaps:(NSDictionary *)jsonResp {
     // Nil for an analytics only instance and inside an app extension, where there is nothing to cap.
     if (!self.ndStore || !self.ndFCManager || !self.ndEvaluationManager) return;
 
@@ -2657,7 +2657,7 @@ static BOOL sharedInstanceErrorLogged;
 
     if (displayUnits.count == 0) return;
 
-    NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsWithinCaps:displayUnits];
+    NSArray<CleverTapDisplayUnit *> *withinCaps = [self nativeDisplayUnitsStillAllowedToShow:displayUnits];
 
     [self initializeDisplayUnitWithCallback:^(BOOL success) {
         if (success) {
@@ -2677,7 +2677,7 @@ static BOOL sharedInstanceErrorLogged;
  The SDK already checked them and sent the ids that passed in @c adUnit_eval, and the server sent
  content only for those. This is the only place @c ndmc and @c mdc are applied.
  */
-- (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsWithinCaps:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
+- (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsStillAllowedToShow:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
     if (!self.ndFCManager) return displayUnits;
 
     // Roll the day over first, so a unit is not checked against yesterday's daily counts.
@@ -2734,10 +2734,10 @@ static BOOL sharedInstanceErrorLogged;
 - (void)warnIfNativeDisplayViewsAreNeverReported:(NSUInteger)capManagedCount {
     if (capManagedCount == 0) return;
 
-    if (self.deliveredCapManagedNativeDisplays && !self.countedANativeDisplayView) {
+    if (self.sentCappedNativeDisplaysToApp && !self.appReportedANativeDisplayView) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Native Display units with frequency caps have been delivered more than once and none has been reported as viewed. The caps cannot work until the app calls recordDisplayUnitViewedEventForID: for every unit it shows.", self);
     }
-    self.deliveredCapManagedNativeDisplays = YES;
+    self.sentCappedNativeDisplaysToApp = YES;
 }
 
 /// The App Launched entries, or an empty array when the response has none.
@@ -5348,7 +5348,7 @@ static BOOL sharedInstanceErrorLogged;
     [self.ndFCManager checkUpdateDailyLimits];
     [self.ndFCManager didShowTarget:targetId
                      storeTimestamp:[self nativeDisplayTargetNeedsTimestamps:targetId]];
-    self.countedANativeDisplayView = YES;
+    self.appReportedANativeDisplayView = YES;
 }
 
 /**
