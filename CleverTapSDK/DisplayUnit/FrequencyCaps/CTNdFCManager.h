@@ -81,8 +81,16 @@ NS_ASSUME_NONNULL_BEGIN
       totalDailyCount:(int)totalDailyCount
         maxPerSession:(int)maxPerSession;
 
-/// Records one display: the impression, the target's today and lifetime counts, and the day total.
-- (void)didShowTarget:(NSString *)targetId;
+/**
+ Records one display: the impression, the target's today and lifetime counts, and the day total.
+
+ @param storeTimestamp whether to keep the impression's timestamp on disk. Only pass @c YES for a
+        target that carries @c frequencyLimits or @c occurrenceLimits, since matching those is the
+        only thing that ever reads the saved timestamps. Native Display impressions come from the app
+        and are unbounded, so writing a timestamp for every one of them would grow a list nothing
+        reads. See @c CTImpressionManager @c recordImpression:storeTimestamp:.
+ */
+- (void)didShowTarget:(NSString *)targetId storeTimestamp:(BOOL)storeTimestamp;
 
 /// Saves the account maximums the server sends with each response. Pass -1 for no limit.
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;

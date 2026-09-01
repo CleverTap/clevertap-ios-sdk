@@ -51,6 +51,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)recordImpression:(NSString *)campaignId;
 
+/**
+ Records one impression, and says whether to keep the timestamp on disk.
+
+ The session counts are always updated; they live in memory and are cheap. The timestamp is a
+ different matter, because the whole saved list for the campaign is rewritten on every append, so it
+ gets longer and slower the more impressions there are.
+
+ The saved timestamps have exactly one reader: matching @c frequencyLimits and @c occurrenceLimits.
+ A campaign with neither has nothing that will ever look at them, so passing @c NO leaves them out.
+
+ In-app always passes @c YES, through @c recordImpression: above. Native Display passes @c NO for the
+ campaigns it knows have no such limits, because its impressions are driven by the app rather than by
+ the SDK and there is no upper bound on how many arrive.
+ */
+- (void)recordImpression:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp;
+
 - (NSInteger)perSessionTotal;
 
 - (NSInteger)perSession:(NSString *)campaignId;

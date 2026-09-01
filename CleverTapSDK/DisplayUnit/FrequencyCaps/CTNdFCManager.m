@@ -171,11 +171,12 @@ static const int kCTNdSessionCapDefault = 1000;
                          excludeGlobalCaps:excludeGlobalCaps];
 }
 
-- (void)didShowTarget:(NSString *)targetId {
+- (void)didShowTarget:(NSString *)targetId storeTimestamp:(BOOL)storeTimestamp {
     if (![targetId isKindOfClass:[NSString class]] || targetId.length == 0) return;
 
-    // Record the impression, which feeds the session counts and the whenLimits timestamps.
-    [self.impressionManager recordImpression:targetId];
+    // Record the impression. This always feeds the session counts, and when asked for it also saves
+    // the timestamp that frequencyLimits and occurrenceLimits are matched against.
+    [self.impressionManager recordImpression:targetId storeTimestamp:storeTimestamp];
 
     // Add to the total shown today.
     [self incrementShownToday];

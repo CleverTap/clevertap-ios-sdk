@@ -144,7 +144,19 @@ typedef void (^CleverTapDisplayUnitSuccessBlock)(BOOL success);
  
  @abstract
  Record Notification Viewed for display unit.
- 
+
+ @discussion
+ Call this every time your app shows a display unit. The SDK does not draw display units, so this
+ call is the only way it can tell that one was shown.
+
+ Frequency caps depend on it. A campaign capped at, say, three views per day is only held back once
+ the SDK has been told about those three views, so a missing call means the cap never applies and the
+ view counts reported to CleverTap stay at zero.
+
+ Call it once per view. Repeat calls for the same unit each count as another view, so avoid calling it
+ from somewhere that runs more than once for a single display, such as a table or collection view
+ cell being reused.
+
  @param unitID      unique id of the display unit
  */
 - (void)recordDisplayUnitViewedEventForID:(NSString *_Nonnull)unitID;

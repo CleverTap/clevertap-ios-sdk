@@ -90,10 +90,14 @@
 
 #pragma mark Manage Impressions
 - (void)recordImpression:(NSString *)campaignId {
+    [self recordImpression:campaignId storeTimestamp:YES];
+}
+
+- (void)recordImpression:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp {
     if (![campaignId isKindOfClass:[NSString class]] || [campaignId length] == 0) {
         return;
     }
-    
+
     self.sessionImpressionsTotal++;
     // Record session impressions
     @synchronized (self.sessionImpressions) {
@@ -101,7 +105,11 @@
         existing++;
         self.sessionImpressions[campaignId] = @(existing);
     }
-    
+
+    if (!storeTimestamp) {
+        return;
+    }
+
     NSNumber *now = [self.clock timeIntervalSince1970];
     [self addImpression:campaignId timestamp:now];
 }
