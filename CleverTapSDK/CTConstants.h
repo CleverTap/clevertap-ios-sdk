@@ -253,8 +253,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 // already handled; these carry the caps.
 #define CLTAP_ND_SS_JSON_RESPONSE_KEY @"adUnit_notifs_ss"
 #define CLTAP_ND_STALE_JSON_RESPONSE_KEY @"adUnit_stale"
-// Note the direction: on a response ndmc and ndmp are ceilings, on a request ndmp is a count.
-// In-app overloads imp the same way.
+// Watch the direction. Coming from the server, ndmc and ndmp are the maximums allowed. Going to
+// the server, ndmp is how many we have shown today. In-app uses imp for both meanings too.
 #define CLTAP_ND_SESSION_MAX_META_KEY @"ndmc"
 #define CLTAP_ND_DAILY_MAX_META_KEY @"ndmp"
 

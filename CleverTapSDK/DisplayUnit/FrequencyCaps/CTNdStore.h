@@ -13,13 +13,14 @@ NS_ASSUME_NONNULL_BEGIN
 @class CTMultiDelegateManager;
 
 /**
- Holds the @c adUnit_notifs_ss rule bundle and nothing else.
+ Saves the @c adUnit_notifs_ss list that the server sends, and nothing else.
 
- The bundle is rules, not content, so unlike @c CTInAppStore nothing here is encrypted. There is
- also no queue, no TTL, and no client-side variant, because Native Display is server-side only.
+ These entries hold only the frequency rules for each campaign, never the text or images the user
+ sees, so unlike @c CTInAppStore nothing here is encrypted. There is also no queue, no expiry time,
+ and no client side version, because Native Display is server side only.
 
- The server sends the complete current set every time, so an empty array means "clear it", not
- "no change".
+ The server always sends the full current list rather than the changes since last time, so an empty
+ array means "there are no rules any more", not "nothing changed".
  */
 @interface CTNdStore : NSObject
 
@@ -29,10 +30,10 @@ NS_ASSUME_NONNULL_BEGIN
                delegateManager:(CTMultiDelegateManager *)delegateManager
                       deviceId:(NSString *)deviceId NS_DESIGNATED_INITIALIZER;
 
-/// The saved rule bundle, or an empty array if there is none. Never nil.
+/// The saved rules, or an empty array if there are none. Never nil.
 - (NSArray *)serverSideNativeDisplays;
 
-/// Replaces the saved bundle. A nil argument is ignored; pass an empty array to clear.
+/// Replaces the saved rules. A nil argument does nothing; pass an empty array to clear them.
 - (void)storeServerSideNativeDisplays:(nullable NSArray *)serverSideNativeDisplays;
 
 - (void)removeServerSideNativeDisplays;

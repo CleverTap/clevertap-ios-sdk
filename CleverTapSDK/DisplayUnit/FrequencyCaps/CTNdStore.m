@@ -88,7 +88,7 @@
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     @synchronized (self) {
         self.deviceId = newDeviceId;
-        // Set to nil so the next read loads the new user's bundle from storage.
+        // Set to nil so the next read loads the new user's rules from storage.
         _serverSideNativeDisplays = nil;
     }
 }

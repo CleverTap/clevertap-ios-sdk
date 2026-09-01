@@ -19,21 +19,22 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Counter frequency caps for the Native Display channel. The sibling of @c CTInAppFCManager.
 
- It enforces the caps that are counted rather than evaluated:
- per-target lifetime (@c tlc) and daily (@c tdc), per-target session (@c mdc), the global session
- ceiling (@c ndmc) and the global daily ceiling (@c ndmp).
+ It checks the caps that work by counting how many times something was shown:
+ per-target lifetime (@c tlc) and daily (@c tdc), per-target session (@c mdc), the account session
+ max (@c ndmc) and the account daily max (@c ndmp).
 
- There are two exclusion flags and they are not the same size. @c efc skips every counter cap.
- @c excludeGlobalFCaps skips only the two account-wide ones, so a target that opted out of the
- account budget still owes its own limits. In-app collapses both into a single flag; this does not.
+ There are two exclusion flags and one is wider than the other. @c efc skips every one of these
+ caps. @c excludeGlobalFCaps skips only the two account-wide ones, so a target that opted out of the
+ account maximums still has to obey its own limits. In-app treats both as one flag; this does not.
 
- The advanced rules, @c frequencyLimits and @c occurrenceLimits, are not re-checked here. For Native
- Display the vote the SDK sends in @c adUnit_eval is the only enforcement the server relies on, so
- re-checking at delivery would just repeat a decision the server already deferred to. This is the one
- place the API deliberately differs from @c CTInAppFCManager, which does re-check.
+ The advanced rules, @c frequencyLimits and @c occurrenceLimits, are not checked here. The SDK
+ already checked them earlier and sent the ids that passed in @c adUnit_eval, and the server sends
+ content back only for those ids. Checking again now would repeat a decision that has already been
+ made and acted on. This is the one place the API deliberately differs from @c CTInAppFCManager,
+ which does check them a second time.
 
- The API takes primitives instead of a model object because Native Display has no notification class
- to pass around.
+ The methods take plain numbers and strings instead of a model object, because Native Display has no
+ notification class to pass around.
  */
 @interface CTNdFCManager : NSObject <CTAttachToBatchHeaderDelegate, CTSwitchUserDelegate>
 
@@ -48,11 +49,11 @@ NS_ASSUME_NONNULL_BEGIN
                 triggerManager:(CTInAppTriggerManager *)triggerManager NS_DESIGNATED_INITIALIZER;
 
 /**
- Whether a unit carries any frequency-cap configuration at all.
+ Whether a unit carries any frequency-cap settings at all.
 
- Only these units are gated and counted. Anything without one of these markers passes through
- untouched, so display units that exist today keep working and never eat into the account's Native
- Display budget.
+ Only these units are checked against the caps and counted. A unit with none of these fields is
+ left alone, so display units that exist today keep working and never add to the account's daily
+ and session totals.
  */
 + (BOOL)isFcapManaged:(nullable NSDictionary *)unit;
 
@@ -62,16 +63,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)checkUpdateDailyLimits;
 
 /**
- Whether this target can be surfaced right now under every counter cap.
+ Whether this target can be shown right now, under all of the counting caps.
 
  @param targetId the @c ti. Never @c wzrk_id, which changes daily and would reset every count.
- @param excludeFromCaps @c efc, which skips every counter cap.
- @param excludeGlobalCaps @c excludeGlobalFCaps, which skips both account-wide caps, the daily
-        @c ndmp and the session @c ndmc. The target's own @c tlc, @c tdc and @c mdc still apply.
-        This is the narrower of the two flags, so the pair is not interchangeable.
- @param totalLifetimeCount @c tlc, or -1 for uncapped.
- @param totalDailyCount @c tdc, or -1 for uncapped.
- @param maxPerSession @c mdc, or negative for the per-target session default.
+ @param excludeFromCaps @c efc, which skips all of these caps.
+ @param excludeGlobalCaps @c excludeGlobalFCaps, which skips only the two account-wide caps, the
+        daily @c ndmp and the session @c ndmc. The target's own @c tlc, @c tdc and @c mdc still
+        apply. This flag skips less than @c efc does, so the two are not interchangeable.
+ @param totalLifetimeCount @c tlc, or -1 for no limit.
+ @param totalDailyCount @c tdc, or -1 for no limit.
+ @param maxPerSession @c mdc, or negative to use the default.
  */
 - (BOOL)canShowTarget:(NSString *)targetId
       excludeFromCaps:(BOOL)excludeFromCaps
@@ -80,16 +81,16 @@ NS_ASSUME_NONNULL_BEGIN
       totalDailyCount:(int)totalDailyCount
         maxPerSession:(int)maxPerSession;
 
-/// Records one render: the impression, the target's today and lifetime pair, and the global counter.
+/// Records one display: the impression, the target's today and lifetime counts, and the day total.
 - (void)didShowTarget:(NSString *)targetId;
 
-/// Stores the account ceilings pushed on every cap-aware response. Pass -1 for uncapped.
+/// Saves the account maximums the server sends with each response. Pass -1 for no limit.
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
 
-/// Purges counts, impressions and triggers for targets the server has declared dead.
+/// Deletes the counts, impressions and triggers for targets the server says no longer exist.
 - (void)removeStaleTargetCounts:(NSArray *)staleTargets;
 
-/// The SDK's render count for today. This is the @c ndmp value on a request.
+/// How many Native Display units the SDK has shown today. Sent as @c ndmp on a request.
 - (int)shownTodayCount;
 
 @end

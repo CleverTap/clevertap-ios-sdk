@@ -15,7 +15,7 @@
 #import "CleverTapInternal.h"
 #import "CTMultiDelegateManager.h"
 
-// -1 is how the server says "no ceiling" for every count in this file, per-target and account-wide.
+// -1 is how the server says "no limit" for every count in this file, per-target and account-wide.
 static const int kCTNdUncapped = -1;
 
 // Used when a target sets no mdc of its own. Same value in-app uses, high enough to be no limit in
@@ -157,8 +157,9 @@ static const int kCTNdSessionCapDefault = 1000;
         return YES;
     }
 
-    // efc skips every counter cap, so it can short-circuit. excludeGlobalFCaps cannot, because it
-    // only lifts the two account-wide caps and the target still owes its own tlc, tdc and mdc.
+    // efc skips all the caps, so we can answer right here. excludeGlobalFCaps cannot do that,
+    // because it skips only the two account-wide caps and the target still has to obey its own
+    // tlc, tdc and mdc. That is why it is passed down to the checks instead.
     if (excludeFromCaps) return YES;
 
     return ![self hasSessionCapacityMaxedOut:targetId
@@ -173,19 +174,19 @@ static const int kCTNdSessionCapDefault = 1000;
 - (void)didShowTarget:(NSString *)targetId {
     if (![targetId isKindOfClass:[NSString class]] || targetId.length == 0) return;
 
-    // Record the impression, for the session counts and the whenLimits timestamps.
+    // Record the impression, which feeds the session counts and the whenLimits timestamps.
     [self.impressionManager recordImpression:targetId];
 
-    // Record the render for the day.
+    // Add to the total shown today.
     [self incrementShownToday];
 
-    // Record the render in the target's today and lifetime pair.
+    // Add to this target's own today and lifetime counts.
     @synchronized (self.targetCounts) {
         NSMutableArray *counts = [self.targetCounts[targetId] mutableCopy];
         if (!counts || counts.count != 2) {
             counts = [[NSMutableArray alloc] initWithObjects:@1, @1, nil];
         } else {
-            // protocol: todayCount, lifetimeCount
+            // The two values are todayCount then lifetimeCount.
             counts[0] = @([counts[0] intValue] + 1);
             counts[1] = @([counts[1] intValue] + 1);
         }
@@ -266,7 +267,7 @@ static const int kCTNdSessionCapDefault = 1000;
                 [self.targetCounts removeObjectForKey:key];
                 continue;
             }
-            // protocol: todayCount, lifetimeCount. Lifetime survives the rollover.
+            // The two values are todayCount then lifetimeCount. Lifetime is not reset.
             counts[0] = @0;
             self.targetCounts[key] = counts;
         }
