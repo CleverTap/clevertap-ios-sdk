@@ -2569,22 +2569,122 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)handleDisplayUnitResponse:(id)jsonResp {
-    NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
-    if ([displayUnitJSON isKindOfClass:[NSArray class]] && displayUnitJSON.count > 0) {
-        if (self.isUserSwitching) {
+    if (![jsonResp isKindOfClass:[NSDictionary class]]) return;
+
+    // Caps and rules first, and on every response, including one that arrives during a user switch.
+    // They belong to the account rather than to a user, so they should stay current either way, and
+    // the content half below reads the caps this writes.
+    [self ingestNativeDisplayMeta:jsonResp];
+
+    // Only the content is held back on a user switch. Showing the previous user's display units to
+    // the one who just switched in is the thing to avoid.
+    if (self.isUserSwitching) {
+        // Said only when there was content to hold back, so a response carrying nothing but caps
+        // does not read like something was dropped.
+        if (jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY] || jsonResp[CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY]) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
-            return;
         }
-        NSArray<CleverTapDisplayUnit *> *displayUnits = [self _parseDisplayUnitsFromJSONArray:displayUnitJSON];
-        if (displayUnits.count > 0) {
-            [self initializeDisplayUnitWithCallback:^(BOOL success) {
-                if (success) {
-                    [self.displayUnitCache updateDisplayUnits:displayUnits];
-                    [self _notifyDisplayUnitsUpdated];
-                }
-            }];
+        return;
+    }
+    [self deliverNativeDisplayContent:jsonResp];
+}
+
+- (void)ingestNativeDisplayMeta:(NSDictionary *)jsonResp {
+    // Nil for an analytics only instance and inside an app extension, where there is nothing to cap.
+    if (!self.ndStore || !self.ndFCManager || !self.ndEvaluationManager) return;
+
+    @try {
+        // ndmc comes back on every response that knows about caps, so its presence is what tells us
+        // this response carries them at all. A missing ndmp means there is no daily max, which is
+        // what INT_MAX says here.
+        if (jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] != nil) {
+            int perSession = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] fallback:1];
+            int perDay = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_DAILY_MAX_META_KEY] fallback:INT_MAX];
+            [self.ndFCManager updateGlobalLimitsPerDay:perDay andPerSession:perSession];
+        }
+
+        // Campaigns the server has finished with. removeStaleTargetCounts: clears the counts, the
+        // impressions and the triggers, so there is nothing else to clean up here.
+        NSArray *staleIds = jsonResp[CLTAP_ND_STALE_JSON_RESPONSE_KEY];
+        if ([staleIds isKindOfClass:[NSArray class]]) {
+            [self.ndFCManager removeStaleTargetCounts:staleIds];
+        }
+
+        // The rules the SDK evaluates locally. This replaces whatever was saved, and an empty array
+        // is a real instruction to clear: the server only sends this list when it is sending the
+        // complete current set.
+        NSArray *serverSideNativeDisplays = jsonResp[CLTAP_ND_SS_JSON_RESPONSE_KEY];
+        if ([serverSideNativeDisplays isKindOfClass:[NSArray class]]) {
+            [self.ndStore storeServerSideNativeDisplays:serverSideNativeDisplays];
+            CleverTapLogInternal(self.config.logLevel, @"%@: Stored %lu Native Display rules", self, (unsigned long)serverSideNativeDisplays.count);
+        }
+
+        // Control group users get a stub instead of content. Telling the server we saw it is what
+        // stops it being sent again. Only App Launched needs this; for any other event the server
+        // decides the control group itself and sends nothing.
+        for (NSDictionary *entry in [self nativeDisplayAppLaunchedEntries:jsonResp]) {
+            if ([entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
+                [self.ndEvaluationManager recordSuppressedNativeDisplay:entry];
+            }
+        }
+    } @catch (NSException *e) {
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to read the Native Display caps: %@", self, e.debugDescription);
+    }
+}
+
+- (void)deliverNativeDisplayContent:(NSDictionary *)jsonResp {
+    NSArray *displayUnitJSON = jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY];
+    NSArray *appLaunchedJSON = [self nativeDisplayAppLaunchedEntries:jsonResp];
+
+    NSMutableArray<CleverTapDisplayUnit *> *displayUnits = [NSMutableArray new];
+    if ([displayUnitJSON isKindOfClass:[NSArray class]]) {
+        [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:displayUnitJSON]];
+    }
+    // The suppressed stubs carry no content, so they are dropped here. They were acknowledged with
+    // the caps above.
+    NSMutableArray *appLaunchedWithContent = [NSMutableArray new];
+    for (NSDictionary *entry in appLaunchedJSON) {
+        if (![entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
+            [appLaunchedWithContent addObject:entry];
         }
     }
+    [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:appLaunchedWithContent]];
+
+    if (displayUnits.count == 0) return;
+
+    [self initializeDisplayUnitWithCallback:^(BOOL success) {
+        if (success) {
+            // One write for the whole response. updateDisplayUnits: replaces the cache rather than
+            // adding to it, so writing the two lists separately would leave only the second one.
+            [self.displayUnitCache updateDisplayUnits:displayUnits];
+            [self _notifyDisplayUnitsUpdated];
+        }
+    }];
+}
+
+/// The App Launched entries, or an empty array when the response has none.
+- (NSArray<NSDictionary *> *)nativeDisplayAppLaunchedEntries:(NSDictionary *)jsonResp {
+    NSArray *appLaunched = jsonResp[CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY];
+    if (![appLaunched isKindOfClass:[NSArray class]]) return @[];
+
+    NSMutableArray<NSDictionary *> *entries = [NSMutableArray new];
+    for (id entry in appLaunched) {
+        if ([entry isKindOfClass:[NSDictionary class]]) {
+            [entries addObject:entry];
+        }
+    }
+    return entries;
+}
+
+/// Caps arrive as numbers on some responses and as strings on others. Anything that is neither, or a
+/// string that is not a number, falls back rather than being read as zero.
+- (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback {
+    if ([value isKindOfClass:[NSNumber class]]) return [value intValue];
+    if ([value isKindOfClass:[NSString class]]) {
+        NSNumber *parsed = [CTUtils numberFromString:(NSString *)value];
+        if (parsed) return [parsed intValue];
+    }
+    return fallback;
 }
 #endif
 
