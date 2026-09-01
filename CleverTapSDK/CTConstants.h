@@ -241,23 +241,23 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_INAPP_LOCAL_INAPP_COUNT_KEY @"local_in_app_count"
 #define CLTAP_INAPP_EVAL_DEDUPED_FLAG @"ss_evals_deduped"
 
-// Storage namespaces for CTImpressionManager and CTInAppTriggerManager. These sit inside the
-// preference key, so changing a value orphans every impression and trigger count already saved on a
-// device. They exist as constants to make that obvious - treat the values as frozen.
+// Storage names for CTImpressionManager and CTInAppTriggerManager. These words go inside the
+// preference key. Change a value and every impression and trigger count already saved on a device
+// can no longer be found. They are constants to make that clear. Treat the values as frozen.
 #define CLTAP_PREFS_INAPP_IMPRESSIONS_NAMESPACE @"impressions"
 #define CLTAP_PREFS_INAPP_TRIGGERS_NAMESPACE @"triggers"
 
 #pragma mark Native Display frequency caps
 
-// Response, server to SDK. CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY carries the content and is
-// already handled; these carry the caps.
+// Response, server to SDK. CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY carries the content and is already
+// handled. These carry the caps.
 #define CLTAP_ND_SS_JSON_RESPONSE_KEY @"adUnit_notifs_ss"
 #define CLTAP_ND_STALE_JSON_RESPONSE_KEY @"adUnit_stale"
-// Campaigns that fired on App Launched. Carries real content, except for the entries marked
-// suppressed, which say a control group user was picked and there is nothing to show.
+// Campaigns that fired on App Launched. These carry real content, except the entries marked
+// suppressed. Those mean the user is in the control group and there is nothing to show.
 #define CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY @"adUnit_notifs_applaunched"
-// Watch the direction. Coming from the server, ndmc and ndmp are the maximums allowed. Going to
-// the server, ndmp is how many we have shown today. In-app uses imp for both meanings too.
+// Watch the direction. From the server, ndmc and ndmp are the limits. To the server, ndmp is how
+// many we showed today. In-app does the same thing with imp.
 #define CLTAP_ND_SESSION_MAX_META_KEY @"ndmc"
 #define CLTAP_ND_DAILY_MAX_META_KEY @"ndmp"
 
@@ -267,8 +267,8 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_ND_SS_EVAL_META_KEY @"adUnit_eval"
 #define CLTAP_ND_SUPPRESSED_META_KEY @"adUnit_suppressed"
 
-// At rest. Every name here is new, so no key already saved on a device is read or written by
-// Native Display code.
+// On disk. Every name here is new, so Native Display never reads or writes a key that is already
+// saved on a device.
 #define CLTAP_PREFS_ND_KEY_SS @"adUnit_notifs_ss"
 #define CLTAP_ND_SS_EVAL_STORAGE_KEY @"adUnit_eval"
 #define CLTAP_ND_SUPPRESSED_STORAGE_KEY @"adUnit_suppressed"

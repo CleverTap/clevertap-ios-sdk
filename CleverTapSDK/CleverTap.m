@@ -84,8 +84,8 @@ static NSArray *sslCertNames;
 #import "CTNdStore.h"
 #import "CTNdFCManager.h"
 #import "CTNdEvaluationManager.h"
-// Native Display reuses these two classes with its own namespace. They are imported here as well as
-// in the in-app block above, because display units are built even when in-app support is compiled out.
+// Native Display uses these two classes with its own storage names. They are imported here as well
+// as in the in-app block above, because display units are built even when in-app is compiled out.
 #import "CTImpressionManager.h"
 #import "CTInAppTriggerManager.h"
 #endif
@@ -190,17 +190,17 @@ typedef NS_ENUM(NSInteger, CleverTapPushTokenRegistrationAction) {
 @property (nonatomic, strong) id<CleverTapDisplayUnitCache> displayUnitCache;
 @property (atomic, weak) id <CleverTapDisplayUnitDelegate> displayUnitDelegate;
 
-// Native Display frequency caps. Separate from the in-app ones on purpose: sharing them would let a
-// display unit count against an in-app's limits and the other way round. All five are nil when the
-// instance is analytics only or running in an app extension.
+// Native Display frequency caps. Kept separate from the in-app ones on purpose. If they were
+// shared, a display unit would count towards an in-app's limits and the other way round. All five
+// are nil when the instance is analytics only or running in an app extension.
 @property (nonatomic, strong, readwrite) CTNdStore *ndStore;
 @property (nonatomic, strong, readwrite) CTNdFCManager *ndFCManager;
 @property (nonatomic, strong, readwrite) CTNdEvaluationManager *ndEvaluationManager;
 @property (nonatomic, strong, readwrite) CTImpressionManager *ndImpressionManager;
 @property (nonatomic, strong, readwrite) CTInAppTriggerManager *ndTriggerManager;
 
-// Used only to warn when the app never reports a view. Without those reports nothing is counted and
-// every Native Display cap stays wide open, which is silent unless we say something.
+// Used only to warn when the app never reports a view. Without those reports nothing is counted, so
+// every Native Display cap stays open. Nothing looks wrong unless we say so.
 @property (atomic, assign) BOOL deliveredCapManagedNativeDisplays;
 @property (atomic, assign) BOOL countedANativeDisplayView;
 @end
@@ -577,8 +577,8 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
         if (!_config.analyticsOnly && ![CTUIUtils runningInsideAppExtension]) {
-            // After in-app, because that is where the session manager is built and Native Display
-            // needs to hand it an impression manager to reset.
+            // Runs after in-app, because the session manager is built there and Native Display has
+            // to give it an impression manager to reset.
             [self initializeNativeDisplaySupport];
             self.sessionManager.ndImpressionManager = self.ndImpressionManager;
         }
@@ -647,8 +647,8 @@ static BOOL sharedInstanceErrorLogged;
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
 - (void)initializeNativeDisplaySupport {
-    // Native Display keeps its own impression and trigger counts, in their own preference namespace,
-    // so the two channels never see each other's numbers. Everything else about these two managers is
+    // Native Display keeps its own impression and trigger counts, under its own storage names, so
+    // the two channels never see each other's numbers. Everything else about these two managers is
     // the same as in-app's.
     self.ndImpressionManager = [[CTImpressionManager alloc] initWithAccountId:self.config.accountId
                                                                      deviceId:self.deviceInfo.deviceId
@@ -2180,9 +2180,9 @@ static BOOL sharedInstanceErrorLogged;
 #endif
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-    // Deliberately a separate block that reads the event again rather than sharing the in-app locals
-    // above. The two channels can be compiled out independently, and this way the in-app path is
-    // untouched. Wrapped in @try so a fault here cannot stop the event being queued and sent.
+    // This block reads the event again instead of reusing the in-app variables above, on purpose.
+    // Either channel can be compiled out on its own, and this way the in-app path stays untouched.
+    // The @try is here so a problem in this code cannot stop the event being queued and sent.
     @try {
         NSString *ndEventName = event[CLTAP_EVENT_NAME];
         if (ndEventName && [ndEventName isEqualToString:CLTAP_CHARGED_EVENT]) {
@@ -2576,16 +2576,16 @@ static BOOL sharedInstanceErrorLogged;
 - (void)handleDisplayUnitResponse:(id)jsonResp {
     if (![jsonResp isKindOfClass:[NSDictionary class]]) return;
 
-    // Caps and rules first, and on every response, including one that arrives during a user switch.
-    // They belong to the account rather than to a user, so they should stay current either way, and
-    // the content half below reads the caps this writes.
+    // Caps and rules first, on every response, even one that arrives during a user switch. They
+    // belong to the account and not to a user, so they should stay up to date either way. The
+    // content step below also reads what this writes.
     [self ingestNativeDisplayMeta:jsonResp];
 
-    // Only the content is held back on a user switch. Showing the previous user's display units to
-    // the one who just switched in is the thing to avoid.
+    // Only the content is held back during a user switch. The thing to avoid is showing the old
+    // user's display units to the new one.
     if (self.isUserSwitching) {
-        // Said only when there was content to hold back, so a response carrying nothing but caps
-        // does not read like something was dropped.
+        // Logged only when there was content to hold back, so a response with nothing but caps does
+        // not look like it lost something.
         if (jsonResp[CLTAP_DISPLAY_UNIT_JSON_RESPONSE_KEY] || jsonResp[CLTAP_ND_APP_LAUNCHED_JSON_RESPONSE_KEY]) {
             CleverTapLogDebug(self.config.logLevel, @"%@: Display Units response will not be handled due to user switch", self);
         }
@@ -2599,9 +2599,9 @@ static BOOL sharedInstanceErrorLogged;
     if (!self.ndStore || !self.ndFCManager || !self.ndEvaluationManager) return;
 
     @try {
-        // ndmc comes back on every response that knows about caps, so its presence is what tells us
-        // this response carries them at all. A missing ndmp means there is no daily max, which is
-        // what INT_MAX says here.
+        // ndmc is on every response that knows about caps, so seeing it is how we know this
+        // response has caps at all. No ndmp means there is no daily limit, which is what INT_MAX
+        // means here.
         if (jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] != nil) {
             int perSession = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_SESSION_MAX_META_KEY] fallback:1];
             int perDay = [self nativeDisplayIntFrom:jsonResp[CLTAP_ND_DAILY_MAX_META_KEY] fallback:INT_MAX];
@@ -2615,9 +2615,9 @@ static BOOL sharedInstanceErrorLogged;
             [self.ndFCManager removeStaleTargetCounts:staleIds];
         }
 
-        // The rules the SDK evaluates locally. This replaces whatever was saved, and an empty array
-        // is a real instruction to clear: the server only sends this list when it is sending the
-        // complete current set.
+        // The rules the SDK checks on the device. This replaces whatever was saved. An empty array
+        // really does mean clear them, because the server sends this list only when it is sending
+        // the full current set.
         NSArray *serverSideNativeDisplays = jsonResp[CLTAP_ND_SS_JSON_RESPONSE_KEY];
         if ([serverSideNativeDisplays isKindOfClass:[NSArray class]]) {
             [self.ndStore storeServerSideNativeDisplays:serverSideNativeDisplays];
@@ -2625,8 +2625,8 @@ static BOOL sharedInstanceErrorLogged;
         }
 
         // Control group users get a stub instead of content. Telling the server we saw it is what
-        // stops it being sent again. Only App Launched needs this; for any other event the server
-        // decides the control group itself and sends nothing.
+        // stops it coming again. Only App Launched needs this. For any other event the server
+        // handles the control group itself and sends nothing.
         for (NSDictionary *entry in [self nativeDisplayAppLaunchedEntries:jsonResp]) {
             if ([entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
                 [self.ndEvaluationManager recordSuppressedNativeDisplay:entry];
@@ -2645,8 +2645,8 @@ static BOOL sharedInstanceErrorLogged;
     if ([displayUnitJSON isKindOfClass:[NSArray class]]) {
         [displayUnits addObjectsFromArray:[self _parseDisplayUnitsFromJSONArray:displayUnitJSON]];
     }
-    // The suppressed stubs carry no content, so they are dropped here. They were acknowledged with
-    // the caps above.
+    // Suppressed stubs carry no content, so they are dropped here. They were already replied to in
+    // the step above.
     NSMutableArray *appLaunchedWithContent = [NSMutableArray new];
     for (NSDictionary *entry in appLaunchedJSON) {
         if (![entry[CLTAP_INAPP_IS_SUPPRESSED] boolValue]) {
@@ -2661,8 +2661,8 @@ static BOOL sharedInstanceErrorLogged;
 
     [self initializeDisplayUnitWithCallback:^(BOOL success) {
         if (success) {
-            // One write for the whole response. updateDisplayUnits: replaces the cache rather than
-            // adding to it, so writing the two lists separately would leave only the second one.
+            // One write for the whole response. updateDisplayUnits: replaces the cache instead of
+            // adding to it, so writing the two lists one after the other would keep only the second.
             [self.displayUnitCache updateDisplayUnits:withinCaps];
             [self _notifyDisplayUnitsUpdated];
         }
@@ -2672,16 +2672,15 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Drops the Native Display units that have no room left under the counting caps.
 
- A unit carrying none of the cap fields is passed through untouched, so display units that predate
- this feature behave exactly as they did. The advanced rules, @c frequencyLimits and
- @c occurrenceLimits, are not re-checked here: the SDK already checked them and reported the ids that
- passed in @c adUnit_eval, and the server sent content back only for those. This is the only place
- @c ndmc and @c mdc are enforced.
+ A unit with no cap settings passes through untouched, so display units that came before this feature
+ behave exactly as they did. @c frequencyLimits and @c occurrenceLimits are not checked again here.
+ The SDK already checked them and sent the ids that passed in @c adUnit_eval, and the server sent
+ content only for those. This is the only place @c ndmc and @c mdc are applied.
  */
 - (NSArray<CleverTapDisplayUnit *> *)nativeDisplayUnitsWithinCaps:(NSArray<CleverTapDisplayUnit *> *)displayUnits {
     if (!self.ndFCManager) return displayUnits;
 
-    // Rolls the day over first, so a unit is not judged against yesterday's daily counts.
+    // Roll the day over first, so a unit is not checked against yesterday's daily counts.
     [self.ndFCManager checkUpdateDailyLimits];
 
     NSUInteger capManagedCount = 0;
@@ -2696,16 +2695,16 @@ static BOOL sharedInstanceErrorLogged;
 
         NSString *targetId = [CTNdFCManager targetIdFrom:json];
         if (targetId.length == 0) {
-            // Nothing to key a count by, so there is no cap to check. Delivering it is the safer of
-            // the two mistakes: holding it back would hide a campaign for a reason nobody can see.
+            // No id means nothing to store a count under, so there is no cap to check. Showing it
+            // is the safer mistake. Holding it back would hide a campaign for a reason nobody can
+            // see.
             CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has caps but no ti, so its caps cannot be checked", self, unit.unitID);
             [withinCaps addObject:unit];
             continue;
         }
 
-        // The two exclusion flags are passed separately on purpose. efc skips every cap;
-        // excludeGlobalFCaps skips only the two account-wide ones and leaves the target's own tlc,
-        // tdc and mdc in force.
+        // The two flags are passed separately on purpose. efc skips every cap. excludeGlobalFCaps
+        // skips only the two account caps and leaves the campaign's own tlc, tdc and mdc in place.
         BOOL canShow = [self.ndFCManager canShowTarget:targetId
                                       excludeFromCaps:[json[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue]
                                     excludeGlobalCaps:[json[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue]
@@ -2726,10 +2725,11 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Warns when capped Native Display units keep arriving but the app never reports a view.
 
- Nothing is counted without those reports, so every cap stays wide open and the totals sent to the
- server stay at zero. Nothing else about the app would look wrong, which is why it is worth saying.
- Waits for a second delivery before warning, because having no views yet after the first one is
- normal - the user may simply not have scrolled to the unit.
+ Nothing is counted without those reports, so every cap stays open and the totals sent to the server
+ stay at zero. Nothing else about the app looks wrong, which is why this is worth saying.
+
+ It waits for a second delivery before warning. Having no views after the first one is normal,
+ because the user may not have scrolled to the unit yet.
  */
 - (void)warnIfNativeDisplayViewsAreNeverReported:(NSUInteger)capManagedCount {
     if (capManagedCount == 0) return;
@@ -2754,8 +2754,8 @@ static BOOL sharedInstanceErrorLogged;
     return entries;
 }
 
-/// Caps arrive as numbers on some responses and as strings on others. Anything that is neither, or a
-/// string that is not a number, falls back rather than being read as zero.
+/// Caps come as numbers on some responses and as strings on others. Anything else, or a string that
+/// is not a number, uses the fallback instead of being read as zero.
 - (int)nativeDisplayIntFrom:(id)value fallback:(int)fallback {
     if ([value isKindOfClass:[NSNumber class]]) return [value intValue];
     if ([value isKindOfClass:[NSString class]]) {
@@ -5325,13 +5325,13 @@ static BOOL sharedInstanceErrorLogged;
 /**
  Adds one display to the Native Display counts.
 
- Every call counts, including repeated calls for the same unit in one session. There is no check for
- repeats and that is deliberate: if the app's call is what tells us a unit was shown, then throwing
- some of those calls away would be second-guessing the one signal we have. Android counts every call
- too, and the totals are reported to the server, so both platforms have to count the same way.
+ Every call counts, including two calls for the same unit in one session. There is no check for
+ repeats, on purpose. The app's call is the only sign we have that a unit was shown, so throwing some
+ of those calls away would mean second-guessing our only signal. Android counts every call too, and
+ the totals go to the server, so both platforms have to count the same way.
 
- Units carrying no cap fields are ignored, so a display unit that predates this feature never adds to
- the account's daily and session totals.
+ Units with no cap settings are ignored, so a display unit that came before this feature never adds
+ to the account's daily and session totals.
  */
 - (void)countNativeDisplayView:(CleverTapDisplayUnit *)displayUnit {
     if (!self.ndFCManager) return;
@@ -5352,23 +5352,20 @@ static BOOL sharedInstanceErrorLogged;
 }
 
 /**
- Whether this target's impression timestamps are worth keeping on disk.
+ Whether this campaign's impression times are worth saving on disk.
 
- Saved timestamps have exactly one reader: matching @c frequencyLimits and @c occurrenceLimits while
- evaluating the rules in @c adUnit_notifs_ss. Evaluation only ever walks that list, so a target that
- is not in it will never have its timestamps looked at, and a target in it with neither kind of limit
- will not either. Both cases can skip the write.
+ Saved times have one reader: matching @c frequencyLimits and @c occurrenceLimits while checking the
+ rules in @c adUnit_notifs_ss. Only campaigns in that list are ever checked, and a campaign in it
+ with neither kind of limit is never checked either. Both cases can skip the write.
 
- This matters more for Native Display than it would for in-app. In-app appends a timestamp from its
- own render path, once per display, after the caps have already allowed it, so the caps bound the
- growth. Here the app decides when to report a view and how often, and the whole saved list for the
- target is rewritten on each append, so with nothing to bound it the list would grow and each write
- would get slower.
+ This matters more here than for in-app. In-app saves one time per display, from its own drawing
+ code, after the caps already allowed it, so the caps limit how much the list can grow. Here the app
+ decides when and how often to report a view, and the whole saved list is rewritten every time we add
+ to it, so nothing would stop the list growing and each write getting slower.
 
- One narrow gap: if content for a target is shown before its rule arrives, the views in between leave
- no timestamps, so a limit that starts applying later begins with no history behind it. Small and
- bounded, and the alternative is writing a timestamp for every view of every target on the chance a
- rule shows up.
+ One small gap: if content is shown before its rule arrives, those views leave no times behind, so a
+ limit that starts applying later begins with no history. It only affects those few views. The other
+ option is saving a time for every view of every campaign in case a rule turns up.
  */
 - (BOOL)nativeDisplayTargetNeedsTimestamps:(NSString *)targetId {
     for (id rule in [self.ndStore serverSideNativeDisplays]) {
@@ -5391,9 +5388,9 @@ static BOOL sharedInstanceErrorLogged;
     // get the display unit data via the active cache
     CleverTapDisplayUnit *displayUnit = [self getDisplayUnitForID:unitID];
 
-    // The app calling this is the only sign that a display unit was really shown, because the SDK
-    // does not draw it. Done on the serial queue because the counts are written to disk and this is
-    // called from the app's own UI code.
+    // This call is the only sign that a display unit was really shown, because the SDK does not
+    // draw it. Runs on the serial queue because the counts are written to disk and this comes from
+    // the app's own UI code.
     [self.dispatchQueueManager runSerialAsync:^{
         [self countNativeDisplayView:displayUnit];
     }];

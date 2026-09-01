@@ -19,9 +19,9 @@
 
 @interface CTNdEvaluationManager ()
 
-/// The ti of every campaign the user has qualified for but which has not been reported yet.
+/// The ti of every campaign the user qualified for that has not been sent yet.
 @property (nonatomic, strong) NSMutableArray *evaluatedServerSideNativeDisplayIds;
-/// Control group acknowledgements waiting to be reported. See recordSuppressedNativeDisplay:.
+/// Control group replies waiting to be sent. See recordSuppressedNativeDisplay:.
 @property (nonatomic, strong) NSMutableArray *suppressedNativeDisplays;
 
 /// The properties of the last App Launched event, merged into profile change events.
@@ -55,8 +55,8 @@
         self.triggerManager = triggerManager;
         self.ndStore = ndStore;
 
-        // Both matchers are stateless and take the managers per call, so in-app's instances could
-        // have been shared. Separate ones are cheap and keep the two channels independent.
+        // Both matchers hold no state and take the managers on each call, so in-app's could have
+        // been shared. Making our own is cheap and keeps the two channels apart.
         self.triggersMatcher = [[CTTriggersMatcher alloc] initWithDataStore:dataStore];
         self.limitsMatcher = [CTLimitsMatcher new];
 
@@ -87,7 +87,7 @@
 
 - (void)evaluateOnEvent:(NSString *)eventName withProps:(NSDictionary *)properties {
     if ([eventName isEqualToString:CLTAP_APP_LAUNCHED_EVENT]) {
-        // App Launched is not evaluated for Native Display. Keep the properties, because profile
+        // App Launched is not evaluated for Native Display. We keep its properties because profile
         // change events are matched against them too.
         self.appLaunchedProperties = properties ? properties : @{};
         return;
@@ -158,8 +158,8 @@
             NSArray *whenTriggers = nativeDisplay[CLTAP_INAPP_TRIGGERS];
             if (![self.triggersMatcher matchEventWhenTriggers:whenTriggers event:event]) continue;
 
-            // The campaign matched the trigger, so the trigger count goes up whether or not the
-            // limits pass. occurrenceLimits are counted in triggers, so they need this.
+            // The campaign matched the trigger, so its trigger count goes up whether the limits
+            // pass or not. occurrenceLimits are counted in triggers, so they need this.
             [self.triggerManager incrementTrigger:campaignId];
 
             NSMutableArray *whenLimits = [NSMutableArray new];
@@ -174,9 +174,9 @@
             NSNumber *ti = [CTUtils numberFromString:campaignId];
             if (!ti) continue;
 
-            // Added even if the same id is already waiting. A campaign that qualifies again while an
-            // earlier report is still in flight must not be dropped, because sending only removes
-            // what it sent. The server ignores repeats.
+            // Added even if the same id is already in the list. A campaign can qualify again while
+            // an earlier send is still going out, and sending only removes what it sent, so
+            // dropping the repeat here would lose it. The server ignores repeats.
             @synchronized (self) {
                 [self.evaluatedServerSideNativeDisplayIds addObject:ti];
             }
@@ -197,7 +197,7 @@
     return campaignId.length > 0 ? campaignId : nil;
 }
 
-#pragma mark Control Group Acknowledgements
+#pragma mark Control Group Replies
 
 - (void)recordSuppressedNativeDisplay:(NSDictionary *)suppressedUnit {
     if (![suppressedUnit isKindOfClass:[NSDictionary class]]) return;
@@ -205,32 +205,32 @@
     NSString *wzrkId = suppressedUnit[CLTAP_NOTIFICATION_ID_TAG];
     if (![wzrkId isKindOfClass:[NSString class]] || wzrkId.length == 0) {
         // The server always sends wzrk_id on these stubs, so this should not happen. Without one
-        // there is nothing to acknowledge, so log it rather than dropping it quietly.
-        CleverTapLogStaticDebug(@"Dropping Native Display control group acknowledgement, no wzrk_id on %@", suppressedUnit);
+        // there is nothing to reply about, so log it instead of dropping it silently.
+        CleverTapLogStaticDebug(@"Dropping Native Display control group reply, no wzrk_id on %@", suppressedUnit);
         return;
     }
 
-    NSMutableDictionary *acknowledgement = [NSMutableDictionary new];
-    acknowledgement[CLTAP_NOTIFICATION_ID_TAG] = wzrkId;
-    acknowledgement[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] ?: CLTAP_NOTIFICATION_PIVOT_DEFAULT;
+    NSMutableDictionary *reply = [NSMutableDictionary new];
+    reply[CLTAP_NOTIFICATION_ID_TAG] = wzrkId;
+    reply[CLTAP_NOTIFICATION_PIVOT] = suppressedUnit[CLTAP_NOTIFICATION_PIVOT] ?: CLTAP_NOTIFICATION_PIVOT_DEFAULT;
     NSNumber *controlGroupId = suppressedUnit[CLTAP_NOTIFICATION_CONTROL_GROUP_ID];
     if (controlGroupId) {
-        acknowledgement[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = controlGroupId;
+        reply[CLTAP_NOTIFICATION_CONTROL_GROUP_ID] = controlGroupId;
     }
 
     @synchronized (self) {
-        [self.suppressedNativeDisplays addObject:acknowledgement];
+        [self.suppressedNativeDisplays addObject:reply];
     }
     [self saveSuppressedNativeDisplays];
-    CleverTapLogStaticDebug(@"Recorded Native Display control group acknowledgement for %@", wzrkId);
+    CleverTapLogStaticDebug(@"Recorded Native Display control group reply for %@", wzrkId);
 }
 
 #pragma mark AttachToBatchHeader delegate
 
 - (BatchHeaderKeyPathValues)onBatchHeaderCreationForQueue:(CTQueueType)queueType {
     NSMutableDictionary *header = [NSMutableDictionary new];
-    // Both lists ride on the events batch, even the entries that came from a profile change. That is
-    // where in-app sends its equivalents, and the server reads them from the same place.
+    // Both lists go out on the events batch, even entries that came from a profile change. In-app
+    // sends its versions there too, and the server reads them from the same place.
     if (queueType != CTQueueTypeEvents) return header;
 
     @synchronized (self) {
@@ -261,8 +261,8 @@
              didSave:^{ [self saveSuppressedNativeDisplays]; }];
 }
 
-/// Drops as many entries from the front of the list as the batch carried, and nothing more. Anything
-/// added while the batch was in flight sits behind them and goes out next time.
+/// Removes as many entries from the front of the list as the batch carried, and no more. Anything
+/// added while the batch was being sent sits behind them and goes out next time.
 - (void)removeSent:(NSArray *)sent fromList:(NSMutableArray *)list didSave:(void (^)(void))save {
     if (![sent isKindOfClass:[NSArray class]] || sent.count == 0) return;
 
@@ -290,7 +290,7 @@
     }
 }
 
-// Matches the ordering CTInAppEvaluationManager uses, which is accountId:suffix:deviceId.
+// Same key order as CTInAppEvaluationManager, which is accountId:suffix:deviceId.
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.accountId, suffix, self.deviceId];
 }
@@ -300,8 +300,8 @@
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     @synchronized (self) {
         self.deviceId = newDeviceId;
-        // Anything still waiting belongs to the previous user, so it is left on their key rather
-        // than reported under the new one.
+        // Anything still waiting belongs to the old user, so we leave it under their key instead of
+        // sending it under the new one.
         [self loadPendingLists];
     }
 }

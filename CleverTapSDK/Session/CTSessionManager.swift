@@ -37,9 +37,9 @@ public final class CTSessionManager: NSObject {
 #endif
 
 #if !CLEVERTAP_NO_DISPLAY_UNIT_SUPPORT
-    /// Native Display's own impression manager, reset alongside the in-app one so its session counts
-    /// start fresh too. Set after init rather than passed in, because display units are built after
-    /// the session manager. Nil when the instance is analytics only or in an app extension.
+    /// Native Display's own impression manager. Reset along with the in-app one so its session
+    /// counts start fresh too. Set after init instead of being passed in, because display units are
+    /// built after the session manager. Nil when the instance is analytics only or in an extension.
     public var ndImpressionManager: CTImpressionManager?
 #endif
 

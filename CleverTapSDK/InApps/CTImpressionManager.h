@@ -16,17 +16,17 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTImpressionManager : NSObject <CTSwitchUserDelegate>
 
 /**
- The word that identifies this store inside its preference keys, for example @c impressions.
- Two managers with the same value share storage, so each channel needs its own.
+ The word used to identify this store inside its preference keys, for example @c impressions.
+ Two managers with the same word share storage, so each channel needs its own.
 
- Called @c storageNamespace rather than @c namespace because @c namespace is a reserved word in
- Objective-C++ and would break any consumer compiling this header from a @c .mm file.
+ It is called @c storageNamespace and not @c namespace because @c namespace is a reserved word in
+ Objective-C++, and would break anyone compiling this header from a @c .mm file.
  */
 @property (nonatomic, copy, readonly) NSString *storageNamespace;
 
 - (instancetype)init NS_UNAVAILABLE;
 
-/// Uses the in-app namespace. Kept so existing call sites and stored keys are unaffected.
+/// Uses the in-app storage name. Kept so existing call sites and saved keys do not change.
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager;
@@ -52,18 +52,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)recordImpression:(NSString *)campaignId;
 
 /**
- Records one impression, and says whether to keep the timestamp on disk.
+ Records one impression, and says whether to save the time on disk.
 
- The session counts are always updated; they live in memory and are cheap. The timestamp is a
- different matter, because the whole saved list for the campaign is rewritten on every append, so it
- gets longer and slower the more impressions there are.
+ Session counts always go up. They live in memory and are cheap. The time is different, because the
+ whole saved list for the campaign is rewritten every time we add to it, so it gets longer and slower
+ the more impressions there are.
 
- The saved timestamps have exactly one reader: matching @c frequencyLimits and @c occurrenceLimits.
- A campaign with neither has nothing that will ever look at them, so passing @c NO leaves them out.
+ Saved times have one reader: matching @c frequencyLimits and @c occurrenceLimits. A campaign with
+ neither has nothing that will ever read them, so passing @c NO leaves them out.
 
- In-app always passes @c YES, through @c recordImpression: above. Native Display passes @c NO for the
- campaigns it knows have no such limits, because its impressions are driven by the app rather than by
- the SDK and there is no upper bound on how many arrive.
+ In-app always passes @c YES, through @c recordImpression: above. Native Display passes @c NO for
+ campaigns it knows have no such limits, because its impressions come from the app and not from the
+ SDK, and there is no limit on how many arrive.
  */
 - (void)recordImpression:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp;
 

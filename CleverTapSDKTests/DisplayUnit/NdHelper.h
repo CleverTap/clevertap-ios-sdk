@@ -19,14 +19,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Builds a full set of Native Display managers for a test, wired the same way @c CleverTap wires them.
- The sibling of @c InAppHelper.
+ Builds a full set of Native Display managers for a test, connected the same way @c CleverTap
+ connects them. The Native Display version of @c InAppHelper.
 
- Each instance invents its own account id, so two tests never read each other's counts. Preferences
- are a single flat keyspace shared by the whole test run, and every one of these managers writes to
- it, so without that the order the tests happen to run in would change their results.
+ Each instance makes up its own account id, so two tests never read each other's counts. Preferences
+ are one flat list of keys shared by the whole test run, and every manager here writes to it. Without
+ its own account id, the order the tests happen to run in would change their results.
 
- Call @c tearDown at the end of a test to take those preferences back out again.
+ Call @c tearDown at the end of a test to remove those preferences again.
  */
 @interface NdHelper : NSObject
 
@@ -36,8 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) CleverTapInstanceConfig *config;
 @property (nonatomic, strong) CTMultiDelegateManager *delegateManager;
 
-/// The Native Display impression and trigger managers, on the Native Display namespaces. Sharing
-/// in-app's would let one channel's displays count against the other's limits.
+/// The Native Display impression and trigger managers, using the Native Display storage names.
+/// Sharing in-app's would make one channel's displays count towards the other's limits.
 @property (nonatomic, strong) CTImpressionManager *impressionManager;
 @property (nonatomic, strong) CTInAppTriggerManager *triggerManager;
 

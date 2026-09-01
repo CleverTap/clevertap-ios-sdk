@@ -13,14 +13,15 @@ NS_ASSUME_NONNULL_BEGIN
 @class CTMultiDelegateManager;
 
 /**
- Saves the @c adUnit_notifs_ss list that the server sends, and nothing else.
+ Saves the frequency rules the server sends for Native Display campaigns. On the wire that list is
+ called @c adUnit_notifs_ss. This class saves it and nothing else.
 
- These entries hold only the frequency rules for each campaign, never the text or images the user
- sees, so unlike @c CTInAppStore nothing here is encrypted. There is also no queue, no expiry time,
- and no client side version, because Native Display is server side only.
+ The entries hold only the rules, never the text or images the user sees, so unlike @c CTInAppStore
+ nothing here is encrypted. There is also no queue, no expiry time and no client side version,
+ because Native Display is server side only.
 
- The server always sends the full current list rather than the changes since last time, so an empty
- array means "there are no rules any more", not "nothing changed".
+ The server always sends the full current list, not just what changed. So an empty array means there
+ are no rules any more, not that nothing changed.
  */
 @interface CTNdStore : NSObject
 

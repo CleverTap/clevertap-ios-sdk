@@ -14,17 +14,17 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CTInAppTriggerManager : NSObject <CTSwitchUserDelegate>
 
 /**
- The word that identifies this store inside its preference keys, for example @c triggers.
- Two managers with the same value share storage, so each channel needs its own.
+ The word used to identify this store inside its preference keys, for example @c triggers.
+ Two managers with the same word share storage, so each channel needs its own.
 
- Called @c storageNamespace rather than @c namespace because @c namespace is a reserved word in
- Objective-C++ and would break any consumer compiling this header from a @c .mm file.
+ It is called @c storageNamespace and not @c namespace because @c namespace is a reserved word in
+ Objective-C++, and would break anyone compiling this header from a @c .mm file.
  */
 @property (nonatomic, copy, readonly) NSString *storageNamespace;
 
 - (instancetype)init NS_UNAVAILABLE;
 
-/// Uses the in-app namespace. Kept so existing call sites and stored keys are unaffected.
+/// Uses the in-app storage name. Kept so existing call sites and saved keys do not change.
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
                   delegateManager:(CTMultiDelegateManager *)delegateManager;

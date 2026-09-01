@@ -15,11 +15,12 @@
 #import "CleverTapInternal.h"
 #import "CTMultiDelegateManager.h"
 
-// -1 is how the server says "no limit" for every count in this file, per-target and account-wide.
+// The server sends -1 to mean no limit. That is true for every count here, per campaign and
+// account-wide.
 static const int kCTNdUncapped = -1;
 
-// Used when a target sets no mdc of its own. Same value in-app uses, high enough to be no limit in
-// practice while still being a number the comparison can use.
+// Used when a campaign sets no mdc of its own. Same value as in-app. High enough that it never
+// blocks anything in practice, but still a number we can compare against.
 static const int kCTNdSessionCapDefault = 1000;
 
 @interface CTNdFCManager ()
@@ -30,7 +31,7 @@ static const int kCTNdSessionCapDefault = 1000;
 @property (atomic, strong) CTImpressionManager *impressionManager;
 @property (atomic, strong) CTInAppTriggerManager *triggerManager;
 
-/// targetId -> [todayCount, lifetimeCount]
+/// campaign id -> a two item array, today's count then the lifetime count.
 @property (atomic, strong) NSMutableDictionary *targetCounts;
 
 @end
@@ -66,8 +67,8 @@ static const int kCTNdSessionCapDefault = 1000;
     }
 }
 
-// Matches the ordering CTInAppFCManager uses, which is accountId:suffix:deviceId. CTInAppStore
-// orders it differently, so each class follows the one it mirrors.
+// Same key order as CTInAppFCManager, which is accountId:suffix:deviceId. CTInAppStore uses a
+// different order, so each class copies the one it is based on.
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix {
     return [NSString stringWithFormat:@"%@:%@:%@", self.config.accountId, suffix, self.deviceId];
 }
@@ -76,7 +77,7 @@ static const int kCTNdSessionCapDefault = 1000;
     return [NSString stringWithFormat:@"%@:%@:%@", self.class, self.config.accountId, self.deviceId];
 }
 
-#pragma mark Cap-Managed Units
+#pragma mark Which units have caps
 
 + (BOOL)isFcapManaged:(NSDictionary *)unit {
     if (![unit isKindOfClass:[NSDictionary class]]) return NO;
@@ -93,7 +94,7 @@ static const int kCTNdSessionCapDefault = 1000;
 
     id targetId = unit[CLTAP_INAPP_ID];
     if ([targetId isKindOfClass:[NSString class]]) return targetId;
-    // The server sends ti as a number in the content payload and as a string in some others.
+    // The server sends ti as a number in the content payload and as a string in other payloads.
     if ([targetId isKindOfClass:[NSNumber class]]) return [targetId stringValue];
     return @"";
 }
@@ -122,14 +123,14 @@ static const int kCTNdSessionCapDefault = 1000;
 - (BOOL)hasSessionCapacityMaxedOut:(NSString *)targetId
                      maxPerSession:(int)maxPerSession
                  excludeGlobalCaps:(BOOL)excludeGlobalCaps {
-    // 1. Has this target hit its own session count? excludeGlobalFCaps does not skip this one.
+    // 1. Has this campaign hit its own session cap? excludeGlobalFCaps does not skip this one.
     int perSessionMax = maxPerSession >= 0 ? maxPerSession : kCTNdSessionCapDefault;
     if ([self.impressionManager perSession:targetId] >= perSessionMax) {
         return YES;
     }
 
-    // 2. Have we shown enough Native Display units this session? This is account-wide, so
-    // excludeGlobalFCaps skips it.
+    // 2. Has the account hit its session cap? This one is account-wide, so excludeGlobalFCaps
+    // skips it.
     if (excludeGlobalCaps) return NO;
     int globalSessionMax = [self globalSessionMax];
     if (globalSessionMax == kCTNdUncapped) return NO;
@@ -144,7 +145,7 @@ static const int kCTNdSessionCapDefault = 1000;
 - (BOOL)hasDailyCapacityMaxedOut:(NSString *)targetId
                  totalDailyCount:(int)totalDailyCount
                excludeGlobalCaps:(BOOL)excludeGlobalCaps {
-    // 1. Has the account's daily count maxed out? Account-wide, so excludeGlobalFCaps skips it.
+    // 1. Has the account hit its daily cap? Account-wide, so excludeGlobalFCaps skips it.
     if (!excludeGlobalCaps) {
         int maxPerDayCount = [self maxPerDayCount];
         if (maxPerDayCount != kCTNdUncapped && [self shownTodayCount] >= maxPerDayCount) {
@@ -152,7 +153,7 @@ static const int kCTNdSessionCapDefault = 1000;
         }
     }
 
-    // 2. Has this target hit its own daily count? excludeGlobalFCaps does not skip this one.
+    // 2. Has this campaign hit its own daily cap? excludeGlobalFCaps does not skip this one.
     if (totalDailyCount == kCTNdUncapped) return NO;
     return [self todayCountForTarget:targetId] >= totalDailyCount;
 }
@@ -167,9 +168,9 @@ static const int kCTNdSessionCapDefault = 1000;
         return YES;
     }
 
-    // efc skips all the caps, so we can answer right here. excludeGlobalFCaps cannot do that,
-    // because it skips only the two account-wide caps and the target still has to obey its own
-    // tlc, tdc and mdc. That is why it is passed down to the checks instead.
+    // efc skips every cap, so we can answer here. excludeGlobalFCaps cannot, because it skips only
+    // the two account caps and the campaign still has to obey its own tlc, tdc and mdc. That is why
+    // it is passed down to each check instead.
     if (excludeFromCaps) return YES;
 
     return ![self hasSessionCapacityMaxedOut:targetId
@@ -184,20 +185,20 @@ static const int kCTNdSessionCapDefault = 1000;
 - (void)didShowTarget:(NSString *)targetId storeTimestamp:(BOOL)storeTimestamp {
     if (![targetId isKindOfClass:[NSString class]] || targetId.length == 0) return;
 
-    // Record the impression. This always feeds the session counts, and when asked for it also saves
-    // the timestamp that frequencyLimits and occurrenceLimits are matched against.
+    // Record the impression. Session counts always go up. The time is saved only when asked for,
+    // and only frequencyLimits and occurrenceLimits ever read it.
     [self.impressionManager recordImpression:targetId storeTimestamp:storeTimestamp];
 
     // Add to the total shown today.
     [self incrementShownToday];
 
-    // Add to this target's own today and lifetime counts.
+    // Add to this campaign's own daily and lifetime counts.
     @synchronized (self.targetCounts) {
         NSMutableArray *counts = [self.targetCounts[targetId] mutableCopy];
         if (!counts || counts.count != 2) {
             counts = [[NSMutableArray alloc] initWithObjects:@1, @1, nil];
         } else {
-            // The two values are todayCount then lifetimeCount.
+            // The two values are today's count then the lifetime count.
             counts[0] = @([counts[0] intValue] + 1);
             counts[1] = @([counts[1] intValue] + 1);
         }
@@ -218,17 +219,17 @@ static const int kCTNdSessionCapDefault = 1000;
         @synchronized (self.targetCounts) {
             for (id stale in staleTargets) {
                 NSString *targetId = [NSString stringWithFormat:@"%@", stale];
-                // Counts, impressions and triggers all key off the target id, so all three go.
-                // Dropping only the counts would leave the other two on disk for good.
+                // Counts, impressions and triggers are all stored under the campaign id, so all
+                // three go. Removing only the counts would leave the other two on disk forever.
                 [self.targetCounts removeObjectForKey:targetId];
                 [self.impressionManager removeImpressions:targetId];
                 [self.triggerManager removeTriggers:targetId];
-                CleverTapLogInternal(self.config.logLevel, @"%@: Purged Native Display counts, triggers, and impressions with key %@", self, targetId);
+                CleverTapLogInternal(self.config.logLevel, @"%@: Removed Native Display counts, triggers and impressions for campaign %@", self, targetId);
             }
             [CTPreferences putObject:self.targetCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY]];
         }
     } @catch (NSException *e) {
-        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to purge out stale Native Display counts - %@", self, e.debugDescription);
+        CleverTapLogInternal(self.config.logLevel, @"%@: Failed to remove old Native Display counts - %@", self, e.debugDescription);
     }
 }
 
@@ -278,7 +279,7 @@ static const int kCTNdSessionCapDefault = 1000;
                 [self.targetCounts removeObjectForKey:key];
                 continue;
             }
-            // The two values are todayCount then lifetimeCount. Lifetime is not reset.
+            // The two values are today's count then the lifetime count. Lifetime is not reset.
             counts[0] = @0;
             self.targetCounts[key] = counts;
         }
@@ -306,7 +307,7 @@ static const int kCTNdSessionCapDefault = 1000;
             for (NSString *key in [self.targetCounts allKeys]) {
                 NSArray *counts = self.targetCounts[key];
                 if (counts.count == 2) {
-                    // ndtlc: [[targetId, todayCount, lifetimeCount], ...]
+                    // ndtlc: [[campaign id, today's count, lifetime count], ...]
                     [arr addObject:@[key, counts[0], counts[1]]];
                 }
             }

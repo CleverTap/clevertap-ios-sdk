@@ -20,22 +20,23 @@ NS_ASSUME_NONNULL_BEGIN
 @class CTNdStore;
 
 /**
- Works out which Native Display campaigns the user is eligible for. The sibling of
+ Works out which Native Display campaigns the user is eligible for. The Native Display version of
  @c CTInAppEvaluationManager.
 
- On each event it walks the rules saved in @c CTNdStore, matches @c whenTriggers, counts the trigger,
- then checks @c frequencyLimits and @c occurrenceLimits against Native Display's own impression and
- trigger counts. Every campaign that passes has its @c ti added to @c adUnit_eval, which is sent with
- the next request. The server then sends content back only for the ids in that list, which is why
- @c CTNdFCManager does not check these two rules a second time at display time.
+ On each event it goes through the rules saved in @c CTNdStore. For each campaign it checks whether
+ the event matches @c whenTriggers, adds one to that campaign's trigger count, then checks
+ @c frequencyLimits and @c occurrenceLimits against Native Display's own impression and trigger
+ counts. Every campaign that passes has its @c ti added to @c adUnit_eval, which goes out with the
+ next request. The server then sends content only for the ids in that list. That is why
+ @c CTNdFCManager does not check those two limits again when the unit is shown.
 
- The class also holds the @c adUnit_suppressed list. Those entries are not produced here: they are
- control group acknowledgements that response handling records through
- @c recordSuppressedNativeDisplay:. Both lists live in this class because that is where in-app keeps
- its equivalents, and both survive an app restart.
+ This class also holds the @c adUnit_suppressed list. Those are not made here. They are control group
+ replies, which means the server picked this user to see nothing and we tell it we noticed. Response
+ handling adds them through @c recordSuppressedNativeDisplay:. Both lists live here because that is
+ where in-app keeps its versions, and both survive an app restart.
 
- Native Display is server side only, so there is no client side path and nothing here decides what to
- show. It only reports what the user qualifies for.
+ Native Display is server side only. Nothing here decides what to show. It only reports what the user
+ qualifies for.
  */
 @interface CTNdEvaluationManager : NSObject <CTBatchSentDelegate, CTAttachToBatchHeaderDelegate, CTSwitchUserDelegate>
 
@@ -46,8 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  @param impressionManager the Native Display impression manager, not the in-app one. Sharing in-app's
-        would let one channel's displays count against the other's limits.
- @param triggerManager likewise the Native Display trigger manager.
+        would make one channel's displays count towards the other's limits.
+ @param triggerManager the Native Display trigger manager, for the same reason.
  */
 - (instancetype)initWithAccountId:(NSString *)accountId
                          deviceId:(NSString *)deviceId
@@ -62,13 +63,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)evaluateOnUserAttributeChange:(NSDictionary<NSString *, NSDictionary *> *)properties;
 
 /**
- Records that a campaign was held back because the user is in its control group.
+ Records that a campaign was not shown because the user is in its control group.
 
- The server sends these as stubs inside @c adUnit_notifs_applaunched, carrying @c wzrk_id and
- @c wzrk_cgId but no content. Acknowledging them here rather than on the server means the control
- group event lines up with the moment the unit would have been shown.
+ The server sends these inside @c adUnit_notifs_applaunched as stubs. They carry @c wzrk_id and
+ @c wzrk_cgId but no content. We reply here rather than on the server so the control group event
+ happens at the same moment the unit would have been shown.
 
- A stub with no @c wzrk_id is logged and dropped, because there is nothing to acknowledge.
+ A stub with no @c wzrk_id is logged and dropped, because there is nothing to reply about.
  */
 - (void)recordSuppressedNativeDisplay:(NSDictionary *)suppressedUnit;
 
