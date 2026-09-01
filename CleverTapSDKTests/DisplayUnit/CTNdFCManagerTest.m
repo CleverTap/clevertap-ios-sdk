@@ -62,9 +62,9 @@ static NSString *const kOtherCampaignId = @"70002";
     }
 }
 
-#pragma mark isFcapManaged
+#pragma mark hasFrequencyCaps
 
-- (void)testIsFcapManagedRecognisesEachMarkerOnItsOwn {
+- (void)testHasFrequencyCapsRecognisesEachMarkerOnItsOwn {
     NSArray *markers = @[
         CLTAP_INAPP_EXCLUDE_FROM_CAPS,
         CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS,
@@ -76,21 +76,21 @@ static NSString *const kOtherCampaignId = @"70002";
         // Built outside the assert. Inside it, the commas in the literal would be read as extra
         // arguments to the macro.
         NSDictionary *unit = @{ CLTAP_INAPP_ID: kCampaignId, marker: @1 };
-        XCTAssertTrue([CTNdFCManager isFcapManaged:unit],
+        XCTAssertTrue([CTNdFCManager hasFrequencyCaps:unit],
                       @"%@ on its own should be enough to make a unit capped", marker);
     }
 }
 
-- (void)testIsFcapManagedIsFalseForAUnitWithNoMarkers {
+- (void)testHasFrequencyCapsIsFalseForAUnitWithNoMarkers {
     // Display units that already exist have none of these and must keep working untouched. They
     // must also not add to the account's daily and session totals.
     NSDictionary *unit = @{ CLTAP_INAPP_ID: kCampaignId, @"type": @"banner", @"msg": @{} };
-    XCTAssertFalse([CTNdFCManager isFcapManaged:unit]);
+    XCTAssertFalse([CTNdFCManager hasFrequencyCaps:unit]);
 }
 
-- (void)testIsFcapManagedIsFalseForANonDictionary {
-    XCTAssertFalse([CTNdFCManager isFcapManaged:nil]);
-    XCTAssertFalse([CTNdFCManager isFcapManaged:(NSDictionary *)@"not a dictionary"]);
+- (void)testHasFrequencyCapsIsFalseForANonDictionary {
+    XCTAssertFalse([CTNdFCManager hasFrequencyCaps:nil]);
+    XCTAssertFalse([CTNdFCManager hasFrequencyCaps:(NSDictionary *)@"not a dictionary"]);
 }
 
 #pragma mark efc and excludeGlobalFCaps are not the same flag

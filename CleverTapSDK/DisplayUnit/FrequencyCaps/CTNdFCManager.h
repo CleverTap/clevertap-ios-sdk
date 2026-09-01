@@ -46,10 +46,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether the server sent any frequency cap settings with this unit.
 
+ The settings are @c efc, @c excludeGlobalFCaps, @c tlc, @c tdc and @c mdc. Any one of them is
+ enough. This does not look at @c frequencyLimits or @c occurrenceLimits, which are a different
+ thing and are checked before the unit is even asked for.
+
  Only these units are capped and counted. A unit without them is left alone, so display units that
  already exist keep working and never add to the account's daily and session totals.
  */
-+ (BOOL)isFcapManaged:(nullable NSDictionary *)unit;
++ (BOOL)hasFrequencyCaps:(nullable NSDictionary *)unit;
 
 /**
  The campaign id this unit's counts are stored under. Empty string if the unit has none.

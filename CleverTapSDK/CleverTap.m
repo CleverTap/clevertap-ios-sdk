@@ -2687,7 +2687,7 @@ static BOOL sharedInstanceErrorLogged;
     NSMutableArray<CleverTapDisplayUnit *> *withinCaps = [NSMutableArray new];
     for (CleverTapDisplayUnit *unit in displayUnits) {
         NSDictionary *json = unit.json;
-        if (![CTNdFCManager isFcapManaged:json]) {
+        if (![CTNdFCManager hasFrequencyCaps:json]) {
             [withinCaps addObject:unit];
             continue;
         }
@@ -5337,7 +5337,7 @@ static BOOL sharedInstanceErrorLogged;
     if (!self.ndFCManager) return;
 
     NSDictionary *json = displayUnit.json;
-    if (![CTNdFCManager isFcapManaged:json]) return;
+    if (![CTNdFCManager hasFrequencyCaps:json]) return;
 
     NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
     if (campaignId.length == 0) {

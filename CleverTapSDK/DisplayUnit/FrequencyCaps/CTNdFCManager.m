@@ -79,7 +79,7 @@ static const int kCTNdSessionCapDefault = 1000;
 
 #pragma mark Which units have caps
 
-+ (BOOL)isFcapManaged:(NSDictionary *)unit {
++ (BOOL)hasFrequencyCaps:(NSDictionary *)unit {
     if (![unit isKindOfClass:[NSDictionary class]]) return NO;
 
     return unit[CLTAP_INAPP_EXCLUDE_FROM_CAPS] != nil
