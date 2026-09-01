@@ -272,7 +272,7 @@ extern NSString *CLTAP_PROFILE_IDENTITY_KEY;
 #define CLTAP_PREFS_ND_KEY_SS @"adUnit_notifs_ss"
 #define CLTAP_ND_SS_EVAL_STORAGE_KEY @"adUnit_eval"
 #define CLTAP_ND_SUPPRESSED_STORAGE_KEY @"adUnit_suppressed"
-#define CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY @"nd_counts_per_target"
+#define CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY @"nd_counts_per_campaign"
 #define CLTAP_PREFS_ND_COUNTS_SHOWN_TODAY_KEY @"ndstc"
 #define CLTAP_PREFS_ND_MAX_PER_DAY_KEY @"ndstmcd"
 #define CLTAP_PREFS_ND_SESSION_MAX_KEY @"ndmc_max"

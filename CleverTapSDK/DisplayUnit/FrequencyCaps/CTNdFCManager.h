@@ -61,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
  It lives here, next to the caps, and not at the call site. Every store uses what this returns as its
  key, and they only match as long as they all ask the same place.
  */
-+ (NSString *)targetIdFrom:(nullable NSDictionary *)unit;
++ (NSString *)campaignIdFrom:(nullable NSDictionary *)unit;
 
 - (NSString *)storageKeyWithSuffix:(NSString *)suffix;
 
@@ -71,7 +71,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether this campaign can be shown right now, under all the counting caps.
 
- @param targetId the @c ti, which is the campaign. Never @c wzrk_id, which changes on every send and
+ @param campaignId the @c ti, which is the campaign. Never @c wzrk_id, which changes on every send and
         would restart the counts.
  @param excludeFromCaps @c efc. Skips every cap.
  @param excludeGlobalCaps @c excludeGlobalFCaps. Skips only the two account caps, @c ndmp for the day
@@ -81,12 +81,12 @@ NS_ASSUME_NONNULL_BEGIN
  @param totalDailyCount @c tdc, or -1 for no limit.
  @param maxPerSession @c mdc, or negative to use the default.
  */
-- (BOOL)canShowTarget:(NSString *)targetId
-      excludeFromCaps:(BOOL)excludeFromCaps
-    excludeGlobalCaps:(BOOL)excludeGlobalCaps
-   totalLifetimeCount:(int)totalLifetimeCount
-      totalDailyCount:(int)totalDailyCount
-        maxPerSession:(int)maxPerSession;
+- (BOOL)canShowCampaign:(NSString *)campaignId
+        excludeFromCaps:(BOOL)excludeFromCaps
+      excludeGlobalCaps:(BOOL)excludeGlobalCaps
+     totalLifetimeCount:(int)totalLifetimeCount
+        totalDailyCount:(int)totalDailyCount
+          maxPerSession:(int)maxPerSession;
 
 /**
  Records one display: the impression, the campaign's daily and lifetime counts, and the day total.
@@ -97,13 +97,13 @@ NS_ASSUME_NONNULL_BEGIN
         limit on how many arrive, so saving a time for each one would grow a list nobody reads. See
         @c CTImpressionManager @c recordImpression:storeTimestamp:.
  */
-- (void)didShowTarget:(NSString *)targetId storeTimestamp:(BOOL)storeTimestamp;
+- (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp;
 
 /// Saves the account limits the server sends with each response. Pass -1 for no limit.
 - (void)updateGlobalLimitsPerDay:(int)perDay andPerSession:(int)perSession;
 
 /// Deletes the counts, impressions and triggers for campaigns the server says are gone.
-- (void)removeStaleTargetCounts:(NSArray *)staleTargets;
+- (void)removeStaleCampaignCounts:(NSArray *)staleCampaigns;
 
 /// How many Native Display units the SDK showed today. Sent to the server as @c ndmp.
 - (int)shownTodayCount;

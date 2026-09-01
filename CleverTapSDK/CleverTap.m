@@ -2608,11 +2608,11 @@ static BOOL sharedInstanceErrorLogged;
             [self.ndFCManager updateGlobalLimitsPerDay:perDay andPerSession:perSession];
         }
 
-        // Campaigns the server has finished with. removeStaleTargetCounts: clears the counts, the
+        // Campaigns the server has finished with. removeStaleCampaignCounts: clears the counts, the
         // impressions and the triggers, so there is nothing else to clean up here.
         NSArray *staleIds = jsonResp[CLTAP_ND_STALE_JSON_RESPONSE_KEY];
         if ([staleIds isKindOfClass:[NSArray class]]) {
-            [self.ndFCManager removeStaleTargetCounts:staleIds];
+            [self.ndFCManager removeStaleCampaignCounts:staleIds];
         }
 
         // The rules the SDK checks on the device. This replaces whatever was saved. An empty array
@@ -2693,8 +2693,8 @@ static BOOL sharedInstanceErrorLogged;
         }
         capManagedCount++;
 
-        NSString *targetId = [CTNdFCManager targetIdFrom:json];
-        if (targetId.length == 0) {
+        NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
+        if (campaignId.length == 0) {
             // No id means nothing to store a count under, so there is no cap to check. Showing it
             // is the safer mistake. Holding it back would hide a campaign for a reason nobody can
             // see.
@@ -2705,16 +2705,16 @@ static BOOL sharedInstanceErrorLogged;
 
         // The two flags are passed separately on purpose. efc skips every cap. excludeGlobalFCaps
         // skips only the two account caps and leaves the campaign's own tlc, tdc and mdc in place.
-        BOOL canShow = [self.ndFCManager canShowTarget:targetId
-                                      excludeFromCaps:[json[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue]
-                                    excludeGlobalCaps:[json[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue]
-                                   totalLifetimeCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] fallback:-1]
-                                      totalDailyCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_DAILY_COUNT] fallback:-1]
-                                        maxPerSession:[self nativeDisplayIntFrom:json[CLTAP_INAPP_MAX_PER_SESSION] fallback:-1]];
+        BOOL canShow = [self.ndFCManager canShowCampaign:campaignId
+                                         excludeFromCaps:[json[CLTAP_INAPP_EXCLUDE_FROM_CAPS] boolValue]
+                                       excludeGlobalCaps:[json[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] boolValue]
+                                      totalLifetimeCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_LIFETIME_COUNT] fallback:-1]
+                                         totalDailyCount:[self nativeDisplayIntFrom:json[CLTAP_INAPP_TOTAL_DAILY_COUNT] fallback:-1]
+                                           maxPerSession:[self nativeDisplayIntFrom:json[CLTAP_INAPP_MAX_PER_SESSION] fallback:-1]];
         if (canShow) {
             [withinCaps addObject:unit];
         } else {
-            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ held back by its frequency caps", self, targetId);
+            CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ held back by its frequency caps", self, campaignId);
         }
     }
 
@@ -5339,15 +5339,15 @@ static BOOL sharedInstanceErrorLogged;
     NSDictionary *json = displayUnit.json;
     if (![CTNdFCManager isFcapManaged:json]) return;
 
-    NSString *targetId = [CTNdFCManager targetIdFrom:json];
-    if (targetId.length == 0) {
+    NSString *campaignId = [CTNdFCManager campaignIdFrom:json];
+    if (campaignId.length == 0) {
         CleverTapLogDebug(self.config.logLevel, @"%@: Native Display unit %@ has caps but no ti, so it cannot be counted", self, displayUnit.unitID);
         return;
     }
 
     [self.ndFCManager checkUpdateDailyLimits];
-    [self.ndFCManager didShowTarget:targetId
-                     storeTimestamp:[self nativeDisplayTargetNeedsTimestamps:targetId]];
+    [self.ndFCManager didShowCampaign:campaignId
+                       storeTimestamp:[self nativeDisplayCampaignNeedsTimestamps:campaignId]];
     self.appReportedANativeDisplayView = YES;
 }
 
@@ -5367,10 +5367,10 @@ static BOOL sharedInstanceErrorLogged;
  limit that starts applying later begins with no history. It only affects those few views. The other
  option is saving a time for every view of every campaign in case a rule turns up.
  */
-- (BOOL)nativeDisplayTargetNeedsTimestamps:(NSString *)targetId {
+- (BOOL)nativeDisplayCampaignNeedsTimestamps:(NSString *)campaignId {
     for (id rule in [self.ndStore serverSideNativeDisplays]) {
         if (![rule isKindOfClass:[NSDictionary class]]) continue;
-        if (![targetId isEqualToString:[CTNdFCManager targetIdFrom:rule]]) continue;
+        if (![campaignId isEqualToString:[CTNdFCManager campaignIdFrom:rule]]) continue;
 
         NSArray *frequencyLimits = rule[CLTAP_INAPP_FC_LIMITS];
         NSArray *occurrenceLimits = rule[CLTAP_INAPP_OCCURRENCE_LIMITS];

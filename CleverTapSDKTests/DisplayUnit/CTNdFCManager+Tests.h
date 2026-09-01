@@ -15,12 +15,12 @@
 
 @property (atomic, strong) CTImpressionManager *impressionManager;
 @property (atomic, strong) CTInAppTriggerManager *triggerManager;
-@property (atomic, strong) NSMutableDictionary *targetCounts;
+@property (atomic, strong) NSMutableDictionary *campaignCounts;
 
 - (int)globalSessionMax;
 - (int)maxPerDayCount;
-- (int)todayCountForTarget:(NSString *)targetId;
-- (int)lifetimeCountForTarget:(NSString *)targetId;
+- (int)todayCountForCampaign:(NSString *)campaignId;
+- (int)lifetimeCountForCampaign:(NSString *)campaignId;
 - (NSString *)todaysFormattedDate;
 - (void)resetDailyCounters:(NSString *)today;
 

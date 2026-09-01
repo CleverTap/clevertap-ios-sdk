@@ -32,7 +32,7 @@ static const int kCTNdSessionCapDefault = 1000;
 @property (atomic, strong) CTInAppTriggerManager *triggerManager;
 
 /// campaign id -> a two item array, today's count then the lifetime count.
-@property (atomic, strong) NSMutableDictionary *targetCounts;
+@property (atomic, strong) NSMutableDictionary *campaignCounts;
 
 @end
 
@@ -52,18 +52,18 @@ static const int kCTNdSessionCapDefault = 1000;
         [delegateManager addSwitchUserDelegate:self];
         [delegateManager addAttachToHeaderDelegate:self];
 
-        [self initTargetCounts];
+        [self initCampaignCounts];
         [self checkUpdateDailyLimits];
     }
     return self;
 }
 
-- (void)initTargetCounts {
-    id saved = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY]];
+- (void)initCampaignCounts {
+    id saved = [CTPreferences getObjectForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY]];
     if ([saved isKindOfClass:[NSDictionary class]]) {
-        _targetCounts = [saved mutableCopy];
+        _campaignCounts = [saved mutableCopy];
     } else {
-        _targetCounts = [NSMutableDictionary new];
+        _campaignCounts = [NSMutableDictionary new];
     }
 }
 
@@ -89,13 +89,13 @@ static const int kCTNdSessionCapDefault = 1000;
         || unit[CLTAP_INAPP_EXCLUDE_GLOBAL_CAPS] != nil;
 }
 
-+ (NSString *)targetIdFrom:(NSDictionary *)unit {
++ (NSString *)campaignIdFrom:(NSDictionary *)unit {
     if (![unit isKindOfClass:[NSDictionary class]]) return @"";
 
-    id targetId = unit[CLTAP_INAPP_ID];
-    if ([targetId isKindOfClass:[NSString class]]) return targetId;
+    id campaignId = unit[CLTAP_INAPP_ID];
+    if ([campaignId isKindOfClass:[NSString class]]) return campaignId;
     // The server sends ti as a number in the content payload and as a string in other payloads.
-    if ([targetId isKindOfClass:[NSNumber class]]) return [targetId stringValue];
+    if ([campaignId isKindOfClass:[NSNumber class]]) return [campaignId stringValue];
     return @"";
 }
 
@@ -120,12 +120,12 @@ static const int kCTNdSessionCapDefault = 1000;
     return (int)[CTPreferences getIntForKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_SHOWN_TODAY_KEY] withResetValue:0];
 }
 
-- (BOOL)hasSessionCapacityMaxedOut:(NSString *)targetId
+- (BOOL)hasSessionCapacityMaxedOut:(NSString *)campaignId
                      maxPerSession:(int)maxPerSession
                  excludeGlobalCaps:(BOOL)excludeGlobalCaps {
     // 1. Has this campaign hit its own session cap? excludeGlobalFCaps does not skip this one.
     int perSessionMax = maxPerSession >= 0 ? maxPerSession : kCTNdSessionCapDefault;
-    if ([self.impressionManager perSession:targetId] >= perSessionMax) {
+    if ([self.impressionManager perSession:campaignId] >= perSessionMax) {
         return YES;
     }
 
@@ -137,12 +137,12 @@ static const int kCTNdSessionCapDefault = 1000;
     return [self.impressionManager perSessionTotal] >= globalSessionMax;
 }
 
-- (BOOL)hasLifetimeCapacityMaxedOut:(NSString *)targetId totalLifetimeCount:(int)totalLifetimeCount {
+- (BOOL)hasLifetimeCapacityMaxedOut:(NSString *)campaignId totalLifetimeCount:(int)totalLifetimeCount {
     if (totalLifetimeCount == kCTNdUncapped) return NO;
-    return [self lifetimeCountForTarget:targetId] >= totalLifetimeCount;
+    return [self lifetimeCountForCampaign:campaignId] >= totalLifetimeCount;
 }
 
-- (BOOL)hasDailyCapacityMaxedOut:(NSString *)targetId
+- (BOOL)hasDailyCapacityMaxedOut:(NSString *)campaignId
                  totalDailyCount:(int)totalDailyCount
                excludeGlobalCaps:(BOOL)excludeGlobalCaps {
     // 1. Has the account hit its daily cap? Account-wide, so excludeGlobalFCaps skips it.
@@ -155,16 +155,16 @@ static const int kCTNdSessionCapDefault = 1000;
 
     // 2. Has this campaign hit its own daily cap? excludeGlobalFCaps does not skip this one.
     if (totalDailyCount == kCTNdUncapped) return NO;
-    return [self todayCountForTarget:targetId] >= totalDailyCount;
+    return [self todayCountForCampaign:campaignId] >= totalDailyCount;
 }
 
-- (BOOL)canShowTarget:(NSString *)targetId
-      excludeFromCaps:(BOOL)excludeFromCaps
-    excludeGlobalCaps:(BOOL)excludeGlobalCaps
-   totalLifetimeCount:(int)totalLifetimeCount
-      totalDailyCount:(int)totalDailyCount
-        maxPerSession:(int)maxPerSession {
-    if (![targetId isKindOfClass:[NSString class]] || targetId.length == 0) {
+- (BOOL)canShowCampaign:(NSString *)campaignId
+        excludeFromCaps:(BOOL)excludeFromCaps
+      excludeGlobalCaps:(BOOL)excludeGlobalCaps
+     totalLifetimeCount:(int)totalLifetimeCount
+        totalDailyCount:(int)totalDailyCount
+          maxPerSession:(int)maxPerSession {
+    if (![campaignId isKindOfClass:[NSString class]] || campaignId.length == 0) {
         return YES;
     }
 
@@ -173,28 +173,28 @@ static const int kCTNdSessionCapDefault = 1000;
     // it is passed down to each check instead.
     if (excludeFromCaps) return YES;
 
-    return ![self hasSessionCapacityMaxedOut:targetId
+    return ![self hasSessionCapacityMaxedOut:campaignId
                                maxPerSession:maxPerSession
                            excludeGlobalCaps:excludeGlobalCaps]
-        && ![self hasLifetimeCapacityMaxedOut:targetId totalLifetimeCount:totalLifetimeCount]
-        && ![self hasDailyCapacityMaxedOut:targetId
+        && ![self hasLifetimeCapacityMaxedOut:campaignId totalLifetimeCount:totalLifetimeCount]
+        && ![self hasDailyCapacityMaxedOut:campaignId
                            totalDailyCount:totalDailyCount
                          excludeGlobalCaps:excludeGlobalCaps];
 }
 
-- (void)didShowTarget:(NSString *)targetId storeTimestamp:(BOOL)storeTimestamp {
-    if (![targetId isKindOfClass:[NSString class]] || targetId.length == 0) return;
+- (void)didShowCampaign:(NSString *)campaignId storeTimestamp:(BOOL)storeTimestamp {
+    if (![campaignId isKindOfClass:[NSString class]] || campaignId.length == 0) return;
 
     // Record the impression. Session counts always go up. The time is saved only when asked for,
     // and only frequencyLimits and occurrenceLimits ever read it.
-    [self.impressionManager recordImpression:targetId storeTimestamp:storeTimestamp];
+    [self.impressionManager recordImpression:campaignId storeTimestamp:storeTimestamp];
 
     // Add to the total shown today.
     [self incrementShownToday];
 
     // Add to this campaign's own daily and lifetime counts.
-    @synchronized (self.targetCounts) {
-        NSMutableArray *counts = [self.targetCounts[targetId] mutableCopy];
+    @synchronized (self.campaignCounts) {
+        NSMutableArray *counts = [self.campaignCounts[campaignId] mutableCopy];
         if (!counts || counts.count != 2) {
             counts = [[NSMutableArray alloc] initWithObjects:@1, @1, nil];
         } else {
@@ -202,8 +202,8 @@ static const int kCTNdSessionCapDefault = 1000;
             counts[0] = @([counts[0] intValue] + 1);
             counts[1] = @([counts[1] intValue] + 1);
         }
-        self.targetCounts[targetId] = counts;
-        [CTPreferences putObject:self.targetCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY]];
+        self.campaignCounts[campaignId] = counts;
+        [CTPreferences putObject:self.campaignCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY]];
     }
 }
 
@@ -212,21 +212,21 @@ static const int kCTNdSessionCapDefault = 1000;
     [CTPreferences putInt:perSession forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_SESSION_MAX_KEY]];
 }
 
-- (void)removeStaleTargetCounts:(NSArray *)staleTargets {
-    if (![staleTargets isKindOfClass:[NSArray class]]) return;
+- (void)removeStaleCampaignCounts:(NSArray *)staleCampaigns {
+    if (![staleCampaigns isKindOfClass:[NSArray class]]) return;
 
     @try {
-        @synchronized (self.targetCounts) {
-            for (id stale in staleTargets) {
-                NSString *targetId = [NSString stringWithFormat:@"%@", stale];
+        @synchronized (self.campaignCounts) {
+            for (id stale in staleCampaigns) {
+                NSString *campaignId = [NSString stringWithFormat:@"%@", stale];
                 // Counts, impressions and triggers are all stored under the campaign id, so all
                 // three go. Removing only the counts would leave the other two on disk forever.
-                [self.targetCounts removeObjectForKey:targetId];
-                [self.impressionManager removeImpressions:targetId];
-                [self.triggerManager removeTriggers:targetId];
-                CleverTapLogInternal(self.config.logLevel, @"%@: Removed Native Display counts, triggers and impressions for campaign %@", self, targetId);
+                [self.campaignCounts removeObjectForKey:campaignId];
+                [self.impressionManager removeImpressions:campaignId];
+                [self.triggerManager removeTriggers:campaignId];
+                CleverTapLogInternal(self.config.logLevel, @"%@: Removed Native Display counts, triggers and impressions for campaign %@", self, campaignId);
             }
-            [CTPreferences putObject:self.targetCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY]];
+            [CTPreferences putObject:self.campaignCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY]];
         }
     } @catch (NSException *e) {
         CleverTapLogInternal(self.config.logLevel, @"%@: Failed to remove old Native Display counts - %@", self, e.debugDescription);
@@ -235,16 +235,16 @@ static const int kCTNdSessionCapDefault = 1000;
 
 #pragma mark Counts
 
-- (int)todayCountForTarget:(NSString *)targetId {
-    @synchronized (self.targetCounts) {
-        NSArray *counts = self.targetCounts[targetId];
+- (int)todayCountForCampaign:(NSString *)campaignId {
+    @synchronized (self.campaignCounts) {
+        NSArray *counts = self.campaignCounts[campaignId];
         return counts.count == 2 ? [counts[0] intValue] : 0;
     }
 }
 
-- (int)lifetimeCountForTarget:(NSString *)targetId {
-    @synchronized (self.targetCounts) {
-        NSArray *counts = self.targetCounts[targetId];
+- (int)lifetimeCountForCampaign:(NSString *)campaignId {
+    @synchronized (self.campaignCounts) {
+        NSArray *counts = self.campaignCounts[campaignId];
         return counts.count == 2 ? [counts[1] intValue] : 0;
     }
 }
@@ -271,19 +271,19 @@ static const int kCTNdSessionCapDefault = 1000;
 
     [CTPreferences putInt:0 forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_SHOWN_TODAY_KEY]];
 
-    @synchronized (self.targetCounts) {
-        NSArray *keys = [self.targetCounts allKeys];
+    @synchronized (self.campaignCounts) {
+        NSArray *keys = [self.campaignCounts allKeys];
         for (NSString *key in keys) {
-            NSMutableArray *counts = [self.targetCounts[key] mutableCopy];
+            NSMutableArray *counts = [self.campaignCounts[key] mutableCopy];
             if (!counts || counts.count != 2) {
-                [self.targetCounts removeObjectForKey:key];
+                [self.campaignCounts removeObjectForKey:key];
                 continue;
             }
             // The two values are today's count then the lifetime count. Lifetime is not reset.
             counts[0] = @0;
-            self.targetCounts[key] = counts;
+            self.campaignCounts[key] = counts;
         }
-        [CTPreferences putObject:self.targetCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_TARGET_KEY]];
+        [CTPreferences putObject:self.campaignCounts forKey:[self storageKeyWithSuffix:CLTAP_PREFS_ND_COUNTS_PER_CAMPAIGN_KEY]];
     }
 }
 
@@ -291,7 +291,7 @@ static const int kCTNdSessionCapDefault = 1000;
 
 - (void)deviceIdDidChange:(NSString *)newDeviceId {
     self.deviceId = newDeviceId;
-    [self initTargetCounts];
+    [self initCampaignCounts];
     [self checkUpdateDailyLimits];
 }
 
@@ -303,9 +303,9 @@ static const int kCTNdSessionCapDefault = 1000;
         header[CLTAP_ND_SHOWN_TODAY_META_KEY] = @([self shownTodayCount]);
 
         NSMutableArray *arr = [NSMutableArray new];
-        @synchronized (self.targetCounts) {
-            for (NSString *key in [self.targetCounts allKeys]) {
-                NSArray *counts = self.targetCounts[key];
+        @synchronized (self.campaignCounts) {
+            for (NSString *key in [self.campaignCounts allKeys]) {
+                NSArray *counts = self.campaignCounts[key];
                 if (counts.count == 2) {
                     // ndtlc: [[campaign id, today's count, lifetime count], ...]
                     [arr addObject:@[key, counts[0], counts[1]]];

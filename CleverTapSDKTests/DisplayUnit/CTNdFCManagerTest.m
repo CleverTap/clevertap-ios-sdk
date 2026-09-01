@@ -16,11 +16,11 @@
 #import "CTNdFCManager+Tests.h"
 
 /// The campaign id. Every store must use this as its key.
-static NSString *const kTargetId = @"70001";
+static NSString *const kCampaignId = @"70001";
 /// The same campaign's wzrk_id. Nothing should ever be stored under this.
 static NSString *const kWzrkId = @"70001_20260810";
 /// A second campaign, for filling up the account caps without touching the first.
-static NSString *const kOtherTargetId = @"70002";
+static NSString *const kOtherCampaignId = @"70002";
 
 @interface CTNdFCManagerTest : XCTestCase
 @property (nonatomic, strong) NdHelper *helper;
@@ -46,9 +46,9 @@ static NSString *const kOtherTargetId = @"70002";
 
 #pragma mark Helpers
 
-/// canShowTarget with no caps set, so a test only has to pass the one value it cares about.
-- (BOOL)canShow:(NSString *)targetId {
-    return [self.fcManager canShowTarget:targetId
+/// canShowCampaign with no caps set, so a test only has to pass the one value it cares about.
+- (BOOL)canShow:(NSString *)campaignId {
+    return [self.fcManager canShowCampaign:campaignId
                          excludeFromCaps:NO
                        excludeGlobalCaps:NO
                       totalLifetimeCount:-1
@@ -56,9 +56,9 @@ static NSString *const kOtherTargetId = @"70002";
                            maxPerSession:-1];
 }
 
-- (void)show:(NSString *)targetId times:(int)times {
+- (void)show:(NSString *)campaignId times:(int)times {
     for (int i = 0; i < times; i++) {
-        [self.fcManager didShowTarget:targetId storeTimestamp:YES];
+        [self.fcManager didShowCampaign:campaignId storeTimestamp:YES];
     }
 }
 
@@ -75,7 +75,7 @@ static NSString *const kOtherTargetId = @"70002";
     for (NSString *marker in markers) {
         // Built outside the assert. Inside it, the commas in the literal would be read as extra
         // arguments to the macro.
-        NSDictionary *unit = @{ CLTAP_INAPP_ID: kTargetId, marker: @1 };
+        NSDictionary *unit = @{ CLTAP_INAPP_ID: kCampaignId, marker: @1 };
         XCTAssertTrue([CTNdFCManager isFcapManaged:unit],
                       @"%@ on its own should be enough to make a unit capped", marker);
     }
@@ -84,7 +84,7 @@ static NSString *const kOtherTargetId = @"70002";
 - (void)testIsFcapManagedIsFalseForAUnitWithNoMarkers {
     // Display units that already exist have none of these and must keep working untouched. They
     // must also not add to the account's daily and session totals.
-    NSDictionary *unit = @{ CLTAP_INAPP_ID: kTargetId, @"type": @"banner", @"msg": @{} };
+    NSDictionary *unit = @{ CLTAP_INAPP_ID: kCampaignId, @"type": @"banner", @"msg": @{} };
     XCTAssertFalse([CTNdFCManager isFcapManaged:unit]);
 }
 
@@ -98,10 +98,10 @@ static NSString *const kOtherTargetId = @"70002";
 - (void)testExcludeFromCapsSkipsEveryCap {
     // Every cap set as tight as it goes, and both account caps already used up.
     [self.fcManager updateGlobalLimitsPerDay:1 andPerSession:1];
-    [self show:kOtherTargetId times:1];
-    [self show:kTargetId times:1];
+    [self show:kOtherCampaignId times:1];
+    [self show:kCampaignId times:1];
 
-    XCTAssertTrue([self.fcManager canShowTarget:kTargetId
+    XCTAssertTrue([self.fcManager canShowCampaign:kCampaignId
                                 excludeFromCaps:YES
                               excludeGlobalCaps:NO
                              totalLifetimeCount:1
@@ -109,17 +109,17 @@ static NSString *const kOtherTargetId = @"70002";
                                   maxPerSession:1]);
 }
 
-- (void)testExcludeGlobalCapsSkipsTheAccountDailyMaxButNotTheTargetsOwnCaps {
+- (void)testExcludeGlobalCapsSkipsTheAccountDailyMaxButNotTheCampaignsOwnCaps {
     // The two flags skip different amounts. In-app treats them as one flag. This must not. Both
     // halves of the test start the same way, and only the flag changes.
     [self.fcManager updateGlobalLimitsPerDay:1 andPerSession:-1];
-    [self show:kOtherTargetId times:1];
+    [self show:kOtherCampaignId times:1];
 
     // The account daily cap is used up, so without the flag the campaign cannot show.
-    XCTAssertFalse([self canShow:kTargetId]);
+    XCTAssertFalse([self canShow:kCampaignId]);
 
     // With the flag it can, because that cap belongs to the account.
-    XCTAssertTrue([self.fcManager canShowTarget:kTargetId
+    XCTAssertTrue([self.fcManager canShowCampaign:kCampaignId
                                 excludeFromCaps:NO
                               excludeGlobalCaps:YES
                              totalLifetimeCount:-1
@@ -128,8 +128,8 @@ static NSString *const kOtherTargetId = @"70002";
 
     // But its own lifetime cap still applies. This is the check both existing versions fail,
     // because they treat this flag as if it were efc.
-    [self show:kTargetId times:1];
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId
+    [self show:kCampaignId times:1];
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId
                                  excludeFromCaps:NO
                                excludeGlobalCaps:YES
                               totalLifetimeCount:1
@@ -139,9 +139,9 @@ static NSString *const kOtherTargetId = @"70002";
 
 - (void)testExcludeGlobalCapsStillRespectsTotalDailyCount {
     [self.fcManager updateGlobalLimitsPerDay:-1 andPerSession:-1];
-    [self show:kTargetId times:2];
+    [self show:kCampaignId times:2];
 
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId
                                  excludeFromCaps:NO
                                excludeGlobalCaps:YES
                               totalLifetimeCount:-1
@@ -150,9 +150,9 @@ static NSString *const kOtherTargetId = @"70002";
 }
 
 - (void)testExcludeGlobalCapsStillRespectsMaxPerSession {
-    [self show:kTargetId times:1];
+    [self show:kCampaignId times:1];
 
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId
                                  excludeFromCaps:NO
                                excludeGlobalCaps:YES
                               totalLifetimeCount:-1
@@ -162,10 +162,10 @@ static NSString *const kOtherTargetId = @"70002";
 
 - (void)testExcludeGlobalCapsSkipsTheAccountSessionMax {
     [self.fcManager updateGlobalLimitsPerDay:-1 andPerSession:1];
-    [self show:kOtherTargetId times:1];
+    [self show:kOtherCampaignId times:1];
 
-    XCTAssertFalse([self canShow:kTargetId]);
-    XCTAssertTrue([self.fcManager canShowTarget:kTargetId
+    XCTAssertFalse([self canShow:kCampaignId]);
+    XCTAssertTrue([self.fcManager canShowCampaign:kCampaignId
                                 excludeFromCaps:NO
                               excludeGlobalCaps:YES
                              totalLifetimeCount:-1
@@ -176,29 +176,29 @@ static NSString *const kOtherTargetId = @"70002";
 #pragma mark The counting caps
 
 - (void)testTotalLifetimeCountBlocksOnceReached {
-    XCTAssertTrue([self.fcManager canShowTarget:kTargetId excludeFromCaps:NO excludeGlobalCaps:NO
+    XCTAssertTrue([self.fcManager canShowCampaign:kCampaignId excludeFromCaps:NO excludeGlobalCaps:NO
                              totalLifetimeCount:2 totalDailyCount:-1 maxPerSession:-1]);
-    [self show:kTargetId times:2];
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId excludeFromCaps:NO excludeGlobalCaps:NO
+    [self show:kCampaignId times:2];
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId excludeFromCaps:NO excludeGlobalCaps:NO
                               totalLifetimeCount:2 totalDailyCount:-1 maxPerSession:-1]);
 }
 
 - (void)testMinusOneMeansNoLimit {
-    [self show:kTargetId times:20];
-    XCTAssertTrue([self canShow:kTargetId]);
+    [self show:kCampaignId times:20];
+    XCTAssertTrue([self canShow:kCampaignId]);
 }
 
-- (void)testTheAccountDailyMaxBlocksEveryTarget {
+- (void)testTheAccountDailyMaxBlocksEveryCampaign {
     [self.fcManager updateGlobalLimitsPerDay:2 andPerSession:-1];
-    [self show:kOtherTargetId times:2];
+    [self show:kOtherCampaignId times:2];
 
     // Used up by a different campaign, which is the whole point of an account cap.
-    XCTAssertFalse([self canShow:kTargetId]);
+    XCTAssertFalse([self canShow:kCampaignId]);
 }
 
 #pragma mark What happens when we cannot check
 
-- (void)testATargetWithNoIdIsAllowedThrough {
+- (void)testACampaignWithNoIdIsAllowedThrough {
     // No id means nothing to store a count under, so there is no cap to check. Holding it back
     // would hide a campaign for a reason nobody could see.
     XCTAssertTrue([self canShow:@""]);
@@ -207,120 +207,120 @@ static NSString *const kOtherTargetId = @"70002";
 #pragma mark Counting a display
 
 - (void)testDidShowCountsTodayLifetimeAndTheDayTotal {
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:YES];
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:YES];
 
-    XCTAssertEqual(1, [self.fcManager todayCountForTarget:kTargetId]);
-    XCTAssertEqual(1, [self.fcManager lifetimeCountForTarget:kTargetId]);
+    XCTAssertEqual(1, [self.fcManager todayCountForCampaign:kCampaignId]);
+    XCTAssertEqual(1, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
     XCTAssertEqual(1, [self.fcManager shownTodayCount]);
-    XCTAssertEqual(1, [[self.fcManager.impressionManager getImpressions:kTargetId] count]);
+    XCTAssertEqual(1, [[self.fcManager.impressionManager getImpressions:kCampaignId] count]);
 }
 
 - (void)testTwoViewedCallsForTheSameUnitCountTwice {
     // This is on purpose, not a bug. One call from the app is one impression. The SDK does not
     // remove repeats, because it cannot tell a real second view from the same view reported twice.
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:YES];
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:YES];
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:YES];
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:YES];
 
-    XCTAssertEqual(2, [self.fcManager todayCountForTarget:kTargetId]);
-    XCTAssertEqual(2, [self.fcManager lifetimeCountForTarget:kTargetId]);
+    XCTAssertEqual(2, [self.fcManager todayCountForCampaign:kCampaignId]);
+    XCTAssertEqual(2, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
     XCTAssertEqual(2, [self.fcManager shownTodayCount]);
-    XCTAssertEqual(2, [[self.fcManager.impressionManager getImpressions:kTargetId] count]);
+    XCTAssertEqual(2, [[self.fcManager.impressionManager getImpressions:kCampaignId] count]);
 }
 
-- (void)testDidShowIgnoresAnEmptyTargetId {
-    [self.fcManager didShowTarget:@"" storeTimestamp:YES];
+- (void)testDidShowIgnoresAnEmptyCampaignId {
+    [self.fcManager didShowCampaign:@"" storeTimestamp:YES];
     XCTAssertEqual(0, [self.fcManager shownTodayCount]);
 }
 
 #pragma mark Which displays get their time saved
 
-- (void)testATargetWithNoLimitsGetsNoSavedTimestamp {
+- (void)testACampaignWithNoLimitsGetsNoSavedTimestamp {
     // Only frequencyLimits and occurrenceLimits ever read saved times. Saving one for a campaign
     // with neither would grow a list nobody reads, and the app can report as many views as it likes.
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:NO];
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:NO];
 
-    XCTAssertEqual(0, [[self.fcManager.impressionManager getImpressions:kTargetId] count]);
+    XCTAssertEqual(0, [[self.fcManager.impressionManager getImpressions:kCampaignId] count]);
 
     // The counts that do not need saved times still had to happen.
-    XCTAssertEqual(1, [self.fcManager todayCountForTarget:kTargetId]);
-    XCTAssertEqual(1, [self.fcManager lifetimeCountForTarget:kTargetId]);
+    XCTAssertEqual(1, [self.fcManager todayCountForCampaign:kCampaignId]);
+    XCTAssertEqual(1, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
     XCTAssertEqual(1, [self.fcManager shownTodayCount]);
-    XCTAssertEqual(1, [self.fcManager.impressionManager perSession:kTargetId]);
+    XCTAssertEqual(1, [self.fcManager.impressionManager perSession:kCampaignId]);
     XCTAssertEqual(1, [self.fcManager.impressionManager perSessionTotal]);
 }
 
-- (void)testATargetWithLimitsGetsASavedTimestamp {
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:YES];
-    XCTAssertEqual(1, [[self.fcManager.impressionManager getImpressions:kTargetId] count]);
+- (void)testACampaignWithLimitsGetsASavedTimestamp {
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:YES];
+    XCTAssertEqual(1, [[self.fcManager.impressionManager getImpressions:kCampaignId] count]);
 }
 
 - (void)testSessionCapsStillWorkWithoutSavedTimestamps {
     // The session counts live in memory, so turning off saved times must not weaken mdc.
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:NO];
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId excludeFromCaps:NO excludeGlobalCaps:NO
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:NO];
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId excludeFromCaps:NO excludeGlobalCaps:NO
                               totalLifetimeCount:-1 totalDailyCount:-1 maxPerSession:1]);
 }
 
 #pragma mark The change of day
 
 - (void)testTheDailyResetZeroesTodayAndKeepsLifetime {
-    [self show:kTargetId times:3];
+    [self show:kCampaignId times:3];
 
     [self.fcManager resetDailyCounters:@"20990101"];
 
-    XCTAssertEqual(0, [self.fcManager todayCountForTarget:kTargetId]);
-    XCTAssertEqual(3, [self.fcManager lifetimeCountForTarget:kTargetId]);
+    XCTAssertEqual(0, [self.fcManager todayCountForCampaign:kCampaignId]);
+    XCTAssertEqual(3, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
     XCTAssertEqual(0, [self.fcManager shownTodayCount]);
 }
 
 - (void)testALifetimeCapSurvivesTheDailyReset {
     // The whole reason lifetime counts are kept when the day changes.
-    [self show:kTargetId times:1];
+    [self show:kCampaignId times:1];
     [self.fcManager resetDailyCounters:@"20990101"];
 
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId excludeFromCaps:NO excludeGlobalCaps:NO
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId excludeFromCaps:NO excludeGlobalCaps:NO
                               totalLifetimeCount:1 totalDailyCount:-1 maxPerSession:-1]);
 }
 
 - (void)testCheckUpdateDailyLimitsDoesNothingTwiceInADay {
-    [self show:kTargetId times:2];
+    [self show:kCampaignId times:2];
     [self.fcManager checkUpdateDailyLimits];
 
-    XCTAssertEqual(2, [self.fcManager todayCountForTarget:kTargetId]);
+    XCTAssertEqual(2, [self.fcManager todayCountForCampaign:kCampaignId]);
     XCTAssertEqual(2, [self.fcManager shownTodayCount]);
 }
 
 #pragma mark Campaigns the server has finished with
 
-- (void)testRemoveStaleTargetCountsClearsCountsImpressionsAndTriggers {
-    [self show:kTargetId times:2];
-    [self.fcManager.triggerManager incrementTrigger:kTargetId];
+- (void)testRemoveStaleCampaignCountsClearsCountsImpressionsAndTriggers {
+    [self show:kCampaignId times:2];
+    [self.fcManager.triggerManager incrementTrigger:kCampaignId];
 
     // The server sends these ids as numbers, so pass one here to check we convert it.
-    [self.fcManager removeStaleTargetCounts:@[@70001]];
+    [self.fcManager removeStaleCampaignCounts:@[@70001]];
 
-    XCTAssertEqual(0, [self.fcManager todayCountForTarget:kTargetId]);
-    XCTAssertEqual(0, [self.fcManager lifetimeCountForTarget:kTargetId]);
-    XCTAssertEqual(0, [[self.fcManager.impressionManager getImpressions:kTargetId] count]);
-    XCTAssertEqual(0, [self.fcManager.triggerManager getTriggers:kTargetId]);
+    XCTAssertEqual(0, [self.fcManager todayCountForCampaign:kCampaignId]);
+    XCTAssertEqual(0, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
+    XCTAssertEqual(0, [[self.fcManager.impressionManager getImpressions:kCampaignId] count]);
+    XCTAssertEqual(0, [self.fcManager.triggerManager getTriggers:kCampaignId]);
 }
 
-- (void)testRemoveStaleTargetCountsLeavesOtherTargetsAlone {
-    [self show:kTargetId times:1];
-    [self show:kOtherTargetId times:1];
+- (void)testRemoveStaleCampaignCountsLeavesOtherCampaignsAlone {
+    [self show:kCampaignId times:1];
+    [self show:kOtherCampaignId times:1];
 
-    [self.fcManager removeStaleTargetCounts:@[kTargetId]];
+    [self.fcManager removeStaleCampaignCounts:@[kCampaignId]];
 
-    XCTAssertEqual(0, [self.fcManager lifetimeCountForTarget:kTargetId]);
-    XCTAssertEqual(1, [self.fcManager lifetimeCountForTarget:kOtherTargetId]);
+    XCTAssertEqual(0, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
+    XCTAssertEqual(1, [self.fcManager lifetimeCountForCampaign:kOtherCampaignId]);
 }
 
 #pragma mark The batch header
 
-- (void)testTheBatchHeaderCarriesTheDayTotalAndThePerTargetCounts {
-    [self show:kTargetId times:2];
+- (void)testTheBatchHeaderCarriesTheDayTotalAndThePerCampaignCounts {
+    [self show:kCampaignId times:2];
     [self.fcManager resetDailyCounters:@"20990101"];
-    [self show:kTargetId times:1];
+    [self show:kCampaignId times:1];
 
     NSDictionary *header = [self.fcManager onBatchHeaderCreationForQueue:CTQueueTypeEvents];
 
@@ -330,7 +330,7 @@ static NSString *const kOtherTargetId = @"70002";
     // ndtlc is [[campaign id, today's count, lifetime count], ...].
     NSArray *counts = header[CLTAP_ND_COUNTS_META_KEY];
     XCTAssertEqual(1, counts.count);
-    NSArray *expected = @[kTargetId, @1, @3];
+    NSArray *expected = @[kCampaignId, @1, @3];
     XCTAssertEqualObjects(expected, counts[0]);
 }
 
@@ -343,40 +343,40 @@ static NSString *const kOtherTargetId = @"70002";
 
 #pragma mark Which id the counts are stored under
 
-- (void)testTargetIdComesFromTiAndNeverFromWzrkId {
+- (void)testCampaignIdComesFromTiAndNeverFromWzrkId {
     // The one check that would have caught the Android bug. Android reads the unit id, which is the
     // wzrk_id, so it saves counts under a key that changes on every send of the campaign.
     NSDictionary *unit = @{ CLTAP_INAPP_ID: @70001, CLTAP_NOTIFICATION_ID_TAG: kWzrkId };
-    XCTAssertEqualObjects(kTargetId, [CTNdFCManager targetIdFrom:unit]);
+    XCTAssertEqualObjects(kCampaignId, [CTNdFCManager campaignIdFrom:unit]);
 }
 
-- (void)testTargetIdAcceptsTiAsANumberOrAString {
+- (void)testCampaignIdAcceptsTiAsANumberOrAString {
     // The content payload sends ti as a number, other payloads send it as a string.
     NSDictionary *asNumber = @{ CLTAP_INAPP_ID: @70001 };
     NSDictionary *asString = @{ CLTAP_INAPP_ID: @"70001" };
-    XCTAssertEqualObjects(kTargetId, [CTNdFCManager targetIdFrom:asNumber]);
-    XCTAssertEqualObjects(kTargetId, [CTNdFCManager targetIdFrom:asString]);
+    XCTAssertEqualObjects(kCampaignId, [CTNdFCManager campaignIdFrom:asNumber]);
+    XCTAssertEqualObjects(kCampaignId, [CTNdFCManager campaignIdFrom:asString]);
 }
 
-- (void)testTargetIdIsEmptyWhenThereIsNoTi {
+- (void)testCampaignIdIsEmptyWhenThereIsNoTi {
     // Empty, and not the wzrk_id instead. An empty id makes the check let the unit through, which is
     // the safer mistake. Using the wzrk_id would count under the wrong key without telling anyone.
     NSDictionary *noTi = @{ CLTAP_NOTIFICATION_ID_TAG: kWzrkId };
-    XCTAssertEqualObjects(@"", [CTNdFCManager targetIdFrom:noTi]);
-    XCTAssertEqualObjects(@"", [CTNdFCManager targetIdFrom:nil]);
-    XCTAssertEqualObjects(@"", [CTNdFCManager targetIdFrom:(NSDictionary *)@"not a dictionary"]);
+    XCTAssertEqualObjects(@"", [CTNdFCManager campaignIdFrom:noTi]);
+    XCTAssertEqualObjects(@"", [CTNdFCManager campaignIdFrom:nil]);
+    XCTAssertEqualObjects(@"", [CTNdFCManager campaignIdFrom:(NSDictionary *)@"not a dictionary"]);
 }
 
 - (void)testAUnitWithNoTiIsNotCapped {
     // The two rules above, put together. No ti gives an empty id, and an empty id lets the unit show.
     NSDictionary *unit = @{ CLTAP_NOTIFICATION_ID_TAG: kWzrkId, CLTAP_INAPP_TOTAL_LIFETIME_COUNT: @0 };
-    NSString *targetId = [CTNdFCManager targetIdFrom:unit];
+    NSString *campaignId = [CTNdFCManager campaignIdFrom:unit];
 
-    XCTAssertTrue([self.fcManager canShowTarget:targetId excludeFromCaps:NO excludeGlobalCaps:NO
+    XCTAssertTrue([self.fcManager canShowCampaign:campaignId excludeFromCaps:NO excludeGlobalCaps:NO
                              totalLifetimeCount:0 totalDailyCount:0 maxPerSession:0]);
 }
 
-- (void)testEvaluateThenGateThenCountAllUseTheSameTargetId {
+- (void)testEvaluateThenGateThenCountAllUseTheSameCampaignId {
     // Android does not have this test. Its NdFcapGateTest fakes the unit id, so it never notices
     // that the three stores use different keys. That is how the Android check ended up reading
     // counts under wzrk_id while the evaluator saved triggers under ti.
@@ -392,40 +392,40 @@ static NSString *const kOtherTargetId = @"70002";
 
     // Read off the unit the same way the check reads it, so the whole chain is tested instead of a
     // value the test made up.
-    NSString *targetId = [CTNdFCManager targetIdFrom:rule];
-    XCTAssertEqualObjects(kTargetId, targetId);
+    NSString *campaignId = [CTNdFCManager campaignIdFrom:rule];
+    XCTAssertEqualObjects(kCampaignId, campaignId);
 
     // 1. Evaluate. Saves a trigger and adds the id to adUnit_eval.
     [self.helper.evaluationManager evaluateOnEvent:@"Product Viewed" withProps:nil];
 
-    XCTAssertEqual(1, [self.helper.triggerManager getTriggers:kTargetId]);
+    XCTAssertEqual(1, [self.helper.triggerManager getTriggers:kCampaignId]);
     NSDictionary *evalHeader = [self.helper.evaluationManager onBatchHeaderCreationForQueue:CTQueueTypeEvents];
     XCTAssertEqualObjects(@[@70001], evalHeader[CLTAP_ND_SS_EVAL_META_KEY]);
 
     // 2. Check the caps. This reads the counts that the next step writes.
-    XCTAssertTrue([self canShow:targetId]);
+    XCTAssertTrue([self canShow:campaignId]);
 
     // 3. Count.
-    [self.fcManager didShowTarget:targetId storeTimestamp:YES];
+    [self.fcManager didShowCampaign:campaignId storeTimestamp:YES];
 
     // All three stores saved under the campaign id.
-    XCTAssertEqual(1, [self.helper.triggerManager getTriggers:kTargetId]);
-    XCTAssertEqual(1, [[self.fcManager.impressionManager getImpressions:kTargetId] count]);
-    XCTAssertEqual(1, [self.fcManager lifetimeCountForTarget:kTargetId]);
+    XCTAssertEqual(1, [self.helper.triggerManager getTriggers:kCampaignId]);
+    XCTAssertEqual(1, [[self.fcManager.impressionManager getImpressions:kCampaignId] count]);
+    XCTAssertEqual(1, [self.fcManager lifetimeCountForCampaign:kCampaignId]);
 
     // And none of them saved under the wzrk_id. This is the check that fails on Android.
     XCTAssertEqual(0, [self.helper.triggerManager getTriggers:kWzrkId]);
     XCTAssertEqual(0, [[self.fcManager.impressionManager getImpressions:kWzrkId] count]);
-    XCTAssertEqual(0, [self.fcManager lifetimeCountForTarget:kWzrkId]);
-    XCTAssertNil(self.fcManager.targetCounts[kWzrkId]);
+    XCTAssertEqual(0, [self.fcManager lifetimeCountForCampaign:kWzrkId]);
+    XCTAssertNil(self.fcManager.campaignCounts[kWzrkId]);
 }
 
 - (void)testACapCountedUnderTheCampaignIdIsReachedAcrossSends {
     // What the test above means in practice. Two sends of one campaign have the same ti but
     // different wzrk_ids, so a lifetime cap of 1 has to stop the second send.
-    [self.fcManager didShowTarget:kTargetId storeTimestamp:NO];
+    [self.fcManager didShowCampaign:kCampaignId storeTimestamp:NO];
 
-    XCTAssertFalse([self.fcManager canShowTarget:kTargetId excludeFromCaps:NO excludeGlobalCaps:NO
+    XCTAssertFalse([self.fcManager canShowCampaign:kCampaignId excludeFromCaps:NO excludeGlobalCaps:NO
                               totalLifetimeCount:1 totalDailyCount:-1 maxPerSession:-1]);
 }
 
@@ -433,7 +433,7 @@ static NSString *const kOtherTargetId = @"70002";
 
 - (void)testNativeDisplayCountsDoNotTouchTheInAppStores {
     // Both channels use these two classes. The storage name is the only thing keeping them apart.
-    [self show:kTargetId times:1];
+    [self show:kCampaignId times:1];
 
     CTImpressionManager *inAppImpressions =
         [[CTImpressionManager alloc] initWithAccountId:self.helper.accountId
@@ -444,8 +444,8 @@ static NSString *const kOtherTargetId = @"70002";
                                                 deviceId:self.helper.deviceId
                                          delegateManager:self.helper.delegateManager];
 
-    XCTAssertEqual(0, [[inAppImpressions getImpressions:kTargetId] count]);
-    XCTAssertEqual(0, [inAppTriggers getTriggers:kTargetId]);
+    XCTAssertEqual(0, [[inAppImpressions getImpressions:kCampaignId] count]);
+    XCTAssertEqual(0, [inAppTriggers getTriggers:kCampaignId]);
 }
 
 @end
